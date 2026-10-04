@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-04 10:51 +02:00
+JETON            : occupé
+Battement        : 2026-10-04 10:55 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S478 — K2 : la conception de la campagne de la surface non graphe**
 Dernière session : S477 — K1 : le type d'eau dans l'espace ([preuve](docs/validation/TYPE-EAU-S474.md) §5) — sans carte au bit, surcoût 0,044 ms. Avant : S476 (ADR-219 : le jeu est DyingStar)
 Session suivante : **S478 — K2 : la surface non graphe (4.16)**, le point qui en débloque le plus (22 en aval) : relire où en est 4.16 (partiel depuis S393 ; la bande APIC de la carte, S416–S470), écrire la conception de K2 — δ qui se retourne, se sépare et se referme, la cavité, la gerbe, les bulles — et son découpage en sessions, critères de fin par point (4.16, 4.1, 4.12, 4.20, 7.2–7.5, 3.1, 3.3). **Sans attendre de « Continue »**
 Maillons        : 1 — journal

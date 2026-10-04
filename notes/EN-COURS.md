@@ -62,27 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S477 — **terminée**. En autonomie, plan de complétion K1 : **le type d'eau dans l'espace** (ADR-217 D1, second temps).
+Session : S478 — **en cours**. En autonomie (« Ok » de l'utilisateur au plan) : **K2, la conception**.
 
-**Ce que la session fait.** Une **carte des constituants** (Chl, a_g(440), MES par texel, sur un rectangle de la carte en coordonnées
-de B) lue **par fragment** : une structure `Optique` (R0, kd, c) que `optique_en(xy)` calcule — le modèle de `type_eau.py` porté dans
-le nuanceur — et que les fonctions de la lumière de l'eau reçoivent en paramètre (Godot n'a pas de variable globale modifiable :
-vérifié). L'eau (surface vue d'en haut et d'en dessous), le fond, le ciel sous l'eau de `mer.tscn` ; `saut.tscn` prêt à la lire. Sans
-carte, `optique_en` rend les uniformes de la scène. Une scène d'essai : un panache de rivière qui entre dans la mer
-(`TYPE_EAU_CARTE=panache`).
+**Ce que la session fait.** Relire où en sont les dix points de K2 (4.16, 4.1, 4.12, 4.20, 7.2–7.5, 3.3, 3.1), les anomalies qui les
+tiennent (A311 : l'air enfermé à pression nulle, qui arrête le calcul fin ; A312 : jet et couronne qui suivent la maille), ADR-015
+(l'air en poches T2) et ADR-007 (pas de transfert d'état entre solveurs) ; écrire la conception
+(`docs/registres/CAMPAGNE-K2-S478.md`) — les sessions dans l'ordre des dépendances, chacune avec sa référence publiée et son critère —
+et les décisions techniques (ADR-220).
 
-**Critères, écrits avant.** (1) sans carte, les images **au bit** (`mer.tscn` : proche, sous l'eau ; `saut.tscn` : six captures) ;
-(2) le modèle du nuanceur égal à `type_eau.py` : une carte uniforme d'un préréglage donne les mêmes images que `TYPE_EAU=<préréglage>`
-(à l'arrondi des flottants près : écart ≤ 1/255 par canal) ; (3) la transition montrée (images) ; (4) le surcoût GPU mesuré, ≤ 0,3 ms
-par image à 1280 × 720.
+**Critères, écrits avant.** (1) chaque point de K2 dans au moins une session, avec un critère de réception chiffré contre une
+référence publiée ou une mesure ; (2) ADR-220 écrite et indexée ; `--check` à 0.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Optique`, `optique_en`, les fonctions qui la reçoivent ; la carte dans `mer.gd` ; le panache ; mesures ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — la conception ; ADR-220.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — (1) sans carte au bit (mer et saut) ; (2) carte uniforme contre préréglage : ≤ 1/255 — après un premier contrôle mal posé
-  (la grille de 12 km dépasse la carte de 5 km) ; (3) le panache montré ; (4) surcoût **0,044 ms**. Preuve : TYPE-EAU-S474 §5.
-- **P3** — la preuve : TYPE-EAU-S474 §5 ; **le lot des registres** (en retard : dû en S473) pour S471–S477 — LISTE (8.5, 13.1), FEUILLE-DE-ROUTE ; QUESTIONS-OUVERTES inchangée ; journal ; jeton libre ; maillons 1 ; suivant : S478, K2.
