@@ -103,3 +103,9 @@ fin de S480 fait par `rituel.py`.
 - **P4a** — le journal : 1,36 Mo → 7 Ko (S470–S479) ; S01–S469 dans `notes/journal/`, cinq archives par centaine (99 + 100 + 100
   + 100 + 70 + 10 vivantes = 479 entrées, avant comme après ; texte identique à l'espacement près) ; liens relatifs recalés d'un
   niveau, 0 lien mort dans les archives.
+- **P4b** — `outils/calcul.py` (lancer, etat, garder) ; `calculs/` ignoré par git, `notes/CALCULS.md` versionné. Essai : un calcul
+  de 45 s lancé, le shell qui l'a lancé fermé aussitôt, retrouvé « terminé » par le registre ; la sortie d'un processus détaché
+  n'arrivait pas au journal (pas de console) — poignées explicites. **Les sorties de S479 mises à l'abri** (`calculs/…-s479-b10-bulle`) :
+  `b10_p24.txt` est **vide** (le calcul est mort avec sa conversation) ; `bulle_b.txt` : la grande cuve (80×80×68, dx 2 cm, R 8 cm)
+  oscille à **47,84 Hz contre 42,22** de Minnaert (rapport 1,133, six périodes, volume moyen 2,03·10⁻³ contre 2,14 pour la sphère) —
+  à consigner dans POCHES-AIR-S479 par K2-2 ; B10 à `D/dx` = 24 est à relancer, par `calcul.py`.

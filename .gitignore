@@ -28,3 +28,6 @@ desktop.ini
 # l'étape interrompue (S321, contrôle `etat_projet.py --check`)
 __pycache__/
 *.py[co]
+
+# S480 — les sorties des calculs longs (outils/calcul.py) ; leur registre, notes/CALCULS.md, se versionne
+calculs/

@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-10-04 16:46 +02:00
+Battement        : 2026-10-04 16:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : **S480 — la structure du projet : la boussole, le tableau de bord, les registres générés, les calculs longs, le rituel outillé**
 Dernière session : S479 — K2-1 : l'air enfermé dans APIC 3D ([preuve](docs/validation/POCHES-AIR-S479.md)) — Minnaert à 2 %, B10 au bout à 16 mailles ; 7.4 partiel. Avant : S478 (K2 conçue)
