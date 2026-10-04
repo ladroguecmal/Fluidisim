@@ -18547,3 +18547,11 @@ calme lisait le détail de la mer du large ; corrigée, les mesures fines de S47
 comparer à traitement égal, notre séquence compressée dans le navigateur) — et la houle longue de 2 m toujours ajoutée (réglable).
 La mer de Méditerranée : mouvement × 1,03, part haute fréquence × 1,01. Reste E5, le contraste local. **Rituel** (allégé). Maillons
 **1**. Suivant : le type d'eau.
+
+## S474 — 2026-10-04 — le type d'eau, premier temps
+
+**Entrée.** En autonomie (ADR-217). **Fait** ([preuve](../docs/validation/TYPE-EAU-S474.md)) : les propriétés optiques d'une eau tirées
+de trois constituants (phytoplancton, matière dissoute, particules ; Morel et Maritorena 2001, Babin et al. 2003) ajoutés à l'eau
+pure ; Python et Godot d'accord ; sept préréglages ; sans `TYPE_EAU`, au bit. Le côtier réglé contre V5 : les teintes de l'eau proche
+dans la tolérance. V1 hors de portée de toute eau (étalonnée). Image envoyée. **Rituel** (allégé). Maillons **1**. Suivant : le champ
+dans l'espace.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S474 — **en cours**. En autonomie : **le type d'eau** (ADR-217), premier temps.
+Session : S474 — **terminée**. En autonomie : **le type d'eau** (ADR-217), premier temps.
 
 **Ce que la session fait.** (1) **Le modèle** : les propriétés optiques d'une eau tirées de trois constituants — le phytoplancton
 (`Chl`, Morel et Maritorena 2001, Table 2), la matière dissoute (`a_g(440)`, pente de Babin et al. 2003), les particules minérales
@@ -84,7 +84,7 @@ qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images m
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le modèle (Python, GDScript), les préréglages, `TYPE_EAU` ; l'égalité ; le défaut au bit.
 - [x] **P3** — V5 et V1 mesurées par préréglage ; le réglage du côtier ; les images.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `outils/type_eau.py` (la référence, sources dans l'en-tête), `godot/type_eau.gd` (le rendu) ; `TYPE_EAU=<préréglage>` ou
@@ -98,4 +98,4 @@ qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images m
   ciel reflété domine les crêtes et l'eau lointaine, que le type d'eau ne bouge pas). **V1** : aucune eau ne l'atteint (l'eau pure est
   la plus bleue ; V1 a un rouge à 1 % du bleu) — très probablement étalonnée (« Aesthetic Video […] for Editing Practice ») : V1 pour
   la texture et le mouvement, pas la couleur. Image `captures/types_eau_S474.png` envoyée (pure, côtier, rivière).
-
+- **P4** — la preuve : TYPE-EAU-S474 ; journal ; jeton libre ; maillons 1 ; suivant : S475, le champ du type d'eau dans l'espace.
