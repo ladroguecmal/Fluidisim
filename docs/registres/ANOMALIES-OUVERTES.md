@@ -5,7 +5,7 @@
 suites datées ; l'état est lu par mots sur la dernière suite qui tranche (voir l'outil). Les entrées plus anciennes, au tableau
 général du registre, ne sont pas lues ici.
 
-**39 entrées lues — 24 ouvertes, 15 closes.** Sévérité : 1 = refonte d'architecture si découvert
+**39 entrées lues — 23 ouvertes, 16 closes.** Sévérité : 1 = refonte d'architecture si découvert
 tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 
 ## Ouvertes
@@ -30,7 +30,6 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A303 bis | 2 | S312 | Personne n'avait demandé à W ce qu'il sait faire | — |
 | A305 | 2 | S313 | Le résidu du cas ouvert est d'un seul signe | — |
 | A309 | 2 | S316 | La direction que lit le raccord est biaisée, et le biais ne converge pas | — |
-| A311 | 2 | S320 | L'air n'est pas modélisé : une bulle enfermée est à pression nulle | S481 : le remède porté sur la carte (la bulle à 4·10⁻⁵ de la référence) ; une poche de moins de huit mailles se résorbe désormais (POCHE_MAILLES_MIN) — les poches … |
 | A312 | 2 | S320 | La couronne et le jet d'un impact sont des grandeurs de la maille | S326 : Le contraste ci-dessus ne tient qu'à moitié : à trois mailles, le temps de pincement ne converge pas non plus — 2,20 → 2,30 → 2,40 √(D/g) — et la cavité … |
 | A314 | 2 | S323 | La surface d'APIC dépend de l'arrangement de ses particules | — |
 | A319 | 2 | S351 | « Rétrécir ou détruire un domaine perturbatif est visuellement gratuit » n'a jamais été mesuré | — |
@@ -48,6 +47,7 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A306 | 2 | S314 | S316 | Aucun estimateur de fréquence du dépôt n'a été vérifié |
 | A307 | 2 | S315 | S316 | Aucun banc du dépôt ne déroule une phase |
 | A308 | 2 | S316 | S316 | Les bancs du transfert tiraient de l'onde posée ce qu'une scène ne leur donnerait pas |
+| A311 | 2 | S320 | S482 | L'air n'est pas modélisé : une bulle enfermée est à pression nulle |
 | A313 | 1 | S320 | S323 | Le volume géométrique d'APIC n'a pas de mesure propre en écoulement agité |
 | A315 | 2 | S324 | S326 | Les petites cellules d'un fond coupé 3D font ramper le gradient conjugué du mode linéaire |
 | A316 | 2 | S325 | S407 | La frontière du raccord dynamique décale la surface et dissipe |

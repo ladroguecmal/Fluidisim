@@ -4215,6 +4215,10 @@ et au cas fin de S326 (le banc 2D à 32 mailles, sans poches dans le banc 2D).
 4·10⁻⁵ de la référence) ; une poche de moins de huit mailles se résorbe désormais (`POCHE_MAILLES_MIN`) — les poches d'une maille
 emballaient la scène `--v1`. A311 reste ouverte jusqu'à la production au temps réel avec poches (K2-2b).
 
+*Note du 2026-10-05, S482, sur A311* ([COUT-POCHES-S482](../validation/COUT-POCHES-S482.md)) : **close** — l'air enfermé est modélisé dans
+la référence (S479) et en production sur la carte, au temps réel (le pas de `--v1` à 1,4 % du témoin) ; ce qui reste de l'air (la
+remontée libre, la fragmentation, les microbulles) est K2-3 et suivantes, au plan de K2.
+
 **A312 — S320, 2026-09-22 (sévérité 2, ouverte). La couronne et le jet d'un impact sont des grandeurs
 de la maille.** De `D/dx` = 8 à 16, ils changent de 40 à 60 %, dans un sens ou dans l'autre, alors que
 le temps de pincement et la cavité maximale convergent à 10 % près

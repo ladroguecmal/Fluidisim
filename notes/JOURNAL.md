@@ -120,3 +120,15 @@ de chaque maille identique à étiquettes égales ; la bulle suit la référence
 deux questions en attente (relance planifiée, téléchargements). **Capacité reçue** : l'air enfermé en production sur la carte ; le
 chemin : `--v1` (`APIC3D_POCHES=1`) ; la preuve ci-dessus. Maillons **0**. Suivant : **S482, K2-2b — le coût des poches**.
 
+## S482 — 2026-10-05 — K2-2b : le coût des poches
+
+**Entrée.** Réponses de l'utilisateur (*« non pour la 1 sinon oui »*) : pas de relance planifiée ; téléchargements faits — le Godot 4.7
+mono double de DyingStar et DyingStar `develop`, dans `C:/Users/antoi/FluidisimExterne/` ; **DyingStar est passé à Godot 4.7** (boussole,
+ADR-219 et ADR-222, notes ; le C# demandera le SDK .NET 9). **Fait** ([preuve](../docs/validation/COUT-POCHES-S482.md)) : rien quand rien
+n'est enfermé ; **les poches dans la multigrille** (préconditionneur par blocs : 14 itérations au lieu de 151) ; les compactions à
+plusieurs groupes (mêmes listes). **Mesuré** : `--v1` avec poches **15,55 ms contre 15,33** sans (71 contre 16,7 en S481), 60 s,
+masse exacte ; la bulle toujours à 4·10⁻⁵ de la référence (42,47 Hz contre 42,50) ; détection identique. **A311 close.** **Limite** :
+`--v1` ne fait aucune poche d'au moins huit mailles en 60 s — le coût poche présente se lit sur la carte seule (+0,2 ms). **Capacité
+reçue** : l'air enfermé en production au temps réel ; le chemin : `--v1` ; la preuve ci-dessus. Maillons **0**. Suivant : **S483 —
+ADR-222 D2 et D3** (la référence CPU parallèle, le banc de non-régression du rituel), puis K2-3.
+

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-05 01:06 +02:00
+JETON            : libre
+Battement        : 2026-10-05 01:11 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S482 — K2-2b : le coût des poches**
-Dernière session : S481 — K2-2 : l'air enfermé sur la carte ([journal](notes/JOURNAL.md)). Avant : S480 (la structure du projet : la boussole, les registres générés, le rituel outillé)
-Session suivante : **S482 — K2-2b : le coût des poches** ([preuve](docs/validation/POCHES-CARTE-S481.md) §4) : les poches dans la multigrille (préconditionneur par blocs : le cycle en V sur les mailles, la diagonale sur les poches), rien quand aucun air n'est enfermé (dispatch indirect), la détection et les listes à plusieurs groupes ; critère : `--v1` avec poches au coût du témoin à 20 % près (16,7 ms), la bulle toujours à 10⁻⁴ de la référence. Puis ADR-222 D2 (la référence CPU parallèle) et D3 (le banc de non-régression du rituel). Relancer B10 à 24 mailles par `calcul.py` (hors session). **Sans attendre de « Continue »**
-Maillons        : 0 — S481 : l'air enfermé en production sur la carte (le chemin : --v1, APIC3D_POCHES=1 ; la preuve : POCHES-CARTE-S481)
+Session en cours : aucune
+Dernière session : S482 — K2-2b : le coût des poches ([journal](notes/JOURNAL.md)). Avant : S481 (K2-2 : l'air enfermé sur la carte)
+Session suivante : **S483 — ADR-222 D2 et D3** : (1) la référence CPU parallèle (les cœurs de ce PC, au bit de la séquentielle — les jobs de `HostServices` ; mesurer la bulle de `--apic3d-poches MODE=suivi`, 700 s aujourd'hui) ; (2) un banc de non-régression rapide appelé par `rituel.py fin` (le témoin `--v1` court : masse, pas, particules au bit contre une empreinte versionnée ; le coût contre un seuil). Puis **K2-3** (les grosses bulles libres, Davies–Taylor) sur une scène à maille assez fine pour des poches résolues (ADR-222 D6). Relancer B10 à 24 mailles par `calcul.py`. **Sans attendre de « Continue »**
+Maillons        : 0 — S482 : l'air enfermé en production au temps réel (le chemin : --v1 ; la preuve : COUT-POCHES-S482)
 Registres       : dernier lot S480 (ADR-213 D3) ; le prochain au plus tard en S483
 ```
 

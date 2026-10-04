@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S482 — **en cours**. En autonomie (ADR-215, ADR-222), **K2-2b — le coût des poches** ([POCHES-CARTE-S481](../docs/validation/POCHES-CARTE-S481.md)
+Session : S482 — **terminée**. En autonomie (ADR-215, ADR-222), **K2-2b — le coût des poches** ([POCHES-CARTE-S481](../docs/validation/POCHES-CARTE-S481.md)
 §4 : 71 ms par pas avec poches contre 16,7 sans, sur `--v1`). Avant le plan, sur la réponse de l'utilisateur (*« non pour la 1 sinon
 oui »*) : pas de relance planifiée ; les téléchargements faits (Godot 4.7 mono double de DyingStar, DyingStar `develop`) dans
 `C:/Users/antoi/FluidisimExterne/` ; DyingStar est passé à Godot 4.7 (ADR-219 et ADR-222, notes ; boussole).
@@ -86,8 +86,8 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
 - [x] **P2** — rien quand rien n'est enfermé ; mesure.
 - [x] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
 - [x] **P4** — les poches dans la multigrille ; (2) ; mesure.
-- [>] **P5** — `--v1` 60 s (1), (3) ; preuve.
-- [ ] **P6** — rituel (par `rituel.py`).
+- [x] **P5** — `--v1` 60 s (1), (3) ; preuve.
+- [x] **P6** — rituel (par `rituel.py`).
 
 ### Notes de reprise
 - **P2** — `H_ANY` : l'aplatissement compte les racines enfermées ; `pk_number`, `pk_lists` sortent aussitôt sans elles, `pk_faces`
@@ -101,3 +101,5 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
   `pk_faces` (un seul groupe) ; le même ordre des mailles — détection et bilan identiques au chiffre près (critère (4)). Coût, carte
   seule (`MODE=cout`), poche présente : reconstruction **≈ +0,2 ms** au lieu de +1,7 à 2 (60 000 mailles). FXC : pas de `switch` qui
   retourne dans chaque branche.
+- **P5** — `--v1` 60 s : avec poches 15,55 ms, témoin 15,33 (trajectoire de S481 au pas près), masse exacte ; aucune poche ≥ 8 mailles
+  dans la scène. Preuve COUT-POCHES-S482 ; 7.4 ; A311 close ; index.
