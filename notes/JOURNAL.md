@@ -18555,3 +18555,12 @@ de trois constituants (phytoplancton, matière dissoute, particules ; Morel et M
 pure ; Python et Godot d'accord ; sept préréglages ; sans `TYPE_EAU`, au bit. Le côtier réglé contre V5 : les teintes de l'eau proche
 dans la tolérance. V1 hors de portée de toute eau (étalonnée). Image envoyée. **Rituel** (allégé). Maillons **1**. Suivant : le champ
 dans l'espace.
+
+## S475 — 2026-10-04 — l'objectif : la liste à 100 %
+
+**Entrée.** Décision de l'utilisateur : *« l'objectif est de finir le système complet de l'eau, à ce moment précis la feuille to do
+list devra être validée à 100% pas moins »* → [ADR-218](../docs/adr/ADR-218-le-systeme-de-l-eau-complet.md). **Fait**
+([plan](../docs/registres/PLAN-COMPLETION-S475.md)) : la liste actualisée (aucun changement de catégorie depuis S408 ; 116 points
+ouverts sur 119) ; le plan de complétion — treize campagnes, chaque point ouvert dans une seule, ≈ 310 sessions ; six faits que seul
+l'utilisateur peut fournir, une recommandation chacun. **Rituel** (allégé). Maillons **1**. Suivant : K1, le type d'eau dans
+l'espace.
