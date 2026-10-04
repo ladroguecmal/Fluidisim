@@ -1547,3 +1547,33 @@ fn open_boundaries_carry_their_flux_s446() {
     assert!(a.set_open_boundaries(&[0.; 3], &[0.; 16]).is_err());
 }
 
+
+/// S479 (K2-1) : une bulle enfermée devient une poche — détectée, sa pression finie et proche de la charge hydrostatique après
+/// quelques pas, la masse d'eau exacte ; une seule poche (l'air libre n'en fait pas) ; un second `enable_air_pockets` refusé.
+#[test]
+fn air_pocket_holds_a_bubble_s479() {
+    let (n, nz, dx) = (16usize, 16usize, 0.025f32);
+    let (mut a, mut arena) = apic(n, n, nz, dx, n * n * nz * 8);
+    let (h, r, c) = (0.3f32, 0.06f32, [0.2f32, 0.2, 0.15]);
+    let seeded = a
+        .seed(&|p| {
+            let e = [p[0] - c[0], p[1] - c[1], p[2] - c[2]];
+            p[2] < h && e[0] * e[0] + e[1] * e[1] + e[2] * e[2] >= r * r
+        })
+        .unwrap();
+    a.enable_air_pockets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    assert!(a.enable_air_pockets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).is_err());
+    let mut poches = [AirPocket::default(); 4];
+    for _ in 0..20 {
+        a.step(1000).unwrap();
+    }
+    let np = a.air_pockets(&mut poches);
+    assert_eq!(np, 1, "une poche");
+    let p = poches[0];
+    let v_sphere = 4. / 3. * core::f64::consts::PI * (r as f64).powi(3);
+    assert!((p.volume / v_sphere - 1.).abs() < 0.2, "volume {} contre {}", p.volume, v_sphere);
+    // La charge au centre de la bulle, à 0,15 m : 1 471 Pa ; la poche oscille autour.
+    let gauge = p.pressure - P_ATM;
+    assert!(gauge.is_finite() && gauge > 0. && gauge < 4000., "pression relative {gauge}");
+    assert_eq!(a.particle_count(), seeded);
+}

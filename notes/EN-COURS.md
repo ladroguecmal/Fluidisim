@@ -83,8 +83,18 @@ les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les poches dans `apic3d.rs` ; les essais (1) à (3).
+- [x] **P2** — les poches dans `apic3d.rs` ; les essais (1) à (3).
 - [ ] **P3** — B10 avec poches (4) ; mesures.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `code/water-core/src/apic3d_poches.rs` : `enable_air_pockets`, la détection (remplissage), le suivi (recouvrement : fusion,
+  scission), la naissance à la pression de l'eau voisine, l'invariant `V·P^(1/γ)`, la poche comme inconnue de la projection
+  (`project_with_pockets`, une seconde projection : le chemin sans poches au bit, par construction). **Trouvé en chemin** : le volume
+  géométrique seul saute de 1 % quand des mailles changent d'étiquette (trois mailles d'un coup) — chaque saut frappe la poche ;
+  la première bulle oscillait à 56 Hz (× 1,34). **Remède** : le volume suivi par le flux de la projection, rappelé vers la
+  géométrie en 0,1 s. **Mesuré** : (1) les 43 tests d'APIC 3D passent (le nouveau `air_pocket_holds_a_bubble_s479` compris) ;
+  (2) la bulle (R = 0,08 m, R/dx = 4, à 0,3 m de fond) remonte (son centre de 0,258 à 0,300 m en 0,15 s), son volume moyen
+  comprimé de 1,6 % (l'adiabatique sous la charge en attend 2,0 %), oscillation de ± 1,3 %, masse exacte ; (3) **42,5 Hz contre
+  41,6 de Minnaert (× 1,021)** — la cuve, par la méthode des images, attendrait 38,4 (× 1,107) : dans les 15 % des deux.
+

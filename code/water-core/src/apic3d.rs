@@ -101,6 +101,9 @@ pub struct Apic3 {
     /// **S446 (C7d-3c, c2) — les bords ouverts en `x`** : la vitesse normale imposée sur les faces `u` des bords `i = 0` (les `ny·nz`
     /// premières, rangées `k·ny + j`) puis `i = nx` ; `None`, des parois — au bit.
     pub(crate) open_x: Option<Vec<f32>>,
+    /// **S479 (K2-1, ADR-220 D1) — les poches d'air enfermé** (`enable_air_pockets`, `apic3d_poches.rs`) ; `None`, le défaut :
+    /// l'air enfermé à la pression atmosphérique, au bit.
+    pub(crate) poches: Option<Box<poches::Poches>>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -182,6 +185,7 @@ impl Apic3 {
             background: [None; 2],
             background_time_s: 0.,
             open_x: None,
+            poches: None,
         })
     }
 
@@ -936,6 +940,8 @@ impl Apic3 {
         self.reconstruct();
         self.columns_label();
         self.label_body();
+        // S479 : les poches d'air enfermé (rien sans `enable_air_pockets`).
+        self.pockets_detect();
         if upto == ApicStage::Reconstruct {
             return Ok(ApicReport::default());
         }
@@ -950,7 +956,7 @@ impl Apic3 {
         }
         self.walls();
         self.impose_body();
-        let (iterations, residual) = self.project(dt);
+        let (iterations, residual) = if self.poches.is_some() { self.project_with_pockets(dt) } else { self.project(dt) };
         let divergence = self.divergence_metric();
         let partial = ApicReport { iterations, residual, divergence, max_speed: 0. };
         if upto == ApicStage::Project {
@@ -1528,6 +1534,9 @@ impl Apic3 {
 
 #[path = "apic3d_columns.rs"]
 mod columns;
+#[path = "apic3d_poches.rs"]
+mod poches;
+pub use poches::{pockets_reserved_bytes, AirPocket, GAMMA_AIR, MAX_POCKETS, P_ATM};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};
 
 #[cfg(test)]

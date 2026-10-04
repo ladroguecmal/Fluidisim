@@ -32,7 +32,7 @@
 mod host_impl;
 
 use std::time::Instant;
-use water_core::apic3d::{Apic3, ColumnsSwitch, Sphere3};
+use water_core::apic3d::{AirPocket, Apic3, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 use water_core::host::HostServices;
 
@@ -82,6 +82,15 @@ fn main() {
         let (c, v) = corps(t);
         Sphere3 { center: [c[0] as f32, c[1] as f32, c[2] as f32], radius: r as f32, velocity: [0., 0., v as f32] }
     };
+    // S479 (K2-1, ADR-220 D1) — `APIC3D_POCHES=1` : l'air enfermé en poches adiabatiques ; `APIC3D_APRES=<x>` : le calcul
+    // continue `x·√(D/g)` après le pincement (0,3 par défaut), pour la vie de la bulle.
+    let poches_actives = std::env::var("APIC3D_POCHES").is_ok();
+    if poches_actives {
+        a.enable_air_pockets(&mut hote).expect("poches");
+    }
+    let apres: f64 = std::env::var("APIC3D_APRES").ok().and_then(|v| v.parse().ok()).unwrap_or(0.3);
+    let mut poches = [AirPocket::default(); 8];
+    let (mut poche_max, mut poche_fin, mut poche_p_min, mut poche_p_max) = (0f64, 0f64, f64::MAX, f64::MIN);
     let v0 = a.total_volume();
     let mut bascule = cles.as_ref().map(|cles| {
         a.enable_columns(&mut hote, &vec![0u8; nx * ny]).expect("zone");
@@ -218,6 +227,23 @@ fn main() {
                 pincement = Some((t, h - bulle_haut, h - (cz - r), enferme, dt));
             }
         }
+        if poches_actives {
+            let np = a.air_pockets(&mut poches);
+            let v_p: f64 = poches[..np].iter().map(|p| p.volume).sum();
+            poche_max = poche_max.max(v_p);
+            poche_fin = v_p;
+            for p in &poches[..np] {
+                poche_p_min = poche_p_min.min(p.pressure);
+                poche_p_max = poche_p_max.max(p.pressure);
+            }
+            if std::env::var("APIC3D_TRACE").is_ok() {
+                let haut = if np > 0 { (h - poches[0].centroid[2]) / D } else { f64::NAN };
+                println!(
+                    "APIC3D_B10_POCHES t_sur_rac_d_g={:.4} poches={np} volume_sur_d3={:.5} pression_pa={:.0} profondeur_sur_d={haut:.3}",
+                    t / echelle, v_p * quarts / (D * D * D), if np > 0 { poches[0].pressure } else { 0. }
+                );
+            }
+        }
         if std::env::var("APIC3D_TRACE").is_ok() {
             let bande = (0..nx * ny).filter(|c| !a.is_column(c % nx, c / nx)).count() as f64 / (nx * ny) as f64;
             println!(
@@ -235,7 +261,7 @@ fn main() {
             );
         }
         if let Some((tp, ..)) = pincement {
-            if t > tp + 0.3 * echelle {
+            if t > tp + apres * echelle {
                 break;
             }
         }
@@ -262,6 +288,12 @@ fn main() {
         iterations as f64 / pas as f64,
         debut.elapsed().as_secs_f64()
     );
+    if poches_actives {
+        println!(
+            "APIC3D_B10_POCHES bilan poche_max_sur_d3={:.5} poche_fin_sur_d3={:.5} pression_min_pa={poche_p_min:.0} pression_max_pa={poche_p_max:.0}              apres_pincement_sur_rac_d_g={apres} debordement={}",
+            poche_max * quarts / (D * D * D), poche_fin * quarts / (D * D * D), a.air_pockets_overflow()
+        );
+    }
     if let Some(s) = &bascule {
         let [absorbees, retirees, posees] = a.columns_exchange_counts();
         println!(
