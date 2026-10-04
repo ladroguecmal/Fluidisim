@@ -76,7 +76,13 @@ référence publiée ou une mesure ; (2) ADR-220 écrite et indexée ; `--check`
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la conception ; ADR-220.
+- [x] **P2** — la conception ; ADR-220.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `docs/registres/CAMPAGNE-K2-S478.md` : douze sessions (K2-1 à K2-12, ≈ 30), chaque point de K2 dans au moins une, chaque
+  critère contre une référence (Minnaert, Davies et Taylor, Chen 1999, Deane et Stokes 2002, la loi de Willis, ADR-015 §3 et §5,
+  C13, C20, C07) ; **relu : aucun modèle d'air n'existe dans APIC** — A311 commande tout ce qui suit le pincement, d'où K2-1 en
+  premier. ADR-220 (indexée) : l'air enfermé en poche T2 (ADR-015), la nappe rompue en gouttes sous une maille, 4.20 par la voie
+  d'ADR-007, le vide dans V.
+

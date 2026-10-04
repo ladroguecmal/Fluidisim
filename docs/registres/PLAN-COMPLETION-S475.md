@@ -29,7 +29,7 @@ des campagnes. Les sessions de rendu continuent d'alterner avec la physique (ADR
 | | campagne | points qu'elle ferme | attend | sessions |
 |---|---|---|---|---:|
 | **K1** | **Rendu final et banc visuel** — le type d'eau dans l'espace (S476), la lumière sous l'eau (E3), le contraste au loin (E5), les vues de contrôle, la non-régression ; le LOD | 8.1, 8.2, 8.3, 8.5, 8.6, 8.8, 8.9 ; 8.7, 8.10 (verdicts) | — | 20 |
-| **K2** | **La surface non graphe** — δ qui se retourne, se sépare, se referme ; la cavité, la gerbe, les bulles | 4.16, 4.1, 4.12, 4.20, 7.4, 7.5, 7.2, 7.3, 3.3, 3.1 | — | 30 |
+| **K2** | **La surface non graphe** — δ qui se retourne, se sépare, se referme ; la cavité, la gerbe, les bulles ([conception S478](CAMPAGNE-K2-S478.md), [ADR-220](../adr/ADR-220-la-campagne-k2.md)) | 4.16, 4.1, 4.12, 4.20, 7.4, 7.5, 7.2, 7.3, 3.3, 3.1 | — | 30 |
 | **K3** | **Le fond et la côte** — la bathymétrie complète, les chemins de B, la réfraction, le déferlement, la plage | 2.7, 2.9, 3.6, 3.2, 3.5, 4.14, 4.15, 6.5, 2.6, 3.9, 4.6 | — | 30 |
 | **K4** | **Les eaux intérieures** — lacs, rivières, canaux, l'éditeur de rivières | 2.3, 2.4, 2.5, 12.2 | K3 | 15 |
 | **K5** | **δ, le système** — domaines multiples, création et disparition, fusion, adaptation, profondeur adaptative, régime substitutif, frontière, conservation, phase, coût | 4.2, 4.3, 4.4, 4.5, 4.7, 4.8, 4.9, 4.10, 4.11, 4.17, 4.18, 4.19, 4.21, 1.6 | K2 (4.20) | 30 |
