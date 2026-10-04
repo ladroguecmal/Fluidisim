@@ -86,7 +86,7 @@ fin de S480 fait par `rituel.py`.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la boussole ; REPRISE et AGENTS.
 - [x] **P3** — les trois registres générés, tenus par `--check`.
-- [>] **P4** — le journal archivé (P4a) ; `calcul.py` (P4b) ; `rituel.py` (P4c) — trois commits.
+- [x] **P4** — le journal archivé (P4a) ; `calcul.py` (P4b) ; `rituel.py` (P4c) — trois commits.
 - [ ] **P5** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
@@ -109,3 +109,7 @@ fin de S480 fait par `rituel.py`.
   `b10_p24.txt` est **vide** (le calcul est mort avec sa conversation) ; `bulle_b.txt` : la grande cuve (80×80×68, dx 2 cm, R 8 cm)
   oscille à **47,84 Hz contre 42,22** de Minnaert (rapport 1,133, six périodes, volume moyen 2,03·10⁻³ contre 2,14 pour la sphère) —
   à consigner dans POCHES-AIR-S479 par K2-2 ; B10 à `D/dx` = 24 est à relancer, par `calcul.py`.
+- **P4c** — `outils/rituel.py` : `debut` (l'amorce, le jeton et son avis, le plan, le tableau, les calculs), `fin` (vérifie cases et
+  journal, régénère les trois registres, libère le jeton, coche, `etat_projet --check`) ; essai du refus : P4 non cochée et pas
+  d'entrée S480 → deux MANQUE, rien d'écrit. `calcul.py` : `VAR=valeur` avant `--`, inscrits avec la commande. **B10 à `D/dx` = 24
+  relancé** par l'outil à 16:52 (`calculs/20261004-165215-b10-poches-p24`, ≈ 2 h 30) : K2-2 le consigne à son arrivée.

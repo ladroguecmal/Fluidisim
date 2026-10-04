@@ -29,6 +29,9 @@ de validation et des candidats δ, en Rust, sans aucune dépendance.
    git status --short
    ```
 
+   `python outils/rituel.py debut` fait ces quatre commandes, lit le jeton et dit ce qu'il commande (S480) ; sans Python, les
+   commandes ci-dessus suffisent.
+
    **Les deux premières commandes ne sont pas facultatives, et elles passent avant le jeton.** Le
    jeton de `REPRISE.md` est un fichier **versionné** : il est propre à une branche et à une copie
    de travail. Une session travaillant dans une copie isolée possède son propre jeton, le trouve

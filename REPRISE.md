@@ -145,6 +145,10 @@ En deux parties ([ADR-187](docs/adr/ADR-187-methode-refondue-s321.md) D1). La pr
 **toujours** ; la seconde **seulement si l'état a changé**. Une session qui n'a rien changé
 n'écrit pas dans les registres.
 
+**Outillé depuis S480** : `python outils/rituel.py fin --session Snnn --suivante "…" [--maillons "…"] [--lot]`
+vérifie les points 1 et 2 (cases, entrée de journal), régénère les registres générés, libère le jeton (point 4), coche le rituel et
+lance le point 5 ; il échoue sans rien écrire si un point manque, et ne committe pas. Le journal et la suite restent écrits par la session.
+
 **Toujours**
 
 1. `EN-COURS` : cases cochées ; ce qui doit survivre des notes, versé à la preuve ou au journal.

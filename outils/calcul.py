@@ -6,13 +6,13 @@ la conversation, disparaît avec lui (S479 : `b10_p24.txt` et `bulle_b.txt` n'ex
 un processus détaché, écrit sa sortie dans `calculs/<id>/` (dans le dépôt, non versionné) et inscrit le calcul dans
 `notes/CALCULS.md` (versionné) : la session suivante le retrouve par le registre, quelle que soit la conversation.
 
-    python outils/calcul.py lancer <nom> [--session S480] -- <commande> [arguments…]
+    python outils/calcul.py lancer <nom> [--session S480] [VAR=valeur …] -- <commande> [arguments…]
     python outils/calcul.py etat            # met à jour la colonne « état » du registre depuis calculs/, et l'affiche
     python outils/calcul.py garder <nom> <fichier>…   # met à l'abri des sorties déjà produites ailleurs
 
 Dans `calculs/<id>/` : `commande.txt`, `sortie.log` (sortie et erreurs), `pid`, et `fin.txt` (code de sortie, heure) écrit par le
 processus lui-même quand la commande se termine. Un calcul sans `fin.txt` dont le processus n'existe plus est « interrompu ».
-La commande s'exécute à la racine du dépôt.
+La commande s'exécute à la racine du dépôt ; les `VAR=valeur` avant `--` lui sont données et s'inscrivent avec elle.
 """
 import ctypes
 import os
@@ -97,11 +97,12 @@ def mettre_a_jour() -> list:
     return vus
 
 
-def lancer(nom: str, session: str, commande: list) -> Path:
+def lancer(nom: str, session: str, commande: list, env: dict | None = None) -> Path:
     ident = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + nom
     d = DOSSIER / ident
     d.mkdir(parents=True)
     texte = subprocess.list2cmdline(commande) if os.name == "nt" else shlex.join(commande)
+    texte = " ".join(f"{k}={v}" for k, v in (env or {}).items()) + (" " if env else "") + texte
     (d / "commande.txt").write_text(texte + "\n", encoding="utf-8")
     sortie = open(d / "sortie.log", "wb")
     options = {}
@@ -110,7 +111,8 @@ def lancer(nom: str, session: str, commande: list) -> Path:
     else:
         options["start_new_session"] = True
     p = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "_executer", str(d), "--", *commande], cwd=ROOT,
-                         stdin=subprocess.DEVNULL, stdout=sortie, stderr=subprocess.STDOUT, close_fds=True, **options)
+                         stdin=subprocess.DEVNULL, stdout=sortie, stderr=subprocess.STDOUT, close_fds=True,
+                         env=dict(os.environ, **(env or {})), **options)
     (d / "pid").write_text(str(p.pid), encoding="utf-8")
     inscrire(ident, session, nom, texte, f"lancé {maintenant()}")
     return d
@@ -155,10 +157,12 @@ def main(argv) -> int:
     if action == "_executer":
         return executer(Path(reste[0]), reste[reste.index("--") + 1:])
     if action == "lancer":
-        if "--" not in reste or reste.index("--") != 1:
-            print("usage : calcul.py lancer <nom> [--session Snnn] -- <commande> …")
+        i = reste.index("--") if "--" in reste else -1
+        env = dict(x.split("=", 1) for x in reste[1:i]) if i > 0 else {}
+        if i < 1 or any("=" not in x for x in reste[1:i]):
+            print("usage : calcul.py lancer <nom> [--session Snnn] [VAR=valeur …] -- <commande> …")
             return 2
-        d = lancer(reste[0], session, reste[2:])
+        d = lancer(reste[0], session, reste[i + 1:], env)
         print(f"CALCUL lancé : {d.relative_to(ROOT)} (sortie.log, fin.txt à la fin)")
         return 0
     if action == "garder":
