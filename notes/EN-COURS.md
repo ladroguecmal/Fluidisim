@@ -62,43 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S484 — **terminée**. En autonomie, **K2-3 — les grosses bulles libres** ([conception](../docs/registres/CAMPAGNE-K2-S478.md)) :
-la remontée d'une bulle d'air résolue, dans la référence APIC 3D avec poches (S479, S481 ; `FILS=16`, S483).
+Session : S485 — **en cours**. En autonomie, **K2-3b — attribuer la remontée lente** de S484 ([REMONTEE-S484](../docs/validation/REMONTEE-S484.md)
+§4 : 0,338 m/s contre 0,603 de Davies et Taylor à R/dx = 6).
 
-**Ce que la session fait.** Un exemple `apic3d_remontee` : un **quart de cuve** (la bulle centrée sur le coin ; les parois d'APIC
-reflètent — plans de symétrie : une cuve deux fois plus large pour un quart des mailles), une bulle de rayon `R` lâchée près du fond ;
-le centre de la poche suivi à chaque pas ; la vitesse terminale par une droite sur la partie établie de la remontée. La référence publiée :
-**Davies et Taylor (1950)**, calotte sphérique, `U = 0,711·√(g·d_e)` (Clift, Grace et Weber 1978), valable pour `Eo = ρ·g·d_e²/σ > 40`
-(ici ≈ 900 : la tension de surface, absente du modèle, n'y joue pas) ; la correction de paroi de Collins (1967), négligeable sous
-`d_e/D = 0,125`. Deux résolutions (`R/dx` = 4 et 6) pour la convergence.
+**Ce que la session fait.** Un cas `CAS=remontee` du banc `--apic3d-poches` : la même cuve que `apic3d_remontee` (quart ou entière),
+ensemencée par la référence, menée **par la carte seule** (elle suit la référence à 10⁻⁴, S481–S482, et va cent fois plus vite) ; le
+centre de la poche relu à chaque pas, la même droite. Puis les quatre causes de §4, une à une : la résolution (R/dx = 6, 8), le quart
+contre la cuve entière, le pas (1 et 2 ms).
 
-**Entrées, et comment elles se vérifient.** La cuve, la bulle et la profondeur sont imprimées par l'exemple ; le volume de la poche au
-départ contre celui de la sphère (un quart) ; la masse exacte à chaque pas (le nombre de particules).
+**Entrées, et comment elles se vérifient.** Le cas à R/dx = 6 en quart, 1 ms, rejoue d'abord S484 sur la carte : sa vitesse doit
+retrouver 0,338 m/s à 5 % — sinon la carte ne mesure pas la même chose, et c'est la première chose à dire.
 
-**Critères, écrits avant.** (1) la vitesse terminale à **15 %** de Davies–Taylor à `R/dx` = 6 ; (2) l'écart entre `R/dx` = 4 et 6 dit (la
-convergence), sans seuil ; (3) la bulle remonte selon `−g` (la dérive latérale du centre sous 0,1 R) ; masse exacte. Si (1) ne tient
-pas, l'écart est attribué (la résolution, le volume suivi, la paroi), pas maquillé.
+**Critères, écrits avant.** (1) le rejeu de S484 sur la carte à 5 % ; (2) chaque cause mesurée (U par résolution, par cuve, par pas) ;
+(3) U à 15 % de Davies–Taylor dans au moins une configuration résolue — ou la cause nommée, chiffrée, et la suite écrite.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `apic3d_remontee` ; un essai court.
-- [x] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
-- [x] **P4** — preuve ; liste 7.4 ; rituel.
+- [ ] **P2** — `CAS=remontee` sur la carte ; le rejeu de S484 (1).
+- [ ] **P3** — résolution, cuve, pas (2), (3).
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2** — `code/water-core/examples/apic3d_remontee.rs` : quart de cuve (8 R de demi-largeur, 22 R d'eau), bulle au coin à 2,5 R du
-  fond, pas stable ≤ 5 ms, la plus grande poche suivie ; la droite sur `z ≥ z0 + 2R`. Essai court (R/dx = 3, 13 pas) : la poche suivie,
-  masse exacte ; le centre d'un quart de bulle est à 3R/8 des axes (la dérive se lit par rapport au départ). R/dx = 4 lancé à 20:34.
-- **P3a** — R/dx = 4 au pas stable (≈ 3,5 à 5 ms) : la bulle cale puis s'effondre (« plus de poche » à 0,166 s). **Trouvé** : le centre
-  d'une poche était divisé par le volume entier (mailles d'eau voisines comprises) — tiré vers l'origine d'un facteur ≈ 0,8 depuis S479
-  (la « remontée » de POCHES-AIR-S479 aussi) ; corrigé dans la référence et la carte (la part d'air des seules mailles d'air). Au pas de
-  1 ms : la bulle part de 10 cm et monte (15 cm à 0,12 s, ≈ 0,5 m/s). Le critère (3) de dérive latérale est mal posé (une calotte qui
-  s'aplatit écarte le centre du quart sans dériver). R/dx = 4 à 1 ms lancé (1,5 s).
-- **P3b** — R/dx = 4 à 1 ms, 1,5 s : « plus de poche » à 0,176 s. Tracé : la bulle monte à ≈ 0,5 m/s jusqu'à 0,13 s (10 → 16 cm), puis
-  cale, s'étale (centre du quart de 3,1 à 4,1 cm des axes) et **perd du volume** (2,46 → 1,35·10⁻⁴ m³ en 40 ms) jusqu'à moins de huit
-  mailles. À R/dx = 4, le quart de bulle n'a que ≈ 70 mailles d'air : les particules y entrent quand elle se déforme, chaque étiquette
-  qui change fait sauter son volume (pics de vitesse à 2,7 m/s). R/dx = 6 lancé (0,6 s, trace).
-- **P3c** — R/dx = 6, 1 ms : **U = 0,338 m/s** (212 points, 0,185 à 0,396 s ; 0,336 puis 0,327), Davies–Taylor 0,603 (d_e mesuré 7,3 cm) :
-  × 0,56 — critère (1) manqué. Arrêté à 0,40 s (la trace suffisait ; le CPU à B10 à 24 mailles).
-- **P4** — preuve REMONTEE-S484 ; 7.4 ; POCHES-AIR-S479 annotée ; index ; journal.
