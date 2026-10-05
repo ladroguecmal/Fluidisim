@@ -66,8 +66,10 @@ fn main() {
     let (mut t, mut serie) = (0f64, Vec::new());
     let debut = Instant::now();
     let mut fin = "duree";
+    let pas_max_us: u64 = std::env::var("PAS_US").ok().and_then(|v| v.parse().ok()).unwrap_or(5_000);
     while t < duree {
-        let us = a.stable_step_us(5_000);
+        // `PAS_US=<µs>` : le pas plafonné (le pas stable sinon, 5 ms au plus).
+        let us = a.stable_step_us(pas_max_us);
         let rep = a.step(us).expect("pas");
         t += us as f64 * 1e-6;
         assert_eq!(a.particle_count(), particules, "masse");

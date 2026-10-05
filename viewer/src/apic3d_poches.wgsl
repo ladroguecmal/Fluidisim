@@ -426,7 +426,7 @@ fn frac(c: u32) -> f32 {
 }
 
 // La somme par poche : un groupe par poche, chaque fil une tranche fixe des listes, puis l'arbre — un ordre fixe.
-var<workgroup> pk_red: array<array<f32, 7>, 256>;
+var<workgroup> pk_red: array<array<f32, 8>, 256>;
 var<workgroup> pk_n: u32;
 
 @compute @workgroup_size(256)
@@ -440,7 +440,7 @@ fn pk_reduce(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) 
         return;
     }
     let cell_volume = P.dx * P.dx * P.dx;
-    var s = array<f32, 7>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    var s = array<f32, 8>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     let na = atomicLoad(&pko[pk_h() + H_LA]);
     for (var e = t; e < na; e = e + 256u) {
         if atomicLoad(&pko[la_base() + 2u * e + 1u]) != b + 1u {
@@ -450,6 +450,7 @@ fn pk_reduce(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) 
         let f = frac(c) * cell_volume;
         let q = (vec3<f32>(cell_ijk(c)) + vec3<f32>(0.5)) * P.dx;
         s[0] = s[0] + f;
+        s[7] = s[7] + f;
         s[1] = s[1] + f * q.x;
         s[2] = s[2] + f * q.y;
         s[3] = s[3] + f * q.z;
@@ -473,7 +474,7 @@ fn pk_reduce(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) 
     workgroupBarrier();
     for (var h = 128u; h > 0u; h = h / 2u) {
         if t < h {
-            for (var k = 0u; k < 7u; k = k + 1u) {
+            for (var k = 0u; k < 8u; k = k + 1u) {
                 pk_red[t][k] = pk_red[t][k] + pk_red[t + h][k];
             }
         }
@@ -482,7 +483,8 @@ fn pk_reduce(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) 
     if t == 0u {
         let r = pk_red[0];
         pkf[pf(PF_GEO, b)] = r[0];
-        let inv = select(0.0, 1.0 / r[0], r[0] > 0.0);
+        // S484 : le centre pondéré par la seule part d'air des mailles d'air (comme la référence).
+        let inv = select(0.0, 1.0 / r[7], r[7] > 0.0);
         pkf[pf(PF_CX, b)] = r[1] * inv;
         pkf[pf(PF_CX + 1u, b)] = r[2] * inv;
         pkf[pf(PF_CX + 2u, b)] = r[3] * inv;

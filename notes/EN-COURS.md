@@ -83,10 +83,15 @@ pas, l'écart est attribué (la résolution, le volume suivi, la paroi), pas maq
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `apic3d_remontee` ; un essai court.
-- [ ] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
+- [>] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
 - [ ] **P4** — preuve ; liste 7.4 ; rituel.
 
 ### Notes de reprise
 - **P2** — `code/water-core/examples/apic3d_remontee.rs` : quart de cuve (8 R de demi-largeur, 22 R d'eau), bulle au coin à 2,5 R du
   fond, pas stable ≤ 5 ms, la plus grande poche suivie ; la droite sur `z ≥ z0 + 2R`. Essai court (R/dx = 3, 13 pas) : la poche suivie,
   masse exacte ; le centre d'un quart de bulle est à 3R/8 des axes (la dérive se lit par rapport au départ). R/dx = 4 lancé à 20:34.
+- **P3a** — R/dx = 4 au pas stable (≈ 3,5 à 5 ms) : la bulle cale puis s'effondre (« plus de poche » à 0,166 s). **Trouvé** : le centre
+  d'une poche était divisé par le volume entier (mailles d'eau voisines comprises) — tiré vers l'origine d'un facteur ≈ 0,8 depuis S479
+  (la « remontée » de POCHES-AIR-S479 aussi) ; corrigé dans la référence et la carte (la part d'air des seules mailles d'air). Au pas de
+  1 ms : la bulle part de 10 cm et monte (15 cm à 0,12 s, ≈ 0,5 m/s). Le critère (3) de dérive latérale est mal posé (une calotte qui
+  s'aplatit écarte le centre du quart sans dériver). R/dx = 4 à 1 ms lancé (1,5 s).

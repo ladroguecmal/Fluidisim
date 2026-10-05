@@ -259,7 +259,9 @@ impl Apic3 {
                 continue;
             }
             let id = count as u32 + 1;
-            let (mut vol, mut cen, mut n_cells) = (0f64, [0f64; 3], 0u32);
+            // S484 : `vol_air`, la part d'air des seules mailles d'air — le poids du centre (avant S484, le centre était divisé par le
+            // volume entier, mailles d'eau voisines comprises, et tiré vers l'origine d'un facteur ≈ 0,8).
+            let (mut vol, mut vol_air, mut cen, mut n_cells) = (0f64, 0f64, [0f64; 3], 0u32);
             ps.of[start] = id;
             ps.stack.push(start as u32);
             while let Some(c) = ps.stack.pop() {
@@ -267,6 +269,7 @@ impl Apic3 {
                 let (i, j, k) = (c % nx, (c / nx) % ny, c / (nx * ny));
                 let f = frac(self.phi[c]) * cell_volume;
                 vol += f;
+                vol_air += f;
                 n_cells += 1;
                 let q = [(i as f64 + 0.5) * dx as f64, (j as f64 + 0.5) * dx as f64, (k as f64 + 0.5) * dx as f64];
                 for m in 0..3 {
@@ -286,7 +289,7 @@ impl Apic3 {
             let b = count;
             ps.volume[b] = vol;
             ps.cells[b] = n_cells;
-            ps.centroid[b] = if vol > 0. { [cen[0] / vol, cen[1] / vol, cen[2] / vol] } else { [0.; 3] };
+            ps.centroid[b] = if vol_air > 0. { [cen[0] / vol_air, cen[1] / vol_air, cen[2] / vol_air] } else { [0.; 3] };
             count += 1;
             // Le marqueur d'eau : une poche voisine recompterait une maille d'eau partagée — un nouveau tampon par poche.
             ps.stamp = ps.stamp.wrapping_add(1);
