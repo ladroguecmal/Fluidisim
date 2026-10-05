@@ -62,48 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S483 — **terminée**. Sur « Continue », la suite du jeton : **ADR-222 D2 et D3** — la référence CPU parallèle, le banc de
-non-régression du rituel. Puis, si la session le permet, la relance de B10 à 24 mailles.
+Session : S484 — **en cours**. En autonomie, **K2-3 — les grosses bulles libres** ([conception](../docs/registres/CAMPAGNE-K2-S478.md)) :
+la remontée d'une bulle d'air résolue, dans la référence APIC 3D avec poches (S479, S481 ; `FILS=16`, S483).
 
-**Ce que la session fait.** (1) **Mesurer d'abord** : un relevé du temps par étage dans `Apic3::step_upto` (la bulle de S479, B10),
-pour paralléliser là où le temps est. (2) **La référence parallèle** : `Apic3` reçoit un système de tâches de l'hôte
-(`set_jobs`, `ScopedJobs` aux bancs) ; les boucles chaudes deviennent des **écritures disjointes** (`parallel_fill_f32`, S243 : le
-résultat ne dépend ni du grain ni du nombre de fils) ; les sommes gardent leur ordre séquentiel. (3) **Le banc de non-régression** :
-`outils/non_regression.py` — la bulle (référence, quelques pas) et `--v1` court sur la carte : masse, particules, une empreinte des
-champs au bit contre `docs/validation/EMPREINTES.md` (versionné) ; le coût contre un seuil ; appelé par `rituel.py fin`.
+**Ce que la session fait.** Un exemple `apic3d_remontee` : un **quart de cuve** (la bulle centrée sur le coin ; les parois d'APIC
+reflètent — plans de symétrie : une cuve deux fois plus large pour un quart des mailles), une bulle de rayon `R` lâchée près du fond ;
+le centre de la poche suivi à chaque pas ; la vitesse terminale par une droite sur la partie établie de la remontée. La référence publiée :
+**Davies et Taylor (1950)**, calotte sphérique, `U = 0,711·√(g·d_e)` (Clift, Grace et Weber 1978), valable pour `Eo = ρ·g·d_e²/σ > 40`
+(ici ≈ 900 : la tension de surface, absente du modèle, n'y joue pas) ; la correction de paroi de Collins (1967), négligeable sous
+`d_e/D = 0,125`. Deux résolutions (`R/dx` = 4 et 6) pour la convergence.
 
-**Entrées, et comment elles se vérifient.** La séquentielle est la référence : chaque boucle parallélisée se compare **au bit** à
-elle (les 43 essais d'APIC 3D, et une empreinte de la bulle après N pas, `ScopedJobs::with_workers(1)` contre 16).
+**Entrées, et comment elles se vérifient.** La cuve, la bulle et la profondeur sont imprimées par l'exemple ; le volume de la poche au
+départ contre celui de la sphère (un quart) ; la masse exacte à chaque pas (le nombre de particules).
 
-**Critères, écrits avant.** (1) au bit : la bulle après 20 pas, mêmes bits avec 1 et 16 fils ; les essais d'APIC 3D passent ; (2) la
-bulle de S479 (0,15 s) **au moins 4 fois plus vite** qu'en séquentiel ; (3) le banc de non-régression tourne en moins de 3 min, échoue
-sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appelle. Ce qui ne tient pas est dit.
+**Critères, écrits avant.** (1) la vitesse terminale à **15 %** de Davies–Taylor à `R/dx` = 6 ; (2) l'écart entre `R/dx` = 4 et 6 dit (la
+convergence), sans seuil ; (3) la bulle remonte selon `−g` (la dérive latérale du centre sous 0,1 R) ; masse exacte. Si (1) ne tient
+pas, l'écart est attribué (la résolution, le volume suivi, la paroi), pas maquillé.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le temps par étage de la référence ; où il est.
-- [x] **P3** — la référence parallèle, au bit ; (1), (2).
-- [x] **P4** — le banc de non-régression ; (3).
-- [x] **P5** — preuve ; rituel.
+- [ ] **P2** — `apic3d_remontee` ; un essai court.
+- [ ] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
+- [ ] **P4** — preuve ; liste 7.4 ; rituel.
 
 ### Notes de reprise
-- **P2** — `Apic3::step_marked` (un repère nommé par étage ; le cœur ne lit aucune horloge, l'exemple oui ; `step_upto` l'appelle avec
-  un repère vide). La bulle (`PROFIL=1`, 20 pas) : reconstruction **41 %**, séparation + corps + échange 19 %, projection 15 %, p2g 10 %,
-  advection 10 %, g2p 5 %.
-- **P3a** — `set_jobs` ; la reconstruction en `parallel_fill_f32` (`reconstruct_cell`) : **14,1 → 2,8 s**, empreinte identique avec 0, 1
-  et 16 fils (`b67cab1db66f94f5`) ; les essais d'APIC 3D passent.
-- **P3b** — en écritures disjointes (`parallel_fill_f32`, `as_flattened_mut` pour les triplets, sans `unsafe`) : l'advection, le transfert
-  vers les particules, le produit `A·d` (avec et sans poches) ; **en collecte**, dans l'ordre de la carte : la séparation (chaque particule
-  somme ses voisines, `separate_shift`) et le transfert vers la grille (chaque face somme les particules des mailles qui la touchent,
-  `p2g` ; le tri se fait là et la reconstruction le reprend, `bin_fresh`). Empreinte de la bulle **identique** avec 0, 1, 4, 8, 12, 16 fils ;
-  43 essais d'APIC 3D ; le banc carte | référence inchangé. **Vitesse** (20 pas de la bulle) : 34,6 s → **11,9 s** sur 16 fils (×2,9) ;
-  B10 à 16 mailles, 10 pas : 81 → 25 s (×3,2). **Critère (2) manqué** (×4) : la projection reste séquentielle pour l'essentiel (les
-  produits scalaires ordonnés, les mises à jour ; `ScopedJobs` recrée ses fils à chaque appel, 150 fois par pas). Le séquentiel ralentit
-  (34,6 → 47,7 s) : les collectes font plus de travail que les dispersions — le prix d'un résultat indépendant du nombre de fils.
-- **P4** — `outils/non_regression.py` (la bulle au bit et 1 = 16 fils ; la carte contre la référence sur les poches ; `--v1` 5 s : masse,
-  trajectoire, pas médian sous 1,3 fois l'inscrit) ; empreintes inscrites dans `docs/validation/EMPREINTES.md` ; 124 s ; passe sur l'état
-  présent, échoue sur une empreinte modifiée (`0000…` : « dc06f28c8a909e04 au lieu de 0000000000000000 ») ; `rituel.py fin` le lance
-  (`--sans-banc "raison"` pour le sauter). Critère (3) tenu. Une vérification lancée ce matin est restée suspendue 12 h — la machine en
-  veille, vraisemblablement ; elle a fini d'elle-même à la reprise, avec le bon résultat.
-- **P5** — preuve REFERENCE-PARALLELE-S483 ; index ; journal.
