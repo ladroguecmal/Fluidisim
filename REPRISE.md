@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-10-05 07:32 +02:00
+Battement        : 2026-10-05 07:39 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : **S483 — ADR-222 D2 et D3 : la référence parallèle, la non-régression**
 Dernière session : S482 — K2-2b : le coût des poches ([journal](notes/JOURNAL.md)). Avant : S481 (K2-2 : l'air enfermé sur la carte)

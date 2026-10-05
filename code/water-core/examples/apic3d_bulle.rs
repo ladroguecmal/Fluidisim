@@ -52,6 +52,10 @@ fn main() {
     if std::env::var("SANS_POCHES").is_err() {
         a.enable_air_pockets(&mut hote).expect("poches");
     }
+    // S483 (ADR-222 D2) : `FILS=<n>` — les écritures disjointes du pas sur `n` fils (le résultat ne change pas, l'empreinte le vérifie).
+    if let Some(n) = std::env::var("FILS").ok().and_then(|v| v.parse::<u32>().ok()) {
+        a.set_jobs(Some(std::sync::Arc::new(host_impl::ScopedJobs::with_workers(n))));
+    }
     let p_eq = P_ATM + RHO * G * z_b;
     let f_minnaert = (3. * GAMMA_AIR * p_eq / RHO).sqrt() / (2. * std::f64::consts::PI * r);
     println!(
@@ -61,8 +65,26 @@ fn main() {
     let mut poches = [AirPocket::default(); 8];
     let (mut t, mut serie) = (0f64, Vec::new());
     let debut = Instant::now();
+    let profil = std::env::var("PROFIL").is_ok();
+    let mut etages: Vec<(&'static str, f64)> = Vec::new();
     while t < duree {
-        let rep = a.step(pas_us).expect("pas");
+        // S483 : `PROFIL=1` — le temps par étage (le cœur pose les repères, l'exemple lit l'horloge).
+        let rep = if profil {
+            let mut t0 = Instant::now();
+            let r = a
+                .step_marked(pas_us, water_core::apic3d::ApicStage::Full, &mut |nom| {
+                    let e = t0.elapsed().as_secs_f64();
+                    t0 = Instant::now();
+                    match etages.iter_mut().find(|(n, _)| *n == nom) {
+                        Some(x) => x.1 += e,
+                        None => etages.push((nom, e)),
+                    }
+                })
+                .expect("pas");
+            r
+        } else {
+            a.step(pas_us).expect("pas")
+        };
         t += pas_us as f64 * 1e-6;
         let np = a.air_pockets(&mut poches);
         let (v, p, z) = if np > 0 { (poches[0].volume, poches[0].pressure, poches[0].centroid[2]) } else { (0., 0., 0.) };
@@ -75,6 +97,24 @@ fn main() {
             );
         }
         assert_eq!(a.particle_count(), particules, "masse");
+    }
+    // S483 : l'empreinte de l'état final (FNV-1a sur les bits des positions, des vitesses et de `φ`) — le même calcul, les mêmes bits.
+    let mut h: u64 = 0xcbf29ce484222325;
+    let mut mix = |x: f32| {
+        for b in x.to_bits().to_le_bytes() {
+            h ^= b as u64;
+            h = h.wrapping_mul(0x100000001b3);
+        }
+    };
+    for p in a.particles().iter().chain(a.velocities()) {
+        p.iter().for_each(|x| mix(*x));
+    }
+    a.distance().iter().for_each(|x| mix(*x));
+    println!("BULLE_EMPREINTE pas={} empreinte={h:016x}", serie.len());
+    if profil {
+        let total: f64 = etages.iter().map(|e| e.1).sum();
+        let detail: Vec<String> = etages.iter().map(|(n, e)| format!("{n}={:.1}s({:.0}%)", e, 100. * e / total)).collect();
+        println!("BULLE_PROFIL total_s={total:.1} {}", detail.join(" "));
     }
     // La fréquence : les passages du volume par sa moyenne, après le premier dixième de la durée.
     let debut_i = serie.len() / 10;

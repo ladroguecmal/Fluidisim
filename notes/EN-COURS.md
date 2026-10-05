@@ -82,9 +82,14 @@ sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appe
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le temps par étage de la référence ; où il est.
-- [ ] **P3** — la référence parallèle, au bit ; (1), (2).
+- [x] **P2** — le temps par étage de la référence ; où il est.
+- [>] **P3** — la référence parallèle, au bit ; (1), (2).
 - [ ] **P4** — le banc de non-régression ; (3).
 - [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2** — `Apic3::step_marked` (un repère nommé par étage ; le cœur ne lit aucune horloge, l'exemple oui ; `step_upto` l'appelle avec
+  un repère vide). La bulle (`PROFIL=1`, 20 pas) : reconstruction **41 %**, séparation + corps + échange 19 %, projection 15 %, p2g 10 %,
+  advection 10 %, g2p 5 %.
+- **P3a** — `set_jobs` ; la reconstruction en `parallel_fill_f32` (`reconstruct_cell`) : **14,1 → 2,8 s**, empreinte identique avec 0, 1
+  et 16 fils (`b67cab1db66f94f5`) ; les essais d'APIC 3D passent.

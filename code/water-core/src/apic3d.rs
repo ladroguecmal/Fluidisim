@@ -104,6 +104,9 @@ pub struct Apic3 {
     /// **S479 (K2-1, ADR-220 D1) — les poches d'air enfermé** (`enable_air_pockets`, `apic3d_poches.rs`) ; `None`, le défaut :
     /// l'air enfermé à la pression atmosphérique, au bit.
     pub(crate) poches: Option<Box<poches::Poches>>,
+    /// **S483 (ADR-222 D2)** — le système de tâches de l'hôte pour les écritures disjointes du pas (`set_jobs`) ; `None`, le
+    /// défaut : les boucles séquentielles. Le résultat ne dépend pas de ce choix (S243).
+    pub(crate) jobs: Option<std::sync::Arc<dyn crate::host::JobSystem + Send + Sync>>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -186,6 +189,7 @@ impl Apic3 {
             background_time_s: 0.,
             open_x: None,
             poches: None,
+            jobs: None,
         })
     }
 
@@ -771,91 +775,121 @@ impl Apic3 {
     /// Puis les étiquettes : eau où `φ < 0`. Trie les particules d'abord ; aucune allocation.
     pub(crate) fn reconstruct(&mut self) {
         self.bin();
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        // S483 (ADR-222 D2) : chaque maille ne lit que les particules et écrit sa seule valeur — une écriture disjointe, en
+        // parallèle quand l'hôte a donné un système de tâches (`set_jobs`), au bit de la boucle séquentielle quel que soit le
+        // nombre de fils (S243). Une maille de la zone des colonnes ou sous le fond garde sa valeur (`columns_label`).
+        let mut phi = core::mem::take(&mut self.phi);
+        {
+            let this = &*self;
+            let fill = |start: usize, out: &mut [f32]| {
+                for (o, v) in out.iter_mut().enumerate() {
+                    let c = start + o;
+                    let (i, j, k) = (c % nx, (c / nx) % ny, c / (nx * ny));
+                    if let Some(x) = this.reconstruct_cell(i, j, k) {
+                        *v = x;
+                    }
+                }
+            };
+            match &self.jobs {
+                Some(jobs) => jobs.parallel_fill_f32(&mut phi, nx * ny, &fill),
+                None => fill(0, &mut phi),
+            }
+        }
+        self.phi = phi;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    if self.columns.is_some() && self.grid_cell(i, j, k) {
+                        continue;
+                    }
+                    let c = self.cell(i, j, k);
+                    self.label[c] = if self.phi[c] < 0. { WATER } else { AIR };
+                }
+            }
+        }
+    }
+
+    /// La surface reconstruite en une maille : `φ` (la distance au centre pondéré des particules voisines moins le rayon), ou
+    /// `None` pour une maille de la zone des colonnes ou sous le fond de la bande (sa valeur vient d'ailleurs).
+    fn reconstruct_cell(&self, i: usize, j: usize, k: usize) -> Option<f32> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let radius = self.kernel * dx;
         let inv_r2 = 1. / (radius * radius);
         let reach = self.kernel.ceil() as usize;
-        for k in 0..nz {
-            for j in 0..ny {
-                for i in 0..nx {
-                    // S398–S399 : une maille de la zone des colonnes prend `φ = z − η` (`columns_label`) ; rien à reconstruire.
-                    // S413 : ni une maille sous le fond de la bande, à la grille (`φ = z − fond`).
-                    if self.columns.is_some() && self.grid_cell(i, j, k) {
-                        continue;
-                    }
-                    let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
-                    // S389 : les parois **reflètent** les particules — sans quoi, près d'une paroi latérale, le noyau n'en
-                    // trouve que d'un côté, la moyenne se décale vers l'intérieur et la surface y paraît plus basse. Une image
-                    // n'est cherchée que si le centre est à moins d'un rayon de noyau de la paroi ; le couvercle n'en a pas.
-                    let (lx, ly) = (nx as f32 * dx, ny as f32 * dx);
-                    let near = [q[0] < radius, q[0] > lx - radius, q[1] < radius, q[1] > ly - radius, q[2] < radius];
-                    let images_x = [Some(1f32), near[0].then_some(-1.), near[1].then_some(2.)];
-                    let images_y = [Some(1f32), near[2].then_some(-1.), near[3].then_some(2.)];
-                    let images_z = [Some(1f32), near[4].then_some(-1.)];
-                    // S393 : le corps **reflète** aussi, pour la même raison — sans quoi la surface paraît plus basse contre
-                    // lui et l'eau y monte (9,4 cm/s au repos). Image radiale, `c + (2R − d)·n`, cherchée seulement près du corps.
-                    let body = self.body.filter(|b| {
-                        let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
-                        (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt() < b.radius + radius
-                    });
-                    let (mut sw, mut sx) = (0f32, [0f32; 3]);
-                    for c in k.saturating_sub(reach)..(k + reach + 1).min(nz) {
-                        for b in j.saturating_sub(reach)..(j + reach + 1).min(ny) {
-                            for a in i.saturating_sub(reach)..(i + reach + 1).min(nx) {
-                                let cell = self.cell(a, b, c);
-                                for s in self.bin_start[cell]..self.bin_start[cell + 1] {
-                                    let p0 = self.x[self.order[s as usize] as usize];
-                                    // Image : 1 — la particule ; −1 — reflétée par la paroi basse ; 2 — par la paroi haute.
-                                    let mirror = |v: f32, m: f32, l: f32| if m == 1. { v } else if m == -1. { -v } else { 2. * l - v };
-                                    for mx in images_x.iter().flatten() {
-                                        for my in images_y.iter().flatten() {
-                                            for mz in images_z.iter().flatten() {
-                                                let p = [mirror(p0[0], *mx, lx), mirror(p0[1], *my, ly), mirror(p0[2], *mz, 0.)];
-                                                let mut add = |p: [f32; 3]| {
-                                                    let d = [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
-                                                    let wt = kernel((d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * inv_r2);
-                                                    if wt > 0. {
-                                                        sw += wt;
-                                                        for m in 0..3 {
-                                                            sx[m] += wt * p[m];
-                                                        }
-                                                    }
-                                                };
-                                                add(p);
-                                                if let Some(b) = body {
-                                                    let e = [p[0] - b.center[0], p[1] - b.center[1], p[2] - b.center[2]];
-                                                    let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
-                                                    if d > 0. && d < 2. * b.radius {
-                                                        let f = (2. * b.radius - d) / d;
-                                                        add([b.center[0] + f * e[0], b.center[1] + f * e[1], b.center[2] + f * e[2]]);
-                                                    }
-                                                }
+        // S398–S399 : une maille de la zone des colonnes prend `φ = z − η` (`columns_label`) ; rien à reconstruire.
+        // S413 : ni une maille sous le fond de la bande, à la grille (`φ = z − fond`).
+        if self.columns.is_some() && self.grid_cell(i, j, k) {
+            return None;
+        }
+        let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+        // S389 : les parois **reflètent** les particules — sans quoi, près d'une paroi latérale, le noyau n'en
+        // trouve que d'un côté, la moyenne se décale vers l'intérieur et la surface y paraît plus basse. Une image
+        // n'est cherchée que si le centre est à moins d'un rayon de noyau de la paroi ; le couvercle n'en a pas.
+        let (lx, ly) = (nx as f32 * dx, ny as f32 * dx);
+        let near = [q[0] < radius, q[0] > lx - radius, q[1] < radius, q[1] > ly - radius, q[2] < radius];
+        let images_x = [Some(1f32), near[0].then_some(-1.), near[1].then_some(2.)];
+        let images_y = [Some(1f32), near[2].then_some(-1.), near[3].then_some(2.)];
+        let images_z = [Some(1f32), near[4].then_some(-1.)];
+        // S393 : le corps **reflète** aussi, pour la même raison — sans quoi la surface paraît plus basse contre
+        // lui et l'eau y monte (9,4 cm/s au repos). Image radiale, `c + (2R − d)·n`, cherchée seulement près du corps.
+        let body = self.body.filter(|b| {
+            let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+            (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt() < b.radius + radius
+        });
+        let (mut sw, mut sx) = (0f32, [0f32; 3]);
+        for c in k.saturating_sub(reach)..(k + reach + 1).min(nz) {
+            for b in j.saturating_sub(reach)..(j + reach + 1).min(ny) {
+                for a in i.saturating_sub(reach)..(i + reach + 1).min(nx) {
+                    let cell = self.cell(a, b, c);
+                    for s in self.bin_start[cell]..self.bin_start[cell + 1] {
+                        let p0 = self.x[self.order[s as usize] as usize];
+                        // Image : 1 — la particule ; −1 — reflétée par la paroi basse ; 2 — par la paroi haute.
+                        let mirror = |v: f32, m: f32, l: f32| if m == 1. { v } else if m == -1. { -v } else { 2. * l - v };
+                        for mx in images_x.iter().flatten() {
+                            for my in images_y.iter().flatten() {
+                                for mz in images_z.iter().flatten() {
+                                    let p = [mirror(p0[0], *mx, lx), mirror(p0[1], *my, ly), mirror(p0[2], *mz, 0.)];
+                                    let mut add = |p: [f32; 3]| {
+                                        let d = [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
+                                        let wt = kernel((d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * inv_r2);
+                                        if wt > 0. {
+                                            sw += wt;
+                                            for m in 0..3 {
+                                                sx[m] += wt * p[m];
                                             }
+                                        }
+                                    };
+                                    add(p);
+                                    if let Some(b) = body {
+                                        let e = [p[0] - b.center[0], p[1] - b.center[1], p[2] - b.center[2]];
+                                        let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
+                                        if d > 0. && d < 2. * b.radius {
+                                            let f = (2. * b.radius - d) / d;
+                                            add([b.center[0] + f * e[0], b.center[1] + f * e[1], b.center[2] + f * e[2]]);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    // S399 : près de la zone, la reconstruction compte aussi les particules **virtuelles** des colonnes.
-                    if self.columns.is_some() {
-                        let (w, v) = self.virtual_column_sums(q, i, j, reach, radius, inv_r2, [images_x, [images_y[0], images_y[1], images_y[2]]], images_z);
-                        sw += w;
-                        for m in 0..3 {
-                            sx[m] += v[m];
-                        }
-                    }
-                    let c = self.cell(i, j, k);
-                    self.phi[c] = if sw > 0. {
-                        let m = [sx[0] / sw - q[0], sx[1] / sw - q[1], sx[2] / sw - q[2]];
-                        (m[0] * m[0] + m[1] * m[1] + m[2] * m[2]).sqrt() - self.radius
-                    } else {
-                        dx
-                    };
-                    self.label[c] = if self.phi[c] < 0. { WATER } else { AIR };
                 }
             }
         }
+        // S399 : près de la zone, la reconstruction compte aussi les particules **virtuelles** des colonnes.
+        if self.columns.is_some() {
+            let (w, v) = self.virtual_column_sums(q, i, j, reach, radius, inv_r2, [images_x, [images_y[0], images_y[1], images_y[2]]], images_z);
+            sw += w;
+            for m in 0..3 {
+                sx[m] += v[m];
+            }
+        }
+        Some(if sw > 0. {
+            let m = [sx[0] / sw - q[0], sx[1] / sw - q[1], sx[2] / sw - q[2]];
+            (m[0] * m[0] + m[1] * m[1] + m[2] * m[2]).sqrt() - self.radius
+        } else {
+            dx
+        })
     }
 }
 
@@ -925,6 +959,18 @@ impl Apic3 {
     /// **S416 — le pas jusqu'à l'étage `upto` compris** (banc de la carte, C7). `Full` est `step`, au bit ; avant `Full`,
     /// le pas s'arrête sans ses contrôles de fin et rend ce qu'il a déjà mesuré.
     pub fn step_upto(&mut self, duration_us: u64, upto: ApicStage) -> Result<ApicReport, Error> {
+        self.step_marked(duration_us, upto, &mut |_| {})
+    }
+
+    /// **S483 (ADR-222 D2)** — le système de tâches des écritures disjointes du pas (la reconstruction, …) ; `None` : séquentiel.
+    /// Changer de système, ou son nombre de fils, change la vitesse, jamais le résultat (S243).
+    pub fn set_jobs(&mut self, jobs: Option<std::sync::Arc<dyn crate::host::JobSystem + Send + Sync>>) {
+        self.jobs = jobs;
+    }
+
+    /// **S483** — le pas, avec un repère nommé à la fin de chaque étage (`mark`) : un banc y lit son horloge (le cœur n'en lit
+    /// aucune). Le résultat est celui de `step_upto`, au bit.
+    pub fn step_marked(&mut self, duration_us: u64, upto: ApicStage, mark: &mut dyn FnMut(&'static str)) -> Result<ApicReport, Error> {
         if duration_us == 0 || duration_us > (1u64 << 40) {
             return Err(Error::NotFinite);
         }
@@ -933,15 +979,18 @@ impl Apic3 {
         // S398 : sans zone de colonnes, ces quatre appels ne font rien.
         self.columns_begin();
         self.particles_to_grid();
+        mark("p2g");
         if upto == ApicStage::ParticlesToGrid {
             return Ok(ApicReport::default());
         }
         self.columns_advect(dt);
         self.reconstruct();
+        mark("reconstruction");
         self.columns_label();
         self.label_body();
         // S479 : les poches d'air enfermé (rien sans `enable_air_pockets`).
         self.pockets_detect();
+        mark("etiquettes_poches");
         if upto == ApicStage::Reconstruct {
             return Ok(ApicReport::default());
         }
@@ -957,6 +1006,7 @@ impl Apic3 {
         self.walls();
         self.impose_body();
         let (iterations, residual) = if self.poches.is_some() { self.project_with_pockets(dt) } else { self.project(dt) };
+        mark("projection");
         let divergence = self.divergence_metric();
         let partial = ApicReport { iterations, residual, divergence, max_speed: 0. };
         if upto == ApicStage::Project {
@@ -964,15 +1014,18 @@ impl Apic3 {
         }
         self.extrapolate();
         self.impose_body();
+        mark("extrapolation");
         if upto == ApicStage::Extrapolate {
             return Ok(partial);
         }
         self.columns_transport(dt);
         self.grid_to_particles();
+        mark("g2p");
         if upto == ApicStage::GridToParticles {
             return Ok(partial);
         }
         self.advect(dt);
+        mark("advection");
         if upto == ApicStage::Advect {
             return Ok(partial);
         }
@@ -982,6 +1035,7 @@ impl Apic3 {
         self.move_body(dt);
         // S399 : l'échange à la frontière de la zone des colonnes (rien sans zone).
         self.columns_exchange();
+        mark("separation_corps_echange");
         let mut max_speed = 0f32;
         for k in 0..self.n {
             let (p, v) = (self.x[k], self.vel[k]);
