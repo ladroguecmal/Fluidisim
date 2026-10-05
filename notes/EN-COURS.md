@@ -75,7 +75,11 @@ de ne rien changer ; (2) au moins un contrôle outillé nouveau, qui aurait vu u
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la revue : ADR-223 ; METHODE, boussole ; le contrôle nouveau.
+- [x] **P2** — la revue : ADR-223 ; METHODE, boussole ; le contrôle nouveau.
 - [ ] **P3** — le lot des registres ; preuve ; rituel.
 
 ### Notes de reprise
+- **P2** — ADR-223 : neuf frictions relues, chacune sa suite (trois faites avant, une sans changement, trois protections, deux pièges,
+  un essai) ; METHODE (21 protections), LECONS L374–L376, boussole (pièges, la ligne « revue »). **Contrôle nouveau** :
+  `air_pocket_centroid_is_the_bubble_centre_s486` (il aurait vu le centre faux de S479 : 0,16 m au lieu de 0,20). Le script qui
+  écrivait ces lignes est tombé dans le piège qu'il consignait (un `U` échappé dans un heredoc) : refait depuis un fichier.

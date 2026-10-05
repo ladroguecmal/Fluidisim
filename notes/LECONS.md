@@ -6481,3 +6481,19 @@ note substituée ont le même message de commit.
 **La règle.** Un ajout à un document qui ne se réécrit pas se fait par ajout, jamais par écriture du fichier entier ; et un
 contrôle tient la forme : un ADR commence par son titre (`etat_projet.py --check`, S402).
 
+## L374
+
+**S484–S485 — le quart de cuve.** Une bulle centrée sur le coin d'un quart de cuve, les parois d'APIC prises pour des plans de symétrie :
+× 0,57 à 0,67 de Davies et Taylor, et l'affinement s'en éloignait ; la cuve entière, × 0,90. Deux sessions sur un montage jamais éprouvé.
+Protection : un montage simplifié s'éprouve contre le montage entier avant de servir ([ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md) D1).
+
+## L375
+
+**S479–S484 — le centre des poches.** Divisé par le volume entier, mailles d'eau voisines comprises : × 0,8, de S479 à S484, chiffres
+publiés compris. Une grandeur de diagnostic s'éprouve à sa naissance sur un cas connu (ADR-223 D2 ; essai de S486).
+
+## L376
+
+**S485 — le rejeu.** La carte et la référence coïncident au chiffre à 0,05 s puis divergent ; le critère « à 5 % sur 0,4 s » était mal
+posé. Au-delà du temps de divergence, on compare des statistiques (ADR-223 D3).
+

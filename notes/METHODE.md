@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Dix-huit, tirées des erreurs qui se sont **répétées** ; chacune renvoie à sa leçon, et au contrôle
+Vingt et une, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -19,9 +19,12 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Une convergence se lit sur trois points au moins, et juge un ordre, pas un déplacement | L274, L361 | — |
 | | Un comportement s'éprouve sur sa durée d'usage : six secondes ne disent rien d'une minute | L369 | — |
 | | L'incertitude vraie est la sensibilité à une perturbation minime, pas l'accord de deux calculs | L371 | — |
+| | Au-delà de leur temps de divergence (mesuré), deux calculs d'un écoulement qui se déstabilise se comparent en statistiques, pas en trajectoire | L376 | — |
+| | Un montage simplifié (symétrie, quart, paroi prise pour un plan de symétrie) s'éprouve une fois contre le montage entier avant de servir ; un modèle neuf n'est tenu qu'après une scène de jeu | L374 | — |
 | | Une erreur systématique ne s'annule que si les deux côtés la portent également | L278 | — |
 | | Critère et prédiction s'écrivent avant la mesure ; un seuil ne se relève jamais pour faire passer ; un fait mesuré et son explication se publient séparément | L177 | — |
 | **en construisant l'instrument** | Un instrument s'éprouve sur un cas de réponse connue, et se réépreuve quand ce qu'il mesure s'améliore ; deux représentations se comparent à frontière et point de fonctionnement égaux | L360, L368 | — |
+| | Une grandeur de diagnostic (centre, volume, débit) s'éprouve à sa naissance par un essai du cœur sur un cas de réponse connue | L375 | essai `air_pocket_centroid_is_the_bubble_centre_s486` |
 | | Le compilateur est dans la boucle : une identité flottante du source n'est pas celle du binaire, carte graphique comprise — la vérifier sur la cible | L345, L346 | — |
 | **en lançant** | Un binaire ne s'exécute qu'après une compilation **réussie** et lue : `cargo run`, ou code de sortie vérifié, jamais une sortie filtrée | L362 | zéro avertissement de construction : un avertissement neuf se voit |
 | | Une revue visuelle part avec ses options explicites (`--meilleur`) ; deux rendus se comparent à horizon forcé | L349, A301 | — |
