@@ -181,4 +181,3 @@ auraient calculé faux en silence : trouvé en essayant R/dx = 8). **Mesuré** :
 U × 0,90 à R/dx = 4 et × 0,85 à 6 — à 6, Davies–Taylor (× 1,04) jusqu'à une scission en trois poches vers 0,25 s, vraisemblablement
 numérique. **Limite** : R/dx = 8 attend les faces à deux dimensions ; deux points ne font pas une convergence. Maillons **2**. Suivant :
 **S488** — les faces et les mailles à deux dimensions (A326), puis R/dx = 8 ; ou la scission de la calotte (la jupe sous-résolue).
-

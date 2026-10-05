@@ -15,7 +15,7 @@ Battement        : 2026-10-06 00:17 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : aucune
 Dernière session : S487 — les dispatchs à deux dimensions ; la remontée en cuve entière ([journal](notes/JOURNAL.md)). Avant : S486 (la première revue de méthode)
-Session suivante : **S488 — les faces et les mailles à deux dimensions** (A326 : l'indice linéaire dans les noyaux sur les faces, les mailles et les poches ; au bit sous la borne), puis la remontée en cuve entière à R/dx = 8 (le troisième point de la convergence de U, REMONTEE-S487). Si la mémoire de la carte bloque à R/dx = 8, le dire et passer à la scission de la calotte. **Sans attendre de « Continue »**
+Session suivante : **S488 — K2-4 : la nappe et sa rupture** ([conception](docs/registres/CAMPAGNE-K2-S478.md)) : une nappe plus mince qu'une maille se rompt en gouttes (modèle sous-maille, ADR-014 §4 : Weber), les gouttes particules balistiques avec traînée qui rendent leur masse en retombant ; critère **A312** : la hauteur du jet et le rayon de la couronne de B10 à trois mailles, à 15 % entre elles — ou contre une mesure publiée ; masse exacte, gouttes comprises. *Choisi en S487 par la règle des maillons* (deux ; la convergence de U en maille est un approfondissement différable : K2-3 tenu à × 0,90 ; les faces à deux dimensions attendent le déclencheur d'A326). **Sans attendre de « Continue »**
 Maillons        : 2 — S487 : un outil (A326 pour les particules) et une mesure ; aucun point de la liste ne change d'état
 Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
 ```
