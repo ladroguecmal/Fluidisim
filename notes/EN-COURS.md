@@ -82,8 +82,11 @@ pas, l'écart est attribué (la résolution, le volume suivi, la paroi), pas maq
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `apic3d_remontee` ; un essai court.
+- [x] **P2** — `apic3d_remontee` ; un essai court.
 - [ ] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
 - [ ] **P4** — preuve ; liste 7.4 ; rituel.
 
 ### Notes de reprise
+- **P2** — `code/water-core/examples/apic3d_remontee.rs` : quart de cuve (8 R de demi-largeur, 22 R d'eau), bulle au coin à 2,5 R du
+  fond, pas stable ≤ 5 ms, la plus grande poche suivie ; la droite sur `z ≥ z0 + 2R`. Essai court (R/dx = 3, 13 pas) : la poche suivie,
+  masse exacte ; le centre d'un quart de bulle est à 3R/8 des axes (la dérive se lit par rapport au départ). R/dx = 4 lancé à 20:34.
