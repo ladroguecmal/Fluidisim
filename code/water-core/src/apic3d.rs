@@ -109,6 +109,8 @@ pub struct Apic3 {
     pub(crate) jobs: Option<std::sync::Arc<dyn crate::host::JobSystem + Send + Sync>>,
     /// S483 : le tri par maille vient d'être fait sur les positions courantes (`particles_to_grid`) ; la reconstruction le reprend.
     pub(crate) bin_fresh: bool,
+    /// **S488 (K2-4)** — les gouttes (`enable_droplets`, `apic3d_gouttes.rs`) ; `None`, le défaut : le pas d'avant, au bit.
+    pub(crate) gouttes: Option<Box<gouttes::Gouttes>>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -193,6 +195,7 @@ impl Apic3 {
             poches: None,
             jobs: None,
             bin_fresh: false,
+            gouttes: None,
         })
     }
 
@@ -763,6 +766,9 @@ impl Apic3 {
                     let cell = self.cell(a, b, c);
                     for s in self.bin_start[cell]..self.bin_start[cell + 1] {
                         let k = self.order[s as usize] as usize;
+                        if self.is_droplet(k) {
+                            continue;
+                        }
                         let p = self.x[k];
                         // Le poids de ce seul nœud, axe par axe, avec les bornes de `weights` et son ordre de multiplication.
                         let mut wa = [0f32; 3];
@@ -799,12 +805,19 @@ impl Apic3 {
             let this = &*self;
             let fill_v = |start: usize, out: &mut [f32]| {
                 for (o, v) in out.chunks_exact_mut(3).enumerate() {
+                    if this.is_droplet(start / 3 + o) {
+                        continue;
+                    }
                     let (vk, _) = this.gather_particle(start / 3 + o);
                     v.copy_from_slice(&vk);
                 }
             };
             let fill_c = |start: usize, out: &mut [f32]| {
                 for (o, m) in out.chunks_exact_mut(9).enumerate() {
+                    if this.is_droplet(start / 9 + o) {
+                        m.fill(0.);
+                        continue;
+                    }
                     let (_, ck) = this.gather_particle(start / 9 + o);
                     for a in 0..3 {
                         m[3 * a..3 * a + 3].copy_from_slice(&ck[a]);
@@ -819,6 +832,10 @@ impl Apic3 {
                 None => {
                     // Séquentiel : un seul passage (les poids une fois), les mêmes valeurs.
                     for k in 0..n {
+                        if this.is_droplet(k) {
+                            c[k] = [[0.; 3]; 3];
+                            continue;
+                        }
                         let (vk, ck) = this.gather_particle(k);
                         vel[k] = vk;
                         c[k] = ck;
@@ -950,7 +967,11 @@ impl Apic3 {
                 for a in i.saturating_sub(reach)..(i + reach + 1).min(nx) {
                     let cell = self.cell(a, b, c);
                     for s in self.bin_start[cell]..self.bin_start[cell + 1] {
-                        let p0 = self.x[self.order[s as usize] as usize];
+                        let k = self.order[s as usize] as usize;
+                    if self.is_droplet(k) {
+                        continue;
+                    }
+                    let p0 = self.x[k];
                         // Image : 1 — la particule ; −1 — reflétée par la paroi basse ; 2 — par la paroi haute.
                         let mirror = |v: f32, m: f32, l: f32| if m == 1. { v } else if m == -1. { -v } else { 2. * l - v };
                         for mx in images_x.iter().flatten() {
@@ -1095,6 +1116,8 @@ impl Apic3 {
         mark("reconstruction");
         self.columns_label();
         self.label_body();
+        // S488 : les gouttes (rien sans `enable_droplets`).
+        self.droplets_classify();
         // S479 : les poches d'air enfermé (rien sans `enable_air_pockets`).
         self.pockets_detect();
         mark("etiquettes_poches");
@@ -1628,7 +1651,10 @@ impl Apic3 {
             let fill = |start: usize, out: &mut [f32]| {
                 for (o, q) in out.chunks_exact_mut(3).enumerate() {
                     let k = start / 3 + o;
-                    let _ = k;
+                    // S488 : une goutte suit sa trajectoire balistique (plus bas).
+                    if this.is_droplet(k) {
+                        continue;
+                    }
                     let p = [q[0], q[1], q[2]]; // la position avant le pas (le tableau pris contient encore les positions)
                     let v1 = with_b(this, this.grid_velocity(p), p, t0);
                     let mid = [p[0] + 0.5 * dt * v1[0], p[1] + 0.5 * dt * v1[1], p[2] + 0.5 * dt * v1[2]];
@@ -1645,6 +1671,25 @@ impl Apic3 {
             }
         }
         self.x = x;
+        // S488 : les gouttes, balistiques ; bornées au domaine, la composante normale annulée à la paroi.
+        if self.gouttes.is_some() {
+            let (g, d, rho) = (self.droplet_gravity(), droplet_diameter(dx as f64), self.rho as f64);
+            let (lo, hi) = ([margin; 3], [lx - margin, ly - margin, lz - margin]);
+            for k in 0..n {
+                if !self.is_droplet(k) {
+                    continue;
+                }
+                let (mut q, mut v) = ballistic_step(self.x[k], self.vel[k], g, d, rho, dt);
+                for a in 0..3 {
+                    if q[a] < lo[a] || q[a] > hi[a] {
+                        q[a] = q[a].clamp(lo[a], hi[a]);
+                        v[a] = 0.;
+                    }
+                }
+                self.x[k] = q;
+                self.vel[k] = v;
+            }
+        }
     }
 
     /// **Séparation** : deux particules plus proches que 0,4 maille s'écartent chacune du quart de leur recouvrement,
@@ -1666,6 +1711,10 @@ impl Apic3 {
                 let fill = |start: usize, out: &mut [f32]| {
                     for (o, sh) in out.chunks_exact_mut(3).enumerate() {
                         let a = start / 3 + o;
+                        if this.is_droplet(a) {
+                            sh.copy_from_slice(&[0.; 3]);
+                            continue;
+                        }
                         let xa = this.x[a];
                         let (i, j, k) = this.cell_of(xa);
                         let mut acc = [0f32; 3];
@@ -1675,7 +1724,7 @@ impl Apic3 {
                                     let other = this.cell(a_, b_, c);
                                     for sb in this.bin_start[other]..this.bin_start[other + 1] {
                                         let b = this.order[sb as usize] as usize;
-                                        if b == a {
+                                        if b == a || this.is_droplet(b) {
                                             continue;
                                         }
                                         let e = [this.x[b][0] - xa[0], this.x[b][1] - xa[1], this.x[b][2] - xa[2]];
@@ -1737,6 +1786,9 @@ impl Apic3 {
 
 #[path = "apic3d_columns.rs"]
 mod columns;
+#[path = "apic3d_gouttes.rs"]
+mod gouttes;
+pub use gouttes::{ballistic_step, droplet_diameter, CD_GOUTTE, RHO_AIR, SIGMA_EAU, WEBER_RUPTURE};
 #[path = "apic3d_poches.rs"]
 mod poches;
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};

@@ -83,8 +83,13 @@ mailles à 15 % entre elles avec gouttes (contre 40 à 60 % sans) — sinon, l'�
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les gouttes dans la référence ; essais (1), (2).
-- [ ] **P3** — B10 à trois mailles, avec et sans gouttes ; (3).
+- [x] **P2** — les gouttes dans la référence ; essais (1), (2).
+- [>] **P3** — B10 à trois mailles, avec et sans gouttes ; (3).
 - [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2** — `apic3d_gouttes.rs` (`enable_droplets`, `droplets_classify` après les étiquettes, `ballistic_step`) ; les gouttes hors du
+  transfert vers la grille, de la reconstruction, de la séparation ; leur vitesse gardée au transfert vers les particules ; balistiques à
+  l'advection (bornées au domaine). Refusées avec une zone de colonnes. Essais : `droplet_ballistic_apex_s488` (l'apogée à 1 %, avec et
+  sans traînée), `droplets_from_a_jet_keep_the_mass_s488` (des gouttes naissent et retombent, masse exacte) ; 46 essais d'APIC 3D ;
+  non-régression au bit. `apic3d_b10` : `APIC3D_GOUTTES=1`.

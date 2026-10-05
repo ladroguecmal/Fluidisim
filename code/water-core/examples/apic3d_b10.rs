@@ -93,6 +93,11 @@ fn main() {
     if let Some(n) = std::env::var("FILS").ok().and_then(|v| v.parse::<u32>().ok()) {
         a.set_jobs(Some(std::sync::Arc::new(host_impl::ScopedJobs::with_workers(n))));
     }
+    // S488 (K2-4) : `APIC3D_GOUTTES=1` — la nappe rompue en gouttes balistiques.
+    let gouttes_actives = std::env::var("APIC3D_GOUTTES").is_ok();
+    if gouttes_actives {
+        a.enable_droplets(&mut hote).expect("gouttes");
+    }
     let pas_max: u64 = std::env::var("PAS_MAX").ok().and_then(|v| v.parse().ok()).unwrap_or(u64::MAX);
     let apres: f64 = std::env::var("APIC3D_APRES").ok().and_then(|v| v.parse().ok()).unwrap_or(0.3);
     let mut poches = [AirPocket::default(); 8];
@@ -276,6 +281,10 @@ fn main() {
         assert_eq!(a.particle_count(), n, "masse");
     }
     let (tp, prof, base, air, dtp) = pincement.unwrap_or((f64::NAN, f64::NAN, f64::NAN, f64::NAN, f64::NAN));
+    if gouttes_actives {
+        let (maintenant, nees, retombees) = a.droplet_counts();
+        println!("APIC3D_B10_GOUTTES bilan maintenant={maintenant} nees={nees} retombees={retombees}");
+    }
     println!(
         "APIC3D_B10 fr={fr} d_sur_dx={n_d} domaine={} demi_largeur_d={demi} mailles={} particules={n} pas={pas} \
          pincement_t_sur_rac_d_g={:.4} pincement_t_sur_rac_r_g={:.4} pas_au_pincement_sur_rac_d_g={:.4} \

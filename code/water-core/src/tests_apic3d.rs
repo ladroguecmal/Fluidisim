@@ -1600,3 +1600,56 @@ fn air_pocket_centroid_is_the_bubble_centre_s486() {
         assert!(e < 0.1 * dx as f64, "centre, axe {m} : {} contre {} (écart {e})", poches[0].centroid[m], c[m]);
     }
 }
+
+/// **S488 (K2-4)** — l'intégrateur balistique d'une goutte contre une intégration fine en double précision (pas de 10 µs) : l'apogée
+/// d'un jet vertical à 5 m/s, traînée comprise, à 1 % ; sans traînée (une goutte énorme), `v0²/2g` à 1 %.
+#[test]
+fn droplet_ballistic_apex_s488() {
+    let (g, rho) = (9.81f64, 1000f64);
+    for d in [droplet_diameter(0.01), 10.] {
+        let k = 0.75 * RHO_AIR / rho * CD_GOUTTE / d;
+        // La référence fine.
+        let (mut z, mut v, h) = (0f64, 5f64, 1e-5f64);
+        while v > 0. {
+            v -= (g + k * v * v) * h;
+            z += v * h;
+        }
+        // Le pas du jeu, 2 ms.
+        let (mut x, mut w, mut top) = ([0f32; 3], [0f32, 0., 5.], 0f32);
+        for _ in 0..2000 {
+            let (nx, nw) = ballistic_step(x, w, [0., 0., -g as f32], d, rho, 0.002);
+            x = nx;
+            w = nw;
+            top = top.max(x[2]);
+            if w[2] < 0. {
+                break;
+            }
+        }
+        assert!((top as f64 / z - 1.).abs() < 0.01, "d = {d} : apogée {top} contre {z}");
+    }
+}
+
+/// **S488 (K2-4)** — un jet d'eau lancé vers le haut au-dessus d'un bassin : des gouttes naissent (la nappe s'amincit sous la maille),
+/// retombent dans l'eau, et la masse reste exacte ; `enable_droplets` refusé une seconde fois.
+#[test]
+fn droplets_from_a_jet_keep_the_mass_s488() {
+    let (n, nz, dx) = (12usize, 24usize, 0.025f32);
+    let (mut a, mut arena) = apic(n, n, nz, dx, n * n * nz * 8);
+    let c = [0.15f32, 0.15];
+    let seeded = a
+        .seed(&|p| p[2] < 0.1 || ((p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) < 0.03f32.powi(2) && p[2] < 0.2))
+        .unwrap();
+    a.set_particle_velocities(&|p| if p[2] >= 0.1 { ([0., 0., 3.], [[0.; 3]; 3]) } else { ([0.; 3], [[0.; 3]; 3]) }).unwrap();
+    a.enable_droplets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    assert!(a.enable_droplets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).is_err());
+    let mut max_drops = 0usize;
+    for _ in 0..300 {
+        a.step(2000).unwrap();
+        max_drops = max_drops.max(a.droplet_counts().0);
+        assert_eq!(a.particle_count(), seeded, "masse");
+    }
+    let (now, born, landed) = a.droplet_counts();
+    assert!(born > 0 && max_drops > 0, "des gouttes naissent : {born}");
+    assert!(landed > 0, "des gouttes retombent : {landed}");
+    assert!(now < max_drops, "à 0,6 s, la plupart sont retombées : {now} contre {max_drops} au plus");
+}
