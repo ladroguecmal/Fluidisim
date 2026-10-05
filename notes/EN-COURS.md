@@ -84,7 +84,7 @@ sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appe
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le temps par étage de la référence ; où il est.
 - [x] **P3** — la référence parallèle, au bit ; (1), (2).
-- [ ] **P4** — le banc de non-régression ; (3).
+- [x] **P4** — le banc de non-régression ; (3).
 - [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
@@ -101,3 +101,8 @@ sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appe
   B10 à 16 mailles, 10 pas : 81 → 25 s (×3,2). **Critère (2) manqué** (×4) : la projection reste séquentielle pour l'essentiel (les
   produits scalaires ordonnés, les mises à jour ; `ScopedJobs` recrée ses fils à chaque appel, 150 fois par pas). Le séquentiel ralentit
   (34,6 → 47,7 s) : les collectes font plus de travail que les dispersions — le prix d'un résultat indépendant du nombre de fils.
+- **P4** — `outils/non_regression.py` (la bulle au bit et 1 = 16 fils ; la carte contre la référence sur les poches ; `--v1` 5 s : masse,
+  trajectoire, pas médian sous 1,3 fois l'inscrit) ; empreintes inscrites dans `docs/validation/EMPREINTES.md` ; 124 s ; passe sur l'état
+  présent, échoue sur une empreinte modifiée (`0000…` : « dc06f28c8a909e04 au lieu de 0000000000000000 ») ; `rituel.py fin` le lance
+  (`--sans-banc "raison"` pour le sauter). Critère (3) tenu. Une vérification lancée ce matin est restée suspendue 12 h — la machine en
+  veille, vraisemblablement ; elle a fini d'elle-même à la reprise, avec le bon résultat.

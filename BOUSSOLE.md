@@ -66,7 +66,8 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 
 - Le plan d'une session est écrit et committé **avant** le travail, ses critères avec ; **il déclare ses entrées et comment il les
   vérifie** (S480 — la leçon de S472, où une mer lisait le détail d'une autre).
-- Une étape par commit `S<n> P<k> — …` ; la preuve dans `docs/validation/` ; le rituel de fin par `python outils/rituel.py fin`.
+- Une étape par commit `S<n> P<k> — …` ; la preuve dans `docs/validation/` ; le rituel de fin par `python outils/rituel.py fin`, qui
+  lance le banc de non-régression (S483) ; la référence APIC 3D tourne sur les cœurs (`set_jobs`, au bit, S483).
 - Une propriété numérique revendiquée s'écrit en code et se mesure, contre une référence publiée.
 - Les calculs longs se lancent par `python outils/calcul.py lancer` — hors de la session (WMI, S481), ils survivent à la conversation ; leur trace est dans
   [`notes/CALCULS.md`](notes/CALCULS.md).

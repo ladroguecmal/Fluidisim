@@ -7,11 +7,13 @@ de la liste) reste écrit par la session, et l'outil vérifie qu'il l'a été. I
     python outils/rituel.py debut
         L'amorce d'AGENTS.md : copies de travail, branches, derniers commits, état ; le jeton et son âge, et ce qu'il commande
         (prendre, s'arrêter, reprise à chaud) ; la session en cours d'EN-COURS ; le tableau de bord ; les calculs longs.
-    python outils/rituel.py fin --session S480 --suivante "<texte>" [--maillons "<texte>"] [--lot]
+    python outils/rituel.py fin --session S480 --suivante "<texte>" [--maillons "<texte>"] [--lot] [--sans-banc "<raison>"]
         Vérifie : toutes les cases d'EN-COURS cochées sauf la dernière (le rituel), une entrée `## S480` au journal (vingt lignes
         au plus). Puis : régénère le tableau de bord (avec sa ligne d'historique), les décisions et les anomalies ; met à jour
         les calculs ; libère le jeton (battement, dernière session tirée du journal, suivante, maillons ; avec --lot, la ligne
         Registres) ; coche le rituel ; lance `etat_projet.py --check`. Échoue, sans rien écrire, si une vérification manque.
+        **S483 (ADR-222 D3)** : lance d'abord le banc de non-régression (`outils/non_regression.py`, ≈ 2 min) ; un échec arrête le
+        rituel. `--sans-banc "<raison>"` le saute — la raison est imprimée, et va au journal.
 """
 import re
 import subprocess
@@ -118,6 +120,16 @@ def fin(argv) -> int:
         lignes = [l for l in entree.group(1).splitlines() if l.strip()]
         if len(lignes) > 20:
             manques.append(f"journal : l'entrée {session} a {len(lignes)} lignes de texte (vingt au plus)")
+    if not manques:
+        if "--sans-banc" in argv:
+            print(f"BANC sauté : {option('--sans-banc')} (à dire au journal)")
+        else:
+            banc = subprocess.run([sys.executable, str(ROOT / "outils/non_regression.py")], cwd=ROOT, capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace")
+            for ligne in banc.stdout.splitlines()[-4:]:
+                print(ligne)
+            if banc.returncode != 0:
+                manques.append("le banc de non-régression échoue (ci-dessus) : corriger, ou réinscrire les empreintes si le changement est voulu")
     if manques:
         for m in manques:
             print("MANQUE " + m)

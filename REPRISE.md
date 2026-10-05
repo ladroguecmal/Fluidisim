@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-10-05 07:59 +02:00
+Battement        : 2026-10-05 20:28 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : **S483 — ADR-222 D2 et D3 : la référence parallèle, la non-régression**
 Dernière session : S482 — K2-2b : le coût des poches ([journal](notes/JOURNAL.md)). Avant : S481 (K2-2 : l'air enfermé sur la carte)
@@ -147,7 +147,9 @@ n'écrit pas dans les registres.
 
 **Outillé depuis S480** : `python outils/rituel.py fin --session Snnn --suivante "…" [--maillons "…"] [--lot]`
 vérifie les points 1 et 2 (cases, entrée de journal), régénère les registres générés, libère le jeton (point 4), coche le rituel et
-lance le point 5 ; il échoue sans rien écrire si un point manque, et ne committe pas. Le journal et la suite restent écrits par la session.
+lance le point 5 ; il échoue sans rien écrire si un point manque, et ne committe pas. **Depuis S483** (ADR-222 D3), il lance
+d'abord le banc de non-régression (`outils/non_regression.py`, ≈ 2 min ; empreintes dans `docs/validation/EMPREINTES.md`) et
+s'arrête s'il échoue ; un changement voulu réinscrit les empreintes (`--inscrire`) et le journal le dit. Le journal et la suite restent écrits par la session.
 
 **Toujours**
 
