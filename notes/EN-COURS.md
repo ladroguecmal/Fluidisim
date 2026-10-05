@@ -62,29 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S489 — **terminée**. En autonomie. **Changement de suite, par la règle des maillons** (trois) : la suite déclarée en S488
-(Taylor–Culick pour A312) est écartée — à l'échelle de B10 (le mètre), la rétraction de Taylor–Culick (≈ 0,4 m/s pour une nappe d'un
-millimètre) est petite devant l'éjection (plusieurs m/s) ; elle ne fixerait pas la couronne. A312 attend une mesure publiée ou un verdict
-sur l'image (son déclencheur d'origine). **Le lot choisi fait avancer la liste : 5.3, le débordement vers l'extérieur** (V, ADR-010).
+Session : S490 — **en cours**. En autonomie, **6.5 — un décor fixe qui perce la surface, éprouvé comme tel** (la liste : « Manque un
+décor qui perce la surface »). 9.5 et 9.7 écartés pour cette session : ils ouvrent des questions de conception (le consommateur réseau des
+événements, ADR-056 ; la graine de condensation, ADR-022).
 
-**Ce que la session fait.** Une arête `Flow::Spill` : le débordement d'un nœud vers l'extérieur (`to: None`). Quand le nœud reçoit plus
-que sa place libre (arêtes, pluie), l'excédent n'est plus refusé : il passe par-dessus le bord, et l'hôte le lit dans `scratch` à
-l'indice de l'arête (avec sa position, pour le déposer : le sol, δ, la mer). Le nœud reste plein. Sans arête de débordement, le pas
-d'avant au bit (le transfert refusé, S227).
+**Ce que la session fait.** Une cloison fixe au milieu d'une cuve de δ 3D (référence CPU, mode linéaire, `configure_with_floating_solid` :
+le solide perce le couvercle), du fond jusqu'au-dessus de la surface : (1) au repos, le repos au bit ; (2) une seiche dans la moitié
+gauche : la moitié droite reste au repos (aucune fuite à travers le décor) ; la fréquence de la demi-cuve contre la dispersion linéaire,
+`ω² = g·k·tanh(k·h)`, `k = π/L_gauche`.
 
-**Critères, écrits avant.** (1) sans débordement, au bit (les essais de V) ; (2) un contenant plein qui reçoit `Q` déverse exactement `Q`
-au millilitre près, reste plein, et la somme réseau + déversé égale le total ; (3) la pluie sur un contenant plein déborde de même ;
-(4) la sauvegarde empreinte la nouvelle arête ; un débordement vers un autre nœud est refusé (`Error::Domain`) dans cette version ;
-(5) la liste 5.3 validée si (1)–(4) tiennent et que les déversoirs et orifices de S227 sont déjà éprouvés.
+**Critères, écrits avant.** (1) repos au bit ; (2) la moitié droite sous 10⁻⁶ m pendant trois périodes ; (3) la période de la demi-cuve
+à 3 % de la théorie ; (4) si la configuration refuse un solide posé sur le fond, le dire (une cloison suspendue avec un jour au fond n'est
+pas la même épreuve). 6.5 validée si (1)–(3) tiennent : le décor fixe immergé (S329, S358) et le perçage (S332) sont déjà reçus.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Flow::Spill` ; essais (1)–(4).
-- [x] **P3** — preuve ; 5.3 ; rituel.
+- [ ] **P2** — l'essai de la cloison ; (1)–(4).
+- [ ] **P3** — preuve ; 6.5 ; rituel.
 
 ### Notes de reprise
-- **P2** — `Flow::Spill` : l'étape 3 ne borne plus les arrivées d'un receveur qui déborde (la boucle en indices : une lecture du tableau
-  avant l'écriture, sans allocation) ; l'étape 5 envoie l'excédent par le débordement. Essais : déversé = reçu au ml, la pluie, la
-  sauvegarde, vers un nœud refusé ; 52 essais de V. (Un seuil d'essai faux — 100 000 ml pour ≈ 27 500 — corrigé.)
-- **P3** — preuve DEBORDEMENT-S489 ; **5.3 validée** (décompte 4 / 73 / 44) ; dépendances et tableau régénérés ; index ; journal.
