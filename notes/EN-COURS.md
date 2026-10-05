@@ -62,26 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S486 — **terminée**. En autonomie, **la première revue de méthode** ([ADR-222](../docs/adr/ADR-222-la-methode-se-revise-elle-meme.md)
-D4, toutes les cinq sessions) **et le lot des registres** (dû en S486, ADR-213 D3).
+Session : S487 — **en cours**. En autonomie, **A326 — les dispatchs à deux dimensions de la carte** (au-delà de 65 535 groupes, ≈ 8,4 M
+particules), puis la remontée en cuve entière à R/dx = 6 (la convergence de U, REMONTEE-S485 §5).
 
-**Ce que la session fait.** Relire au journal les frictions de S481 à S485 — ce qui a coûté du temps ou fait refaire — et corriger
-METHODE (ses protections), la boussole (ses pièges), les outils, par un ADR. Puis le lot : la feuille de route, les angles morts nouveaux
-(sévérité 2 ou plus, ou bloquants), l'index.
+**Ce que la session fait.** `dispatch` passe en deux dimensions au-delà de 65 535 groupes ; les dix noyaux par particule (tri, transferts,
+advection, séparation, corps, compactage) reconstruisent l'indice linéaire (`g.x + g.y·65 535·128`). Sous la borne, `g.y` vaut 0 : le même
+calcul, au bit.
 
-**Critères, écrits avant.** (1) chaque friction relue reçoit une suite écrite — une protection, un piège, un contrôle outillé, ou la raison
-de ne rien changer ; (2) au moins un contrôle outillé nouveau, qui aurait vu une des erreurs de S481–S485 ; (3) le lot fait, `--check` à 0.
+**Entrées, et comment elles se vérifient.** Le banc de non-régression (la trajectoire de `--v1`, les poches) au bit avant et après ; la
+remontée R/dx = 4 en cuve entière rejouée (0,548 m/s).
+
+**Critères, écrits avant.** (1) non-régression tenue, au bit ; (2) la remontée en cuve entière à R/dx = 6 (9,7 M particules) passe et donne U ;
+(3) U à R/dx = 4 et 6 en cuve entière, l'écart dit (la convergence, sur deux points — un troisième, R/dx = 8, si la mémoire le permet).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la revue : ADR-223 ; METHODE, boussole ; le contrôle nouveau.
-- [x] **P3** — le lot des registres ; preuve ; rituel.
+- [ ] **P2** — les dispatchs à deux dimensions ; (1).
+- [ ] **P3** — la remontée en cuve entière, R/dx = 6 (et 8) ; (2), (3).
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2** — ADR-223 : neuf frictions relues, chacune sa suite (trois faites avant, une sans changement, trois protections, deux pièges,
-  un essai) ; METHODE (21 protections), LECONS L374–L376, boussole (pièges, la ligne « revue »). **Contrôle nouveau** :
-  `air_pocket_centroid_is_the_bubble_centre_s486` (il aurait vu le centre faux de S479 : 0,16 m au lieu de 0,20). Le script qui
-  écrivait ces lignes est tombé dans le piège qu'il consignait (un `U` échappé dans un heredoc) : refait depuis un fichier.
-- **P3** — le lot : feuille de route (S484–S486) ; A325 (les parois ne sont pas des symétries — B10 en quart concerné) et A326 (la
-  carte bornée à 65 535 groupes par passe) ; index (ADR-223, preuves de S484 et S485 déjà). Pas de preuve à part : la revue est ADR-223.

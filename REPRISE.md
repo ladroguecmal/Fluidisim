@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-05 23:54 +02:00
+JETON            : occupé
+Battement        : 2026-10-05 23:55 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S487 — les dispatchs à deux dimensions (A326) ; la convergence de U**
 Dernière session : S486 — la première revue de méthode ; le lot des registres ([journal](notes/JOURNAL.md)). Avant : S485 (K2-3b : la remontée lente attribuée)
 Session suivante : **S487 — les dispatchs à deux dimensions de la carte** (A326) : l'indice linéaire reconstruit dans chaque noyau par particule et par maille (`workgroup_id`, `num_workgroups`), au bit du chemin d'avant sous 65 535 groupes ; puis la remontée en cuve entière à R/dx = 6 et 8 (REMONTEE-S485 §5, la convergence de U) ; le témoin B10 en domaine entier à 8 mailles (A325). **Sans attendre de « Continue »**
 Maillons        : 1 — S486 : la revue de méthode, aucun point de la liste
