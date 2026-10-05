@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S483 — **en cours**. Sur « Continue », la suite du jeton : **ADR-222 D2 et D3** — la référence CPU parallèle, le banc de
+Session : S483 — **terminée**. Sur « Continue », la suite du jeton : **ADR-222 D2 et D3** — la référence CPU parallèle, le banc de
 non-régression du rituel. Puis, si la session le permet, la relance de B10 à 24 mailles.
 
 **Ce que la session fait.** (1) **Mesurer d'abord** : un relevé du temps par étage dans `Apic3::step_upto` (la bulle de S479, B10),
@@ -85,7 +85,7 @@ sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appe
 - [x] **P2** — le temps par étage de la référence ; où il est.
 - [x] **P3** — la référence parallèle, au bit ; (1), (2).
 - [x] **P4** — le banc de non-régression ; (3).
-- [ ] **P5** — preuve ; rituel.
+- [x] **P5** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2** — `Apic3::step_marked` (un repère nommé par étage ; le cœur ne lit aucune horloge, l'exemple oui ; `step_upto` l'appelle avec
@@ -106,3 +106,4 @@ sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appe
   présent, échoue sur une empreinte modifiée (`0000…` : « dc06f28c8a909e04 au lieu de 0000000000000000 ») ; `rituel.py fin` le lance
   (`--sans-banc "raison"` pour le sauter). Critère (3) tenu. Une vérification lancée ce matin est restée suspendue 12 h — la machine en
   veille, vraisemblablement ; elle a fini d'elle-même à la reprise, avec le bon résultat.
+- **P5** — preuve REFERENCE-PARALLELE-S483 ; index ; journal.

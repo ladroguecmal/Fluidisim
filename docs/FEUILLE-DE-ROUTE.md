@@ -353,6 +353,8 @@ campagnes (K1 à K13), les faits que seul l'utilisateur peut fournir (F1 à F6, 
 DyingStar) ; ce qui suit garde l'histoire de l'ordre par fronts. **S471–S477** : le banc visuel (ADR-216), le type d'eau (ADR-217 ; K1 en
 cours), la liste à 100 % (ADR-218). **S478–S480** : K2 conçue (ADR-220), K2-1 — l'air enfermé dans la référence APIC (A311 : le remède
 éprouvé) ; la structure du projet (ADR-221 : la boussole, le [tableau de bord](registres/TABLEAU-DE-BORD.md), le rituel outillé).
+**S481–S483** : K2-2, l'air enfermé sur la carte, puis son coût (les poches dans la multigrille ; `--v1` à 1,4 % du témoin ; A311 close) ;
+ADR-222, la méthode se révise elle-même — les calculs hors de la session, la référence APIC 3D sur les cœurs, le banc de non-régression.
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

@@ -4,6 +4,11 @@
 quand un changement voulu modifie le résultat, et le journal de la session le dit. Le pas médian dépend de la carte et de sa
 température : le seuil est 1,3 fois la valeur inscrite.
 
+## Reproduire
+
+`python outils/non_regression.py` (vérifier) ; `python outils/non_regression.py --inscrire` (réinscrire). Le détail des trois vérifications
+est en tête de l'outil et dans [REFERENCE-PARALLELE-S483](REFERENCE-PARALLELE-S483.md) §3.
+
 | clé | valeur |
 |---|---|
 | `bulle_empreinte_fils_1` | `dc06f28c8a909e04` |

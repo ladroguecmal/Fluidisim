@@ -132,3 +132,14 @@ masse exacte ; la bulle toujours à 4·10⁻⁵ de la référence (42,47 Hz cont
 reçue** : l'air enfermé en production au temps réel ; le chemin : `--v1` ; la preuve ci-dessus. Maillons **0**. Suivant : **S483 —
 ADR-222 D2 et D3** (la référence CPU parallèle, le banc de non-régression du rituel), puis K2-3.
 
+## S483 — 2026-10-05 — ADR-222 D2 et D3 : la référence parallèle, le banc de non-régression
+
+**Entrée.** « Continue » puis « Reprends » (une vérification restée suspendue 12 h — la machine en veille — a fini d'elle-même). **Fait**
+([preuve](../docs/validation/REFERENCE-PARALLELE-S483.md)) : `Apic3::step_marked` (le temps par étage, le cœur sans horloge) ;
+`Apic3::set_jobs` — reconstruction, advection, transfert vers les particules, `A·d` en écritures disjointes ; séparation et transfert vers
+la grille **en collectes dans l'ordre de la carte**. **Mesuré** : la même empreinte avec 0 à 16 fils ; 43 essais ; la bulle × 2,9, B10 ×
+3,2. **Manqué** : × 4 (la projection reste séquentielle ; les fils de `ScopedJobs` se recréent à chaque appel). Le séquentiel ralentit
+(× 1,4) — les bancs prennent `FILS=16`. **Le banc de non-régression** (`outils/non_regression.py`, 124 s, empreintes versionnées) : passe,
+échoue sur une empreinte modifiée, lancé par `rituel.py fin`. Maillons **1** — de l'outillage, aucun point de la liste. Suivant : **S484,
+K2-3** (les grosses bulles libres) ; relancer B10 à 24 mailles avec `FILS=16`.
+

@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-05 20:28 +02:00
+JETON            : libre
+Battement        : 2026-10-05 20:32 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S483 — ADR-222 D2 et D3 : la référence parallèle, la non-régression**
-Dernière session : S482 — K2-2b : le coût des poches ([journal](notes/JOURNAL.md)). Avant : S481 (K2-2 : l'air enfermé sur la carte)
-Session suivante : **S483 — ADR-222 D2 et D3** : (1) la référence CPU parallèle (les cœurs de ce PC, au bit de la séquentielle — les jobs de `HostServices` ; mesurer la bulle de `--apic3d-poches MODE=suivi`, 700 s aujourd'hui) ; (2) un banc de non-régression rapide appelé par `rituel.py fin` (le témoin `--v1` court : masse, pas, particules au bit contre une empreinte versionnée ; le coût contre un seuil). Puis **K2-3** (les grosses bulles libres, Davies–Taylor) sur une scène à maille assez fine pour des poches résolues (ADR-222 D6). Relancer B10 à 24 mailles par `calcul.py`. **Sans attendre de « Continue »**
-Maillons        : 0 — S482 : l'air enfermé en production au temps réel (le chemin : --v1 ; la preuve : COUT-POCHES-S482)
-Registres       : dernier lot S480 (ADR-213 D3) ; le prochain au plus tard en S483
+Session en cours : aucune
+Dernière session : S483 — ADR-222 D2 et D3 : la référence parallèle, le banc de non-régression ([journal](notes/JOURNAL.md))
+Session suivante : **S484 — K2-3 : les grosses bulles libres** ([conception](docs/registres/CAMPAGNE-K2-S478.md)) : une poche qui se détache remonte selon `−g_eff`, se déforme, se fragmente ou se résorbe sous une taille ; critère : la vitesse terminale contre Davies et Taylor (`0,707·√(g·d_e)`, calotte sphérique) à 15 %, sur une scène à maille assez fine pour une bulle résolue (ADR-222 D6) ; la référence avec `FILS=16` (S483). D'abord : relancer B10 à 24 mailles par `calcul.py` avec `FILS=16` et consigner B10 et la grande cuve dans POCHES-AIR-S479. **Sans attendre de « Continue »**
+Maillons        : 1 — S483 : de l'outillage (ADR-222 D2, D3), aucun point de la liste
+Registres       : dernier lot S483 (ADR-213 D3) ; le prochain au plus tard en S486
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
