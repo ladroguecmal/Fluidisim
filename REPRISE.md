@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-05 20:33 +02:00
+JETON            : libre
+Battement        : 2026-10-05 22:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S484 — K2-3 : les grosses bulles libres**
-Dernière session : S483 — ADR-222 D2 et D3 : la référence parallèle, le banc de non-régression ([journal](notes/JOURNAL.md))
-Session suivante : **S484 — K2-3 : les grosses bulles libres** ([conception](docs/registres/CAMPAGNE-K2-S478.md)) : une poche qui se détache remonte selon `−g_eff`, se déforme, se fragmente ou se résorbe sous une taille ; critère : la vitesse terminale contre Davies et Taylor (`0,707·√(g·d_e)`, calotte sphérique) à 15 %, sur une scène à maille assez fine pour une bulle résolue (ADR-222 D6) ; la référence avec `FILS=16` (S483). D'abord : relancer B10 à 24 mailles par `calcul.py` avec `FILS=16` et consigner B10 et la grande cuve dans POCHES-AIR-S479. **Sans attendre de « Continue »**
-Maillons        : 1 — S483 : de l'outillage (ADR-222 D2, D3), aucun point de la liste
+Session en cours : aucune
+Dernière session : S484 — K2-3, premier temps : la remontée d'une grosse bulle ([journal](notes/JOURNAL.md)). Avant : S483 (ADR-222 D2 et D3 : la référence parallèle, le banc de non-régression)
+Session suivante : **S485 — K2-3b : attribuer la remontée lente** ([REMONTEE-S484](docs/validation/REMONTEE-S484.md) §4) : la remontée sur la carte (un cas du banc `--apic3d-poches`, la carte suit la référence à 10⁻⁴), R/dx = 8 et 12, quart de cuve et cuve entière, deux pas ; critère : U à 15 % de Davies–Taylor à la plus fine, ou la cause nommée et mesurée. Consigner B10 à 24 mailles s'il est arrivé (`calculs/20261005-203223-b10-poches-p24-paral`). **Sans attendre de « Continue »**
+Maillons        : 2 — S484 : K2-3 non reçue (U × 0,56) ; une correction de mesure (le centre des poches)
 Registres       : dernier lot S483 (ADR-213 D3) ; le prochain au plus tard en S486
 ```
 

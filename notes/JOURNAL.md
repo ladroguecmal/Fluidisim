@@ -143,3 +143,12 @@ la grille **en collectes dans l'ordre de la carte**. **Mesuré** : la même empr
 échoue sur une empreinte modifiée, lancé par `rituel.py fin`. Maillons **1** — de l'outillage, aucun point de la liste. Suivant : **S484,
 K2-3** (les grosses bulles libres) ; relancer B10 à 24 mailles avec `FILS=16`.
 
+## S484 — 2026-10-05 — K2-3, premier temps : la remontée d'une grosse bulle
+
+**Entrée.** En autonomie, puis « continue ». **Fait** ([preuve](../docs/validation/REMONTEE-S484.md)) : `apic3d_remontee` — un quart de
+cuve, une bulle de 4 cm, la référence sur 16 fils. **Mesuré** : à R/dx = 6, **U = 0,338 m/s contre 0,603** de Davies et Taylor (× 0,56),
+stable sur 0,2 s ; à R/dx = 4, la bulle cale, perd son volume et se résorbe à 0,176 s. **Critère manqué** ; causes à départager (la
+résolution, le quart de cuve, la diffusion d'APIC, le pas). **Trouvé** : le centre des poches tiré vers l'origine (× 0,8) depuis S479 —
+corrigé, référence et carte ; POCHES-AIR-S479 annotée. R/dx = 6 arrêté à 0,40 s (la trace suffisait ; le CPU va à B10 à 24 mailles,
+en cours). Maillons **2**. Suivant : **S485, K2-3b** — la remontée sur la carte, R/dx = 8 et 12, quart et cuve entière.
+

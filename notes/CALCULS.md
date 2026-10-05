@@ -28,6 +28,7 @@ dépôt). Ce qu'une session tire d'une sortie va dans sa preuve (`docs/validatio
 | `20261005-004435-s482-v1-temoin` | S482 | s482-v1-temoin | `DUREE=60 SORTIE=captures/s482t viewer/target/release/water-viewer.exe --v1-banc` | terminé, 2026-10-05 00:46 |
 | `20261005-010641-s482-v1-poches-b` | S482 | s482-v1-poches-b | `DUREE=60 APIC3D_POCHES=1 SORTIE=captures/s482 viewer/target/release/water-viewer.exe --v1-banc` | terminé, 2026-10-05 01:08 |
 | `20261005-010843-s482-v1-temoin-b` | S482 | s482-v1-temoin-b | `DUREE=60 SORTIE=captures/s482t viewer/target/release/water-viewer.exe --v1-banc` | terminé, 2026-10-05 01:10 |
-| `20261005-203223-b10-poches-p24-paral` | S484 | b10-poches-p24-paral | `APIC3D_POCHES=1 APIC3D_APRES=1.5 FILS=16 code/target/release/examples/apic3d_b10.exe 2 24` | lancé 2026-10-05 20:32 |
-| `20261005-203441-remontee-r4` | S484 | remontee-r4 | `FILS=16 code/target/release/examples/apic3d_remontee.exe 4 0.04 1.5` | lancé 2026-10-05 20:34 |
-| `20261005-204739-remontee-r4-1ms` | S484 | remontee-r4-1ms | `FILS=16 PAS_US=1000 code/target/release/examples/apic3d_remontee.exe 4 0.04 1.5` | lancé 2026-10-05 20:47 |
+| `20261005-203223-b10-poches-p24-paral` | S484 | b10-poches-p24-paral | `APIC3D_POCHES=1 APIC3D_APRES=1.5 FILS=16 code/target/release/examples/apic3d_b10.exe 2 24` | en cours |
+| `20261005-203441-remontee-r4` | S484 | remontee-r4 | `FILS=16 code/target/release/examples/apic3d_remontee.exe 4 0.04 1.5` | terminé, 2026-10-05 20:36 |
+| `20261005-204739-remontee-r4-1ms` | S484 | remontee-r4-1ms | `FILS=16 PAS_US=1000 code/target/release/examples/apic3d_remontee.exe 4 0.04 1.5` | terminé, 2026-10-05 20:53 |
+| `20261005-205939-remontee-r6-1ms` | S484 | remontee-r6-1ms | `FILS=16 PAS_US=1000 TRACE=1 code/target/release/examples/apic3d_remontee.exe 6 0.04 0.6` | interrompu (pas de fin.txt) |

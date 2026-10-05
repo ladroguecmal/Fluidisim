@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S484 — **en cours**. En autonomie, **K2-3 — les grosses bulles libres** ([conception](../docs/registres/CAMPAGNE-K2-S478.md)) :
+Session : S484 — **terminée**. En autonomie, **K2-3 — les grosses bulles libres** ([conception](../docs/registres/CAMPAGNE-K2-S478.md)) :
 la remontée d'une bulle d'air résolue, dans la référence APIC 3D avec poches (S479, S481 ; `FILS=16`, S483).
 
 **Ce que la session fait.** Un exemple `apic3d_remontee` : un **quart de cuve** (la bulle centrée sur le coin ; les parois d'APIC
@@ -83,8 +83,8 @@ pas, l'écart est attribué (la résolution, le volume suivi, la paroi), pas maq
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `apic3d_remontee` ; un essai court.
-- [>] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
-- [ ] **P4** — preuve ; liste 7.4 ; rituel.
+- [x] **P3** — les deux résolutions (par `calcul.py`) ; (1) à (3).
+- [x] **P4** — preuve ; liste 7.4 ; rituel.
 
 ### Notes de reprise
 - **P2** — `code/water-core/examples/apic3d_remontee.rs` : quart de cuve (8 R de demi-largeur, 22 R d'eau), bulle au coin à 2,5 R du
@@ -95,3 +95,10 @@ pas, l'écart est attribué (la résolution, le volume suivi, la paroi), pas maq
   (la « remontée » de POCHES-AIR-S479 aussi) ; corrigé dans la référence et la carte (la part d'air des seules mailles d'air). Au pas de
   1 ms : la bulle part de 10 cm et monte (15 cm à 0,12 s, ≈ 0,5 m/s). Le critère (3) de dérive latérale est mal posé (une calotte qui
   s'aplatit écarte le centre du quart sans dériver). R/dx = 4 à 1 ms lancé (1,5 s).
+- **P3b** — R/dx = 4 à 1 ms, 1,5 s : « plus de poche » à 0,176 s. Tracé : la bulle monte à ≈ 0,5 m/s jusqu'à 0,13 s (10 → 16 cm), puis
+  cale, s'étale (centre du quart de 3,1 à 4,1 cm des axes) et **perd du volume** (2,46 → 1,35·10⁻⁴ m³ en 40 ms) jusqu'à moins de huit
+  mailles. À R/dx = 4, le quart de bulle n'a que ≈ 70 mailles d'air : les particules y entrent quand elle se déforme, chaque étiquette
+  qui change fait sauter son volume (pics de vitesse à 2,7 m/s). R/dx = 6 lancé (0,6 s, trace).
+- **P3c** — R/dx = 6, 1 ms : **U = 0,338 m/s** (212 points, 0,185 à 0,396 s ; 0,336 puis 0,327), Davies–Taylor 0,603 (d_e mesuré 7,3 cm) :
+  × 0,56 — critère (1) manqué. Arrêté à 0,40 s (la trace suffisait ; le CPU à B10 à 24 mailles).
+- **P4** — preuve REMONTEE-S484 ; 7.4 ; POCHES-AIR-S479 annotée ; index ; journal.

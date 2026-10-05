@@ -57,3 +57,5 @@ trois millions de particules, est en cours).
   fragmentation.
 - **A312** : la gerbe suit toujours la maille (couronne 0,205 D à 8 mailles, 0,305 D à 16) — K2-4.
 - Le mode relatif (B dans la bande) refuse les poches pour l'instant.
+
+*Note corrective du 2026-10-05 (S484)* : le centre des poches était divisé par leur volume entier (mailles d'eau voisines comprises) et tiré vers l'origine d'un facteur ≈ 0,8 ; la remontée « 0,258 → 0,300 m » ci-dessus en est faussée (la bulle partait de 0,30 m). Corrigé ; voir [REMONTEE-S484](REMONTEE-S484.md).
