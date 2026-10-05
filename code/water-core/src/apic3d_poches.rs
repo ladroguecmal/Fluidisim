@@ -568,29 +568,33 @@ impl Apic3 {
 
     /// `y = A·x` sur les mailles d'eau, la poche voisine lue dans `ps.d` (le vecteur des poches du même gradient conjugué).
     fn apply_with_pockets(&self, ps: &Poches, x: &[f32], y: &mut [f32]) {
-        let Domain3 { nx, ny, nz, .. } = self.domain;
-        for k in 0..nz {
-            for j in 0..ny {
-                for i in 0..nx {
-                    let c = self.cell(i, j, k);
-                    if self.label[c] != WATER {
-                        y[c] = 0.;
-                        continue;
-                    }
-                    let mut s = 0f32;
-                    for (n, _, _) in self.neighbours(i, j, k).into_iter().flatten() {
-                        match self.label[n] {
-                            WATER => s += x[c] - x[n],
-                            AIR => match ps.of[n] {
-                                0 => s += x[c] / self.theta(c, n),
-                                b => s += (x[c] - ps.d[b as usize - 1]) / self.theta(c, n),
-                            },
-                            _ => {}
-                        }
-                    }
-                    y[c] = s;
+        // S483 (ADR-222 D2) : une écriture par maille, en parallèle avec un système de tâches, au bit.
+        let Domain3 { nx, ny, .. } = self.domain;
+        let fill = |start: usize, out: &mut [f32]| {
+            for (o, yc) in out.iter_mut().enumerate() {
+                let c = start + o;
+                let (i, j, k) = (c % nx, (c / nx) % ny, c / (nx * ny));
+                if self.label[c] != WATER {
+                    *yc = 0.;
+                    continue;
                 }
+                let mut s = 0f32;
+                for (n, _, _) in self.neighbours(i, j, k).into_iter().flatten() {
+                    match self.label[n] {
+                        WATER => s += x[c] - x[n],
+                        AIR => match ps.of[n] {
+                            0 => s += x[c] / self.theta(c, n),
+                            b => s += (x[c] - ps.d[b as usize - 1]) / self.theta(c, n),
+                        },
+                        _ => {}
+                    }
+                }
+                *yc = s;
             }
+        };
+        match &self.jobs {
+            Some(jobs) => jobs.parallel_fill_f32(y, nx * ny * 4, &fill),
+            None => fill(0, y),
         }
     }
 }

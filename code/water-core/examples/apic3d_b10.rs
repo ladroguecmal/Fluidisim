@@ -88,6 +88,12 @@ fn main() {
     if poches_actives {
         a.enable_air_pockets(&mut hote).expect("poches");
     }
+    // S483 (ADR-222 D2) : `FILS=<n>` — les écritures disjointes du pas sur `n` fils (le résultat ne change pas) ; `PAS_MAX=<n>` :
+    // s'arrêter après `n` pas (une mesure de vitesse).
+    if let Some(n) = std::env::var("FILS").ok().and_then(|v| v.parse::<u32>().ok()) {
+        a.set_jobs(Some(std::sync::Arc::new(host_impl::ScopedJobs::with_workers(n))));
+    }
+    let pas_max: u64 = std::env::var("PAS_MAX").ok().and_then(|v| v.parse().ok()).unwrap_or(u64::MAX);
     let apres: f64 = std::env::var("APIC3D_APRES").ok().and_then(|v| v.parse().ok()).unwrap_or(0.3);
     let mut poches = [AirPocket::default(); 8];
     let (mut poche_max, mut poche_fin, mut poche_p_min, mut poche_p_max) = (0f64, 0f64, f64::MAX, f64::MIN);
@@ -129,7 +135,7 @@ fn main() {
     let mut atteint = vec![false; nx * ny * nz];
     let mut pile = Vec::new();
     let debut = Instant::now();
-    while t < t_max {
+    while t < t_max && pas < pas_max {
         a.set_body(Some(sphere(t))).expect("corps");
         let us = a.stable_step_us(20_000);
         let avant = a.total_volume();

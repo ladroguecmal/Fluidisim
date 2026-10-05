@@ -107,6 +107,8 @@ pub struct Apic3 {
     /// **S483 (ADR-222 D2)** — le système de tâches de l'hôte pour les écritures disjointes du pas (`set_jobs`) ; `None`, le
     /// défaut : les boucles séquentielles. Le résultat ne dépend pas de ce choix (S243).
     pub(crate) jobs: Option<std::sync::Arc<dyn crate::host::JobSystem + Send + Sync>>,
+    /// S483 : le tri par maille vient d'être fait sur les positions courantes (`particles_to_grid`) ; la reconstruction le reprend.
+    pub(crate) bin_fresh: bool,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -190,6 +192,7 @@ impl Apic3 {
             open_x: None,
             poches: None,
             jobs: None,
+            bin_fresh: false,
         })
     }
 
@@ -691,63 +694,164 @@ impl Apic3 {
     /// **Particules → grille**, APIC : `u_f = Σ w·(v_a + C_a·(x_f − x_p)) / Σ w`. Les poids restent dans `wu`, `wv`, `ww`
     /// — une face de poids nul n'a reçu aucune particule.
     pub(crate) fn particles_to_grid(&mut self) {
-        let dx = self.domain.dx;
-        self.u.fill(0.);
-        self.v.fill(0.);
-        self.w.fill(0.);
-        self.wu.fill(0.);
-        self.wv.fill(0.);
-        self.ww.fill(0.);
-        for k in 0..self.n {
-            let (p, v, c) = (self.x[k], self.vel[k], self.c[k]);
-            for axis in 0..3 {
-                let (origin, dims) = staggered(self.domain, axis);
-                for (idx, wt, _) in weights(p, dx, origin, dims) {
-                    if wt == 0. {
-                        continue;
+        // S483 (ADR-222 D2) : chaque face **collecte** les particules des mailles qui la touchent (en z, y, x ; dans l'ordre du tri)
+        // — l'ordre de `p2g` de la carte —, au lieu que chaque particule disperse sur ses huit nœuds : une écriture disjointe, en
+        // parallèle avec un système de tâches, au bit de la boucle séquentielle. Le tri se fait ici ; la reconstruction le reprend
+        // (les particules n'ont pas bougé entre les deux).
+        self.bin();
+        self.bin_fresh = true;
+        let jobs = self.jobs.clone();
+        for axis in 0..3 {
+            let (mut field, mut weight) = match axis {
+                0 => (core::mem::take(&mut self.u), core::mem::take(&mut self.wu)),
+                1 => (core::mem::take(&mut self.v), core::mem::take(&mut self.wv)),
+                _ => (core::mem::take(&mut self.w), core::mem::take(&mut self.ww)),
+            };
+            {
+                let this = &*self;
+                match &jobs {
+                    Some(jobs) => {
+                        let grain = 4096;
+                        jobs.parallel_fill_f32(&mut weight, grain, &|start, out: &mut [f32]| {
+                            for (o, w) in out.iter_mut().enumerate() {
+                                *w = this.gather_face(axis, start + o).1;
+                            }
+                        });
+                        let wref = &weight;
+                        jobs.parallel_fill_f32(&mut field, grain, &|start, out: &mut [f32]| {
+                            for (o, f) in out.iter_mut().enumerate() {
+                                let w = wref[start + o];
+                                *f = if w > 0. { this.gather_face(axis, start + o).0 / w } else { 0. };
+                            }
+                        });
                     }
-                    let f = self.node(axis, idx);
-                    let affine = c[axis][0] * (f[0] - p[0]) + c[axis][1] * (f[1] - p[1]) + c[axis][2] * (f[2] - p[2]);
-                    let (field, weight) = match axis {
-                        0 => (&mut self.u, &mut self.wu),
-                        1 => (&mut self.v, &mut self.wv),
-                        _ => (&mut self.w, &mut self.ww),
-                    };
-                    field[idx] += wt * (v[axis] + affine);
-                    weight[idx] += wt;
+                    None => {
+                        for f in 0..field.len() {
+                            let (sum, w) = this.gather_face(axis, f);
+                            weight[f] = w;
+                            field[f] = if w > 0. { sum / w } else { 0. };
+                        }
+                    }
+                }
+            }
+            match axis {
+                0 => (self.u, self.wu) = (field, weight),
+                1 => (self.v, self.wv) = (field, weight),
+                _ => (self.w, self.ww) = (field, weight),
+            }
+        }
+    }
+
+    /// La face `f` de la grille `axis` : `Σ wt·(v + C·(x_f − x_p))` et `Σ wt` sur les particules dont elle est un des huit
+    /// nœuds (les mailles `idx − 1 … idx` le long de l'axe, `idx − 1 … idx + 1` en travers), dans l'ordre des mailles et du tri.
+    fn gather_face(&self, axis: usize, f: usize) -> (f32, f32) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let (origin, dims) = staggered(self.domain, axis);
+        let idx = [f % dims[0], (f / dims[0]) % dims[1], f / (dims[0] * dims[1])];
+        let xf = self.node(axis, f);
+        let n = [nx, ny, nz];
+        let mut lo = [0usize; 3];
+        let mut hi = [0usize; 3];
+        for a in 0..3 {
+            lo[a] = idx[a].saturating_sub(1);
+            hi[a] = if a == axis { idx[a] } else { idx[a] + 1 }.min(n[a] - 1);
+        }
+        let (mut sum, mut wsum) = (0f32, 0f32);
+        for c in lo[2]..=hi[2] {
+            for b in lo[1]..=hi[1] {
+                for a in lo[0]..=hi[0] {
+                    let cell = self.cell(a, b, c);
+                    for s in self.bin_start[cell]..self.bin_start[cell + 1] {
+                        let k = self.order[s as usize] as usize;
+                        let p = self.x[k];
+                        // Le poids de ce seul nœud, axe par axe, avec les bornes de `weights` et son ordre de multiplication.
+                        let mut wa = [0f32; 3];
+                        for d in 0..3 {
+                            let top = (dims[d] - 1) as f32;
+                            let fr = (p[d] / dx - origin[d]).clamp(0., (top - 1e-4).max(0.));
+                            let base = fr.floor() as usize;
+                            let frac = fr - base as f32;
+                            let next = (base + 1).min(dims[d] - 1);
+                            wa[d] = if idx[d] == base { 1. - frac } else { 0. } + if idx[d] == next { frac } else { 0. };
+                        }
+                        let wt = wa[0] * wa[1] * wa[2];
+                        if wt == 0. {
+                            continue;
+                        }
+                        let cr = self.c[k][axis];
+                        let affine = cr[0] * (xf[0] - p[0]) + cr[1] * (xf[1] - p[1]) + cr[2] * (xf[2] - p[2]);
+                        sum += wt * (self.vel[k][axis] + affine);
+                        wsum += wt;
+                    }
                 }
             }
         }
-        for (f, wt) in self.u.iter_mut().zip(&self.wu).chain(self.v.iter_mut().zip(&self.wv)).chain(self.w.iter_mut().zip(&self.ww)) {
-            *f = if *wt > 0. { *f / *wt } else { 0. };
-        }
+        (sum, wsum)
     }
 
     /// **Grille → particules**, APIC : la vitesse interpolée et la matrice affine `C_ab = Σ ∂_b w · u_a`.
     pub(crate) fn grid_to_particles(&mut self) {
-        let dx = self.domain.dx;
-        for k in 0..self.n {
-            let p = self.x[k];
-            let mut v = [0f32; 3];
-            let mut c = [[0f32; 3]; 3];
-            for axis in 0..3 {
-                let (origin, dims) = staggered(self.domain, axis);
-                let field = match axis {
-                    0 => &self.u,
-                    1 => &self.v,
-                    _ => &self.w,
-                };
-                for (idx, wt, g) in weights(p, dx, origin, dims) {
-                    let f = field[idx];
-                    v[axis] += wt * f;
-                    for b in 0..3 {
-                        c[axis][b] += g[b] * f;
+        // S483 (ADR-222 D2) : la vitesse et la matrice affine de chaque particule, deux écritures disjointes (trois puis neuf
+        // flottants par particule), en parallèle avec un système de tâches, au bit de la boucle séquentielle.
+        let n = self.n;
+        let (mut vel, mut c) = (core::mem::take(&mut self.vel), core::mem::take(&mut self.c));
+        {
+            let this = &*self;
+            let fill_v = |start: usize, out: &mut [f32]| {
+                for (o, v) in out.chunks_exact_mut(3).enumerate() {
+                    let (vk, _) = this.gather_particle(start / 3 + o);
+                    v.copy_from_slice(&vk);
+                }
+            };
+            let fill_c = |start: usize, out: &mut [f32]| {
+                for (o, m) in out.chunks_exact_mut(9).enumerate() {
+                    let (_, ck) = this.gather_particle(start / 9 + o);
+                    for a in 0..3 {
+                        m[3 * a..3 * a + 3].copy_from_slice(&ck[a]);
+                    }
+                }
+            };
+            match &self.jobs {
+                Some(jobs) => {
+                    jobs.parallel_fill_f32(vel[..n].as_flattened_mut(), 3 * 4096, &fill_v);
+                    jobs.parallel_fill_f32(c[..n].as_flattened_mut().as_flattened_mut(), 9 * 4096, &fill_c);
+                }
+                None => {
+                    // Séquentiel : un seul passage (les poids une fois), les mêmes valeurs.
+                    for k in 0..n {
+                        let (vk, ck) = this.gather_particle(k);
+                        vel[k] = vk;
+                        c[k] = ck;
                     }
                 }
             }
-            self.vel[k] = v;
-            self.c[k] = c;
         }
+        self.vel = vel;
+        self.c = c;
+    }
+
+    /// La vitesse et la matrice affine que la grille donne à la particule `k` (`grid_to_particles`).
+    fn gather_particle(&self, k: usize) -> ([f32; 3], [[f32; 3]; 3]) {
+        let dx = self.domain.dx;
+        let p = self.x[k];
+        let mut v = [0f32; 3];
+        let mut c = [[0f32; 3]; 3];
+        for axis in 0..3 {
+            let (origin, dims) = staggered(self.domain, axis);
+            let field = match axis {
+                0 => &self.u,
+                1 => &self.v,
+                _ => &self.w,
+            };
+            for (idx, wt, g) in weights(p, dx, origin, dims) {
+                let f = field[idx];
+                v[axis] += wt * f;
+                for b in 0..3 {
+                    c[axis][b] += g[b] * f;
+                }
+            }
+        }
+        (v, c)
     }
 
     /// Vitesse de la grille interpolée en un point (trilinéaire par composante décalée).
@@ -774,7 +878,10 @@ impl Apic3 {
     /// particules à moins de `R = kernel·dx` (deux mailles depuis S389), pondérée par `(1 − s²/R²)³` ; `φ = dx` sans voisine.
     /// Puis les étiquettes : eau où `φ < 0`. Trie les particules d'abord ; aucune allocation.
     pub(crate) fn reconstruct(&mut self) {
-        self.bin();
+        // S483 : le tri de `particles_to_grid`, si les particules n'ont pas bougé depuis.
+        if !core::mem::take(&mut self.bin_fresh) {
+            self.bin();
+        }
         let Domain3 { nx, ny, nz, .. } = self.domain;
         // S483 (ADR-222 D2) : chaque maille ne lit que les particules et écrit sa seule valeur — une écriture disjointe, en
         // parallèle quand l'hôte a donné un système de tâches (`set_jobs`), au bit de la boucle séquentielle quel que soit le
@@ -1189,27 +1296,31 @@ impl Apic3 {
 
     /// `y = A·x` sur les mailles d'eau : `Σ (x_c − x_n)` vers l'eau, `x_c/θ` vers l'air, rien vers une paroi (sans `1/dx²`).
     fn apply(&self, x: &[f32], y: &mut [f32]) {
-        let Domain3 { nx, ny, nz, .. } = self.domain;
-        for k in 0..nz {
-            for j in 0..ny {
-                for i in 0..nx {
-                    let c = self.cell(i, j, k);
-                    if self.label[c] != WATER {
-                        y[c] = 0.;
-                        continue;
-                    }
-                    let mut s = 0f32;
-                    for (n, _, _) in self.neighbours(i, j, k).into_iter().flatten() {
-                        match self.label[n] {
-                            WATER => s += x[c] - x[n],
-                            AIR => s += x[c] / self.theta(c, n),
-                            // Le corps : paroi mobile, flux imposé, pas de pression.
-                            _ => {}
-                        }
-                    }
-                    y[c] = s;
+        // S483 (ADR-222 D2) : une écriture par maille, en parallèle avec un système de tâches, au bit.
+        let Domain3 { nx, ny, .. } = self.domain;
+        let fill = |start: usize, out: &mut [f32]| {
+            for (o, yc) in out.iter_mut().enumerate() {
+                let c = start + o;
+                let (i, j, k) = (c % nx, (c / nx) % ny, c / (nx * ny));
+                if self.label[c] != WATER {
+                    *yc = 0.;
+                    continue;
                 }
+                let mut s = 0f32;
+                for (n, _, _) in self.neighbours(i, j, k).into_iter().flatten() {
+                    match self.label[n] {
+                        WATER => s += x[c] - x[n],
+                        AIR => s += x[c] / self.theta(c, n),
+                        // Le corps : paroi mobile, flux imposé, pas de pression.
+                        _ => {}
+                    }
+                }
+                *yc = s;
             }
+        };
+        match &self.jobs {
+            Some(jobs) => jobs.parallel_fill_f32(y, nx * ny * 4, &fill),
+            None => fill(0, y),
         }
     }
 
@@ -1508,17 +1619,32 @@ impl Apic3 {
             let u = a.background_velocity(q[0], q[2], t);
             [v[0] + u[0], v[1] + u[1], v[2] + u[2]]
         };
-        for k in 0..self.n {
-            let p = self.x[k];
-            let v1 = with_b(self, self.grid_velocity(p), p, t0);
-            let mid = [p[0] + 0.5 * dt * v1[0], p[1] + 0.5 * dt * v1[1], p[2] + 0.5 * dt * v1[2]];
-            let v2 = with_b(self, self.grid_velocity(mid), mid, t0 + 0.5 * dt as f64);
-            self.x[k] = [
-                (p[0] + dt * v2[0]).clamp(margin, lx - margin),
-                (p[1] + dt * v2[1]).clamp(margin, ly - margin),
-                (p[2] + dt * v2[2]).clamp(margin, lz - margin),
-            ];
+        // S483 (ADR-222 D2) : chaque particule n'écrit que sa position — une écriture disjointe (`as_flattened_mut`, trois flottants
+        // par particule), en parallèle avec un système de tâches, au bit de la boucle séquentielle.
+        let n = self.n;
+        let mut x = core::mem::take(&mut self.x);
+        {
+            let this = &*self;
+            let fill = |start: usize, out: &mut [f32]| {
+                for (o, q) in out.chunks_exact_mut(3).enumerate() {
+                    let k = start / 3 + o;
+                    let _ = k;
+                    let p = [q[0], q[1], q[2]]; // la position avant le pas (le tableau pris contient encore les positions)
+                    let v1 = with_b(this, this.grid_velocity(p), p, t0);
+                    let mid = [p[0] + 0.5 * dt * v1[0], p[1] + 0.5 * dt * v1[1], p[2] + 0.5 * dt * v1[2]];
+                    let v2 = with_b(this, this.grid_velocity(mid), mid, t0 + 0.5 * dt as f64);
+                    q[0] = (p[0] + dt * v2[0]).clamp(margin, lx - margin);
+                    q[1] = (p[1] + dt * v2[1]).clamp(margin, ly - margin);
+                    q[2] = (p[2] + dt * v2[2]).clamp(margin, lz - margin);
+                }
+            };
+            let flat = x[..n].as_flattened_mut();
+            match &self.jobs {
+                Some(jobs) => jobs.parallel_fill_f32(flat, 3 * 4096, &fill),
+                None => fill(0, flat),
+            }
         }
+        self.x = x;
     }
 
     /// **Séparation** : deux particules plus proches que 0,4 maille s'écartent chacune du quart de leur recouvrement,
@@ -1527,61 +1653,84 @@ impl Apic3 {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let (lx, ly, lz) = (nx as f32 * dx, ny as f32 * dx, nz as f32 * dx);
         let (d_min, margin) = (SEPARATION * dx, 1e-3 * dx);
+        let n = self.n;
         for _ in 0..SEPARATION_PASSES {
             self.bin();
-            for s in self.shift[..self.n].iter_mut() {
-                *s = [0.; 3];
-            }
-            for k in 0..nz {
-                for j in 0..ny {
-                    for i in 0..nx {
-                        let cell = self.cell(i, j, k);
-                        for sa in self.bin_start[cell]..self.bin_start[cell + 1] {
-                            let a = self.order[sa as usize] as usize;
-                            for c in k.saturating_sub(1)..(k + 2).min(nz) {
-                                for b_ in j.saturating_sub(1)..(j + 2).min(ny) {
-                                    for a_ in i.saturating_sub(1)..(i + 2).min(nx) {
-                                        let other = self.cell(a_, b_, c);
-                                        for sb in self.bin_start[other]..self.bin_start[other + 1] {
-                                            let b = self.order[sb as usize] as usize;
-                                            if b <= a {
-                                                continue;
-                                            }
-                                            let e = [self.x[b][0] - self.x[a][0], self.x[b][1] - self.x[a][1], self.x[b][2] - self.x[a][2]];
-                                            let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
-                                            if d < d_min && d > 1e-6 * dx {
-                                                let m = 0.25 * (d_min - d) / d;
-                                                for t in 0..3 {
-                                                    self.shift[a][t] -= m * e[t];
-                                                    self.shift[b][t] += m * e[t];
-                                                }
+            // S483 (ADR-222 D2) : chaque particule **collecte** sa poussée sur ses voisines (mailles en z, y, x ; particules dans
+            // l'ordre du tri) — l'ordre de `separate_shift` de la carte —, au lieu de l'accumuler par paires : une écriture disjointe,
+            // en parallèle avec un système de tâches, au bit de la boucle séquentielle. (Avant S483, l'accumulation par paires
+            // donnait la même poussée dans un autre ordre de somme.)
+            let mut shift = core::mem::take(&mut self.shift);
+            {
+                let this = &*self;
+                let fill = |start: usize, out: &mut [f32]| {
+                    for (o, sh) in out.chunks_exact_mut(3).enumerate() {
+                        let a = start / 3 + o;
+                        let xa = this.x[a];
+                        let (i, j, k) = this.cell_of(xa);
+                        let mut acc = [0f32; 3];
+                        for c in k.saturating_sub(1)..(k + 2).min(nz) {
+                            for b_ in j.saturating_sub(1)..(j + 2).min(ny) {
+                                for a_ in i.saturating_sub(1)..(i + 2).min(nx) {
+                                    let other = this.cell(a_, b_, c);
+                                    for sb in this.bin_start[other]..this.bin_start[other + 1] {
+                                        let b = this.order[sb as usize] as usize;
+                                        if b == a {
+                                            continue;
+                                        }
+                                        let e = [this.x[b][0] - xa[0], this.x[b][1] - xa[1], this.x[b][2] - xa[2]];
+                                        let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
+                                        if d < d_min && d > 1e-6 * dx {
+                                            let m = 0.25 * (d_min - d) / d;
+                                            for t in 0..3 {
+                                                acc[t] -= m * e[t];
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                        sh.copy_from_slice(&acc);
                     }
+                };
+                let flat = shift[..n].as_flattened_mut();
+                match &self.jobs {
+                    Some(jobs) => jobs.parallel_fill_f32(flat, 3 * 4096, &fill),
+                    None => fill(0, flat),
                 }
             }
-            for k in 0..self.n {
-                let (p, d) = (self.x[k], self.shift[k]);
-                let mut q = [
-                    (p[0] + d[0]).clamp(margin, lx - margin),
-                    (p[1] + d[1]).clamp(margin, ly - margin),
-                    (p[2] + d[2]).clamp(margin, lz - margin),
-                ];
-                // S400 : la séparation est tenue du côté de la bande — une particule qu'elle pousserait dans une colonne de la
-                // zone garde sa position horizontale (l'échange ne passe que par le flux de la face).
-                if self.columns.is_some() {
-                    let (a, b) = (self.cell_of(q), self.cell_of(p));
-                    if self.column_of(a.0, a.1) && !self.column_of(b.0, b.1) {
-                        q[0] = p[0];
-                        q[1] = p[1];
+            self.shift = shift;
+            let mut x = core::mem::take(&mut self.x);
+            {
+                let this = &*self;
+                let fill = |start: usize, out: &mut [f32]| {
+                    for (o, q) in out.chunks_exact_mut(3).enumerate() {
+                        let k = start / 3 + o;
+                        let (p, d) = ([q[0], q[1], q[2]], this.shift[k]);
+                        let mut r = [
+                            (p[0] + d[0]).clamp(margin, lx - margin),
+                            (p[1] + d[1]).clamp(margin, ly - margin),
+                            (p[2] + d[2]).clamp(margin, lz - margin),
+                        ];
+                        // S400 : la séparation est tenue du côté de la bande — une particule qu'elle pousserait dans une colonne de
+                        // la zone garde sa position horizontale (l'échange ne passe que par le flux de la face).
+                        if this.columns.is_some() {
+                            let (a, b) = (this.cell_of(r), this.cell_of(p));
+                            if this.column_of(a.0, a.1) && !this.column_of(b.0, b.1) {
+                                r[0] = p[0];
+                                r[1] = p[1];
+                            }
+                        }
+                        q.copy_from_slice(&r);
                     }
+                };
+                let flat = x[..n].as_flattened_mut();
+                match &self.jobs {
+                    Some(jobs) => jobs.parallel_fill_f32(flat, 3 * 4096, &fill),
+                    None => fill(0, flat),
                 }
-                self.x[k] = q;
             }
+            self.x = x;
         }
     }
 }
