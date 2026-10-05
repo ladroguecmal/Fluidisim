@@ -1,8 +1,8 @@
 //! **S488 (K2-4, ADR-014 §4) — la nappe rompue en gouttes.**
 //!
 //! Sans tension de surface ni viscosité, rien n'arrête l'amincissement d'une nappe d'APIC : la couronne et le jet d'un impact dépendent
-//! de la maille (A312). Ici, une particule d'eau dont la maille est étiquetée **air** — une nappe plus mince qu'une maille, que la
-//! reconstruction ne voit plus — et dont la vitesse donne `We = ρ·v²·d/σ > 12` (ADR-014 §4 ; `d` le diamètre d'une goutte du volume de la
+//! de la maille (A312). Ici, une particule d'eau dont la maille **et ses six voisines** sont sans eau — une nappe plus mince qu'une maille,
+//! que la reconstruction ne voit plus, détachée du corps de l'eau — et dont la vitesse donne `We = ρ·v²·d/σ > 12` (ADR-014 §4 ; `d` le diamètre d'une goutte du volume de la
 //! particule, `dx/2·(6/π)^(1/3)`) **devient une goutte** :
 //!
 //! - **hors de la grille** : ni transfert vers la grille, ni reconstruction, ni séparation ;
@@ -84,7 +84,10 @@ impl Apic3 {
             let lab = self.label[self.cell(i, j, l)];
             let v = self.vel[k];
             if g.est[k] == 0 {
-                if lab == AIR && v[0] * v[0] + v[1] * v[1] + v[2] * v[2] > v2_min {
+                // Une nappe détachée : sa maille et ses six voisines sans eau (une particule de surface a de l'eau à côté — S488 :
+                // la seule maille d'air faisait de chaque surface en mouvement une pluie de gouttes, et changeait la cavité de B10).
+                let detachee = lab == AIR && self.neighbours(i, j, l).into_iter().flatten().all(|(m, _, _)| self.label[m] != WATER);
+                if detachee && v[0] * v[0] + v[1] * v[1] + v[2] * v[2] > v2_min {
                     g.est[k] = 1;
                     g.nees += 1;
                 }

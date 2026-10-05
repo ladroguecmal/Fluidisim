@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S488 — **en cours**. En autonomie, **K2-4 — la nappe et sa rupture** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
+Session : S488 — **terminée**. En autonomie, **K2-4 — la nappe et sa rupture** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
 ADR-014 §4, **A312**), dans la référence (ADR-213 : la référence d'abord, la carte en K2-5).
 
 **Ce que la session fait.** `Apic3::enable_droplets` : une particule d'eau dont la maille est étiquetée **air** (une nappe plus mince
@@ -84,8 +84,8 @@ mailles à 15 % entre elles avec gouttes (contre 40 à 60 % sans) — sinon, l'�
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les gouttes dans la référence ; essais (1), (2).
-- [>] **P3** — B10 à trois mailles, avec et sans gouttes ; (3).
-- [ ] **P4** — preuve ; rituel.
+- [x] **P3** — B10 à trois mailles, avec et sans gouttes ; (3).
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2** — `apic3d_gouttes.rs` (`enable_droplets`, `droplets_classify` après les étiquettes, `ballistic_step`) ; les gouttes hors du
@@ -93,3 +93,7 @@ mailles à 15 % entre elles avec gouttes (contre 40 à 60 % sans) — sinon, l'�
   l'advection (bornées au domaine). Refusées avec une zone de colonnes. Essais : `droplet_ballistic_apex_s488` (l'apogée à 1 %, avec et
   sans traînée), `droplets_from_a_jet_keep_the_mass_s488` (des gouttes naissent et retombent, masse exacte) ; 46 essais d'APIC 3D ;
   non-régression au bit. `apic3d_b10` : `APIC3D_GOUTTES=1`.
+- **P3** — premier critère (la seule maille d'air) : 4 936 gouttes à D/dx = 8, la cavité changée — retiré pour « la maille et ses six
+  voisines sans eau ». B10 : couronne 0,205 / 0,204 / 0,305 D (8, 12, 16), **identique avec gouttes** (5, 1, 34 nées) ; critère (3) manqué,
+  la cause nommée (la vitesse d'éjection du bord ; il manque Taylor–Culick).
+- **P4** — preuve GOUTTES-S488 ; A312 annotée ; index ; journal.

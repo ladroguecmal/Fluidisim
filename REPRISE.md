@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 00:18 +02:00
+JETON            : libre
+Battement        : 2026-10-06 00:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S488 — K2-4 : la nappe et sa rupture (A312)**
-Dernière session : S487 — les dispatchs à deux dimensions ; la remontée en cuve entière ([journal](notes/JOURNAL.md)). Avant : S486 (la première revue de méthode)
-Session suivante : **S488 — K2-4 : la nappe et sa rupture** ([conception](docs/registres/CAMPAGNE-K2-S478.md)) : une nappe plus mince qu'une maille se rompt en gouttes (modèle sous-maille, ADR-014 §4 : Weber), les gouttes particules balistiques avec traînée qui rendent leur masse en retombant ; critère **A312** : la hauteur du jet et le rayon de la couronne de B10 à trois mailles, à 15 % entre elles — ou contre une mesure publiée ; masse exacte, gouttes comprises. *Choisi en S487 par la règle des maillons* (deux ; la convergence de U en maille est un approfondissement différable : K2-3 tenu à × 0,90 ; les faces à deux dimensions attendent le déclencheur d'A326). **Sans attendre de « Continue »**
-Maillons        : 2 — S487 : un outil (A326 pour les particules) et une mesure ; aucun point de la liste ne change d'état
+Session en cours : aucune
+Dernière session : S488 — K2-4, premier temps : la nappe rompue en gouttes ([journal](notes/JOURNAL.md)). Avant : S487 (les dispatchs à deux dimensions)
+Session suivante : **S489 — K2-4b : la rétraction du bord d'une nappe** (Taylor–Culick, `v = √(2σ/(ρ·h))`) : l'épaisseur locale estimée par les particules d'une maille sans eau autour ; le bord d'une nappe plus mince qu'une maille freiné vers le corps de l'eau ; critère A312 — la couronne de B10 à 8, 12, 16 mailles à 15 % entre elles ; puis contre une mesure publiée de la gerbe d'une sphère (le jet de Worthington, la couronne). Si la troisième session sur A312 n'avance pas la liste, le dire et choisir dans le plan de complétion. **Sans attendre de « Continue »**
+Maillons        : 3 — S488 : un modèle neuf (les gouttes), A312 non levée ; justifié : la cause nommée désigne un remède construisible (Taylor–Culick)
 Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
 ```
 

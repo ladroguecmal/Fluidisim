@@ -4232,6 +4232,11 @@ sous-maille de nappe (rupture en gouttes, embruns), jugé sur l'image et non sur
 mailles, le temps de pincement ne converge pas non plus — 2,20 → 2,30 → 2,40 `√(D/g)` — et la cavité
 maximale lentement, d'ordre ≈ 0,5 ([preuve](../validation/B10-APIC-S320.md) §5 bis).
 
+*Note du 2026-10-06, S488, sur A312* ([GOUTTES-S488](../validation/GOUTTES-S488.md)) : la couronne de B10, avec la référence d'aujourd'hui :
+0,205 / 0,204 / 0,305 / 0,386 D à 8, 12, 16, 24 mailles ; **la rupture en gouttes n'y change rien** — la hauteur est celle de la vitesse
+d'éjection du bord, que la maille résout. La cause : sans tension de surface, rien ne rétracte le bord (Taylor–Culick). A312 reste ouverte ;
+le remède désigné est un modèle sous-maille de la rétraction du bord.
+
 **A313 — S320, 2026-09-22 (sévérité 1, ouverte). Le volume géométrique d'APIC n'a pas de mesure
 propre en écoulement agité.** La masse est exacte, mais le volume dépend de la règle de séparation à
 ±10 % (0,4 contre 0,45 maille, P3). L'occupation est biaisée (−8 % sans cavité). L'écart entre niveau

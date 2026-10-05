@@ -181,3 +181,14 @@ auraient calculé faux en silence : trouvé en essayant R/dx = 8). **Mesuré** :
 U × 0,90 à R/dx = 4 et × 0,85 à 6 — à 6, Davies–Taylor (× 1,04) jusqu'à une scission en trois poches vers 0,25 s, vraisemblablement
 numérique. **Limite** : R/dx = 8 attend les faces à deux dimensions ; deux points ne font pas une convergence. Maillons **2**. Suivant :
 **S488** — les faces et les mailles à deux dimensions (A326), puis R/dx = 8 ; ou la scission de la calotte (la jupe sous-résolue).
+
+## S488 — 2026-10-06 — K2-4, premier temps : la nappe rompue en gouttes
+
+**Entrée.** En autonomie, choisi par la règle des maillons. **Fait** ([preuve](../docs/validation/GOUTTES-S488.md)) : `enable_droplets` — une
+particule dont la maille et ses six voisines sont sans eau, au-delà de Weber 12, devient une goutte balistique (traînée) et redevient de
+l'eau en retombant ; masse exacte, au bit sans gouttes. Un premier critère (la seule maille d'air) faisait pleuvoir la surface : retiré.
+**Mesuré** : la couronne de B10 0,205 / 0,204 / 0,305 D à 8, 12, 16 mailles, **avec ou sans gouttes** — A312 non levée. **La cause** : la
+hauteur est celle de la vitesse d'éjection du bord ; ce qui manque est la rétraction du bord par la tension de surface (Taylor–Culick).
+Maillons **3** — justifié : K2-4 est la suite du plan, et la cause, désormais nommée, désigne un remède construisible. Suivant : **S489,
+K2-4b — la rétraction de Taylor–Culick**, sous-maille.
+

@@ -32,3 +32,31 @@ dépôt). Ce qu'une session tire d'une sortie va dans sa preuve (`docs/validatio
 | `20261005-203441-remontee-r4` | S484 | remontee-r4 | `FILS=16 code/target/release/examples/apic3d_remontee.exe 4 0.04 1.5` | terminé, 2026-10-05 20:36 |
 | `20261005-204739-remontee-r4-1ms` | S484 | remontee-r4-1ms | `FILS=16 PAS_US=1000 code/target/release/examples/apic3d_remontee.exe 4 0.04 1.5` | terminé, 2026-10-05 20:53 |
 | `20261005-205939-remontee-r6-1ms` | S484 | remontee-r6-1ms | `FILS=16 PAS_US=1000 TRACE=1 code/target/release/examples/apic3d_remontee.exe 6 0.04 0.6` | interrompu (pas de fin.txt) |
+| `20261006-002606-b10-gouttes-serie` | S488 | b10-gouttes-serie | interrompu (pas de fin.txt) |
+import subprocess, os
+for nd in (8, 12, 16):
+    for g in (0, 1):
+        env = dict(os.environ, FILS='16')
+        if g:
+            env['APIC3D_GOUTTES'] = '1'
+        print(f'=== D/dx={nd} gouttes={g}', flush=True)
+        r = subprocess.run([r'code/target/release/examples/apic3d_b10.exe', '2', str(nd)], env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
+        for l in r.stdout.splitlines():
+            if l.startswith('APIC3D_B10') and ('fr=' in l or 'GOUTTES' in l):
+                print(l, flush=True)
+        print('code', r.returncode, flush=True)
+"` | lancé 2026-10-06 00:26 |
+| `20261006-002902-b10-gouttes-serie2` | S488 | b10-gouttes-serie2 | terminé, 2026-10-06 00:47 |
+import subprocess, os
+for nd in (8, 12, 16):
+    for g in (0, 1):
+        env = dict(os.environ, FILS='16')
+        if g:
+            env['APIC3D_GOUTTES'] = '1'
+        print(f'=== D/dx={nd} gouttes={g}', flush=True)
+        r = subprocess.run([r'code/target/release/examples/apic3d_b10.exe', '2', str(nd)], env=env, capture_output=True, text=True, encoding='utf-8', errors='replace')
+        for l in r.stdout.splitlines():
+            if l.startswith('APIC3D_B10') and ('fr=' in l or 'GOUTTES' in l):
+                print(l, flush=True)
+        print('code', r.returncode, flush=True)
+"` | lancé 2026-10-06 00:29 |
