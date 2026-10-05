@@ -62,30 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S487 — **terminée**. En autonomie, **A326 — les dispatchs à deux dimensions de la carte** (au-delà de 65 535 groupes, ≈ 8,4 M
-particules), puis la remontée en cuve entière à R/dx = 6 (la convergence de U, REMONTEE-S485 §5).
+Session : S488 — **en cours**. En autonomie, **K2-4 — la nappe et sa rupture** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
+ADR-014 §4, **A312**), dans la référence (ADR-213 : la référence d'abord, la carte en K2-5).
 
-**Ce que la session fait.** `dispatch` passe en deux dimensions au-delà de 65 535 groupes ; les dix noyaux par particule (tri, transferts,
-advection, séparation, corps, compactage) reconstruisent l'indice linéaire (`g.x + g.y·65 535·128`). Sous la borne, `g.y` vaut 0 : le même
-calcul, au bit.
+**Ce que la session fait.** `Apic3::enable_droplets` : une particule d'eau dont la maille est étiquetée **air** (une nappe plus mince
+qu'une maille, que la reconstruction ne voit plus) et dont la vitesse donne `We = ρ·v²·d/σ > 12` (d : le diamètre de la goutte de son
+volume, `dx/2·(6/π)^(1/3)`) **devient une goutte** : hors de la grille (ni transfert vers la grille, ni reconstruction, ni séparation),
+**balistique** — `g_eff` et la traînée de l'air (`C_d` = 0,47, ρ_air = 1,2) ; elle **redevient de l'eau** en entrant dans une maille
+d'eau (sa vitesse transmise). Aucune particule ne naît ni ne meurt : la masse est exacte par construction. Sans `enable_droplets`, le pas
+d'avant, au bit.
 
-**Entrées, et comment elles se vérifient.** Le banc de non-régression (la trajectoire de `--v1`, les poches) au bit avant et après ; la
-remontée R/dx = 4 en cuve entière rejouée (0,548 m/s).
+**Entrées, et comment elles se vérifient.** B10 (`apic3d_b10`, le quart — A325 dit le prix du quart ; la mesure ici est la dépendance à la
+maille, au même montage) à `D/dx` = 8, 12, 16, avec et sans gouttes ; la couronne (la particule la plus haute avant le pincement, gouttes
+comprises) ; le banc de non-régression au bit (sans gouttes).
 
-**Critères, écrits avant.** (1) non-régression tenue, au bit ; (2) la remontée en cuve entière à R/dx = 6 (9,7 M particules) passe et donne U ;
-(3) U à R/dx = 4 et 6 en cuve entière, l'écart dit (la convergence, sur deux points — un troisième, R/dx = 8, si la mémoire le permet).
+**Critères, écrits avant.** (1) sans gouttes, au bit (non-régression, essais d'APIC 3D) ; (2) masse exacte avec gouttes ; une goutte isolée
+suit une trajectoire balistique (essai : la portée d'un jet vertical à 1 %) ; (3) **A312** : la hauteur de la couronne de B10 à trois
+mailles à 15 % entre elles avec gouttes (contre 40 à 60 % sans) — sinon, l'écart dit et attribué.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les dispatchs à deux dimensions ; (1).
-- [x] **P3** — la remontée en cuve entière, R/dx = 6 (et 8) ; (2), (3).
-- [x] **P4** — preuve ; rituel.
+- [ ] **P2** — les gouttes dans la référence ; essais (1), (2).
+- [ ] **P3** — B10 à trois mailles, avec et sans gouttes ; (3).
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2** — `lin128` dans dix noyaux par particule ; `dispatch` en deux dimensions au-delà de 65 535 groupes (une assertion arrête tout
-  autre noyau qui y serait lancé). Non-régression tenue au bit ; la cuve entière à R/dx = 6 (9 724 888 particules) passe (50 pas, 11 s).
-- **P3** — cuve entière : R/dx = 6, U = 0,525 (× 0,85 ; 0,645 puis 0,453 — la scission en trois poches vers 0,25 s ; la plus grande à
-  ≈ 0,47 m/s, × 0,87 pour sa taille ; l'air à 5 %). R/dx = 8 : les faces (9,9 M) dépassent ; l'assertion de P2 ne regardait que la taille
-  du groupe — **resserrée à une liste explicite** (`LIN128`), les poches aussi : l'arrêt est désormais bruyant (`columns_begin`).
-- **P4** — preuve REMONTEE-S487 ; A326 annotée ; 7.4 ; index ; journal.
