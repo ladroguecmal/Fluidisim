@@ -36,6 +36,10 @@ const KERNELS: [&str; 104] = [
     // S456 — le débit des bords ouverts, cumulé.
     "open_count",
 ];
+/// S487 (A326) — les noyaux qui reconstruisent leur indice à deux dimensions (`lin128` du nuanceur).
+const LIN128: [&str; 10] = [
+    "bin_count", "bin_scatter", "bin_rank", "bin_place", "g2p", "advect", "separate_shift", "separate_apply", "move_body", "compact_copy",
+];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
 const SCAN_LOCAL: usize = 2;
@@ -847,9 +851,13 @@ impl ApicCarte {
         pass.set_bind_group(0, &self.bind, &[]);
         let groups = (threads as u32).div_ceil(group).max(1);
         if groups > 65_535 {
-            // S487 (A326) : au-delà de 65 535 groupes, deux dimensions ; seuls les noyaux de 128 fils qui reconstruisent leur indice
-            // (`lin128`) y sont lancés — un autre noyau ici serait une erreur, que l'assertion arrête.
-            assert!(group == WG, "noyau {} lancé au-delà de 65 535 groupes sans indice à deux dimensions", KERNELS[kernel]);
+            // S487 (A326) : au-delà de 65 535 groupes, deux dimensions — pour les seuls noyaux qui reconstruisent leur indice (`lin128`) ;
+            // tout autre (les faces, au-delà de 8,4 M) s'arrête ici, bruyamment, au lieu de calculer faux.
+            assert!(
+                group == WG && LIN128.contains(&KERNELS[kernel]),
+                "noyau {} lancé au-delà de 65 535 groupes sans indice à deux dimensions (A326)",
+                KERNELS[kernel]
+            );
             pass.dispatch_workgroups(65_535, groups.div_ceil(65_535), 1);
         } else {
             pass.dispatch_workgroups(groups, 1, 1);

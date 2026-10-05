@@ -173,3 +173,12 @@ la session y est tombée en les écrivant ; FXC), un essai du cœur (`air_pocket
 faux de S479). **Lot** : feuille de route, A325 (les parois d'APIC ne sont pas des symétries : B10 en quart concerné), A326 (la carte bornée
 à 8 M particules). Maillons **1**. Suivant : **S487 — les dispatchs à deux dimensions** (A326), puis la convergence de U en cuve entière.
 
+## S487 — 2026-10-06 — les dispatchs à deux dimensions ; la remontée en cuve entière
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/REMONTEE-S487.md)) : A326 levée pour les particules — `dispatch` en deux
+dimensions au-delà de 65 535 groupes, `lin128` dans dix noyaux ; une assertion à liste explicite arrête tout autre noyau au-delà (les faces
+auraient calculé faux en silence : trouvé en essayant R/dx = 8). **Mesuré** : non-régression au bit ; 9,7 M particules ; cuve entière,
+U × 0,90 à R/dx = 4 et × 0,85 à 6 — à 6, Davies–Taylor (× 1,04) jusqu'à une scission en trois poches vers 0,25 s, vraisemblablement
+numérique. **Limite** : R/dx = 8 attend les faces à deux dimensions ; deux points ne font pas une convergence. Maillons **2**. Suivant :
+**S488** — les faces et les mailles à deux dimensions (A326), puis R/dx = 8 ; ou la scission de la calotte (la jupe sous-résolue).
+

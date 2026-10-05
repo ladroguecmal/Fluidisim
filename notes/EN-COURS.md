@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S487 — **en cours**. En autonomie, **A326 — les dispatchs à deux dimensions de la carte** (au-delà de 65 535 groupes, ≈ 8,4 M
+Session : S487 — **terminée**. En autonomie, **A326 — les dispatchs à deux dimensions de la carte** (au-delà de 65 535 groupes, ≈ 8,4 M
 particules), puis la remontée en cuve entière à R/dx = 6 (la convergence de U, REMONTEE-S485 §5).
 
 **Ce que la session fait.** `dispatch` passe en deux dimensions au-delà de 65 535 groupes ; les dix noyaux par particule (tri, transferts,
@@ -79,9 +79,13 @@ remontée R/dx = 4 en cuve entière rejouée (0,548 m/s).
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les dispatchs à deux dimensions ; (1).
-- [>] **P3** — la remontée en cuve entière, R/dx = 6 (et 8) ; (2), (3).
-- [ ] **P4** — preuve ; rituel.
+- [x] **P3** — la remontée en cuve entière, R/dx = 6 (et 8) ; (2), (3).
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2** — `lin128` dans dix noyaux par particule ; `dispatch` en deux dimensions au-delà de 65 535 groupes (une assertion arrête tout
   autre noyau qui y serait lancé). Non-régression tenue au bit ; la cuve entière à R/dx = 6 (9 724 888 particules) passe (50 pas, 11 s).
+- **P3** — cuve entière : R/dx = 6, U = 0,525 (× 0,85 ; 0,645 puis 0,453 — la scission en trois poches vers 0,25 s ; la plus grande à
+  ≈ 0,47 m/s, × 0,87 pour sa taille ; l'air à 5 %). R/dx = 8 : les faces (9,9 M) dépassent ; l'assertion de P2 ne regardait que la taille
+  du groupe — **resserrée à une liste explicite** (`LIN128`), les poches aussi : l'arrêt est désormais bruyant (`columns_begin`).
+- **P4** — preuve REMONTEE-S487 ; A326 annotée ; 7.4 ; index ; journal.

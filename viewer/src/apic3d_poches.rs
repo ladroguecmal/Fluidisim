@@ -141,7 +141,10 @@ impl ApicCarte {
         let pipeline = if par { &ps.par1[kernel - PK_MG_UPDATE_ALPHA] } else { &ps.pipelines[kernel] };
         pass.set_pipeline(pipeline);
         pass.set_bind_group(0, self.bind_group(), &[]);
-        pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
+        let groups = (threads as u32).div_ceil(group).max(1);
+        // S487 (A326) : les noyaux des poches n'ont pas d'indice à deux dimensions — au-delà de 65 535 groupes, l'arrêt.
+        assert!(groups <= 65_535, "noyau des poches {} au-delà de 65 535 groupes (A326)", KERNELS[kernel]);
+        pass.dispatch_workgroups(groups, 1, 1);
     }
 
     /// S482 — une compaction dans l'ordre des mailles : le compte de chaque bloc, le préfixe des blocs, l'écriture.

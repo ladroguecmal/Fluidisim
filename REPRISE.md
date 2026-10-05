@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-05 23:55 +02:00
+JETON            : libre
+Battement        : 2026-10-06 00:17 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S487 — les dispatchs à deux dimensions (A326) ; la convergence de U**
-Dernière session : S486 — la première revue de méthode ; le lot des registres ([journal](notes/JOURNAL.md)). Avant : S485 (K2-3b : la remontée lente attribuée)
-Session suivante : **S487 — les dispatchs à deux dimensions de la carte** (A326) : l'indice linéaire reconstruit dans chaque noyau par particule et par maille (`workgroup_id`, `num_workgroups`), au bit du chemin d'avant sous 65 535 groupes ; puis la remontée en cuve entière à R/dx = 6 et 8 (REMONTEE-S485 §5, la convergence de U) ; le témoin B10 en domaine entier à 8 mailles (A325). **Sans attendre de « Continue »**
-Maillons        : 1 — S486 : la revue de méthode, aucun point de la liste
+Session en cours : aucune
+Dernière session : S487 — les dispatchs à deux dimensions ; la remontée en cuve entière ([journal](notes/JOURNAL.md)). Avant : S486 (la première revue de méthode)
+Session suivante : **S488 — les faces et les mailles à deux dimensions** (A326 : l'indice linéaire dans les noyaux sur les faces, les mailles et les poches ; au bit sous la borne), puis la remontée en cuve entière à R/dx = 8 (le troisième point de la convergence de U, REMONTEE-S487). Si la mémoire de la carte bloque à R/dx = 8, le dire et passer à la scission de la calotte. **Sans attendre de « Continue »**
+Maillons        : 2 — S487 : un outil (A326 pour les particules) et une mesure ; aucun point de la liste ne change d'état
 Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
 ```
 

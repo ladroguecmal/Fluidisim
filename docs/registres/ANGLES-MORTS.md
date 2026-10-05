@@ -4557,3 +4557,4 @@ miroirs dans chaque étage, ou les bancs en domaine entier.
 §2). Déclencheur : **tout domaine de plus de 8 millions de particules** — la convergence de U, les grands domaines de K10. Remède : des
 dispatchs à deux dimensions (la reconstruction le fait déjà, S423) et l'indice linéaire reconstruit dans chaque noyau.
 
+*Note du 2026-10-06, S487, sur A326* ([REMONTEE-S487](../validation/REMONTEE-S487.md)) : **levée pour les particules** — les dix noyaux par particule lancés en deux dimensions (9,7 M particules passent, non-régression au bit) ; **ouverte pour les faces, les mailles et les poches** (au-delà de 8,4 M faces) — une assertion les arrête désormais au lieu qu'ils calculent faux.
