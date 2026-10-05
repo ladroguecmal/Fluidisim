@@ -62,44 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S482 — **terminée**. En autonomie (ADR-215, ADR-222), **K2-2b — le coût des poches** ([POCHES-CARTE-S481](../docs/validation/POCHES-CARTE-S481.md)
-§4 : 71 ms par pas avec poches contre 16,7 sans, sur `--v1`). Avant le plan, sur la réponse de l'utilisateur (*« non pour la 1 sinon
-oui »*) : pas de relance planifiée ; les téléchargements faits (Godot 4.7 mono double de DyingStar, DyingStar `develop`) dans
-`C:/Users/antoi/FluidisimExterne/` ; DyingStar est passé à Godot 4.7 (ADR-219 et ADR-222, notes ; boussole).
+Session : S483 — **en cours**. Sur « Continue », la suite du jeton : **ADR-222 D2 et D3** — la référence CPU parallèle, le banc de
+non-régression du rituel. Puis, si la session le permet, la relance de B10 à 24 mailles.
 
-**Ce que la session fait.** (1) **Rien quand rien n'est enfermé** : les racines enfermées se comptent en parallèle ; sans elles, les
-parcours par un groupe (numérotation, listes, faces) ne parcourent rien. (2) **Les parcours à plusieurs groupes** : compte par bloc de
-256 mailles, préfixe des blocs, écriture — le même ordre des mailles, donc le même résultat. (3) **Les poches dans la multigrille** :
-un préconditionneur par blocs — le cycle en V sur les mailles, la diagonale sur les poches —, défini positif ; les noyaux fusionnés du
-gradient conjugué de la multigrille, dans des variantes du module des poches.
+**Ce que la session fait.** (1) **Mesurer d'abord** : un relevé du temps par étage dans `Apic3::step_upto` (la bulle de S479, B10),
+pour paralléliser là où le temps est. (2) **La référence parallèle** : `Apic3` reçoit un système de tâches de l'hôte
+(`set_jobs`, `ScopedJobs` aux bancs) ; les boucles chaudes deviennent des **écritures disjointes** (`parallel_fill_f32`, S243 : le
+résultat ne dépend ni du grain ni du nombre de fils) ; les sommes gardent leur ordre séquentiel. (3) **Le banc de non-régression** :
+`outils/non_regression.py` — la bulle (référence, quelques pas) et `--v1` court sur la carte : masse, particules, une empreinte des
+champs au bit contre `docs/validation/EMPREINTES.md` (versionné) ; le coût contre un seuil ; appelé par `rituel.py fin`.
 
-**Entrées, et comment elles se vérifient.** Le témoin `--v1` sans poches (S481 : 16,7 ms, 60 s, masse exacte) et la bulle de S481
-(`MODE=suivi`, 4·10⁻⁵, 42,47 Hz) : rejoués avant et après chaque étape avec le même binaire ; les étages par `V1_LENTS`.
+**Entrées, et comment elles se vérifient.** La séquentielle est la référence : chaque boucle parallélisée se compare **au bit** à
+elle (les 43 essais d'APIC 3D, et une empreinte de la bulle après N pas, `ScopedJobs::with_workers(1)` contre 16).
 
-**Critères, écrits avant.** (1) sans poches, le témoin inchangé (pas médian à 5 %, masse exacte) ; (2) la bulle carte contre référence
-toujours à 10⁻⁴ (volume, pression), sa fréquence à 10⁻³ ; (3) `--v1` avec poches : **pas médian à 20 % du témoin** (≤ 20 ms), 60 s
-stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 écart à étiquettes égales). Ce qui ne tient pas est dit.
+**Critères, écrits avant.** (1) au bit : la bulle après 20 pas, mêmes bits avec 1 et 16 fils ; les essais d'APIC 3D passent ; (2) la
+bulle de S479 (0,15 s) **au moins 4 fois plus vite** qu'en séquentiel ; (3) le banc de non-régression tourne en moins de 3 min, échoue
+sur une empreinte modifiée, passe sur l'état présent ; `rituel.py fin` l'appelle. Ce qui ne tient pas est dit.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; les réponses et les téléchargements consignés.
-- [x] **P2** — rien quand rien n'est enfermé ; mesure.
-- [x] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
-- [x] **P4** — les poches dans la multigrille ; (2) ; mesure.
-- [x] **P5** — `--v1` 60 s (1), (3) ; preuve.
-- [x] **P6** — rituel (par `rituel.py`).
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — le temps par étage de la référence ; où il est.
+- [ ] **P3** — la référence parallèle, au bit ; (1), (2).
+- [ ] **P4** — le banc de non-régression ; (3).
+- [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2** — `H_ANY` : l'aplatissement compte les racines enfermées ; `pk_number`, `pk_lists` sortent aussitôt sans elles, `pk_faces`
-  sans poche gardée. Détection inchangée (banc : 0 écart à étiquettes égales, mêmes écarts V/P qu'en S481). `--v1` avec poches, 6 s :
-  reconstruction **2,7 ms** en moyenne (≈ 12 avant), projection 10,9 ms ; pas médian 31 ms (71 sur 60 s en S481, à remesurer sur 60 s).
-- **P4** (avant P3 : la projection était le gros du coût) — `pk_mg_init_finish`, `pk_mg_update_alpha`, `pk_mg_beta_direction` (deux
-  parités) : le cycle en V sur les mailles, la diagonale sur les poches. Bulle, 300 pas : volume 2,9·10⁻⁵, pression 4,1·10⁻⁵, **42,47 Hz
-  contre 42,50**, **14 itérations au plus** (151 en diagonale), masse exacte — critère (2) tenu. `--v1` avec poches, 6 s : pas médian
-  **14,9 ms** (projection 5,6, reconstruction 2,6). `MULTIGRILLE=0` au banc : la diagonale de S481.
-- **P3** — `pk_blk_count`, `pk_blk_scan`, `pk_blk_write` (constante `KIND` : racines, LA, LW, LF) remplacent `pk_number`, `pk_lists`,
-  `pk_faces` (un seul groupe) ; le même ordre des mailles — détection et bilan identiques au chiffre près (critère (4)). Coût, carte
-  seule (`MODE=cout`), poche présente : reconstruction **≈ +0,2 ms** au lieu de +1,7 à 2 (60 000 mailles). FXC : pas de `switch` qui
-  retourne dans chaque branche.
-- **P5** — `--v1` 60 s : avec poches 15,55 ms, témoin 15,33 (trajectoire de S481 au pas près), masse exacte ; aucune poche ≥ 8 mailles
-  dans la scène. Preuve COUT-POCHES-S482 ; 7.4 ; A311 close ; index.

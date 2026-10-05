@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-05 01:11 +02:00
+JETON            : occupé
+Battement        : 2026-10-05 07:32 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S483 — ADR-222 D2 et D3 : la référence parallèle, la non-régression**
 Dernière session : S482 — K2-2b : le coût des poches ([journal](notes/JOURNAL.md)). Avant : S481 (K2-2 : l'air enfermé sur la carte)
 Session suivante : **S483 — ADR-222 D2 et D3** : (1) la référence CPU parallèle (les cœurs de ce PC, au bit de la séquentielle — les jobs de `HostServices` ; mesurer la bulle de `--apic3d-poches MODE=suivi`, 700 s aujourd'hui) ; (2) un banc de non-régression rapide appelé par `rituel.py fin` (le témoin `--v1` court : masse, pas, particules au bit contre une empreinte versionnée ; le coût contre un seuil). Puis **K2-3** (les grosses bulles libres, Davies–Taylor) sur une scène à maille assez fine pour des poches résolues (ADR-222 D6). Relancer B10 à 24 mailles par `calcul.py`. **Sans attendre de « Continue »**
 Maillons        : 0 — S482 : l'air enfermé en production au temps réel (le chemin : --v1 ; la preuve : COUT-POCHES-S482)
