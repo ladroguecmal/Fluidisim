@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**224 ADR** — actée : 173, proposée : 49, rétractée en partie : 2.
+**225 ADR** — actée : 174, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -154,7 +154,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [141](../adr/ADR-141-surface-linearisee-et-coefficients-temporels.md) | Surface linéarisée et coefficients temporels de δ | actée | S233 | 003 127 | 149 152 164 |
 | [142](../adr/ADR-142-composition-sur-l-union-des-emprises.md) | La composition mixte sert l'union des emprises, sous un plancher certifié | actée | S236 | 077 080 126 128 137 138 |  |
 | [143](../adr/ADR-143-la-pression-f32-converge-a-sa-precision-representable.md) | La pression f32 de δ s'arrête à sa précision représentable | actée | S238 |  | 144 147 150 151 152 153 167 169 175 201 |
-| [144](../adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) | La tolérance physique de la projection est une condition d'acceptation, sur les lignes franches | actée | S239 | 143 | 147 175 201 |
+| [144](../adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) | La tolérance physique de la projection est une condition d'acceptation, sur les lignes franches | actée | S239 | 143 | 147 175 201 225 |
 | [145](../adr/ADR-145-i-06-pour-l-hote-graphique.md) | I-06 pour l'hôte graphique : tenue par notre code, comptée pour la pile | actée | S240 | 139 |  |
 | [146](../adr/ADR-146-l-ecriture-disjointe-est-inconditionnellement-deterministe.md) | L'écriture disjointe est inconditionnellement déterministe, et c'est elle qu'on parallélise | actée | S243 | 029 |  |
 | [147](../adr/ADR-147-la-multigrille-est-un-repli-de-precision.md) | La multigrille est un repli de précision, pas le solveur ordinaire | actée | S245 | 143 144 | 150 151 167 |
@@ -225,7 +225,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [212](../adr/ADR-212-la-bande-etroite-en-profondeur.md) | La bande étroite en profondeur : une hauteur eulérienne sous les particules | actée | S412 | 207 211 |  |
 | [213](../adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) | Accélérer : tolérance, plafond, rituel allégé, bancs courts | actée | S443 | 187 | 214 215 221 |
 | [214](../adr/ADR-214-b-entre-dans-la-bande.md) | B entre dans la bande : `Apic3` et sa carte reçoivent le couplage relatif | actée | S444 | 198 207 213 |  |
-| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 |
+| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 |
 | [216](../adr/ADR-216-le-banc-visuel.md) | Le banc visuel : mesurer plutôt que regarder | actée | S471 | 215 | 217 |
 | [217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md) | Le type d'eau, une option d'édition de la carte ; le ciel qui bouge, à l'atmosphère | actée | S473 | 197 216 |  |
 | [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 222 |
@@ -235,3 +235,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 |  |
+| [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |

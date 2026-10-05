@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 01:29 +02:00
+JETON            : libre
+Battement        : 2026-10-06 01:48 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S492 — A327 : le mur aligné sur la grille**
-Dernière session : S491 — la machine éveillée ; la deuxième revue de méthode ; le lot ([journal](notes/JOURNAL.md)). Avant : S490 (6.5 : un décor fixe qui perce la surface)
-Session suivante : **S492 — A327 : le mur aligné sur la grille** (DECOR-S490 §3 ; l'essai ignoré `a_grid_aligned_wall_through_the_surface_a327_s490`) : trouver pourquoi la projection linéaire stagne quand la paroi d'un décor tombe sur un plan de la grille (premier suspect : le couvercle en partie couvert, S334–S335), corriger, faire passer l'essai ; puis 6.5 validée. **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée.
-Maillons        : 2 — S491 : méthode et outillage, aucun point de la liste
+Session en cours : aucune
+Dernière session : S492 — A327 réattribuée et levée ([journal](notes/JOURNAL.md)). Avant : S491 (la machine éveillée)
+Session suivante : **S493 — 6.5 sur la carte** : la cloison qui perce la surface dans le δ linéaire de la carte (LINEAIRE-GPU-S358 charge la découpe du cœur telle quelle) — la carte accepte-t-elle un solide qui perce le couvercle ? la seiche de la demi-cuve, aucune fuite, contre la référence ; ADR-225 porté si la carte refuse au point mort. 6.5 validée si la carte tient. **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée.
+Maillons        : 0 — S492 : A327 levée, le décor aligné sur la grille tient (6.5 avance)
 Registres       : dernier lot S491 (ADR-213 D3) ; le prochain au plus tard en S494
 ```
 

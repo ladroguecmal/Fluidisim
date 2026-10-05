@@ -34,6 +34,7 @@ use crate::host::{AllocError, HostServices, JobSystem};
 /// reste dans la hauteur de remplissage que `1/a` changerait en pointe — 5,5 m/s sous 10 %, 0,55 m/s à 10 %.
 pub const PARTIAL_LID_MIN_APERTURE: f32 = 0.1;
 
+
 /// S375, ADR-201 — **le plancher de
 /// l'échelle de vitesse** du critère de divergence du pas mobile 3D (ADR-143 : `max|div u|·dx/max|u|` ≤ 10⁻⁵), m/s. Sous
 /// 0,1 mm/s, le critère devient absolu : `max|div u|·dx` ≤ 10⁻⁹ m/s, une dérive de surface de l'ordre de 50 µm par heure
@@ -1207,7 +1208,15 @@ impl Volume3 {
                 self.divergence_metric()
             }
         };
-        let accepted = (actual_rr <= tol * b2 || floor_stop) && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
+        // S492 (A327, ADR-225) : arrêtée au plancher d'arrondi, une projection dont la divergence tient la tolérance **avec le plancher de
+        // vitesse** est acceptée — au point mort d'une oscillation, toutes les vitesses passent près de zéro et la mesure relative ne juge
+        // plus que l'arrondi (une seiche refusée à sa demi-période, 1,1·10⁻⁴ m/s). Une projection déjà acceptée l'est au bit comme avant.
+        let au_point_mort = floor_stop && {
+            let umax = self.u.iter().chain(&self.v).chain(&self.w).fold(0f32, |m, x| m.max(x.abs()));
+            umax < crate::delta_projection::DIVERGENCE_VELOCITY_FLOOR
+                && divergence * (umax / crate::delta_projection::DIVERGENCE_VELOCITY_FLOOR) as f64 <= PROJECTION_DIVERGENCE_TOLERANCE
+        };
+        let accepted = (actual_rr <= tol * b2 || floor_stop) && (divergence <= PROJECTION_DIVERGENCE_TOLERANCE || au_point_mort);
         Ok(Report {
             refinements: 0,
             iterations: it,

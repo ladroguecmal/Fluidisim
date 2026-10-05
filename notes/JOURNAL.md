@@ -220,3 +220,12 @@ frictions de S486–S490 : l'ordre de grandeur d'un remède avant de le déclare
 nomme ce qu'il autorise, une édition par script qui vérifie toutes ses ancres d'abord (le script de la revue y est tombé en l'écrivant ;
 vu, réappliqué). Lot : feuille de route. Maillons **2**. Suivant : **S492, A327** — le mur aligné sur la grille, pour valider 6.5.
 
+## S492 — 2026-10-06 — A327 réattribuée et levée
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/A327-S492.md)) : trois mesures provisoires dans la projection — ni petite
+cellule, ni matrice brisée ; la projection **avait convergé** et était refusée sur la divergence relative à une vitesse quasi nulle, **au
+point mort de la seiche** (1,1·10⁻⁴ m/s). [ADR-225](../docs/adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) : au plancher
+d'arrondi, un plancher de vitesse de 1 mm/s à la seule décision finale (un premier essai dans la mesure elle-même changeait six essais au
+bit : retiré). **Mesuré** : le mur aligné, 0,16 % et aucune fuite ; 651 essais du cœur. A327 levée ; 6.5 avance (manque la carte).
+Maillons **0** (un défaut levé, une capacité : le décor aligné). Suivant : **S493, 6.5 sur la carte**.
+

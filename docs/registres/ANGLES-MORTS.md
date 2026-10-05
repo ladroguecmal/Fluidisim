@@ -4572,3 +4572,5 @@ un mur de décor aligné sur la grille — le cas courant — n'est pas sûr dan
 de scène dans δ** (K3, la côte ; K7, les contenants). Premier suspect : le couvercle en partie couvert d'une colonne presque libre (S334–S335).
 Reproduction : `cargo test -p water-core --release --offline s490 -- --ignored`.
 
+*Note du 2026-10-06, S492, sur A327* ([A327-S492](../validation/A327-S492.md)) : **levée, et réattribuée** — la cloison n'était pas en cause. La projection avait convergé (plancher d'arrondi atteint) et était refusée sur la divergence **relative à la plus grande vitesse**, qui passe près de zéro au point mort d'une oscillation (1,1·10⁻⁴ m/s). Remède : ADR-225 (un plancher de vitesse de 1 mm/s à la seule décision finale, au plancher d'arrondi) ; la 2D, le couplage et la colonne graduée restent exposés au même point mort.
+

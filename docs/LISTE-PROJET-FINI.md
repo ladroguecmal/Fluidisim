@@ -429,7 +429,8 @@ pas recopiée ici (L137).
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**
   depuis S358, découpe du cœur chargée telle quelle ([preuve](validation/LINEAIRE-GPU-S358.md) §2) ; **un décor qui perce la
   surface, posé sur le fond** (S490) : repos au bit, aucune fuite, la seiche de la demi-cuve à 0,3 %
-  ([DECOR-S490](validation/DECOR-S490.md)). Manque **le mur aligné sur la grille** (A327 : la projection échoue).
+  ([DECOR-S490](validation/DECOR-S490.md)) ; **aligné sur la grille** depuis S492 (A327 levée : la tolérance au point mort,
+  [A327-S492](validation/A327-S492.md)). Manque **le décor qui perce la surface sur la carte** (la production).
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.
 - [ ] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *absent*.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S492 — **en cours**. En autonomie, **A327 — le mur aligné sur la grille** ([DECOR-S490](../docs/validation/DECOR-S490.md) §3) :
+Session : S492 — **terminée**. En autonomie, **A327 — le mur aligné sur la grille** ([DECOR-S490](../docs/validation/DECOR-S490.md) §3) :
 la projection linéaire de δ stagne quand la paroi d'un décor qui perce la surface tombe sur un plan de la grille (ou le dépasse d'un
 micromètre) ; un micromètre en deçà, tout tient.
 
@@ -76,8 +76,13 @@ micromètre en deçà (passe). **Critères, écrits avant.** (1) le mécanisme n
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le mécanisme.
-- [ ] **P3** — la correction ; (2)–(3).
-- [ ] **P4** — preuve ; 6.5 ; rituel.
+- [x] **P2** — le mécanisme.
+- [x] **P3** — la correction ; (2)–(3).
+- [x] **P4** — preuve ; 6.5 ; rituel.
 
 ### Notes de reprise
+- **P2** — diagnostic : divergence par maille ≈ 5·10⁻⁸ (mailles pleines) ; aucun `d·A·d ≤ 0` ; au pas refusé, résidu sous le seuil,
+  plancher atteint, divergence 2,97·10⁻⁵ avec max|u| = 1,1·10⁻⁴ m/s — **le point mort** de la seiche, pas la géométrie.
+- **P3** — premier remède (le plancher dans la mesure, 2D comprise) : six essais changés au bit — retiré ; second (la seule décision
+  finale de la 3D linéaire, au plancher d'arrondi) : 651 essais passent, le mur aligné passe (0,16 %).
+- **P4** — ADR-225 ; preuve A327-S492 ; A327 levée ; 6.5 (manque la carte) ; index ; journal.

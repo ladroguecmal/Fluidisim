@@ -191,6 +191,12 @@ pub struct Report {
 /// toute construction : `max|div u|·dx/max|u|`. Elle ne décide qu'à cycle certifié.
 pub const PROJECTION_DIVERGENCE_TOLERANCE: f64 = 1e-5;
 
+/// **S492 (A327, ADR-225)** — le plancher de la vitesse de référence de cette tolérance, m/s : un millimètre par seconde, une vitesse
+/// sans effet visible. Au point mort d'une oscillation, toutes les vitesses passent ensemble près de zéro ; la mesure relative
+/// `max|div u|·dx / max|u|` n'y juge plus que le bruit d'arrondi. **Il ne sert qu'à la décision finale** d'une projection arrêtée au
+/// plancher d'arrondi (la 3D linéaire) : la mesure, la boucle et toute projection déjà acceptée restent celles d'avant, au bit.
+pub const DIVERGENCE_VELOCITY_FLOOR: f32 = 1e-3;
+
 /// S238, ADR-143 : erreur inverse composante par composante en deçà de laquelle le vrai résidu est
 /// indiscernable de l'arrondi de son propre calcul. Modèle standard de la virgule flottante (Higham,
 /// *Accuracy and Stability*, §3.1–3.4), `u = 2⁻²⁴` en f32 : une ligne à `m = 4` faces évalue chaque

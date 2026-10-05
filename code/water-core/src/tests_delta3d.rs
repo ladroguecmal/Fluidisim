@@ -2427,11 +2427,10 @@ fn a_fixed_wall_through_the_surface_splits_the_tank_s490() {
     assert!((mesuree / periode - 1.).abs() <= 0.03, "période {mesuree} contre {periode}");
 }
 
-/// **S490 — A327, le défaut reproduit** : la même cloison, sa paroi **exactement sur un plan de la grille** (ou un micromètre au-delà) —
-/// la projection linéaire se dit dégradée à la demi-période de la seiche (`Error::Convergence`, pas 307), quel que soit le plafond
-/// d'itérations ; un micromètre en deçà, elle tient. Ignoré tant qu'A327 est ouverte : `cargo test -- --ignored s490`.
+/// **S490 — A327** : la même cloison, sa paroi **exactement sur un plan de la grille**. En S490 la projection se disait dégradée à la
+/// demi-période de la seiche ; S492 l'a attribué à la tolérance de divergence, relative à la vitesse maximale, qui passe près de zéro au
+/// point mort (1,1·10⁻⁴ m/s) — non à la géométrie. Avec le plancher de vitesse (ADR-225), l'essai passe.
 #[test]
-#[ignore]
 fn a_grid_aligned_wall_through_the_surface_a327_s490() {
     std::env::set_var("CLOISON_E", "0.05");
     a_fixed_wall_through_the_surface_splits_the_tank_s490();
