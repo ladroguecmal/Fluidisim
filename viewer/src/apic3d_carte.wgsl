@@ -89,6 +89,12 @@ fn body_point(q: vec3<f32>, c: vec3<f32>) -> vec3<f32> {
 @group(0) @binding(25) var<storage, read_write> mgb: array<f32>;
 @group(0) @binding(26) var<storage, read_write> mgl: array<u32>;
 
+// S487 (A326) — l'indice linéaire d'un noyau de 128 fils lancé en deux dimensions au-delà de 65 535 groupes (`dispatch`) : `g.y` vaut 0
+// sous la borne, l'indice est alors `g.x`, au bit.
+fn lin128(g: vec3<u32>) -> u32 {
+    return g.x + g.y * 8388480u;
+}
+
 // Le nombre de particules, résident.
 fn np() -> u32 {
     return atomicLoad(&pcount[0]);
@@ -124,7 +130,7 @@ fn bin_clear(@builtin(global_invocation_id) g: vec3<u32>) {
 
 @compute @workgroup_size(128)
 fn bin_count(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     if k >= np() || px[k].w != 0.0 {
         return;
     }
@@ -218,7 +224,7 @@ fn scan_add(@builtin(global_invocation_id) g: vec3<u32>, @builtin(workgroup_id) 
 
 @compute @workgroup_size(128)
 fn bin_scatter(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     if k >= np() || px[k].w != 0.0 {
         return;
     }
@@ -256,7 +262,7 @@ fn bin_sort(@builtin(global_invocation_id) g: vec3<u32>) {
 // insertion d'une maille sur un fil — qui coûtait 64 µs sur B10, quelques mailles portant 30 à 50 particules.
 @compute @workgroup_size(128)
 fn bin_rank(@builtin(global_invocation_id) g: vec3<u32>) {
-    let s = g.x;
+    let s = lin128(g);
     if s >= start[P.cells] {
         return;
     }
@@ -276,7 +282,7 @@ fn bin_rank(@builtin(global_invocation_id) g: vec3<u32>) {
 
 @compute @workgroup_size(128)
 fn bin_place(@builtin(global_invocation_id) g: vec3<u32>) {
-    let s = g.x;
+    let s = lin128(g);
     if s >= start[P.cells] {
         return;
     }
@@ -1119,7 +1125,7 @@ fn grid_velocity(p: vec3<f32>) -> vec3<f32> {
 
 @compute @workgroup_size(128)
 fn g2p(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     if k >= np() {
         return;
     }
@@ -1139,7 +1145,7 @@ fn clamp_domain(p: vec3<f32>) -> vec3<f32> {
 
 @compute @workgroup_size(128)
 fn advect(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     if k >= np() {
         return;
     }
@@ -1156,7 +1162,7 @@ fn advect(@builtin(global_invocation_id) g: vec3<u32>) {
 
 @compute @workgroup_size(128)
 fn separate_shift(@builtin(global_invocation_id) g: vec3<u32>) {
-    let a = g.x;
+    let a = lin128(g);
     if a >= np() {
         return;
     }
@@ -1196,7 +1202,7 @@ fn separate_shift(@builtin(global_invocation_id) g: vec3<u32>) {
 
 @compute @workgroup_size(128)
 fn separate_apply(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     if k >= np() {
         return;
     }
@@ -1246,7 +1252,7 @@ fn impose_body(@builtin(global_invocation_id) g: vec3<u32>) {
 
 @compute @workgroup_size(128)
 fn move_body(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     if k >= np() || P.has_body == 0.0 {
         return;
     }
@@ -1720,7 +1726,7 @@ fn compact_scatter(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_i
 
 @compute @workgroup_size(128)
 fn compact_copy(@builtin(global_invocation_id) g: vec3<u32>) {
-    let k = g.x;
+    let k = lin128(g);
     let groups = u32(P.q2);
     if k >= pblk[groups] {
         return;

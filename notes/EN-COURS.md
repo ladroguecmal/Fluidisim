@@ -78,8 +78,10 @@ remontée R/dx = 4 en cuve entière rejouée (0,548 m/s).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les dispatchs à deux dimensions ; (1).
-- [ ] **P3** — la remontée en cuve entière, R/dx = 6 (et 8) ; (2), (3).
+- [x] **P2** — les dispatchs à deux dimensions ; (1).
+- [>] **P3** — la remontée en cuve entière, R/dx = 6 (et 8) ; (2), (3).
 - [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2** — `lin128` dans dix noyaux par particule ; `dispatch` en deux dimensions au-delà de 65 535 groupes (une assertion arrête tout
+  autre noyau qui y serait lancé). Non-régression tenue au bit ; la cuve entière à R/dx = 6 (9 724 888 particules) passe (50 pas, 11 s).

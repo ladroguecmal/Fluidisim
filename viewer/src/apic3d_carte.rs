@@ -845,7 +845,15 @@ impl ApicCarte {
     pub(crate) fn dispatch(&self, pass: &mut wgpu::ComputePass, kernel: usize, threads: usize, group: u32) {
         pass.set_pipeline(&self.pipelines[kernel]);
         pass.set_bind_group(0, &self.bind, &[]);
-        pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
+        let groups = (threads as u32).div_ceil(group).max(1);
+        if groups > 65_535 {
+            // S487 (A326) : au-delà de 65 535 groupes, deux dimensions ; seuls les noyaux de 128 fils qui reconstruisent leur indice
+            // (`lin128`) y sont lancés — un autre noyau ici serait une erreur, que l'assertion arrête.
+            assert!(group == WG, "noyau {} lancé au-delà de 65 535 groupes sans indice à deux dimensions", KERNELS[kernel]);
+            pass.dispatch_workgroups(65_535, groups.div_ceil(65_535), 1);
+        } else {
+            pass.dispatch_workgroups(groups, 1, 1);
+        }
     }
 
     /// S421 — l'étendue des listes ordonnées : particules et faces-mailles.
