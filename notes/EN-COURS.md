@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S486 — **en cours**. En autonomie, **la première revue de méthode** ([ADR-222](../docs/adr/ADR-222-la-methode-se-revise-elle-meme.md)
+Session : S486 — **terminée**. En autonomie, **la première revue de méthode** ([ADR-222](../docs/adr/ADR-222-la-methode-se-revise-elle-meme.md)
 D4, toutes les cinq sessions) **et le lot des registres** (dû en S486, ADR-213 D3).
 
 **Ce que la session fait.** Relire au journal les frictions de S481 à S485 — ce qui a coûté du temps ou fait refaire — et corriger
@@ -76,10 +76,12 @@ de ne rien changer ; (2) au moins un contrôle outillé nouveau, qui aurait vu u
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la revue : ADR-223 ; METHODE, boussole ; le contrôle nouveau.
-- [ ] **P3** — le lot des registres ; preuve ; rituel.
+- [x] **P3** — le lot des registres ; preuve ; rituel.
 
 ### Notes de reprise
 - **P2** — ADR-223 : neuf frictions relues, chacune sa suite (trois faites avant, une sans changement, trois protections, deux pièges,
   un essai) ; METHODE (21 protections), LECONS L374–L376, boussole (pièges, la ligne « revue »). **Contrôle nouveau** :
   `air_pocket_centroid_is_the_bubble_centre_s486` (il aurait vu le centre faux de S479 : 0,16 m au lieu de 0,20). Le script qui
   écrivait ces lignes est tombé dans le piège qu'il consignait (un `U` échappé dans un heredoc) : refait depuis un fichier.
+- **P3** — le lot : feuille de route (S484–S486) ; A325 (les parois ne sont pas des symétries — B10 en quart concerné) et A326 (la
+  carte bornée à 65 535 groupes par passe) ; index (ADR-223, preuves de S484 et S485 déjà). Pas de preuve à part : la revue est ADR-223.

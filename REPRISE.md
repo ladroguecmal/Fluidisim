@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-05 23:51 +02:00
+JETON            : libre
+Battement        : 2026-10-05 23:54 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S486 — la revue de méthode et le lot des registres**
-Dernière session : S485 — K2-3b : la remontée lente attribuée ([journal](notes/JOURNAL.md)). Avant : S484 (K2-3, premier temps : la remontée d'une grosse bulle)
-Session suivante : **S486 — la revue de méthode** (ADR-222 D4, la première : relire les frictions de S481–S485 dans le journal — calculs tués, veille de la machine, montage de S484, rejeu manqué — et corriger METHODE, la boussole, les outils, par un ADR) **et le lot des registres** (dû en S486) ; puis **les dispatchs à deux dimensions de la carte** (au-delà de 65 535 groupes) et la convergence de U en cuve entière (R/dx = 6, 8 ; REMONTEE-S485 §5). **Sans attendre de « Continue »**
-Maillons        : 0 — S485 : la vitesse terminale d'une grosse bulle tenue (× 0,90, cuve entière ; 7.4 avance) ; le chemin : la référence et la carte ; la preuve : REMONTEE-S485
-Registres       : dernier lot S483 (ADR-213 D3) ; le prochain au plus tard en S486
+Session en cours : aucune
+Dernière session : S486 — la première revue de méthode ; le lot des registres ([journal](notes/JOURNAL.md)). Avant : S485 (K2-3b : la remontée lente attribuée)
+Session suivante : **S487 — les dispatchs à deux dimensions de la carte** (A326) : l'indice linéaire reconstruit dans chaque noyau par particule et par maille (`workgroup_id`, `num_workgroups`), au bit du chemin d'avant sous 65 535 groupes ; puis la remontée en cuve entière à R/dx = 6 et 8 (REMONTEE-S485 §5, la convergence de U) ; le témoin B10 en domaine entier à 8 mailles (A325). **Sans attendre de « Continue »**
+Maillons        : 1 — S486 : la revue de méthode, aucun point de la liste
+Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -4542,3 +4542,18 @@ rompait**. Cause : le fantôme latéral retranchait l'erreur de B interpolée en
 **Corrigée** : il interpole les fantômes verticaux des deux colonnes (`Volume3::set_lateral_own_ghost`, le défaut) ; δ nul reste nul au
 bit sous 6,5 cm à 12,5 cm, le germe y reste à 1,1 mm, rien sous `4·dx` ; 25 cm au bit tant que rien ne franchit. Essai
 `zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436`. Reste : le porter sur la carte avec le mode relatif (C7d-3b).
+
+**A325 — S485, 2026-10-05 (sévérité 2, ouverte). Les parois d'APIC ne sont pas des plans de symétrie pour l'écoulement qui les longe.**
+Une bulle centrée sur le coin d'un quart de cuve monte à 0,57–0,67 fois la vitesse de Davies et Taylor, la même dans la cuve entière à
+0,90 ([REMONTEE-S485](../validation/REMONTEE-S485.md)) : la reconstruction reflète les particules aux parois, la séparation, l'extrapolation
+et le transfert vers la grille non ; la calotte s'étale le long des parois. **Conséquence** : tout banc en quart ou demi-domaine (B10 depuis
+S393, son pincement, sa cavité, sa bulle) suppose une symétrie non éprouvée. Déclencheur : **avant de citer un chiffre d'un banc en quart
+comme celui de la scène entière** ; témoin à faire : B10 en domaine entier à 8 mailles (ADR-223 D1). Remède possible : des conditions
+miroirs dans chaque étage, ou les bancs en domaine entier.
+
+**A326 — S485, 2026-10-05 (sévérité 2, ouverte). La carte ne lance pas plus de 65 535 groupes par passe.** Les passes par particule
+(G2P, l'advection, le tri) sont des dispatchs à une dimension : au-delà d'environ 8,4 millions de particules (65 535 × 128), la carte
+échoue à la validation. La cuve entière de la remontée à R/dx = 6 (9,7 millions) ne passe pas ([REMONTEE-S485](../validation/REMONTEE-S485.md)
+§2). Déclencheur : **tout domaine de plus de 8 millions de particules** — la convergence de U, les grands domaines de K10. Remède : des
+dispatchs à deux dimensions (la reconstruction le fait déjà, S423) et l'indice linéaire reconstruit dans chaque noyau.
+

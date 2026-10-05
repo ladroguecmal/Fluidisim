@@ -5,7 +5,7 @@
 suites datées ; l'état est lu par mots sur la dernière suite qui tranche (voir l'outil). Les entrées plus anciennes, au tableau
 général du registre, ne sont pas lues ici.
 
-**39 entrées lues — 23 ouvertes, 16 closes.** Sévérité : 1 = refonte d'architecture si découvert
+**41 entrées lues — 25 ouvertes, 16 closes.** Sévérité : 1 = refonte d'architecture si découvert
 tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 
 ## Ouvertes
@@ -34,6 +34,8 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A314 | 2 | S323 | La surface d'APIC dépend de l'arrangement de ses particules | — |
 | A319 | 2 | S351 | « Rétrécir ou détruire un domaine perturbatif est visuellement gratuit » n'a jamais été mesuré | — |
 | A323 | 2 | S409 | Au pas long, la cuve fermée gagne de l'énergie | — |
+| A325 | 2 | S485 | Les parois d'APIC ne sont pas des plans de symétrie pour l'écoulement qui les longe | — |
+| A326 | 2 | S485 | La carte ne lance pas plus de 65 535 groupes par passe | — |
 | A320 | 3 | S369 | Sous une houle raide, une perturbation de δ croît | S443–S445 : la bascule des défauts (S443) fait du mode relatif la production ; A320 l'y accompagne, plafonnée (ADR-213 D2), sa limite écrite (MER-S369 §9–11) ; rien en … |
 
 ## Closes

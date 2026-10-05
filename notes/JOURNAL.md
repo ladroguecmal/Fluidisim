@@ -164,3 +164,12 @@ R/dx ≥ 6 dépasse la carte (> 65 535 groupes). B10 à 24 mailles arrivé (pinc
 vu par le banc). Maillons **0** — 7.4 avance (la vitesse terminale tenue). Suivant : S486 — **la revue de méthode** (ADR-222 D4) et le lot
 des registres, puis les dispatchs à deux dimensions et la convergence de U.
 
+## S486 — 2026-10-05 — la première revue de méthode ; le lot des registres
+
+**Entrée.** En autonomie (ADR-222 D4). **Fait** : [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md) — neuf frictions de S481–S485
+relues, chacune sa suite : trois protections nouvelles (un montage simplifié s'éprouve contre l'entier, et un modèle neuf dans une scène ;
+un diagnostic s'éprouve à sa naissance ; au-delà du temps de divergence, des statistiques), deux pièges (les échappements dans un heredoc —
+la session y est tombée en les écrivant ; FXC), un essai du cœur (`air_pocket_centroid_is_the_bubble_centre_s486`, qui aurait vu le centre
+faux de S479). **Lot** : feuille de route, A325 (les parois d'APIC ne sont pas des symétries : B10 en quart concerné), A326 (la carte bornée
+à 8 M particules). Maillons **1**. Suivant : **S487 — les dispatchs à deux dimensions** (A326), puis la convergence de U en cuve entière.
+
