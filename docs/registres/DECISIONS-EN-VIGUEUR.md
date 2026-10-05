@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**223 ADR** — actée : 172, proposée : 49, rétractée en partie : 2.
+**224 ADR** — actée : 173, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -232,5 +232,6 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 |
-| [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 |  |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 |
+| [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 |
+| [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 |  |

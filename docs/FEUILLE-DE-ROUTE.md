@@ -357,6 +357,8 @@ cours), la liste à 100 % (ADR-218). **S478–S480** : K2 conçue (ADR-220), K2-
 ADR-222, la méthode se révise elle-même — les calculs hors de la session, la référence APIC 3D sur les cœurs, le banc de non-régression.
 **S484–S486** : K2-3, la remontée d'une grosse bulle — l'air conservé, cuve entière à 0,90 de Davies et Taylor (A325 : le quart de cuve
 n'est pas une symétrie ; A326 : la carte bornée à 8 M particules) ; la première revue de méthode (ADR-223).
+**S487–S491** : A326 levée pour les particules ; K2-4, les gouttes (A312 non levée : la couronne suit la vitesse d'éjection) ; **5.3 validée**
+(le débordement vers l'extérieur) ; 6.5 avancée (A327 : le mur aligné sur la grille) ; la deuxième revue (ADR-224) ; `eveil.py`.
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Vingt et une, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
+Vingt-quatre, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -25,6 +25,8 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Critère et prédiction s'écrivent avant la mesure ; un seuil ne se relève jamais pour faire passer ; un fait mesuré et son explication se publient séparément | L177 | — |
 | **en construisant l'instrument** | Un instrument s'éprouve sur un cas de réponse connue, et se réépreuve quand ce qu'il mesure s'améliore ; deux représentations se comparent à frontière et point de fonctionnement égaux | L360, L368 | — |
 | | Une grandeur de diagnostic (centre, volume, débit) s'éprouve à sa naissance par un essai du cœur sur un cas de réponse connue | L375 | essai `air_pocket_centroid_is_the_bubble_centre_s486` |
+| | Une valeur attendue se calcule dans l'essai (la formule, puis la tolérance), jamais en dur depuis un calcul de tête | L378 | — |
+| | Un garde-fou nomme ce qu'il autorise (une liste explicite), il ne le déduit pas d'une propriété voisine | L379 | — |
 | | Le compilateur est dans la boucle : une identité flottante du source n'est pas celle du binaire, carte graphique comprise — la vérifier sur la cible | L345, L346 | — |
 | **en lançant** | Un binaire ne s'exécute qu'après une compilation **réussie** et lue : `cargo run`, ou code de sortie vérifié, jamais une sortie filtrée | L362 | zéro avertissement de construction : un avertissement neuf se voit |
 | | Une revue visuelle part avec ses options explicites (`--meilleur`) ; deux rendus se comparent à horizon forcé | L349, A301 | — |
@@ -34,7 +36,9 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Jamais `Get-Content` ni `Set-Content` de Windows PowerShell sur un fichier du dépôt — il lit en ANSI ; l'outil d'édition, ou Python en UTF-8 | S301 | encodage |
 | | Une note à un ADR s'**ajoute** ; écrire le fichier entier avec la seule note l'efface (ADR-005, de S35 à S401) | L373 | un ADR commence par son titre |
 | | Une liste qu'il faut penser à tenir se confie à un outil : décomptes, plafonds, fichiers produits | L349 | décompte, plafonds, fichiers produits |
+| | Une édition par script vérifie toutes ses ancres avant d'écrire, et s'ancre sur une ligne courte | L380 | — |
 | **en choisissant la suite** | Un blocage hérité se vérifie dans le code avant d'être contourné ou tranché ; un ordre nomme la dépendance qu'il protège | L176, L243, L343 | — |
+| | Avant de déclarer un remède physique, son ordre de grandeur à l'échelle de la scène : un remède qui n'y pèse pas n'est pas déclaré | L377 | — |
 
 Les contrôles sont ceux de `python outils/etat_projet.py --check`, sauf les avertissements, qui se
 lisent à la construction.

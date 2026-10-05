@@ -6497,3 +6497,23 @@ publiés compris. Une grandeur de diagnostic s'éprouve à sa naissance sur un c
 **S485 — le rejeu.** La carte et la référence coïncident au chiffre à 0,05 s puis divergent ; le critère « à 5 % sur 0,4 s » était mal
 posé. Au-delà du temps de divergence, on compare des statistiques (ADR-223 D3).
 
+## L377
+
+**S488–S489 — Taylor–Culick.** Déclarée comme suite pour A312 sans calculer l'ordre de grandeur : à l'échelle de B10, ≈ 0,4 m/s contre une
+éjection de plusieurs m/s. Défaite à la session suivante ([ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md) D1).
+
+## L378
+
+**S489 (et S378) — le seuil écrit à la main.** 100 000 ml attendus pour ≈ 27 500 ; en S378, une erreur d'arithmétique du critère. La valeur
+attendue se calcule dans l'essai (ADR-224 D2).
+
+## L379
+
+**S487 — le garde-fou trop large.** L'assertion des dispatchs à deux dimensions ne vérifiait que la taille du groupe : un noyau de faces
+aurait calculé faux en silence. Un garde-fou nomme ce qu'il autorise (ADR-224 D3).
+
+## L380
+
+**S490 — l'édition à moitié appliquée.** Un script ancré sur un texte coupé autrement à la ligne : une partie écrite, l'autre non. Toutes les
+ancres d'abord, l'écriture ensuite (ADR-224 D4).
+

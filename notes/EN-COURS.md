@@ -62,28 +62,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S490 — **terminée**. En autonomie, **6.5 — un décor fixe qui perce la surface, éprouvé comme tel** (la liste : « Manque un
-décor qui perce la surface »). 9.5 et 9.7 écartés pour cette session : ils ouvrent des questions de conception (le consommateur réseau des
-événements, ADR-056 ; la graine de condensation, ADR-022).
+Session : S491 — **terminée**. « Continue en pure autonomie » : la machine se met en veille, l'utilisateur n'est pas toujours là pour
+relancer. **La deuxième revue de méthode** (ADR-222 D4) **et le lot des registres**.
 
-**Ce que la session fait.** Une cloison fixe au milieu d'une cuve de δ 3D (référence CPU, mode linéaire, `configure_with_floating_solid` :
-le solide perce le couvercle), du fond jusqu'au-dessus de la surface : (1) au repos, le repos au bit ; (2) une seiche dans la moitié
-gauche : la moitié droite reste au repos (aucune fuite à travers le décor) ; la fréquence de la demi-cuve contre la dispersion linéaire,
-`ω² = g·k·tanh(k·h)`, `k = π/L_gauche`.
-
-**Critères, écrits avant.** (1) repos au bit ; (2) la moitié droite sous 10⁻⁶ m pendant trois périodes ; (3) la période de la demi-cuve
-à 3 % de la théorie ; (4) si la configuration refuse un solide posé sur le fond, le dire (une cloison suspendue avec un jour au fond n'est
-pas la même épreuve). 6.5 validée si (1)–(3) tiennent : le décor fixe immergé (S329, S358) et le perçage (S332) sont déjà reçus.
+**Critères, écrits avant.** (1) la machine tenue éveillée sans rien régler ; (2) chaque friction de S486–S490 reçoit sa suite (ADR-224) ;
+(3) le lot fait, `--check` à 0.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'essai de la cloison ; (1)–(4).
-- [x] **P3** — preuve ; 6.5 ; rituel.
+- [x] **P1** — `outils/eveil.py`, lancé hors de la session (14 h) ; boussole, mémoire.
+- [x] **P2** — ADR-224 : D1 l'ordre de grandeur d'un remède avant de le déclarer, D2 une valeur attendue calculée, D3 un garde-fou qui nomme,
+  D4 une édition par script qui vérifie toutes ses ancres d'abord ; METHODE (24), LECONS L377–L380, boussole, index.
+- [x] **P3** — le lot : feuille de route (S487–S491) ; rituel.
 
 ### Notes de reprise
-- **P2** — l'essai de la cloison (posée sur le fond : acceptée ; repos au bit). La cloison de deux mailles alignée sur la grille : la
-  projection dégradée au pas 307 (0,616 s), plafond 100 000 sans effet. Variantes : une maille, 0,37 % ; suspendue, 0,29 % et 0,85 mm à
-  droite ; paroi 1 µm en deçà du plan : 0,16 % ; 1 µm au-delà : l'échec ; milieu de maille (7,5 cm) : 0,27 %, droite 0. **A327.** L'essai
-  garde le milieu de maille ; le cas aligné, un essai ignoré.
-- **P3** — preuve DECOR-S490 ; A327 ; 6.5 (partielle, note) ; index ; journal.
+- **P2** — le script de la revue est tombé **dans D4 au moment de l'écrire** : il relisait METHODE depuis le disque pour la ligne D1 et
+  écrasait la version qui portait les trois autres ; vu au contrôle (`grep`), réappliqué. La règle tient : toutes les ancres d'abord, une
+  seule écriture par fichier.

@@ -11,13 +11,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : libre
-Battement        : 2026-10-06 01:19 +02:00
+Battement        : 2026-10-06 01:29 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : aucune
-Dernière session : S490 — 6.5 : un décor fixe qui perce la surface ; A327 ([journal](notes/JOURNAL.md)). Avant : S489 (5.3 validée : le débordement vers l'extérieur)
-Session suivante : **S491 — la revue de méthode** (ADR-223 §3 : les frictions de S486–S490) **et le lot des registres** (dû : le faire maintenant) ; puis **A327** (le mur aligné sur la grille : le couvercle en partie couvert, S334–S335) pour valider 6.5. **Sans attendre de « Continue »**
-Maillons        : 1 — S490 : 6.5 avancée sans être validée (A327)
-Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
+Dernière session : S491 — la machine éveillée ; la deuxième revue de méthode ; le lot ([journal](notes/JOURNAL.md)). Avant : S490 (6.5 : un décor fixe qui perce la surface)
+Session suivante : **S492 — A327 : le mur aligné sur la grille** (DECOR-S490 §3 ; l'essai ignoré `a_grid_aligned_wall_through_the_surface_a327_s490`) : trouver pourquoi la projection linéaire stagne quand la paroi d'un décor tombe sur un plan de la grille (premier suspect : le couvercle en partie couvert, S334–S335), corriger, faire passer l'essai ; puis 6.5 validée. **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée.
+Maillons        : 2 — S491 : méthode et outillage, aucun point de la liste
+Registres       : dernier lot S491 (ADR-213 D3) ; le prochain au plus tard en S494
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

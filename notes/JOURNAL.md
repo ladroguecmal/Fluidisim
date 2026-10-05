@@ -211,3 +211,12 @@ la paroi tombe exactement sur un plan de la grille (ou le dépasse d'un micromè
 par un essai ignoré. **6.5 reste partielle** (le cas courant d'un décor de jeu). Maillons **1**. Suivant : **S491 — la revue de méthode**
 (ADR-223 §3) et le lot des registres ; puis A327 (le couvercle en partie couvert).
 
+## S491 — 2026-10-06 — la machine éveillée ; la deuxième revue de méthode ; le lot
+
+**Entrée.** *« Continue en pure autonomie, fais attention, mon ordinateur se met en veille […] quand tu finis je ne suis pas toujours là
+pour te relancer »*. **Fait** : `outils/eveil.py` (la veille sur inactivité retenue par `SetThreadExecutionState`, rien de réglé, lancé hors
+de la session pour 14 h) ; les sessions s'enchaînent dans la séance. [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md) — six
+frictions de S486–S490 : l'ordre de grandeur d'un remède avant de le déclarer, une valeur attendue calculée dans l'essai, un garde-fou qui
+nomme ce qu'il autorise, une édition par script qui vérifie toutes ses ancres d'abord (le script de la revue y est tombé en l'écrivant ;
+vu, réappliqué). Lot : feuille de route. Maillons **2**. Suivant : **S492, A327** — le mur aligné sur la grille, pour valider 6.5.
+

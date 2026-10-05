@@ -51,7 +51,7 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 | écume | reprise, d'après les vidéos V2 et V3 | ADR-219 D5 |
 | hors périmètre | les eaux souterraines (5.11) | ADR-197 D4 |
 | air | poches adiabatiques (T2), jamais un solveur diphasique | ADR-015, ADR-220 |
-| revue | la première en S486 : un montage simplifié s'éprouve contre l'entier, un diagnostic à sa naissance, un écoulement instable en statistiques ; la prochaine en S491 | ADR-223 |
+| revue | S486 (ADR-223) : un montage simplifié s'éprouve contre l'entier, un diagnostic à sa naissance, un écoulement instable en statistiques ; S491 (ADR-224) : l'ordre de grandeur d'un remède avant de le déclarer, une valeur attendue calculée, un garde-fou qui nomme ; la prochaine en S496 | ADR-223, ADR-224 |
 | méthode | elle se révise elle-même toutes les cinq sessions ; une décision technique que la mesure contredit est remplacée sans demander ; à l'utilisateur : ambition, rendus, téléchargements, configuration de sa machine | ADR-222 |
 | structure | la boussole d'abord ; l'état dans les registres générés ; les calculs longs par `calcul.py` ; le rituel par `rituel.py` | ADR-221 |
 
