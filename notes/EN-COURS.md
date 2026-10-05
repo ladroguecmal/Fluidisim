@@ -62,20 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S491 — **terminée**. « Continue en pure autonomie » : la machine se met en veille, l'utilisateur n'est pas toujours là pour
-relancer. **La deuxième revue de méthode** (ADR-222 D4) **et le lot des registres**.
+Session : S492 — **en cours**. En autonomie, **A327 — le mur aligné sur la grille** ([DECOR-S490](../docs/validation/DECOR-S490.md) §3) :
+la projection linéaire de δ stagne quand la paroi d'un décor qui perce la surface tombe sur un plan de la grille (ou le dépasse d'un
+micromètre) ; un micromètre en deçà, tout tient.
 
-**Critères, écrits avant.** (1) la machine tenue éveillée sans rien régler ; (2) chaque friction de S486–S490 reçoit sa suite (ADR-224) ;
-(3) le lot fait, `--check` à 0.
+**Ce que la session fait.** Reproduire au plus court (l'essai ignoré de S490) ; regarder la matrice au pas qui stagne (diagonales,
+ouvertures des faces et du couvercle des colonnes contre la paroi) ; nommer le mécanisme ; corriger ; faire passer l'essai.
+
+**Entrées, et comment elles se vérifient.** L'essai `a_grid_aligned_wall_through_the_surface_a327_s490` (échec au pas 307) ; le témoin à un
+micromètre en deçà (passe). **Critères, écrits avant.** (1) le mécanisme nommé, chiffré au pas qui stagne ; (2) l'essai aligné passe (période
+à 3 %, aucune fuite) ; (3) les essais de δ passent, la non-régression tient ; (4) 6.5 validée si (2)–(3).
 
 ### Plan
 
-- [x] **P1** — `outils/eveil.py`, lancé hors de la session (14 h) ; boussole, mémoire.
-- [x] **P2** — ADR-224 : D1 l'ordre de grandeur d'un remède avant de le déclarer, D2 une valeur attendue calculée, D3 un garde-fou qui nomme,
-  D4 une édition par script qui vérifie toutes ses ancres d'abord ; METHODE (24), LECONS L377–L380, boussole, index.
-- [x] **P3** — le lot : feuille de route (S487–S491) ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — le mécanisme.
+- [ ] **P3** — la correction ; (2)–(3).
+- [ ] **P4** — preuve ; 6.5 ; rituel.
 
 ### Notes de reprise
-- **P2** — le script de la revue est tombé **dans D4 au moment de l'écrire** : il relisait METHODE depuis le disque pour la ligne D1 et
-  écrasait la version qui portait les trois autres ; vu au contrôle (`grep`), réappliqué. La règle tient : toutes les ancres d'abord, une
-  seule écriture par fichier.
