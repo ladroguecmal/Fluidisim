@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 01:09 +02:00
+JETON            : libre
+Battement        : 2026-10-06 01:19 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S490 — 6.5 : un décor fixe qui perce la surface**
-Dernière session : S489 — 5.3 validée : le débordement vers l'extérieur ([journal](notes/JOURNAL.md)). Avant : S488 (K2-4, premier temps : la nappe rompue en gouttes)
-Session suivante : **S490 — un point partiel proche de son périmètre** : 9.5 (le consommateur des événements prédits, confirmés ou rétractés), 9.7 (la condensation hors caméra) ou 6.5 (un décor qui perce la surface, éprouvé comme tel) — lire chacun dans la liste et son ADR, choisir celui dont le critère est le plus net, l'écrire avant ; ou K2-5 si le plan de complétion l'exige. **Sans attendre de « Continue »**
-Maillons        : 0 — S489 : 5.3 validée (la liste avance : 4 sur 120)
+Session en cours : aucune
+Dernière session : S490 — 6.5 : un décor fixe qui perce la surface ; A327 ([journal](notes/JOURNAL.md)). Avant : S489 (5.3 validée : le débordement vers l'extérieur)
+Session suivante : **S491 — la revue de méthode** (ADR-223 §3 : les frictions de S486–S490) **et le lot des registres** (dû : le faire maintenant) ; puis **A327** (le mur aligné sur la grille : le couvercle en partie couvert, S334–S335) pour valider 6.5. **Sans attendre de « Continue »**
+Maillons        : 1 — S490 : 6.5 avancée sans être validée (A327)
 Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
 ```
 

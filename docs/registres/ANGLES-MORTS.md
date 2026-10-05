@@ -4563,3 +4563,12 @@ miroirs dans chaque étage, ou les bancs en domaine entier.
 dispatchs à deux dimensions (la reconstruction le fait déjà, S423) et l'indice linéaire reconstruit dans chaque noyau.
 
 *Note du 2026-10-06, S487, sur A326* ([REMONTEE-S487](../validation/REMONTEE-S487.md)) : **levée pour les particules** — les dix noyaux par particule lancés en deux dimensions (9,7 M particules passent, non-régression au bit) ; **ouverte pour les faces, les mailles et les poches** (au-delà de 8,4 M faces) — une assertion les arrête désormais au lieu qu'ils calculent faux.
+
+**A327 — S490, 2026-10-06 (sévérité 2, ouverte). Un mur de décor aligné sur la grille fait échouer la projection linéaire de δ.** Une cloison
+qui perce la surface, posée sur le fond, dont la paroi tombe **exactement sur un plan de la grille** — ou le dépasse d'un micromètre — :
+la projection se dit dégradée à la demi-période d'une seiche (`Error::Convergence`, quel que soit le plafond d'itérations) ; un micromètre
+en deçà, ou en milieu de maille, tout tient (la période à 0,3 %, aucune fuite) ([DECOR-S490](../validation/DECOR-S490.md)). **Conséquence** :
+un mur de décor aligné sur la grille — le cas courant — n'est pas sûr dans δ ; la liste 6.5 reste partielle. Déclencheur : **avant tout décor
+de scène dans δ** (K3, la côte ; K7, les contenants). Premier suspect : le couvercle en partie couvert d'une colonne presque libre (S334–S335).
+Reproduction : `cargo test -p water-core --release --offline s490 -- --ignored`.
+

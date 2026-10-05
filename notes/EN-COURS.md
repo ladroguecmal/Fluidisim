@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S490 — **en cours**. En autonomie, **6.5 — un décor fixe qui perce la surface, éprouvé comme tel** (la liste : « Manque un
+Session : S490 — **terminée**. En autonomie, **6.5 — un décor fixe qui perce la surface, éprouvé comme tel** (la liste : « Manque un
 décor qui perce la surface »). 9.5 et 9.7 écartés pour cette session : ils ouvrent des questions de conception (le consommateur réseau des
 événements, ADR-056 ; la graine de condensation, ADR-022).
 
@@ -78,7 +78,12 @@ pas la même épreuve). 6.5 validée si (1)–(3) tiennent : le décor fixe imme
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'essai de la cloison ; (1)–(4).
-- [ ] **P3** — preuve ; 6.5 ; rituel.
+- [x] **P2** — l'essai de la cloison ; (1)–(4).
+- [x] **P3** — preuve ; 6.5 ; rituel.
 
 ### Notes de reprise
+- **P2** — l'essai de la cloison (posée sur le fond : acceptée ; repos au bit). La cloison de deux mailles alignée sur la grille : la
+  projection dégradée au pas 307 (0,616 s), plafond 100 000 sans effet. Variantes : une maille, 0,37 % ; suspendue, 0,29 % et 0,85 mm à
+  droite ; paroi 1 µm en deçà du plan : 0,16 % ; 1 µm au-delà : l'échec ; milieu de maille (7,5 cm) : 0,27 %, droite 0. **A327.** L'essai
+  garde le milieu de maille ; le cas aligné, un essai ignoré.
+- **P3** — preuve DECOR-S490 ; A327 ; 6.5 (partielle, note) ; index ; journal.

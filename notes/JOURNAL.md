@@ -202,3 +202,12 @@ la sauvegarde empreinte l'arête ; 52 essais de V, les anciens au bit. **5.3 val
 Suivant : un autre point partiel proche de son périmètre (9.5, le consommateur des événements prédits ; 9.7, la condensation hors caméra ;
 6.5, un décor qui perce la surface), ou K2-5 selon le plan.
 
+## S490 — 2026-10-06 — 6.5 : un décor fixe qui perce la surface ; A327
+
+**Entrée.** En autonomie (9.5, 9.7 écartés : questions de conception ouvertes). **Fait** ([preuve](../docs/validation/DECOR-S490.md)) : une
+cloison posée sur le fond, qui perce la surface de δ (référence CPU, linéaire) ; un essai et ses variantes. **Mesuré** : repos au bit ; la
+moitié droite nulle au bit (aucune fuite) ; la seiche de la demi-cuve à 0,16–0,37 % de `ω² = g·k·tanh(k·h)`. **Trouvé : A327** — un mur dont
+la paroi tombe exactement sur un plan de la grille (ou le dépasse d'un micromètre) fait échouer la projection à la demi-période ; reproduit
+par un essai ignoré. **6.5 reste partielle** (le cas courant d'un décor de jeu). Maillons **1**. Suivant : **S491 — la revue de méthode**
+(ADR-223 §3) et le lot des registres ; puis A327 (le couvercle en partie couvert).
+

@@ -2334,3 +2334,106 @@ fn second_order_advection_stops_the_ftcs_growth_s391() {
     assert!(corrected < 0.5, "le mode croît encore : ×{corrected}");
     assert!(!volume(8, 4, 6, 0.25, 9.81).0.advection_correction());
 }
+
+/// La distance signée d'une cloison `|x − xc| ≤ e`, toute la largeur, de `z0` à `z1`, aux nœuds d'une grille `nx × ny × nz`.
+fn noeuds_cloison(nx: usize, ny: usize, nz: usize, dx: f64, xc: f64, e: f64, z0: f64, z1: f64) -> Vec<f32> {
+    let mut out = Vec::with_capacity((nx + 1) * (ny + 1) * (nz + 1));
+    for k in 0..=nz {
+        for _j in 0..=ny {
+            for i in 0..=nx {
+                let (x, z) = (i as f64 * dx, k as f64 * dx);
+                let q = [(x - xc).abs() - e, (z - 0.5 * (z0 + z1)).abs() - 0.5 * (z1 - z0)];
+                let dehors = (q[0].max(0.).powi(2) + q[1].max(0.).powi(2)).sqrt();
+                out.push((dehors + q[0].max(q[1]).min(0.)) as f32);
+            }
+        }
+    }
+    out
+}
+
+/// **S490 (liste 6.5) — un décor fixe qui perce la surface, éprouvé comme tel.** Une cuve de 2,4 m sur 0,8 m d'eau, une cloison fixe de
+/// trois mailles au milieu (sa paroi en milieu de maille), du fond jusqu'au-dessus du couvercle. (1) Au repos, le repos au bit. (2) Une seiche dans la moitié gauche
+/// (`η = a·cos(π·x/L)`) : la moitié droite reste au repos — aucune eau ne traverse le décor. (3) La période de la demi-cuve contre la
+/// dispersion linéaire, `ω² = g·k·tanh(k·h)`, à 3 %.
+#[test]
+fn a_fixed_wall_through_the_surface_splits_the_tank_s490() {
+    let (nx, ny, nz, dx) = (48usize, 4usize, 16usize, 0.05f32);
+    // La cloison coupe les mailles (sa paroi en milieu de maille) ; alignée sur la grille, voir l'essai suivant (A327).
+    let (h, xc, e) = (nz as f64 * dx as f64, 1.2f64, 0.075f64);
+    // Diagnostic S490 : `CLOISON_Z0` (bas de la cloison), `CLOISON_E` (demi-épaisseur ; négative : aucune cloison).
+    let z0: f64 = std::env::var("CLOISON_Z0").ok().and_then(|v| v.parse().ok()).unwrap_or(-1.0);
+    let e: f64 = std::env::var("CLOISON_E").ok().and_then(|v| v.parse().ok()).unwrap_or(e);
+    let solide = noeuds_cloison(nx, ny, nz, dx as f64, xc, e, z0, h + 1.0);
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let d = Domain3 { nx, ny, nz, dx };
+    let config = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, d,
+        1000., 9.81, &vec![0.; nx * ny], &solide);
+    let mut v = match config {
+        Ok(v) => v,
+        Err(err) => panic!("la cloison posée sur le fond est refusée : {err:?}"),
+    };
+    // (1) Le repos.
+    v.set_surface(&vec![h as f32; nx * ny]).unwrap();
+    for pas in 0..50 {
+        v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(v.surface().iter().all(|x| x.to_bits() == (h as f32).to_bits()), "repos, pas {pas}");
+    }
+    // (2) et (3) La seiche de la moitié gauche : les colonnes d'eau à gauche de la cloison, `x < xc − e`.
+    let lg = xc - e;
+    let a = 0.01f64;
+    let k = core::f64::consts::PI / lg;
+    let eta0: Vec<f32> = (0..nx * ny)
+        .map(|c| {
+            let x = ((c % nx) as f64 + 0.5) * dx as f64;
+            if x < lg { (h + a * (k * x).cos()) as f32 } else { h as f32 }
+        })
+        .collect();
+    v.set_surface(&eta0).unwrap();
+    let periode = 2. * core::f64::consts::PI / (9.81 * k * (k * h).tanh()).sqrt();
+    let (pas_us, n_pas) = (2000u64, (3.2 * periode / 0.002) as usize);
+    let (mut droite_max, mut serie) = (0f64, Vec::with_capacity(n_pas));
+    for p in 0..n_pas {
+        let r = match v.step_surface_linear(pas_us, 100_000, &Jobs) {
+            Ok(r) => r,
+            Err(err) => {
+                let s = v.surface();
+                let (lo, hi) = s.iter().fold((f32::MAX, f32::MIN), |m, x| (m.0.min(*x), m.1.max(*x)));
+                panic!("pas {p} ({:.3} s) : {err:?} ; surface de {lo} à {hi}", (p + 1) as f64 * 0.002);
+            }
+        };
+        if p < 3 {
+            println!("S490 : pas {p}, {} itérations", r.iterations);
+        }
+        let s = v.surface();
+        for c in 0..nx * ny {
+            let x = ((c % nx) as f64 + 0.5) * dx as f64;
+            if x > xc + e {
+                droite_max = droite_max.max((s[c] as f64 - h).abs());
+            }
+        }
+        serie.push(((p + 1) as f64 * 0.002, s[0] as f64 - h));
+    }
+    // La période : les passages par zéro vers le bas de la colonne du bord gauche.
+    let mut passages = Vec::new();
+    for w in serie.windows(2) {
+        if w[0].1 > 0. && w[1].1 <= 0. {
+            passages.push(w[0].0 + (w[1].0 - w[0].0) * w[0].1 / (w[0].1 - w[1].1));
+        }
+    }
+    let mesuree = (passages[passages.len() - 1] - passages[0]) / (passages.len() - 1) as f64;
+    println!("S490 : periode {mesuree:.4} s contre {periode:.4} s (ecart {:.2e}), droite au pire {droite_max:e} m, {} passages",
+        (mesuree / periode - 1.).abs(), passages.len());
+    assert!(droite_max <= 1e-6, "de l'eau traverse la cloison : {droite_max}");
+    assert!((mesuree / periode - 1.).abs() <= 0.03, "période {mesuree} contre {periode}");
+}
+
+/// **S490 — A327, le défaut reproduit** : la même cloison, sa paroi **exactement sur un plan de la grille** (ou un micromètre au-delà) —
+/// la projection linéaire se dit dégradée à la demi-période de la seiche (`Error::Convergence`, pas 307), quel que soit le plafond
+/// d'itérations ; un micromètre en deçà, elle tient. Ignoré tant qu'A327 est ouverte : `cargo test -- --ignored s490`.
+#[test]
+#[ignore]
+fn a_grid_aligned_wall_through_the_surface_a327_s490() {
+    std::env::set_var("CLOISON_E", "0.05");
+    a_fixed_wall_through_the_surface_splits_the_tank_s490();
+}
+

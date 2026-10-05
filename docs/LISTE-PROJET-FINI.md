@@ -427,8 +427,9 @@ pas recopiée ici (L137).
 - [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**
-  depuis S358, découpe du cœur chargée telle quelle ([preuve](validation/LINEAIRE-GPU-S358.md) §2). Manque un décor
-  qui perce la surface, éprouvé comme tel.
+  depuis S358, découpe du cœur chargée telle quelle ([preuve](validation/LINEAIRE-GPU-S358.md) §2) ; **un décor qui perce la
+  surface, posé sur le fond** (S490) : repos au bit, aucune fuite, la seiche de la demi-cuve à 0,3 %
+  ([DECOR-S490](validation/DECOR-S490.md)). Manque **le mur aligné sur la grille** (A327 : la projection échoue).
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.
 - [ ] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *absent*.
