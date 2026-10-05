@@ -152,3 +152,15 @@ résolution, le quart de cuve, la diffusion d'APIC, le pas). **Trouvé** : le ce
 corrigé, référence et carte ; POCHES-AIR-S479 annotée. R/dx = 6 arrêté à 0,40 s (la trace suffisait ; le CPU va à B10 à 24 mailles,
 en cours). Maillons **2**. Suivant : **S485, K2-3b** — la remontée sur la carte, R/dx = 8 et 12, quart et cuve entière.
 
+## S485 — 2026-10-05 — K2-3b : la remontée lente attribuée
+
+**Entrée.** En autonomie, puis « continue ». **Fait** ([preuve](../docs/validation/REMONTEE-S485.md)) : la remontée sur la carte
+(`CAS=remontee`, cent fois plus vite que la référence). **Trouvé** : la bulle perdait son air — (a) les fragments résorbés emportaient leur
+part (l'air se partage désormais entre les seules poches gardées), (b) la calotte envahie par les particules plus vite que la pression ne
+réagissait (`RAPPEL_VOLUME_S` 0,1 → 0,02 s) ; référence et carte. **Mesuré** : air conservé à 0,3 % ; **cuve entière R/dx = 4 : U = 0,548
+m/s, × 0,90 de Davies–Taylor** ; le quart de cuve donnait × 0,57 à 0,67 — le montage de S484 était le défaut. Minnaert : 37,2 Hz, à 3 % de
+la valeur de cuve. **Manqué** : le rejeu de S484 sur la carte (les deux calculs divergent après 0,05 s). **Limite** : la cuve entière à
+R/dx ≥ 6 dépasse la carte (> 65 535 groupes). B10 à 24 mailles arrivé (pincement 2,024 √(R/g)). Empreintes réinscrites (changement voulu,
+vu par le banc). Maillons **0** — 7.4 avance (la vitesse terminale tenue). Suivant : S486 — **la revue de méthode** (ADR-222 D4) et le lot
+des registres, puis les dispatchs à deux dimensions et la convergence de U.
+

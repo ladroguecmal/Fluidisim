@@ -59,3 +59,5 @@ trois millions de particules, est en cours).
 - Le mode relatif (B dans la bande) refuse les poches pour l'instant.
 
 *Note corrective du 2026-10-05 (S484)* : le centre des poches était divisé par leur volume entier (mailles d'eau voisines comprises) et tiré vers l'origine d'un facteur ≈ 0,8 ; la remontée « 0,258 → 0,300 m » ci-dessus en est faussée (la bulle partait de 0,30 m). Corrigé ; voir [REMONTEE-S484](REMONTEE-S484.md).
+
+*Note du 2026-10-05 (S485)* : **B10 à `D/dx` = 24** (critère 4 bis), arrivé : pincement à 2,024 √(R/g) (2,084 à 16 mailles), la bulle 0,328 D³ au plus, 0,243 à la fin, pression de 76,6 à 160,5 kPa. **La grande cuve** (S480) : 47,84 Hz contre 42,22 de Minnaert, rapport 1,133 — avec le rappel de 0,1 s et le partage de l'air de l'époque ; la bulle de la petite cuve, avec les règles de S485, oscille à 37,2 Hz (à 3 % de la valeur corrigée de la cuve). Voir [REMONTEE-S485](REMONTEE-S485.md).

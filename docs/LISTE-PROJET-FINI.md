@@ -450,7 +450,9 @@ pas recopiée ici (L137).
   (42,47 Hz contre 42,50) ; `--v1` 60 s stable avec poches ([POCHES-CARTE-S481](validation/POCHES-CARTE-S481.md)) — au prix de la
   multigrille (71 ms contre 16,7 par pas) — **levé en S482** : les poches dans la multigrille, 15,55 ms contre 15,33 sans
   ([COUT-POCHES-S482](validation/COUT-POCHES-S482.md)). **La vitesse terminale, S484** : 56 % de Davies et Taylor à R/dx = 6
-  ([REMONTEE-S484](validation/REMONTEE-S484.md)), à attribuer. Manquent la vitesse terminale juste, la fragmentation, C13.
+  ([REMONTEE-S484](validation/REMONTEE-S484.md)) — **attribuée en S485** : l'air se perdait, et le quart de cuve n'est pas une
+  symétrie ; **cuve entière, U = 0,90 de Davies et Taylor** ([REMONTEE-S485](validation/REMONTEE-S485.md)). Manquent la convergence
+  en maille de U, la fragmentation, C13.
 - [ ] **7.5 Air comprimé, vide, eau dans le vide** (ADR-015) — *absent*.
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*. L'évaporation et le gel des contenants, par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S485 — **en cours**. En autonomie, **K2-3b — attribuer la remontée lente** de S484 ([REMONTEE-S484](../docs/validation/REMONTEE-S484.md)
+Session : S485 — **terminée**. En autonomie, **K2-3b — attribuer la remontée lente** de S484 ([REMONTEE-S484](../docs/validation/REMONTEE-S484.md)
 §4 : 0,338 m/s contre 0,603 de Davies et Taylor à R/dx = 6).
 
 **Ce que la session fait.** Un cas `CAS=remontee` du banc `--apic3d-poches` : la même cuve que `apic3d_remontee` (quart ou entière),
@@ -81,7 +81,7 @@ retrouver 0,338 m/s à 5 % — sinon la carte ne mesure pas la même chose, et c
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `CAS=remontee` sur la carte ; le rejeu de S484 (1).
 - [x] **P3** — résolution, cuve, pas (2), (3).
-- [ ] **P4** — preuve ; rituel.
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2** — `CAS=remontee` : à t = 0,05 s la carte donne la référence de S484 au chiffre (z 0,1182, V 2,4777·10⁻⁴) ; sur 0,4 s elle
@@ -95,3 +95,4 @@ retrouver 0,338 m/s à 5 % — sinon la carte ne mesure pas la même chose, et c
   bulle qui les longe). La cuve entière à R/dx ≥ 6 dépasse la carte (plus de 65 535 groupes par passe au-delà de ≈ 8 M particules).
   Minnaert (S479, rappel 0,02) : 37,2 Hz — 0,89 de l'eau infinie, à 3 % de la valeur corrigée de la cuve (38,4). Empreintes de
   non-régression réinscrites (le changement voulu ; détecté par le banc : 079c9a99… au lieu de dc06f28c…).
+- **P4** — preuve REMONTEE-S485 ; 7.4 ; POCHES-AIR-S479 (B10 à 24 mailles, la grande cuve) ; index ; journal.
