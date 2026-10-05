@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 00:54 +02:00
+JETON            : libre
+Battement        : 2026-10-06 01:07 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S489 — 5.3 : le débordement vers l'extérieur (V)**
-Dernière session : S488 — K2-4, premier temps : la nappe rompue en gouttes ([journal](notes/JOURNAL.md)). Avant : S487 (les dispatchs à deux dimensions)
-Session suivante : **S489 — K2-4b : la rétraction du bord d'une nappe** (Taylor–Culick, `v = √(2σ/(ρ·h))`) : l'épaisseur locale estimée par les particules d'une maille sans eau autour ; le bord d'une nappe plus mince qu'une maille freiné vers le corps de l'eau ; critère A312 — la couronne de B10 à 8, 12, 16 mailles à 15 % entre elles ; puis contre une mesure publiée de la gerbe d'une sphère (le jet de Worthington, la couronne). Si la troisième session sur A312 n'avance pas la liste, le dire et choisir dans le plan de complétion. **Sans attendre de « Continue »**
-Maillons        : 3 — S488 : un modèle neuf (les gouttes), A312 non levée ; justifié : la cause nommée désigne un remède construisible (Taylor–Culick)
+Session en cours : aucune
+Dernière session : S489 — 5.3 validée : le débordement vers l'extérieur ([journal](notes/JOURNAL.md)). Avant : S488 (K2-4, premier temps : la nappe rompue en gouttes)
+Session suivante : **S490 — un point partiel proche de son périmètre** : 9.5 (le consommateur des événements prédits, confirmés ou rétractés), 9.7 (la condensation hors caméra) ou 6.5 (un décor qui perce la surface, éprouvé comme tel) — lire chacun dans la liste et son ADR, choisir celui dont le critère est le plus net, l'écrire avant ; ou K2-5 si le plan de complétion l'exige. **Sans attendre de « Continue »**
+Maillons        : 0 — S489 : 5.3 validée (la liste avance : 4 sur 120)
 Registres       : dernier lot S486 (ADR-213 D3) ; le prochain au plus tard en S489
 ```
 

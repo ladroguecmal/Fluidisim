@@ -192,3 +192,13 @@ hauteur est celle de la vitesse d'éjection du bord ; ce qui manque est la rétr
 Maillons **3** — justifié : K2-4 est la suite du plan, et la cause, désormais nommée, désigne un remède construisible. Suivant : **S489,
 K2-4b — la rétraction de Taylor–Culick**, sous-maille.
 
+## S489 — 2026-10-06 — 5.3 validée : le débordement vers l'extérieur
+
+**Entrée.** « continue » ; **la suite changée par la règle des maillons** (trois) : Taylor–Culick écartée pour A312 (à l'échelle de B10,
+la rétraction ≈ 0,4 m/s ne pèse pas devant l'éjection) ; un lot qui fait avancer la liste. **Fait** ([preuve](../docs/validation/DEBORDEMENT-S489.md)) :
+`Flow::Spill` dans V — un contenant plein ne refuse plus ce qui lui arrive, l'excédent sort vers l'extérieur ; l'hôte lit le déversé et
+sa position. **Mesuré** : déversé = reçu au millilitre à chaque pas, bilan fermé ; la pluie sur un plein déborde (320 000 ml l'heure) ;
+la sauvegarde empreinte l'arête ; 52 essais de V, les anciens au bit. **5.3 validée — 4 points sur 120.** Maillons **0** (la liste avance).
+Suivant : un autre point partiel proche de son périmètre (9.5, le consommateur des événements prédits ; 9.7, la condensation hors caméra ;
+6.5, un décor qui perce la surface), ou K2-5 selon le plan.
+

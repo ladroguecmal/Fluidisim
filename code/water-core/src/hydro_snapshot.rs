@@ -52,6 +52,7 @@ fn valid_edge(e: &Opening, nodes: usize) -> bool {
         Flow::Weir { width_mm } => width_mm,
         Flow::Pump { max_flow_mlps, shutoff_head_um, .. } => if shutoff_head_um <= 0 { -1 } else { max_flow_mlps },
         Flow::Rain { catchment_mm2 } => if e.to != Some(e.from) { -1 } else { catchment_mm2 },
+        Flow::Spill => if e.to.is_none() { 0 } else { -1 },
     };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
@@ -111,6 +112,7 @@ impl<'a> Baseline<'a> {
                     for x in outlet_um { h.write_u64(x as u64); }
                 }
                 Flow::Rain { catchment_mm2 } => { h.write_u8(3); h.write_u64(catchment_mm2 as u64); }
+                Flow::Spill => h.write_u8(4),
             }
             for x in e.position_um { h.write_u64(x as u64); }
             h.write_u32(e.discharge.to_bits());

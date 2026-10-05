@@ -587,3 +587,89 @@ fn the_overflow_pool_under_rain_spills_the_rain_s378() {
     assert!(((h - h_attendu) / h_attendu).abs() < 0.01, "charge {h} contre {h_attendu}");
     assert!(((q_mesure - q) / q).abs() < 0.01, "débit {q_mesure} contre {q}");
 }
+
+/// Le débordement du nœud `n` vers l'extérieur, posé au bord (`position_um`).
+fn debordement(n: u16, position_um: [i64; 3]) -> Opening {
+    Opening { from: n, to: None, flow: Flow::Spill, position_um, discharge: 0.0, residue_nl: 0, control_pm: CONTROL_FULL }
+}
+
+/// **S489 (liste 5.3) — le débordement vers l'extérieur.** Une cuve haute (2 m, pleine) se vide par un orifice dans une cuve basse
+/// **pleine** ; sans débordement, le transfert est refusé (S227) ; avec, la cuve basse reste pleine et **déverse exactement ce qu'elle
+/// reçoit**, au millilitre, à chaque pas ; le bilan ferme : réseau + déversé = total.
+#[test]
+fn a_full_container_spills_exactly_what_it_receives_s489() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    for avec in [false, true] {
+        let mut nodes = [node(1_000_000, 1_000_000, 2_000_000), node(500_000, 500_000, 0)];
+        let mut edges = vec![Opening {
+            from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1_000 }, position_um: [0, 0, 2_000_000],
+            discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, control_pm: CONTROL_FULL,
+        }];
+        if avec {
+            edges.push(debordement(1, [500_000, 0, 1_000_000]));
+        }
+        let mut scratch = vec![0i64; edges.len()];
+        let (total, mut deverse) = (1_500_000i64, 0i64);
+        for _ in 0..100 {
+            let haut = nodes[0].volume_ml;
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+            let recu = haut - nodes[0].volume_ml;
+            assert_eq!(nodes[1].volume_ml, 500_000, "la cuve basse reste pleine");
+            if avec {
+                assert_eq!(scratch[1], recu, "déversé = reçu, au millilitre");
+                deverse += scratch[1];
+            } else {
+                assert_eq!(recu, 0, "sans débordement, le transfert est refusé (S227)");
+            }
+            assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml + deverse, total, "le bilan ferme");
+        }
+        if avec {
+            // Torricelli sous ≈ 1 m de charge : 0,62 · 10⁻³ m² · √(2 g) ≈ 2,75 l/s, ≈ 27,5 l en 10 s (la charge baisse un peu).
+            assert!((20_000..28_000).contains(&deverse), "la cuve haute s'est vidée par-dessus la basse : {deverse} ml");
+        }
+    }
+}
+
+/// **S489** — la pluie sur un contenant plein déborde de même ; un débordement vers un autre nœud est refusé (`Error::Domain`) ;
+/// la sauvegarde empreinte l'arête (deux configurations qui ne diffèrent que par elle ont des empreintes différentes).
+#[test]
+fn rain_on_a_full_container_spills_and_spill_targets_are_checked_s489() {
+    let table = prism(1_500_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(48_000_000, 48_000_000, 0)];
+    let mut edges = [pluie(0, 32_000_000, CONTROL_FULL), debordement(0, [0, 0, 1_500_000])];
+    let mut scratch = [0i64; 2];
+    let mut deverse = 0i64;
+    for _ in 0..36_000 {
+        step_meteo(&mut nodes, &mut edges, &shapes, DOWN, Meteo { pluie_mm_h: 10.0 }, SimTime(STEP_US), &mut scratch).unwrap();
+        assert_eq!(nodes[0].volume_ml, 48_000_000);
+        assert_eq!(scratch[1], scratch[0], "la pluie du pas déborde entière");
+        deverse += scratch[1];
+    }
+    assert!((deverse - 320_000).abs() <= 1, "une heure à 10 mm/h sur 32 m² : {deverse} ml");
+    let mut vers_noeud = [debordement(0, [0; 3])];
+    vers_noeud[0].to = Some(0);
+    assert_eq!(
+        step(&mut nodes, &mut vers_noeud, &shapes, DOWN, SimTime(STEP_US), &mut [0i64; 1]),
+        Err(Error::Domain)
+    );
+}
+
+/// **S489** — la sauvegarde empreinte le débordement : deux configurations qui ne diffèrent que par lui ont des empreintes
+/// différentes ; un débordement vers un nœud n'est pas une configuration valide.
+#[test]
+fn the_snapshot_fingerprints_the_spill_s489() {
+    use super::snapshot::Baseline;
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let nodes = [node(500_000, 1_000_000, 0)];
+    let sans = [orifice(0, None, 1_000, [0; 3])];
+    let avec = [orifice(0, None, 1_000, [0; 3]), debordement(0, [0, 0, 1_000_000])];
+    let a = Baseline::new(7, 1, &nodes, &sans, &shapes).unwrap().fingerprint();
+    let b = Baseline::new(7, 1, &nodes, &avec, &shapes).unwrap().fingerprint();
+    assert_ne!(a, b);
+    let mut vers_noeud = [debordement(0, [0; 3])];
+    vers_noeud[0].to = Some(0);
+    assert!(Baseline::new(7, 1, &nodes, &vers_noeud, &shapes).is_err());
+}

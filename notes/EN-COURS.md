@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S489 — **en cours**. En autonomie. **Changement de suite, par la règle des maillons** (trois) : la suite déclarée en S488
+Session : S489 — **terminée**. En autonomie. **Changement de suite, par la règle des maillons** (trois) : la suite déclarée en S488
 (Taylor–Culick pour A312) est écartée — à l'échelle de B10 (le mètre), la rétraction de Taylor–Culick (≈ 0,4 m/s pour une nappe d'un
 millimètre) est petite devant l'éjection (plusieurs m/s) ; elle ne fixerait pas la couronne. A312 attend une mesure publiée ou un verdict
 sur l'image (son déclencheur d'origine). **Le lot choisi fait avancer la liste : 5.3, le débordement vers l'extérieur** (V, ADR-010).
@@ -80,7 +80,11 @@ au millilitre près, reste plein, et la somme réseau + déversé égale le tota
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `Flow::Spill` ; essais (1)–(4).
-- [ ] **P3** — preuve ; 5.3 ; rituel.
+- [x] **P2** — `Flow::Spill` ; essais (1)–(4).
+- [x] **P3** — preuve ; 5.3 ; rituel.
 
 ### Notes de reprise
+- **P2** — `Flow::Spill` : l'étape 3 ne borne plus les arrivées d'un receveur qui déborde (la boucle en indices : une lecture du tableau
+  avant l'écriture, sans allocation) ; l'étape 5 envoie l'excédent par le débordement. Essais : déversé = reçu au ml, la pluie, la
+  sauvegarde, vers un nœud refusé ; 52 essais de V. (Un seuil d'essai faux — 100 000 ml pour ≈ 27 500 — corrigé.)
+- **P3** — preuve DEBORDEMENT-S489 ; **5.3 validée** (décompte 4 / 73 / 44) ; dépendances et tableau régénérés ; index ; journal.

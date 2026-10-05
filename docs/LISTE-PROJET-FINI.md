@@ -367,8 +367,10 @@ pas recopiée ici (L137).
 - [ ] **5.2 Géométrie réelle des contenants** : gravité dirigée, plans orientés, formes non
   convexes — *partiel* (S226, S228). Manquent la précision des grands volumes (A269) et les formes
   courbes cuites depuis les assets.
-- [ ] **5.3 Fuites, transferts et débordements entre contenants** — *partiel* : orifices et
-  déversoirs entre nœuds, arrivées collectives (S227). Manque le débordement vers l'extérieur.
+- [x] **5.3 Fuites, transferts et débordements entre contenants** — *validé* (S489) : orifices et
+  déversoirs entre nœuds, arrivées collectives (S227) ; **le débordement vers l'extérieur** (`Flow::Spill`) — un contenant plein
+  déverse exactement ce qu'il reçoit, au millilitre, la pluie comprise, le bilan fermé ; l'hôte lit le déversé et sa position
+  ([DEBORDEMENT-S489](validation/DEBORDEMENT-S489.md)). Un débordement *dans* un autre contenant passe par un déversoir au bord.
 - [ ] **5.4 Vannes et pompes** — *partiel* depuis S372 : une **commande** entière par arête, état répliqué et sauvegardé
   (WVST v2) ; la vanne, section ou largeur commandée — C12 à demi-ouverture à −0,10 % de l'analytique ; la **pompe** en
   réseau ouvert, courbe parabolique, clapet, à sec, similitude — à 0,025 % de l'intégrale analytique, barrage au
@@ -700,7 +702,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
-| 5. Volumes finis (V) | 12 | 1 | 6 | 5 |
+| 5. Volumes finis (V) | 12 | 2 | 5 | 5 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
@@ -709,7 +711,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **3** | **74** | **44** |
+| **total** | **121** | **4** | **73** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

@@ -115,6 +115,13 @@ pub enum Flow {
     /// horizontale : la pluie qui tombe dans l'ouverture d'un contenant finit dans son eau), l'exposition est la commande
     /// de l'arête (bâche entière : 0 ; demi-bâche : 500). Ne vide aucun nœud ; bornée par la place libre du receveur.
     Rain { catchment_mm2: i64 },
+    /// **Débordement** (S489, liste 5.3) : le trop-plein du nœud `from` **vers l'extérieur** (`to` vaut `None` ; vers un autre nœud,
+    /// le pas est refusé, `Error::Domain` — une chaîne de capacités n'est pas dans cette version). Quand le nœud reçoit, dans un pas,
+    /// plus que sa place libre (arêtes, pluie), l'excédent n'est plus refusé : il passe par-dessus le bord, par cette arête ; le nœud
+    /// finit plein. L'hôte lit le volume déversé dans `scratch` à l'indice de l'arête, et la position de l'arête lui dit où le
+    /// déposer (le sol, δ, la mer). La première arête de débordement d'un nœud, dans l'ordre du tableau, le porte (I-03). Sans
+    /// arête de débordement, le transfert est refusé comme avant (S227), au bit.
+    Spill,
 }
 
 /// **La météo du pas** (ADR-204 D4) : une entrée, fournie à l'identique à tous les participants (I-03) ; qui la calcule
@@ -334,7 +341,12 @@ pub fn step_meteo(
             Flow::Rain { catchment_mm2 } => {
                 if e.to != Some(e.from) { -1 } else { catchment_mm2 }
             }
+            // S489 : le débordement va dehors ; vers un nœud, refusé plus bas (`Error::Domain`).
+            Flow::Spill => 0,
         };
+        if matches!(e.flow, Flow::Spill) && e.to.is_some() {
+            return Err(Error::Domain);
+        }
         if e.from as usize >= nodes.len()
             || e.to.is_some_and(|t| t as usize >= nodes.len())
             || size < 0
@@ -353,6 +365,10 @@ pub fn step_meteo(
     // --- 2. Débit par arête, dans l'ordre du tableau (I-03).
     for (e, out) in edges.iter().zip(scratch.iter_mut()) {
         *out = 0;
+        // S489 : le débordement ne débite que l'excédent des arrivées (étape 5).
+        if matches!(e.flow, Flow::Spill) {
+            continue;
+        }
         // ADR-204 : la pluie, sans lecture de surface — intensité (mm/h → m/s) × ouverture (mm² → m²) × exposition.
         if let Flow::Rain { catchment_mm2 } = e.flow {
             if meteo.pluie_mm_h == 0.0 || e.control_pm == 0 {
@@ -432,7 +448,9 @@ pub fn step_meteo(
                     * head_m.powf(1.5)
                     * ouverture
             }
-            Flow::Pump { .. } | Flow::Rain { .. } => unreachable!("pompe et pluie ont leur propre calcul, plus haut"),
+            Flow::Pump { .. } | Flow::Rain { .. } | Flow::Spill => {
+                unreachable!("pompe, pluie et débordement ont leur propre calcul")
+            }
         };
         if !q_m3s.is_finite() {
             return Err(Error::NonFinite);
@@ -446,7 +464,10 @@ pub fn step_meteo(
     }
 
     // --- 3. Quantification avec report de reste, puis limiteur d'arrivée par arête.
-    for (e, want) in edges.iter_mut().zip(scratch.iter_mut()) {
+    for k in 0..edges.len() {
+        // S489 : le receveur déborde-t-il ? (une lecture du tableau, avant d'emprunter l'arête en écriture ; aucune allocation)
+        let deborde = edges[k].to.is_some_and(|t| edges.iter().any(|x| x.from == t && matches!(x.flow, Flow::Spill)));
+        let (e, want) = (&mut edges[k], &mut scratch[k]);
         let total_nl = (*want as i128) + (e.residue_nl as i128);
         if total_nl <= 0 {
             e.residue_nl = 0;
@@ -456,7 +477,8 @@ pub fn step_meteo(
         let mut ml = (total_nl / 1_000_000) as i64;
         if let Some(t) = e.to {
             let free = nodes[t as usize].capacity_ml - nodes[t as usize].volume_ml;
-            if ml > free {
+            // S489 : un receveur qui déborde ne borne pas ses arrivées — l'excédent sortira par son débordement (étape 5).
+            if ml > free && !deborde {
                 ml = free.max(0);
             }
         }
@@ -514,6 +536,11 @@ pub fn step_meteo(
             .map(|(_, ml)| *ml as i128).sum();
         let free = (node.capacity_ml - node.volume_ml) as i128;
         if asked <= free {
+            continue;
+        }
+        // S489 : un nœud qui déborde accepte tout ; l'excédent sort par sa première arête de débordement.
+        if let Some(k) = edges.iter().position(|e| e.from as usize == i && matches!(e.flow, Flow::Spill)) {
+            scratch[k] += (asked - free) as i64;
             continue;
         }
         let (mut cumulative, mut given) = (0i128, 0i128);
