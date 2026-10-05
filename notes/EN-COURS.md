@@ -62,37 +62,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S485 — **terminée**. En autonomie, **K2-3b — attribuer la remontée lente** de S484 ([REMONTEE-S484](../docs/validation/REMONTEE-S484.md)
-§4 : 0,338 m/s contre 0,603 de Davies et Taylor à R/dx = 6).
+Session : S486 — **en cours**. En autonomie, **la première revue de méthode** ([ADR-222](../docs/adr/ADR-222-la-methode-se-revise-elle-meme.md)
+D4, toutes les cinq sessions) **et le lot des registres** (dû en S486, ADR-213 D3).
 
-**Ce que la session fait.** Un cas `CAS=remontee` du banc `--apic3d-poches` : la même cuve que `apic3d_remontee` (quart ou entière),
-ensemencée par la référence, menée **par la carte seule** (elle suit la référence à 10⁻⁴, S481–S482, et va cent fois plus vite) ; le
-centre de la poche relu à chaque pas, la même droite. Puis les quatre causes de §4, une à une : la résolution (R/dx = 6, 8), le quart
-contre la cuve entière, le pas (1 et 2 ms).
+**Ce que la session fait.** Relire au journal les frictions de S481 à S485 — ce qui a coûté du temps ou fait refaire — et corriger
+METHODE (ses protections), la boussole (ses pièges), les outils, par un ADR. Puis le lot : la feuille de route, les angles morts nouveaux
+(sévérité 2 ou plus, ou bloquants), l'index.
 
-**Entrées, et comment elles se vérifient.** Le cas à R/dx = 6 en quart, 1 ms, rejoue d'abord S484 sur la carte : sa vitesse doit
-retrouver 0,338 m/s à 5 % — sinon la carte ne mesure pas la même chose, et c'est la première chose à dire.
-
-**Critères, écrits avant.** (1) le rejeu de S484 sur la carte à 5 % ; (2) chaque cause mesurée (U par résolution, par cuve, par pas) ;
-(3) U à 15 % de Davies–Taylor dans au moins une configuration résolue — ou la cause nommée, chiffrée, et la suite écrite.
+**Critères, écrits avant.** (1) chaque friction relue reçoit une suite écrite — une protection, un piège, un contrôle outillé, ou la raison
+de ne rien changer ; (2) au moins un contrôle outillé nouveau, qui aurait vu une des erreurs de S481–S485 ; (3) le lot fait, `--check` à 0.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `CAS=remontee` sur la carte ; le rejeu de S484 (1).
-- [x] **P3** — résolution, cuve, pas (2), (3).
-- [x] **P4** — preuve ; rituel.
+- [ ] **P2** — la revue : ADR-223 ; METHODE, boussole ; le contrôle nouveau.
+- [ ] **P3** — le lot des registres ; preuve ; rituel.
 
 ### Notes de reprise
-- **P2** — `CAS=remontee` : à t = 0,05 s la carte donne la référence de S484 au chiffre (z 0,1182, V 2,4777·10⁻⁴) ; sur 0,4 s elle
-  diverge (U = 0,440 contre 0,338, et elle accélère) — **critère (1) manqué** : deux calculs qui coïncident au départ s'écartent.
-- **P3** — **trouvé : la bulle perd son air.** (a) L'air d'une poche se partageait entre toutes les nouvelles, fragments d'une à sept
-  mailles compris, résorbés aussitôt — corrigé : entre les seules poches gardées (référence et carte). (b) La calotte qui se scinde :
-  les particules envahissent la poche haute (160 → 21 mailles en 30 ms, volume suivi inchangé) et elle se résorbe avec son air —
-  `RAPPEL_VOLUME_S` 0,1 → **0,02 s** : air conservé à 0,3 % sur 0,6 s. Mesure sur toutes les poches (centre pondéré). **Quart de cuve**
-  R/dx = 8 : U = 0,376 (× 0,61), R/dx = 6 : 0,414 (× 0,67), R/dx = 4 : 0,343 (× 0,57) ; **cuve entière R/dx = 4 : U = 0,548 m/s, × 0,90
-  de Davies–Taylor** — critère (3) tenu : le quart de cuve était le défaut (les parois d'APIC ne sont pas des plans de symétrie pour une
-  bulle qui les longe). La cuve entière à R/dx ≥ 6 dépasse la carte (plus de 65 535 groupes par passe au-delà de ≈ 8 M particules).
-  Minnaert (S479, rappel 0,02) : 37,2 Hz — 0,89 de l'eau infinie, à 3 % de la valeur corrigée de la cuve (38,4). Empreintes de
-  non-régression réinscrites (le changement voulu ; détecté par le banc : 079c9a99… au lieu de dc06f28c…).
-- **P4** — preuve REMONTEE-S485 ; 7.4 ; POCHES-AIR-S479 (B10 à 24 mailles, la grande cuve) ; index ; journal.
