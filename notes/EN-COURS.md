@@ -62,27 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S492 — **terminée**. En autonomie, **A327 — le mur aligné sur la grille** ([DECOR-S490](../docs/validation/DECOR-S490.md) §3) :
-la projection linéaire de δ stagne quand la paroi d'un décor qui perce la surface tombe sur un plan de la grille (ou le dépasse d'un
-micromètre) ; un micromètre en deçà, tout tient.
+Session : S493 — **en cours**. En autonomie, **6.5 sur la carte** : le δ linéaire de la carte (`Linear3`, S358) refuse un couvercle
+qui n'est pas entièrement ouvert ; un décor fixe qui perce la surface y manque.
 
-**Ce que la session fait.** Reproduire au plus court (l'essai ignoré de S490) ; regarder la matrice au pas qui stagne (diagonales,
-ouvertures des faces et du couvercle des colonnes contre la paroi) ; nommer le mécanisme ; corriger ; faire passer l'essai.
+**Ce que la session fait.** Le couvercle partiel d'un décor fixe porté sur la carte (la pression `ρg·η/max(a, plancher)` de S334, sans
+le dépôt ni le transfert d'une coque qui bouge) ; un banc `--lineaire-cloison` : la cloison de S490 (alignée, et en milieu de maille), la
+référence et la carte depuis le même état.
 
-**Entrées, et comment elles se vérifient.** L'essai `a_grid_aligned_wall_through_the_surface_a327_s490` (échec au pas 307) ; le témoin à un
-micromètre en deçà (passe). **Critères, écrits avant.** (1) le mécanisme nommé, chiffré au pas qui stagne ; (2) l'essai aligné passe (période
-à 3 %, aucune fuite) ; (3) les essais de δ passent, la non-régression tient ; (4) 6.5 validée si (2)–(3).
+**Critères, écrits avant.** (1) les bancs de S358 inchangés (couvercle plein : la valeur d'avant, au bit) ; (2) la carte suit la référence
+sur la cloison à 10⁻⁴ m (le critère de S358, `CRITERE_ETA`), alignée et en milieu de maille ; (3) la moitié droite sous 10⁻⁶ m sur la carte ;
+la période à 3 %. 6.5 validée si (1)–(3).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le mécanisme.
-- [x] **P3** — la correction ; (2)–(3).
-- [x] **P4** — preuve ; 6.5 ; rituel.
+- [ ] **P2** — le couvercle partiel sur la carte ; le banc ; (1)–(3).
+- [ ] **P3** — preuve ; 6.5 ; rituel.
 
 ### Notes de reprise
-- **P2** — diagnostic : divergence par maille ≈ 5·10⁻⁸ (mailles pleines) ; aucun `d·A·d ≤ 0` ; au pas refusé, résidu sous le seuil,
-  plancher atteint, divergence 2,97·10⁻⁵ avec max|u| = 1,1·10⁻⁴ m/s — **le point mort** de la seiche, pas la géométrie.
-- **P3** — premier remède (le plancher dans la mesure, 2D comprise) : six essais changés au bit — retiré ; second (la seule décision
-  finale de la 3D linéaire, au plancher d'arrondi) : 651 essais passent, le mur aligné passe (0,16 %).
-- **P4** — ADR-225 ; preuve A327-S492 ; A327 levée ; 6.5 (manque la carte) ; index ; journal.

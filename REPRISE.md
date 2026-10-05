@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 01:48 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 01:50 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S493 — 6.5 sur la carte**
 Dernière session : S492 — A327 réattribuée et levée ([journal](notes/JOURNAL.md)). Avant : S491 (la machine éveillée)
 Session suivante : **S493 — 6.5 sur la carte** : la cloison qui perce la surface dans le δ linéaire de la carte (LINEAIRE-GPU-S358 charge la découpe du cœur telle quelle) — la carte accepte-t-elle un solide qui perce le couvercle ? la seiche de la demi-cuve, aucune fuite, contre la référence ; ADR-225 porté si la carte refuse au point mort. 6.5 validée si la carte tient. **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée.
 Maillons        : 0 — S492 : A327 levée, le décor aligné sur la grille tient (6.5 avance)
