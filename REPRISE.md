@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-10-05 23:48 +02:00
+Battement        : 2026-10-05 23:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : **S486 — la revue de méthode et le lot des registres**
 Dernière session : S485 — K2-3b : la remontée lente attribuée ([journal](notes/JOURNAL.md)). Avant : S484 (K2-3, premier temps : la remontée d'une grosse bulle)

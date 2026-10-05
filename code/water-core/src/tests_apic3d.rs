@@ -1577,3 +1577,26 @@ fn air_pocket_holds_a_bubble_s479() {
     assert!(gauge.is_finite() && gauge > 0. && gauge < 4000., "pression relative {gauge}");
     assert_eq!(a.particle_count(), seeded);
 }
+
+/// **S486 (ADR-223, la revue de méthode)** — une grandeur de diagnostic s'éprouve sur un cas de réponse connue : le centre d'une bulle
+/// sphérique au repos, **au premier pas**, est son centre géométrique à 0,1 maille près. Le défaut de S479 (le centre divisé par le volume
+/// entier, mailles d'eau voisines comprises) le plaçait à 0,8 fois sa distance à l'origine — vu seulement en S484.
+#[test]
+fn air_pocket_centroid_is_the_bubble_centre_s486() {
+    let (n, nz, dx) = (16usize, 16usize, 0.025f32);
+    let (mut a, mut arena) = apic(n, n, nz, dx, n * n * nz * 8);
+    let (h, r, c) = (0.3f32, 0.06f32, [0.2f32, 0.2, 0.15]);
+    a.seed(&|p| {
+        let e = [p[0] - c[0], p[1] - c[1], p[2] - c[2]];
+        p[2] < h && e[0] * e[0] + e[1] * e[1] + e[2] * e[2] >= r * r
+    })
+    .unwrap();
+    a.enable_air_pockets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    a.step(500).unwrap();
+    let mut poches = [AirPocket::default(); 4];
+    assert_eq!(a.air_pockets(&mut poches), 1, "une poche");
+    for m in 0..3 {
+        let e = (poches[0].centroid[m] - c[m] as f64).abs();
+        assert!(e < 0.1 * dx as f64, "centre, axe {m} : {} contre {} (écart {e})", poches[0].centroid[m], c[m]);
+    }
+}
