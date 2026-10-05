@@ -62,38 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S488 — **terminée**. En autonomie, **K2-4 — la nappe et sa rupture** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
-ADR-014 §4, **A312**), dans la référence (ADR-213 : la référence d'abord, la carte en K2-5).
+Session : S489 — **en cours**. En autonomie. **Changement de suite, par la règle des maillons** (trois) : la suite déclarée en S488
+(Taylor–Culick pour A312) est écartée — à l'échelle de B10 (le mètre), la rétraction de Taylor–Culick (≈ 0,4 m/s pour une nappe d'un
+millimètre) est petite devant l'éjection (plusieurs m/s) ; elle ne fixerait pas la couronne. A312 attend une mesure publiée ou un verdict
+sur l'image (son déclencheur d'origine). **Le lot choisi fait avancer la liste : 5.3, le débordement vers l'extérieur** (V, ADR-010).
 
-**Ce que la session fait.** `Apic3::enable_droplets` : une particule d'eau dont la maille est étiquetée **air** (une nappe plus mince
-qu'une maille, que la reconstruction ne voit plus) et dont la vitesse donne `We = ρ·v²·d/σ > 12` (d : le diamètre de la goutte de son
-volume, `dx/2·(6/π)^(1/3)`) **devient une goutte** : hors de la grille (ni transfert vers la grille, ni reconstruction, ni séparation),
-**balistique** — `g_eff` et la traînée de l'air (`C_d` = 0,47, ρ_air = 1,2) ; elle **redevient de l'eau** en entrant dans une maille
-d'eau (sa vitesse transmise). Aucune particule ne naît ni ne meurt : la masse est exacte par construction. Sans `enable_droplets`, le pas
-d'avant, au bit.
+**Ce que la session fait.** Une arête `Flow::Spill` : le débordement d'un nœud vers l'extérieur (`to: None`). Quand le nœud reçoit plus
+que sa place libre (arêtes, pluie), l'excédent n'est plus refusé : il passe par-dessus le bord, et l'hôte le lit dans `scratch` à
+l'indice de l'arête (avec sa position, pour le déposer : le sol, δ, la mer). Le nœud reste plein. Sans arête de débordement, le pas
+d'avant au bit (le transfert refusé, S227).
 
-**Entrées, et comment elles se vérifient.** B10 (`apic3d_b10`, le quart — A325 dit le prix du quart ; la mesure ici est la dépendance à la
-maille, au même montage) à `D/dx` = 8, 12, 16, avec et sans gouttes ; la couronne (la particule la plus haute avant le pincement, gouttes
-comprises) ; le banc de non-régression au bit (sans gouttes).
-
-**Critères, écrits avant.** (1) sans gouttes, au bit (non-régression, essais d'APIC 3D) ; (2) masse exacte avec gouttes ; une goutte isolée
-suit une trajectoire balistique (essai : la portée d'un jet vertical à 1 %) ; (3) **A312** : la hauteur de la couronne de B10 à trois
-mailles à 15 % entre elles avec gouttes (contre 40 à 60 % sans) — sinon, l'écart dit et attribué.
+**Critères, écrits avant.** (1) sans débordement, au bit (les essais de V) ; (2) un contenant plein qui reçoit `Q` déverse exactement `Q`
+au millilitre près, reste plein, et la somme réseau + déversé égale le total ; (3) la pluie sur un contenant plein déborde de même ;
+(4) la sauvegarde empreinte la nouvelle arête ; un débordement vers un autre nœud est refusé (`Error::Domain`) dans cette version ;
+(5) la liste 5.3 validée si (1)–(4) tiennent et que les déversoirs et orifices de S227 sont déjà éprouvés.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les gouttes dans la référence ; essais (1), (2).
-- [x] **P3** — B10 à trois mailles, avec et sans gouttes ; (3).
-- [x] **P4** — preuve ; rituel.
+- [ ] **P2** — `Flow::Spill` ; essais (1)–(4).
+- [ ] **P3** — preuve ; 5.3 ; rituel.
 
 ### Notes de reprise
-- **P2** — `apic3d_gouttes.rs` (`enable_droplets`, `droplets_classify` après les étiquettes, `ballistic_step`) ; les gouttes hors du
-  transfert vers la grille, de la reconstruction, de la séparation ; leur vitesse gardée au transfert vers les particules ; balistiques à
-  l'advection (bornées au domaine). Refusées avec une zone de colonnes. Essais : `droplet_ballistic_apex_s488` (l'apogée à 1 %, avec et
-  sans traînée), `droplets_from_a_jet_keep_the_mass_s488` (des gouttes naissent et retombent, masse exacte) ; 46 essais d'APIC 3D ;
-  non-régression au bit. `apic3d_b10` : `APIC3D_GOUTTES=1`.
-- **P3** — premier critère (la seule maille d'air) : 4 936 gouttes à D/dx = 8, la cavité changée — retiré pour « la maille et ses six
-  voisines sans eau ». B10 : couronne 0,205 / 0,204 / 0,305 D (8, 12, 16), **identique avec gouttes** (5, 1, 34 nées) ; critère (3) manqué,
-  la cause nommée (la vitesse d'éjection du bord ; il manque Taylor–Culick).
-- **P4** — preuve GOUTTES-S488 ; A312 annotée ; index ; journal.

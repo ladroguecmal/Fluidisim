@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 00:51 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 00:54 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S489 — 5.3 : le débordement vers l'extérieur (V)**
 Dernière session : S488 — K2-4, premier temps : la nappe rompue en gouttes ([journal](notes/JOURNAL.md)). Avant : S487 (les dispatchs à deux dimensions)
 Session suivante : **S489 — K2-4b : la rétraction du bord d'une nappe** (Taylor–Culick, `v = √(2σ/(ρ·h))`) : l'épaisseur locale estimée par les particules d'une maille sans eau autour ; le bord d'une nappe plus mince qu'une maille freiné vers le corps de l'eau ; critère A312 — la couronne de B10 à 8, 12, 16 mailles à 15 % entre elles ; puis contre une mesure publiée de la gerbe d'une sphère (le jet de Worthington, la couronne). Si la troisième session sur A312 n'avance pas la liste, le dire et choisir dans le plan de complétion. **Sans attendre de « Continue »**
 Maillons        : 3 — S488 : un modèle neuf (les gouttes), A312 non levée ; justifié : la cause nommée désigne un remède construisible (Taylor–Culick)
