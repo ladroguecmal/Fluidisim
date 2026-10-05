@@ -315,6 +315,9 @@ fn cuve_a_bulles(dx: f64, l: f64, h: f64, bulles: &[([f64; 3], f64)], cheminee: 
 /// de chaque maille se comparent.
 pub fn banc_poches() -> Result<(), String> {
     let cas = std::env::var("CAS").unwrap_or_else(|_| "bulle".into());
+    if cas == "remontee" {
+        return remontee();
+    }
     let pas: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(5);
     let pas_us: u64 = std::env::var("PAS_US").ok().and_then(|v| v.parse().ok()).unwrap_or(500);
     let dx = 0.02;
@@ -500,4 +503,122 @@ fn cout(a: &Apic3, carte: &mut ApicCarte, pas_us: u64) -> Result<(), String> {
         med(&mut proj)
     );
     Ok(())
+}
+
+/// **S485 — la remontée sur la carte** (`CAS=remontee`, K2-3b) : la cuve d'`apic3d_remontee` (S484) — un quart (`QUART=1`, le défaut :
+/// la bulle centrée sur le coin) ou entière (`QUART=0`, la bulle au centre) —, ensemencée par la référence, menée par la carte seule.
+/// `R_DX` (6), `R` (0,04 m), `DUREE` (0,6 s), `PAS_US` (1000 : le pas plafonné). Le centre de la plus grande poche à chaque pas ; la
+/// vitesse terminale par la droite des moindres carrés de `z(t)` sur `z ≥ z0 + 2R`, contre Davies et Taylor (`0,711·√(g·d_e)`).
+fn remontee() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::apic3d::ApicStage;
+    use water_core::delta3d::Domain3;
+    use water_core::host::HostServices;
+    let env = |k: &str, d: f64| std::env::var(k).ok().and_then(|v| v.parse::<f64>().ok()).unwrap_or(d);
+    let (r_dx, r, duree, pas_max) = (env("R_DX", 6.), env("R", 0.04), env("DUREE", 0.6), env("PAS_US", 1000.) as u64);
+    let quart = std::env::var("QUART").map_or(true, |v| v != "0");
+    let dx = r / r_dx;
+    let (demi, h, air) = (8. * r, 22. * r, 3. * r);
+    let largeur = if quart { demi } else { 2. * demi };
+    let n = (largeur / dx).round() as usize;
+    let nz = ((h + air) / dx).round() as usize;
+    let z0 = 2.5 * r;
+    let (cx, cy) = if quart { (0., 0.) } else { (demi, demi) };
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 36);
+    let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
+    let capacity = n * n * ((h / dx).ceil() as usize) * 8;
+    let mut a = Apic3::configure(&mut host, Domain3 { nx: n, ny: n, nz, dx: dx as f32 }, 1000., 9.81, capacity)
+        .map_err(|e| format!("{e:?}"))?;
+    let particules = a
+        .seed(&|p| {
+            let e = [p[0] as f64 - cx, p[1] as f64 - cy, p[2] as f64 - z0];
+            (p[2] as f64) < h && e[0] * e[0] + e[1] * e[1] + e[2] * e[2] >= r * r
+        })
+        .map_err(|e| format!("{e:?}"))?;
+    let facteur = if quart { 4. } else { 1. };
+    let d_e = 2. * r;
+    let u_dt = 0.711 * (9.81 * d_e).sqrt();
+    pollster::block_on(async {
+        let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
+        carte.enable_air_pockets()?;
+        carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(100));
+        carte.set_adaptive_cap(false);
+        carte.load(&a)?;
+        let n0 = carte.counts()?[0];
+        println!(
+            "REMONTEE_CARTE_S485 carte={} quart={quart} maille={n}x{n}x{nz} dx={dx:.5} R_sur_dx={r_dx} particules={particules} pas_max_us={pas_max} U_davies_taylor={u_dt:.3}",
+            carte.adapter
+        );
+        let (mut t, mut serie, mut fin, mut non_conv) = (0f64, Vec::new(), "duree", 0usize);
+        let debut = std::time::Instant::now();
+        while t < duree {
+            let us = carte.stable_step_us(5_000)?.min(pas_max);
+            carte.step_upto(us, ApicStage::Full)?;
+            t += us as f64 * 1e-6;
+            let (_, _, _, conv) = carte.pressure_stats_full()?;
+            if !conv {
+                non_conv += 1;
+            }
+            let pc = carte.air_pockets()?;
+            let Some(b) = pc.iter().max_by(|x, y| x.volume.total_cmp(&y.volume)).copied() else {
+                fin = "plus_de_poche";
+                break;
+            };
+            let lat = (b.centroid[0] - cx).hypot(b.centroid[1] - cy);
+            // S485 : la bulle entière — toutes ses poches —, le centre pondéré par les volumes (`ENSEMBLE=0` : la plus grande seule).
+            let (z_b, v_b) = if std::env::var("ENSEMBLE").map_or(true, |v| v != "0") {
+                let v: f64 = pc.iter().map(|p| p.volume).sum();
+                (pc.iter().map(|p| p.volume * p.centroid[2]).sum::<f64>() / v, facteur * v)
+            } else {
+                (b.centroid[2], facteur * b.volume)
+            };
+            serie.push((t, z_b, lat, v_b));
+            if std::env::var("TRACE").is_ok() {
+                let air: f64 = pc.iter().map(|p| p.volume * p.pressure.powf(1. / 1.4)).sum();
+                let v_tot: f64 = pc.iter().map(|p| p.volume).sum();
+                println!(
+                    "REMONTEE_CARTE_TRACE t={t:.4} dt_us={us} z={:.4} r_lat={lat:.4} V_bulle={:.4e} P={:.0} poches={} V_toutes={:.4e} air_total={:.4e} mailles={}",
+                    b.centroid[2], facteur * b.volume, b.pressure, pc.len(), facteur * v_tot, facteur * air, b.cells
+                );
+            }
+            // `TRACE_POCHES=<t0>,<t1>` : chaque poche, entre t0 et t1.
+            if let Some(f) = std::env::var("TRACE_POCHES").ok() {
+                let v: Vec<f64> = f.split(',').filter_map(|x| x.parse().ok()).collect();
+                if v.len() == 2 && t >= v[0] && t <= v[1] {
+                    let d: Vec<String> = pc
+                        .iter()
+                        .map(|p| format!("[V={:.3e} P={:.0} n={} z={:.3} air={:.4}]", facteur * p.volume, p.pressure, p.cells, p.centroid[2], facteur * p.volume * p.pressure.powf(1. / 1.4)))
+                        .collect();
+                    println!("REMONTEE_CARTE_POCHES t={t:.4} {}", d.join(" "));
+                }
+            }
+            if b.centroid[2] > h - 1.5 * d_e {
+                fin = "surface";
+                break;
+            }
+        }
+        let etabli: Vec<(f64, f64, f64, f64)> = serie.iter().copied().filter(|s| s.1 >= z0 + 2. * r).collect();
+        let pente = |p: &[(f64, f64, f64, f64)]| {
+            let m = p.len() as f64;
+            let (st, sz) = (p.iter().map(|x| x.0).sum::<f64>() / m, p.iter().map(|x| x.1).sum::<f64>() / m);
+            p.iter().map(|x| (x.0 - st) * (x.1 - sz)).sum::<f64>() / p.iter().map(|x| (x.0 - st).powi(2)).sum::<f64>()
+        };
+        let (u, u1, u2, v) = if etabli.len() >= 6 {
+            let mi = etabli.len() / 2;
+            (pente(&etabli), pente(&etabli[..mi]), pente(&etabli[mi..]), etabli.iter().map(|x| x.3).sum::<f64>() / etabli.len() as f64)
+        } else {
+            (f64::NAN, f64::NAN, f64::NAN, f64::NAN)
+        };
+        let d_m = (6. * v / std::f64::consts::PI).cbrt();
+        let u_dm = 0.711 * (9.81 * d_m).sqrt();
+        let n1 = carte.counts()?[0];
+        println!(
+            "REMONTEE_CARTE_S485 bilan quart={quart} R_sur_dx={r_dx} pas_max_us={pas_max} fin={fin} t_s={t:.3} pas={} points_etablis={} U={u:.3} U1={u1:.3} U2={u2:.3} V_bulle={v:.4e} d_e_mesure={d_m:.4} U_davies_taylor={u_dm:.3} rapport={:.3} non_converges={non_conv} particules={n0}->{n1} calcul_s={:.1}",
+            serie.len(),
+            etabli.len(),
+            u / u_dm,
+            debut.elapsed().as_secs_f64()
+        );
+        Ok(())
+    })
 }

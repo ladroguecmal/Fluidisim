@@ -266,7 +266,8 @@ const PF_SCAL: u32 = 31u;    // [0] le dernier pas, s
 
 const P_ATM: f32 = 101325.0;
 const GAMMA_AIR: f32 = 1.4;
-const RAPPEL_VOLUME_S: f32 = 0.1;
+// `RAPPEL_VOLUME_S` de la référence (S485 : 0,02 s).
+const RAPPEL_VOLUME_S: f32 = 0.02;
 // `POCHE_MAILLES_MIN` de la référence (S481).
 const POCHE_MAILLES_MIN: f32 = 8.0;
 
@@ -512,16 +513,23 @@ fn pk_scalars() {
         air[b] = 0.0;
         vf[b] = 0.0;
     }
-    // 4. L'air hérité : l'air de chaque poche d'avant partagé au prorata des mailles recouvertes.
+    // 4. L'air hérité : l'air de chaque poche d'avant partagé au prorata des mailles recouvertes — entre les seules poches gardées
+    // (S485, comme la référence : un fragment qui sera résorbé ne prend rien).
+    let cell_volume0 = P.dx * P.dx * P.dx;
     for (var o = 0u; o < on; o = o + 1u) {
         var total = 0u;
         for (var b = 0u; b < n; b = b + 1u) {
-            total = total + atomicLoad(&pko[h + H_OVERLAP + b * MAXP + o]);
+            if pkf[pf(PF_GEO, b)] >= cell_volume0 && pkf[pf(PF_CELLS, b)] >= POCHE_MAILLES_MIN {
+                total = total + atomicLoad(&pko[h + H_OVERLAP + b * MAXP + o]);
+            }
         }
         if total == 0u {
             continue;
         }
         for (var b = 0u; b < n; b = b + 1u) {
+            if pkf[pf(PF_GEO, b)] < cell_volume0 || pkf[pf(PF_CELLS, b)] < POCHE_MAILLES_MIN {
+                continue;
+            }
             let wgt = atomicLoad(&pko[h + H_OVERLAP + b * MAXP + o]);
             if wgt > 0u {
                 let part = f32(wgt) / f32(total);

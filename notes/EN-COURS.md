@@ -79,8 +79,19 @@ retrouver 0,338 m/s à 5 % — sinon la carte ne mesure pas la même chose, et c
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `CAS=remontee` sur la carte ; le rejeu de S484 (1).
-- [ ] **P3** — résolution, cuve, pas (2), (3).
+- [x] **P2** — `CAS=remontee` sur la carte ; le rejeu de S484 (1).
+- [x] **P3** — résolution, cuve, pas (2), (3).
 - [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2** — `CAS=remontee` : à t = 0,05 s la carte donne la référence de S484 au chiffre (z 0,1182, V 2,4777·10⁻⁴) ; sur 0,4 s elle
+  diverge (U = 0,440 contre 0,338, et elle accélère) — **critère (1) manqué** : deux calculs qui coïncident au départ s'écartent.
+- **P3** — **trouvé : la bulle perd son air.** (a) L'air d'une poche se partageait entre toutes les nouvelles, fragments d'une à sept
+  mailles compris, résorbés aussitôt — corrigé : entre les seules poches gardées (référence et carte). (b) La calotte qui se scinde :
+  les particules envahissent la poche haute (160 → 21 mailles en 30 ms, volume suivi inchangé) et elle se résorbe avec son air —
+  `RAPPEL_VOLUME_S` 0,1 → **0,02 s** : air conservé à 0,3 % sur 0,6 s. Mesure sur toutes les poches (centre pondéré). **Quart de cuve**
+  R/dx = 8 : U = 0,376 (× 0,61), R/dx = 6 : 0,414 (× 0,67), R/dx = 4 : 0,343 (× 0,57) ; **cuve entière R/dx = 4 : U = 0,548 m/s, × 0,90
+  de Davies–Taylor** — critère (3) tenu : le quart de cuve était le défaut (les parois d'APIC ne sont pas des plans de symétrie pour une
+  bulle qui les longe). La cuve entière à R/dx ≥ 6 dépasse la carte (plus de 65 535 groupes par passe au-delà de ≈ 8 M particules).
+  Minnaert (S479, rappel 0,02) : 37,2 Hz — 0,89 de l'eau infinie, à 3 % de la valeur corrigée de la cuve (38,4). Empreintes de
+  non-régression réinscrites (le changement voulu ; détecté par le banc : 079c9a99… au lieu de dc06f28c…).

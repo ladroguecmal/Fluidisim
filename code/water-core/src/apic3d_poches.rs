@@ -36,7 +36,12 @@ pub const GAMMA_AIR: f64 = 1.4;
 /// K2-7). Leur volume compte la part d'air des mailles d'eau voisines : la règle du volume (`V < dx³`) ne les attrapait pas.
 pub const POCHE_MAILLES_MIN: u32 = 8;
 /// Le temps de rappel du volume suivi par le flux vers le volume géométrique, s (voir le volume, en tête).
-pub const RAPPEL_VOLUME_S: f64 = 0.1;
+///
+/// **S485 : 0,02 s (0,1 avant).** Une poche dont l'eau envahit les mailles (les particules y entrent par les vitesses extrapolées,
+/// que la projection ne contraint pas) perdait sa géométrie plus vite que le rappel ne faisait monter sa pression : la calotte d'une
+/// bulle qui monte fondait de 160 à 21 mailles en 30 ms et se résorbait avec son air (REMONTEE-S485). À 0,02 s, l'air de la bulle
+/// est conservé à 0,3 % sur 0,6 s ; la bulle de S479 garde sa fréquence (voir la preuve).
+pub const RAPPEL_VOLUME_S: f64 = 0.02;
 
 /// Une poche, telle que le pas la rend.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -300,7 +305,11 @@ impl Apic3 {
                 ps.stamp = 1;
             }
         }
-        // 4. L'air hérité : recouvrements avec les poches d'avant, l'air de chacune partagé au prorata de ses mailles.
+        // 4. L'air hérité : recouvrements avec les poches d'avant, l'air de chacune partagé au prorata de ses mailles — **entre les
+        // seules poches gardées** (S485) : un fragment qui sera résorbé (moins d'une maille de volume, moins de `POCHE_MAILLES_MIN`
+        // mailles) ne prend rien. Avant S485, les fragments d'une à sept mailles que le bruit des étiquettes détache à chaque pas
+        // emportaient leur part : une bulle qui monte perdait 42 % de son air en 40 ms (REMONTEE-S485). L'air ne se perd plus que si
+        // aucune poche gardée ne recouvre l'ancienne (la bulle qui crève, l'air rendu à l'air libre).
         for v in ps.overlap.iter_mut() {
             *v = 0;
         }
@@ -314,12 +323,16 @@ impl Apic3 {
             ps.air[b] = 0.;
             ps.vol_flux[b] = 0.;
         }
+        let gardee = |ps: &Poches, b: usize| ps.volume[b] >= cell_volume && ps.cells[b] >= POCHE_MAILLES_MIN;
         for o in 0..ps.old_count {
-            let total: u64 = (0..count).map(|b| ps.overlap[b * MAX_POCKETS + o] as u64).sum();
+            let total: u64 = (0..count).filter(|b| gardee(&ps, *b)).map(|b| ps.overlap[b * MAX_POCKETS + o] as u64).sum();
             if total == 0 {
                 continue;
             }
             for b in 0..count {
+                if !gardee(&ps, b) {
+                    continue;
+                }
                 let w = ps.overlap[b * MAX_POCKETS + o];
                 if w > 0 {
                     ps.air[b] += ps.old_air[o] * w as f64 / total as f64;
