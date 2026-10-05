@@ -60,3 +60,4 @@ for nd in (8, 12, 16):
                 print(l, flush=True)
         print('code', r.returncode, flush=True)
 "` | lancé 2026-10-06 00:29 |
+| `20261006-012537-eveil` | S491 | eveil | `python outils/eveil.py 14` | lancé 2026-10-06 01:25 |

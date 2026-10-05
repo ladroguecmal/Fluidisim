@@ -70,6 +70,8 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 - Une étape par commit `S<n> P<k> — …` ; la preuve dans `docs/validation/` ; le rituel de fin par `python outils/rituel.py fin`, qui
   lance le banc de non-régression (S483) ; la référence APIC 3D tourne sur les cœurs (`set_jobs`, au bit, S483).
 - Une propriété numérique revendiquée s'écrit en code et se mesure, contre une référence publiée.
+- **En autonomie, la machine reste éveillée** : `python outils/calcul.py lancer eveil -- python outils/eveil.py <heures>` (la veille sur
+  inactivité retenue, rien de réglé ; S491, demande de l'utilisateur) ; les sessions s'enchaînent sans attendre de relance.
 - Les calculs longs se lancent par `python outils/calcul.py lancer` — hors de la session (WMI, S481), ils survivent à la conversation ; leur trace est dans
   [`notes/CALCULS.md`](notes/CALCULS.md).
 
