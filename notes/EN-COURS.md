@@ -62,32 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S568 — **terminée**. En autonomie, **5.8 — les pompes et les clapets du réseau en charge**.
+Session : S569 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S567–S568), puis **5.8** — deux manques : la vitesse
+commandée d'une pompe, et un raccord qui se dénoie (aujourd'hui refusé : `Domain`, et l'hôte ne peut plus avancer).
 
-**Ce que la session fait.** Une conduite porte un organe : aucun, un **clapet** (le débit de `a` vers `b` seulement ; fermé, une fuite
-linéaire de 10⁻¹² m²/s garde la jacobienne inversible — 0,1 ml par jour sous 1 m), ou une **pompe** centrifuge avec son clapet (la loi de
-V, ADR-199 D3 : `H(Q) = H₀·(1 − (Q/Q_max)²)`, soit `h_a − h_b + H₀ = (R + H₀/Q_max²)·Q²`, `Q ≥ 0`).
+**Ce que la session fait.** (a) `Organe::Pompe` reçoit sa vitesse `n` (0 à 1, la commande d'ADR-199 D1) : lois de similitude, `H ∝ n²`,
+`Q ∝ n`, soit `H(Q) = H₀·n² − H₀·Q²/Q_max²`. (b) **Un raccord hors de l'eau est un exutoire à l'air libre** : sa charge est la cote du
+raccord (la pression atmosphérique), et il ne fait que **recevoir** — un débit qui sortirait du nœud (le réseau aspirerait de l'air) est
+coupé comme par un clapet. Plus de refus.
 
-**Références, calculées avant par bissection ou forme fermée** (ce script les écrit). (1) Une pompe (`H₀` = 30 m, `Q_max` = 0,05 m³/s,
-`R` = 2 000) d'un réservoir à 0 m vers une jonction reliée (`R` = 3 000) à un réservoir à 20 m : **`h_j` = 21.764705882 m, `Q` = 0.024253563
-m³/s**. (2) Les trois réservoirs de S565, la branche de 80 m munie d'un clapet qui ne laisse passer que vers le réservoir : il se ferme,
-**`h_j` = 71.428571429 m** (`1500·(100 − h) = 2000·(h − 50)`). (3) Couplé : deux cuves de 1 m² (1,5 et 0,2 m), une pompe (`H₀` = 1 m,
-`Q_max` = 0,01 m³/s, `R` = 10⁴) de la basse vers la haute : l'équilibre au refoulement nul, **0,35 et 1,35 m**, atteint à 10⁻⁴ m vers
-**213 s** (un Euler fin, ADR-240 D2) ; l'essai dure 426 s ; ensuite rien ne revient (le clapet).
+**Références, calculées avant** (ce script les écrit). (1) La pompe de S568 à `n` = 0,9 (à 0,8 elle ne monterait plus à 20 m : 19,2 m de barrage) — bissection : **`h_j` = 20.758823529 m, `Q` =
+0.015904125 m³/s**. (2) Exutoire : A (1 m², 1,5 m) se vide par le fond vers B dont l'arrivée est à 1,0 m, au-dessus de son eau (0,2 m) ;
+`√(h_A − 1) = √0,5 − t/(2√R)`, `R` = 4·10⁴ : **`h_A` = 1.208947 m à 100 s, 1.042893 m à 200 s**, A s'arrête à 1,0 m vers
+**283 s**, B à 0,7 m ; l'essai dure 600 s. (3) Un raccord qui se dénoie : la sortie de A en paroi à 1,0 m, B rempli par le fond
+(0,2 m) ; A se vide jusqu'à ce que sa surface passe sous sa sortie, puis plus rien ; le dernier pas dépasse d'au plus `√(0,3/R)·dt` =
+**0.274 mm**.
 
-**Quantum** (ADR-236 D1) : les références à 10⁻⁹ ; 1 µm en V. **Critères, écrits avant.** (1) `h_j` et `Q` à 10⁻⁸ ; (2) `h_j` à 10⁻⁸ m
-(la fuite du clapet la déplace de ~4·10⁻⁹ m, calculé : `10⁻¹²·8,6/2,1·10⁻³`) ; (3) les cuves à 2·10⁻⁴ m de 0,35 et 1,35 m, la masse à
-l'entier, aucun retour une fois l'équilibre atteint (la haute ne baisse plus) ; (4) sans organe, S565 et S567 inchangés (la suite).
+**Quantum** (ADR-236 D1) : 10⁻⁹ pour (1) ; 1 µm en V ; l'Euler du pas pour (2) — l'écart attendu comme en S567 (~2·10⁻⁴ m). **Critères,
+écrits avant.** (1) à 10⁻⁸ ; (2) `h_A` à 10⁻³ m de la loi fermée à 100 et 200 s, l'état final à 2·10⁻⁴ m de 1,0 et 0,7 m, la masse à
+l'entier ; (3) A final entre 1,0 m − 0.274 mm et 1,0 m, puis immobile ; aucun refus ; (4) S565–S568 inchangés.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — les organes et leurs essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.8 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — la vitesse, l'exutoire ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.8 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — pompe 21,764705882 m ; clapet 71,428571430 m ; couplé 0,350000 / 1,350001 m sans retour ; S565, S567 inchangés. En route :
-  l'arrêt au plancher flottant (une conduite de résistance 10⁻⁶ rendait la tolérance inatteignable : `NonFinite`). Le plan avait un
-  nombre fait à la main (la fuite, un majorant) — contre ADR-243 D1, noté pour la revue de S571. Suite 738.
-- **P3** — preuve RESEAU-ORGANES-S568 ; liste 5.8 ; index ; journal.
-

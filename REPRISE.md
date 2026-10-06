@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 23:11 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 23:12 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S569 — le lot ; 5.8, la vitesse des pompes et le raccord qui se dénoie ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S568 — les pompes et les clapets du réseau en charge ([journal](notes/JOURNAL.md)). Avant : S567 (le réseau en charge couplé au pas de V)
 Session suivante : **S569 — le lot** (dû en S569) **et un point partiel** (5.8 : la vitesse commandée des pompes, un raccord qui se dénoie ; ou un autre). Revue à S571. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S568 : 5.8 avance (pompes et clapets)
