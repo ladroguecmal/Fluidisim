@@ -849,3 +849,11 @@ Suivant : **S567**, un point partiel.
 ([preuve](../docs/validation/RESEAU-COUPLE-S567.md)) : `pas_reseau` — les surfaces des nœuds comme charges fixes, les débits en millilitres
 entiers avec reste. **Mesuré** : deux cuves égalisées à 1 µm d'un Euler indépendant (la loi fermée à l'erreur du pas près, bornée au plan),
 la masse à l'entier, un robinet à 1 ml. Maillons **0** (5.8 avance). Suivant : **S568**, un point partiel.
+
+## S568 — 2026-10-06 — les pompes et les clapets du réseau en charge
+
+**Entrée.** En autonomie ; 5.8. **Fait** ([preuve](../docs/validation/RESEAU-ORGANES-S568.md)) : les organes d'une conduite — clapet,
+pompe centrifuge (la loi de V). **Mesuré** : le point de fonctionnement et le clapet fermé à 10⁻⁹ de leurs références ; une pompe couplée
+remplit une cuve jusqu'à sa hauteur de barrage (0,350000 / 1,350001 m), et rien ne revient. **En route** : une conduite presque sans
+résistance rendait la tolérance de continuité inatteignable (l'ulp de la charge ×10⁶) — l'arrêt au plancher flottant ajouté ; un nombre du
+plan fait à la main, noté pour la revue. Maillons **0** (5.8 avance). Suivant : **S569**, le lot (dû) et un point partiel.

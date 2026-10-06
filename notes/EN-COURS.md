@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S568 — **en cours**. En autonomie, **5.8 — les pompes et les clapets du réseau en charge**.
+Session : S568 — **terminée**. En autonomie, **5.8 — les pompes et les clapets du réseau en charge**.
 
 **Ce que la session fait.** Une conduite porte un organe : aucun, un **clapet** (le débit de `a` vers `b` seulement ; fermé, une fuite
 linéaire de 10⁻¹² m²/s garde la jacobienne inversible — 0,1 ml par jour sous 1 m), ou une **pompe** centrifuge avec son clapet (la loi de
@@ -82,7 +82,12 @@ l'entier, aucun retour une fois l'équilibre atteint (la haute ne baisse plus) ;
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les organes et leurs essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.8 ; rituel.
+- [x] **P2** — les organes et leurs essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.8 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — pompe 21,764705882 m ; clapet 71,428571430 m ; couplé 0,350000 / 1,350001 m sans retour ; S565, S567 inchangés. En route :
+  l'arrêt au plancher flottant (une conduite de résistance 10⁻⁶ rendait la tolérance inatteignable : `NonFinite`). Le plan avait un
+  nombre fait à la main (la fuite, un majorant) — contre ADR-243 D1, noté pour la revue de S571. Suite 738.
+- **P3** — preuve RESEAU-ORGANES-S568 ; liste 5.8 ; index ; journal.
+
