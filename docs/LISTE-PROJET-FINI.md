@@ -120,7 +120,9 @@ pas recopiée ici (L137).
   intégrée, profondeur de déferlement (McCowan) —, tenue contre Fenton–McKee et la levée minimale des manuels
   ([preuve](validation/BATHYMETRIE-S362.md)) ; **S364** : l'entrée **dans B**, par composante, décidée
   ([ADR-196](adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md)) et construite pour les isobathes droites —
-  tables cuites, η à 0,13 mm de la référence, B au bit au large, requête en O(1) (§5). Manquent la bathymétrie 2D et la
+  tables cuites, η à 0,13 mm de la référence, B au bit au large, requête en O(1) (§5) ; **S522** : **W en profondeur uniforme** — le
+  nombre d'onde effectif `k·tanh kh` dans la pression de W, le chemin profond au bit, le sillage à `Fr_h` = 0,9 à 2,0 % de la référence
+  par 5 m de fond (121 % de la profonde) ([preuve](validation/W-PROFONDEUR-S522.md)). Manquent la bathymétrie 2D (et sous W) et la
   diffraction des hauts-fonds isolés, la marée, la dissipation au déferlement, la non-linéarité peu profonde (A234), et
   les autres chemins de B jusqu'à la scène de Godot.
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent* ; la météo **à la fin** (ADR-197 D5), un système
@@ -138,7 +140,8 @@ pas recopiée ici (L137).
   profonde (C07) — *partiel* : source de pression mobile par tronçons, scène à trois sillages ;
   domaine honnête de 89 m et 18,5 s (ADR-132). **S519 : C07 en eau profonde passe** — le sillage de W à 0,33 % de la théorie
   linéaire exacte en temps, son angle à 19,98° par un instrument éprouvé sur la théorie seule
-  ([preuve](validation/C07-PROFOND-S519.md)). Manquent les durées longues et l'eau peu profonde (C07 peu profond, après 2.7).
+  ([preuve](validation/C07-PROFOND-S519.md)). Manquent les durées longues et C07 peu profond — que W en profondeur uniforme rend
+  mesurable depuis S522 ([preuve](validation/W-PROFONDEUR-S522.md)).
 - [ ] **3.3 Explosions de surface et sous-marines** — *absent*.
 - [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *absent*.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.

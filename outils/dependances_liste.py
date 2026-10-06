@@ -45,7 +45,7 @@ D = {
  "2.8": ("A", "—", ["2.7", "3.6"], "la fin du projet : météo et son en dernier (ADR-197 D5)"),
  "2.9": ("A", "—", ["2.7"], None),
  "3.1": ("A", "—", ["2.7", "4.12"], None),
- "3.2": ("A", "durées longues ; C07 peu profond (C07 profond passé, S519)", ["2.7"], None),
+ "3.2": ("A", "durées longues ; C07 peu profond, W en profondeur uniforme fait (S522)", [], None),
  "3.3": ("A", "la source d'explosion de W, champ lointain", ["4.16", "7.4"], None),
  "3.4": ("A", "—", ["2.7", "3.6"], None),
  "3.5": ("A", "—", ["2.7", "3.6"], None),

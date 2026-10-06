@@ -13,6 +13,7 @@ de W.
     python outils/reference_sillage.py instrument_fige   — l'instrument figé (le bord d'Airy, 4–6 λ₀) sur la référence, trois grilles
     python outils/reference_sillage.py coque             — S520 : l'instrument figé sur la référence de la coque (4 × 1,6 m), trois grilles
     python outils/reference_sillage.py delta <fichier>   — S520 : l'instrument figé sur la surface de δ (banc `--lineaire-sillage`, `SORTIE=`)
+    python outils/reference_sillage.py profondeur <fichier> — S522 : W par 5 m de fond (`c07_profondeur`) contre la référence finie et profonde
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import sys
@@ -32,7 +33,7 @@ def phi(z):
     return out
 
 
-def champ(sigma, u, t, lx, ly, dx, x0, coupure, spectre=None):
+def champ(sigma, u, t, lx, ly, dx, x0, coupure, spectre=None, profondeur=None):
     """η au temps t sur la grille [−lx/2, lx/2) × [−ly/2, ly/2), pas dx ; la source part de (x0, 0). `spectre(KX, KY)` : la transformée
     de la pression de la source (N), la gaussienne de `wake_source` par défaut."""
     nx, ny = int(round(lx / dx)), int(round(ly / dx))
@@ -40,7 +41,9 @@ def champ(sigma, u, t, lx, ly, dx, x0, coupure, spectre=None):
     ky = 2 * np.pi * np.fft.fftfreq(ny, dx)
     KX, KY = np.meshgrid(kx, ky)
     k = np.hypot(KX, KY)
-    w = np.sqrt(G * k)
+    # S522 : en profondeur finie, le nombre d'onde effectif `k tanh kh` dans la pulsation et le forçage.
+    kk = k if profondeur is None else k * np.tanh(k * profondeur)
+    w = np.sqrt(G * kk)
     om = KX * u
     ws = np.where(w > 0, w, 1.0)
     i_t = t / (2j * ws) * (np.exp(-1j * om * t) * phi(1j * (ws + om) * t) - np.exp(-1j * ws * t) * phi(1j * (ws - om) * t))
@@ -48,7 +51,7 @@ def champ(sigma, u, t, lx, ly, dx, x0, coupure, spectre=None):
     xg0, yg0 = -lx / 2, -ly / 2
     forme = F * np.exp(-0.5 * (k * sigma) ** 2) if spectre is None else spectre(KX, KY)
     ph = forme * np.exp(-1j * (KX * (x0 - xg0) + KY * (0 - yg0)))
-    eta_k = -(k / RHO) * ph * i_t
+    eta_k = -(kk / RHO) * ph * i_t
     eta_k[k == 0] = 0
     eta_k[k > coupure] = 0
     eta = np.fft.ifft2(eta_k).real / dx**2
@@ -206,6 +209,36 @@ def delta(chemin):
           f" profil {' '.join(f'{angles[i]:.0f}:{prof[i]:.2e}' for i in range(0, len(angles), 8))}", flush=True)
 
 
+def profondeur(chemin):
+    """S522 P3 — W en profondeur finie (fichier de `c07_profondeur`) contre la référence par 5 m de fond, convergée sur trois grilles,
+    et contre la référence profonde : l'écart quadratique relatif sur la zone établie (critère 3)."""
+    with open(chemin, "rb") as f:
+        tete = f.readline().split()
+        nx, ny = int(tete[0]), int(tete[1])
+        gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+        w = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+    sigma, u, t, h, coupure = 2.0, 6.3, 40.0, 5.0, 3.0
+    x0 = xs_src - u * t
+    # L'onde transverse par 5 m de fond : U² = g tanh(kh)/k.
+    k = G / u**2
+    for _ in range(100):
+        k -= (u * u * k - G * np.tanh(k * h)) / (u * u - G * h * (1 - np.tanh(k * h) ** 2))
+    lam = 2 * np.pi / k
+    gx = gx0 + dx * np.arange(nx)
+    gy = gy0 + dx * np.arange(ny)
+    GX, GY = np.meshgrid(gx, gy)
+    d = xs_src - GX
+    zone = (d >= lam) & (d <= u * t / 2 - lam) & (np.abs(GY) <= d * np.tan(np.radians(60.0)))
+    print(f"C07_S522 lambda_transverse={lam:.2f} zone=[{lam:.1f},{u * t / 2 - lam:.1f}] points_zone={zone.sum()} max_w_zone={np.abs(w[zone]).max():.4f}", flush=True)
+    for nom, prof, grilles in [("finie", h, [(1024.0, 1024.0, 1.0), (1536.0, 1536.0, 1.0), (1024.0, 1024.0, 0.5)]),
+                               ("profonde", None, [(1024.0, 1024.0, 1.0)])]:
+        for (lx, ly, ddx) in grilles:
+            xs, ys, eta = champ(sigma, u, t, lx, ly, ddx, x0, coupure, profondeur=prof)
+            ref = bilineaire(xs, ys, eta, GX.ravel(), GY.ravel()).reshape(ny, nx)
+            ecart = np.sqrt(((w - ref)[zone] ** 2).sum() / (ref[zone] ** 2).sum())
+            print(f"C07_S522 reference={nom} grille={lx:.0f}x{ly:.0f}@{ddx} ecart_quadratique_relatif={ecart:.4f} max_ref_zone={np.abs(ref[zone]).max():.4f}", flush=True)
+
+
 def instrument():
     t, coupure = 24.0, 6.0
     for sigma in [0.5, 1.0, 2.0]:
@@ -228,5 +261,7 @@ if __name__ == "__main__":
         comparer(sys.argv[2])
     elif sys.argv[1] == "delta":
         delta(sys.argv[2])
+    elif sys.argv[1] == "profondeur":
+        profondeur(sys.argv[2])
     else:
         {"instrument": instrument, "instrument_fige": instrument_fige, "coque": coque}[sys.argv[1]]()

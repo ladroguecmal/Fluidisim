@@ -50,8 +50,8 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 45 | 1.7, 1.8, 2.6, 2.7, 3.8, 3.9, 4.2, 4.4, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 7.1, 7.6, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
-| **1** | 30 | 1.1, 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 3.7, 4.1, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
+| **0** | 46 | 1.7, 1.8, 2.6, 2.7, 3.2, 3.8, 3.9, 4.2, 4.4, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 7.1, 7.6, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
+| **1** | 29 | 1.1, 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.6, 3.7, 4.1, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
 | **2** | 11 | 1.6, 2.5, 3.3, 3.4, 3.5, 4.9, 4.12, 6.7, 7.5, 10.6, 12.2 |
 | **3** | 5 | 3.1, 4.3, 4.14, 5.9, 7.3 |
 | **4** | 5 | 4.10, 6.6, 8.4, 13.2, 13.3 |
@@ -92,7 +92,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **2.4** Rivières | A | — | 2.6, 2.7 | 2.5, 12.2 | **1** |
 | **2.5** Canaux | A | — | 2.4 | — | **2** |
 | **2.6** Courants macroscopiques à niveau de détail propre | A | le courant macroscopique, du vecteur au champ (ADR-011) | — | 2.3, 2.4, 6.2 | **0** |
-| **2.7** Bathymétrie | A | l'entrée dans B, isobathes droites, faite (ADR-196, S364) ; les chemins de B et Godot, puis la 2D et la marée ; hauts-fonds isolés | — | 1.3, 2.3, 2.4, 2.8, 2.9, 3.1, 3.2, 3.4, 3.5, 3.6, 4.14 | **0** |
+| **2.7** Bathymétrie | A | l'entrée dans B, isobathes droites, faite (ADR-196, S364) ; les chemins de B et Godot, puis la 2D et la marée ; hauts-fonds isolés | — | 1.3, 2.3, 2.4, 2.8, 2.9, 3.1, 3.4, 3.5, 3.6, 4.14 | **0** |
 | **2.8** Précalcul côtier et météo | A | — | 2.7, 3.6 | 2.2, 5.5, 12.3 | **E** — la fin du projet : météo et son en dernier (ADR-197 D5) |
 | **2.9** Dérivées du fond pour les couches volumiques | A | — | 2.7 | — | **1** |
 
@@ -101,7 +101,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
 | **3.1** Anneaux d'impact dispersifs | A | — | 2.7, 4.12 | — | **3** |
-| **3.2** Sillages de bateaux | A | durées longues ; C07 peu profond (C07 profond passé, S519) | 2.7 | 6.6, 13.2 | **1** |
+| **3.2** Sillages de bateaux | A | durées longues ; C07 peu profond, W en profondeur uniforme fait (S522) | — | 6.6, 13.2 | **0** |
 | **3.3** Explosions de surface et sous-marines | A | la source d'explosion de W, champ lointain | 4.16, 7.4 | — | **2** |
 | **3.4** Tsunamis | A | — | 2.7, 3.6 | 11.3 | **2** |
 | **3.5** Déferlement | A | — | 2.7, 3.6 | 4.14 | **2** |

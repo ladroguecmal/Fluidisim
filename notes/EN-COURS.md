@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S522 — **en cours**. En autonomie ; deux maillons : un lot qui fait avancer une capacité. **W en profondeur finie** : la pression
+Session : S522 — **terminée**. En autonomie ; deux maillons : un lot qui fait avancer une capacité. **W en profondeur finie** : la pression
 de W (sillages, impacts de pression) suppose l'eau profonde (`ω² = g k`, aucune `tanh`) ; C07 peu profond, les anneaux en eau peu profonde
 (K2-12) et 2.7 l'attendent.
 
@@ -89,11 +89,14 @@ la profondeur. (3) **Le sillage** à `Fr_h` = 0,9 (h = 5 m, U = 6,3 m/s, σ = 2 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le cœur en profondeur finie ; (1), (2).
-- [ ] **P3** — la référence et le sillage ; (3).
-- [ ] **P4** — preuve ; listes 2.7, 3.2 ; rituel (lot dû à S522 : fait en S521, `--lot` non requis).
+- [x] **P3** — la référence et le sillage ; (3).
+- [x] **P4** — preuve ; listes 2.7, 3.2 ; rituel (lot dû à S522 : fait en S521, `--lot` non requis).
 
 ### Notes de reprise
 - **P2 fini** — `effective_wavenumber`, `ModalPressure::new_in_depth`, `prepare_in_depth` ; `add_segments` reçoit la profondeur (le nœud
   reste à 64 octets : l'essai de taille l'a rappelé). Essais `s522` : pulsation libre à **2·10⁻⁷** de `√(g k tanh kh)` (kh 0,1 à 3), creux
   `−2p/ρg` à 10⁻⁷, le chemin profond au bit (modes et champ), 5 m de fond diffère. Suite du cœur : **684**, verte.
+- **P3 fini** — `c07_profondeur` (W, 40 119 points, 22 s) ; référence par 5 m de fond (`reference_sillage.py profondeur`) : λ transverse
+  36,48 m ; écart quadratique **2,0 %** sur les trois grilles ; la référence profonde **121 %** → (3) tenu.
+- **P4** — preuve W-PROFONDEUR-S522 ; listes 2.7, 3.2 ; dépendances ; index ; journal.
 

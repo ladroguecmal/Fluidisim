@@ -487,3 +487,13 @@ en S517, le bord d'Airy en S520 (éprouvé sur une gaussienne, il lit sur une co
 code désormais), le script cassé par une apostrophe (les protections ont arrêté le dégât) : rien à ajouter. Le profil d'abord (S518) et
 la référence indépendante (S519) ont tenu. Maillons **2** (une revue n'avance aucun point) : la suivante choisit un lot qui fait avancer
 une capacité. Suivant : **S522**, un point partiel ; le lot des registres dû à S522.
+
+## S522 — 2026-10-06 — la pression de W en profondeur uniforme
+
+**Entrée.** En autonomie ; deux maillons : une capacité. **Fait** ([preuve](../docs/validation/W-PROFONDEUR-S522.md)) : le nombre d'onde
+effectif `k·tanh kh` dans les modes de W (pulsation, forçage, potentiel, vitesses, énergie), sans libm ; `prepare_in_depth`. **Mesuré** :
+la pulsation libre à 2·10⁻⁷ de `√(g k tanh kh)`, le chemin profond au bit, et le sillage à `Fr_h` = 0,9 par 5 m de fond à **2,0 %** de la
+référence linéaire exacte en temps (convergée sur trois grilles), contre 121 % pour la profonde. Le nœud du pool reste à 64 octets (un
+essai de taille l'a rappelé : la profondeur passe en paramètre). Maillons **0** (2.7 avance, C07 peu profond devient mesurable : le
+chemin, `prepare_in_depth` ; la preuve). Suivant : **S523, C07 peu profond** — l'angle `arcsin(1/Fr_h)` et la résonance, instruments
+éprouvés sur la référence de la même famille (ADR-233).
