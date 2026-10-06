@@ -34,3 +34,20 @@ committé de plan avant le travail (P1 manqué) : le critère n'a pas été red�
 
 **C21 passe en référentiel fixe.** Manquent la variante accélérée (des formes volumiques de V à l'échelle d'une mer, ou un compartiment
 qui en est un) et un δ que V déclencherait lui-même (5.10, la porte E).
+
+## 5. S545 — le référentiel accéléré ; une raison fausse corrigée
+
+*S545, 2026-10-06.* **Correction** : le §2 disait que les formes volumiques de V « frôlent le débordement des entiers en µm³ » à l'échelle
+d'une mer — **faux, et écrit sans calcul** : `Tetrahedron` borne ses coordonnées à ± 4 096 m (I-08) et calcule son déterminant en i128 (une
+mer de 100 × 100 × 20 m : 1,2·10²⁴ µm³·6). Le seul obstacle était que les formes n'étaient pas construites.
+
+Le scénario rejoué avec des formes volumiques (la mer 100 × 100 × 20 m, le compartiment 2,5 × 2 × 2 m) :
+
+| | `volume_ml`, sans puis avec δ | entrés en 20 s |
+|---|---|---|
+| tables « +Z », `g_eff` vertical | identiques à l'entier, 200 pas | 761 747 ml |
+| formes volumiques, `g_eff` vertical | identiques à l'entier, 200 pas | 761 741 ml |
+| **formes volumiques, `g_eff` = (1, 0, −9,759) m/s² (incliné de 5,85°)** | **identiques à l'entier, 200 pas** | 761 481 ml |
+
+Critères (écrits avant, plan committé) : tenus. **C21 passe dans ses deux référentiels.** (δ y reçoit la grandeur de `g_eff` ; sa
+pesanteur horizontale, S542, ne vaut que pour le pas linéaire, et le domaine de C21 avance en pas mobile.)

@@ -672,3 +672,11 @@ avec un domaine δ qui suit V (`shift_rest`, comme S375) — **200 pas identique
 tables de forme « +Z » de V refusent un `g_eff` incliné. Deux refus de δ en route, compris (S375 les avait décrits). Maillons **0** (13.2
 avance). Frictions pour S546 : *le plan sauté* ; *une limite de V (les tables +Z sous g_eff incliné) trouvée en route*. Suivant : **S545**.
 
+## S545 — 2026-10-06 — C21 en référentiel accéléré ; une raison fausse corrigée
+
+**Entrée.** En autonomie ; plan committé d'abord. S544 avait écrit, sans calcul, que les formes volumiques de V débordaient les entiers à
+l'échelle d'une mer — **faux** (± 4 096 m, i128) ; corrigé. **Fait** ([preuve](../docs/validation/C21-MASSE-S544.md) §5) : le scénario de C21
+avec des formes volumiques, `g_eff` incliné de 5,85° — **identique à l'entier sur 200 pas, sans puis avec δ**. **C21 passe dans ses deux
+référentiels.** Maillons **0** (13.2). Friction pour S546 : *une affirmation de limite écrite sans calcul* (S544). Suivant : **S546, la
+treizième revue de méthode**.
+

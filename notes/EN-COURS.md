@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S545 — **en cours**. En autonomie, **C21 en référentiel accéléré**. S544 a écrit que les formes volumiques de V « frôlent le
+Session : S545 — **terminée**. En autonomie, **C21 en référentiel accéléré**. S544 a écrit que les formes volumiques de V « frôlent le
 débordement des entiers en µm³ » à l'échelle d'une mer : **faux, et écrit sans calcul** — `Tetrahedron` borne ses coordonnées à ± 4 096 m
 (I-08) et calcule le déterminant en i128 ; le seul obstacle était que les formes n'étaient pas construites. À corriger d'abord.
 
@@ -78,8 +78,12 @@ compartiment reçoit plus de 100 L. (2) Vertical, avec les formes volumiques : d
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — la correction de S544 ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve (C21-MASSE-S544 §5) ; C21 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la correction de S544 ; l'essai ; (1)–(3).
+- [x] **P3** — preuve (C21-MASSE-S544 §5) ; C21 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — l'essai de S544 étendu (tables fixe ; volumiques fixe et accéléré) : identiques à l'entier, 761 747 / 761 741 / 761 481 ml.
+  La raison fausse de S544 corrigée dans la preuve, l'essai et la note de C21. Suite verte.
+- **P3** — C21-MASSE-S544 §5 ; C21 ; liste 13.2 ; journal.
+

@@ -2652,15 +2652,27 @@ fn a_tank_on_a_rotating_station_takes_the_cylindrical_surface_s543() {
 /// Le compartiment de C17 (5 m² × 2 m, plafond à la flottaison, brèche d'1 dm² à son fond), ouvert, 20 s sous `g_eff` ; avec δ : un domaine
 /// de 2,5 × 2 × 2 m (10 × 8 × 8 mailles) au-dessus du nœud, dont la surface monte à chaque pas de V de l'eau entrée (répartie sur ses
 /// colonnes), puis qui avance de dix pas linéaires. Rend `volume_ml` du compartiment à chaque pas.
-fn inondation_s544(g_eff: [f32; 3], avec_delta: bool) -> Vec<i64> {
+fn inondation_s544(g_eff: [f32; 3], avec_delta: bool, volumique: bool) -> Vec<i64> {
     use crate::hydro_network::{step, Flow, HydroNode, Opening, Shapes, SHAPE_ENTRIES, SHARP_EDGE_DISCHARGE, STEP_US};
     let prism = |h: i64| -> [i64; SHAPE_ENTRIES] { core::array::from_fn(|i| h * i as i64 / (SHAPE_ENTRIES - 1) as i64) };
     let mut table = prism(20_000_000).to_vec();
     table.extend_from_slice(&prism(2_000_000));
-    let shapes = Shapes::new(&table).unwrap();
+    // S545 : les formes volumiques (tétraèdres) — la mer 100 × 100 × 20 m, le compartiment 2,5 × 2 × 2 m ; seules elles suivent un `g_eff`
+    // incliné (les tables « +Z » le refusent).
+    use crate::hydro_network::geometry::{Tetrahedron, VolumeShape};
+    let boite = |lo: [i64; 3], hi: [i64; 3]| -> [Tetrahedron; 6] {
+        let v: [[i64; 3]; 8] = core::array::from_fn(|b| core::array::from_fn(|a| if b & (1 << a) == 0 { lo[a] } else { hi[a] }));
+        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
+            .map(|p| Tetrahedron::new([v[0], v[1 << p[0]], v[(1 << p[0]) | (1 << p[1])], v[7]]).unwrap())
+    };
+    let (mer_t, comp_t) = (boite([-50_000_000, -50_000_000, 0], [50_000_000, 50_000_000, 20_000_000]),
+        boite([-1_250_000, -1_000_000, 0], [1_250_000, 1_000_000, 2_000_000]));
+    let formes = [VolumeShape::new(&mer_t).unwrap(), VolumeShape::new(&comp_t).unwrap()];
+    let shapes = if volumique { Shapes::from_volumes(&formes).unwrap() } else { Shapes::new(&table).unwrap() };
+    let (cap_mer, cap_comp) = if volumique { (formes[0].capacity_ml(), formes[1].capacity_ml()) } else { (1_000_000_000_000, 10_000_000) };
     let mut nodes = [
-        HydroNode { volume_ml: 500_000_000_000, capacity_ml: 1_000_000_000_000, origin_um: [0, 0, -10_000_000], shape: 0 },
-        HydroNode { volume_ml: 0, capacity_ml: 10_000_000, origin_um: [0, 0, -2_000_000], shape: 1 },
+        HydroNode { volume_ml: cap_mer / 2, capacity_ml: cap_mer, origin_um: [0, 0, -10_000_000], shape: 0 },
+        HydroNode { volume_ml: 0, capacity_ml: cap_comp, origin_um: [0, 0, -2_000_000], shape: 1 },
     ];
     let mut edges = [Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 10_000 }, position_um: [0, 0, -2_000_000],
         discharge: SHARP_EDGE_DISCHARGE, ..Default::default() }];
@@ -2699,12 +2711,14 @@ fn inondation_s544(g_eff: [f32; 3], avec_delta: bool) -> Vec<i64> {
 /// l'entier près à chaque pas.
 #[test]
 fn a_compartment_holds_the_same_mass_with_and_without_delta_s544() {
-    // Le référentiel accéléré n'est pas joué : sous un `g_eff` incliné, les tables de forme « +Z » de V refusent (`Orientation`) — il
-    // faut des formes volumiques (tétraèdres), dont une mer de taille réaliste frôle le débordement des entiers en µm³.
-    for g_eff in [[0.0f32, 0.0, -9.81]] {
-        let (sans, avec) = (inondation_s544(g_eff, false), inondation_s544(g_eff, true));
-        assert_eq!(sans, avec, "C21 sous g_eff {g_eff:?}");
-        println!("S544 C21 sous g_eff {g_eff:?} : {} pas identiques à l'entier, {} ml entrés en 20 s", sans.len(), sans.last().unwrap());
+    // Tables « +Z » : le référentiel fixe seul (sous un `g_eff` incliné, elles refusent : `Orientation`). S545 : les formes volumiques,
+    // fixe puis accéléré. (S544 avait écrit que ces formes « frôlent le débordement des entiers » : faux — coordonnées bornées à
+    // ± 4 096 m, déterminant en i128.)
+    for (g_eff, volumique) in [([0.0f32, 0.0, -9.81], false), ([0.0, 0.0, -9.81], true), ([1.0, 0.0, -9.759], true)] {
+        let (sans, avec) = (inondation_s544(g_eff, false, volumique), inondation_s544(g_eff, true, volumique));
+        assert_eq!(sans, avec, "C21 sous g_eff {g_eff:?}, formes volumiques {volumique}");
+        println!("S544–S545 C21 sous g_eff {g_eff:?}, formes volumiques {volumique} : {} pas identiques à l'entier, {} ml entrés en 20 s",
+            sans.len(), sans.last().unwrap());
         assert!(*sans.last().unwrap() > 100_000, "le compartiment s'inonde vraiment");
     }
 }

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 18:46 +02:00
+JETON            : libre
+Battement        : 2026-10-06 18:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S545 — C21 en référentiel accéléré (formes volumiques de V) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S544 — C21 en référentiel fixe ; un plan manqué ([journal](notes/JOURNAL.md)). Avant : S543 (la rotation de C16)
-Session suivante : **S545 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — les formes volumiques de V à grande échelle (la variante accélérée de C21 ; les débordements d'entiers en µm³), Coriolis dans δ, la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, l'évent à débit limité (5.9) ; nombres recalculés (ADR-237 D1), quantum écrit à côté des seuils (ADR-236 D1). Revue à S546. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S544 : C21 en référentiel fixe (13.2)
+Session en cours : aucune
+Dernière session : S545 — C21 en référentiel accéléré ; une raison fausse corrigée ([journal](notes/JOURNAL.md)). Avant : S544 (C21 en référentiel fixe)
+Session suivante : **S546 — la treizième revue de méthode** (S541–S545 ; ADR-222 D4) : frictions — un plan non committé avant le travail (S544), une affirmation de limite écrite sans calcul et fausse (S544 : le débordement des entiers des formes de V), deux usages de δ refusés en route que S375 avait décrits (S544), une limite de V découverte en route (les tables +Z sous g_eff incliné) ; ce qui a tenu (C16 et sa formule recalculée, S542–S543 ; C21 corrigé le lendemain). Puis le lot (dû à S545… voir RAPPEL) et un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S545 : C21 passe (fixe et accéléré)
 Registres       : dernier lot S542 (ADR-213 D3) ; le prochain au plus tard en S545
 ```
 

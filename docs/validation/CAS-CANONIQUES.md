@@ -927,6 +927,9 @@ exécutions.
 
 > *Note du 2026-10-06, S544, sur C21* ([C21-MASSE-S544](C21-MASSE-S544.md)) : **exécuté et passé en référentiel fixe** — 200 pas
 > identiques à l'entier, sans puis avec un domaine δ actif au-dessus du nœud. La variante accélérée attend des formes volumiques dans V.
+>
+> *Note du 2026-10-06, S545, sur C21* : **la variante accélérée passe** (formes volumiques de V, `g_eff` incliné de 5,85° : 200 pas
+> identiques à l'entier). La raison donnée en S544 pour ne pas la jouer (un débordement des entiers) était fausse.
 
 **Ce que le cas attrape.** Toute réapparition du transfert de propriété de masse qu'ADR-025 a retiré.
 Si un solveur δ rendait sa masse au nœud, les deux exécutions divergeraient de sa dérive — et la
