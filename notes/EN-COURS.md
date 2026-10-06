@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S502 — **en cours**. En autonomie, **6.1, l'amortissement des autres degrés de liberté** : S336 a mesuré par δ la masse ajoutée
+Session : S502 — **terminée**. En autonomie, **6.1, l'amortissement des autres degrés de liberté** : S336 a mesuré par δ la masse ajoutée
 et l'amortissement de rayonnement de la coque de la porte D **en pilonnement** seulement ; elle roule et tangue sans perte.
 
 **Ce que la session fait.** (a) δ rend le **moment** de sa pression sur la paroi (`solid_wall_force` → force et moment, la force au bit) ;
@@ -84,7 +84,7 @@ autour de leur `ω` propre, résidu d'ajustement ≤ 10 %, `B` > 0 ; (3) le corp
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le moment de δ ; son essai hydrostatique.
 - [x] **P3** — roulis et tangage imposés (calcul détaché) ; `A`, `B`.
-- [ ] **P4** — l'amortissement angulaire du corps ; l'essai de lâcher ; preuve ; liste 6.1 ; rituel.
+- [x] **P4** — l'amortissement angulaire du corps ; l'essai de lâcher ; preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
 - **P2** — `solid_wall_load` / `Volume3::solid_load` ; pavé incliné noyé : moment contre `r_c × F` à 7,4·10⁻⁴, 1,5·10⁻⁴, 9,9·10⁻⁶ (n = 24, 48, 96), force au bit. (Critère 1 réécrit avant mesure : `r_c × F`, plus simple que `ρgV·KB`.)
@@ -95,3 +95,4 @@ autour de leur `ω` propre, résidu d'ajustement ≤ 10 %, `B` > 0 ; (3) le corp
   7 001 (71 / 28 / 7,7 % : les ondes longues reviennent des murs du domaine de 16 m).
 - **P4 (en cours)** — `added_inertia`, `radiation_damping_angular` (relatif à la rotation de la surface). Lâchers : roulis période 0,43 %,
   décrément 0,9 % ; tangage 0,07 / 0,03 % ; sans amortissement crêtes constantes ; glissades à 0,1 %. 663 essais.
+- **P4** — preuve RAYONNEMENT-6DDL-S502 ; **6.1 validée** (7 / 120) ; index ; journal.

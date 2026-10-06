@@ -402,7 +402,7 @@ pas recopiée ici (L137).
 
 ## 6. Solides et flottabilité
 
-- [ ] **6.1 Flottabilité des objets importants** (C10, C11, B6) — *partiel* : **corps rigide à six degrés
+- [x] **6.1 Flottabilité des objets importants** (C10, C11, B6) — *validé* (S502) : **corps rigide à six degrés
   de liberté dans le cœur** depuis S331 — proxy sur B + W, masse ajoutée ; C10 tenu à 0,02 % sur le tirant
   ([preuve](validation/CORPS-RIGIDE-S331.md)) ; **sa coque pilotée dans δ** depuis S332, sans que δ touche la
   trajectoire (I-04) ; **sur une houle de B** depuis S333, pilonnement forcé à 3·10⁻⁵, δ relatif à l'eau
@@ -414,7 +414,9 @@ pas recopiée ici (L137).
   ([preuve](validation/PETIT-OBJET-S498.md)) ; **B6 mesuré** en S499 — la hauteur métacentrique d'un proxy en grille suit
   `BM·(1 − 1/n²) + z_F` à 3·10⁻⁸ ([preuve](validation/B6-PROXY-S499.md)) ; **S500** : la poussée au centre de la part immergée
   ([ADR-227](adr/ADR-227-la-poussee-au-centre-de-la-part-immergee.md)) — une couche suffit, 70 points pour le navire, 49 pour la barque
-  et la caisse ([preuve](validation/POUSSEE-S500.md)). Manque l'amortissement des autres degrés de liberté.
+  et la caisse ([preuve](validation/POUSSEE-S500.md)). **S502** : l'amortissement et l'inertie ajoutée des cinq autres degrés de liberté, mesurés par δ (le moment de sa pression sur la
+  paroi), reçus par le corps comme constantes d'archétype ; lâchers à ±1 % ([preuve](validation/RAYONNEMENT-6DDL-S502.md)). Limites :
+  constantes à ± 10 à 30 % (25 cm, A317), figées à une pulsation ; un pavé (ADR-227 §3).
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
   du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)) ; **S494** : les **impacts de W** — B et les
@@ -715,7 +717,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 2 | 5 | 5 |
-| 6. Solides | 8 | 2 | 3 | 3 |
+| 6. Solides | 8 | 3 | 2 | 3 |
 | 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 0 | 9 | 4 |
@@ -723,7 +725,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **6** | **71** | **44** |
+| **total** | **121** | **7** | **70** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

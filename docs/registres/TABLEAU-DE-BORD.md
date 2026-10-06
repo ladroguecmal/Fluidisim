@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 6** (5.0 %) — partiels : 71 — absents : 43.
+**Périmètre : 120 points** (5.11 hors). **Validés : 7** (5.8 %) — partiels : 70 — absents : 43.
 
 ## Par campagne
 
@@ -17,7 +17,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K3** Le fond et la côte | 1 | 5 | 5 | ◐2.7 ◐2.9 ·3.6 ◐3.2 ·3.5 ·4.14 ◐4.15 ✅6.5 ·2.6 ·3.9 ◐4.6 |
 | **K4** Les eaux intérieures | 0 | 0 | 4 | ·2.3 ·2.4 ·2.5 ·12.2 |
 | **K5** δ, le système | 0 | 10 | 4 | ◐4.2 ◐4.3 ·4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ·4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
-| **K6** Les solides | 1 | 5 | 3 | ◐6.1 ◐6.2 ✅6.3 ◐6.4 ·6.7 ·6.8 ·6.6 ◐4.13 ◐1.3 |
+| **K6** Les solides | 2 | 4 | 3 | ✅6.1 ◐6.2 ✅6.3 ◐6.4 ·6.7 ·6.8 ·6.6 ◐4.13 ◐1.3 |
 | **K7** Les volumes finis | 1 | 4 | 4 | ◐5.2 ✅5.3 ◐5.4 ·5.6 ·5.7 ·5.8 ·5.9 ◐5.10 ◐5.12 |
 | **K8** Activation, prédiction, budget | 0 | 13 | 4 | ◐9.1 ◐9.2 ◐9.3 ·9.4 ◐9.5 ·9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ·9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
 | **K9** Réseau et persistance | 0 | 9 | 2 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ·10.5 ◐10.6 ◐10.8 ◐10.9 ·1.5 ◐3.7 ◐3.8 |
@@ -87,7 +87,6 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 5.9 | absent | Compartiments, brèches, inondation de navire, limitée par l'air |
 | 5.10 | partiel | Articulation V↔δ |
 | 5.12 | partiel | Capture et restauration de V |
-| 6.1 | partiel | Flottabilité des objets importants |
 | 6.2 | partiel | Forces de l'eau sur les objets |
 | 6.4 | partiel | Parois et corps mobiles dans δ |
 | 6.6 | absent | Grands navires |
@@ -177,4 +176,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S499 | 2026-10-06 | 6 | 71 | 43 | 120 |
 | S500 | 2026-10-06 | 6 | 71 | 43 | 120 |
 | S501 | 2026-10-06 | 6 | 71 | 43 | 120 |
+| S502 | 2026-10-06 | 7 | 70 | 43 | 120 |
 <!-- fin de l'historique -->

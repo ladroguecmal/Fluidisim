@@ -313,3 +313,13 @@ une protection : un corps d'essai se choisit loin de ses limites (la bouée haut
 d'une conclusion de S494) ; une pratique outillée : le battement lu par le script qui écrit le jeton (trois battements écrits d'avance, de
 tête, jusqu'à onze minutes). Quatre frictions sans suite : les protections ont joué. METHODE : 28 protections ; L384. Maillons **1**.
 Suivant : **S502** — 6.1, l'amortissement des autres degrés de liberté (le dernier manque de 6.1).
+
+## S502 — 2026-10-06 — 6.1 validée : la coque amortie sur ses six degrés de liberté
+
+**Entrée.** En autonomie ; le dernier manque de 6.1. **Fait** ([preuve](../docs/validation/RAYONNEMENT-6DDL-S502.md)) : δ rend le moment de sa
+pression sur la paroi (la force au bit ; un pavé incliné noyé à 10⁻⁵ de `r_c × F`) ; `rayonnement_coque` mesure inertie ajoutée et
+amortissement en roulis, tangage, lacet, cavalement, embardée ; le corps les reçoit (`added_inertia`, `radiation_damping_angular`).
+**Mesuré** : roulis ζ = 0,016, tangage 0,10 (dans les ordres prévus) ; lâchers à ±1 % de l'oscillateur ; résidu du roulis à 2,5 rad/s
+manqué (15,8 % : sauts aux franchissements de faces, A317), embardée et lacet bruités aux basses pulsations (les murs du domaine).
+**6.1 validée — 7 points sur 120**, sous des constantes à ± 10 à 30 %. Maillons **0**. Suivant : un autre point partiel proche de son
+périmètre.

@@ -50,8 +50,8 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 45 | 1.7, 1.8, 2.6, 2.7, 3.8, 3.9, 4.2, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 6.1, 6.4, 7.1, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
-| **1** | 32 | 1.1, 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 3.7, 4.1, 4.4, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 7.6, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
+| **0** | 46 | 1.7, 1.8, 2.6, 2.7, 3.8, 3.9, 4.2, 4.4, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 6.4, 7.1, 7.6, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
+| **1** | 30 | 1.1, 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 3.7, 4.1, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
 | **2** | 12 | 1.6, 2.5, 3.3, 3.4, 3.5, 4.9, 4.12, 6.7, 7.5, 9.5, 10.6, 12.2 |
 | **3** | 6 | 3.1, 4.3, 4.14, 5.9, 6.8, 7.3 |
 | **4** | 5 | 4.10, 6.6, 8.4, 13.2, 13.3 |
@@ -117,7 +117,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **4.1** Solveur volumique 3D à surface libre | B | — | 4.16 | — | **1** |
 | **4.2** Plusieurs domaines actifs simultanés | B | plus de deux domaines ; l'ordonnanceur dans l'afficheur | — | 4.9 | **0** |
 | **4.3** Subdivision adaptative anisotrope, blocs épars | B | — | 1.6 | 4.10, 9.9, 13.3 | **3** |
-| **4.4** Profondeur adaptative | B | `nz` variable : le redimensionnement vertical | 6.1 | — | **1** |
+| **4.4** Profondeur adaptative | B | `nz` variable : le redimensionnement vertical | — | — | **0** |
 | **4.5** Création, croissance, réduction et disparition visuellement gratuites | B | une disparition progressive | — | — | **E** — un verdict visuel des passages (A319) |
 | **4.6** Entrée des vagues de B/W dans le domaine | C | la houle progressive traversante sur une durée utile ; B4 | 3.9 | — | **1** |
 | **4.7** Frontière sans réflexion ni rupture visible | C | la réflexion d'un front oblique ; C05 | — | 13.2 | **0** |
@@ -155,12 +155,11 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **6.1** Flottabilité des objets importants | H | W derrière la requête ; les autres degrés de liberté ; C11 ; B6 | — | 4.4, 6.6, 6.8, 7.6, 13.2, 13.3 | **0** |
 | **6.2** Forces de l'eau sur les objets | H | W derrière la requête | 2.6, 4.15 | 6.7 | **1** |
 | **6.4** Parois et corps mobiles dans δ | B | la coque dans la production GPU de δ ; C23 sur le système | — | 1.3, 4.13, 6.6 | **0** |
-| **6.6** Grands navires | H | — | 3.2, 4.13, 5.9, 6.1, 6.4 | 11.3 | **4** |
+| **6.6** Grands navires | H | — | 3.2, 4.13, 5.9, 6.4 | 11.3 | **4** |
 | **6.7** Acteur poussé, renversé ou déplacé par l'eau | B | — | 6.2 | — | **2** |
-| **6.8** Impulsion d'entrée dans l'eau | H | — | 4.12, 6.1 | 13.2 | **3** |
+| **6.8** Impulsion d'entrée dans l'eau | H | — | 4.12 | 13.2 | **3** |
 
 ### 7. Phénomènes secondaires
 
@@ -171,7 +170,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **7.3** Microbulles visuelles | B | — | 4.12 | 8.4 | **3** |
 | **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 8.4, 13.2 | **1** |
 | **7.5** Air comprimé, vide, eau dans le vide | B | — | 7.4 | 5.9 | **2** |
-| **7.6** Glace et vapeur | H | — | 6.1 | 13.2 | **1** |
+| **7.6** Glace et vapeur | H | — | — | 13.2 | **0** |
 | **7.7** Danger et traversabilité | H | la publication par tuiles depuis B, W et V (ADR-018) | — | — | **0** |
 | **7.8** Audio de l'eau | H | les événements et paramètres publiés (ADR-016) | — | — | **E** — la fin du projet, par Wwise, l'audio du jeu (ADR-197 D5, ADR-219) |
 
@@ -247,8 +246,8 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
 | **13.1** Harnais de validation | H | les étages manquants de SPEC-003 | — | — | **0** |
-| **13.2** Les 23 cas canoniques passent sur le système | H | chaque cas exécuté sur le système | 3.2, 4.7, 4.17, 4.18, 5.9, 5.10, 6.1, 6.8, 7.1, 7.4, 7.6, 10.6 | 13.4 | **4** |
-| **13.3** Les onze bancs rendent leur verdict | H | chaque banc exécuté | 2.1, 4.3, 4.12, 6.1, 7.1, 8.6, 9.1, 11.5 | — | **4** |
+| **13.2** Les 23 cas canoniques passent sur le système | H | chaque cas exécuté sur le système | 3.2, 4.7, 4.17, 4.18, 5.9, 5.10, 6.8, 7.1, 7.4, 7.6, 10.6 | 13.4 | **4** |
+| **13.3** Les onze bancs rendent leur verdict | H | chaque banc exécuté | 2.1, 4.3, 4.12, 7.1, 8.6, 9.1, 11.5 | — | **4** |
 | **13.4** L'eau dans le jeu | H | lire les dépôts publics de DyingStar ; le jeu d'essai sur sa pile (ADR-219 D3) | 9.11, 10.1, 11.1, 12.4, 13.2 | — | **5** |
 
 <!-- fin des tables -->
