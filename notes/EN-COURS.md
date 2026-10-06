@@ -62,16 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S526 — **terminée**. En autonomie, **la neuvième revue de méthode** (ADR-222 D4 ; S521–S525).
+Session : S527 — **en cours**. En autonomie : **l'angle de C07 à `Fr_h` = 2,14** (S523 : la dernière crête des rayons a pris sur W un
+maximum local du plancher f32, 79,75° pour 27,83°). ADR-234 D2 : la référence d'un instrument porte le bruit de l'objet.
 
-**Ce que la session fait.** Relu : S521 (la revue), S522 (W en profondeur : l'essai de taille du nœud), S523 (un montage hors du domaine
-honnête de W ; un instrument qui prend le bruit f32 ; une note théorique fausse), S524 (une transition plus douce que le critère), S525 (la
-théorie calculée d'abord, l'assertion de C07 corrigée). **ADR-234** : D1 (tout le montage dans le domaine de ses outils, élargit ADR-228
-D1 et ADR-232 D1), D2 (la référence d'un instrument bruitée comme l'objet) ; L390, L391 ; METHODE (trente-deux) ; BOUSSOLE.
+**Ce que la session fait.** L'instrument « dernière crête **au-dessus d'un plancher** » : le maximum local le plus extérieur dont la valeur
+dépasse 10⁻³ du maximum du profil — seuil déclaré ici, avant toute mesure, à mi-chemin (en ordre de grandeur) entre le plancher de W et la
+crête. Éprouvé d'abord sur la référence **bruitée** au niveau de W, puis appliqué aux champs de W de S523 (montage retenu), sans les
+refaire.
+
+**Ordre de grandeur, calculé.** Profil à 15 m/s (80–100 m) : maximum 1,3·10⁻², crête de Mach ≈ 3·10⁻³ (0,23 du maximum), queue de W
+6–8·10⁻⁸ (6·10⁻⁶ du maximum). Le seuil 10⁻³ est 160 fois au-dessus du plancher, 230 fois sous la crête. Bruit de la référence : gaussien,
+d'écart-type 10⁻⁷ m par point (le plancher de W).
+
+**Critères, écrits avant.** (1) Sur la référence bruitée (trois tirages, trois grilles), l'instrument lit `arcsin(1/Fr_h)` à 1° aux deux
+vitesses. (2) Sur W (S523), à 2° de 44,46° et de 27,83°. Si (1) tient et (2) aussi, C07 peu profond passe aux deux vitesses.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-234, METHODE, L390–L391, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'instrument, la référence bruitée, W ; (1), (2).
+- [ ] **P3** — preuve ; listes 3.2, 13.2 ; C07 ; rituel.
 
 ### Notes de reprise

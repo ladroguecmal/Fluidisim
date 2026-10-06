@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 16:27 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 16:28 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S527 — l'angle de C07 à Fr_h = 2,14, un instrument robuste au bruit ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S526 — la neuvième revue de méthode (ADR-234) ([journal](notes/JOURNAL.md)). Avant : S525 (la résonance de C07 : W suit la théorie)
 Session suivante : **S527 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'angle de C07 à Fr_h = 2,14 (un instrument éprouvé sur une référence bruitée, ADR-234 D2), A330 (une référence de corps pour la coque, Michell), 6.2 la turbulence, 6.7 la poche d'air, 9.3, 2.6 C1 ; le montage dans le domaine de ses outils (ADR-234 D1), ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 1 — S526 : la revue de méthode (ADR-234), sans capacité
