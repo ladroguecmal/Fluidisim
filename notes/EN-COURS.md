@@ -83,7 +83,15 @@ sous l'empreinte (RK4 à 0,1 ms) à 3 % de max|η̄| (prévu < 1 %), et l'impact
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `Prepared::sample_local`, `MixedWater` ; essais (1)–(4).
+- [x] **P2** — `Prepared::sample_local`, `MixedWater` ; essais (1)–(4).
 - [ ] **P3** — preuve ; liste 6.2 ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
+- **P2** — (1) 2,0·10⁻¹⁰ m sur 20 s. (2) pilonnement à 0,81 % de max|η̄| (1 kJ sur 2 cm), l'impact seul : 6,9 cm de pilonnement pour
+  3,8 cm de surface. (3) **manqué d'abord** : à 1 kJ l'écart horizontal vaut l'excursion (7,65 cm) — une **dérive du second ordre**
+  vers l'extérieur ; ×97,5 de 10 J à 1 kJ (second ordre). Au linéaire (0,1 J), le reste est l'empreinte : 4,90 % à 0,5 m, 1,26 % à
+  0,25 m (÷ 3,90, en L²). Critère (3) réécrit après le manqué, dit dans l'essai. (4) zéro refus. Impasses : 64 modes refusés
+  (`Resolution`, 32 m sur 12 s) → 256 ; une bouée étroite et haute (0,25 × 0,25 × 0,4) chavire → proportions gardées ; départ au
+  repos dans la houle → 0,21 m de retard (vitesse de l'eau au départ, comme S333). Observation : sous B seule, l'écart du pilonnement à
+  l'oscillateur temporel vaut 3·10⁻⁵ à 1,4·10⁻⁴ m (2,5 mm à 2 cm de houle), non proportionnel — sous 1 % de la houle, cause non
+  cherchée. Suite : 653 essais.

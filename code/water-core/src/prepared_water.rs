@@ -159,6 +159,27 @@ impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
         output[..points.len()].copy_from_slice(&scratch[..points.len()]);
         Ok(points.len())
     }
+    /// **S494 — la requête d'un corps** ([`crate::rigid_body::MixedWater`]) : B au point `local` du repère de son ancre,
+    /// composé aux impacts confirmés par la composition autoritaire (ADR-077), sans passer par une position du monde — le
+    /// corps vit dans ce repère local. Mêmes refus que `sample_world_batch`, le point portant l'indice 0.
+    pub fn sample_local(
+        &self,
+        bound: &BoundBackground<'_>,
+        local: [f32; 2],
+        time: SimTime,
+        max_slope: f32,
+    ) -> Result<WaterSample, BatchError> {
+        if bound.frame != self.frame || bound.cell != self.cell || self.gravity != bound.background.gravity() {
+            return Err(BatchError::Context);
+        }
+        let point = |error| BatchError::Point { index: 0, error };
+        let base = bound
+            .background
+            .eval_local([local[0], local[1], 0.0], time)
+            .ok_or(point(composition::Error::InvalidBackground))?;
+        composition::compose(base, self.journal, self.fields.iter().flatten(), self.frame, self.cell, local, time, max_slope)
+            .map_err(point)
+    }
     /// B et points doivent provenir du même instant et repère hôte. Pas de calcul de B ici.
     pub fn sample_batch(
         &self,

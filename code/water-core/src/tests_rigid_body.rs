@@ -358,3 +358,192 @@ fn the_added_mass_follows_the_accelerating_water_s336() {
     }
 }
 
+
+/// **S494 — W derrière la requête du corps.** Le montage : la houle de B (`a`, 6 s) et, si `energie > 0`, un impact
+/// confirmé de W à l'origine — `energie` J, λ = 4 m, né à 0 —, domaine de 32 m sur 12 s, 256 modes ; la bouée — 0,5 × 0,5 × 0,4 m,
+/// 500 kg/m³, proxy 4 × 4 × 4 — lâchée à son tirant en `(x0, 0)`, à la vitesse horizontale de B (l'impact naît au repos), `pas` pas de 2 ms sous `MixedWater` (`mixte`) ou
+/// sous `BackgroundWater`. `visite` reçoit l'instant (µs), la bouée et la requête à cet instant : avant le premier pas, puis
+/// après chacun. Rend le nombre de refus de la composition.
+fn bouee_sous_w(
+    a: f64,
+    energie: f32,
+    cote: f64,
+    x0: f64,
+    pas: u64,
+    mixte: bool,
+    visite: &mut dyn FnMut(u64, &RigidBody, &dyn WaterQuery),
+) -> u64 {
+    use crate::prepared_water::{BoundBackground, Context, Prepared};
+    use crate::radial_impact::{Domain, RadialImpact};
+    use crate::wave_event::{Impact, Origin, WaveEvent};
+    use crate::wave_journal::{Cause, Journal};
+    use crate::FrameId;
+    let b = houle(a, 6.);
+    let bound = BoundBackground::new(&b, FrameId(0), 0);
+    let mut records = [None; 1];
+    let mut journal = Journal::new(0, &mut records);
+    if energie > 0. {
+        let event = WaveEvent::impact(Impact {
+            id: 1,
+            frame: FrameId(0),
+            cell: 0,
+            birth: SimTime(0),
+            ttl_us: 12_000_000,
+            position: [0.; 3],
+            energy_j: energie,
+            wavelength_m: 4.,
+            direction_turns: 0.,
+            anisotropy: 0.,
+            displaced_l: 0.,
+            material: 0,
+            origin: Origin::Server,
+            above_surface: true,
+        })
+        .unwrap();
+        journal.confirm(0, Cause { entity: 1, command: 1, emission: 0 }, event).unwrap();
+    }
+    let ctx = Context {
+        frame: FrameId(0),
+        cell: 0,
+        medium: crate::impact_field::Medium { gravity: b.gravity(), density: 1025., depth: 50., max_slope: 0.5 },
+        domain: Domain { radius: 32., age_us: 12_000_000 },
+    };
+    let mut pool: [Option<RadialImpact<256>>; 1] = [const { None }; 1];
+    let impacts = Prepared::<256>::build(&journal, &mut pool, ctx).unwrap();
+    let haut = 0.8 * cote;
+    let z_eq = haut * (0.5 - 500. / MER.rho);
+    let mut bouee = RigidBody::cuboid([cote, cote, haut], 500., [x0, 0., z_eq], [4, 4, 4]);
+    let mut refus = 0;
+    let mixte_a = |t: u64| MixedWater { bound: &bound, impacts: &impacts, time: SimTime(t), max_slope: 0.5, refusals: core::cell::Cell::new(0) };
+    // Lâchée à la vitesse horizontale de l'eau qui la porte (S333) : au repos, elle prendrait du retard sur la houle de B.
+    let u0 = BackgroundWater { background: &b, time: SimTime(0) }.velocity([x0, 0., 0.]);
+    bouee.velocity = [u0[0], u0[1], 0.];
+    for n in 0..=pas {
+        let t = n * 2000;
+        if mixte {
+            let eau = mixte_a(t);
+            visite(t, &bouee, &eau);
+            if n < pas {
+                bouee.step(0.002, &eau, MER);
+            }
+            refus += eau.refusals.get();
+        } else {
+            let eau = BackgroundWater { background: &b, time: SimTime(t) };
+            visite(t, &bouee, &eau);
+            if n < pas {
+                bouee.step(0.002, &eau, MER);
+            }
+        }
+    }
+    refus
+}
+
+/// **S494, critère 1 — sans impact, la requête mixte est celle de B.** Sur 20 s de houle de B (5 cm, 6 s), la bouée sous
+/// `MixedWater` (journal vide) suit sa trajectoire sous `BackgroundWater` à 10⁻⁶ m : seule la normale est renormalisée.
+#[test]
+fn without_impact_the_mixed_query_is_the_background_s494() {
+    let mut seule = Vec::new();
+    bouee_sous_w(0.05, 0., 0.5, 5., 10_000, false, &mut |_, c, _| seule.push(c.position));
+    let mut mixte = Vec::new();
+    let refus = bouee_sous_w(0.05, 0., 0.5, 5., 10_000, true, &mut |_, c, _| mixte.push(c.position));
+    let ecart = seule.iter().zip(&mixte).flat_map(|(p, q)| (0..3).map(move |k| (p[k] - q[k]).abs())).fold(0f64, f64::max);
+    println!("S494 critère 1 : écart {ecart:.2e} m, refus {refus}");
+    assert_eq!(refus, 0);
+    assert!(ecart <= 1e-6, "{ecart}");
+}
+
+/// La mesure de S494 : la bouée de côté `cote` sous B (`a`) et un impact de `energie` J à 5 m, 10 s. Rend `[max|η̄_W|, max|z_W|,
+/// écart du pilonnement à l'oscillateur, max|∫u dt|, écart horizontal, refus, max|η̄ − η̄(0)|]` — `_W` : la différence avec la même scène sans impact ;
+/// `η̄` la surface moyenne sous les seize colonnes du proxy à la position de la bouée ; l'oscillateur
+/// `z'' = (ρgA/m)(η̄ − z + h/2) − g`, forcé par cette `η̄` (interpolée linéairement entre les pas, ω·dt ≈ 0,008), intégré en
+/// RK4 à 0,1 ms depuis le même état ; `∫u dt` l'excursion de la particule de surface au centre de la bouée.
+fn mesure_s494(a: f64, energie: f32, cote: f64) -> [f64; 7] {
+    let (pas, dt) = (5000u64, 0.002);
+    // `ρgA/m` = `ρg/(h·ρ_bouée)`, la hauteur `h` = 0,8 × le côté.
+    let haut = 0.8 * cote;
+    let k_raideur = MER.rho * G / (haut * 500.);
+    // La série : (t, x, z, η̄, u_x), à 0 puis après chaque pas.
+    let serie_de = |energie: f32| {
+        let mut serie: Vec<[f64; 5]> = Vec::new();
+        let refus = bouee_sous_w(a, energie, cote, 5., pas, true, &mut |t, c, eau| {
+            let mut eta = 0.;
+            for j in 0..4 {
+                for i in 0..4 {
+                    eta += eau.surface(c.position[0] + ((i as f64 + 0.5) / 4. - 0.5) * cote, c.position[1] + ((j as f64 + 0.5) / 4. - 0.5) * cote);
+                }
+            }
+            let u = eau.velocity([c.position[0], c.position[1], 0.]);
+            serie.push([t as f64 * 1e-6, c.position[0], c.position[2], eta / 16., u[0]]);
+        });
+        (serie, refus)
+    };
+    let (serie, refus) = serie_de(energie);
+    let (sans, _) = serie_de(0.);
+    let eta_a = |t: f64| -> f64 {
+        let s = t / dt;
+        let i = (s.floor() as usize).min(serie.len() - 2);
+        let f = s - i as f64;
+        serie[i][3] * (1. - f) + serie[i + 1][3] * f
+    };
+    let acc = |t: f64, z: f64| k_raideur * (eta_a(t) - z + 0.5 * haut) - G;
+    let (mut z, mut v, sous) = (serie[0][2], 0., 20usize);
+    let h = dt / sous as f64;
+    let (mut eta_w, mut z_w, mut pire, mut excursion, mut ampl_x, mut pire_x) = (0f64, 0f64, 0f64, 0f64, 0f64, 0f64);
+    let mut ampl = 0f64;
+    for n in 1..serie.len() {
+        for q in 0..sous {
+            let t = (n - 1) as f64 * dt + q as f64 * h;
+            let (k1z, k1v) = (v, acc(t, z));
+            let (k2z, k2v) = (v + 0.5 * h * k1v, acc(t + 0.5 * h, z + 0.5 * h * k1z));
+            let (k3z, k3v) = (v + 0.5 * h * k2v, acc(t + 0.5 * h, z + 0.5 * h * k2z));
+            let (k4z, k4v) = (v + h * k3v, acc(t + h, z + h * k3z));
+            z += h / 6. * (k1z + 2. * k2z + 2. * k3z + k4z);
+            v += h / 6. * (k1v + 2. * k2v + 2. * k3v + k4v);
+        }
+        let s = serie[n];
+        excursion += 0.5 * (serie[n - 1][4] + s[4]) * dt;
+        eta_w = eta_w.max((s[3] - sans[n][3]).abs());
+        z_w = z_w.max((s[2] - sans[n][2]).abs());
+        pire = pire.max((s[2] - z).abs());
+        ampl = ampl.max((s[3] - serie[0][3]).abs());
+        ampl_x = ampl_x.max(excursion.abs());
+        pire_x = pire_x.max((s[1] - 5. - excursion).abs());
+    }
+    [eta_w, z_w, pire, ampl_x, pire_x, refus as f64, ampl]
+}
+
+/// **S494, critères 2 à 4 — un impact de W fait pilonner et cavaler la bouée.** La bouée de 0,5 m à 5 m d'un impact d'1 kJ
+/// (λ = 4 m), sur une houle de B de 2 cm. (2) Le pilonnement suit l'oscillateur forcé par la surface sous l'empreinte à 3 % de
+/// max|η̄| ; l'impact la fait bouger d'au moins 30 % de max|η̄_W|. (3) **Manqué d'abord** : l'écart horizontal y vaut
+/// l'excursion — la bouée prend une **dérive du second ordre** vers l'extérieur (le corps suit `x'' = −g·∂η/∂x`, la particule
+/// `x'' = −g·∂η/∂x + u·∂u/∂x`), que l'ordre de grandeur n'avait pas prévue. Écrit après le manqué : l'écart croît comme
+/// l'énergie (`a²`) de 10 J à 1 kJ — ×≥ 30 pour ×100, le premier ordre donnerait ×10 ; au régime linéaire (0,1 J, B à 10 µm), ce
+/// qui reste est **l'empreinte** — l'anneau vu à travers 0,5 m — : il décroît comme le carré du côté (÷ ≥ 3 de 0,5 à 0,25 m) et
+/// tient 2 % de l'excursion à 0,25 m. (4) Aucun refus.
+#[test]
+fn an_impact_of_w_heaves_and_carries_the_buoy_s494() {
+    let m = mesure_s494(0.02, 1000., 0.5);
+    let ampl = m[6];
+    println!(
+        "S494 1 kJ sur 2 cm : max|η̄| {ampl:.4} m, max|η̄_W| {:.4} m, pilonnement dû à W {:.4} m, écart à l'oscillateur {:.2e} m ({:.2} % de max|η̄|), excursion {:.4} m, écart horizontal {:.2e} m ({:.1} %), refus {}",
+        m[0], m[1], m[2], 100. * m[2] / ampl, m[3], m[4], 100. * m[4] / m[3], m[5]
+    );
+    assert_eq!(m[5], 0., "critère 4");
+    assert!(m[2] <= 0.03 * ampl, "critère 2 : {} contre {ampl}", m[2]);
+    assert!(m[1] >= 0.3 * m[0], "critère 2 : {} contre {}", m[1], m[0]);
+    let (dix, mille) = (mesure_s494(1e-5, 10., 0.5), mesure_s494(1e-5, 1000., 0.5));
+    let echelle = mille[4] / dix[4];
+    let (l50, l25) = (mesure_s494(1e-5, 0.1, 0.5), mesure_s494(1e-5, 0.1, 0.25));
+    println!(
+        "S494 : écart horizontal ×{echelle:.1} de 10 J à 1 kJ (second ordre ≈ 100, premier 10) ; à 0,1 J, {:.2} % de l'excursion à 0,5 m, {:.2} % à 0,25 m (÷ {:.2}) ; pilonnement {:.2} % et {:.2} %",
+        100. * l50[4] / l50[3], 100. * l25[4] / l25[3], (l50[4] / l50[3]) / (l25[4] / l25[3]),
+        100. * l50[2] / l50[6], 100. * l25[2] / l25[6]
+    );
+    assert!(echelle >= 30., "critère 3, second ordre : {echelle}");
+    assert!((l50[4] / l50[3]) / (l25[4] / l25[3]) >= 3., "critère 3, l'empreinte");
+    assert!(l25[4] <= 0.02 * l25[3], "critère 3 : {} contre {}", l25[4], l25[3]);
+    for r in [dix, mille, l50, l25] {
+        assert_eq!(r[5], 0., "critère 4");
+        assert!(r[2] <= 0.03 * r[6], "critère 2 : {} contre {}", r[2], r[6]);
+    }
+}

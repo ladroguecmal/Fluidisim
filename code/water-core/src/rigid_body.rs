@@ -87,6 +87,60 @@ impl WaterQuery for BackgroundWater<'_> {
     }
 }
 
+/// **S494 : B + W derrière la requête du corps** — la houle de B et les impacts confirmés de W, composés par la composition
+/// autoritaire ([`crate::prepared_water::Prepared::sample_local`], ADR-077), dans le repère local de l'ancre de B. Un point que
+/// la composition refuse — hors du domaine d'un impact, au-delà de sa validité, pente au-delà de `max_slope` — rend B seul, et
+/// le refus est **compté** (`refusals`) : l'hôte le lit, rien ne le masque. L'accélération de W est une différence centrée de
+/// 1 ms sur sa vitesse de surface (B garde la sienne, analytique) : la masse ajoutée seule la lit.
+pub struct MixedWater<'a, 'j, const N: usize = 64> {
+    pub bound: &'a crate::prepared_water::BoundBackground<'a>,
+    pub impacts: &'a crate::prepared_water::Prepared<'a, 'j, N>,
+    pub time: crate::types::SimTime,
+    pub max_slope: f32,
+    pub refusals: core::cell::Cell<u64>,
+}
+
+impl<const N: usize> MixedWater<'_, '_, N> {
+    fn sample(&self, x: f64, y: f64, time: crate::types::SimTime) -> Option<crate::types::WaterSample> {
+        match self.impacts.sample_local(self.bound, [x as f32, y as f32], time, self.max_slope) {
+            Ok(s) => Some(s),
+            Err(_) => {
+                self.refusals.set(self.refusals.get() + 1);
+                self.bound.binding().0.eval_local([x as f32, y as f32, 0.], time)
+            }
+        }
+    }
+    /// La vitesse de surface de W seule : la composée moins celle de B, au même point et au même instant.
+    fn w_velocity(&self, x: f64, y: f64, time: crate::types::SimTime) -> [f64; 3] {
+        let b = self.bound.binding().0.eval_local([x as f32, y as f32, 0.], time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64));
+        let m = self.sample(x, y, time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64));
+        [m[0] - b[0], m[1] - b[1], m[2] - b[2]]
+    }
+}
+
+impl<const N: usize> WaterQuery for MixedWater<'_, '_, N> {
+    fn surface(&self, x: f64, y: f64) -> f64 {
+        self.sample(x, y, self.time).map_or(0., |s| s.eta as f64)
+    }
+    fn slope(&self, x: f64, y: f64) -> [f64; 2] {
+        self.sample(x, y, self.time).map_or([0.; 2], |s| [-(s.normal[0] / s.normal[2]) as f64, -(s.normal[1] / s.normal[2]) as f64])
+    }
+    fn velocity(&self, p: [f64; 3]) -> [f64; 3] {
+        self.sample(p[0], p[1], self.time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64))
+    }
+    fn acceleration(&self, p: [f64; 3]) -> [f64; 3] {
+        let b = self.bound.binding().0;
+        let mut a = b.acceleration_local([p[0] as f32, p[1] as f32, 0.], self.time).map_or([0.; 3], |a| a.map(|v| v as f64));
+        let (avant, apres) = (crate::types::SimTime(self.time.0.saturating_sub(1000)), crate::types::SimTime(self.time.0 + 1000));
+        let (u0, u1) = (self.w_velocity(p[0], p[1], avant), self.w_velocity(p[0], p[1], apres));
+        let h = (apres.0 - avant.0) as f64 * 1e-6;
+        for k in 0..3 {
+            a[k] += (u1[k] - u0[k]) / h;
+        }
+        a
+    }
+}
+
 /// Un point du proxy de flottabilité, dans le repère du corps : position par rapport au centre de masse,
 /// volume représenté, épaisseur sur laquelle son immersion passe de 0 à 1, aire qu'il oppose à la traînée.
 #[derive(Clone, Copy, Debug, PartialEq)]
