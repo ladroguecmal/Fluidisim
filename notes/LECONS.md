@@ -6582,3 +6582,9 @@ points (S524). Comme les corps d'essai à leur limite (L384, L387) : tout le mon
 **S523 — l'instrument sans bruit.** La dernière crête des rayons, éprouvée sur la théorie (float64, sans bruit), prend sur W un maximum
 local du plancher f32 (8·10⁻⁸ m pour un profil de 10⁻² m) : 79,75° au lieu de 27°. La famille de l'objet mesuré comprend son bruit
 (ADR-234 D2).
+
+## L392
+
+**S520, S529 — la limite matérielle trouvée en lançant.** La carte s'est arrêtée deux fois au premier domaine dix fois plus grand :
+71 504 groupes de dispatch pour 65 535 (1,49 M mailles), puis une liaison de 230 Mo pour 128 Mo (3,4 M mailles) ; et la limite des noyaux
+de mailles (4,19 M) a fixé la taille du domaine suivant. Une ligne de script au plan les aurait dites (ADR-235 D1).

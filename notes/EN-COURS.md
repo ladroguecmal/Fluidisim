@@ -62,32 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S530 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S528–S529), puis **5.5 — l'absorption par le
-sol** : la pluie tombe dans V (S378), mais rien n'entre dans le sol.
+Session : S531 — **terminée**. En autonomie, **la dixième revue de méthode** (ADR-222 D4 ; S526–S530).
 
-**Ce que la session fait.** Une loi d'arête de V, `Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm }` : **Green–
-Ampt**, `f = K·(1 + (ψ + h₀)·Δθ/F)`, de la flaque (`from`, la surface du sol à la cote de l'arête ; `h₀` la lame au-dessus) vers le sol
-(`to`, un nœud dont le remplissage rapporté à l'aire est la lame infiltrée cumulée `F` — aucun état nouveau). Sur un pas, l'équation
-s'intègre **exactement** : `t(F) = (F − M ln(1 + F/M))/K`, `M = (ψ + h₀)Δθ`, inversée par bissection en f64 (déterministe). Le sol plein, le
-limiteur d'arrivée arrête l'infiltration ; la flaque à sec, rien ne passe. La validation, l'empreinte et l'instantané connaissent la loi.
-
-**Ordre de grandeur, calculé.** Limon sableux : K = 1,09 cm/h, ψ = 11 cm, Δθ = 0,3, h₀ = 1 cm : `F` = **3,74 / 12,68 / 35,71 mm** à 60 s /
-10 min / 1 h. **Un Euler explicite** (`F` au début du pas, plancher 1 µm, pas de 0,1 s) donne +212 % / +37 % / +7,6 % — d'où l'intégration
-exacte. Le quantum de V (1 ml sur 1 m², 1 µm) : 3·10⁻⁵ de `F` à 1 h.
-
-**Critères, écrits avant.** (1) Les lois d'avant au bit (suite). (2) Flaque à charge quasi constante (1 000 m², 1 cm), 1 m² de sol :
-`F(t)` à 10⁻³ de la solution implicite à 60 s, 10 min, 1 h ; la masse exacte. (3) Le sol plein arrête l'infiltration (au millilitre) ;
-une flaque à sec n'infiltre rien. (4) Une pluie de 5 mm/h sur 1 m² de sol de K = 10,9 mm/h pendant 1 h : tout entre (5 L au millilitre
-près), la flaque reste sous 2 ml.
+**Ce que la session fait.** Relu : S526 (la revue), S527 (la référence bruitée, appliquée : elle a reproduit l'échec de S523), S528 (la
+garde de résolution qui refuse un montage), S529 (la liaison de 128 Mo ; un critère de convergence point par point manqué, maille et pas
+variant ensemble), S530 (l'ordre de grandeur qui change la construction). **ADR-235** : D1, les limites matérielles calculées avant
+d'agrandir un domaine, refusées avec un nom ; L392 ; METHODE (trente-trois) ; BOUSSOLE.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot (feuille de route S528–S529) ; plan.
-- [x] **P2** — la loi, les essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.5 ; rituel (`--lot`).
+- [x] **P1** — jeton ; la revue (ADR-235, METHODE, L392, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — `Flow::Infiltration`, `green_ampt_step` ; essais `s530` : 3·10⁻⁵ / 1·10⁻⁵ / 7·10⁻⁵ ; sol plein exact ; flaque à sec ; pluie
-  4 999 ml, flaque ≤ 1 ml. Suite 690.
-- **P3** — preuve INFILTRATION-S530 ; liste 5.5 ; index ; journal.
-

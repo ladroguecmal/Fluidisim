@@ -566,3 +566,11 @@ lot (dû) et un point partiel.
 grandeur calculé au plan a changé la construction** : un Euler explicite faisait +212 % à 60 s ; l'équation est intégrée exactement sur le
 pas. **Mesuré** : 7·10⁻⁵ de la solution implicite au pire sur 1 h, masse exacte, sol plein et flaque à sec, la pluie toute absorbée.
 Maillons **0** (5.5 avance). Suivant : **S531, la dixième revue de méthode** (S526–S530).
+
+## S531 — 2026-10-06 — la dixième revue de méthode (ADR-235)
+
+**Entrée.** En autonomie ; revue due (S526–S530). **Friction répétée** : une limite matérielle de la carte trouvée en lançant le premier
+grand domaine (65 535 groupes en S520, 128 Mo par liaison en S529) — **protection nouvelle** (ADR-235 D1, L392) : les calculer au plan, et
+une limite atteinte se refuse avec un nom. Le reste — la convergence où maille et pas varient ensemble (S529), une fois — rien à ajouter ;
+les protections de S521–S526 ont servi (la référence bruitée, la garde de résolution, l'ordre de grandeur qui change la construction).
+Maillons **1**. Suivant : **S532**, un point partiel — et la carte qui refuse au lieu de s'arrêter (D1).
