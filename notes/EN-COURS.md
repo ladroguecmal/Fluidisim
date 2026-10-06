@@ -62,16 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S551 — **terminée**. En autonomie, **la quatorzième revue de méthode** (ADR-222 D4 ; S546–S550) et **le lot des registres** (dû).
+Session : S552 — **en cours**. En autonomie, **6.6 — S548 et S549 ensemble** : une citerne latérale s'envahit par une brèche, la coque gîte
+vers elle et s'enfonce — l'eau entre sous une pesanteur que la gîte incline, et pèse là où elle se tient.
 
-**Ce que la session fait.** Relu : S546 (la revue), S547 (l'évent ; la reprise après coupure), S548 (la barge envahie), S549 (une formule
-d'analyse fausse, un diagnostic posé avant de la relire), S550 (la formule éprouvée par intégration avant la mesure). **ADR-239** : D1, une
-formule d'analyse nouvelle s'éprouve par un calcul indépendant avant la mesure et se relit la première devant un écart ; L397 ; METHODE ;
-BOUSSOLE. Le lot : feuille de route S548–S551.
+**Ce que la session fait.** Un essai, sans code neuf : la barge de S548 (20 × 8 × 4 m, 246 t) ; une citerne latérale de V à tribord
+(20 × 0,5 × 4 m, `y` de 3,5 à 4 m), forme volumique, une brèche de 0,1 m² à son fond ; la mer, vue du navire, une forme volumique de
+400 × 400 × 20 m centrée sur la verticale de la brèche, replacée à chaque pas sur la surface du monde ; la pesanteur du navire
+`Rᵀ·(0, 0, −g)` pour V ; l'eau de la citerne pèse en son centre mouillé (S549).
+
+**Ordre de grandeur, calculé — la référence indépendante** (ADR-239 D1) : la flottabilité perdue en section, intégrée numériquement (la
+section intacte `y` ∈ [−4 ; 3,5] sous la flottaison inclinée, la force et le moment résolus par bisection) : **gîte 8,088°, tirant au
+centre 1,6355 m, 21,68 m³ dans la citerne** ; tribord immergé à 2,20 m, bâbord à 1,07 m (pont sec, bouchain noyé). Une citerne de 2 m
+n'aurait aucun équilibre avant 40° (calculé) : elle n'est pas prise.
+
+**Critères, écrits avant.** (1) La gîte finale à 3 % de 8,088°. (2) Le tirant au centre à 1 % de 1,6355 m ; l'eau à 2 % de 21,68 m³.
+(3) La masse de V exacte. Quantum : 1 ml sur 10 m² de citerne (0,1 µm), rapport 10⁷.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-239, METHODE, L397, BOUSSOLE, index) ; le lot.
-- [x] **P2** — rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
