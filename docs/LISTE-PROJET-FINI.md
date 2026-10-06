@@ -554,7 +554,7 @@ pas recopiée ici (L137).
   bascule, la bulle libre (7.4), le vide et l'eau dans le vide.
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *partiel* depuis S574 : **la glace** — la croissance de Stefan, la portance de Gold (la table de SPEC-002
   reproduite ligne à ligne), la flottaison, la formation en plaque ([preuve](validation/GLACE-S574.md)). Manquent la vapeur, la glace
-  dans les couches (un plan d'eau qui gèle, sa fonte), le gel borné aux plans d'eau gelables (ADR-027 §3), le rendu. L'évaporation et le gel des contenants, par V
+  dans les couches (un plan d'eau qui gèle, sa fonte), le gel borné aux plans d'eau gelables (ADR-027 §3), le rendu. Décidé : l'évaporation et le gel des contenants passent par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *partiel* depuis S570 : **l'échantillon** (le produit
   de danger `HR = d·(v + 0,5)` et ses classes, la classe de profondeur d'un humanoïde) et **le prochain franchissement** d'une profondeur

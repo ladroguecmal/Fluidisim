@@ -412,6 +412,8 @@ l'écrémeur, l'instantané de la composition (`WVLQ`).
 **S567–S568** : 5.8 avance deux fois — le réseau en charge couplé au pas de V (la masse à l'entier), ses pompes et ses clapets.
 **S569–S571** : 5.8 avance (la vitesse des pompes, l'exutoire à l'air libre) ; **7.7 ouvert** (l'échantillon de traversabilité, le
 prochain franchissement) ; la dix-huitième revue (ADR-244 : un essai n'affirme que ce que le plan a écrit).
+**S572–S574** : 7.7 avance trois fois — les tuiles, l'invalidation et la praticabilité par agent, la glace porteuse ; **7.6 ouvert**
+(la glace : Stefan, Gold).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

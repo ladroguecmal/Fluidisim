@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 23:50 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 23:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S575 — le lot ; C15, la glace d'un lac dans V ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S574 — la glace : croissance et portance ([journal](notes/JOURNAL.md)). Avant : S573 (l'invalidation et la praticabilité par agent)
 Session suivante : **S575 — le lot** (dû en S575) **et un point partiel** (par la feuille de route). Revue à S576. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 1 — S574 : 7.6 absent → partiel ; 7.7 avance

@@ -62,37 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S574 — **terminée**. En autonomie, **la glace** — 7.6 (absent) et 7.7 (la glace porteuse, SPEC-006 §5.1 `ice_h`,
-`ice_capacity_kg`). SPEC-002 §4 ; ADR-027 §3 (la glace retenue, bornée aux lacs et baies abritées).
+Session : S575 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S572–S574 ; la ligne 7.6 de la liste reformulée), puis
+**C15 — la croissance de la glace** (non exécuté ; listes 7.6, 13.2) : « lac abrité, `FDD` imposé, 30 jours ; épaisseur à ± 10 % de
+`0,035·√FDD` ; aucune plaque tant que `Hs > 0,15 m` ; masse conservée sur un cycle gel/dégel complet ». ADR-203 D6 : le gel des contenants
+passe par V.
 
-**Ce que la session fait.** `glace.rs` : la croissance de **Stefan**, `h = √(h₀² + 2·k·ΔT·t/(ρ·L))` (`k` = 2,2 W/m/K, `L` = 334 kJ/kg,
-`ρ` = 917 kg/m³), et son écriture en degrés-jours ; la portance de **Gold**, `P = A·h²`, **A = 3,5 kg/cm²** (la valeur prudente de Gold,
-charges mobiles) ; la fraction émergée (`1 − ρ_glace/ρ_eau`) ; la formation en plaque (`Hs < 0,15 m`). L'échantillon de traversabilité
-reçoit `ice_h` et `ice_capacity_kg` (dérivé une fois, ici : SPEC-006 §5.1) ; un agent de masse donnée traverse si la charge admissible la
-couvre ; l'échéance où la glace portera une charge se prédit par le franchissement de `h_min = √(m/A)`.
+**Ce que la session fait.** La glace d'un lac est **une couche des liquides de V** (ADR-241), de densité 917, au-dessus de l'eau — sa
+flottaison est alors l'hydrostatique des couches. `glace::geler(…)` : l'épaisseur visée par Stefan (S574), le volume de glace visé
+`A·h` (l'aire de la surface, fournie), et le gel **par quanta exacts** — 917 ml d'eau deviennent 1 000 ml de glace (`917·1000 = 1000·917` :
+la masse à l'entier) ; la fonte, le chemin inverse. Le nœud gagne 83 ml par quantum (la glace prend plus de place). Pas de prise en plaque
+si `Hs ≥ 0,15 m` (le mécanisme existe : l'assertion n'est plus vide, note S29 de C15).
 
-**Références, calculées avant** (ce script les écrit). Stefan : `h = 0.035231·√FDD` — à 10, 50, 100, 200 K·jour : **0.1114,
-0.2491, 0.3523, 0.4982 m** (la table de SPEC-002 : 11, 25, 35, 50 cm). Gold : à 5, 10, 20, 30, 50 cm,
-**87.5, 350, 1400, 3150, 8750 kg** — avec les masses de référence 100 kg (une
-personne équipée), 400 kg (un groupe, une motoneige), 1 500 kg (une voiture légère), 5 000 kg (un camion léger), la table de SPEC-002
-est reproduite ligne à ligne (le script l'a vérifié avant d'écrire). L'échéance : depuis 10 cm sous 10 K de gel, une voiture légère
-(`h_min` = 0.20702 m) portée dans **228714.1 s** (2.647 jours). Émergé en eau douce : **8.3 %**.
+**Références, calculées avant** (ce script les écrit). Un lac de 10 × 10 m, 2 m d'eau, 30 jours à 10 K de gel (300 K·jour) : Stefan
+**0.610219 m** ; la référence de C15, `0,035·√FDD` = **0.606218 m** (écart +0.66 %) ; **61021 quanta**,
+55956257 ml d'eau gelés ; la surface monte de 50.647 mm. Le dégel complet rend toute l'eau.
 
-**Quantum** (ADR-236 D1) : f64 pour la croissance (`h` à 10⁻⁹) ; la bissection à 1 ms sur des jours (10⁻⁸ relatif). **Critères, écrits
-avant.** (1) Stefan à 10⁻⁶ m de ces valeurs ; (2) Gold à 10⁻⁶ relatif, et la table des charges ; (3) l'échéance à 1 s ; (4) l'émergé à
-10⁻⁶ ; la plaque refusée à `Hs` = 0,15 m, formée à 0,149 ; (5) refus : épaisseur, gel ou temps négatifs.
+**Quantum** (ADR-236 D1) : un quantum de glace, 1 000 ml sur 100 m² = 10 µm d'épaisseur. **Critères, écrits avant.** (1) l'épaisseur
+à ± 10 % de `0,035·√FDD` (et à un quantum de Stefan) ; (2) la masse `ρ_eau·V_eau + ρ_glace·V_glace` exacte à chaque pas, et l'eau rendue
+au millilitre après le dégel complet ; (3) sous `Hs` = 0,2 m, aucune glace en 30 jours ; (4) la composition somme au volume du nœud à chaque
+pas (la place comprise : refus si la capacité manque).
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `glace.rs`, l'échantillon ; (1)–(5).
-- [x] **P3** — preuve ; listes 7.6 et 7.7 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `geler`, `fondre` et C15 ; (1)–(4).
+- [ ] **P3** — preuve ; listes 7.6, 13.2 ; C15 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **Vérification ajoutée en route** (ADR-244 D1, avant l'essai) : `porte_par_la_glace` — sur 30 cm de glace (Gold : 3 150 kg, la valeur du
-  plan), une voiture de 1 500 kg est portée, un camion de 5 000 kg non ; sans glace, rien n'est porté.
-- **P2 fini** — Stefan et Gold à leurs références, la table de SPEC-002 reproduite, l'échéance à 0,1 s, l'émergé, la plaque, les refus ;
-  la vérification de route tenue. Suite 749. Pour la revue de S576 : deux scripts encore écrits par heredoc (S566, S574), contre la lettre
-  d'ADR-240 D1.
-- **P3** — preuve GLACE-S574 ; listes 7.6 (absent → partiel) et 7.7 ; décompte ; index ; journal.
-
