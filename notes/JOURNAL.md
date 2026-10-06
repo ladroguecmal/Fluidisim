@@ -946,3 +946,9 @@ sa dérivée analytique ; une mer de B réelle plus une marée à 1 ulp ; la com
 **Entrée.** En autonomie ; 2.2 (et 7.7, qui lit le courant de B). **Fait** ([preuve](../docs/validation/COURANT-MAREE-S580.md)) : le courant
 tiré de la carte cotidale par `∂u/∂t = −g·∇η`, sans la profondeur ; `avec_courant`. **Mesuré** : l'onde progressive retrouvée à 2·10⁻⁶ m/s
 (le sinc de la corde compris), en phase avec le niveau. Maillons **0** (2.2 avance). Suivant : **S581, la vingtième revue de méthode**.
+
+## S581 — 2026-10-07 — la vingtième revue de méthode (ADR-246) ; le lot
+
+**Entrée.** En autonomie ; revue et lot dus. **Relu** S576–S580 : un signe faux au plan sans effet (la forme physique était jugée), une
+coupure de session reprise sans perte, un critère sous le quantum écarté au plan. **Aucune protection nouvelle** : rien ne s'est répété
+(ADR-246). Le lot : feuille de route S578–S581. Maillons **1**. Suivant : **S582**, un point partiel.

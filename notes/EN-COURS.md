@@ -62,31 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S580 — **terminée**. En autonomie, **2.2 — le courant de marée** (S579 : « manque le courant de marée ») ; il sert aussi 7.7
-(SPEC-006 §5.5 : `flow_speed` est le courant de B, sans l'orbitale).
+Session : S581 — **terminée**. En autonomie, **la vingtième revue de méthode** (ADR-222 D4 ; S576–S580) et **le lot** (dû).
 
-**Ce que la session fait.** La quantité de mouvement linéaire, sans frottement ni Coriolis : `∂u/∂t = −g·∇η`. Pour chaque composante
-`η = Re(H·e^(iωt))`, `u = Re(i·g·∇H·e^(iωt)/ω)` = `−(g/ω)·(∇Re H·sin ωt + ∇Im H·cos ωt)` — **sans la profondeur** : la carte cotidale porte
-déjà la propagation. `CarteCotidale::courant(x, y, t)` (le gradient de l'interpolation bilinéaire) ; `maree::avec_courant(échantillon, u)` :
-le courant horizontal ajouté à `u_total`. Ne fait pas : le frottement sur le fond, Coriolis (`f` ≈ 10⁻⁴ s⁻¹, comparable à ω de M2 : à
-reprendre avant les grandes baies), le courant dans les zones peu profondes (non linéaire).
-
-**Références, calculées avant** (ce script les écrit). L'onde progressive de S578 (chenal de 20 m, `c` = 14.0071 m/s, `A` = 1 m) : `u =
-(g·k/ω)·η` = **0.700356 m/s** d'amplitude (`g/c` = 0.700357). La pente de la corde au milieu d'une maille de 10 km :
-`sinc(k·Δx/2)` = **0.999580720**, soit **0.700062 m/s**, la phase exacte — le courant y est maximal en même temps que η.
-
-**Quantum** (ADR-236 D1) : f32 (10⁻⁷ relatif) ; la dérive de phase de S577 (2·10⁻⁵ sur 25 h). **Critères, écrits avant.** (1) au milieu
-d'une maille, le maximum de `u` sur 25 h (pas d'une minute) à 10⁻⁴ m/s de 0.700062 m/s, et `v` nul à 10⁻⁶ m/s ; (2) au même point, le
-pic du courant et celui du niveau au même instant à 60 s près ; (3) `avec_courant` ne change que `u_total[0..2]` (les autres champs au bit) ;
-(4) un point hors de la grille refusé.
+**Ce que la session fait.** Relu : S576 (la revue), S577 (la marée), S578 (la carte ; un signe faux au plan), S579 (la marée dans B ; une
+coupure reprise ; un critère sous le quantum écarté), S580 (le courant). **ADR-246** : aucune protection nouvelle ; BOUSSOLE ; index. Le
+lot : feuille de route S578–S581.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — le courant et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 2.2 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-246, BOUSSOLE, index) ; le lot.
+- [ ] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — u max 0,700060 m/s (0,700062) ; v nul ; pics à 3 900 s tous deux ; `avec_courant` ; refus. Suite 756.
-- **P3** — preuve COURANT-MAREE-S580 ; liste 2.2 ; index ; journal.
-
