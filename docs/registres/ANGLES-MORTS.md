@@ -4635,3 +4635,11 @@ par point (un déphasage ; le pas suit la maille, A328 en cause probable, non é
 
 *Note du 2026-10-06, S529, sur A317* ([A330-CONVERGENCE-S529](../validation/A330-CONVERGENCE-S529.md)) : le pic d'étrave de la coque en
 boîte **diverge** en maille — 0,30 / 0,72 / 1,47 m à 50 / 25 / 12,5 cm (la stagnation au coin vif, sous couvercle partiel).
+
+**A332 — S555, 2026-10-06 (sévérité 2, ouverte). L'énergie discrète de δ linéaire n'est pas connue.** C09 demande `dE/dt ≤ 0` en tout
+temps ; l'énergie naturelle (vitesses aux faces, surface aux colonnes) oscille d'un pas à l'autre — 5 955 hausses sur 12 000, jusqu'à 0,8 %
+— et sa moyenne se tient 8,4 % au-dessus de l'énergie initiale, constante sur 120 s ([C09-ENERGIE-S555](../validation/C09-ENERGIE-S555.md)).
+Aucune instabilité, mais aucun moyen de dire, pas à pas, que l'énergie ne croît pas. **Conséquence** : une instabilité lente ne se verrait
+que par des moyennes par fenêtre. Déclencheur : **avant de déclarer la conservation de l'énergie de δ (4.18) ou de juger une dissipation**.
+Premiers remèdes : la forme discrète que le schéma conserve (les vitesses à la moyenne de deux demi-pas, ou la surface décalée d'un
+demi-pas), dérivée du schéma ; l'énergie sur la carte.

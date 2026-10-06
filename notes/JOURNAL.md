@@ -747,3 +747,11 @@ ensemble — 1,6052 m, 16,83 m³. **Fait** ([preuve](../docs/validation/POCHE-PO
 scellé de S538. **Mesuré** : le tirant au dix-millième, l'eau à 0,02 % ; ouvert, 2,000 m ; la durée vérifiée par la trace. Maillons **0**
 (6.6). Suivant : **S555**.
 
+## S555 — 2026-10-06 — C09 : la masse tient, l'énergie naturelle manque le critère ; A332
+
+**Entrée.** En autonomie ; C09 (non exécuté), plan committé avec la mise en garde sur l'énergie d'un schéma décalé. **Fait**
+([preuve](../docs/validation/C09-ENERGIE-S555.md)) : une cuve close de δ linéaire, 120 s. **Mesuré** : la masse à 2·10⁻⁶ s⁻¹ (tenu) ;
+l'énergie naturelle oscille (5 955 hausses sur 12 000) et finit 13 % au-dessus de l'initiale — **critères 2 et 3 manqués** ; ses moyennes par
+fenêtre de 5 s sont constantes à ± 0,15 % : aucune instabilité. L'énergie discrète du schéma n'est pas connue (**A332**). Les critères n'ont
+pas été changés ; une garde de non-régression, posée après coup, le dit. Maillons **0** (13.2 : C09 exécuté). Suivant : **S556, la quinzième
+revue de méthode**.

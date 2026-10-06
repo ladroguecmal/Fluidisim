@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:21 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:29 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S555 — C09, la masse et l'énergie de δ ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S554 — le lot ; la poche porteuse d'un compartiment scellé ([journal](notes/JOURNAL.md)). Avant : S553 (deux compartiments et une cloison percée)
-Session suivante : **S555 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — le ballottement d'un compartiment (une seiche de V ? V n'a pas de dynamique interne : δ dans un compartiment couplé à la gîte), Coriolis dans δ, C14/C15, 5.10 (V qui déclenche δ), la pesanteur horizontale sur la carte GPU ; références indépendantes (ADR-239 D1), durées vérifiées par une trace. Revue à S556. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S554 : la poche porteuse (6.6)
+Session en cours : aucune
+Dernière session : S555 — C09 : la masse tient, l'énergie naturelle manque le critère ; A332 ([journal](notes/JOURNAL.md)). Avant : S554 (le lot)
+Session suivante : **S556 — la quinzième revue de méthode** (S551–S555 ; ADR-222 D4) : frictions — une durée d'essai trop courte relevée par une trace (S553), un écart de définition dans une comparaison (S552 : le tirant le long de l'axe contre la verticale), une assertion canonique inapplicable telle qu'écrite (S555 : l'énergie naturelle d'un schéma décalé), deux scripts de clôture cassés par une apostrophe dans un heredoc (S520, S555) ; ce qui a tenu (les références indépendantes avant la mesure, S552–S554 ; la mise en garde écrite avant, S555). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S555 : C09 exécuté (13.2), A332
 Registres       : dernier lot S554 (ADR-213 D3) ; le prochain au plus tard en S557
 ```
 

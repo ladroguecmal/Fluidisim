@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S555 — **en cours**. En autonomie, **C09 — la conservation de la masse et de l'énergie** (non exécuté ; liste 4.18, 13.2) :
+Session : S555 — **terminée**. En autonomie, **C09 — la conservation de la masse et de l'énergie** (non exécuté ; liste 4.18, 13.2) :
 « domaine clos, sans frottement, perturbation initiale, 120 s ; `|dm/dt| < 10⁻³ s⁻¹` ; `dE/dt ≤ 0` en tout temps ».
 
 **Ce que la session fait.** Un essai de δ linéaire (le cœur) : une cuve close de 4 × 2 × 1,5 m (16 × 8 × 6 mailles de 25 cm), une bosse
@@ -80,8 +80,12 @@ l'énergie naturelle. (3) L'énergie finale sous l'initiale (pas de croissance d
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; listes 4.18, 13.2 ; C09 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; listes 4.18, 13.2 ; C09 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — masse : 2,1·10⁻⁶ s⁻¹ (tenu) ; énergie naturelle : 5 955 hausses, +13 % à l'instant final : (2), (3) **manqués** ; moyennes
+  par fenêtre de 5 s constantes à ± 0,15 % (+8,4 % de E₀) — aucune instabilité. A332 ouverte. Suite 714.
+- **P3** — preuve C09-ENERGIE-S555 ; A332 ; liste 13.2 ; C09 ; index ; journal.
+

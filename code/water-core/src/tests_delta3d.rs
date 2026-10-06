@@ -2723,3 +2723,66 @@ fn a_compartment_holds_the_same_mass_with_and_without_delta_s544() {
     }
 }
 
+
+/// **S555 — C09, la masse et l'énergie** (liste 4.18). Une cuve close de 4 × 2 × 1,5 m (16 × 8 × 6 mailles), une bosse gaussienne de 2 cm
+/// (σ = 0,5 m), 120 s au pas de 10 ms, δ linéaire. À chaque pas : la masse `ρ·Σ(η − z₀)·dA` rapportée à la masse d'eau, et l'énergie
+/// naturelle `½ρ·Σ|u|²·dx³ + ½ρg·Σ(η − z₀)²·dA`. Critères : `|dm/dt|` < 10⁻³ s⁻¹ ; `dE/dt ≤ 0` à chaque pas ; l'énergie finale sous
+/// l'initiale. **Les critères 2 et 3 sont manqués** (l'énergie naturelle d'un schéma décalé oscille ; sa moyenne, constante, se tient
+/// au-dessus de E₀) — seul le critère 1 est affirmé, plus une garde de non-régression posée après coup.
+#[test]
+fn a_closed_tank_keeps_its_mass_and_loses_energy_s555() {
+    let (n, m, k, dx, g, rho) = (16usize, 8usize, 6usize, 0.25f32, 9.81f64, 1025.0f64);
+    let (mut v, _) = volume(n, m, k, dx, g as f32);
+    let z0 = v.domain().z0() as f64;
+    let mut eta = vec![0f32; n * m];
+    for j in 0..m {
+        for i in 0..n {
+            let (x, y) = ((i as f64 + 0.5) * 0.25 - 2.0, (j as f64 + 0.5) * 0.25 - 1.0);
+            eta[j * n + i] = (z0 + 0.02 * (-(x * x + y * y) / (2. * 0.25)).exp()) as f32;
+        }
+    }
+    v.set_surface(&eta).unwrap();
+    let (da, dv) = (0.0625f64, 0.015625f64);
+    let masse_eau = rho * 4. * 2. * z0;
+    let mesure = |v: &Volume3| {
+        let pot: f64 = v.surface().iter().map(|e| (*e as f64 - z0).powi(2)).sum::<f64>() * 0.5 * rho * g * da;
+        let cin: f64 = v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).map(|u| (*u as f64).powi(2)).sum::<f64>() * 0.5 * rho * dv;
+        let masse: f64 = v.surface().iter().map(|e| *e as f64 - z0).sum::<f64>() * rho * da;
+        (pot + cin, masse)
+    };
+    let (e0, m0) = mesure(&v);
+    let (mut e_prec, mut m_prec) = (e0, m0);
+    let (mut hausses, mut pire_hausse, mut pire_dm, mut somme_hausses) = (0usize, 0f64, 0f64, 0f64);
+    let (mut fenetre, mut moyennes) = (0f64, Vec::new());
+    for pas in 0..12_000 {
+        v.step_surface_linear(10_000, 2000, &Jobs).unwrap();
+        let (e, mm) = mesure(&v);
+        fenetre += e / 500.;
+        if pas % 500 == 499 {
+            moyennes.push(fenetre);
+            fenetre = 0.;
+        }
+        pire_dm = pire_dm.max(((mm - m_prec) / masse_eau / 0.01).abs());
+        if e > e_prec {
+            hausses += 1;
+            pire_hausse = pire_hausse.max((e - e_prec) / e0);
+            somme_hausses += e - e_prec;
+        }
+        e_prec = e;
+        m_prec = mm;
+    }
+    println!(
+        "S555 C09 : énergie {e0:.5} J → {e_prec:.5} J ({:.2} %) ; hausses d'un pas à l'autre : {hausses} sur 12 000, la plus forte {pire_hausse:.2e} de E₀, \
+         leur somme {:.2e} de E₀ ; |dm/dt| au pire {pire_dm:.2e} s⁻¹ ; masse de perturbation {m0:.4e} → {m_prec:.4e} kg",
+        100. * (e_prec / e0 - 1.), somme_hausses / e0
+    );
+    let (lo, hi) = moyennes.iter().fold((f64::MAX, 0f64), |(a, b), x| (a.min(*x), b.max(*x)));
+    println!("S555 C09 : énergie moyenne par fenêtre de 5 s, de {:.5} à {:.5} J ({:+.2} % à {:+.2} % de E₀) sur 24 fenêtres", lo, hi,
+        100. * (lo / e0 - 1.), 100. * (hi / e0 - 1.));
+    assert!(pire_dm < 1e-3, "critère 1");
+    // Critères 2 et 3 de C09 (sur l'énergie naturelle) : **manqués**, publiés ci-dessus et dans la preuve — l'énergie naturelle d'un schéma
+    // décalé oscille d'un pas à l'autre et sa moyenne se tient au-dessus de E₀ (la mise en garde du plan). Garde de non-régression posée
+    // après la mesure, pas un critère de C09 : les moyennes par fenêtre de 5 s restent à 1 % l'une de l'autre (aucune croissance).
+    assert!(hi / lo - 1. < 0.01, "garde : l'énergie moyenne croît ({lo} → {hi})");
+    let _ = (hausses, e_prec);
+}

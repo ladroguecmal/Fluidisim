@@ -580,6 +580,11 @@ Une énergie qui croît est une instabilité, quel que soit l'aspect visuel à l
 qui dérive de 3 % par seconde rend le régime substitutif inutilisable (ADR-010 §6) et le défaut
 resterait invisible pendant des mois.
 
+> *Note du 2026-10-06, S555, sur C09* ([C09-ENERGIE-S555](C09-ENERGIE-S555.md)) : **exécuté, en partie passé.** La masse : `|dm/dt|`
+> = 2·10⁻⁶ s⁻¹. L'énergie : `dE/dt ≤ 0` à chaque pas est **manqué** sur l'énergie naturelle, qui oscille dans un schéma décalé ; ses
+> moyennes par fenêtre de 5 s restent constantes à ± 0,15 % sur 120 s (aucune instabilité). L'assertion demande une énergie discrète que le
+> schéma conserve — inconnue (A332).
+
 ## C10 — Cube flottant
 
 **Montage.** Cube de 0,5 m, `ρ = 500 kg/m³`, lâché à la surface d'une eau calme.
