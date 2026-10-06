@@ -1797,3 +1797,73 @@ fn a_ship_heels_by_its_flooded_wing_tank_s552() {
     assert!((tirant / 1.6355 - 1.).abs() <= 0.01, "critère 2, tirant");
     assert!((eau / 21.68 - 1.).abs() <= 0.02, "critère 2, eau");
 }
+
+/// **S553 — deux compartiments et une cloison percée.** La barge de S548 ; deux compartiments de V de 5 × 8 × 4 m, l'avant (`x` ∈ [0 ; 5])
+/// et l'arrière (`x` ∈ [−5 ; 0]), formes volumiques ; une brèche de 0,1 m² au fond de l'avant, un trou de 0,05 m² au pied de la cloison
+/// (deux arêtes d'orifice, une par sens) ; la mer volumique recentrée sous la brèche ; la pesanteur du navire ; l'eau de chaque compartiment
+/// en son centre mouillé. Critères : le tirant final (vertical, au centre) à 1 % de 3,000 m et l'assiette sous 0,1° ; chaque compartiment à
+/// 2 % de 120 m³ ; l'arrière en retard sur l'avant pendant l'envahissement ; la masse de V exacte.
+#[test]
+fn progressive_flooding_through_a_pierced_bulkhead_s553() {
+    use crate::hydro_network::geometry::{Tetrahedron, VolumeShape};
+    use crate::hydro_network::{step, Flow, HydroNode, Opening, Shapes, SHARP_EDGE_DISCHARGE, STEP_US};
+    let boite = |lo: [i64; 3], hi: [i64; 3]| -> [Tetrahedron; 6] {
+        let v: [[i64; 3]; 8] = core::array::from_fn(|b| core::array::from_fn(|a| if b & (1 << a) == 0 { lo[a] } else { hi[a] }));
+        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
+            .map(|p| Tetrahedron::new([v[0], v[1 << p[0]], v[(1 << p[0]) | (1 << p[1])], v[7]]).unwrap())
+    };
+    let mer_t = boite([-200_000_000, -200_000_000, -10_000_000], [200_000_000, 200_000_000, 10_000_000]);
+    let av_t = boite([0, -4_000_000, -2_000_000], [5_000_000, 4_000_000, 2_000_000]);
+    let ar_t = boite([-5_000_000, -4_000_000, -2_000_000], [0, 4_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&mer_t).unwrap(), VolumeShape::new(&av_t).unwrap(), VolumeShape::new(&ar_t).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let calme = CalmWater { level: 0. };
+    let mh = 246_000.;
+    let mut barge = RigidBody::cuboid([20., 8., 4.], mh / 640., [0., 0., 2. - mh / MER.rho / 160.], [16, 8, 16]);
+    barge.radiation_damping = [0., 0., 1.0e6];
+    barge.radiation_damping_angular = [5.0e6, 2.0e7, 5.0e6];
+    let breche = [2.5, 0., -2.];
+    let noeud = |i: usize, v: i64| HydroNode { volume_ml: v, capacity_ml: formes[i].capacity_ml(), origin_um: [0, 0, 0], shape: i as u16 };
+    let mut nodes = [noeud(0, formes[0].capacity_ml() / 2), noeud(1, 0), noeud(2, 0)];
+    let orifice = |from: u16, to: u16, aire: i64, p: [f64; 3]| Opening { from, to: Some(to), flow: Flow::Orifice { area_mm2: aire },
+        position_um: p.map(|x| (x * 1e6) as i64), discharge: SHARP_EDGE_DISCHARGE, ..Default::default() };
+    let mut edges = [orifice(0, 1, 100_000, breche), orifice(1, 2, 50_000, [0., 0., -2.]), orifice(2, 1, 50_000, [0., 0., -2.])];
+    let mut scratch = [0i64; 3];
+    let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
+    let inverse = |q: [f64; 4]| [q[0], -q[1], -q[2], -q[3]];
+    let mut retard = false;
+    // 3 000 s : l'équilibre est atteint vers 1 800 s (un premier essai à 900 s s'arrêtait en plein envahissement — la trace l'a montré).
+    for n in 0..30_000 {
+        if n % 6_000 == 0 {
+            println!("S553 trace {} s : avant {} ml, arrière {} ml, z {:.4}", n / 10, nodes[1].volume_ml, nodes[2].volume_ml, barge.position[2]);
+        }
+        let q = barge.orientation;
+        let w = add(barge.position, rotate(q, breche));
+        nodes[0].origin_um = rotate(inverse(q), sub([w[0], w[1], 0.], barge.position)).map(|x| (x * 1e6).round() as i64);
+        let g = rotate(inverse(q), [0., 0., -9.81]).map(|x| x as f32);
+        step(&mut nodes, &mut edges, &shapes, g, SimTime(STEP_US), &mut scratch).unwrap();
+        assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), total, "masse de V");
+        if n == 600 {
+            retard = nodes[2].volume_ml < nodes[1].volume_ml;
+        }
+        let mut charges = Vec::new();
+        for k in 1..3 {
+            if nodes[k].volume_ml > 0 {
+                let c = formes[k].centroid_below_um(formes[k].plane(nodes[k].volume_ml, g).unwrap()).unwrap().map(|x| x * 1e-6);
+                charges.push(crate::rigid_body::PointLoad { body: c, force: [0., 0., -(nodes[k].volume_ml as f64 * 1e-6) * MER.rho * 9.81] });
+            }
+        }
+        barge.loads = charges;
+        for _ in 0..10 {
+            barge.step(0.01, &calme, MER);
+        }
+    }
+    let q = barge.orientation;
+    let assiette = (2. * q[2].atan2(q[0])).to_degrees();
+    let tirant = -(barge.position[2] + rotate(q, [0., 0., -2.])[2]);
+    let (av, ar) = (nodes[1].volume_ml as f64 * 1e-6, nodes[2].volume_ml as f64 * 1e-6);
+    println!("S553 cloison percée : tirant {tirant:.4} m (3,000), assiette {assiette:.4}° ; avant {av:.3} m³, arrière {ar:.3} m³ (120) ; arrière en retard à 60 s : {retard}");
+    assert!((tirant / 3. - 1.).abs() <= 0.01 && assiette.abs() <= 0.1, "critère 1");
+    assert!((av / 120. - 1.).abs() <= 0.02 && (ar / 120. - 1.).abs() <= 0.02, "critère 2");
+    assert!(retard, "critère 3");
+}

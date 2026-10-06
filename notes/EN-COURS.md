@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S553 — **en cours**. En autonomie, **6.6 — plusieurs compartiments et leurs cloisons** : l'envahissement progressif — la brèche
+Session : S553 — **terminée**. En autonomie, **6.6 — plusieurs compartiments et leurs cloisons** : l'envahissement progressif — la brèche
 envahit un compartiment, qui envahit le suivant par une cloison percée.
 
 **Ce que la session fait.** Un essai, sans code neuf (les pièces de S548–S552) : la barge de S548 ; deux compartiments de V de 5 × 8 × 4 m,
@@ -79,8 +79,12 @@ compartiment à 2 % de 120 m³. (3) Pendant l'envahissement, l'arrière en retar
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.6 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — à 900 s l'envahissement n'était pas fini (2,64 m) ; la trace : équilibre vers 1 800 s ; à 3 000 s, tirant 2,9985 m, assiette
+  0, 119,88 m³ chacun ; l'arrière en retard ; masse exacte. Suite 712.
+- **P3** — preuve CLOISON-PERCEE-S553 ; liste 6.6 ; index ; journal.
+

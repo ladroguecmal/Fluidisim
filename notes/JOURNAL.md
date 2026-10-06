@@ -732,3 +732,11 @@ intégrée — 8,088°, 1,6355 m, 21,68 m³ ; une citerne de 2 m n'aurait pas d'
 la citerne latérale de V et la mer en formes volumiques, la pesanteur du navire, le centre mouillé. **Mesuré** : gîte 8,101°, eau à 0,04 % ;
 le tirant à 0,997 % — un écart de définition (`cos θ`), 0,01 % à définition égale, écrit tel quel. Maillons **0** (6.6). Suivant : **S553**.
 
+## S553 — 2026-10-06 — deux compartiments et une cloison percée
+
+**Entrée.** En autonomie ; 6.6, l'envahissement progressif. **Fait** ([preuve](../docs/validation/CLOISON-PERCEE-S553.md)) : deux compartiments
+de V, une brèche et une cloison percée, la barge et la mer de S552. **Mesuré** : le tirant final à 0,05 % de la flottabilité perdue des deux,
+chaque compartiment à 0,1 %, l'assiette du transitoire revenue à zéro, l'arrière en retard. **En route** : l'essai écrit s'arrêtait à 900 s,
+en plein envahissement ; la mesure relue d'abord (ADR-239 D1) a montré l'équilibre vers 1 800 s. Maillons **0** (6.6). Suivant : **S554**,
+le lot (dû) et un point partiel.
+

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:07 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:14 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S553 — 6.6, deux compartiments et une cloison percée ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S552 — un navire gîte par sa brèche ([journal](notes/JOURNAL.md)). Avant : S551 (la quatorzième revue de méthode)
-Session suivante : **S553 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — le ballottement d'un compartiment (l'eau qui court : une seiche dans V ou dans δ couplée à la gîte), plusieurs compartiments et une cloison percée, la poche porteuse d'un compartiment scellé, Coriolis dans δ, C14/C15 ; références indépendantes avant la mesure (ADR-239 D1), définitions des grandeurs comparées écrites au plan. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S552 : un navire gîte par sa brèche (6.6)
+Session en cours : aucune
+Dernière session : S553 — deux compartiments et une cloison percée ([journal](notes/JOURNAL.md)). Avant : S552 (un navire gîte par sa brèche)
+Session suivante : **S554 — le lot des registres (dû à S554), puis un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — le ballottement d'un compartiment (l'eau qui court : un mode de seiche dans un compartiment couplé à la gîte), la poche porteuse d'un compartiment scellé (S538–S539 au navire), Coriolis dans δ, C14/C15, le domaine 5.10 (V qui déclenche δ) ; références indépendantes, durées vérifiées par une trace (ADR-239 D1). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S553 : l'envahissement progressif (6.6)
 Registres       : dernier lot S551 (ADR-213 D3) ; le prochain au plus tard en S554
 ```
 
