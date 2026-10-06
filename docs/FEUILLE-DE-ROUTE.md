@@ -388,6 +388,8 @@ sillage de δ stable en maille, l'écart revient au modèle de référence ; le 
 **S530–S533** : 5.5 avance deux fois — l'absorption par le sol (Green–Ampt dans V, intégré exactement) et la pluie hors contenant
 (rétention, infiltration, ruissellement) ; la dixième revue (ADR-235 : les limites matérielles calculées) ; la carte refuse ses limites
 avec un nom.
+**S534–S536** : C1, le champ de courant 2D régional (2.6 ; la pente cyclostrophique porte le corps) ; l'assèchement du sol (5.5 :
+drainage de Brooks–Corey, évaporation ; le cycle de l'eau du sol à la masse exacte) ; la onzième revue (ADR-236).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

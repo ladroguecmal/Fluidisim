@@ -608,3 +608,9 @@ neutre tient une rotation solide à ± 0,025 % (l'oscillation du pas, prévue), 
 rétention, infiltration, ruissellement, drainage, évaporation — à la masse exacte à chaque pas. Maillons **0** (5.5 avance). Suivant :
 **S536, la onzième revue de méthode** (S531–S535) et le lot (dû à S536).
 
+## S536 — 2026-10-06 — la onzième revue de méthode (ADR-236) ; le lot
+
+**Entrée.** En autonomie ; revue et lot dus. **Friction** : un seuil au quantum de V (S533) sous une protection qui le défendait (ADR-234
+D2) — **protection changée** : le plan écrit le quantum à côté de chaque seuil, un rapport sous 10 le disqualifie (ADR-236 D1, L393). Les
+limites refusées avec un nom (S532), le calcul au plan qui désigne le mécanisme (S534) et le schéma (S530, S535) ont tenu. Le lot : la
+feuille de route S534–S536. Maillons **1**. Suivant : **S537**, un point partiel.

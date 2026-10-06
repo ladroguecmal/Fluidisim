@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 17:36 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 17:37 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S536 — la onzième revue de méthode et le lot ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S535 — l'assèchement du sol ([journal](notes/JOURNAL.md)). Avant : S534 (C1, le champ de courant 2D régional)
 Session suivante : **S536 — la onzième revue de méthode** (S531–S535 ; ADR-222 D4) et **le lot des registres** (dû à S536) : frictions — un seuil d'instrument au quantum de V (S533, malgré ADR-234 D2), des limites matérielles refusées avec un nom (S532), le mécanisme physique désigné par le calcul au plan (S534 : la pente cyclostrophique), l'intégration exacte choisie au plan (S530, S535). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S535 : l'assèchement du sol (5.5)

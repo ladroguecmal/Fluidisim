@@ -6588,3 +6588,9 @@ local du plancher f32 (8·10⁻⁸ m pour un profil de 10⁻² m) : 79,75° au l
 **S520, S529 — la limite matérielle trouvée en lançant.** La carte s'est arrêtée deux fois au premier domaine dix fois plus grand :
 71 504 groupes de dispatch pour 65 535 (1,49 M mailles), puis une liaison de 230 Mo pour 128 Mo (3,4 M mailles) ; et la limite des noyaux
 de mailles (4,19 M) a fixé la taille du domaine suivant. Une ligne de script au plan les aurait dites (ADR-235 D1).
+
+## L393
+
+**S533 — la protection écrite, pas appliquée.** ADR-234 D2 (S526) disait qu'un instrument doit tenir au-dessus du bruit de l'objet ; sept
+sessions plus tard, j'ai écrit « la rétention passe 1 ml » quand 1 ml est le quantum de V et que la pluie arrive par 0 ou 1 ml par pas :
+submersion lue à 29 min pour 38. Une protection qui ne s'écrit pas dans le plan ne s'applique pas (ADR-236 D1).

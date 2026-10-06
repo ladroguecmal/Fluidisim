@@ -62,31 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S535 — **terminée**. En autonomie, **5.5 — l'assèchement du sol** : depuis S530–S533 la pluie entre dans le sol, mais il ne
-rend jamais rien.
+Session : S536 — **terminée**. En autonomie, **la onzième revue de méthode** (ADR-222 D4 ; S531–S535) et **le lot des registres** (dû).
 
-**Ce que la session fait.** Deux lois d'arête de V. `Flow::Drainage { conductivity_nm_s, exponent_pm }` : le **drainage gravitaire**
-d'un sol (`from`) vers le dessous (`to` : une nappe, ou dehors), `q = K·Sᶜ` par unité d'aire (Brooks–Corey, gradient unitaire), `S` le
-remplissage du sol rapporté à sa capacité ; l'aire et la lame de stockage sont celles du nœud. Intégré **exactement** sur le pas :
-`dS/dt = −a·Sᶜ`, `a = K/lame`, `S₁ = (S₀^{1−c} + (c − 1)·a·dt)^{1/(1−c)}` (`c` = 1 : `S₀·e^{−a·dt}`). `Flow::Evaporation { area_mm2,
-rate_nm_s }` : l'**évaporation** d'un nœud vers dehors à taux potentiel d'auteur (en attendant la météo, ADR-197 D5), fois la commande
-(l'exposition), bornée par ce qu'il contient.
-
-**Ordre de grandeur, calculé.** Un sol de 100 mm de stockage (1 m²), K = 10,9 mm/h, `c` = 4 : `S` = 0,910 / 0,616 / 0,484 à 1 / 10 / 24 h
-(91,0 / 61,6 / 48,3 mm restants). Évaporation de 3 mm/jour (34,7 nm/s) : une flaque d'1 cm en 3,33 jours.
-
-**Critères, écrits avant.** (1) Les lois d'avant au bit (suite). (2) Le drainage contre la forme fermée à 10⁻³ à 1, 10 et 24 h ; masse
-exacte. (3) L'évaporation : la flaque décroît au taux, à 1 ml près par jour, et s'arrête à zéro exactement. (4) Un cycle complet — pluie,
-infiltration, drainage, évaporation — garde la masse au millilitre.
+**Ce que la session fait.** Relu : S531 (la revue), S532 (les limites refusées avec un nom), S533 (un seuil au quantum de V, malgré ADR-234
+D2), S534 (la pente cyclostrophique désignée par le calcul au plan), S535 (l'intégration exacte). **ADR-236** : D1, le quantum de l'objet
+écrit au plan à côté de chaque seuil (rend opératoire ADR-234 D2) ; L393 ; METHODE ; BOUSSOLE. Le lot : feuille de route S534–S536.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — les lois, les essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.5 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-236, METHODE, L393, BOUSSOLE, index) ; le lot (feuille de route).
+- [ ] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — `Flow::Drainage`, `Flow::Evaporation` ; essais `s535` : drainage 2–7·10⁻⁶ ; évaporation 3 024 ml exact, à sec exact ;
-  cycle à la masse exacte. Suite 696.
-- **P3** — preuve ASSECHEMENT-S535 ; liste 5.5 ; index ; journal.
-
