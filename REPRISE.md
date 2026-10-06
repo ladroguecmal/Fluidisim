@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 10:50 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 10:56 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S519 — le lot des registres ; C07 en eau profonde, le sillage de W contre la théorie linéaire ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S518 — A329 levée : le recoupage d'une coque qui bouge sous budget dans un grand domaine ([journal](notes/JOURNAL.md)). Avant : S517 (la coque en marche et son sillage)
 Session suivante : **S519 — le lot des registres (dû à S519), puis un point partiel proche de son périmètre** : relire le tableau de bord (6.2 la turbulence, 6.7 la poche d'air, 4.13 le sillage mesuré — la transformée dans le repère de la coque —, 9.3, 2.6 C1…), choisir le critère le plus net ; ordres de grandeur calculés (ADR-232), corps d'essai aux seuls degrés de liberté de leur référence, enchaînements arrêtés au premier échec (ADR-231). Revue de méthode à S521. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 1 — S518 : A329 levée (le recoupage d'une coque qui bouge à 2,2 ms sur 786 000 mailles)

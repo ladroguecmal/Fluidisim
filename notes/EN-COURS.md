@@ -62,42 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S518 — **terminée**. En autonomie, **A329** (S517) : le recoupage d'une coque qui bouge coûte 25 ms par pas sur 786 000 mailles,
-où 6.4 le disait sous 1 ms (dans un petit domaine). Le banc du sillage, instrumenté par étage (S518) : **recoupage du cœur 13,1 ms, envoi
-à la carte 11,5 ms**, extraction 0,35 ms, l'hôte 0,07 ms (4 s, 400 pas).
+Session : S519 — **en cours**. En autonomie : **le lot des registres** (dû à S519), puis **C07 en eau profonde** (3.2) — le cas canonique
+« angle de Kelvin à ±2° » n'a jamais été exécuté : le sillage de W (source de pression gaussienne mobile, `wake_source`) n'a jamais été
+mesuré contre sa théorie. La leçon de S517 : trois instruments d'angle, aucun éprouvé avant d'être appliqué.
 
-**Ce que la session fait.** (a) Le cœur : les ouvertures d'avant le recoupage, aujourd'hui recopiées en entier dans les tampons de
-sauvegarde (que le pas réemploie), deviennent des tableaux de la base, persistants, copiés dans la seule réunion de la boîte du recoupage
-précédent et de la nouvelle (hors d'elle, avant = après) ; la vitesse des faces qui s'ouvrent, les colonnes solides, le transfert de S334 et
-ses poids, `changed_faces` limités à la boîte ; la vérification de finitude et la boîte du solide en une seule passe. (b) La carte :
-`set_motion_parts` prend les tableaux du cœur sans les concaténer, et ne compare à l'ombre que dans la réunion des deux dernières boîtes —
-hors d'elle, rien n'a pu changer (le dépôt, le terme de paroi, le transfert et les faces ne sont non nuls que dans la boîte de leur pas) ; le
-premier appel compare tout.
+**Ce que la session fait.** (a) **Une référence indépendante de W** (numpy) : la réponse linéaire exacte en temps de l'eau profonde à une
+pression gaussienne `p₀·exp(−r²/2σ²)` (la charge de `wake_source`, `p₀ = F/2πσ²`) partie du repos à `t = 0` et menée à `U` constante — par
+mode, `η̂(k,T) = −(k/ρ)·p̂(k)·∫₀ᵀ sin ω(T−s)/ω · e^{−i kₓ U s} ds`, en forme fermée, sur une grille FFT assez grande pour que le transitoire
+n'y revienne pas. (b) **L'instrument d'angle éprouvé sur la référence d'abord** : la moyenne de |η| le long des rayons issus de la source
+(celui de S517), sur la plage de distances où le sillage est établi ; `σ` et `U` choisis sur la seule référence pour qu'il y lise Kelvin
+à 1° (un sillage dominé par les cuspides) — si aucun couple raisonnable ne le permet, l'instrument est changé avant de toucher W. (c) **W
+mesuré** aux mêmes paramètres : recette 256 × 256 à coupure 6 (domaine honnête d'ADR-132 : 89 m, 26,2 s), `T` = 24 s.
 
-**Ordre de grandeur, calculé.** Ce qui reste entier : la passe sur les 836 000 nœuds (finitude et boîte), le remplissage à zéro du terme de
-paroi (786 000 mailles) et des poids (245 000), les boucles de colonnes (49 000) — ≈ 1,9 M valeurs lues ou écrites une fois, contre
-≈ 20 M aujourd'hui (trois copies et une boucle de 2,4 M faces, 786 000 mailles en colonnes, la concaténation et la comparaison de 6,7 M
-valeurs). À ~1 ns la valeur : ≈ 2 ms. La boîte de la coque : ≈ 28 × 14 × 9 mailles — négligeable.
+**Ordre de grandeur, calculé.** À `U` = 2 / 2,5 / 3 m/s : `λ₀ = 2πU²/g` = 2,56 / 4,0 / 5,76 m ; le sillage établi jusqu'à `U·T/2` = 24 / 30
+/ 36 m derrière la source à `T` = 24 s ; `Fr_σ = U/√(gσ)` = 0,45 / 0,56 / 0,68 à σ = 2 m. 65 536 nœuds par point échantillonné.
 
-**Critères, écrits avant.** (1) **Au bit** : le recoupage en boîte rend les tableaux et la surface du recoupage entier (l'essai S508, plus
-les vitesses des faces) ; la carte, avec l'envoi en boîte, rend la surface du banc du sillage au bit de l'envoi entier (empreinte des bits
-de η). (2) **Le coût** : recoupage + extraction + envoi ≤ 3 ms par pas sur le banc du sillage (786 000 mailles), contre 24,9. (3) La suite
-du cœur, les essais de la carte (`--lineaire-mobile`, `--lineaire-coque`) inchangés. A329 levée si (1) et (2) tiennent.
+**Critères, écrits avant.** (1) **La référence et l'instrument** : sur la référence, l'instrument lit 19,47° à 1° (sinon pas de mesure de
+W). (2) **Le champ de W** contre la référence, dans la zone établie (de 2 λ₀ derrière la source jusqu'à `U·T/2` − 2 λ₀, dans le coin de
+Kelvin élargi à 30°) : écart quadratique relatif ≤ 10 %. (3) **C07 profond** : l'instrument sur W lit 19,47° à 2°. L'eau peu profonde de
+C07 (`arcsin(1/Fr_h)`) reste hors de portée — W est en eau profonde (aucune `tanh` dans la pression de W) ; 3.2 le dira.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le cœur en boîte ; (1) côté cœur, (3).
-- [x] **P3** — la carte en boîte ; (1) côté carte, (2).
-- [x] **P4** — preuve ; A329 ; liste 6.4 ; rituel.
+- [ ] **P1** — jeton ; le lot des registres (feuille de route S517–S518) ; plan.
+- [ ] **P2** — la référence et l'instrument éprouvé ; (1).
+- [ ] **P3** — W mesuré ; (2), (3).
+- [ ] **P4** — preuve ; liste 3.2 ; CAS-CANONIQUES (C07) ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — les ouvertures d'avant dans la base (`before_u/v/w`, +1 jeu de faces déclaré à l'hôte), copiées dans la réunion des deux
-  boîtes ; faces qui s'ouvrent, colonnes solides, transfert S334, `changed_faces`, poids du transfert en boîte ; finitude + boîte en une
-  passe (`solid_box_checked`). L'essai S508 étendu aux vitesses des faces : **au bit** sur 60 pas. Suite du cœur : 681 + 23, verte.
-  Banc du sillage (4 s) : **recoupage du cœur 13,1 → 1,71 ms** ; l'envoi reste à 11,2 ms (P3).
-- **P3 fini** — `set_motion_parts` (les tableaux du cœur sans concaténation, la réunion des deux dernières boîtes ; `set_motion` y passe
-  sans boîte) ; `Volume3::recut_box`. Banc du sillage, 15 s : empreinte de η **e41630abd739b189 dans les deux envois** (au bit) ; étages
-  hôte 0,068 / recoupage 1,713 / extraction 0,133 / envoi 0,354 ms → **2,20 ms** (24,9 avant) ; pas complet 27,1 → **9,2 ms** ; l'envoi
-  entier : 13,2 ms. S503 2,205·10⁻⁶ m, S504 1,669·10⁻⁶ m : inchangés.
-- **P4** — preuve RECOUPAGE-GRAND-S518 ; A329 levée ; listes 6.4 et 4.13 ; index ; journal.
