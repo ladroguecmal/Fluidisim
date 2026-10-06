@@ -265,7 +265,7 @@ pas recopiée ici (L137).
   [rayonnement](validation/RAYONNEMENT-COQUE-S336.md)) ; la production GPU d'une coque qui bouge depuis S503–S509 (6.4) ; **S517** : la
   coque **en marche** sur la carte, sa vague d'étrave (0,72 m de stagnation, bornée) et un sillage stable, de forme compatible avec Kelvin
   sans mesure à 2° ([preuve](validation/SILLAGE-S517.md)). Manquent la gerbe (surface non graphe, 4.16), la résolution près de la coque
-  (± 43–49 % à 25 cm), le sillage mesuré, et un recoupage sous budget dans un grand domaine (A329).
+  (± 43–49 % à 25 cm), le sillage mesuré (le recoupage dans un grand domaine : 2,2 ms depuis S518, A329 levée).
 - [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *absent* : C04 exécuté sur un
   véhicule d'essai 1D seulement.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
@@ -448,7 +448,8 @@ pas recopiée ici (L137).
   (10 % du champ proche à ≈ 6 ms) ([preuve](validation/A328-S507.md)) ; **S508** : le recoupage dans la boîte du solide, au bit de
   l'entier — 8 ms → 1,4 à 1,55 ms par pas ([preuve](validation/RECOUPAGE-S508.md)). **S509** : 0,82 ms par pas — la carte ne reçoit que ce qui change
   ([preuve](validation/ENVOI-S509.md)). Limites : l'ordre 1 en temps près d'une coque qui bouge (A328) ; ces 0,82 ms valent pour un petit
-  domaine — 25 ms sur 786 000 mailles (A329, S517).
+  domaine — 25 ms sur 786 000 mailles (A329, S517), **2,2 ms depuis S518** (le recoupage, l'extraction et l'envoi limités à la boîte, au
+  bit ; [preuve](validation/RECOUPAGE-GRAND-S518.md)).
 - [x] **6.5 Décor fixe comme frontière imposée** — *validé* (S493) : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**

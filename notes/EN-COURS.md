@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S518 — **en cours**. En autonomie, **A329** (S517) : le recoupage d'une coque qui bouge coûte 25 ms par pas sur 786 000 mailles,
+Session : S518 — **terminée**. En autonomie, **A329** (S517) : le recoupage d'une coque qui bouge coûte 25 ms par pas sur 786 000 mailles,
 où 6.4 le disait sous 1 ms (dans un petit domaine). Le banc du sillage, instrumenté par étage (S518) : **recoupage du cœur 13,1 ms, envoi
 à la carte 11,5 ms**, extraction 0,35 ms, l'hôte 0,07 ms (4 s, 400 pas).
 
@@ -89,7 +89,7 @@ du cœur, les essais de la carte (`--lineaire-mobile`, `--lineaire-coque`) incha
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le cœur en boîte ; (1) côté cœur, (3).
 - [x] **P3** — la carte en boîte ; (1) côté carte, (2).
-- [ ] **P4** — preuve ; A329 ; liste 6.4 ; rituel.
+- [x] **P4** — preuve ; A329 ; liste 6.4 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — les ouvertures d'avant dans la base (`before_u/v/w`, +1 jeu de faces déclaré à l'hôte), copiées dans la réunion des deux
@@ -100,3 +100,4 @@ du cœur, les essais de la carte (`--lineaire-mobile`, `--lineaire-coque`) incha
   sans boîte) ; `Volume3::recut_box`. Banc du sillage, 15 s : empreinte de η **e41630abd739b189 dans les deux envois** (au bit) ; étages
   hôte 0,068 / recoupage 1,713 / extraction 0,133 / envoi 0,354 ms → **2,20 ms** (24,9 avant) ; pas complet 27,1 → **9,2 ms** ; l'envoi
   entier : 13,2 ms. S503 2,205·10⁻⁶ m, S504 1,669·10⁻⁶ m : inchangés.
+- **P4** — preuve RECOUPAGE-GRAND-S518 ; A329 levée ; listes 6.4 et 4.13 ; index ; journal.

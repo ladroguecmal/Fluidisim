@@ -448,3 +448,13 @@ l'étrave, la stagnation amplifiée par le couvercle partiel) et un sillage stab
 bord vers 23°). **Critère de l'angle manqué** : trois instruments, le troisième déclaré avant son essai (6,5°) ; aucun seuil retenu après
 coup. Et **A329** : le recoupage coûte 25 ms sur ce grand domaine — 6.4 n'est sous 1 ms que dans un petit domaine (la liste le dit).
 Maillons **0** (4.13 avance). Suivant : **S518, A329** — le recoupage limité à sa boîte jusque dans l'extraction et l'ombre.
+
+## S518 — 2026-10-06 — A329 levée : le recoupage d'une coque qui bouge sous budget dans un grand domaine
+
+**Entrée.** En autonomie ; A329 (S517 : 25 ms par pas sur 786 000 mailles). **Profil d'abord** : recoupage du cœur 13,1 ms, envoi à la
+carte 11,5 ms — ≈ 20 M valeurs par pas, calculé. **Fait** ([preuve](../docs/validation/RECOUPAGE-GRAND-S518.md)) : les ouvertures d'avant
+persistent dans la base, copiées dans la seule réunion des deux boîtes ; toutes les boucles du recoupage limitées à la boîte ; la carte ne
+compare à l'ombre que la réunion des deux dernières boîtes, sur les tableaux du cœur non concaténés (`set_motion_parts`). **Mesuré** :
+2,20 ms (24,9 avant), pas complet 27,1 → 9,2 ms ; au bit du recoupage entier (vitesses comprises) et de l'envoi entier (empreinte de η) ;
+S503, S504 inchangés. Maillons **1** (A329 levée, 6.4 tient dans un grand domaine). Suivant : **S519**, le lot des registres (dû) et un
+point partiel.

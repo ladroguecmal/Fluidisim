@@ -4599,3 +4599,9 @@ géométrie reconstruite (`decoupee`) et la comparaison à l'ombre sur toute la 
 **Conséquence** : une coque dans un domaine δ de jeu (des centaines de milliers de mailles) ne tient pas le budget. Déclencheur : **avant une
 coque dans un domaine δ de plus de 50 000 mailles**. Premiers remèdes : l'extraction et l'ombre limitées à la boîte du recoupage (comme les
 faces en place, S509), le dépôt renormalisé seulement là où il change si le bit le permet.
+
+*Note du 2026-10-06, S518, sur A329* ([RECOUPAGE-GRAND-S518](../validation/RECOUPAGE-GRAND-S518.md)) : **levée.** Le profil : recoupage du
+cœur 13,1 ms, envoi à la carte 11,5 ms. Les ouvertures d'avant persistent dans la base et ne se copient que dans la réunion des deux boîtes ;
+toutes les boucles du recoupage ne parcourent que la boîte ; la carte ne compare à l'ombre que la réunion des deux dernières boîtes, sur les
+tableaux du cœur non concaténés. **2,20 ms** sur 786 000 mailles (24,9 avant), au bit du recoupage et de l'envoi entiers ; le pas complet
+passe de 27,1 à 9,2 ms. Le dépôt renormalisé reste entier (49 000 colonnes, négligeable).
