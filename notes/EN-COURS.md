@@ -71,6 +71,6 @@ D2), S534 (la pente cyclostrophique désignée par le calcul au plan), S535 (l'i
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-236, METHODE, L393, BOUSSOLE, index) ; le lot (feuille de route).
-- [ ] **P2** — rituel (`--lot`).
+- [x] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
