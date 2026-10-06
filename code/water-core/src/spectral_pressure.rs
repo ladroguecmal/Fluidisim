@@ -34,6 +34,7 @@ pub struct Slot {
     /// ADR-088 : pression modale cumulée, conservée pour que l'admission incrémentale
     /// puisse recalculer la puissance sans refaire une réponse modale par segment.
     pressure: Complex,
+    /// S522 : en profondeur finie, le nombre d'onde effectif `|k|·tanh(|k|h)` (la profondeur n'est pas gardée : 64 octets par nœud).
     magnitude: f32,
 }
 #[derive(Clone, Copy, Debug, Default)]
@@ -107,6 +108,28 @@ pub fn prepare<'a>(
     max: [f32; 2],
     pool: &'a mut [Slot],
 ) -> Result<Field<'a>, PrepareError> {
+    prepare_in_depth(nodes, path, gravity, density, None, now, end, min, max, pool)
+}
+
+/// **S522 — [`prepare`] en profondeur uniforme `depth`** (m ; `None` : l'eau profonde, au bit de `prepare`). Les modes, les potentiels,
+/// les vitesses horizontales et l'énergie suivent le nombre d'onde effectif `|k|·tanh(|k|h)` ; refus `Domain` sur une profondeur non
+/// finie ou non positive.
+#[allow(clippy::too_many_arguments)]
+pub fn prepare_in_depth<'a>(
+    nodes: &[Node],
+    path: &[Segment],
+    gravity: f32,
+    density: f32,
+    depth: Option<f32>,
+    now: SimTime,
+    end: SimTime,
+    min: [f32; 2],
+    max: [f32; 2],
+    pool: &'a mut [Slot],
+) -> Result<Field<'a>, PrepareError> {
+    if depth.is_some_and(|h| !(h.is_finite() && h > 0.0)) {
+        return Err(Error::Domain.into());
+    }
     if nodes.is_empty()
         || path.is_empty()
         || !(0..2).all(|i| {
@@ -140,6 +163,7 @@ pub fn prepare<'a>(
         path.iter().copied(),
         gravity,
         density,
+        depth,
         now,
         end,
         min,
@@ -148,11 +172,13 @@ pub fn prepare<'a>(
     )
 }
 /// Interne : chemins et contexte déjà validés, itérateur reproductible en ordre canonique.
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn prepare_segments<'a>(
     nodes: &[Node],
     segments: impl Iterator<Item = Segment> + Clone,
     gravity: f32,
     density: f32,
+    depth: Option<f32>,
     now: SimTime,
     end: SimTime,
     min: [f32; 2],
@@ -183,7 +209,7 @@ pub(crate) fn prepare_segments<'a>(
                 pressure_pa: s.pressure_pa * node.transform,
                 ..s
             };
-            let mode = ModalPressure::new(node.k, gravity, density, source, horizon)?;
+            let mode = ModalPressure::new_in_depth(node.k, gravity, density, depth, source, horizon)?;
             let r = mode.sample(now)?;
             let p = mode.pressure(now)?;
             pressure.re += p.re;
@@ -193,7 +219,7 @@ pub(crate) fn prepare_segments<'a>(
             total.velocity.re += r.velocity.re;
             total.velocity.im += r.velocity.im;
         }
-        let magnitude = (node.k[0] * node.k[0] + node.k[1] * node.k[1]).sqrt();
+        let magnitude = crate::modal_pressure::effective_wavenumber((node.k[0] * node.k[0] + node.k[1] * node.k[1]).sqrt(), depth);
         let contribution = density
             * 0.5
             * node.weight
@@ -249,12 +275,15 @@ pub(crate) fn prepare_segments<'a>(
 /// c'est le même ordre d'addition qui est repris, et rien d'autre ne le garantit.
 ///
 /// Les bilans sont refaits en entier depuis les coefficients cumulés — sommation de Kahan sur
-/// les nœuds, dans le même ordre — donc identiques à ceux d'une préparation complète.
+/// les nœuds, dans le même ordre — donc identiques à ceux d'une préparation complète. S522 : `depth`, celle de la préparation (le pool
+/// ne la garde pas).
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn add_segments<'a>(
     nodes: &[Node],
     segments: impl Iterator<Item = Segment> + Clone,
     gravity: f32,
     density: f32,
+    depth: Option<f32>,
     now: SimTime,
     end: SimTime,
     min: [f32; 2],
@@ -285,7 +314,7 @@ pub(crate) fn add_segments<'a>(
                 pressure_pa: s.pressure_pa * node.transform,
                 ..s
             };
-            let mode = ModalPressure::new(node.k, gravity, density, source, horizon)?;
+            let mode = ModalPressure::new_in_depth(node.k, gravity, density, depth, source, horizon)?;
             let r = mode.sample(now)?;
             let p = mode.pressure(now)?;
             pressure.re += p.re;

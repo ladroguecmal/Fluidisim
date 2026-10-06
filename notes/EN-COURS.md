@@ -87,9 +87,13 @@ la profondeur. (3) **Le sillage** à `Fr_h` = 0,9 (h = 5 m, U = 6,3 m/s, σ = 2 
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — le cœur en profondeur finie ; (1), (2).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le cœur en profondeur finie ; (1), (2).
 - [ ] **P3** — la référence et le sillage ; (3).
 - [ ] **P4** — preuve ; listes 2.7, 3.2 ; rituel (lot dû à S522 : fait en S521, `--lot` non requis).
 
 ### Notes de reprise
+- **P2 fini** — `effective_wavenumber`, `ModalPressure::new_in_depth`, `prepare_in_depth` ; `add_segments` reçoit la profondeur (le nœud
+  reste à 64 octets : l'essai de taille l'a rappelé). Essais `s522` : pulsation libre à **2·10⁻⁷** de `√(g k tanh kh)` (kh 0,1 à 3), creux
+  `−2p/ρg` à 10⁻⁷, le chemin profond au bit (modes et champ), 5 m de fond diffère. Suite du cœur : **684**, verte.
+

@@ -292,6 +292,7 @@ fn incremental_and_rebound_fields_keep_physical_metadata() {
         [b].into_iter(),
         G,
         RHO,
+        None,
         t,
         end,
         [-2.0; 2],

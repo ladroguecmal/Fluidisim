@@ -139,6 +139,24 @@ fn integral(rate: i64, us: u64) -> Complex {
     };
     Complex::phase(negative(half)).scale(amplitude)
 }
+/// **S522 — le nombre d'onde effectif en profondeur finie**, `κ = |k|·tanh(|k|·h)` (rad/m) : en surface `η_t = κ φ`, d'où la pulsation
+/// `ω² = g κ` et le forçage `−κ p/ρ`. `None` : l'eau profonde, `κ = |k|` exactement. `tanh` sans libm, par l'exponentielle déterministe du
+/// cœur ; égale à 1 exactement au-delà de `2|k|h` = 32 (le reste, `e⁻³²` ≈ 10⁻¹⁴, est sous l'arrondi f32).
+pub(crate) fn effective_wavenumber(magnitude: f32, depth: Option<f32>) -> f32 {
+    match depth {
+        None => magnitude,
+        Some(h) => {
+            let y = 2.0 * magnitude * h;
+            if y > 32.0 {
+                magnitude
+            } else {
+                let e = crate::gaussian_spectrum::decay(y);
+                magnitude * ((1.0 - e) / (1.0 + e))
+            }
+        }
+    }
+}
+
 impl ModalPressure {
     pub fn new(
         k: [f32; 2],
@@ -147,6 +165,22 @@ impl ModalPressure {
         s: Segment,
         horizon_us: u64,
     ) -> Result<Self, Error> {
+        Self::new_in_depth(k, gravity, density, None, s, horizon_us)
+    }
+
+    /// **S522 — le mode en profondeur uniforme `depth`** (m) : [`effective_wavenumber`] remplace `|k|` dans la pulsation et le forçage.
+    /// `None` : [`ModalPressure::new`], au bit. Refus `Domain` sur une profondeur non finie ou non positive.
+    pub fn new_in_depth(
+        k: [f32; 2],
+        gravity: f32,
+        density: f32,
+        depth: Option<f32>,
+        s: Segment,
+        horizon_us: u64,
+    ) -> Result<Self, Error> {
+        if depth.is_some_and(|h| !(h.is_finite() && h > 0.0)) {
+            return Err(Error::Domain);
+        }
         if !k
             .iter()
             .chain([gravity, density, s.pressure_pa].iter())
@@ -172,10 +206,11 @@ impl ModalPressure {
             }
         }
         let magnitude = (k[0] * k[0] + k[1] * k[1]).sqrt();
-        let omega = (gravity * magnitude).sqrt();
+        let kappa = effective_wavenumber(magnitude, depth);
+        let omega = (gravity * kappa).sqrt();
         let freq = frequency(omega)?;
         let doppler = frequency(k[0] * s.velocity[0] + k[1] * s.velocity[1])?;
-        if !magnitude.is_finite() || magnitude <= 0.0 || !omega.is_finite() || freq <= 0 {
+        if !magnitude.is_finite() || magnitude <= 0.0 || !(kappa > 0.0) || !omega.is_finite() || freq <= 0 {
             return Err(Error::Domain);
         }
         let turns = [k[0] / TAU * s.origin[0], k[1] / TAU * s.origin[1]];
@@ -184,7 +219,7 @@ impl ModalPressure {
         }
         let origin = PhaseQ32::from_distance(k[0] / TAU, s.origin[0])
             .wrapping_add(PhaseQ32::from_distance(k[1] / TAU, s.origin[1]));
-        let force = Complex::phase(negative(origin)).scale(-magnitude * s.pressure_pa / density);
+        let force = Complex::phase(negative(origin)).scale(-kappa * s.pressure_pa / density);
         if !force.re.is_finite() || !force.im.is_finite() {
             return Err(Error::NonFinite);
         }
@@ -567,3 +602,7 @@ mod tests {
         assert!(worst < 2e-6);
     }
 }
+
+#[cfg(test)]
+#[path = "tests_profondeur_w.rs"]
+mod tests_profondeur;
