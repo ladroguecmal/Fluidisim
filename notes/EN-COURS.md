@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S519 — **en cours**. En autonomie : **le lot des registres** (dû à S519), puis **C07 en eau profonde** (3.2) — le cas canonique
+Session : S519 — **terminée**. En autonomie : **le lot des registres** (dû à S519), puis **C07 en eau profonde** (3.2) — le cas canonique
 « angle de Kelvin à ±2° » n'a jamais été exécuté : le sillage de W (source de pression gaussienne mobile, `wake_source`) n'a jamais été
 mesuré contre sa théorie. La leçon de S517 : trois instruments d'angle, aucun éprouvé avant d'être appliqué.
 
@@ -86,8 +86,8 @@ C07 (`arcsin(1/Fr_h)`) reste hors de portée — W est en eau profonde (aucune `
 
 - [x] **P1** — jeton ; le lot des registres (feuille de route S517–S518) ; plan.
 - [x] **P2** — la référence et l'instrument éprouvé ; (1).
-- [ ] **P3** — W mesuré ; (2), (3).
-- [ ] **P4** — preuve ; liste 3.2 ; CAS-CANONIQUES (C07) ; rituel (`--lot`).
+- [x] **P3** — W mesuré ; (2), (3).
+- [x] **P4** — preuve ; liste 3.2 ; CAS-CANONIQUES (C07) ; rituel (`--lot`).
 
 ### Notes de reprise
 - **P2 fini** — `outils/reference_sillage.py` : la référence convergée sur trois grilles (256 × 128 et 512 × 256 à 25 cm, 512 × 256 à
@@ -96,3 +96,7 @@ C07 (`arcsin(1/Fr_h)`) reste hors de portée — W est en eau profonde (aucune `
   d'Airy** : passé le maximum du profil (au-delà de 12°), l'angle où il retombe à Ai(0)/max Ai = 0,663 (la ligne de Kelvin est le zéro de
   l'argument d'Airy) ; par fenêtres d'1 λ₀, il lit 20,3 / 19,9 / 19,9° à 4–7 λ₀ (σ = 0,5, U = 2,5). **Figé** : fenêtre 4–6 λ₀, σ = 0,5 m,
   U = 2,5 m/s (Fr_σ = 1,13, λ₀ = 4 m, établi jusqu'à 30 m). Sur la référence : **19,98 / 19,98 / 19,96°** → (1) tenu (0,5° de 19,47).
+- **P3 fini** — W (256 × 256, coupure 6, 24 s) : écart quadratique **0,33 %**, pire 0,57 % du maximum ; l'instrument figé : **19,98°** sur W
+  et sur la référence → (2), (3) tenus. C07 profond passe.
+- **P4** — preuve C07-PROFOND-S519 ; listes 3.2, 13.2 ; note C07 dans CAS-CANONIQUES ; index ; journal ; rituel `--lot`.
+

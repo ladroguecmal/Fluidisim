@@ -1095,3 +1095,7 @@ ratio inchangé et refus non fini compté. Une assertion de phase spatiale prend
 score erreur/borne ≤ 1, 49 positions et toutes les composantes, témoin et défaut injecté.
 C02/C18 : 0,227536 / 0,650281 ; seul C04 ordre un reste en échec dans physics.
 [CONTROLES-S68](CONTROLES-S68.md). Ce passage ne valide pas les statistiques d’ensemble.
+> *Note du 2026-10-06, S519, sur C07* ([C07-PROFOND-S519](C07-PROFOND-S519.md)) : **la branche profonde est exécutée et passe.** Le
+> sillage de W (σ 0,5 m, 2,5 m/s, 24 s) est à 0,33 % de la réponse linéaire exacte en temps ; l'angle, lu par le bord d'Airy (éprouvé sur
+> la théorie seule : le maximum d'amplitude, lui, lit 16,5–17,75° à ces distances), vaut 19,98°. La branche peu profonde attend la
+> dispersion en profondeur finie de W (2.7).

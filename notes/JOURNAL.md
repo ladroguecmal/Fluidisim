@@ -458,3 +458,13 @@ compare à l'ombre que la réunion des deux dernières boîtes, sur les tableaux
 2,20 ms (24,9 avant), pas complet 27,1 → 9,2 ms ; au bit du recoupage entier (vitesses comprises) et de l'envoi entier (empreinte de η) ;
 S503, S504 inchangés. Maillons **1** (A329 levée, 6.4 tient dans un grand domaine). Suivant : **S519**, le lot des registres (dû) et un
 point partiel.
+
+## S519 — 2026-10-06 — le lot des registres ; C07 en eau profonde passe
+
+**Entrée.** En autonomie ; le lot (feuille de route S517–S518), puis C07 — jamais exécuté. **Fait**
+([preuve](../docs/validation/C07-PROFOND-S519.md)) : une référence indépendante de W (`outils/reference_sillage.py`, la réponse linéaire
+exacte en temps à la pression gaussienne de `wake_source`, convergée sur trois grilles). **L'instrument éprouvé d'abord** : celui de S517
+(le maximum des rayons) lit 16,5–17,75° sur la théorie même — S517 n'avait donc pas d'échec du solveur à conclure ; le **bord d'Airy**
+(l'amplitude retombée à Ai(0)/max Ai passé la cuspide) lit 19,98°, figé avant W. **Mesuré** : W à **0,33 %** de la référence sur la zone
+établie, angle **19,98°** → C07 profond passe (3.2, 13.2). L'eau peu profonde attend la dispersion en profondeur finie (2.7). Maillons
+**0** (3.2 et 13.2 avancent : C07 profond exécuté, le chemin — W tel quel —, la preuve). Suivant : **S520**, un point partiel ; revue à S521.
