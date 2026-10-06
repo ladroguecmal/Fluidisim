@@ -1093,3 +1093,88 @@ fn nothing_amplifies_outside_the_constrained_mode_s498() {
         assert!(g <= 1. + 1e-9, "critère 4, {nom} : {g}");
     }
 }
+
+/// La mesure de B6 sur un pavé `l × b × h` de masse `m` et de proxy `n` : `[raideur de pilonnement / ρgA, GM roulis, GM tangage, GM
+/// roulis prédit, GM tangage prédit]` — GM tiré du moment de rappel d'une inclinaison de 10⁻⁴ rad à l'équilibre en eau calme ; la
+/// prédiction `BM·(1 − 1/n²) + z_F`, `z_F` la hauteur, rapportée au centre, des points pondérés par leur poussée à l'équilibre.
+fn b6_mesure(l: f64, b: f64, h: f64, m: f64, n: [usize; 3]) -> [f64; 5] {
+    let corps = RigidBody::cuboid([l, b, h], m / (l * b * h), [0.; 3], n);
+    let c = corps.equilibrium_offset(MER);
+    let mut droit = corps.clone();
+    droit.position = [0., 0., c];
+    let calme = CalmWater { level: 0. };
+    let raideur = droit.heave_stiffness(&calme, MER) / (MER.rho * G * l * b);
+    let (mut poussee, mut moment_z) = (0., 0.);
+    for p in &droit.proxy {
+        let frac = ((0. - (c + p.body[2] - 0.5 * p.thickness)) / p.thickness).clamp(0., 1.);
+        poussee += p.volume * frac;
+        moment_z += p.volume * frac * p.body[2];
+    }
+    let z_f = moment_z / poussee;
+    let d = m / (MER.rho * l * b);
+    let theta: f64 = 1e-4;
+    let gm = |axe: usize| {
+        let mut q = [(theta / 2.).cos(), 0., 0., 0.];
+        q[1 + axe] = (theta / 2.).sin();
+        let mut incline = droit.clone();
+        incline.orientation = q;
+        -incline.forces(&calme, MER).torque[axe] / (m * G * theta)
+    };
+    let bm = |largeur: f64, k: usize| largeur * largeur / (12. * d) * (1. - 1. / (n[k] * n[k]) as f64);
+    [raideur, gm(0), gm(1), bm(b, 1) + z_f, bm(l, 0) + z_f]
+}
+
+/// **S499 — B6, le nombre de points du proxy par archétype.** Pour le navire, la barque et la caisse d'ADR-008 §3 en pavés : (1) la
+/// raideur de pilonnement vaut `ρgA` à 10⁻⁹ pour toute grille ; (2) la hauteur métacentrique mesurée suit la prédiction
+/// `BM·(1 − 1/n²) + z_F` à 10⁻³ près ; (3) le plus petit proxy (en nombre de points) dont GM, en roulis et en tangage, tient 5 % de
+/// l'analytique `KB + BM − KG` et dont la houle vue par la flottaison tient 1 % du continu pour les ondes de projet `λ = 2L` et `2B`.
+#[test]
+fn b6_how_many_proxy_points_per_archetype_s499() {
+    let sinc = |x: f64| if x == 0. { 1. } else { x.sin() / x };
+    let vue = |n: usize, k: f64, longueur: f64| (0..n).map(|i| (k * ((i as f64 + 0.5) / n as f64 - 0.5) * longueur).cos()).sum::<f64>() / n as f64;
+    for (nom, l, b, h, m) in [("navire", 60., 10., 8., 1.2e6), ("barque", 3., 2., 0.6, 400.), ("caisse", 1., 1., 0.2, 50.)] {
+        let d = m / (MER.rho * l * b);
+        let analytique = |largeur: f64| d / 2. + largeur * largeur / (12. * d) - h / 2.;
+        let (gm_roulis, gm_tangage) = (analytique(b), analytique(l));
+        let mut meilleur: Option<([usize; 3], [f64; 4])> = None;
+        // Sans compensation (L278) : chaque terme de GM tient seul — `BM` discret à 4 % de GM, `z_F` à 1 % — avec la même houle.
+        let mut sans_compensation: Option<[usize; 3]> = None;
+        let mut pire_prediction = 0f64;
+        for nx in 2..=16 {
+            for ny in 2..=16 {
+                for nz in 1..=8 {
+                    let r = b6_mesure(l, b, h, m, [nx, ny, nz]);
+                    assert!((r[0] - 1.).abs() <= 1e-9, "critère 1, {nom} {nx}×{ny}×{nz} : {}", r[0]);
+                    pire_prediction = pire_prediction.max((r[1] / r[3] - 1.).abs()).max((r[2] / r[4] - 1.).abs());
+                    let e = [
+                        (r[1] / gm_roulis - 1.).abs(),
+                        (r[2] / gm_tangage - 1.).abs(),
+                        (vue(nx, core::f64::consts::PI / l, l) / sinc(core::f64::consts::PI / 2.) - 1.).abs(),
+                        (vue(ny, core::f64::consts::PI / b, b) / sinc(core::f64::consts::PI / 2.) - 1.).abs(),
+                    ];
+                    if e[0] <= 0.05 && e[1] <= 0.05 && e[2] <= 0.01 && e[3] <= 0.01 && meilleur.map_or(true, |(g, _)| nx * ny * nz < g[0] * g[1] * g[2]) {
+                        meilleur = Some(([nx, ny, nz], e));
+                    }
+                    let z_f = r[3] - b * b / (12. * d) * (1. - 1. / (ny * ny) as f64);
+                    let separe = (b * b / (12. * d) / (ny * ny) as f64) <= 0.04 * gm_roulis
+                        && (l * l / (12. * d) / (nx * nx) as f64) <= 0.04 * gm_tangage
+                        && (z_f - (d / 2. - h / 2.)).abs() <= 0.01 * gm_roulis.min(gm_tangage)
+                        && e[2] <= 0.01
+                        && e[3] <= 0.01;
+                    if separe && sans_compensation.map_or(true, |g| nx * ny * nz < g[0] * g[1] * g[2]) {
+                        sans_compensation = Some([nx, ny, nz]);
+                    }
+                }
+            }
+        }
+        let r44 = b6_mesure(l, b, h, m, [4, 4, 4]);
+        println!(
+            "S499 {nom} : GM roulis {gm_roulis:.4} m, tangage {gm_tangage:.3} m (analytique) ; 4×4×4 : {:.4} / {:.3} m ({:+.1} % / {:+.1} %) ; \
+             prédiction à {pire_prediction:.1e} ; plus petit proxy {:?} ; sans compensation {:?}",
+            r44[1], r44[2], 100. * (r44[1] / gm_roulis - 1.), 100. * (r44[2] / gm_tangage - 1.), meilleur.map(|(g, e)| (g, g[0] * g[1] * g[2], e)),
+            sans_compensation.map(|g| (g, g[0] * g[1] * g[2]))
+        );
+        assert!(pire_prediction <= 1e-3, "critère 2, {nom} : {pire_prediction}");
+        assert!(meilleur.is_some(), "critère 3, {nom} : aucune grille jusqu'à 16 × 16 × 8");
+    }
+}

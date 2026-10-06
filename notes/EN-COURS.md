@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S499 — **en cours**. En autonomie, **6.1, B6 — le nombre de points du proxy par archétype** (ADR-008 §5.1 : « 20 à 60 »). La
+Session : S499 — **terminée**. En autonomie, **6.1, B6 — le nombre de points du proxy par archétype** (ADR-008 §5.1 : « 20 à 60 »). La
 porte D a pris 16 × 8 × 4 points sans mesure de ce qu'il fallait ; S494–S495 ont vu une bouée de 4 × 4 × 4 points rouler et chavirer.
 
 **Ce que la session fait.** Un banc dans le cœur : pour chaque archétype en pavé (navire, barque, caisse ; la balle est contrainte), et des
@@ -81,7 +81,10 @@ proxy dont `GM` (roulis et tangage) tient 5 % et la houle 1 % de son onde de pro
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le banc ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.1 ; rituel.
+- [x] **P2** — le banc ; (1)–(3).
+- [x] **P3** — preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
+- **P2** — banc `b6_how_many_proxy_points_per_archetype_s499` : prédiction à 3·10⁻⁸ ; plus petits proxys 224 / 49 / 49, sans compensation
+  560 / 196 / 147 ; une couche ne tient que par compensation (L278) → ajouté la recherche « sans compensation ». 659 essais.
+- **P3** — preuve B6-PROXY-S499 ; liste 6.1 ; index ; journal.

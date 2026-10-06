@@ -286,3 +286,12 @@ point partiel proche de son périmètre.
 120 s de B et 10 s de W ; le témoin au pas normal diverge à ×3,052 par pas, la prédiction ; navire, barque, caisse : `|G|` = 1 à 10⁻¹².
 Un instrument refait sans toucher au seuil : les maxima paraboliques portaient un bruit de 6·10⁻⁴. **C11 tenu** ; 6.1 avance (restent
 l'amortissement des autres degrés de liberté et B6). Maillons **0**. Suivant : **S499, B6** — le nombre de points du proxy par archétype.
+
+## S499 — 2026-10-06 — B6 : combien de points pour le proxy de flottabilité
+
+**Entrée.** En autonomie ; ADR-008 §5.1 (« 20 à 60 points → B6 »). **Fait** ([preuve](../docs/validation/B6-PROXY-S499.md)) : un banc sur
+2 880 grilles de trois archétypes — raideur, hauteur métacentrique en roulis et tangage, houle vue par la flottaison. **Mesuré** : le modèle
+`GM_proxy = BM·(1 − 1/n²) + z_F` tient à 3·10⁻⁸ ; le navire demande 224 points (hors des 20 à 60 : son GM de roulis est petit devant BM),
+barque et caisse 49 — mais à une couche par compensation ; sans compensation 560 / 196 / 147. Le surcoût vient de la couche partielle qui
+pousse en son milieu. 6.1 avance. Maillons **0**. Suivant : **S500, pousser au centre de la part immergée** — `z_F` exact à une couche,
+B6 refait.
