@@ -315,6 +315,17 @@ impl RigidBody {
         Forces { force, torque, immersed_volume }
     }
 
+    /// **S497 — le tronçon de sillage d'un corps en marche** (liste 6.3) : le tronçon suivant de l'émetteur de sillage (ADR-104),
+    /// visé du `cursor` — où la source en est — vers la position **prédite** du corps à la fin du tronçon, `x + v·Δ`, sous la charge
+    /// que porte sa coque, son poids `m·g` (ADR-103 : une charge prescrite par l'hôte ; c'est elle). Le chemin de la source reste
+    /// continu, comme l'émetteur l'exige, et se recale sur le corps à chaque tronçon : l'écart en fin de tronçon est celui de la
+    /// prédiction, `½·|a|·Δ²` pour une accélération `a` constante, et ne s'accumule pas.
+    pub fn wake_leg(&self, cursor: crate::wake_source::Cursor, duration_us: u64) -> crate::wake_source::Leg {
+        let d = duration_us as f64 * 1e-6;
+        let vise = |k: usize| ((self.position[k] + self.velocity[k] * d - cursor.position[k] as f64) / d) as f32;
+        crate::wake_source::Leg { duration_us, velocity: [vise(0), vise(1)], downward_force_n: (self.mass * G) as f32 }
+    }
+
     /// **Un pas symplectique** : vitesses d'abord, sous les forces de l'état présent ; positions et
     /// orientation ensuite, avec les vitesses nouvelles. Rend les forces employées.
     pub fn step(&mut self, dt: f64, water: &dyn WaterQuery, milieu: Milieu) -> Forces {

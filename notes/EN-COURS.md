@@ -83,7 +83,10 @@ aucune admission refusée. 6.3 : le corps en marche couplé à la source.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `wake_leg` ; l'essai (1)–(4).
+- [x] **P2** — `wake_leg` ; l'essai (1)–(4).
 - [ ] **P3** — preuve ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
+- **P2** — `RigidBody::wake_leg`. Curseur/corps 0,2244 / 0,0560 / 0,0140 m (prédits 0,2250 / 0,0563 / 0,0141) ; P₀ = 1 249,048 Pa au bit ;
+  sillage émis/déclaré 4,47 / **1,20** / 0,34 % (max|η| 21 cm) ; ordres 1,89 et 1,83 ; 0 refus. Impasses : le journal emprunte les
+  émissions (préparées et acquittées d'abord, admises ensuite) ; un contrôleur ne se construit pas sur un journal vide. 655 essais.

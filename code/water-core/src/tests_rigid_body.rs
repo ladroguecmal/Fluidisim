@@ -739,3 +739,145 @@ fn the_wake_of_a_moving_pressure_heaves_and_carries_the_buoy_s495() {
     assert!(fort[1] >= 0.3 * fort[0], "critère 2 : {} contre {}", fort[1], fort[0]);
     assert!(faible[4] <= 0.05 * faible[3], "critère 3 : {} contre {}", faible[4], faible[3]);
 }
+
+/// **S497 — un corps en marche produit son sillage.** La coque de la porte D (4 × 1,6 × 1 m, 500 kg/m³) menée par le jeu sur un cercle
+/// de 20 m de rayon à 3 m/s (sa vitesse horizontale imposée à chaque pas de 2 ms, l'eau calme la porte), 12 s. La source de son sillage
+/// est émise tronçon par tronçon, `Δ` µs chacun, par `RigidBody::wake_leg` ; la référence est la même trajectoire **déclarée** d'avance —
+/// les positions du corps toutes les 0,2 s, soixante tronçons —, sous la même charge. Rend `[écart max curseur/corps aux fins de tronçon,
+/// prédiction ½·(U²/R)·Δ², max|η_émis − η_déclaré|, max|η_déclaré|, P₀ publiée, m·g/(2πσ²), refus]`, η relevée sur une grille de 15 × 15
+/// points à 4, 8 et 12 s.
+fn sillage_emis_s497(delta_us: u64) -> [f64; 7] {
+    use crate::bound_pressure::{Context, Controller, Settings};
+    use crate::gaussian_spectrum::{bake, Recipe};
+    use crate::pressure_journal::Journal;
+    use crate::pressure_source::Metadata;
+    use crate::spectral_pressure::{Node, Slot};
+    use crate::wake_source::{Emitter, Leg, Wake};
+    use crate::wave_journal::Cause;
+    use crate::FrameId;
+    let (rayon, u, fin_us) = (20f64, 3f64, 12_000_000u64);
+    let settings = Settings {
+        frame: FrameId(0),
+        cell: 0,
+        gravity: G as f32,
+        density: MER.rho as f32,
+        min: [-30.; 2],
+        max: [30.; 2],
+        start: SimTime(0),
+        end: SimTime(14_000_000),
+    };
+    let recipe = Recipe { sigma: 2., cutoff: 3., radial: 64, angular: 128 };
+    let meta = |id: u64| Metadata { epoch: 1, id, cause: Cause { entity: 9, command: id, emission: 0 }, settings, recipe };
+    let mut nodes = vec![Node::default(); 8192];
+    let mut hn = vec![Node::default(); 4096];
+    let full = bake(recipe, &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let context = Context::new(settings, &half).unwrap();
+    // Le corps, mené sur le cercle ; ses positions toutes les 0,2 s pour la référence.
+    let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [rayon, 0., 0.5 - 500. / MER.rho], [8, 4, 4]);
+    let calme = CalmWater { level: 0. };
+    let mene = |c: &mut RigidBody, t: f64| {
+        let th = u * t / rayon;
+        c.velocity[0] = -u * th.sin();
+        c.velocity[1] = u * th.cos();
+    };
+    let poids = (coque.mass * G) as f32;
+    // Les émissions restent chez l'hôte tant que le journal les retient (ADR-104) : préparées et acquittées tronçon par tronçon (un
+    // journal d'un emplacement par acquittement), admises ensuite au contrôleur — le champ, calculé à l'instant demandé, est le même ;
+    // l'admission en direct est celle de S151.
+    let mut emissions = Vec::new();
+    let mut emetteur = Emitter::new(meta(100), SimTime(0), [rayon as f32, 0.]).unwrap();
+    let (mut refus, mut pire_curseur) = (0f64, 0f64);
+    let mut releves = vec![[coque.position[0], coque.position[1]]];
+    let pas = fin_us / 2000;
+    for n in 0..=pas {
+        let t = n * 2000;
+        mene(&mut coque, t as f64 * 1e-6);
+        if t % delta_us == 0 {
+            if t > 0 {
+                let c = emetteur.cursor().position;
+                pire_curseur = pire_curseur.max((c[0] as f64 - coque.position[0]).hypot(c[1] as f64 - coque.position[1]));
+            }
+            if t < fin_us {
+                let leg = coque.wake_leg(emetteur.cursor(), delta_us);
+                let emission = emetteur.prepare(emetteur.cursor(), leg).unwrap();
+                {
+                    let mut un = [None];
+                    let mut j1 = Journal::new(1, &mut un);
+                    if j1.admit_authenticated(emission.source()).is_err() || emetteur.acknowledge(&emission, &j1).is_err() {
+                        refus += 1.;
+                    }
+                }
+                emissions.push(emission);
+            }
+        }
+        if n < pas {
+            coque.step(0.002, &calme, MER);
+            if (n + 1) % 100 == 0 {
+                releves.push([coque.position[0], coque.position[1]]);
+            }
+        }
+    }
+    let mut slots = vec![None; 64];
+    let mut journal = Journal::new(1, &mut slots);
+    // Le contrôleur se construit sur un journal non vide.
+    journal.admit_authenticated(emissions[0].source()).unwrap();
+    let (mut active, mut spare) = (vec![Slot::default(); 4096], vec![Slot::default(); 4096]);
+    let mut emis = Controller::new(context, &half, &mut journal, SimTime(0), &mut active, &mut spare).unwrap();
+    for e in &emissions[1..] {
+        if emis.admit(e.source()).is_err() {
+            refus += 1.;
+        }
+    }
+    // La référence : la trajectoire déclarée, tronçons de 0,2 s entre les positions relevées.
+    let legs: Vec<Leg> = releves
+        .windows(2)
+        .map(|w| Leg { duration_us: 200_000, velocity: [((w[1][0] - w[0][0]) / 0.2) as f32, ((w[1][1] - w[0][1]) / 0.2) as f32], downward_force_n: poids })
+        .collect();
+    let declaree = Wake::build(meta(1), SimTime(0), [releves[0][0] as f32, releves[0][1] as f32], &legs).unwrap();
+    let p0 = declaree.source().segments()[0].pressure_pa as f64;
+    let mut slots_r = vec![None; 2];
+    let mut journal_r = Journal::new(1, &mut slots_r);
+    journal_r.admit_authenticated(declaree.source()).unwrap();
+    let (mut active_r, mut spare_r) = (vec![Slot::default(); 4096], vec![Slot::default(); 4096]);
+    let mut reference = Controller::new(context, &half, &mut journal_r, SimTime(0), &mut active_r, &mut spare_r).unwrap();
+    let (mut ecart, mut ampl) = (0f64, 0f64);
+    for t in [4_000_000u64, 8_000_000, 12_000_000] {
+        emis.update(SimTime(t)).unwrap();
+        reference.update(SimTime(t)).unwrap();
+        let (e, r) = (emis.current(SimTime(t)).unwrap(), reference.current(SimTime(t)).unwrap());
+        for i in 0..15 {
+            for j in 0..15 {
+                let p = [-28. + 4. * i as f32, -28. + 4. * j as f32];
+                let (a, b) = (e.sample_local(p).unwrap().eta as f64, r.sample_local(p).unwrap().eta as f64);
+                ecart = ecart.max((a - b).abs());
+                ampl = ampl.max(b.abs());
+            }
+        }
+    }
+    let d = delta_us as f64 * 1e-6;
+    [pire_curseur, 0.5 * u * u / rayon * d * d, ecart, ampl, p0, poids as f64 / (core::f64::consts::TAU * 4.), refus]
+}
+
+/// **S497, critères 1 à 4 — le sillage émis par le corps en marche contre la trajectoire déclarée.** (1) À chaque fin de tronçon, le
+/// curseur de la source est à moins de 1,2 × `½·(U²/R)·Δ²` du corps ; (2) `P₀ = m·g/(2πσ²)` à 10⁻⁶ près ; (3) à Δ = 0,5 s, le sillage
+/// émis à 10 % de max|η| du sillage déclaré (prévu 2 à 6 %), et un ordre ≥ 1,7 sur Δ = 1 / 0,5 / 0,25 s ; (4) aucun refus.
+/// Mesuré : 0,0560 m (prédit 0,0563) ; P₀ au bit ; 1,20 % ; ordres 1,89 et 1,83 ; 0.
+#[test]
+fn a_moving_body_emits_its_wake_s497() {
+    let r: Vec<[f64; 7]> = [1_000_000u64, 500_000, 250_000].iter().map(|d| sillage_emis_s497(*d)).collect();
+    for (d, m) in [1., 0.5, 0.25].iter().zip(&r) {
+        println!(
+            "S497 Δ = {d} s : curseur/corps {:.4} m (prédit {:.4}), sillage émis/déclaré {:.2e} m sur {:.2e} ({:.2} %), P₀ {:.4} Pa (m·g/2πσ² = {:.4}), refus {}",
+            m[0], m[1], m[2], m[3], 100. * m[2] / m[3], m[4], m[5], m[6]
+        );
+        assert_eq!(m[6], 0., "critère 4");
+        assert!(m[0] <= 1.2 * m[1], "critère 1 : {} contre {}", m[0], m[1]);
+        assert!((m[4] / m[5] - 1.).abs() <= 1e-6, "critère 2 : {} contre {}", m[4], m[5]);
+    }
+    let ordre = |a: f64, b: f64| (a / b).log2();
+    let (o1, o2) = (ordre(r[0][2], r[1][2]), ordre(r[1][2], r[2][2]));
+    println!("S497 : ordres {o1:.2} et {o2:.2}");
+    assert!(r[1][2] <= 0.1 * r[1][3], "critère 3 : {} contre {}", r[1][2], r[1][3]);
+    assert!(o1 >= 1.7 && o2 >= 1.7, "critère 3, ordre : {o1} {o2}");
+}
