@@ -85,3 +85,10 @@ profondes, 19,47°) ; onde transverse `λ = 2πU²/g` = 5,76 m (`kh` = 4,4 : eau
 - [ ] **P3** — preuve ; liste 4.13 ; rituel.
 
 ### Notes de reprise
+- **P2 (en cours)** — premier instrument (maximum latéral) : 2° — il prend le champ proche. Second (le bord du coin à un seuil) : domaine
+  64 × 24 m saturé (le coin touche les éponges, les ondes du démarrage remplissent le domaine) → 64 × 48 m, rampe de 3 s : **24,1 / 21,2 /
+  14,6° aux seuils 0,2 / 0,3 / 0,4** — l'instrument ne tranche pas (retenir 0,3 serait choisir après coup). **Troisième instrument, déclaré
+  avant de le lancer** : la moyenne de |η| le long des rayons issus de l'étrave, de 10 à 24 m, pour chaque angle de 5 à 35° (pas de 0,5°) ;
+  l'angle du maximum contre 19,47° à 2°. L'élévation maximale, 0,72 m, est sur l'étrave (la stagnation, `U²/2g` = 0,46 m, amplifiée par le
+  couvercle partiel). Recoupage CPU 25 ms par pas sur 786 000 mailles (les boucles entières du cœur et de la géométrie dominent).
+

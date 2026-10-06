@@ -1243,3 +1243,158 @@ pub fn recevoir_coque() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// **Banc S517 (liste 4.13) — la coque en marche et son sillage, sur la carte** (`--lineaire-sillage`, `CYCLES`, `VITESSE`, `DUREE`).
+/// La coque de la porte D (4 × 1,6 × 1 m à 500 kg/m³, à son tirant) menée en x à `VITESSE` m/s (3 par défaut ; départ en rampe d'1 s)
+/// dans un δ de 48 × 24 × 4 m (192 × 96 × 16 mailles de 25 cm), éponges de 3 m aux bords. Le cœur ne sert que de découpeur (recoupage en
+/// boîte, S508–S509). Au bout de `DUREE` s (10), le sillage : pour chaque distance derrière le centre de la coque, la position latérale de
+/// la plus forte élévation hors de l'axe, des deux côtés ; la droite de ces points donne le demi-angle, contre les 19,47° de Kelvin.
+pub fn recevoir_sillage() -> Result<(), String> {
+    let lire_n = |nom: &str, defaut: usize| std::env::var(nom).ok().and_then(|v| v.parse().ok()).unwrap_or(defaut);
+    use crate::scene::host_impl;
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+    use water_core::rigid_body::oriented_box_distance;
+    pollster::block_on(async {
+        let d = Domain3 { nx: lire_n("SILLAGE_NX", 256), ny: lire_n("SILLAGE_NY", 192), nz: 16, dx: 0.25 };
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let lire = |nom: &str, defaut: f64| std::env::var(nom).ok().and_then(|v| v.parse().ok()).unwrap_or(defaut);
+        let (vitesse, duree) = (lire("VITESSE", 3.), lire("DUREE", 15.));
+        let cycles = lire("CYCLES", 60.) as u32;
+        let dt_us = 10_000u64;
+        let dt = dt_us as f64 * 1e-6;
+        let pas = (duree / dt).round() as usize;
+        let rampe = lire("RAMPE", 3.);
+        let parcouru = |t: f64| {
+            let pi = core::f64::consts::PI;
+            if t < rampe { 0.5 * vitesse * (t - rampe / pi * (pi * t / rampe).sin()) } else { 0.5 * vitesse * rampe + vitesse * (t - rampe) }
+        };
+        let vitesse_a = |t: f64| if t < rampe { 0.5 * vitesse * (1. - (core::f64::consts::PI * t / rampe).cos()) } else { vitesse };
+        let (x0, yc) = (6.1f64, 0.5 * d.ny as f64 * d.dx as f64 - 0.125);
+        let z = d.z0() as f64 + 0.5 - 500. / rho as f64;
+        let centre = |t: f64| [x0 + parcouru(t), yc, z];
+        let n_noeuds = (d.nx + 1) * (d.ny + 1) * (d.nz + 1);
+        let mut nds = vec![1f32; n_noeuds];
+        let remplir = |c: [f64; 3], boite: [usize; 6], out: &mut Vec<f32>| {
+            for k in boite[4]..=boite[5] {
+                for j in boite[2]..=boite[3] {
+                    for i in boite[0]..=boite[1] {
+                        let p = [i as f64 * d.dx as f64, j as f64 * d.dx as f64, k as f64 * d.dx as f64];
+                        out[(k * (d.ny + 1) + j) * (d.nx + 1) + i] = oriented_box_distance(c, [1., 0., 0., 0.], [2., 0.8, 0.5], p) as f32;
+                    }
+                }
+            }
+        };
+        let boite_de = |c: [f64; 3]| {
+            let (m, h) = (2. * d.dx as f64, [2.0f64, 0.8, 0.5]);
+            let n = |x: f64, lim: usize| ((x / d.dx as f64).floor().max(0.) as usize).min(lim);
+            [n(c[0] - h[0] - m, d.nx), n(c[0] + h[0] + m + d.dx as f64, d.nx), n(c[1] - h[1] - m, d.ny), n(c[1] + h[1] + m + d.dx as f64, d.ny),
+                n(c[2] - h[2] - m, d.nz), n(c[2] + h[2] + m + d.dx as f64, d.nz)]
+        };
+        remplir(centre(0.), [0, d.nx, 0, d.ny, 0, d.nz], &mut nds);
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 30);
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        let mut coeur =
+            Volume3::configure_with_floating_solid(&mut host, d, rho, g, &vec![0.; d.columns()], &nds).map_err(|e| format!("cœur {e:?}"))?;
+        coeur.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+        let geo_de = |c: &Volume3| -> Result<Vec<f32>, String> {
+            let (u, v, w) = c.apertures().ok_or("ouvertures")?;
+            Ok(decoupee(u, v, w, c.fluid_fraction().ok_or("fractions")?))
+        };
+        let geo0 = geo_de(&coeur)?;
+        let carte = Linear3::new(d, rho, g, &geo0).await?;
+        carte.set_step(dt_us, EPONGE)?;
+        let (nu, nv) = ((d.nx + 1) * d.ny * d.nz, d.nx * (d.ny + 1) * d.nz);
+        let zeros = vec![0f32; face_total(d)];
+        carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[nu + nv..], coeur.surface())?;
+        let aire = d.dx * d.dx;
+        let mut colonnes = coeur.solid_column_volumes().ok_or("colonnes solides")?.to_vec();
+        let (mut paroi, mut depot) = (vec![0f32; d.cells()], vec![0f32; d.columns()]);
+        let mut faces: Vec<f32> = geo0[..face_total(d)].iter().map(|a| if *a == 0. { 0. } else { f32::MAX }).collect();
+        let mut transfert = vec![0f32; 5 * d.columns()];
+        println!(
+            "SILLAGE_S517 nx={} ny={} nz={} dx={} vitesse={vitesse} duree={duree} pas={pas} cycles={cycles} froude_profondeur={:.3} carte={:?}",
+            d.nx, d.ny, d.nz, d.dx, vitesse / (9.81 * d.z0() as f64).sqrt(), carte.adapter
+        );
+        let (mut cpu, mut maxi_moitie) = (0f64, 0f32);
+        let debut = std::time::Instant::now();
+        let mut precedent = centre(0.);
+        for n in 1..=pas {
+            let t = n as f64 * dt;
+            let t0 = std::time::Instant::now();
+            let c = centre(t);
+            let (b0, b1) = (boite_de(precedent), boite_de(c));
+            remplir(c, [b0[0].min(b1[0]), b0[1].max(b1[1]), b0[2].min(b1[2]), b0[3].max(b1[3]), b0[4].min(b1[4]), b0[5].max(b1[5])], &mut nds);
+            precedent = c;
+            coeur.set_solid_rigid(&nds, [vitesse_a(t) as f32, 0., 0.], [0.; 3], c.map(|x| x as f32)).map_err(|e| format!("pas {n} : {e:?}"))?;
+            coeur.wall_divergence(&mut paroi).map_err(|e| format!("{e:?}"))?;
+            coeur.changed_faces_in_place(&mut faces).map_err(|e| format!("{e:?}"))?;
+            coeur.lid_transfer_weights(&mut transfert).map_err(|e| format!("{e:?}"))?;
+            let nouvelles = coeur.solid_column_volumes().ok_or("colonnes solides")?;
+            for k in 0..d.columns() {
+                depot[k] = (nouvelles[k] - colonnes[k]) / aire;
+            }
+            colonnes.copy_from_slice(nouvelles);
+            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot, &transfert)?;
+            cpu += t0.elapsed().as_secs_f64();
+            carte.step(cycles);
+            if n == pas / 2 {
+                let (eta, _) = carte.surface()?;
+                maxi_moitie = eta.iter().fold(0f32, |m, e| m.max((e - d.z0()).abs()));
+            }
+        }
+        let (eta, _) = carte.surface()?;
+        let duree_mur = debut.elapsed().as_secs_f64();
+        let (mut maxi, mut ou) = (0f32, 0usize);
+        for (c, e) in eta.iter().enumerate() {
+            if (e - d.z0()).abs() > maxi {
+                maxi = (e - d.z0()).abs();
+                ou = c;
+            }
+        }
+        let (x_max, y_max) = (((ou % d.nx) as f64 + 0.5) * d.dx as f64, ((ou / d.nx) as f64 + 0.5) * d.dx as f64 - yc);
+        let fini = eta.iter().all(|e| e.is_finite());
+        // Le sillage : à chaque distance derrière le centre de la coque, **le bord du coin** — de chaque côté, le point le plus éloigné de
+        // l'axe où |η| dépasse la fraction `SEUIL` (0,2) du maximum à cette distance ; au-delà, l'eau est au repos. (Le maximum latéral,
+        // essayé d'abord, prend le champ proche de la coque : 2° au lieu de 19,5°.)
+        let seuil = lire("SEUIL", 0.2) as f32;
+        let xh = centre(duree)[0];
+        let (mut points, mut ligne) = (Vec::new(), String::new());
+        let (d_min, d_max) = (lire("D_MIN", 10.) as i64, lire("D_MAX", 24.) as i64);
+        for dist in (d_min..=d_max).map(|k| k as f64) {
+            let i = ((xh - dist) / d.dx as f64).floor() as usize;
+            let demi = 0.5 * d.ny as f64 * d.dx as f64 - 3.2;
+            let colonne = |j: usize| (eta[j * d.nx + i] - d.z0()).abs();
+            let ampl = (0..d.ny).filter(|&j| ((j as f64 + 0.5) * d.dx as f64 - yc).abs() <= demi).map(colonne).fold(0f32, f32::max);
+            for cote in [1f64, -1.] {
+                let mut bord = 0f64;
+                for j in 0..d.ny {
+                    let y = (j as f64 + 0.5) * d.dx as f64 - yc;
+                    if y * cote <= 0. || y.abs() > demi {
+                        continue;
+                    }
+                    if colonne(j) > seuil * ampl {
+                        bord = bord.max(y.abs());
+                    }
+                }
+                points.push((dist, bord));
+                if cote > 0. {
+                    ligne.push_str(&format!(" {dist:.0}:{bord:.2}"));
+                }
+            }
+        }
+        let nn = points.len() as f64;
+        let (sx, sy) = (points.iter().map(|p| p.0).sum::<f64>(), points.iter().map(|p| p.1).sum::<f64>());
+        let (sxx, sxy) = (points.iter().map(|p| p.0 * p.0).sum::<f64>(), points.iter().map(|p| p.0 * p.1).sum::<f64>());
+        let pente = (nn * sxy - sx * sy) / (nn * sxx - sx * sx);
+        let angle = pente.atan().to_degrees();
+        println!(
+            "SILLAGE_S517 bilan demi_angle_deg={angle:.2} kelvin_deg=19.47 ecart_deg={:.2} max_eta_m={maxi:.4} au_x={x_max:.2} au_y={y_max:.2} coque_x={xh:.2}              max_eta_mi_parcours_m={maxi_moitie:.4} fini={fini} recoupage_cpu_ms={:.3} pas_total_ms={:.3} bord_droit{ligne}",
+            angle - 19.47,
+            1e3 * cpu / pas as f64,
+            1e3 * duree_mur / pas as f64
+        );
+        Ok(())
+    })
+}
