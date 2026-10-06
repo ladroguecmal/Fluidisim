@@ -62,30 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S552 — **terminée**. En autonomie, **6.6 — S548 et S549 ensemble** : une citerne latérale s'envahit par une brèche, la coque gîte
-vers elle et s'enfonce — l'eau entre sous une pesanteur que la gîte incline, et pèse là où elle se tient.
+Session : S553 — **en cours**. En autonomie, **6.6 — plusieurs compartiments et leurs cloisons** : l'envahissement progressif — la brèche
+envahit un compartiment, qui envahit le suivant par une cloison percée.
 
-**Ce que la session fait.** Un essai, sans code neuf : la barge de S548 (20 × 8 × 4 m, 246 t) ; une citerne latérale de V à tribord
-(20 × 0,5 × 4 m, `y` de 3,5 à 4 m), forme volumique, une brèche de 0,1 m² à son fond ; la mer, vue du navire, une forme volumique de
-400 × 400 × 20 m centrée sur la verticale de la brèche, replacée à chaque pas sur la surface du monde ; la pesanteur du navire
-`Rᵀ·(0, 0, −g)` pour V ; l'eau de la citerne pèse en son centre mouillé (S549).
+**Ce que la session fait.** Un essai, sans code neuf (les pièces de S548–S552) : la barge de S548 ; deux compartiments de V de 5 × 8 × 4 m,
+l'avant (`x` ∈ [0 ; 5]) et l'arrière (`x` ∈ [−5 ; 0]), formes volumiques ; une brèche de 0,1 m² au fond de l'avant, un trou de 0,05 m² au
+pied de la cloison qui les sépare (deux arêtes d'orifice, une par sens : l'eau va du plus haut au plus bas) ; la mer volumique recentrée sous
+la brèche (S552) ; la pesanteur du navire ; l'eau de chaque compartiment en son centre mouillé. Pendant l'envahissement la barge prend de
+l'assiette (l'avant d'abord) ; à l'équilibre, tout est symétrique.
 
-**Ordre de grandeur, calculé — la référence indépendante** (ADR-239 D1) : la flottabilité perdue en section, intégrée numériquement (la
-section intacte `y` ∈ [−4 ; 3,5] sous la flottaison inclinée, la force et le moment résolus par bisection) : **gîte 8,088°, tirant au
-centre 1,6355 m, 21,68 m³ dans la citerne** ; tribord immergé à 2,20 m, bâbord à 1,07 m (pont sec, bouchain noyé). Une citerne de 2 m
-n'aurait aucun équilibre avant 40° (calculé) : elle n'est pas prise.
+**Ordre de grandeur, calculé.** La flottabilité perdue des deux : `T' = T·A/(A − A₁ − A₂)` = 1,5·160/80 = **3,000 m**, **120 m³** dans
+chacun ; franc-bord 1 m ; `GM` transversal après envahissement 1,278 m (stable : les extrémités intactes portent l'inertie de flottaison).
 
-**Critères, écrits avant.** (1) La gîte finale à 3 % de 8,088°. (2) Le tirant au centre à 1 % de 1,6355 m ; l'eau à 2 % de 21,68 m³.
-(3) La masse de V exacte. Quantum : 1 ml sur 10 m² de citerne (0,1 µm), rapport 10⁷.
+**Critères, écrits avant.** (1) Le tirant final au centre (vertical) à 1 % de 3,000 m ; l'assiette finale sous 0,1°. (2) L'eau de chaque
+compartiment à 2 % de 120 m³. (3) Pendant l'envahissement, l'arrière en retard sur l'avant (la cloison limite) ; la masse de V exacte.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.6 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — essai `s552` : gîte 8,101° (8,088), tirant 1,6192 m (1,6355 le long de l'axe ; `cos θ` : 1,6193 vertical), eau 21,689 m³
-  (21,68) ; masse exacte. Suite 711.
-- **P3** — preuve BRECHE-LATERALE-S552 ; liste 6.6 ; index ; journal.
-
