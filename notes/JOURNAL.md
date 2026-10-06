@@ -590,5 +590,4 @@ pièces de V déjà éprouvées — la rétention de surface reçoit la pluie, l
 ruissellement. **Mesuré** : la lame infiltrée à 2 h à 0,098 % de Mein–Larson et Green–Ampt décalé, la masse exacte, le ruissellement dès la
 rétention pleine. **Critère (1) manqué** : la submersion lue à 29,1 min pour 37,67 — le seuil d'1 ml est le quantum de V (ADR-234 D2, que
 j'ai écrite et n'ai pas appliquée à mon propre seuil) ; 10 ml passés à 39,13 min, en diagnostic après coup. Maillons **0** (5.5 avance).
-Suivant : **S534**, un point partiel.
-
+Le lot des registres, dû en S533 (rappel du rituel), fait dans la foulée (feuille de route S530–S533). Suivant : **S534**, un point partiel.

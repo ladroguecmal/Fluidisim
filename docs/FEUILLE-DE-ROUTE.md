@@ -385,6 +385,9 @@ référence éprouvée (A330 ; la carte au-delà de 65 535 groupes) ; la huitiè
 0,03 % de la théorie, l'assertion corrigée) ; l'angle à `Fr_h` = 2,14 — **C07 passe entier** ; la neuvième revue (ADR-234).
 **S528–S529** : les anneaux d'impact de W en eau peu profonde (3.1 ; 0,44 % d'une propagation FFT exacte) ; A330 localisée (l'amplitude du
 sillage de δ stable en maille, l'écart revient au modèle de référence ; le pic d'étrave divergent au coin vif).
+**S530–S533** : 5.5 avance deux fois — l'absorption par le sol (Green–Ampt dans V, intégré exactement) et la pluie hors contenant
+(rétention, infiltration, ruissellement) ; la dixième revue (ADR-235 : les limites matérielles calculées) ; la carte refuse ses limites
+avec un nom.
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

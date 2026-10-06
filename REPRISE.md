@@ -17,7 +17,7 @@ Session en cours : aucune
 Dernière session : S533 — la pluie hors contenant ([journal](notes/JOURNAL.md)). Avant : S532 (la carte refuse ses limites avec un nom)
 Session suivante : **S534 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'assèchement du sol (5.5 : drainage et évaporation, bilans analytiques), A330 (une référence de corps : Michell), la convergence de δ en pas seul (A328), 6.2 la turbulence, 6.7 la poche d'air, 9.3 un corps quelconque ; un seuil d'instrument au-dessus du quantum de l'objet (ADR-234 D2), limites matérielles calculées (ADR-235 D1), ordres de grandeur calculés (ADR-232). Revue à S536. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S533 : la pluie hors contenant (5.5)
-Registres       : dernier lot S530 (ADR-213 D3) ; le prochain au plus tard en S533
+Registres       : dernier lot S533 (ADR-213 D3) ; le prochain au plus tard en S536
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
