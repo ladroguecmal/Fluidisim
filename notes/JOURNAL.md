@@ -237,3 +237,14 @@ la moitié droite nulle, la période à 0,16 % (alignée) et 0,27 % (milieu de m
 écriture qui changeait les bits du couvercle plein (le compilateur réordonnait le chemin plein : la branche placée aux endroits d'usage).
 **6.5 validée — 5 points sur 120.** Maillons **0**. Suivant : un autre point partiel proche de son périmètre.
 
+
+## S494 — 2026-10-06 — les impacts de W poussent les corps (6.2)
+
+**Entrée.** En autonomie ; le point choisi parmi les partiels courts : 6.2 (« Manquent W, le courant, la turbulence ») — 9.7 et 5.12
+écartés (la transduction δ→W n'existe pas ; le stockage durable de V revient à l'hôte). **Fait** ([preuve](../docs/validation/FORCES-W-S494.md)) :
+`MixedWater`, B et les impacts confirmés composés par la composition autoritaire derrière la requête du corps, refus comptés.
+**Mesuré** : sans impact, 2·10⁻¹⁰ m de B seule ; une bouée à 5 m d'un impact d'1 kJ pilonne à 0,81 % de l'oscillateur forcé.
+**Manqué d'abord** : le critère horizontal (5 %) — la bouée dérive avec l'anneau, au second ordre (× 97,5 pour une énergie × 100),
+ce que l'ordre de grandeur n'avait pas compté (`k·a·ω·t`, pas `k·a`) ; au linéaire, l'empreinte (4,9 % → 1,26 % en L²). Lot des
+registres : feuille de route (décompte 5 / 72 / 43), liste, index. Maillons **0** (les corps sentent les impacts de W ; la preuve).
+Suivant : **S495, le sillage de pression derrière la requête du corps** — l'autre part de W.

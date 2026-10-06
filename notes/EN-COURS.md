@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S494 — **en cours**. En autonomie, **6.2, les forces de W sur un corps** : le corps rigide (S331–S336) n'interroge que B
+Session : S494 — **terminée**. En autonomie, **6.2, les forces de W sur un corps** : le corps rigide (S331–S336) n'interroge que B
 (`BackgroundWater`) ; « Manquent W, le courant, la turbulence ». Les impacts de W (`RadialImpact`, composés à B par
 `composition::compose`, ADR-077) n'entrent pas dans sa requête.
 
@@ -84,7 +84,7 @@ sous l'empreinte (RK4 à 0,1 ms) à 3 % de max|η̄| (prévu < 1 %), et l'impact
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Prepared::sample_local`, `MixedWater` ; essais (1)–(4).
-- [ ] **P3** — preuve ; liste 6.2 ; lot des registres (dû) ; rituel.
+- [x] **P3** — preuve ; liste 6.2 ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
 - **P2** — (1) 2,0·10⁻¹⁰ m sur 20 s. (2) pilonnement à 0,81 % de max|η̄| (1 kJ sur 2 cm), l'impact seul : 6,9 cm de pilonnement pour
@@ -95,3 +95,4 @@ sous l'empreinte (RK4 à 0,1 ms) à 3 % de max|η̄| (prévu < 1 %), et l'impact
   repos dans la houle → 0,21 m de retard (vitesse de l'eau au départ, comme S333). Observation : sous B seule, l'écart du pilonnement à
   l'oscillateur temporel vaut 3·10⁻⁵ à 1,4·10⁻⁴ m (2,5 mm à 2 cm de houle), non proportionnel — sous 1 % de la houle, cause non
   cherchée. Suite : 653 essais.
+- **P3** — preuve FORCES-W-S494 ; liste 6.2 ; lot : feuille de route (5 / 72 / 43, S492–S494), index ; journal.

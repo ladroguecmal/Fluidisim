@@ -413,8 +413,10 @@ pas recopiée ici (L137).
   degrés de liberté, C11 et B6 sur ses cinq archétypes.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
-  du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)). Manquent W, le
-  courant, la turbulence.
+  du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)) ; **S494** : les **impacts de W** — B et les
+  impacts confirmés composés par la composition autoritaire derrière la requête du corps (`MixedWater`) ; une bouée pilonne à
+  0,81 % de l'oscillateur forcé par la surface sous elle et dérive avec l'anneau au second ordre ([preuve](validation/FORCES-W-S494.md)).
+  Manquent le sillage de pression (l'autre part de W), le courant, la turbulence.
 - [ ] **6.3 Un objet en mouvement produit son sillage** — *partiel* : mouvement et charge prescrits
   vers la source de pression (ADR-103). Le corps réel remue δ depuis S332, sans avancer (porte D) :
   manque le corps en marche couplé à la source.

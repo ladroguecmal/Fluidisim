@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 02:12 +02:00
+JETON            : libre
+Battement        : 2026-10-06 02:34 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S494 — 6.2, les forces de W (impacts) sur un corps ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S493 — 6.5 validée : le décor qui perce la surface, sur la carte ([journal](notes/JOURNAL.md)). Avant : S492 (A327 réattribuée et levée)
-Session suivante : **S494 — un point partiel proche de son périmètre** : relire le tableau de bord et la liste (les « Manque » les plus courts : 9.5, 9.7, 3.7, 6.2, 5.12, 1.8…), choisir celui dont le critère est le plus net, écrire l'ordre de grandeur et le critère avant (ADR-224). **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà.
-Maillons        : 0 — S493 : 6.5 validée (5 sur 120)
-Registres       : dernier lot S491 (ADR-213 D3) ; le prochain au plus tard en S494
+Session en cours : aucune
+Dernière session : S494 — les impacts de W poussent les corps (6.2) ([journal](notes/JOURNAL.md)). Avant : S493 (6.5 validée : le décor qui perce la surface, sur la carte)
+Session suivante : **S495 — 6.2, le sillage de pression derrière la requête du corps** : l'autre part de W (`bound_pressure`) dans `MixedWater` ; un corps dans le sillage d'un autre ; ordre de grandeur (le second ordre compté) et critères avant (ADR-224). **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà. S496 : la revue de méthode (ADR-222).
+Maillons        : 0 — S494 : les impacts de W poussent les corps (6.2 avancée)
+Registres       : dernier lot S494 (ADR-213 D3) ; le prochain au plus tard en S497
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
