@@ -62,41 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S519 — **terminée**. En autonomie : **le lot des registres** (dû à S519), puis **C07 en eau profonde** (3.2) — le cas canonique
-« angle de Kelvin à ±2° » n'a jamais été exécuté : le sillage de W (source de pression gaussienne mobile, `wake_source`) n'a jamais été
-mesuré contre sa théorie. La leçon de S517 : trois instruments d'angle, aucun éprouvé avant d'être appliqué.
+Session : S520 — **en cours**. En autonomie, **4.13, le sillage mesuré** : S517 n'a pas pu lire l'angle du sillage de la coque dans δ
+(trois instruments) ; S519 a montré que l'instrument de S517 ne lit pas Kelvin même sur la théorie, et a éprouvé le **bord d'Airy** (19,98°
+sur la théorie, 19,98° sur W). S517 lisait entre 1,7 et 4,2 λ₀ ; le bord d'Airy demande 4–6 λ₀ — un domaine plus long, abordable depuis
+S518 (le pas de la carte à 9,2 ms sur 786 000 mailles).
 
-**Ce que la session fait.** (a) **Une référence indépendante de W** (numpy) : la réponse linéaire exacte en temps de l'eau profonde à une
-pression gaussienne `p₀·exp(−r²/2σ²)` (la charge de `wake_source`, `p₀ = F/2πσ²`) partie du repos à `t = 0` et menée à `U` constante — par
-mode, `η̂(k,T) = −(k/ρ)·p̂(k)·∫₀ᵀ sin ω(T−s)/ω · e^{−i kₓ U s} ds`, en forme fermée, sur une grille FFT assez grande pour que le transitoire
-n'y revienne pas. (b) **L'instrument d'angle éprouvé sur la référence d'abord** : la moyenne de |η| le long des rayons issus de la source
-(celui de S517), sur la plage de distances où le sillage est établi ; `σ` et `U` choisis sur la seule référence pour qu'il y lise Kelvin
-à 1° (un sillage dominé par les cuspides) — si aucun couple raisonnable ne le permet, l'instrument est changé avant de toucher W. (c) **W
-mesuré** aux mêmes paramètres : recette 256 × 256 à coupure 6 (domaine honnête d'ADR-132 : 89 m, 26,2 s), `T` = 24 s.
+**Ce que la session fait.** (a) **La référence de la coque** : la même réponse linéaire exacte en temps (`outils/reference_sillage.py`),
+la source étant la pression hydrostatique de la coque sur son empreinte (un rectangle de 4 × 1,6 m, `p = ρ g d`, `d` = 0,488 m, son
+tirant) menée à 3 m/s ; l'instrument (le bord d'Airy, fenêtre 4–6 λ₀, rayons issus du **centre** de la source) éprouvé sur elle. (b) **La
+coque dans δ** : le banc du sillage (`--lineaire-sillage`) sur 104 × 56 × 4 m (416 × 224 × 16 mailles de 25 cm, 1,49 M), 30 s, le même
+instrument, mêmes rayons, mêmes distances, sur la surface de la carte.
 
-**Ordre de grandeur, calculé.** À `U` = 2 / 2,5 / 3 m/s : `λ₀ = 2πU²/g` = 2,56 / 4,0 / 5,76 m ; le sillage établi jusqu'à `U·T/2` = 24 / 30
-/ 36 m derrière la source à `T` = 24 s ; `Fr_σ = U/√(gσ)` = 0,45 / 0,56 / 0,68 à σ = 2 m. 65 536 nœuds par point échantillonné.
+**Ordre de grandeur, calculé.** λ₀ = 5,76 m à 3 m/s : fenêtre 23,1–34,6 m derrière le centre ; le transitoire du départ vers `U·T/2` =
+45 m ; parcours 85,5 m (rampe de 3 s) ; rayons jusqu'à 22,2 m de l'axe à 40°. Une origine des rayons déplacée de 2 m (l'étrave de S517)
+déplace l'angle de 1,2° à 29 m : la même origine des deux côtés. Coût : ≈ 3 000 pas de ≈ 15–25 ms.
 
-**Critères, écrits avant.** (1) **La référence et l'instrument** : sur la référence, l'instrument lit 19,47° à 1° (sinon pas de mesure de
-W). (2) **Le champ de W** contre la référence, dans la zone établie (de 2 λ₀ derrière la source jusqu'à `U·T/2` − 2 λ₀, dans le coin de
-Kelvin élargi à 30°) : écart quadratique relatif ≤ 10 %. (3) **C07 profond** : l'instrument sur W lit 19,47° à 2°. L'eau peu profonde de
-C07 (`arcsin(1/Fr_h)`) reste hors de portée — W est en eau profonde (aucune `tanh` dans la pression de W) ; 3.2 le dira.
+**Critères, écrits avant.** (1) Sur la référence de la coque, le bord d'Airy lit 19,47° à 1° (sinon l'instrument ne vaut pas pour cette
+source, et rien n'est conclu de δ). (2) **4.13, le sillage mesuré** : le bord d'Airy sur δ à 2° de 19,47°. (3) Le pas reste borné et fini
+(élévation maximale publiée), son coût publié.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot des registres (feuille de route S517–S518) ; plan.
-- [x] **P2** — la référence et l'instrument éprouvé ; (1).
-- [x] **P3** — W mesuré ; (2), (3).
-- [x] **P4** — preuve ; liste 3.2 ; CAS-CANONIQUES (C07) ; rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — la référence de la coque, l'instrument ; (1).
+- [ ] **P3** — la coque dans δ ; (2), (3).
+- [ ] **P4** — preuve ; liste 4.13 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `outils/reference_sillage.py` : la référence convergée sur trois grilles (256 × 128 et 512 × 256 à 25 cm, 512 × 256 à
-  12,5 cm : mêmes angles au 0,25° près). **L'instrument de S517 (le maximum des rayons) ne lit pas Kelvin** : 16,5–17,75° pour σ = 0,5 m,
-  5–10° à σ = 1 m, 40° à σ = 2 m (les ondes y sont éteintes) — comme prévu par le critère (1), l'instrument est changé avant W. **Le bord
-  d'Airy** : passé le maximum du profil (au-delà de 12°), l'angle où il retombe à Ai(0)/max Ai = 0,663 (la ligne de Kelvin est le zéro de
-  l'argument d'Airy) ; par fenêtres d'1 λ₀, il lit 20,3 / 19,9 / 19,9° à 4–7 λ₀ (σ = 0,5, U = 2,5). **Figé** : fenêtre 4–6 λ₀, σ = 0,5 m,
-  U = 2,5 m/s (Fr_σ = 1,13, λ₀ = 4 m, établi jusqu'à 30 m). Sur la référence : **19,98 / 19,98 / 19,96°** → (1) tenu (0,5° de 19,47).
-- **P3 fini** — W (256 × 256, coupure 6, 24 s) : écart quadratique **0,33 %**, pire 0,57 % du maximum ; l'instrument figé : **19,98°** sur W
-  et sur la référence → (2), (3) tenus. C07 profond passe.
-- **P4** — preuve C07-PROFOND-S519 ; listes 3.2, 13.2 ; note C07 dans CAS-CANONIQUES ; index ; journal ; rituel `--lot`.
-
