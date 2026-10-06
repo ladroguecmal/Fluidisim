@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S528 — **en cours**. En autonomie, **3.1 — les anneaux d'impact en eau peu profonde** (K2-12) : `RadialImpact` refuse le
+Session : S528 — **terminée**. En autonomie, **3.1 — les anneaux d'impact en eau peu profonde** (K2-12) : `RadialImpact` refuse le
 régime peu profond (`Error::Regime`, profondeur ≤ π/k_min) ; W porte la profondeur uniforme depuis S522.
 
 **Ce que la session fait.** `RadialImpact::new_in_depth(événement, milieu, domaine)` : le nombre d'onde effectif `κ = k tanh(kh)` de
@@ -83,11 +83,14 @@ profonde (le même champ initial) à plus de 5 fois cet écart. (3) La pente ré
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le cœur ; (1).
-- [ ] **P3** — la référence, W ; (2), (3).
-- [ ] **P4** — preuve ; liste 3.1 ; rituel.
+- [x] **P3** — la référence, W ; (2), (3).
+- [x] **P4** — preuve ; liste 3.1 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — `RadialImpact::new_in_depth` (`κ`, potentiel, vitesse horizontale ; pas de resserrement) ; essais `s528` : au bit de `new`
   à 30 m (N 128 : 64 modes refusés par la résolution à 40 m et 10 s), le régime peu profond accepté ; la pente réelle au plus 0,990 de
   `slope_max_at` par 1 m de fond (le critère 3, en avance). Suite verte.
+- **P3 fini** — le champ initial limité à ± 80 m (la portée de la somme à 128 modes ; 280 m refusé par la résolution) ; W contre la FFT
+  exacte par 1 m de fond : **0,44 %** à 5 et 10 s sur les trois grilles ; l'eau profonde 51 % et 94 % → (2) tenu.
+- **P4** — preuve ANNEAUX-PROFONDEUR-S528 ; liste 3.1 ; index ; journal.
 

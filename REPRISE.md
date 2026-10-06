@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 16:33 +02:00
+JETON            : libre
+Battement        : 2026-10-06 16:43 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S528 — 3.1, les anneaux d'impact en eau peu profonde ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S527 — C07 passe entier ([journal](notes/JOURNAL.md)). Avant : S526 (la neuvième revue de méthode)
-Session suivante : **S528 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — A330 (une référence de corps pour la coque : Michell), 6.2 la turbulence, 6.7 la poche d'air, 9.3, 2.6 C1, K2-12 (les anneaux d'impact en eau peu profonde, W en profondeur depuis S522) ; le montage dans le domaine de ses outils (ADR-234 D1), la référence d'un instrument bruitée (D2), ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S527 : C07 passe entier (3.2, 13.2)
+Session en cours : aucune
+Dernière session : S528 — les anneaux d'impact en eau peu profonde ([journal](notes/JOURNAL.md)). Avant : S527 (C07 passe entier)
+Session suivante : **S529 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — A330 (une référence de corps pour la coque : Michell), 6.2 la turbulence, 6.7 la poche d'air, 9.3, 2.6 C1, l'hôte qui choisit la profondeur de W (sillages et anneaux) ; le montage dans le domaine de ses outils (ADR-234 D1), la référence d'un instrument bruitée (D2), ordres de grandeur calculés (ADR-232). Revue à S531. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S528 : les anneaux d'impact en eau peu profonde (3.1)
 Registres       : dernier lot S527 (ADR-213 D3) ; le prochain au plus tard en S530
 ```
 

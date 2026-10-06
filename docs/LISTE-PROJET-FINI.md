@@ -134,8 +134,10 @@ pas recopiée ici (L137).
 ## 3. Ondes propagatives (W)
 
 - [ ] **3.1 Anneaux d'impact dispersifs** (objet qui tombe) — *partiel* : impacts radiaux, table
-  de Bessel, générateur calibré, admission ; horizon reçu 56 s, eau profonde. Manquent l'eau peu
-  profonde, et la gerbe (point 4.12).
+  de Bessel, générateur calibré, admission ; horizon reçu 56 s, eau profonde ; **S528 : l'eau peu profonde** —
+  `RadialImpact::new_in_depth`, à 0,44 % d'une propagation FFT exacte par 1 m de fond (94 % pour l'eau profonde), les bornes de pente
+  sûres ([preuve](validation/ANNEAUX-PROFONDEUR-S528.md)). Manquent la gerbe (point 4.12), une profondeur variable sous l'anneau et
+  l'hôte qui choisit la profondeur.
 - [ ] **3.2 Sillages de bateaux**, trajectoires et vitesses quelconques, eau profonde et peu
   profonde (C07) — *partiel* : source de pression mobile par tronçons, scène à trois sillages ;
   domaine honnête de 89 m et 18,5 s (ADR-132). **S519 : C07 en eau profonde passe** — le sillage de W à 0,33 % de la théorie

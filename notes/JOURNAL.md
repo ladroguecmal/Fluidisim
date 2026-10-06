@@ -540,3 +540,12 @@ partiel.
 la dernière crête au-dessus d'un plancher (10⁻³ du maximum, déclaré avant), éprouvée sur la référence bruitée au niveau de W (ADR-234 D2) ;
 le témoin sans plancher y lit 79° — l'échec de S523 reproduit. **W : 44,00° et 27,00°.** **C07 passe entier.** Maillons **0** (3.2, 13.2).
 Le lot des registres, dû en S527 (rappel du rituel), fait dans la foulée (feuille de route S524–S527). Suivant : **S528**, un point partiel.
+
+## S528 — 2026-10-06 — les anneaux d'impact en eau peu profonde
+
+**Entrée.** En autonomie ; 3.1 (K2-12). **Fait** ([preuve](../docs/validation/ANNEAUX-PROFONDEUR-S528.md)) : `RadialImpact::new_in_depth`
+— le nombre d'onde effectif de S522 dans la pulsation, le potentiel et la vitesse horizontale ; la borne resserrée (mesurée en eau
+profonde) n'y resserre pas. **Mesuré** : au bit de `new` en eau profonde ; contre une propagation FFT exacte du champ initial de W
+(indépendante de la somme de Bessel), **0,44 %** par 1 m de fond à 5 et 10 s (trois grilles), l'eau profonde 94 % ; la pente réelle sous les
+deux bornes. Un montage refusé en route (le champ initial à 280 m, au-delà de la portée de la somme à 128 modes — la garde de résolution
+a parlé, ADR-234 D1). Maillons **0** (3.1 avance). Suivant : **S529**, un point partiel.
