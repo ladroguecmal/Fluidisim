@@ -62,32 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S497 — **terminée**. En autonomie, **6.3, un corps en marche produit son sillage** : l'émetteur de sillage (ADR-104) enchaîne
-des tronçons déclarés par l'hôte ; ADR-103 : « une trajectoire déclarée, pas un flux de poses moteur ». Rien ne choisit les tronçons
-depuis un corps qui bouge.
+Session : S498 — **en cours**. En autonomie, **6.1, C11 — le petit objet léger** : la liste dit « Manquent W derrière la requête (fait
+S494–S495), l'amortissement des autres degrés de liberté, C11 et B6 sur ses cinq archétypes ». ADR-008 §3 fixe trois régimes selon
+`ω·dt` — normal (≤ 0,3), sous-cyclé (≤ 1, 2 à 4 sous-pas), **contraint** (> 1 : projeté sur la surface, orienté sur sa normale, vitesse
+horizontale amortie vers l'orbitale) ; le corps rigide n'en a aucun.
 
-**Ce que la session fait.** `RigidBody::wake_leg` : le tronçon suivant de l'émetteur, visé du curseur vers la position **prédite** du
-corps à la fin du tronçon (`x + v·Δ`), sous sa charge `m·g` ; le chemin de la source reste continu (l'émetteur l'exige) et se recale à
-chaque tronçon. Un essai : la coque de la porte D (4 × 1,6 × 1 m, 3 200 kg, 31,4 kN) menée par le jeu sur un cercle de 20 m à 3 m/s,
-tronçons de Δ = 1, 0,5, 0,25 s, contre la même trajectoire déclarée exacte (tronçons de 0,2 s sur le cercle).
+**Ce que la session fait.** `RigidBody` : la raideur de flottaison mesurée sur le proxy (les points dans leur rampe), `ω`, le régime, un
+pas qui l'applique ; le mode contraint (position d'équilibre trouvée une fois en eau calme, puis `z = η + c`, inclinaison de la surface,
+vitesse relaxée vers celle de l'eau). B6 (le nombre de points par archétype) : S499.
 
-**Ordre de grandeur, écrit avant (ADR-226 D3).** L'erreur de visée en fin de tronçon : `δ = ½·(U²/R)·Δ²` = 5,6 cm à 0,5 s ; elle se
-recale à chaque tronçon (pas d'accumulation). Le terme concurrent, l'onde : `k·δ` avec `λ = 2πU²/g` ≈ 5,8 m → ≈ 6 % au plus, ≈ 2 % en
-moyenne sur le tronçon ; en `Δ²`.
+**Ordre de grandeur, écrit avant.** Le pas symplectique est stable tant que `ω·dt < 2` : la balle de ping-pong à 30 Hz (`ω·dt` ≈ 2,25)
+diverge — la valeur propre `1 − x²/2 − √((1 − x²/2)² − 1)` ≈ −2,7 par pas ; la caisse (0,33) et la barque (0,29) restent bornées, leur
+`|G|` vaut 1 à l'arrondi (le pas symplectique conserve une énergie modifiée).
 
-**Critères, écrits avant.** (1) le curseur suit le corps : à chaque fin de tronçon, l'écart au corps ≤ `½·(U²/R)·Δ²` × 1,2 (la formule
-dans l'essai) ; (2) la charge publiée : `P₀ = m·g/(2πσ²)` à l'arrondi ; (3) le sillage émis contre le déclaré, aux points d'une grille
-autour du cercle, à trois instants : ≤ 10 % de max|η| à Δ = 0,5 s (prévu 2 à 6 %), et un ordre ≥ 1,7 sur Δ = 1 / 0,5 / 0,25 s ; (4)
-aucune admission refusée. 6.3 : le corps en marche couplé à la source.
+**Critères, écrits avant (C11 réécrit en S30).** (1) les régimes : `ω` du corps contre `√(ρgA/(m + m_a))` à 10⁻⁹, et la bascule aux
+seuils 0,3 et 1 ; (2) en mode contraint, sur 120 s de houle de B et d'impacts de W à 30 Hz : `max|z − (η + c)| = 0` et l'axe du corps
+sur la normale à 10⁻¹² rad ; (3) le témoin : la même balle en pas normal diverge (`|G|` > 1, prévu ≈ 2,7 par pas) ; (4) hors mode
+contraint, `|G| ≤ 1 + 10⁻⁹` par période sur 120 s (caisse sous-cyclée, barque normale).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `wake_leg` ; l'essai (1)–(4).
-- [x] **P3** — preuve ; lot des registres (dû) ; rituel.
+- [ ] **P2** — les régimes et le mode contraint ; essais (1)–(4).
+- [ ] **P3** — preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
-- **P2** — `RigidBody::wake_leg`. Curseur/corps 0,2244 / 0,0560 / 0,0140 m (prédits 0,2250 / 0,0563 / 0,0141) ; P₀ = 1 249,048 Pa au bit ;
-  sillage émis/déclaré 4,47 / **1,20** / 0,34 % (max|η| 21 cm) ; ordres 1,89 et 1,83 ; 0 refus. Impasses : le journal emprunte les
-  émissions (préparées et acquittées d'abord, admises ensuite) ; un contrôleur ne se construit pas sur un journal vide. 655 essais.
-- **P3** — preuve SILLAGE-EMIS-S497 ; **6.3 validée** ; lot : feuille de route (6 / 71 / 43, S495–S497), liste, index ; journal.
