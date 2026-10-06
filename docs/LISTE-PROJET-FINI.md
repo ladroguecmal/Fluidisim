@@ -140,8 +140,9 @@ pas recopiée ici (L137).
   profonde (C07) — *partiel* : source de pression mobile par tronçons, scène à trois sillages ;
   domaine honnête de 89 m et 18,5 s (ADR-132). **S519 : C07 en eau profonde passe** — le sillage de W à 0,33 % de la théorie
   linéaire exacte en temps, son angle à 19,98° par un instrument éprouvé sur la théorie seule
-  ([preuve](validation/C07-PROFOND-S519.md)). Manquent les durées longues et C07 peu profond — que W en profondeur uniforme rend
-  mesurable depuis S522 ([preuve](validation/W-PROFONDEUR-S522.md)).
+  ([preuve](validation/C07-PROFOND-S519.md)). **S523 : C07 peu profond passe à `Fr_h` = 1,43** (W en profondeur uniforme, S522 :
+  0,4 % de la théorie, l'angle à 0,5° du coin de Mach) ; à 2,14 l'instrument prend le bruit ([preuve](validation/C07-PEU-PROFOND-S523.md)).
+  Manquent les durées longues, la résonance en deçà du critique (une source plus fine) et l'angle à `Fr_h` = 2,14.
 - [ ] **3.3 Explosions de surface et sous-marines** — *absent*.
 - [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *absent*.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.
@@ -716,8 +717,8 @@ pas recopiée ici (L137).
   C12 (V), la branche V de C19 et **C10 depuis S331** — tirant à 0,02 %, période à 2·10⁻⁶, rapport
   avec masse ajoutée 1,408 pour 1,414 ± 15 %, par le corps rigide du cœur
   ([preuve](validation/CORPS-RIGIDE-S331.md)). Sur véhicules d'essai : C01, C03, C04, C06 (partiel),
-  C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)). Non exécutés : C05, C07 peu
-  profond, C09, C11, C13 à C17, C20, C21. **C18 partiel**
+  C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
+  à `Fr_h` = 1,43 depuis S523** ([preuve](validation/C07-PEU-PROFOND-S523.md)). Non exécutés : C05, la résonance de C07, C09, C11, C13 à C17, C20, C21. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

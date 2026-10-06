@@ -1099,3 +1099,7 @@ C02/C18 : 0,227536 / 0,650281 ; seul C04 ordre un reste en échec dans physics.
 > sillage de W (σ 0,5 m, 2,5 m/s, 24 s) est à 0,33 % de la réponse linéaire exacte en temps ; l'angle, lu par le bord d'Airy (éprouvé sur
 > la théorie seule : le maximum d'amplitude, lui, lit 16,5–17,75° à ces distances), vaut 19,98°. La branche peu profonde attend la
 > dispersion en profondeur finie de W (2.7).
+> *Note du 2026-10-06, S523, sur C07* ([C07-PEU-PROFOND-S523](C07-PEU-PROFOND-S523.md)) : **la branche peu profonde au-delà du critique
+> passe à `Fr_h` = 1,43** (W par 5 m de fond, 44,00° pour 44,46°, le champ à 0,4 % de la théorie) ; à 2,14, l'instrument (la dernière
+> crête des rayons, éprouvé sur la théorie) prend une crête du bruit f32. La pente de la résonance demande une source plus fine que σ 2 m :
+> à cette largeur, le facteur de la source à l'onde transverse varie de 5·10⁻⁵ à 0,94 sur le balayage et masquerait la pente.

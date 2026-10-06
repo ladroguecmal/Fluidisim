@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S523 — **en cours**. En autonomie, **C07 peu profond, la branche supercritique** : par 5 m de fond, le sillage au-delà du
+Session : S523 — **terminée**. En autonomie, **C07 peu profond, la branche supercritique** : par 5 m de fond, le sillage au-delà du
 critique est contenu dans un coin de demi-angle `arcsin(1/Fr_h)` (CAS-CANONIQUES C07, SPEC-001 §5) ; W en profondeur uniforme (S522) le
 rend mesurable.
 
@@ -85,8 +85,8 @@ zone de mesure.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'exemple généralisé, la référence, l'instrument éprouvé ; (1).
-- [ ] **P3** — W ; (2), (3).
-- [ ] **P4** — preuve ; listes 3.2, 13.2 ; CAS-CANONIQUES ; rituel.
+- [x] **P3** — W ; (2), (3).
+- [x] **P4** — preuve ; listes 3.2, 13.2 ; CAS-CANONIQUES ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — l'instrument déclaré (le maximum des rayons, 20–60 m, 24 s) lit sur la référence **14,5° et 11,25°** : le sillage
@@ -94,4 +94,9 @@ zone de mesure.
   longues juste en dedans du coin de Mach**, qui l'approche avec la distance (U = 10 : 41,5 / 43,25 / 43,75 / 44,0 / 44,5° de 20 à 120 m ;
   U = 15 : 24,25 / 26,0 / 26,75 / 27,0 / 27,25°). **Figé** : la dernière crête (le maximum local le plus extérieur), fenêtre 80–100 m,
   40 s (le transitoire hors de la zone). Sur la référence, trois grilles : **43,75–44,00° (attendu 44,46) et 27,00° (27,83)** → (1) tenu.
+- **P3 fini** — montage 1 (512 × 256, coupure 3, 40 s) : 23 % / 62 % → localisé : hors du domaine d'ADR-132 (trajets 400–600 m, rayon 179 m).
+  Montage 2 (512 × 512, coupure 1,5) : 0,03 % à 10 m/s, mais l'instrument lit 77° sur la référence même (Gibbs) — famille non éprouvée.
+  **Montage retenu** (512 × 512, coupure 3, 40 s / 16 s) : 0,38 % / < 0,01 % ; **44,00°** à 10 m/s (tenu) ; 79,75° à 15 m/s (une crête du
+  bruit f32 à 8·10⁻⁸ m : manqué, pas d'instrument changé après coup). A331 ouverte.
+- **P4** — preuve C07-PEU-PROFOND-S523 ; listes 3.2, 13.2 ; CAS-CANONIQUES ; A331 ; index ; journal.
 

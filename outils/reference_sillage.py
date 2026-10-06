@@ -17,6 +17,7 @@ de W.
     python outils/reference_sillage.py supercritique [W10 W15] — S523 : l'angle au-delà du critique, sur la référence (trois grilles) ou W
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
+import os
 import sys
 import numpy as np
 
@@ -240,7 +241,9 @@ def profondeur(chemin):
             print(f"C07_S522 reference={nom} grille={lx:.0f}x{ly:.0f}@{ddx} ecart_quadratique_relatif={ecart:.4f} max_ref_zone={np.abs(ref[zone]).max():.4f}", flush=True)
 
 
-SUPER_U, SUPER_T, SUPER_XS, SUPER_H, SUPER_D = (10.0, 15.0), 40.0, 90.0, 5.0, (80.0, 100.0)
+SUPER_U, SUPER_XS, SUPER_H, SUPER_D = (10.0, 15.0), 90.0, 5.0, (80.0, 100.0)
+# S523 : la durée par vitesse (`SUPER_T=40,16`, par défaut 40 et 40) — la distance du départ à la zone sous le rayon honnête de W.
+SUPER_T = dict(zip(SUPER_U, (float(v) for v in os.environ.get("SUPER_T", "40,40").split(","))))
 
 
 def derniere_crete(angles, prof):
@@ -259,10 +262,10 @@ def supercritique(fichiers=None):
     sur W et la référence aux mêmes points, et l'écart quadratique (critères 2, 3)."""
     for n, u in enumerate(SUPER_U):
         attendu = np.degrees(np.arcsin(np.sqrt(G * SUPER_H) / u))
-        x0 = SUPER_XS - u * SUPER_T
+        x0 = SUPER_XS - u * SUPER_T[u]
         if fichiers is None:
             for (lx, ly, dx) in [(2048.0, 768.0, 1.0), (2048.0, 768.0, 0.5), (2560.0, 1024.0, 0.5)]:
-                xs, ys, eta = champ(2.0, u, SUPER_T, lx, ly, dx, x0, 3.0, profondeur=SUPER_H)
+                xs, ys, eta = champ(2.0, u, SUPER_T[u], lx, ly, dx, x0, 3.0, profondeur=SUPER_H)
                 _, angles, prof = rayons(lambda x, y: bilineaire(xs, ys, eta, x, y), SUPER_XS, *SUPER_D, a_max=80.0)
                 a = derniere_crete(angles, prof)
                 print(f"REF_S523 U={u} Fr_h={u / np.sqrt(G * SUPER_H):.3f} grille={lx:.0f}x{ly:.0f}@{dx} derniere_crete_deg={a:.2f} attendu_deg={attendu:.2f}"
@@ -276,7 +279,8 @@ def supercritique(fichiers=None):
         gx = gx0 + dx * np.arange(nx)
         gy = gy0 + dx * np.arange(ny)
         GX, GY = np.meshgrid(gx, gy)
-        xs, ys, eta = champ(2.0, u, SUPER_T, 2048.0, 768.0, 0.5, x0, 3.0, profondeur=SUPER_H)
+        coupure = float(os.environ.get("COUPURE", "3"))
+        xs, ys, eta = champ(2.0, u, SUPER_T[u], 2048.0, 768.0, 0.5, x0, coupure, profondeur=SUPER_H)
         ref = bilineaire(xs, ys, eta, GX.ravel(), GY.ravel()).reshape(ny, nx)
         d = xs_src - GX
         zone = (d >= SUPER_D[0]) & (d <= SUPER_D[1])

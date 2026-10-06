@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 15:56 +02:00
+JETON            : libre
+Battement        : 2026-10-06 16:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S523 — C07 peu profond, l'angle au-delà du critique ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S522 — la pression de W en profondeur uniforme ([journal](notes/JOURNAL.md)). Avant : S521 (la huitième revue de méthode)
-Session suivante : **S523 — C07 peu profond** : par 5 m de fond, l'angle `arcsin(1/Fr_h)` au-delà du critique (`Fr_h` = 1,43 et 2,14 : 44,4° et 27,8°, ±2°) et la pente −½ ± 0,15 de la résonance en deçà (`Fr_h` ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}) — chaque instrument éprouvé d'abord sur la référence de la même famille (ADR-233), la référence convergée sur trois grilles, les ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S522 : W en profondeur uniforme (2.7 avance ; C07 peu profond mesurable)
+Session en cours : aucune
+Dernière session : S523 — C07 peu profond passe à Fr_h = 1,43 ; A331 ([journal](notes/JOURNAL.md)). Avant : S522 (la pression de W en profondeur uniforme)
+Session suivante : **S524 — le lot des registres (dû à S524), puis un point partiel** : relire le tableau de bord ; candidats — A331 (le domaine honnête de W vérifié sur la distance du chemin aux points : découpe ou marque), la résonance de C07 (source fine σ ≤ 0,25 m), A330 (référence de corps pour la coque), 6.2 la turbulence, 6.7 la poche d'air ; instruments éprouvés sur leur famille et contre le bruit (ADR-233), ordres de grandeur calculés (ADR-232). Revue à S526. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S523 : C07 peu profond passe à Fr_h = 1,43 (3.2, 13.2)
 Registres       : dernier lot S521 (ADR-213 D3) ; le prochain au plus tard en S524
 ```
 

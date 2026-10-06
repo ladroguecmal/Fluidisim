@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [C07 peu profond : l'angle du sillage de W au-delà du critique — S523](validation/C07-PEU-PROFOND-S523.md) : 44,00° pour 44,46° à `Fr_h` = 1,43 ; à 2,14 l'instrument prend le bruit ; A331.
 - [La pression de W en profondeur uniforme — S522](validation/W-PROFONDEUR-S522.md) : `k·tanh kh`, le chemin profond au bit ; le sillage à `Fr_h` = 0,9 à 2,0 % de la référence par 5 m de fond.
 - [Le sillage de la coque dans δ contre la théorie de sa coque — S520](validation/SILLAGE-COQUE-S520.md) : critères manqués ; δ 3,5 fois moins ample que la théorie d'une pression ; la carte au-delà de 65 535 groupes ; A330.
 - [C07 en eau profonde : le sillage de W contre la théorie linéaire, et son angle — S519](validation/C07-PROFOND-S519.md) : 0,33 % de la référence exacte en temps ; 19,98° par le bord d'Airy ; C07 profond passe.

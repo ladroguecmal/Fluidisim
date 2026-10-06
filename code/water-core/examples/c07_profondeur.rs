@@ -7,7 +7,7 @@
 //!
 //! S523 : `[U T xs arrière demi_y dx]` en arguments (défauts : ceux de S522 — 6,3 40 63 128 155 1) ; `T` multiple de 8 s.
 //!
-//! `cargo run -p water-core --release --example c07_profondeur -- <sortie> [U T xs arrière demi_y dx]`
+//! `cargo run -p water-core --release --example c07_profondeur -- <sortie> [U T xs arrière demi_y dx coupure radial angulaire]`
 use water_core::{
     bound_pressure::Settings,
     gaussian_spectrum::{bake, Recipe},
@@ -26,7 +26,8 @@ fn main() {
     let (sigma, profondeur, force) = (2.0f32, 5.0f32, 19_620.0f32);
     let fin_us = (t_s * 1e6).round() as u64;
     let x0 = xs - u * t_s;
-    let recette = Recipe { sigma, cutoff: 3.0, radial: 512, angular: 256 };
+    // S523 : la recette en arguments 8 à 10 (coupure, radial, angulaire ; défauts 3, 512, 256).
+    let recette = Recipe { sigma, cutoff: arg(8, 3.0), radial: arg(9, 512.0) as usize, angular: arg(10, 256.0) as usize };
     let settings = Settings {
         frame: FrameId(0),
         cell: 0,

@@ -4614,3 +4614,11 @@ surface : la source d'une coque mince est la pente de sa carène, Michell) ou de
 sans preuve. Déclencheur : **avant de déclarer juste le sillage d'une coque dans δ**. Premiers remèdes : une référence de corps (la
 théorie de Michell pour une carène, ou δ à 12,5 cm sur un domaine réduit, convergé sur trois points) ; un instrument éprouvé sur un profil
 à plusieurs lobes.
+
+**A331 — S523, 2026-10-06 (sévérité 2, ouverte). W ne dit pas quand un point échantillonné sort du domaine honnête de son chemin.** Le
+domaine d'un sillage (ADR-132, rayon `2π·angulaire/(3·coupure)`) vaut pour la distance **du chemin émetteur** aux points : un trajet de 400
+à 600 m échantillonné à 80–100 m de la source donne **23 à 62 % d'erreur, sans refus ni drapeau** ([C07-PEU-PROFOND-S523](../validation/C07-PEU-PROFOND-S523.md)) ;
+le rayon honnête est plafonné par la recette (512 directions). **Conséquence** : un bateau rapide du jeu, sur un long trajet, sort de son
+domaine en silence. Déclencheur : **avant un sillage de W de plus de quelques centaines de mètres de trajet dans une scène**. Premiers
+remèdes : l'hôte découpe le chemin en sillages successifs dont chacun tient son domaine (ADR-132 le calcule), ou W marque un échantillon
+hors du domaine de ses segments.

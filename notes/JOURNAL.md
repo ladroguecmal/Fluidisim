@@ -497,3 +497,13 @@ référence linéaire exacte en temps (convergée sur trois grilles), contre 121
 essai de taille l'a rappelé : la profondeur passe en paramètre). Maillons **0** (2.7 avance, C07 peu profond devient mesurable : le
 chemin, `prepare_in_depth` ; la preuve). Suivant : **S523, C07 peu profond** — l'angle `arcsin(1/Fr_h)` et la résonance, instruments
 éprouvés sur la référence de la même famille (ADR-233).
+
+## S523 — 2026-10-06 — C07 peu profond passe à Fr_h = 1,43 ; A331
+
+**Entrée.** En autonomie ; C07 peu profond, au-delà du critique. **Fait** ([preuve](../docs/validation/C07-PEU-PROFOND-S523.md)) :
+l'instrument déclaré lit, sur la théorie, le sillage intérieur (14,5° pour 44,46°) — changé avant W pour la dernière crête des rayons à
+80–100 m (0,5–0,8° sur trois grilles). W : un premier montage à 23–62 % — **localisé** : les trajets (400–600 m) sortaient du domaine
+honnête d'ADR-132 (179 m), sans que W le dise (**A331**) ; un second à coupure 1,5 change la famille (Gibbs : 77° sur la théorie même).
+Montage retenu : W à 0,38 % et < 0,01 % de la théorie ; **44,00° à `Fr_h` = 1,43 (tenu)**, 79,75° à 2,14 (une crête du bruit f32 :
+manqué). Maillons **0** (3.2 et 13.2 avancent). Frictions pour S526 : *le domaine honnête se juge sur la distance du chemin aux points* ;
+*un instrument à maximum local sans seuil prend le bruit*. Suivant : **S524**, le lot des registres (dû) et un point partiel.
