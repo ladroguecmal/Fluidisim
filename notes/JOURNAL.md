@@ -940,3 +940,9 @@ du plan, noté. Maillons **0** (2.2 avance). Suivant : **S579**, un point partie
 (`Maree`, `CarteCotidale`) ; `avec_maree`, la marée dans l'échantillon de B (`η`, `∂η/∂t`, `w`). **Mesuré** : la vitesse à 2·10⁻¹¹ m/s de
 sa dérivée analytique ; une mer de B réelle plus une marée à 1 ulp ; la composition B + W exacte ; une marée nulle au bit. Maillons **0**
 (2.2 avance). Suivant : **S580**, un point partiel ; revue à S581.
+
+## S580 — 2026-10-07 — le courant de marée
+
+**Entrée.** En autonomie ; 2.2 (et 7.7, qui lit le courant de B). **Fait** ([preuve](../docs/validation/COURANT-MAREE-S580.md)) : le courant
+tiré de la carte cotidale par `∂u/∂t = −g·∇η`, sans la profondeur ; `avec_courant`. **Mesuré** : l'onde progressive retrouvée à 2·10⁻⁶ m/s
+(le sinc de la corde compris), en phase avec le niveau. Maillons **0** (2.2 avance). Suivant : **S581, la vingtième revue de méthode**.

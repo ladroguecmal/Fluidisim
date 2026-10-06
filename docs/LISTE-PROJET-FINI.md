@@ -110,8 +110,10 @@ pas recopiée ici (L137).
   près, vives-eaux et mortes-eaux, un gué annoncé ; [preuve](validation/MAREE-S577.md)) ; **S578 : la carte cotidale** (l'amplitude
   complexe interpolée, déterministe ; une onde progressive à 2·10⁻⁵ m ; [preuve](validation/CARTE-COTIDALE-S578.md)) ; **S579 : la marée
   dans la surface de B** (`η`, `∂η/∂t`, `w` de l'échantillon, à 1 ulp ; la composition B + W exacte ;
-  [preuve](validation/MAREE-DANS-B-S579.md)). Manquent le courant de marée, le choix de la marée d'une région par l'hôte (l'adoption par
-  défaut), les corrections nodales, le niveau moyen variable par la météo, des houles issues d'une météo.
+  [preuve](validation/MAREE-DANS-B-S579.md)) ; **S580 : le courant de marée** (`−g·∇η`, sans la profondeur ; une onde progressive à
+  2·10⁻⁶ m/s ; [preuve](validation/COURANT-MAREE-S580.md)). Manquent le frottement et Coriolis dans le courant, le choix de la marée d'une
+  région par l'hôte (l'adoption par défaut), les corrections nodales, le niveau moyen variable par la météo, des houles issues d'une
+  météo.
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.

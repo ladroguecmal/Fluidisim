@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S580 — **en cours**. En autonomie, **2.2 — le courant de marée** (S579 : « manque le courant de marée ») ; il sert aussi 7.7
+Session : S580 — **terminée**. En autonomie, **2.2 — le courant de marée** (S579 : « manque le courant de marée ») ; il sert aussi 7.7
 (SPEC-006 §5.5 : `flow_speed` est le courant de B, sans l'orbitale).
 
 **Ce que la session fait.** La quantité de mouvement linéaire, sans frottement ni Coriolis : `∂u/∂t = −g·∇η`. Pour chaque composante
@@ -83,7 +83,10 @@ pic du courant et celui du niveau au même instant à 60 s près ; (3) `avec_cou
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le courant et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 2.2 ; rituel.
+- [x] **P2** — le courant et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 2.2 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — u max 0,700060 m/s (0,700062) ; v nul ; pics à 3 900 s tous deux ; `avec_courant` ; refus. Suite 756.
+- **P3** — preuve COURANT-MAREE-S580 ; liste 2.2 ; index ; journal.
+
