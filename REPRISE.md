@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 17:56 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 17:57 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S539 — 7.5, la flottabilité d'une poche d'air comprimée ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S538 — C17 : l'inondation limitée par l'air ([journal](notes/JOURNAL.md)). Avant : S537 (le contact d'un corps quelconque)
 Session suivante : **S539 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'évent à débit limité (5.9 : l'air qui sort par une ouverture finie, Q_eau ≤ Q_air), la flottabilité d'une poche d'air (6.6, la coque retournée : la poche se comprime avec la profondeur, ADR-015 §3), C16 (le ballottement en repère accéléré) ou C13 (la remontée de bulle) parmi les cas canoniques non exécutés ; le quantum écrit à côté de chaque seuil (ADR-236 D1), ordres de grandeur calculés — vraiment (ADR-232 D2). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S538 : C17 passe, 5.9 partiel

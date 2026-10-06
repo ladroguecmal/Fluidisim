@@ -62,31 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S538 — **terminée**. En autonomie, **5.9 — compartiments et inondation limitée par l'air** (C17, ADR-015 T2) : dans V, l'air
-est implicite (T0) ; un compartiment étanche se remplit comme s'il avait un évent — « tous les temps d'avarie du jeu sont trop courts ».
+Session : S539 — **en cours**. En autonomie, **7.5 — l'air comprimé** (absent) par le cas d'ADR-015 §2–3 : « une coque retournée flotte
+grâce à l'air qu'elle emprisonne » ; la poche se comprime avec la profondeur, « un bateau chaviré flotte, puis passe un point de non-retour
+et coule d'un coup ».
 
-**Ce que la session fait.** `hydro_network::step_air` : le pas de V avec, par nœud, un **état d'air** — ouvert (l'air à la pression
-atmosphérique, T0 : le pas d'avant au bit) ou **scellé** (une poche isotherme, `p·V_air` constant, ADR-015 §3 « lente »). La pression de
-jauge d'une poche entre dans les charges des arêtes (`(p − p_atm)/ρg`) — l'eau qui entre comprime l'air, qui la retient. Les têtes de
-pression dans un tampon de l'appelant (I-06). Ni évent à débit limité (un nœud est scellé ou ouvert), ni effet sur les pompes.
+**Ce que la session fait.** `RigidBody::air_pocket : Option<AirPocket { body, volume_surface, thickness }>` — une poche d'air portée par
+le corps (son centre dans le repère du corps, son volume à la pression atmosphérique, son épaisseur verticale) : noyée à la profondeur `d`
+de son centre, elle déplace `V₀·p_atm/(p_atm + ρ g d)` (isotherme, ADR-015 §3 « lente »), une poussée `ρ g V` appliquée en son centre
+(fraction d'immersion comme un point du proxy, la pente de la surface comme S333). `None` : rien ne change.
 
-**Ordre de grandeur, calculé.** C17 : un compartiment de 10 m³ (5 m² × 2 m, son plafond à la flottaison), une brèche de 1 dm² à 2 m sous
-la flottaison, `C_d` = 0,62, ρ = 1 025 kg/m³ : **sans évent**, l'équilibre `p_atm·2/u = p_atm + ρg·u` donne `u` = 1,710 m d'air, **0,290 m
-d'eau** (14,5 %), l'air à 118,5 kPa ; **avec évent**, Torricelli `t = (2A/(C_d·a·√(2g)))·(√H − √(H − h))` : 99 % en 467 s, plein en
-518 s.
+**Ordre de grandeur, calculé.** La table d'ADR-015 (eau de mer) : 100 / 50,19 / 33,50 / 25,14 % du volume à 0 / 10 / 20 / 30 m. Un corps de
+2 000 kg et 0,5 m³ de matière (4 000 kg/m³) portant 2 m³ d'air à la surface : il faut 1,451 m³ d'air pour le porter → **point de
+non-retour `d*` = 3,811 m**.
 
-**Critères, écrits avant.** (1) Sans air scellé, `step_air` rend `step_meteo` au bit. (2) Sans évent, la hauteur finale à 0,5 % de 0,290 m
-(le quantum : 1 ml sur 5 m², 0,2 µm — rapport 10⁴, ADR-236 D1). (3) Avec évent, 99 % à 1 % de la loi de Torricelli. (4) L'assertion de
-C17 : le rapport des temps de remplissage supérieur à 5 (sans évent, il ne se remplit jamais).
+**Critères, écrits avant.** (1) La poussée de la poche à 0, 10, 20, 30 m à 10⁻¹² de Boyle (le quantum : l'arrondi f64, rapport > 10⁶,
+ADR-236 D1). (2) Lâché au repos à `d*` − 0,3 m, le corps remonte (centre au-dessus de −1 m à 60 s) ; à `d*` + 0,3 m, il coule (sous −20 m
+à 60 s). (3) Sans poche, la suite du cœur au bit.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `step_air`, les essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.9 ; C17 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — la poche, les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 7.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `step_air`, `Air`, `P_ATM_PA` ; essais `s538` : au bit tous ouverts ; avec évent 463,6 s (463,5) ; sans évent 0,2901 m
-  (Boyle 0,2901) ; jamais plein. Le plan disait 467 s (ajusté de tête : la loi donne 463,5). Suite 699.
-- **P3** — preuve C17-AIR-S538 ; liste 5.9 (partiel), 13.2 ; C17 ; dépendances ; index ; journal.
-
