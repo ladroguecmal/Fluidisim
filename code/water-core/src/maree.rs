@@ -78,6 +78,68 @@ impl Maree {
     }
 }
 
+// --- S578 — la carte cotidale.
+
+/// **S578 — la carte cotidale d'une région** : pour chaque composante, l'amplitude complexe `H = A·e^(−ig)` aux nœuds d'une grille
+/// régulière — `(Re H, Im H)`, rangées composante par composante, `y` puis `x`. Interpolée **sous forme complexe** (bilinéaire sur `Re H`
+/// et `Im H`) : `η = Z₀ + Σ (Re Hₖ·cos ωₖt − Im Hₖ·sin ωₖt)` = `Z₀ + Σ Aₖ·cos(ωₖt − gₖ)`. Que des opérations IEEE de base et nos polynômes
+/// de `PhaseQ32` : déterministe, sans `atan2`, sans saut de phase à 2π. Au milieu d'une maille, la corde creuse l'amplitude de
+/// `1 − cos(k·Δx/2)` ; la phase y reste exacte.
+pub struct CarteCotidale<'a> {
+    frequences_q32: [u64; MAX_COMPOSANTES],
+    n: usize,
+    origine: [f64; 2],
+    pas_m: f64,
+    nx: usize,
+    ny: usize,
+    h: &'a [[f32; 2]],
+    niveau_moyen_m: f32,
+}
+
+impl<'a> CarteCotidale<'a> {
+    /// `periodes_h` : une période par composante ; `h` : `composantes × ny × nx` amplitudes complexes, m. Refus : plus de
+    /// [`MAX_COMPOSANTES`], une période non positive, une grille de moins de 2 × 2 nœuds, un pas non positif, une longueur fausse, une
+    /// valeur non finie.
+    pub fn new(periodes_h: &[f64], origine: [f64; 2], pas_m: f64, nx: usize, ny: usize, h: &'a [[f32; 2]], niveau_moyen_m: f32)
+        -> Result<Self, Refus> {
+        if periodes_h.is_empty() || periodes_h.len() > MAX_COMPOSANTES || nx < 2 || ny < 2 || !(pas_m > 0.0) || !pas_m.is_finite()
+            || h.len() != periodes_h.len() * nx * ny || h.iter().flatten().any(|v| !v.is_finite()) || !niveau_moyen_m.is_finite()
+            || !origine.iter().all(|v| v.is_finite()) {
+            return Err(Refus);
+        }
+        let mut frequences_q32 = [0u64; MAX_COMPOSANTES];
+        for (f, p) in frequences_q32.iter_mut().zip(periodes_h) {
+            if !(*p > 0.0) || !p.is_finite() {
+                return Err(Refus);
+            }
+            *f = freq_hz_to_q32(1.0 / (p * 3600.0));
+        }
+        Ok(CarteCotidale { frequences_q32, n: periodes_h.len(), origine, pas_m, nx, ny, h, niveau_moyen_m })
+    }
+
+    /// **Le niveau de la mer** au point `(x, y)` (m, repère de la carte) à l'instant `t`. Refus hors de la grille.
+    pub fn niveau(&self, x: f64, y: f64, t: SimTime) -> Result<f32, Refus> {
+        let (u, v) = ((x - self.origine[0]) / self.pas_m, (y - self.origine[1]) / self.pas_m);
+        if !(u >= 0.0 && v >= 0.0 && u <= (self.nx - 1) as f64 && v <= (self.ny - 1) as f64) {
+            return Err(Refus);
+        }
+        let (i, j) = ((u as usize).min(self.nx - 2), (v as usize).min(self.ny - 2));
+        let (fx, fy) = ((u - i as f64) as f32, (v - j as f64) as f32);
+        let mut eta = self.niveau_moyen_m;
+        for k in 0..self.n {
+            let base = k * self.nx * self.ny;
+            let at = |ii: usize, jj: usize| self.h[base + jj * self.nx + ii];
+            let (a, b, c, d) = (at(i, j), at(i + 1, j), at(i, j + 1), at(i + 1, j + 1));
+            let lerp = |p: f32, q: f32, f: f32| p + (q - p) * f;
+            let re = lerp(lerp(a[0], b[0], fx), lerp(c[0], d[0], fx), fy);
+            let im = lerp(lerp(a[1], b[1], fx), lerp(c[1], d[1], fx), fy);
+            let (s, co) = PhaseQ32::from_time(self.frequences_q32[k], t).sin_cos();
+            eta += re * co - im * s;
+        }
+        Ok(eta)
+    }
+}
+
 #[cfg(test)]
 #[path = "tests_maree.rs"]
 mod tests;
