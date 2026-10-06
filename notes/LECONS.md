@@ -6594,3 +6594,8 @@ de mailles (4,19 M) a fixé la taille du domaine suivant. Une ligne de script au
 **S533 — la protection écrite, pas appliquée.** ADR-234 D2 (S526) disait qu'un instrument doit tenir au-dessus du bruit de l'objet ; sept
 sessions plus tard, j'ai écrit « la rétention passe 1 ml » quand 1 ml est le quantum de V et que la pluie arrive par 0 ou 1 ml par pas :
 submersion lue à 29 min pour 38. Une protection qui ne s'écrit pas dans le plan ne s'applique pas (ADR-236 D1).
+
+## L394
+
+**S538 — le nombre ajusté à vue.** Le temps de remplissage de Torricelli calculé avec `C_d` = 0,61, puis « corrigé » de tête pour 0,62 :
+467 s au plan, 463,5 s par la loi. Un nombre calculé ne se retouche pas quand un paramètre change : il se recalcule (ADR-237 D1).

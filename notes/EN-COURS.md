@@ -62,30 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S540 — **terminée**. En autonomie, **C13 — la remontée d'une bulle** (non exécuté) : des bulles de 0,1, 1 et 5 mm lâchées à 3 m
-de profondeur ; vitesse terminale à ± 15 % de SPEC-002 §2 (5,5 mm/s ; 0,12–0,25 m/s ; ≈ 0,25 m/s) ; trajectoire selon `−g_eff`, pas selon
-`+Z`. Les grosses bulles d'APIC existent (S479–S485) ; les petites, qui portent les microbulles (7.3, absent) et l'aération, non.
+Session : S541 — **terminée**. En autonomie, **la douzième revue de méthode** (ADR-222 D4 ; S536–S540).
 
-**Ce que la session fait.** `bulle.rs` : une bulle ponctuelle — poussée `(ρ − ρ_air)·V·(−g_eff)`, masse ajoutée ½ρV, traînée de Tomiyama
-pour bulles contaminées (`C_D = max(24/Re·(1 + 0,15 Re^0,687), (8/3)·Eo/(Eo + 4))` : Schiller–Naumann, puis le régime où la bulle se
-déforme), la vitesse relative à l'eau ; `vitesse_terminale(d, g, milieu)` par point fixe. Eau douce de SPEC-002 : ρ = 1 000, μ = 10⁻³ Pa·s,
-σ = 0,072 N/m.
-
-**Ordre de grandeur, calculé (la loi d'abord, au plan).** 0,1 mm : **4,99 mm/s** (Stokes 5,45 : −8 %, `Re` 0,5) ; 1 mm : **0,112 m/s**
-(table 0,12–0,25 : −6 % sous le bas, `Re` 112) ; 5 mm : **0,231 m/s** (table 0,25 : −8 %, `Eo` 3,4). Remontée de 3 m : 602 / 27 / 13 s.
-
-**Critères, écrits avant.** (1) La vitesse atteinte par l'intégration (lâchée au repos, à 3 m) à 10⁻⁶ de `vitesse_terminale` (le quantum :
-l'arrondi f64, rapport > 10⁶). (2) **C13** : à ± 15 % de la table (la fourchette du 1 mm élargie de 15 % de part et d'autre). (3) Sous un
-`g_eff` incliné de 20°, la trajectoire selon `−g_eff` à 10⁻⁹ rad.
+**Ce que la session fait.** Relu : S536 (la revue), S537 (le quantum écrit à côté du seuil, appliqué), S538 (un nombre du plan ajusté à
+vue ; la ligne 13.2 en retard ; le décompte arrêté par l'outil), S539 (le point de non-retour prédit et tenu), S540 (la loi choisie au
+plan). **ADR-237** : D1, un nombre se recalcule à chaque changement de paramètre (élargit ADR-232 D2) ; L394 ; METHODE ; BOUSSOLE.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la bulle, les essais ; (1)–(3).
-- [x] **P3** — preuve ; listes 7.4, 13.2 ; C13 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-237, METHODE, L394, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — `bulle.rs` ; essais `s540` : 4,98 mm/s, 0,1124, 0,2309 m/s, intégrées à 10⁻⁶ ; selon −g_eff. Suite 702. C13 est rangé sous
-  7.4 dans la liste (pas 7.3, les microbulles visuelles, qui restent absentes).
-- **P3** — preuve C13-BULLES-S540 ; listes 7.4, 13.2 ; C13 ; index ; journal.
-

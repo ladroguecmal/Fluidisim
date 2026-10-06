@@ -644,3 +644,8 @@ Maillons **0** (7.5 devient partiel). Le lot des registres, dû en S539, fait da
 masse ajoutée, traînée implicite. **Mesuré** : les vitesses intégrées à 10⁻⁶ de la vitesse terminale, à −6 à −9 % de la table ; la trajectoire
 selon `−g_eff` sous une pesanteur inclinée. **C13 passe.** Maillons **0** (7.4, 13.2). Suivant : **S541, la douzième revue de méthode**.
 
+## S541 — 2026-10-06 — la douzième revue de méthode (ADR-237)
+
+**Entrée.** En autonomie ; revue due (S536–S540). **Friction répétée** : un nombre du plan ajusté à vue après un changement de paramètre
+(S538, la troisième fois sous ADR-232 D2) — **protection élargie** : il se recalcule (ADR-237 D1, L394). La ligne 13.2 en retard (C20 depuis
+S512) relevée une fois ; le décompte arrêté par l'outil. Maillons **1**. Suivant : **S542**, le lot (dû) et un point partiel.
