@@ -62,33 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S504 — **terminée**. En autonomie, **6.4, la coque qui perce la surface en mouvement sur la carte** (seconde part de S503).
-La référence, pour une coque qui perce le couvercle : (a) la pression d'un couvercle en partie couvert retire le dépôt du pas (le flux de
-paroi l'emporte pendant ce pas) ; (b) quand l'ouverture du couvercle d'une colonne se referme, l'eau de surface de la part recouverte
-passe aux voisines de la couche du haut, au prorata des faces partagées et de leurs couvercles (S334).
+Session : S505 — **en cours**. En autonomie, **6.4, C23 sur le système** : C23 (CAS-CANONIQUES, ADR-035) — le pas borné par la vitesse
+**gouvernante**, celle du fluide relative à la paroi sur une face coupée, plus la célérité — n'a été éprouvé que sur le véhicule 1D (S28).
+Le δ 3D ne borne pas son pas : l'hôte le choisit, le cœur ne garde que `dt²·g/dx ≤ 1`, et une coque peut franchir plus d'une maille par pas.
 
-**Ce que la session fait.** Le cœur expose les poids du transfert (le rapport de fermeture de chaque colonne et ses quatre parts) ;
-`set_motion` les reçoit ; deux noyaux sur la carte (rassembler ce que chaque colonne reçoit de ses voisines, puis appliquer en somme
-compensée) ; `lid_partial` retire le dépôt du pas ; le dépôt remis à zéro au pas suivant sans mouvement. Un banc : la coque de la porte D
-en pilonnement imposé (5 cm, 3,5 rad/s), puis en roulis (0,05 rad), carte contre référence.
+**Ce que la session fait.** (a) Mesurer d'abord : la coque de la porte D en translation à 5 m/s dans la référence, des pas qui lui font
+franchir 0,25 à 4 mailles par pas, contre un calcul au pas fin ; (b) une borne en amont dans le cœur (`Volume3::courant_bound`) et le
+compteur du Courant réalisé, d'une même vitesse gouvernante (ADR-035 §3) ; (c) C23 rejoué : eau au repos, coque menée de 0,5 à 20 m/s.
 
-**Ordre de grandeur, écrit avant.** Le terme concurrent : l'élévation que la coque rayonne, ≈ 1 cm (S336 : la force de δ ≈ 5 kN pour 5 cm
-de pilonnement) ; S503 tenait 2·10⁻⁶ m pour un solide immergé. Le transfert ajoute un rassemblement en flottant au lieu d'une somme
-exacte : un écart de l'ordre de l'arrondi f32 de la surface (10⁻⁷ m), sans effet visible.
+**Ordre de grandeur, écrit avant.** `c = √(g·h)` = 4,43 m/s pour 2 m d'eau ; à `ν` = 0,45, la borne absolue (`c` seule) laisse la paroi
+franchir `u_p·dt/dx` > 1 dès `u_p > c·(1/ν − 1)` = 5,4 m/s — une coque de jeu (bateau à 10 m/s) y est. Le terme concurrent de l'erreur :
+l'élévation que la coque produit (centimètres) ; une paroi qui saute une maille entière ouvre et ferme des faces sans l'état intermédiaire
+— prévision : l'écart au calcul fin croît au-delà d'une maille par pas.
 
-**Critères, écrits avant.** (1) les bancs de S358 et de S493 (cloison) inchangés ; (2) la coque en pilonnement puis en roulis : la carte à
-10⁻⁴ m de la référence, l'élévation ≥ 10 × l'écart ; (3) les volumes à 10⁻⁶ m³ ; (4) le coût, publié.
+**Critères, écrits avant.** (1) la mesure publiée : l'écart au calcul fin selon les mailles franchies par pas, et s'il rompt au-delà de 1 ;
+(2) borne et compteur d'une même vitesse gouvernante ; sous la borne gouvernante, le Courant réalisé vaut `ν` à toutes les vitesses de
+paroi (au millième) ; sous la borne absolue, il dépasse 1 au-delà du seuil analytique ; (3) sous la borne gouvernante, l'écart au calcul
+fin reste du même ordre à toutes les vitesses.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les poids du transfert (cœur) ; dépôt et transfert sur la carte ; (1).
-- [x] **P3** — le banc de la coque ; (2)–(4).
-- [x] **P4** — preuve ; liste 6.4 ; rituel.
+- [ ] **P2** — la mesure (a).
+- [ ] **P3** — la borne et le compteur ; C23 rejoué (b), (c).
+- [ ] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
-- **P2** — `Volume3::lid_transfer_weights` ; `lid_partial` − dépôt ; `motion_gather`, `motion_apply` ; dépôt effacé au pas suivant sans mouvement. (1) : S358 identique (diff vide), cloisons 5,96·10⁻⁸ m inchangées, sphère de S503 inchangée. Un heredoc mal lu par le shell (rien d'appliqué) → script dans le brouillon.
-- **P3** — `--lineaire-coque` : pilonnement 1,669·10⁻⁶ m pour 4,537 cm (rapport 27 184), volume 5,9·10⁻⁷ m³, aucun transfert (une
-  boîte en pilonnement ne referme pas de couvercle) ; roulis 2,384·10⁻⁷ m pour 8,8 mm (36 913), 5 814 transferts, volume 2,0·10⁻⁷ m³ ;
-  **témoin** sans transfert : 5,555·10⁻⁵ m et croissant ; recoupage CPU 7,9–8,2 ms, carte 0,7–0,9 ms. 663 essais.
-- **P4** — preuve COQUE-CARTE-S504 ; liste 6.4 ; index ; journal.
