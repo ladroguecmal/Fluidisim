@@ -217,3 +217,8 @@ La pluie du §5 est construite ([ADR-204](ADR-204-la-pluie-arete-de-v.md), [preu
 arête du ciel vers le contenant, sur sa **surface d'ouverture** et non sa surface libre (la pluie qui frappe les parois
 intérieures finit dans l'eau ; les deux coïncident pour un prisme) ; `sky_exposure` est la commande de l'arête, dynamique
 (bâches, ADR-203 D2). L'absorption et la création de flaques restent à faire.
+
+## Note du 2026-10-06, S559 — la question 4 tranchée
+
+« Mélange de liquides différents dans un même nœud : autorisé ou interdit ? » — **autorisé, en couches non miscibles** :
+[ADR-241](ADR-241-les-liquides-de-v.md). Le `liquid_id` par nœud du §2 devient une composition par nœud, tranche parallèle de l'appelant.

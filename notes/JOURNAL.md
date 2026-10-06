@@ -779,3 +779,11 @@ E₀. Une note l'écrit dans la preuve de S555. Maillons **0** (4.18, 13.2 avanc
 pondéré par les ouvertures. **Fait** ([preuve](../docs/validation/ENERGIE-COUPEE-S558.md)) : la cuve de S557 sur un fond en pente et bosse,
 280 faces partielles. **Mesuré** : `Q_a` conservé à 2,4·10⁻⁶ de E₀ ; le témoin sans poids dérive jusqu'à +1,8 %. Maillons **0** (4.18
 avance). Suivant : **S559**, un point partiel.
+
+## S559 — 2026-10-06 — les liquides de V (ADR-241) : la pression d'un nœud stratifié
+
+**Entrée.** En autonomie ; 5.7 (absent, A17). **Décidé** (ADR-241) : plusieurs liquides par nœud, non miscibles, en couches
+perpendiculaires à `g_eff` ; l'état entier, une composition parallèle ; la question 4 d'ADR-010 tranchée (autorisé, en couches). **Fait**
+([preuve](../docs/validation/LIQUIDES-COUCHES-S559.md)) : `hydro_liquids.rs`, la pression en un point d'un nœud stratifié, chaque interface
+le plan de la géométrie pour le volume cumulé. **Mesuré** contre trois formes fermées écrites au plan (cuve droite, inclinée, carène en V) :
+4·10⁻⁸ au plus. Maillons **1** (5.7 : absent → partiel). Suivant : **S560**, le débit par couches.

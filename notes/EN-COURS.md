@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S559 — **en cours**. En autonomie, **5.7 — plusieurs liquides** (absent ; A17) : **ADR-241** (non miscibles, en couches ; l'état
+Session : S559 — **terminée**. En autonomie, **5.7 — plusieurs liquides** (absent ; A17) : **ADR-241** (non miscibles, en couches ; l'état
 entier, une composition parallèle ; la pression par couches ; le débit à la session suivante), puis sa première pièce — **la pression en un
 point d'un nœud stratifié** (`hydro_liquids.rs`, sous-module de V).
 
@@ -85,7 +85,10 @@ des couches ne dépend pas de l'ordre de la table (l'huile déclarée avant l'ea
 ### Plan
 
 - [x] **P1** — jeton ; ADR-241 ; plan.
-- [ ] **P2** — `hydro_liquids.rs` et ses essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 5.7 ; A17 ; rituel.
+- [x] **P2** — `hydro_liquids.rs` et ses essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 5.7 ; A17 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — cinq essais `s559` : (1)–(4) à 4·10⁻⁸ au plus, (5), (6) tenus. Suite 721.
+- **P3** — preuve LIQUIDES-COUCHES-S559 ; liste 5.7 (absent → partiel) ; note A17 ; note à ADR-010 (Q4) ; index ; journal.
+

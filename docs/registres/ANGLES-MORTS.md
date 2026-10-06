@@ -4647,3 +4647,7 @@ demi-pas), dérivée du schéma ; l'énergie sur la carte.
 *Note du 2026-10-06, S557, sur A332* ([ENERGIE-DISCRETE-S557](../validation/ENERGIE-DISCRETE-S557.md)) : **levée.** Le pas linéaire est un
 avant-arrière ; son invariant exact est `Q = K(u^{n+1}) + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA`, la face du couvercle comptée pour une
 demi-maille ; mesuré conservé à 2,1·10⁻⁵ de E₀ sur 120 s. Le +8,4 % de S555 venait de l'instrument (le couvercle compté plein).
+
+*Note du 2026-10-06, S559, sur A17* ([ADR-241](../adr/ADR-241-les-liquides-de-v.md), [LIQUIDES-COUCHES-S559](../validation/LIQUIDES-COUCHES-S559.md)) :
+**traitée en partie.** V porte plusieurs liquides non miscibles par nœud, en couches ; la pression d'un nœud stratifié est construite et
+éprouvée. Le débit par couches reste à faire (liste 5.7).

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:50 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:56 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S559 — 5.7, les liquides de V (ADR-241) : la pression d'un nœud stratifié ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S558 — l'énergie du chemin coupé de δ linéaire ([journal](notes/JOURNAL.md)). Avant : S557 (le lot)
-Session suivante : **S559 — un point partiel** (4.18 : l'énergie du pas mobile, ou un autre point ; choisir par la feuille de route). Revue à S561 (noter : l'instrument d'énergie de S555 non éprouvé, L375). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S558 : 4.18 avance (l'énergie du chemin coupé)
+Session en cours : aucune
+Dernière session : S559 — les liquides de V (ADR-241) : la pression d'un nœud stratifié ([journal](notes/JOURNAL.md)). Avant : S558 (l'énergie du chemin coupé de δ linéaire)
+Session suivante : **S560 — 5.7, le débit par couches** (ADR-241 D4) : Torricelli sur la différence de pression au seuil, le liquide de la couche au seuil ; le manomètre en U (l'équilibre ρ₁·h₁ = ρ₂·h₂) et la vidange d'une cuve stratifiée (la couche du bas sort la première) ; références calculées avant. Revue à S561 (noter : l'instrument d'énergie de S555 non éprouvé, L375). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 1 — S559 : 5.7 absent → partiel (ADR-241)
 Registres       : dernier lot S557 (ADR-213 D3) ; le prochain au plus tard en S560
 ```
 

@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**240 ADR** — actée : 189, proposée : 49, rétractée en partie : 2.
+**241 ADR** — actée : 190, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -20,7 +20,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [007](../adr/ADR-007-interface-solveur.md) | Interface de solveur et stratégie de remplacement | proposée | S01 | 001 005 006 | 008 012 020 022 030 031 038 118 124 125 175 220 |
 | [008](../adr/ADR-008-flottabilite-et-autorite.md) | Flottabilité, forces sur les solides et frontière d'autorité | proposée | S01 | 001 003 007 | 009 015 021 023 025 189 193 227 |
 | [009](../adr/ADR-009-reseau-autorite-et-replication.md) | Réseau : réplication d'événements, pas de champs | proposée | S01 | 001 003 005 008 | 010 016 021 024 |
-| [010](../adr/ADR-010-reseau-hydraulique-volumes-finis.md) | Réseau hydraulique des volumes finis (couche V) | proposée | S01 | 001 002 009 | 011 015 017 018 022 023 025 027 139 140 199 202 203 204 |
+| [010](../adr/ADR-010-reseau-hydraulique-volumes-finis.md) | Réseau hydraulique des volumes finis (couche V) | proposée | S01 | 001 002 009 | 011 015 017 018 022 023 025 027 139 140 199 202 203 204 241 |
 | [011](../adr/ADR-011-courants-et-ecoulements-diriges.md) | Courants et écoulements dirigés | proposée | S01 | 004 010 | 018 027 |
 | [012](../adr/ADR-012-ordonnanceur-budget-degradation.md) | Ordonnanceur, budget et dégradation contrôlée | proposée | S01 | 006 007 | 013 014 019 020 021 022 125 129 130 170 175 202 207 210 |
 | [013](../adr/ADR-013-prediction-activation-precalcul.md) | Prédiction, activation et précalcul | proposée | S01 | 005 006 012 | 022 023 024 170 171 202 207 |
@@ -225,7 +225,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [212](../adr/ADR-212-la-bande-etroite-en-profondeur.md) | La bande étroite en profondeur : une hauteur eulérienne sous les particules | actée | S412 | 207 211 |  |
 | [213](../adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) | Accélérer : tolérance, plafond, rituel allégé, bancs courts | actée | S443 | 187 | 214 215 221 |
 | [214](../adr/ADR-214-b-entre-dans-la-bande.md) | B entre dans la bande : `Apic3` et sa carte reçoivent le couplage relatif | actée | S444 | 198 207 213 |  |
-| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 227 229 |
+| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 227 229 241 |
 | [216](../adr/ADR-216-le-banc-visuel.md) | Le banc visuel : mesurer plutôt que regarder | actée | S471 | 215 | 217 |
 | [217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md) | Le type d'eau, une option d'édition de la carte ; le ciel qui bouge, à l'atmosphère | actée | S473 | 197 216 |  |
 | [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 222 |
@@ -251,3 +251,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [238](../adr/ADR-238-treizieme-revue-de-methode.md) | Treizième revue de méthode (S541–S545) | actée | S546 | 222 237 | 239 |
 | [239](../adr/ADR-239-quatorzieme-revue-de-methode.md) | Quatorzième revue de méthode (S546–S550) | actée | S551 | 222 238 | 240 |
 | [240](../adr/ADR-240-quinzieme-revue-de-methode.md) | Quinzième revue de méthode (S551–S555) | actée | S556 | 222 239 |  |
+| [241](../adr/ADR-241-les-liquides-de-v.md) | Les liquides de V : non miscibles, en couches | actée | S559 | 010 215 |  |
