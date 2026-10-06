@@ -48,7 +48,8 @@ struct Params {
 @group(0) @binding(5) var<storage, read_write> scalar: array<f32>;
 @group(0) @binding(6) var<uniform> s: Params;
 /// **S503 — le mouvement d'un solide** (`Linear3::set_motion`) : le terme de paroi de chaque maille (`cells`), la vitesse imposée
-/// des faces qui se ferment ou s'ouvrent (`faces` ; `f32::MAX` : garder), l'eau déposée sur chaque colonne (`columns`, m).
+/// des faces qui se ferment ou s'ouvrent (`faces` ; `f32::MAX` : garder), l'eau déposée sur chaque colonne (`columns`, m) ;
+/// **S504** : les poids du transfert de S334 (`5 × columns` : rapport de fermeture, parts gauche, droite, avant, arrière).
 @group(0) @binding(7) var<storage, read> motion: array<f32>;
 
 const X: u32 = 0u;   // pression
@@ -84,6 +85,11 @@ fn roundoff_at(c: u32) -> u32 { return columns() + c; }
 fn flux_x_at(f: u32) -> u32 { return 2u * columns() + f; }
 fn flux_y_at(f: u32) -> u32 { return 2u * columns() + x_faces() + f; }
 fn published_at(c: u32) -> u32 { return 2u * columns() + x_faces() + y_faces() + c; }
+/// S504 : ce qu'une colonne reçoit du transfert, entre le rassemblement et l'application.
+fn transfer_at(c: u32) -> u32 { return 3u * columns() + x_faces() + y_faces() + c; }
+/// S504 : le dépôt du pas et les poids du transfert, dans le tampon de mouvement.
+fn depot(c: u32) -> f32 { return motion[s.cells + s.faces + c]; }
+fn transfer_w(c: u32, q: u32) -> f32 { return motion[s.cells + s.faces + columns() + 5u * c + q]; }
 
 fn ramp(x: f32, n: u32, width: f32) -> f32 {
     if (width == 0.0) { return 0.0; }
@@ -119,7 +125,9 @@ fn lid(col: u32) -> f32 {
 /// S493 — la pression d'un couvercle **en partie couvert** (`0 < a < 1`), appelée seulement là : un couvercle plein garde
 /// l'expression d'avant aux deux endroits où elle sert, au bit (le compilateur réordonnait sinon le chemin plein, L345).
 fn lid_partial(col: u32, a: f32) -> f32 {
-    return s.rho_g * perturbation(col) / max(a, s.lid_floor);
+    // S504 : l'eau que la coque vient de déposer dans la colonne n'est pas à la surface — le flux de sa paroi la retire pendant
+    // ce pas (`Volume3::lid`). Zéro sans coque qui bouge.
+    return s.rho_g * (perturbation(col) - depot(col)) / max(a, s.lid_floor);
 }
 
 /// Emplacement de face → (i, j, k, axe).
@@ -531,6 +539,47 @@ fn motion_deposit(@builtin(global_invocation_id) id: vec3<u32>) {
     let eta = cols[c];
     let roundoff = cols[roundoff_at(c)];
     let increment = depot - roundoff;
+    let height = eta + increment;
+    cols[c] = height;
+    cols[roundoff_at(c)] = exact_difference(height, eta) - increment;
+    cols[published_at(c)] = difference(height, s.z0) - cols[roundoff_at(c)];
+}
+
+// ── S504 : le transfert de S334, l'eau qu'une paroi qui glisse pousse vers les voisines ──────────────────────────────────────
+
+/// L'eau poussée hors d'une colonne dont le couvercle se referme : sa surface, hors le dépôt du pas, fois le rapport de fermeture.
+fn pousse(c: u32) -> f32 {
+    let r = transfer_w(c, 0u);
+    if (r == 0.0) { return 0.0; }
+    return (perturbation(c) - depot(c)) * r;
+}
+
+/// Ce que la colonne reçoit de ses quatre voisines, moins ce qu'elle pousse : un rassemblement, sans écriture concurrente.
+@compute @workgroup_size(64)
+fn motion_gather(@builtin(global_invocation_id) id: vec3<u32>) {
+    let n = id.x;
+    if (n >= columns()) { return; }
+    let i = n % s.nx;
+    let j = n / s.nx;
+    var recu = 0.0;
+    // La voisine de droite pousse vers sa gauche (part 1), celle de gauche vers sa droite (part 2), etc.
+    if (i + 1u < s.nx) { recu += pousse(n + 1u) * transfer_w(n + 1u, 1u); }
+    if (i > 0u) { recu += pousse(n - 1u) * transfer_w(n - 1u, 2u); }
+    if (j + 1u < s.ny) { recu += pousse(n + s.nx) * transfer_w(n + s.nx, 3u); }
+    if (j > 0u) { recu += pousse(n - s.nx) * transfer_w(n - s.nx, 4u); }
+    cols[transfer_at(n)] = recu - pousse(n);
+}
+
+/// Le transfert appliqué, en somme compensée.
+@compute @workgroup_size(64)
+fn motion_apply(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= columns()) { return; }
+    let t = cols[transfer_at(c)];
+    if (t == 0.0) { return; }
+    let eta = cols[c];
+    let roundoff = cols[roundoff_at(c)];
+    let increment = t - roundoff;
     let height = eta + increment;
     cols[c] = height;
     cols[roundoff_at(c)] = exact_difference(height, eta) - increment;

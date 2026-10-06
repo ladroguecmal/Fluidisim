@@ -14,13 +14,17 @@ use water_core::delta3d::{Domain3, Sponge3};
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `delta3d_linear.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 17] = [
+const KERNELS: [&str; 19] = [
     "predict", "rhs", "finish_bnorm", "init_warm", "finish_rz", "apply_fold", "finish_dq", "update", "finish_beta",
     "direction", "residual_fold", "finish_residual", "correct", "fluxes", "advance", "motion_faces", "motion_deposit",
+    "motion_gather", "motion_apply",
 ];
 /// S503 : le mouvement d'un solide.
 const MOTION_FACES: usize = 15;
 const MOTION_DEPOSIT: usize = 16;
+/// S504 : le transfert de S334.
+const MOTION_GATHER: usize = 17;
+const MOTION_APPLY: usize = 18;
 const PREDICT: usize = 0;
 const RHS: usize = 1;
 const FINISH_BNORM: usize = 2;
@@ -88,6 +92,8 @@ pub struct Linear3 {
     geo: wgpu::Buffer,
     motion: wgpu::Buffer,
     moving: core::cell::Cell<bool>,
+    /// S504 : un dépôt et des poids de transfert restent dans le tampon après leur pas : à effacer au pas suivant sans mouvement.
+    deposited: core::cell::Cell<bool>,
     scalar: wgpu::Buffer,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
@@ -137,7 +143,8 @@ impl Linear3 {
 
         let groups = (cells as u32).div_ceil(GROUP);
         let storage = wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC;
-        let col_len = 3 * columns + (nx + 1) * ny + nx * (ny + 1);
+        // S504 : une colonne de plus par colonne, ce que le transfert y dépose entre deux noyaux.
+        let col_len = 4 * columns + (nx + 1) * ny + nx * (ny + 1);
         let vel = buffer(&device, (2 * faces * 4) as u64, storage);
         let geo_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("geometrie lineaire"),
@@ -145,7 +152,7 @@ impl Linear3 {
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
         // S503 : terme de paroi (mailles), faces imposées, dépôt (colonnes) — à zéro (faces : à garder) sans solide mobile.
-        let mut repos = vec![0f32; cells + faces + columns];
+        let mut repos = vec![0f32; cells + faces + 6 * columns];
         repos[cells..cells + faces].fill(f32::MAX);
         let motion = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("mouvement du solide"),
@@ -229,6 +236,7 @@ impl Linear3 {
             geo: geo_buf,
             motion,
             moving: core::cell::Cell::new(false),
+            deposited: core::cell::Cell::new(false),
             scalar,
             read,
             query,
@@ -304,18 +312,19 @@ impl Linear3 {
 
     /// **S503 — le mouvement d'un solide**, pour le pas suivant : la géométrie recoupée (`geo`, comme à la construction), le terme de
     /// paroi de chaque maille (`Volume3::wall_divergence`), les faces imposées (`Volume3::changed_faces` : `f32::MAX` pour garder) et
-    /// l'eau déposée sur chaque colonne (m). Le terme de paroi vaut jusqu'au prochain appel ; faces et dépôt, pour un pas.
-    pub fn set_motion(&self, geo: &[f32], wall: &[f32], faces: &[f32], deposit: &[f32]) -> Result<(), String> {
+    /// l'eau déposée sur chaque colonne (m) ; **S504** : les poids du transfert de S334 (`Volume3::lid_transfer_weights`). Le terme
+    /// de paroi vaut jusqu'au prochain appel ; faces, dépôt et transfert, pour un pas.
+    pub fn set_motion(&self, geo: &[f32], wall: &[f32], faces: &[f32], deposit: &[f32], transfer: &[f32]) -> Result<(), String> {
         let d = self.domain;
         let (nf, nc, ncol) = (face_total(d), d.cells(), d.columns());
-        if geo.len() != nf + nc || wall.len() != nc || faces.len() != nf || deposit.len() != ncol {
+        if geo.len() != nf + nc || wall.len() != nc || faces.len() != nf || deposit.len() != ncol || transfer.len() != 5 * ncol {
             return Err("formes du mouvement".into());
         }
-        if geo.iter().any(|a| !(0. ..=1.).contains(a)) || wall.iter().chain(deposit).any(|x| !x.is_finite()) {
+        if geo.iter().any(|a| !(0. ..=1.).contains(a)) || wall.iter().chain(deposit).chain(transfer).any(|x| !x.is_finite()) {
             return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
         }
         self.queue.write_buffer(&self.geo, 0, &f32s(geo));
-        let tout: Vec<f32> = wall.iter().chain(faces).chain(deposit).copied().collect();
+        let tout: Vec<f32> = wall.iter().chain(faces).chain(deposit).chain(transfer).copied().collect();
         self.queue.write_buffer(&self.motion, 0, &f32s(&tout));
         self.moving.set(true);
         Ok(())
@@ -339,6 +348,14 @@ impl Linear3 {
             beginning_of_pass_write_index: Some(0),
             end_of_pass_write_index: Some(1),
         });
+        // S504 : le dépôt et les poids du transfert d'un pas de mouvement ne valent que pour lui (le couvercle partiel lit le dépôt).
+        let mouvement = self.moving.replace(false);
+        if mouvement {
+            self.deposited.set(true);
+        } else if self.deposited.replace(false) {
+            let debut = (d.cells() + face_total(d)) * 4;
+            self.queue.write_buffer(&self.motion, debut as u64, &vec![0u8; 6 * d.columns() * 4]);
+        }
         let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamps });
         pass.set_bind_group(0, &self.bind, &[]);
         let mut run = |index: usize, groups: u32| {
@@ -346,9 +363,11 @@ impl Linear3 {
             pass.dispatch_workgroups(groups, 1, 1);
         };
         // S503 : le mouvement d'un solide, une fois, au début du pas qui suit `set_motion`.
-        if self.moving.replace(false) {
+        if mouvement {
             run(MOTION_FACES, faces);
             run(MOTION_DEPOSIT, columns);
+            run(MOTION_GATHER, columns);
+            run(MOTION_APPLY, columns);
         }
         run(PREDICT, faces);
         run(RHS, cells);
@@ -879,6 +898,7 @@ pub fn recevoir_mobile() -> Result<(), String> {
         let aire = d.dx * d.dx;
         let mut colonnes = coeur.solid_column_volumes().ok_or("colonnes solides")?.to_vec();
         let (mut paroi, mut faces, mut depot) = (vec![0f32; d.cells()], vec![0f32; face_total(d)], vec![0f32; d.columns()]);
+        let mut transfert = vec![0f32; 5 * d.columns()];
         let volume = |eta: &[f32]| eta.iter().map(|e| (e - d.z0()) as f64).sum::<f64>() * (d.dx as f64).powi(2);
         println!("MOBILE_S503 nx={} ny={} nz={} dx={} sphere_r={rayon} vitesse={vitesse} pas={pas} dt_us={dt_us} cycles={cycles} carte={:?}", d.nx, d.ny, d.nz, d.dx, carte.adapter);
         let (mut pire, mut elevation, mut pire_volume) = (0f32, 0f32, 0f64);
@@ -894,7 +914,8 @@ pub fn recevoir_mobile() -> Result<(), String> {
                 depot[c] = (nouvelles[c] - colonnes[c]) / aire;
             }
             colonnes.copy_from_slice(nouvelles);
-            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot)?;
+            coeur.lid_transfer_weights(&mut transfert).map_err(|e| format!("{e:?}"))?;
+            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot, &transfert)?;
             cpu += t0.elapsed().as_secs_f64();
             coeur.step_surface_linear(dt_us, 4000, &jobs).map_err(|e| format!("cœur, pas {n} : {e:?}"))?;
             carte.step(cycles);

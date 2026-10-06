@@ -935,6 +935,48 @@ impl Volume3 {
         Ok(())
     }
 
+    /// **S504 — les poids du transfert de S334** au dernier `set_solid_rigid`, cinq par colonne : le rapport de fermeture du couvercle
+    /// `1 − après/avant` (zéro si le couvercle ne se referme pas, ou si aucune voisine ne peut recevoir), puis les parts normalisées vers
+    /// les voisines gauche, droite, avant, arrière — l'ouverture de la face partagée de la couche du haut fois le couvercle voisin, comme
+    /// le transfert du cœur. Valide entre `set_solid_rigid` et le pas suivant.
+    pub fn lid_transfer_weights(&self, out: &mut [f32]) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        let g = self.cut.as_ref().ok_or(Error::Domain)?;
+        if out.len() != 5 * nx * ny {
+            return Err(Error::Shape);
+        }
+        out.fill(0.);
+        if !(self.partial_lid && nz >= 2) {
+            return Ok(());
+        }
+        let (top, k) = (nz * nx * ny, nz - 1);
+        for j in 0..ny {
+            for i in 0..nx {
+                let c = j * nx + i;
+                let (avant, apres) = (self.saved_w[top + c], g.open_w[top + c]);
+                if !(avant > 0. && apres < avant) {
+                    continue;
+                }
+                let fu = |i: usize| (k * ny + j) * (nx + 1) + i;
+                let fv = |j: usize| (k * (ny + 1) + j) * nx + i;
+                let mut poids = [0f32; 4];
+                if i > 0 { poids[0] = g.open_u[fu(i)] * g.open_w[top + c - 1]; }
+                if i + 1 < nx { poids[1] = g.open_u[fu(i + 1)] * g.open_w[top + c + 1]; }
+                if j > 0 { poids[2] = g.open_v[fv(j)] * g.open_w[top + c - nx]; }
+                if j + 1 < ny { poids[3] = g.open_v[fv(j + 1)] * g.open_w[top + c + nx]; }
+                let total: f32 = poids.iter().sum();
+                if !(total > 0.) {
+                    continue;
+                }
+                out[5 * c] = 1. - apres / avant;
+                for q in 0..4 {
+                    out[5 * c + 1 + q] = poids[q] / total;
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// **S503 — le volume solide de chaque colonne** au dernier `set_solid_rigid` (m³) : la différence d'un pas à l'autre, divisée par
     /// l'aire de la colonne, est l'eau que le solide dépose sur la surface.
     pub fn solid_column_volumes(&self) -> Option<&[f32]> {
