@@ -2663,6 +2663,10 @@ fn run() -> Result<(), String> {
     // S503 — 6.4 : un solide qui bouge sur la carte.
     // S504 — 6.4 : la coque qui perce la surface, en mouvement sur la carte.
     // S517 — 4.13 : la coque en marche et son sillage, sur la carte.
+    // S532 — ADR-235 D1 : la carte refuse ses limites avec un nom.
+    if args.iter().any(|a| a == "--lineaire-limites") {
+        return delta3d_linear::recevoir_limites();
+    }
     if args.iter().any(|a| a == "--lineaire-sillage") {
         return delta3d_linear::recevoir_sillage();
     }

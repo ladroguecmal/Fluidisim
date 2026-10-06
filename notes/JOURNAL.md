@@ -574,3 +574,12 @@ grand domaine (65 535 groupes en S520, 128 Mo par liaison en S529) — **protect
 une limite atteinte se refuse avec un nom. Le reste — la convergence où maille et pas varient ensemble (S529), une fois — rien à ajouter ;
 les protections de S521–S526 ont servi (la référence bruitée, la garde de résolution, l'ordre de grandeur qui change la construction).
 Maillons **1**. Suivant : **S532**, un point partiel — et la carte qui refuse au lieu de s'arrêter (D1).
+
+## S532 — 2026-10-06 — la carte refuse ses limites avec un nom
+
+**Entrée.** En autonomie ; ADR-235 D1 appliquée. **Fait** ([preuve](../docs/validation/LIMITES-CARTE-S532.md)) : `Linear3::new` calcule les
+groupes des noyaux de mailles et six tampons contre les limites de l'adaptateur, et refuse en nommant la limite. **Mesuré** : 4,46 M mailles
+refusées par un message, 3,44 M acceptées ; les bancs au bit. Le refus des liaisons écrit, non éprouvé (inatteignable avant celui des
+groupes sur cette carte). Maillons **2** (une garde, aucun point n'avance) : la suivante choisit un lot qui fait avancer une capacité.
+Suivant : **S533**.
+

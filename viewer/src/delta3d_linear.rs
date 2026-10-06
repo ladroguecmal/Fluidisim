@@ -171,10 +171,38 @@ impl Linear3 {
             .map_err(|e| e.to_string())?;
         let info = adapter.get_info();
 
+        // S532 — ADR-235 D1 : les limites matérielles, calculées et refusées avec un nom avant toute création (S520, S529 : la carte
+        // s'arrêtait). Les noyaux de mailles dispatchent en une dimension ; les tampons se lient en entier.
+        let limites = adapter.limits();
+        let groupes_mailles = cells.div_ceil(GROUP as usize);
+        if groupes_mailles > limites.max_compute_workgroups_per_dimension as usize {
+            return Err(format!(
+                "δ linéaire : {cells} mailles demandent {groupes_mailles} groupes, au-delà de {} par dimension (limite de l'adaptateur)",
+                limites.max_compute_workgroups_per_dimension
+            ));
+        }
+        let col_len = 4 * columns + (nx + 1) * ny + nx * (ny + 1);
+        let valeurs_ombre = 2 * faces + 2 * cells + 6 * columns;
+        for (nom, octets) in [
+            ("vitesses", 2 * faces * 4),
+            ("géométrie", (faces + cells) * 4),
+            ("mouvement", (cells + faces + 6 * columns) * 4),
+            ("paires de la dispersion", (2 + 2 * valeurs_ombre) * 4),
+            ("état", 7 * cells * 4),
+            ("colonnes", col_len * 4),
+        ] {
+            let liaison = limites.max_storage_buffer_binding_size as u64;
+            if octets as u64 > liaison || octets as u64 > limites.max_buffer_size {
+                return Err(format!(
+                    "δ linéaire : le tampon « {nom} » fait {octets} octets, au-delà d'une liaison ({liaison}) ou d'un tampon ({}) de l'adaptateur",
+                    limites.max_buffer_size
+                ));
+            }
+        }
+
         let groups = (cells as u32).div_ceil(GROUP);
         let storage = wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC;
-        // S504 : une colonne de plus par colonne, ce que le transfert y dépose entre deux noyaux.
-        let col_len = 4 * columns + (nx + 1) * ny + nx * (ny + 1);
+        // S504 : une colonne de plus par colonne, ce que le transfert y dépose entre deux noyaux (`col_len`, calculé plus haut, S532).
         let vel = buffer(&device, (2 * faces * 4) as u64, storage);
         let geo_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("geometrie lineaire"),
@@ -1529,6 +1557,23 @@ pub fn recevoir_sillage() -> Result<(), String> {
             1e3 * etages[2] / pas as f64,
             1e3 * etages[3] / pas as f64
         );
+        Ok(())
+    })
+}
+
+/// **S532 — ADR-235 D1 : la carte refuse ses limites avec un nom** (`--lineaire-limites`). Un domaine au-delà de la limite des groupes
+/// (512 × 512 × 17 = 4 456 448 mailles → 69 632 groupes) : refusé, sans arrêt ; un en deçà (448 × 320 × 24, le domaine fin de S529) :
+/// accepté.
+pub fn recevoir_limites() -> Result<(), String> {
+    pollster::block_on(async {
+        for (nx, ny, nz) in [(512usize, 512usize, 17usize), (448, 320, 24)] {
+            let d = Domain3 { nx, ny, nz, dx: 0.125 };
+            let geo = toutes_ouvertes(d);
+            match Linear3::new(d, 1025., 9.81, &geo).await {
+                Ok(_) => println!("LIMITES_S532 {nx}x{ny}x{nz} mailles={} accepte", d.cells()),
+                Err(e) => println!("LIMITES_S532 {nx}x{ny}x{nz} mailles={} refus=« {e} »", d.cells()),
+            }
+        }
         Ok(())
     })
 }

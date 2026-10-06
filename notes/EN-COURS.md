@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S532 — **en cours**. En autonomie : **ADR-235 D1 appliquée à la carte** — `Linear3::new` s'arrêtait (une assertion, une
+Session : S532 — **terminée**. En autonomie : **ADR-235 D1 appliquée à la carte** — `Linear3::new` s'arrêtait (une assertion, une
 panique de wgpu) au-delà de ses limites matérielles ; elle les calcule et refuse avec un nom.
 
 **Ce que la session fait.** Après l'obtention de l'adaptateur : les groupes des noyaux de mailles (un par 64 mailles, en une dimension)
@@ -79,8 +79,11 @@ la carte inchangés au bit (sillage `e41630abd739b189`, S503, S504).
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — les contrôles, le banc ; (1), (2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — les contrôles, le banc ; (1), (2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — 4 456 448 mailles refusées (69 632 groupes, nommé) ; 3 440 640 acceptées ; sillage, S503, S504 au bit.
+- **P3** — preuve LIMITES-CARTE-S532 ; index ; journal.
+
