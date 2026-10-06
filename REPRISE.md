@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 20:49 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 20:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S550 — 6.6, l'angle de bande d'une barge instable ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S549 — la carène libre ([journal](notes/JOURNAL.md)). Avant : S548 (le lot)
 Session suivante : **S550 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — la stabilité aux grands angles et le chavirement (6.6 : la courbe GZ d'une barge, l'angle de chavirement), S548 et S549 ensemble (l'envahissement pendant la gîte), la poche porteuse d'un compartiment scellé, Coriolis dans δ, C14/C15 ; formules d'analyse vérifiées avant la mesure, blocages vérifiés (ADR-238 D2), nombres recalculés (ADR-237 D1). Revue à S551. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S549 : la carène libre (6.6)

@@ -62,33 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S549 — **terminée**. En autonomie, **6.6 — la carène libre** : l'eau d'un compartiment à demi plein garde sa surface horizontale
-quand la coque gîte ; son centre se déplace vers le bord bas, et la stabilité perd `i/∇` (la hauteur métacentrique, `GM → GM − i/∇`,
-`i` le moment d'inertie de la surface libre) — un navire qui chavire par l'eau qu'il embarque.
+Session : S550 — **en cours**. En autonomie, **6.6 — la stabilité aux grands angles** par l'angle de bande (*loll*) : une barge dont la
+hauteur métacentrique devient négative sous une charge haute ne reste pas droite ; elle gîte jusqu'à `tan θ = √(−2·GM/BM)` (flancs droits,
+pont sec, bouchain noyé) — la frontière du chavirement.
 
-**Ce que la session fait.** Deux pièces du cœur. (a) `VolumeShape::centroid_below_um(plan)` : le centre de la part mouillée d'une forme de
-V — chaque tétraèdre découpé par le plan (un, deux ou trois sommets mouillés). (b) `RigidBody::loads` : des charges ponctuelles (un point
-du corps, une force du monde) ajoutées aux forces et au moment — vide par défaut. L'essai : la barge de S548 (20 × 8 × 4 m), son
-compartiment central (5 × 8 m) à 1 m d'eau, sans brèche ; son centre de masse décalé latéralement (le proxy déplacé) ; l'eau du compartiment
-pèse en son centre, calculé à chaque pas sous la pesanteur vue du navire (« libre »), ou fixe à son centre au repos (« figée »).
+**Ce que la session fait.** Un essai, sans code neuf : la barge de S548 (20 × 8 × 4 m, 246 t), une charge de 100 t à 8 m au-dessus de la
+quille (une charge ponctuelle, S549), lâchée à 1° de gîte, amortie ; la gîte d'équilibre contre l'angle de bande. Le proxy en 4 × 32 × 16
+points : l'erreur du proxy sur la hauteur métacentrique, `BM/n²` (S499), vaut 2,5 mm à `n` = 32 (3,9 cm à 8).
 
-**Ordre de grandeur, calculé.** 246 t + 41 t d'eau : `∇` = 280 m³, `T` = 1,75 m, `KB` 0,875, `BM` 3,048, `KG` 1,786 → `GM` figé **2,137 m** ;
-`i = l·b³/12` = 213,3 m⁴, `i/∇` = **0,762 m** → `GM` libre 1,375 m, rapport **1,554**. Décalage du centre total de 8,6 cm : gîte figée
-2,30°, libre 3,57° ; à 4°, l'eau monte de 0,28 m au bord (sous les 1 m : la surface reste entre les parois).
+**Ordre de grandeur, calculé.** 346 t : `T` = 2,110 m, `KB` 1,055, `BM` 2,528, `KG` 3,734 → **`GM` = −0,151 m** ; **angle de bande 19,08°** ;
+le pont se mouille à 25,29°, le bouchain émerge à 27,81° (la formule tient jusque-là). La sensibilité : `tan θ ∝ √(−GM)` — 2,5 mm sur
+0,151 m, 0,8 % sur la tangente.
 
-**Critères, écrits avant.** (1) Le centre mouillé d'une boîte inclinée : le déplacement latéral `b²·tan θ/(12 h)` à 10⁻⁹ près (rapport à
-l'arrondi f64 > 10⁶). (2) Sans charges, la suite au bit. (3) Le rapport des tangentes de gîte libre / figée à 3 % de `GM_f/(GM_f − i/∇)`,
-`GM_f` mesuré sur la gîte figée (le proxy a son erreur propre, S499 : elle se retire par le rapport).
+**Critères, écrits avant.** (1) La gîte d'équilibre à 3 % de 19,08° (en tangente), des deux côtés selon le sens du lâcher. (2) Sans la
+charge, la barge revient droite (à 0,1°). La formule d'analyse vérifiée avant la mesure : `GZ = sin θ·(GM + BM·tan²θ/2)`, nul à `θ ≠ 0`
+pour `tan²θ = −2·GM/BM` (un calcul, pas un souvenir : ADR-232 D2).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le centre mouillé, les charges, les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.6 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'essai ; (1), (2).
+- [ ] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `centroid_below_um` (au µm de `b² tan θ/12h`), `RigidBody::loads` ; carène libre : rapport 1,5672 pour 1,5725 (0,34 %). En
-  route : la formule d'analyse du plan fausse (`m_h·Δy/(m·GM)` au lieu de `Δy/GM`) ; un diagnostic faux (le proxy) et un montage changé
-  pour rien, revenu au déclaré. Suite 709.
-- **P3** — preuve CARENE-LIBRE-S549 ; liste 6.6 ; index ; journal.
-
