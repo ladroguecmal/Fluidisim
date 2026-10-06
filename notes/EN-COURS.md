@@ -62,18 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S501 — **terminée**. En autonomie, **la quatrième revue de méthode** (ADR-222 D4) : les frictions de S497–S500.
+Session : S502 — **en cours**. En autonomie, **6.1, l'amortissement des autres degrés de liberté** : S336 a mesuré par δ la masse ajoutée
+et l'amortissement de rayonnement de la coque de la porte D **en pilonnement** seulement ; elle roule et tangue sans perte.
 
-**Ce que la session fait.** Relire journaux et notes de S497–S500 ; pour chaque friction, son coût et sa suite ; un ADR ; METHODE et LECONS
-pour les protections nouvelles seulement ; la boussole.
+**Ce que la session fait.** (a) δ rend le **moment** de sa pression sur la paroi (`solid_wall_force` → force et moment, la force au bit) ;
+(b) `rayonnement_coque` impose un roulis puis un tangage `θ = Θ·sin ωt` et ajuste le moment `M = −A·θ̈ − B·θ̇` ; (c) le corps reçoit un
+amortissement angulaire (constante d'archétype), relatif à la rotation de la surface qui le porte ; un essai de lâcher en eau calme.
 
-**Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
-table ; `etat_projet --check` à zéro.
+**Ordre de grandeur, écrit avant.** La coque 4 × 1,6 × 1 m, 3 200 kg, tirant 0,488 m : roulis `GM` = 0,18 m, `C₄₄` ≈ 5,7 kN·m/rad,
+`I₄₄` ≈ 950 kg·m², `ω` ≈ 2,45 rad/s ; tangage `GM` = 2,48 m, `C₅₅` ≈ 78 kN·m/rad, `I₅₅` ≈ 4 530 kg·m², `ω` ≈ 4,2 rad/s. Le roulis d'une
+barge rayonne peu (la coque déplace peu d'eau en tournant autour de son axe long) : `ζ₄₄` attendu de l'ordre de 0,01 à 0,05 ; le tangage
+pousse l'eau comme le pilonnement aux extrémités : `ζ₅₅` de l'ordre de celui du pilonnement (0,16).
+
+**Critères, écrits avant.** (1) la force de δ inchangée au bit (les essais de S330–S336) ; le moment d'une pression hydrostatique sur un
+pavé incliné contre l'analytique `ρgV·(KB − …)` à 1 % (cas de réponse connue) ; (2) `A` et `B` en roulis et tangage à trois pulsations
+autour de leur `ω` propre, résidu d'ajustement ≤ 10 %, `B` > 0 ; (3) le corps amorti : lâché à 0,1 rad en eau calme, période et décrément
+à ±2 % de l'oscillateur `(I + A)·θ̈ + B·θ̇ + C·θ = 0` ; sans amortissement, ses crêtes ne décroissent pas.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
+- [ ] **P2** — le moment de δ ; son essai hydrostatique.
+- [ ] **P3** — roulis et tangage imposés (calcul détaché) ; `A`, `B`.
+- [ ] **P4** — l'amortissement angulaire du corps ; l'essai de lâcher ; preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
-- **P2** — ADR-228 : six frictions ; une protection (D1, le corps d'essai loin de ses limites), une pratique outillée (D2, le battement lu par le script) ; METHODE (28), L384, BOUSSOLE, index.

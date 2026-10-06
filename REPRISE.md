@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 04:33 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 04:35 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S502 — 6.1, l'amortissement des autres degrés de liberté ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S501 — la quatrième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S500 (la poussée du proxy au centre de la part immergée)
 Session suivante : **S502 — 6.1, l'amortissement des autres degrés de liberté** : le dernier manque de 6.1 — le rayonnement en roulis et tangage (S336 ne l'a mesuré qu'en pilonnement) ; δ mesure hors ligne l'amortissement d'une coque libre qui roule (comme S336), le corps le reçoit comme constante d'archétype. Un corps d'essai loin de ses limites (ADR-228), ordre de grandeur contre le terme concurrent (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
 Maillons        : 1 — S501 : la revue de méthode (ADR-228), sans capacité
