@@ -62,32 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S498 — **terminée**. En autonomie, **6.1, C11 — le petit objet léger** : la liste dit « Manquent W derrière la requête (fait
-S494–S495), l'amortissement des autres degrés de liberté, C11 et B6 sur ses cinq archétypes ». ADR-008 §3 fixe trois régimes selon
-`ω·dt` — normal (≤ 0,3), sous-cyclé (≤ 1, 2 à 4 sous-pas), **contraint** (> 1 : projeté sur la surface, orienté sur sa normale, vitesse
-horizontale amortie vers l'orbitale) ; le corps rigide n'en a aucun.
+Session : S499 — **en cours**. En autonomie, **6.1, B6 — le nombre de points du proxy par archétype** (ADR-008 §5.1 : « 20 à 60 »). La
+porte D a pris 16 × 8 × 4 points sans mesure de ce qu'il fallait ; S494–S495 ont vu une bouée de 4 × 4 × 4 points rouler et chavirer.
 
-**Ce que la session fait.** `RigidBody` : la raideur de flottaison mesurée sur le proxy (les points dans leur rampe), `ω`, le régime, un
-pas qui l'applique ; le mode contraint (position d'équilibre trouvée une fois en eau calme, puis `z = η + c`, inclinaison de la surface,
-vitesse relaxée vers celle de l'eau). B6 (le nombre de points par archétype) : S499.
+**Ce que la session fait.** Un banc dans le cœur : pour chaque archétype en pavé (navire, barque, caisse ; la balle est contrainte), et des
+grilles `nx × ny × nz`, la raideur de pilonnement, la hauteur métacentrique en roulis et en tangage — mesurées par le moment de rappel
+d'une inclinaison de 10⁻⁴ rad en eau calme — contre l'analytique `GM = KB + BM − KG`, et la houle vue par la flottaison contre le continu.
 
-**Ordre de grandeur, écrit avant.** Le pas symplectique est stable tant que `ω·dt < 2` : la balle de ping-pong à 30 Hz (`ω·dt` ≈ 2,25)
-diverge — la valeur propre `1 − x²/2 − √((1 − x²/2)² − 1)` ≈ −2,7 par pas ; la caisse (0,33) et la barque (0,29) restent bornées, leur
-`|G|` vaut 1 à l'arrondi (le pas symplectique conserve une énergie modifiée).
+**Ordre de grandeur, écrit avant (ADR-226 D3).** L'inertie de flottaison d'une grille de `n` centres : `(L²/12)·(1 − 1/n²)` — l'erreur
+sur `BM` est `1/n²`, sur `GM` `(BM/GM)/n²` : le terme concurrent est `GM`, petit devant `BM` pour un navire (roulis : `BM` = 4,27 m,
+`GM` = 1,25 m → `n` ≥ 9 pour 5 %). La couche partielle pousse en son milieu et non au centre de sa part immergée : `KB` faux de
+`(1 − f)·f·e²/(2d)` au plus `e²/(8d)`. La houle : `sin(kL/2)/(kL/2)` contre la moyenne de `cos(k·x)` sur `n` centres.
 
-**Critères, écrits avant (C11 réécrit en S30).** (1) les régimes : `ω` du corps contre `√(ρgA/(m + m_a))` à 10⁻⁹, et la bascule aux
-seuils 0,3 et 1 ; (2) en mode contraint, sur 120 s de houle de B et d'impacts de W à 30 Hz : `max|z − (η + c)| = 0` et l'axe du corps
-sur la normale à 10⁻¹² rad ; (3) le témoin : la même balle en pas normal diverge (`|G|` > 1, prévu ≈ 2,7 par pas) ; (4) hors mode
-contraint, `|G| ≤ 1 + 10⁻⁹` par période sur 120 s (caisse sous-cyclée, barque normale).
+**Critères, écrits avant.** (1) la raideur de pilonnement `ρgA` à 10⁻⁹ quelle que soit la grille ; (2) l'erreur mesurée sur `BM` suit
+`1/n²` à 10⁻³ près (la formule calculée dans l'essai), celle sur `KB` la borne de la couche partielle ; (3) par archétype, le plus petit
+proxy dont `GM` (roulis et tangage) tient 5 % et la houle 1 % de son onde de projet — publié, comparé aux 20 à 60 points d'ADR-008.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les régimes et le mode contraint ; essais (1)–(4).
-- [x] **P3** — preuve ; liste 6.1 ; rituel.
+- [ ] **P2** — le banc ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
-- **P2** — `heave_stiffness`, `equilibrium_offset`, `floating`, `step_floating`. (1) tenu ; (2) 0 et ≤ 4,2·10⁻¹⁷ rad ; (3) 3,052 = prédit ;
-  (4) 1 à 10⁻¹². Impasses : témoin à 1 mm sorti de l'eau au premier pas → 0,1 µm ; `|G|` par maxima paraboliques bruité à 6·10⁻⁴ (la
-  barque à 1 + 1,6·10⁻⁹) → enveloppe ajustée à la pulsation exacte du pas ; seuil inchangé. 658 essais.
-- **P3** — preuve PETIT-OBJET-S498 ; liste 6.1 ; index ; journal.
