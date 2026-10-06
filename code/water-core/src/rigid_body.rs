@@ -191,6 +191,12 @@ pub struct RigidBody {
     /// centre de masse relative à l'eau qui le porte. Constante de l'archétype (ADR-008 §2), mesurée par δ ; 0 :
     /// aucun.
     pub radiation_damping: [f64; 3],
+    /// **S502 : inertie ajoutée**, diagonale, axes principaux du corps, kg·m² — l'eau qu'il entraîne en tournant (roulis, tangage,
+    /// lacet). Constante de l'archétype, mesurée par δ hors ligne ; 0 : aucune.
+    pub added_inertia: [f64; 3],
+    /// **S502 : amortissement de rayonnement angulaire**, diagonal, axes principaux du corps, N·m·s/rad — linéaire en la vitesse
+    /// angulaire relative à la rotation de la surface qui le porte. Constante de l'archétype, mesurée par δ ; 0 : aucun.
+    pub radiation_damping_angular: [f64; 3],
 }
 
 fn add(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
@@ -254,6 +260,8 @@ impl RigidBody {
             proxy,
             drag: 0.,
             radiation_damping: [0.; 3],
+            added_inertia: [0.; 3],
+            radiation_damping_angular: [0.; 3],
         }
     }
 
@@ -342,8 +350,24 @@ impl RigidBody {
         let wb = unrotate(q, self.angular_velocity);
         let tb = unrotate(q, fr.torque);
         let iw = [self.inertia[0] * wb[0], self.inertia[1] * wb[1], self.inertia[2] * wb[2]];
-        let rhs = sub(tb, cross(wb, iw));
-        let dwb = [rhs[0] / self.inertia[0], rhs[1] / self.inertia[1], rhs[2] / self.inertia[2]];
+        let mut rhs = sub(tb, cross(wb, iw));
+        // S502 : l'amortissement angulaire, relatif à la rotation de la surface sous le centre — `(∂w/∂y, −∂w/∂x, 0)` dans le monde, la
+        // vitesse d'inclinaison de la normale —, et l'inertie ajoutée. Nuls par défaut : rien ne change au bit.
+        if self.radiation_damping_angular != [0.; 3] {
+            let [x, y, _] = self.position;
+            let h = 0.25 * self.proxy.iter().map(|p| p.body[0].abs().max(p.body[1].abs())).fold(0.05, f64::max);
+            let w = |a: f64, b: f64| water.velocity([a, b, water.surface(a, b)])[2];
+            let surface = [(w(x, y + h) - w(x, y - h)) / (2. * h), -(w(x + h, y) - w(x - h, y)) / (2. * h), 0.];
+            let sb = unrotate(q, surface);
+            for k in 0..3 {
+                rhs[k] -= self.radiation_damping_angular[k] * (wb[k] - sb[k]);
+            }
+        }
+        let dwb = [
+            rhs[0] / (self.inertia[0] + self.added_inertia[0]),
+            rhs[1] / (self.inertia[1] + self.added_inertia[1]),
+            rhs[2] / (self.inertia[2] + self.added_inertia[2]),
+        ];
         self.angular_velocity = add(self.angular_velocity, scale(rotate(q, dwb), dt));
         for a in 0..3 {
             self.position[a] += dt * self.velocity[a];

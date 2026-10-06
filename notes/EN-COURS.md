@@ -83,8 +83,15 @@ autour de leur `ω` propre, résidu d'ajustement ≤ 10 %, `B` > 0 ; (3) le corp
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le moment de δ ; son essai hydrostatique.
-- [ ] **P3** — roulis et tangage imposés (calcul détaché) ; `A`, `B`.
+- [x] **P3** — roulis et tangage imposés (calcul détaché) ; `A`, `B`.
 - [ ] **P4** — l'amortissement angulaire du corps ; l'essai de lâcher ; preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
 - **P2** — `solid_wall_load` / `Volume3::solid_load` ; pavé incliné noyé : moment contre `r_c × F` à 7,4·10⁻⁴, 1,5·10⁻⁴, 9,9·10⁻⁶ (n = 24, 48, 96), force au bit. (Critère 1 réécrit avant mesure : `r_c × F`, plus simple que `ρgV·KB`.)
+- **P3** — roulis A₄₄ 214 / 209 / 204 kg·m², B₄₄ 71 / 99 / 130 (ω 2 / 2,5 / 3), résidus 8,4 / **15,8** / 6,0 % — manqué à 2,5 : dix sauts
+  jusqu'à 15 N·m (moment de 69 N·m) aux franchissements de faces, comme S336 ; tangage A₅₅ 2 941 / 2 745 / 2 674, B₅₅ 4 780 / 4 738 / 4 353
+  (ω 3,5 / 4 / 4,5), résidus 8,6–9,7 %. En plus (hors critères) : cavalement A 615 / 461 / 320 kg, B 450 / 924 / 1 668 (2 / 3 / 4 rad/s,
+  ≤ 9,6 %) ; embardée 2 477 / 1 939 / 923 kg, 1 692 / 4 958 / 6 761 (16–17 % à 2 et 3) ; lacet 1 809 / 2 228 / 1 534 kg·m², 264 / 1 933 /
+  7 001 (71 / 28 / 7,7 % : les ondes longues reviennent des murs du domaine de 16 m).
+- **P4 (en cours)** — `added_inertia`, `radiation_damping_angular` (relatif à la rotation de la surface). Lâchers : roulis période 0,43 %,
+  décrément 0,9 % ; tangage 0,07 / 0,03 % ; sans amortissement crêtes constantes ; glissades à 0,1 %. 663 essais.

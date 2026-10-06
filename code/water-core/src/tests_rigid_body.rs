@@ -1212,3 +1212,91 @@ fn the_buoyancy_acts_at_the_immersed_centroid_s500() {
         assert!(e[0] <= 0.05 && e[1] <= 0.05, "critère 2, {nom} : {e:?}");
     }
 }
+
+/// **S502 — la coque amortie en roulis et en tangage.** La coque de la porte D (4 × 1,6 × 1 m, proxy 16 × 8 × 4) avec les constantes que δ
+/// lui mesure (`rayonnement_coque --mode roulis|tangage`, 25 cm, interpolées à la pulsation propre) — roulis `A₄₄` = 210 kg·m²,
+/// `B₄₄` = 80 N·m·s ; tangage `A₅₅` = 3 000 kg·m², `B₅₅` = 4 800 N·m·s —, lâchée inclinée de 0,05 rad en eau calme : période et décrément à
+/// ±2 % de l'oscillateur `(I + A)·θ̈ + B·θ̇ + C·θ = 0`, `C` la raideur du proxy mesurée par une inclinaison de 10⁻⁴ rad. Sans
+/// amortissement, ses crêtes ne décroissent pas (à 1 %).
+#[test]
+fn the_hull_rolls_and_pitches_down_at_its_radiation_rate_s502() {
+    let z_eq = 0.5 - 500. / MER.rho;
+    let calme = CalmWater { level: 0. };
+    for (nom, axe, a, b) in [("roulis", 0usize, 210., 80.), ("tangage", 1, 3000., 4800.)] {
+        let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., z_eq], [16, 8, 4]);
+        coque.position[2] = coque.equilibrium_offset(MER);
+        let incline = |c: &RigidBody, theta: f64| {
+            let mut q = [(theta / 2.).cos(), 0., 0., 0.];
+            q[1 + axe] = (theta / 2.).sin();
+            let mut c = c.clone();
+            c.orientation = q;
+            c
+        };
+        let raideur = -incline(&coque, 1e-4).forces(&calme, MER).torque[axe] / 1e-4;
+        let lance = |b: f64| -> Vec<f64> {
+            let mut c = incline(&coque, 0.05);
+            c.added_inertia[axe] = a;
+            c.radiation_damping_angular[axe] = b;
+            (0..6000)
+                .map(|_| {
+                    c.step(0.002, &calme, MER);
+                    let axe_corps = rotate(c.orientation, [0., 0., 1.]);
+                    // L'angle autour de l'axe : roulis, l'axe du corps vers −y ; tangage, vers +x.
+                    if axe == 0 { (-axe_corps[1]).asin() } else { axe_corps[0].asin() }
+                })
+                .collect()
+        };
+        let theta = lance(b);
+        let t = maxima(&theta, 0.002);
+        assert!(t.len() >= 3, "{nom} : {} maxima", t.len());
+        let periode = t[1] - t[0];
+        let pics: Vec<f64> = t.iter().map(|x| theta[(x / 0.002).round() as usize - 1]).collect();
+        let decrement = (pics[0] / pics[1]).ln();
+        let inertie = coque.inertia[axe] + a;
+        let omega = (raideur / inertie).sqrt();
+        let zeta = b / (2. * (raideur * inertie).sqrt());
+        let (periode_ref, decrement_ref) = (core::f64::consts::TAU / (omega * (1. - zeta * zeta).sqrt()), core::f64::consts::TAU * zeta / (1. - zeta * zeta).sqrt());
+        let libre = lance(0.);
+        let t0 = maxima(&libre, 0.002);
+        let (p0, p1) = (libre[(t0[0] / 0.002).round() as usize - 1], libre[(t0[1] / 0.002).round() as usize - 1]);
+        println!(
+            "S502 {nom} : C {raideur:.0} N·m/rad, période {periode:.4} s (réf. {periode_ref:.4}), décrément {decrement:.4} (réf. {decrement_ref:.4}, ζ = {zeta:.4}) ; sans amortissement, crêtes {p0:.5} puis {p1:.5} rad"
+        );
+        assert!((periode / periode_ref - 1.).abs() <= 0.02, "{nom} : {periode} contre {periode_ref}");
+        assert!((decrement / decrement_ref - 1.).abs() <= 0.02, "{nom} : {decrement} contre {decrement_ref}");
+        assert!((p1 / p0 - 1.).abs() <= 0.01, "{nom} : {p0} {p1}");
+    }
+}
+
+/// **S502 — la coque amortie en cavalement, embardée et lacet.** Les constantes que δ mesure à 3 rad/s (`rayonnement_coque --mode
+/// cavalement|embardee|lacet`, 25 cm) — cavalement `A` = 460 kg, `B` = 920 N·s/m ; embardée 1 940 kg, 4 960 N·s/m ; lacet 2 230 kg·m²,
+/// 1 930 N·m·s — ; la coque lancée à 0,5 m/s (ou 0,3 rad/s) en eau calme : sa vitesse décroît au taux `B/(m + A)` (`B/(I + A)`) à ±2 %.
+#[test]
+fn the_hull_glides_down_at_its_radiation_rate_s502() {
+    let z_eq = 0.5 - 500. / MER.rho;
+    let calme = CalmWater { level: 0. };
+    for (nom, k, a, b) in [("cavalement", 0usize, 460., 920.), ("embardée", 1, 1940., 4960.), ("lacet", 5, 2230., 1930.)] {
+        let mut c = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., z_eq], [16, 8, 4]);
+        c.position[2] = c.equilibrium_offset(MER);
+        let inertie = if k < 3 {
+            c.added_mass[k] = a;
+            c.radiation_damping[k] = b;
+            c.velocity[k] = 0.5;
+            c.mass + a
+        } else {
+            c.added_inertia[2] = a;
+            c.radiation_damping_angular[2] = b;
+            c.angular_velocity[2] = 0.3;
+            c.inertia[2] + a
+        };
+        let v0 = if k < 3 { c.velocity[k] } else { c.angular_velocity[2] };
+        for _ in 0..1000 {
+            c.step(0.002, &calme, MER);
+        }
+        let v = if k < 3 { c.velocity[k] } else { c.angular_velocity[2] };
+        let taux = (v0 / v).ln() / 2.;
+        let attendu = b / inertie;
+        println!("S502 {nom} : taux {taux:.5} s⁻¹ (attendu {attendu:.5})");
+        assert!((taux / attendu - 1.).abs() <= 0.02, "{nom} : {taux} contre {attendu}");
+    }
+}
