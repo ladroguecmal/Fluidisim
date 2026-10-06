@@ -402,8 +402,13 @@ pub fn step_air(
         };
     }
     step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, Some(heads_um), None)?;
-    // S547 : l'air qui sort par les évents, à la pression du début du pas (celle des charges, isotherme) ; jamais sous la pression
-    // atmosphérique.
+    vent_air(nodes, edges, air, dt, |i| heads_um[i] * 1e-6 * density * g);
+    Ok(())
+}
+
+/// S547 : l'air qui sort par les évents, à la pression du début du pas (celle des charges, isotherme) ; jamais sous la pression
+/// atmosphérique. `jauge` : la pression de jauge de chaque poche au début du pas, Pa. S563 : partagé avec `liquids::step_liquids_air`.
+fn vent_air(nodes: &[HydroNode], edges: &[Opening], air: &mut [Air], dt: SimTime, jauge: impl Fn(usize) -> f64) {
     let dt_s = dt.0 as f64 * 1e-6;
     for e in edges.iter() {
         let Flow::Vent { area_mm2 } = e.flow else { continue };
@@ -411,7 +416,7 @@ pub fn step_air(
         let Air::Sealed { pv_pa_ml } = air[i] else { continue };
         let n = nodes[i];
         let v_air = (n.capacity_ml - n.volume_ml) as f64;
-        let p = heads_um[i] * 1e-6 * density * g + P_ATM_PA;
+        let p = jauge(i) + P_ATM_PA;
         let surpression = p - P_ATM_PA;
         if !(surpression > 0.0) || e.control_pm == 0 {
             continue;
@@ -422,7 +427,6 @@ pub fn step_air(
         let sortie = p * q_m3s * dt_s * 1e6;
         air[i] = Air::Sealed { pv_pa_ml: (pv_pa_ml - sortie).max(P_ATM_PA * v_air) };
     }
-    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -435,7 +439,7 @@ fn step_inner(
     dt: SimTime,
     scratch: &mut [i64],
     pression_um: Option<&[f64]>,
-    liquides: Option<(&[i64], &[liquids::Liquid])>,
+    liquides: Option<(&[i64], &[liquids::Liquid], Option<&[f64]>)>,
 ) -> Result<(), Error> {
     // S538 : la charge de pression d'une poche, en µm ; zéro sans air scellé (le pas d'avant au bit : `x + 0.0` est `x`).
     let charge = |i: usize| pression_um.map_or(0.0, |p| p[i]);
@@ -592,8 +596,8 @@ fn step_inner(
         // en hauteur du liquide qui sort ; la comparaison des surfaces ne vaut plus (un côté chargé d'huile a sa surface plus haute à
         // l'équilibre).
         let par_couches = match (liquides, e.flow) {
-            (Some((composition, table)), Flow::Orifice { .. } | Flow::Valve { .. }) => {
-                Some(liquids::orifice_head_m(nodes, e, shapes, g_eff, composition, table)?)
+            (Some((composition, table, poches)), Flow::Orifice { .. } | Flow::Valve { .. }) => {
+                Some(liquids::orifice_head_m(nodes, e, shapes, g_eff, composition, table, poches)?)
             }
             _ => None,
         };

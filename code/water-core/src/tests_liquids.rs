@@ -296,3 +296,64 @@ fn the_composition_snapshot_restores_the_continuation_bit_for_bit_s562() {
     assert_eq!(liquids::restore_composition_into(&bloc[..bloc.len() - 1], &milieu.0, &[EAU, HUILE], &mut cible), Err(SnapshotError::Length));
     assert_eq!(cible, [7; 4], "critère 3 : rien d'écrit");
 }
+
+// --- S563 — l'air scellé avec plusieurs liquides. Références résolues à part (bissection), écrites au plan.
+
+/// La mer (100 × 100 × 3 m, l'eau à 1,5 m) et un compartiment de 1 × 1 × 2 m (0,5 m³ d'huile), la brèche au fond ; 3 000 s.
+fn compartiment_s563(scelle: bool) -> ([HydroNode; 2], [i64; 4], [Air; 2]) {
+    let mer_t = box_cells([0, 0, 0], [100_000_000, 100_000_000, 3_000_000]);
+    let comp_t = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&mer_t).unwrap(), VolumeShape::new(&comp_t).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mer = 15_000_000_000i64;
+    let mut nodes = [
+        HydroNode { volume_ml: mer, capacity_ml: formes[0].capacity_ml(), origin_um: [-50_000_000, -50_000_000, 0], shape: 0 },
+        HydroNode { volume_ml: 500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 1 },
+    ];
+    let breche = [500_000, 500_000, 0];
+    let mut edges = [orifice(0, Some(1), breche), orifice(1, Some(0), breche)];
+    let mut composition = [mer, 0, 0, 500_000];
+    let mut air = [Air::Open, if scelle { Air::Sealed { pv_pa_ml: P_ATM_PA * 1_500_000.0 } } else { Air::Open }];
+    let (mut scratch, mut pressions) = ([0i64; 2], [0f64; 2]);
+    for _ in 0..30_000 {
+        liquids::step_liquids_air(&mut nodes, &mut edges, &shapes, [0.0, 0.0, -9.81], Meteo::SEC, SimTime(PAS_US), &mut scratch,
+            &mut composition, &[EAU, HUILE], 0, &mut air, &mut pressions).unwrap();
+    }
+    (nodes, composition, air)
+}
+
+/// (1) Scellé : l'air comprimé retient la mer — 0,126197 m d'eau entrent ; (2) ouvert : 1,074893 m.
+#[test]
+fn a_sealed_compartment_with_oil_holds_the_sea_by_its_air_s563() {
+    for (scelle, attendu) in [(true, 0.126197f64), (false, 1.074893)] {
+        let (nodes, composition, air) = compartiment_s563(scelle);
+        let eau = composition[2] as f64 * 1e-6;
+        println!("S563 {} : eau entrée {eau:.6} m (référence {attendu}), huile {} ml, compartiment {} ml, air {air:?}",
+            if scelle { "scellé" } else { "ouvert" }, composition[3], nodes[1].volume_ml);
+        assert!((eau - attendu).abs() < 1e-4, "critère {} : l'eau entrée", if scelle { 1 } else { 2 });
+        assert_eq!((composition[1], composition[3]), (0, 500_000), "l'huile reste dans le compartiment");
+    }
+}
+
+/// (3) Tout ouvert : `step_liquids_air` est `step_liquids` au bit.
+#[test]
+fn all_open_air_is_the_liquid_step_bit_for_bit_s563() {
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let seuil = [1_000_000, 500_000, 0];
+    let depart = (
+        [HydroNode { volume_ml: 1_500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 },
+         HydroNode { volume_ml: 900_000, capacity_ml: 2_000_000, origin_um: [1_000_000, 0, 0], shape: 0 }],
+        [orifice(0, Some(1), seuil), orifice(1, Some(0), seuil)],
+        [1_500_000i64, 0, 500_000, 400_000],
+    );
+    let a = manometre(depart, 3_000, &shapes);
+    let (mut nodes, mut edges, mut composition) = depart;
+    let (mut scratch, mut pressions, mut air) = ([0i64; 2], [0f64; 2], [Air::Open; 2]);
+    for _ in 0..3_000 {
+        liquids::step_liquids_air(&mut nodes, &mut edges, &shapes, [0.0, 0.0, -9.81], Meteo::SEC, SimTime(PAS_US), &mut scratch,
+            &mut composition, &[EAU, HUILE], 0, &mut air, &mut pressions).unwrap();
+    }
+    assert_eq!((a.0, a.2), (nodes, composition), "critère 3");
+}

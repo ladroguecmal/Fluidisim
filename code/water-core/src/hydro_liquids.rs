@@ -11,7 +11,7 @@
 //! **l'instantané de la composition**, un bloc `WVLQ` à côté de WVST (ADR-140).
 
 use super::snapshot::SnapshotError;
-use super::{along, geometry, step_inner, sub, Error, Flow, HydroNode, Meteo, Opening, Shapes};
+use super::{along, geometry, step_inner, sub, vent_air, Air, Error, Flow, HydroNode, Meteo, Opening, Shapes, P_ATM_PA};
 use crate::SimTime;
 
 /// Le nombre de liquides d'une table, au plus — une borne sans allocation (ADR-241 D2).
@@ -113,23 +113,30 @@ fn liquid_at(row: &[i64], liquids: &[Liquid], below_ml: f64) -> Option<usize> {
 }
 
 /// **S560 — la charge d'un orifice sous plusieurs liquides**, m du liquide qui sort (ADR-241 D4) : `Δp/(ρ·|g|)`, `Δp` la différence des
-/// pressions au seuil des deux côtés (zéro dehors), `ρ` le liquide amont au seuil. `None` si rien ne pousse vers l'aval.
+/// pressions au seuil des deux côtés (zéro dehors), `ρ` le liquide amont au seuil. `None` si rien ne pousse vers l'aval, ou si le seuil est
+/// au-dessus de la surface amont (aucun liquide ne l'atteint). S563 : `poches`, la pression de jauge de l'air de chaque nœud (Pa), ajoutée
+/// des deux côtés.
 pub(super) fn orifice_head_m(nodes: &[HydroNode], e: &Opening, shapes: &Shapes<'_>, g_eff: [f32; 3], composition: &[i64],
-    liquids: &[Liquid]) -> Result<Option<f64>, Error> {
+    liquids: &[Liquid], poches: Option<&[f64]>) -> Result<Option<f64>, Error> {
     let (up, magnitude) = geometry::vertical(g_eff)?;
     let n = liquids.len();
     let ligne = |i: usize| &composition[i * n..(i + 1) * n];
+    let air = |i: usize| poches.map_or(0.0, |p| p[i]);
     let f = e.from as usize;
-    let amont = pressure_at(&nodes[f], ligne(f), liquids, shapes, g_eff, e.position_um)?;
+    let dessous = volume_below_point(&nodes[f], shapes, up, e.position_um)?;
+    if !(dessous < nodes[f].volume_ml as f64) {
+        return Ok(None);
+    }
+    let amont = pressure_at(&nodes[f], ligne(f), liquids, shapes, g_eff, e.position_um)? + air(f);
     let aval = match e.to {
-        Some(t) => pressure_at(&nodes[t as usize], ligne(t as usize), liquids, shapes, g_eff, e.position_um)?,
+        Some(t) => pressure_at(&nodes[t as usize], ligne(t as usize), liquids, shapes, g_eff, e.position_um)? + air(t as usize),
         None => 0.0,
     };
     let dp = amont - aval;
     if !(dp > 0.0) {
         return Ok(None);
     }
-    let Some(sortant) = liquid_at(ligne(f), liquids, volume_below_point(&nodes[f], shapes, up, e.position_um)?) else {
+    let Some(sortant) = liquid_at(ligne(f), liquids, dessous) else {
         return Ok(None);
     };
     Ok(Some(dp / (liquids[sortant].density_kg_m3 as f64 * magnitude)))
@@ -163,6 +170,43 @@ fn take(row: &mut [i64], liquids: &[Liquid], depart: usize, mut ml: i64, pris: &
 #[allow(clippy::too_many_arguments)]
 pub fn step_liquids(nodes: &mut [HydroNode], edges: &mut [Opening], shapes: &Shapes<'_>, g_eff: [f32; 3], meteo: Meteo, dt: SimTime,
     scratch: &mut [i64], composition: &mut [i64], liquids: &[Liquid], pluie: usize) -> Result<(), Error> {
+    step_liquids_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, composition, liquids, pluie, None)
+}
+
+/// **S563 — un pas de V sous plusieurs liquides, avec l'air des compartiments** (ADR-241, ADR-015 T2) : [`step_liquids`], la pression de
+/// jauge de chaque poche scellée (Boyle isotherme, comme `step_air`) ajoutée des deux côtés du seuil d'un orifice ou d'une vanne ; les
+/// évents comme `step_air`. Les déversoirs et les pompes ne voient pas la pression des poches. `pressions_pa` : un tampon de l'appelant,
+/// un par nœud (I-06). Tout ouvert : [`step_liquids`] au bit. Une poche dont l'air disparaîtrait est refusée (`Domain`).
+#[allow(clippy::too_many_arguments)]
+pub fn step_liquids_air(nodes: &mut [HydroNode], edges: &mut [Opening], shapes: &Shapes<'_>, g_eff: [f32; 3], meteo: Meteo, dt: SimTime,
+    scratch: &mut [i64], composition: &mut [i64], liquids: &[Liquid], pluie: usize, air: &mut [Air], pressions_pa: &mut [f64])
+    -> Result<(), Error> {
+    if air.len() != nodes.len() || pressions_pa.len() != nodes.len() {
+        return Err(Error::Capacity);
+    }
+    if air.iter().all(|a| *a == Air::Open) {
+        return step_liquids_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, composition, liquids, pluie, None);
+    }
+    for ((n, a), p) in nodes.iter().zip(air.iter()).zip(pressions_pa.iter_mut()) {
+        *p = match *a {
+            Air::Open => 0.0,
+            Air::Sealed { pv_pa_ml } => {
+                let v_air = (n.capacity_ml - n.volume_ml) as f64;
+                if !(v_air > 0.0) || !(pv_pa_ml > 0.0) || !pv_pa_ml.is_finite() {
+                    return Err(Error::Domain);
+                }
+                pv_pa_ml / v_air - P_ATM_PA
+            }
+        };
+    }
+    step_liquids_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, composition, liquids, pluie, Some(pressions_pa))?;
+    vent_air(nodes, edges, air, dt, |i| pressions_pa[i]);
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn step_liquids_inner(nodes: &mut [HydroNode], edges: &mut [Opening], shapes: &Shapes<'_>, g_eff: [f32; 3], meteo: Meteo, dt: SimTime,
+    scratch: &mut [i64], composition: &mut [i64], liquids: &[Liquid], pluie: usize, poches: Option<&[f64]>) -> Result<(), Error> {
     if shapes.volumes.is_empty() {
         return Err(Error::Shape);
     }
@@ -180,7 +224,7 @@ pub fn step_liquids(nodes: &mut [HydroNode], edges: &mut [Opening], shapes: &Sha
         let node = nodes.get(e.from as usize).ok_or(Error::Capacity)?;
         volume_below_point(node, shapes, up, e.position_um)?;
     }
-    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None, Some((composition, liquids)))?;
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None, Some((composition, liquids, poches)))?;
     for debordements in [false, true] {
         for (e, ml) in edges.iter().zip(scratch.iter()) {
             if *ml <= 0 || matches!(e.flow, Flow::Spill) != debordements || matches!(e.flow, Flow::Vent { .. }) {
