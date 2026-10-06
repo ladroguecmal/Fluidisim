@@ -595,8 +595,10 @@ pas recopiée ici (L137).
   revue, quand le suivi sans prédiction la laisse hors de l'ensemble une fois sur cinq ([preuve](validation/IMPACT-PREVU-S405.md)).
   Manquent un corps quelconque (la sphère englobante seule), le vent, l'entrée orientée consommée par δ.
 - [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.
-- [ ] **9.5 Événement prédit, confirmé ou rétracté**, sans retour arrière du temps — *partiel* :
-  cause et confirmation des impacts dans le journal (ADR-056). Manque le consommateur.
+- [x] **9.5 Événement prédit, confirmé ou rétracté**, sans retour arrière du temps — *validé* (S510) :
+  cause et confirmation des impacts dans le journal (ADR-056) ; **le consommateur** (`wave_consumer`, le chemin d'image) — confirmation au
+  même effet au bit, rejet et correction en fondu (1,6 et 2,3 % de saut d'image au plus), aucun retour du temps
+  ([preuve](validation/CONSOMMATEUR-S510.md)). Le transport réseau des causes est 10.1.
 - [ ] **9.6 Précalcul avant l'impact** : domaines, allocations, collisions, état initial, avance
   plus rapide que le temps réel — *absent*.
 - [ ] **9.7 Hors caméra : quatre niveaux** (normal, réduit, condensé, supprimé) et persistance
@@ -728,12 +730,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 4 | 1 | 3 |
 | 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 0 | 9 | 4 |
+| 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **8** | **69** | **44** |
+| **total** | **121** | **9** | **68** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

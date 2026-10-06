@@ -81,6 +81,8 @@ pub use types::{Saturations, FrameId, LayerMask, SimTime, WaterSample, WorldPos,
 pub mod hydro_network;
 pub mod wave_event;
 pub mod wave_journal;
+/// S510 : le consommateur des impacts prédits, confirmés ou rejetés — le chemin d'image (liste 9.5).
+pub mod wave_consumer;
 pub mod impact_field;
 pub mod radial_impact;
 pub mod wave_train;

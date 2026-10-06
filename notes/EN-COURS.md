@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S510 — **en cours**. En autonomie, **9.5, le consommateur d'un événement prédit, confirmé ou rétracté** : le journal des impacts
+Session : S510 — **terminée**. En autonomie, **9.5, le consommateur d'un événement prédit, confirmé ou rétracté** : le journal des impacts
 (ADR-056) tient les causes, prédites puis confirmées ou rejetées, et rend `Change::Retract` — rien ne le consomme : la composition ne lit que
 les confirmés. Et le lot des registres (dû).
 
@@ -82,7 +82,11 @@ bornée, refus sans écriture. Si (1)–(4), 9.5 validée.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `wave_consumer` ; essais (1)–(4).
-- [ ] **P3** — preuve ; liste 9.5 ; lot des registres ; rituel.
+- [x] **P2** — `wave_consumer` ; essais (1)–(4).
+- [x] **P3** — preuve ; liste 9.5 ; lot des registres ; rituel.
 
 ### Notes de reprise
+- **P2** — `wave_consumer` ; critères 1 (au bit, 150 images), 2 (1,56 % ; témoin sec 8,6 % — la prévision « ≈ 100 % » supposait une
+  crête), 3 (2,28 % ; au bit après le fondu), 4. Un essai mal compté (30 images = 499 980 µs < 500 000) corrigé. 669 essais.
+- **P3** — preuve CONSOMMATEUR-S510 ; **9.5 validée** (9 / 120) ; lot : feuille de route (9 / 68 / 43, S507–S510), index ; journal.
+

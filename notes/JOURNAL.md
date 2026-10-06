@@ -382,3 +382,11 @@ change (une ombre, des paires, un noyau de dispersion à part) ; la vérificatio
 place dans la boîte du recoupage ; les nœuds du banc dans la boîte orientée de la coque. **Mesuré** : 7,9 (S504) → 1,5 (S508) → **0,82 ms**
 par pas ; tous les bancs aux mêmes chiffres, l'essai au bit tenu. **6.4 validée — 8 points sur 120.** Maillons **0**. Suivant : un point
 partiel proche de son périmètre (6.2, le courant ; 9.5 ; 5.4 ; 4.13).
+
+## S510 — 2026-10-06 — 9.5 validée : le consommateur des impacts prédits
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/CONSOMMATEUR-S510.md)) : `wave_consumer` — par cause, l'impact affiché et son
+poids : une prédiction s'affiche dès son admission, une confirmation au même effet ne change rien, une confirmation corrigée fond
+enchaîné, un rejet s'éteint en fondu ; chaque impact garde sa naissance. **Mesuré** : confirmation au bit du seul confirmé sur 150 images ;
+sauts d'image de 1,56 % (rejet) et 2,28 % (correction), sous la borne de 5 %. **9.5 validée — 9 points sur 120.** Lot des registres.
+Maillons **0**. Suivant : **S511, la revue de méthode** (ADR-222).
