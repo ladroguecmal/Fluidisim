@@ -925,6 +925,9 @@ du nœud pendant toute la durée de l'inondation.
 **Assertion.** `volume_ml` du nœud est **identique à l'entier près, à tout instant**, dans les deux
 exécutions.
 
+> *Note du 2026-10-06, S544, sur C21* ([C21-MASSE-S544](C21-MASSE-S544.md)) : **exécuté et passé en référentiel fixe** — 200 pas
+> identiques à l'entier, sans puis avec un domaine δ actif au-dessus du nœud. La variante accélérée attend des formes volumiques dans V.
+
 **Ce que le cas attrape.** Toute réapparition du transfert de propriété de masse qu'ADR-025 a retiré.
 Si un solveur δ rendait sa masse au nœud, les deux exécutions divergeraient de sa dérive — et la
 divergence serait d'autant plus grande que le solveur fuit. C'est la vérification mécanique de

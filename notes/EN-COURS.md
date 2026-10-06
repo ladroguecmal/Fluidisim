@@ -62,27 +62,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S543 — **terminée**. En autonomie, **la rotation de C16** (ADR-002 §2.2) : une cuve de 20 m à 100 m de l'axe d'une station qui
-tourne à 0,313 rad/s — la pesanteur est centrifuge (Ω²R = 9,8 m/s²) ; « surface d'équilibre cylindrique de flèche 50 cm ».
-
-**Ce que la session fait.** `Volume3::set_horizontal_gravity_field(g₀, Ω², centre)` : la part horizontale de `g_eff` affine dans le plan,
-`g_h(x) = g₀ + Ω²·(x − centre)` — dans la cuve, la force centrifuge a une composante horizontale `Ω²·x` le long de la cuve (le rayon
-s'incline de `x/R`) ; la verticale reste `g = Ω²R` de la configuration. La même force de volume au champ prédit (S542). Coriolis n'est pas
-porté : il n'agit pas sur l'équilibre (l'eau au repos dans le repère tournant), seulement sur le ballottement.
-
-**Ordre de grandeur, calculé.** R = 100 m, g = 9,81 : Ω = 0,3132 rad/s ; la flèche exacte du cylindre sur 20 m, 0,5013 m, la parabole du
-modèle linéaire `x²/(2R)` : 0,500 m. Cuve de 20 m, 2 m d'eau (80 × 1 × 8 mailles de 25 cm) : premier mode 9,18 s ; quatre périodes 36,7 s.
-
-**Critères, écrits avant.** (1) Sans champ : le pas d'avant au bit. (2) La surface moyenne sur quatre périodes, ajustée par une
-parabole : sa courbure à 2 % de `1/R` (la flèche à 2 % de 0,500 m) ; le quantum : l'arrondi f32 (10⁻⁷ m sur 0,5 m).
+Session : S544 — **terminée**. En autonomie, **C21 — la masse d'un compartiment avec et sans δ** (ADR-025 §4) : non exécuté, dit vrai « par
+construction » en S375. **Le plan n'a pas été committé avant le travail (P1 manqué)** : le critère est celui de l'énoncé de C21 (identique
+à l'entier près, à tout instant), écrit en S15 ; écrit ici après coup, pour la trace.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le champ, l'essai ; (1), (2).
-- [x] **P3** — preuve ; C16 ; liste 4.17 ; rituel.
+- [x] **P1** — (manqué avant le travail ; écrit après) jeton, plan.
+- [x] **P2** — l'essai C21 (fixe ; l'accéléré non joué : les tables +Z de V refusent un g_eff incliné).
+- [x] **P3** — preuve ; listes 13.2 ; C21 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `set_horizontal_gravity_field` ; essai `s543` : courbure 0,010152 (1,5 %). Suite verte.
-- **P3** — §5 de C16-ACCELERE-S542 ; C16 ; listes 4.17, 13.2 ; journal.
+- **P2** — δ refusé deux fois en route (une colonne à 3,9 L par pas ; la montée uniforme sur le repos d'origine — `shift_rest`, S375) ;
+  puis 200 pas identiques à l'entier, 761 747 ml entrés. Sous `g_eff` incliné : `Orientation` (tables +Z). Suite 705.
 

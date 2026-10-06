@@ -746,7 +746,8 @@ pas recopiée ici (L137).
   C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
   aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
   ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)) ; **C16 depuis S542–S543** (l'inclinaison, la période, la rotation ;
-  [preuve](validation/C16-ACCELERE-S542.md)). Non exécutés : C05, C09, C11, C14, C15, C21. **C18 partiel**
+  [preuve](validation/C16-ACCELERE-S542.md)) ; **C21 en référentiel fixe depuis S544**
+  ([preuve](validation/C21-MASSE-S544.md)). Non exécutés : C05, C09, C11, C14, C15. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

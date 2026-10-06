@@ -2648,3 +2648,64 @@ fn a_tank_on_a_rotating_station_takes_the_cylindrical_surface_s543() {
     println!("S543 C16 rotation : courbure {:.6} m⁻¹ (1/R = {:.6}), écart {:.2e} ; flèche sur 20 m {:.4} m (0,500)", 2. * a, 1. / r, 2. * a * r - 1., a * 100.);
     assert!((2. * a * r - 1.).abs() <= 0.02, "critère 2");
 }
+
+/// Le compartiment de C17 (5 m² × 2 m, plafond à la flottaison, brèche d'1 dm² à son fond), ouvert, 20 s sous `g_eff` ; avec δ : un domaine
+/// de 2,5 × 2 × 2 m (10 × 8 × 8 mailles) au-dessus du nœud, dont la surface monte à chaque pas de V de l'eau entrée (répartie sur ses
+/// colonnes), puis qui avance de dix pas linéaires. Rend `volume_ml` du compartiment à chaque pas.
+fn inondation_s544(g_eff: [f32; 3], avec_delta: bool) -> Vec<i64> {
+    use crate::hydro_network::{step, Flow, HydroNode, Opening, Shapes, SHAPE_ENTRIES, SHARP_EDGE_DISCHARGE, STEP_US};
+    let prism = |h: i64| -> [i64; SHAPE_ENTRIES] { core::array::from_fn(|i| h * i as i64 / (SHAPE_ENTRIES - 1) as i64) };
+    let mut table = prism(20_000_000).to_vec();
+    table.extend_from_slice(&prism(2_000_000));
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [
+        HydroNode { volume_ml: 500_000_000_000, capacity_ml: 1_000_000_000_000, origin_um: [0, 0, -10_000_000], shape: 0 },
+        HydroNode { volume_ml: 0, capacity_ml: 10_000_000, origin_um: [0, 0, -2_000_000], shape: 1 },
+    ];
+    let mut edges = [Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 10_000 }, position_um: [0, 0, -2_000_000],
+        discharge: SHARP_EDGE_DISCHARGE, ..Default::default() }];
+    let mut scratch = [0i64; 1];
+    let mut delta = avec_delta.then(|| {
+        let (mut v, _) = volume(10, 8, 8, 0.25, -g_eff[2]);
+        // Le pas mobile veut une surface sous le haut du domaine : l'eau à 50 cm sous lui, le repos au même niveau.
+        let niveau = v.domain().z0() - 0.5;
+        v.set_surface(&vec![niveau; 80]).unwrap();
+        v.shift_rest(niveau).unwrap();
+        (v, niveau)
+    });
+    let mut volumes = Vec::new();
+    for _ in 0..200 {
+        let avant = nodes[1].volume_ml;
+        step(&mut nodes, &mut edges, &shapes, g_eff, crate::SimTime(STEP_US), &mut scratch).unwrap();
+        if let Some((v, repos)) = delta.as_mut() {
+            // L'eau entrée, répartie sur les colonnes (le domaine substitutif suit le niveau de V, comme la piscine de S375 ; une seule
+            // colonne recevant 3,9 L par pas, la projection refuse) ; δ n'écrit rien dans V (ADR-025).
+            let dh = ((nodes[1].volume_ml - avant) as f64 * 1e-6 / 5.0) as f32;
+            v.add_column_volume(&vec![dh; 80]).unwrap();
+            // S375 : le repos suit le niveau de V — la pression de δ reste la perturbation (un décalage de quelques millimètres sur le
+            // repos d'origine consomme la précision f32 et fait refuser un pas calme).
+            *repos += dh;
+            v.shift_rest(*repos).unwrap();
+            for _ in 0..10 {
+                v.step_surface_mobile(10_000, 2000, &Jobs).unwrap();
+            }
+        }
+        volumes.push(nodes[1].volume_ml);
+    }
+    volumes
+}
+
+/// **S544 — C21, la masse d'un compartiment avec et sans δ** (ADR-025 §4). Sans puis avec δ, en référentiel fixe : `volume_ml` identique à
+/// l'entier près à chaque pas.
+#[test]
+fn a_compartment_holds_the_same_mass_with_and_without_delta_s544() {
+    // Le référentiel accéléré n'est pas joué : sous un `g_eff` incliné, les tables de forme « +Z » de V refusent (`Orientation`) — il
+    // faut des formes volumiques (tétraèdres), dont une mer de taille réaliste frôle le débordement des entiers en µm³.
+    for g_eff in [[0.0f32, 0.0, -9.81]] {
+        let (sans, avec) = (inondation_s544(g_eff, false), inondation_s544(g_eff, true));
+        assert_eq!(sans, avec, "C21 sous g_eff {g_eff:?}");
+        println!("S544 C21 sous g_eff {g_eff:?} : {} pas identiques à l'entier, {} ml entrés en 20 s", sans.len(), sans.last().unwrap());
+        assert!(*sans.last().unwrap() > 100_000, "le compartiment s'inonde vraiment");
+    }
+}
+

@@ -664,3 +664,11 @@ affine dans δ (`Ω²·x` : la force centrifuge le long d'une cuve d'une station
 du cylindre de l'axe à 1,5 % (flèche 0,508 m pour 0,501). **C16 passe dans ses deux parties.** Maillons **0** (4.17, 13.2). Suivant :
 **S544**.
 
+## S544 — 2026-10-06 — C21 en référentiel fixe ; un plan manqué
+
+**Entrée.** En autonomie ; C21 (non exécuté). **Le plan n'a pas été committé avant le travail** — une règle de toujours sautée ; le
+critère était celui de l'énoncé de C21 (S15). **Fait** ([preuve](../docs/validation/C21-MASSE-S544.md)) : le scénario de C17 joué sans puis
+avec un domaine δ qui suit V (`shift_rest`, comme S375) — **200 pas identiques à l'entier**. La variante accélérée n'est pas jouée : les
+tables de forme « +Z » de V refusent un `g_eff` incliné. Deux refus de δ en route, compris (S375 les avait décrits). Maillons **0** (13.2
+avance). Frictions pour S546 : *le plan sauté* ; *une limite de V (les tables +Z sous g_eff incliné) trouvée en route*. Suivant : **S545**.
+

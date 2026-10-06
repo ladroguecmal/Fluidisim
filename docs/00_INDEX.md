@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [C21 : la masse d'un compartiment avec et sans δ — S544](validation/C21-MASSE-S544.md) : identique à l'entier sur 200 pas (référentiel fixe).
 - [C16 : la cuve dans un référentiel accéléré — S542](validation/C16-ACCELERE-S542.md) : la pesanteur horizontale dans δ ; 0,003° de la normale à g_eff, la période à 0,11 %.
 - [C13 : la remontée des petites bulles — S540](validation/C13-BULLES-S540.md) : Tomiyama contaminé, à −6 à −9 % de SPEC-002 ; selon −g_eff.
 - [La flottabilité d'une poche d'air comprimée : la coque retournée — S539](validation/POCHE-AIR-S539.md) : Boyle à 10⁻¹² ; le point de non-retour à 3,81 m.

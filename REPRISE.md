@@ -11,12 +11,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : libre
-Battement        : 2026-10-06 18:32 +02:00
+Battement        : 2026-10-06 18:45 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : aucune
-Dernière session : S543 — la rotation de C16 ([journal](notes/JOURNAL.md)). Avant : S542 (le lot)
-Session suivante : **S544 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — Coriolis dans δ (le ballottement d'une cuve tournante), la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, la poche qui s'échappe (7.5), l'évent à débit limité (5.9), C14/C15/C21 parmi les cas non exécutés ; nombres recalculés (ADR-237 D1), quantum écrit à côté des seuils (ADR-236 D1). Revue à S546. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S543 : C16 passe (la rotation)
+Dernière session : S544 — C21 en référentiel fixe ; un plan manqué ([journal](notes/JOURNAL.md)). Avant : S543 (la rotation de C16)
+Session suivante : **S545 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — les formes volumiques de V à grande échelle (la variante accélérée de C21 ; les débordements d'entiers en µm³), Coriolis dans δ, la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, l'évent à débit limité (5.9) ; nombres recalculés (ADR-237 D1), quantum écrit à côté des seuils (ADR-236 D1). Revue à S546. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S544 : C21 en référentiel fixe (13.2)
 Registres       : dernier lot S542 (ADR-213 D3) ; le prochain au plus tard en S545
 ```
 
