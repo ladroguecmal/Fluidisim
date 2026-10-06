@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S557 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S556), puis **A332 — l'énergie discrète
+Session : S557 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S556), puis **A332 — l'énergie discrète
 de δ linéaire** (liste 4.18, C09) : S555 a montré que l'énergie naturelle oscille ; laquelle le schéma conserve-t-il ?
 
 **La dérivation, faite avant la mesure, depuis le code** (`step_surface_linear`). Le pas est un avant-arrière : `u^{n+1} = u^n − (dt/ρ)·G p`
@@ -89,7 +89,11 @@ publiée, sans critère.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; la dérivation ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; A332 ; liste 4.18, 13.2 ; C09 ; rituel (`--lot`).
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; A332 ; liste 4.18, 13.2 ; C09 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — `Q` à 2,1·10⁻⁵ de E₀ au pire, hausse au pire 4,5·10⁻⁶ ; l'oscillateur à 2·10⁻¹⁴ : (1)–(3) tenus. L'énergie naturelle au
+  demi-poids oscille de ± 1,4 % autour de E₀ ; au poids plein (S555), jusqu'à +16,7 % : le +8,4 % de S555 était l'instrument. Suite 715.
+- **P3** — preuve ENERGIE-DISCRETE-S557 ; A332 levée ; note à C09-ENERGIE-S555 ; liste 4.18, 13.2 ; C09 ; index ; journal.
+

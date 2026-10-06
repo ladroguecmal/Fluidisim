@@ -585,6 +585,11 @@ resterait invisible pendant des mois.
 > moyennes par fenêtre de 5 s restent constantes à ± 0,15 % sur 120 s (aucune instabilité). L'assertion demande une énergie discrète que le
 > schéma conserve — inconnue (A332).
 
+> *Note du 2026-10-06, S557, sur C09* ([ENERGIE-DISCRETE-S557](ENERGIE-DISCRETE-S557.md)) : **passé sur δ linéaire**, avec l'énergie du
+> schéma : l'invariant mixte `Q = K(u^{n+1}) + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA` (le couvercle compté pour une demi-maille), conservé à
+> 2,1·10⁻⁵ de E₀, la plus forte hausse 4,5·10⁻⁶ (le plancher ≈ 10⁻⁶). L'assertion `dE/dt ≤ 0` s'entend désormais sur `Q`. Le pas couplé et
+> le chemin coupé restent à mesurer.
+
 ## C10 — Cube flottant
 
 **Montage.** Cube de 0,5 m, `ρ = 500 kg/m³`, lâché à la surface d'une eau calme.

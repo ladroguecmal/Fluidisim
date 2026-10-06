@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [L'énergie que le pas linéaire de δ conserve — S557](validation/ENERGIE-DISCRETE-S557.md) : l'invariant mixte dérivé du code, conservé à 2·10⁻⁵ ; A332 levée ; C09 passé.
 - [C09 : la masse et l'énergie de δ dans une cuve close — S555](validation/C09-ENERGIE-S555.md) : la masse à 2·10⁻⁶ s⁻¹ ; l'énergie naturelle oscille, sa moyenne constante ; A332.
 - [La poche porteuse d'un compartiment scellé — S554](validation/POCHE-PORTEUSE-S554.md) : Boyle et le navire couplés ; le tirant au dix-millième.
 - [Deux compartiments et une cloison percée — S553](validation/CLOISON-PERCEE-S553.md) : l'envahissement progressif ; le tirant à 0,05 % de la flottabilité perdue.

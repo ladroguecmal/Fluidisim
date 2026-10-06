@@ -331,12 +331,14 @@ pas recopiée ici (L137).
   1,28·10⁻¹⁰ m³ de résidu ([preuve](validation/BILAN-MASSE-S310.md)). **A298 n'est donc pas une
   fuite de volume du schéma.** Dissipation numérique mesurée : 0,0935 % par seconde. **Manquent**
   le compteur sur la carte, et les bilans d'**énergie** et de **quantité de mouvement** — publiés
-  comme états, termes manquants nommés (travail de la pression au bord, flux advectif). C09 non
-  exécuté. **S313** : la loi du plancher (`u₃₂·activité/√N`), et **T2 tenue** — dérive d'un domaine
+  comme états, termes manquants nommés (travail de la pression au bord, flux advectif). C09 exécuté
+  (S555, S557, plus bas). **S313** : la loi du plancher (`u₃₂·activité/√N`), et **T2 tenue** — dérive d'un domaine
   fermé 2,99·10⁻⁹ puis 5,77·10⁻¹⁰ sur 10 s pour 10⁻⁶ admis ([preuve](validation/PLANCHER-BILAN-S313.md)
   §5) ; critères C1–C3 actés (ADR-182). **S317** : le volume qui **quitte** δ a un receveur local, et
   le bilan δ + régions se ferme au résidu ([ordre D](validation/RESTITUTION-S317.md)) — la
-  représentation, pas le monde.
+  représentation, pas le monde. **S555, S557** : C09 sur δ linéaire — la masse à 2·10⁻⁶ s⁻¹ ; l'énergie du
+  schéma, l'invariant mixte `K(u^{n+1}) + ½ρg·Σ η^n·η^{n+1}·dA` dérivé du code, **conservée à 2·10⁻⁵ sur 120 s** : le pas linéaire ne
+  dissipe pas ([preuve](validation/ENERGIE-DISCRETE-S557.md)). Manquent l'énergie du pas couplé et du chemin coupé.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
   (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
   280 à 49 ms, environ 24 fois le budget d'eau. **S276 : δ en direct à 40 images/s** — bande de
@@ -757,8 +759,8 @@ pas recopiée ici (L137).
   aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
   ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)) ; **C16 depuis S542–S543** (l'inclinaison, la période, la rotation ;
   [preuve](validation/C16-ACCELERE-S542.md)) ; **C21 depuis S544–S545** (fixe et accéléré ;
-  [preuve](validation/C21-MASSE-S544.md)) ; **C09 en partie depuis S555** (la masse ; l'énergie naturelle manque le critère, A332 ;
-  [preuve](validation/C09-ENERGIE-S555.md)). Non exécutés : C05, C11, C14, C15. **C18 partiel**
+  [preuve](validation/C21-MASSE-S544.md)) ; **C09 depuis S555–S557** (la masse ; l'énergie du schéma, conservée ;
+  [preuve](validation/ENERGIE-DISCRETE-S557.md)). Non exécutés : C05, C11, C14, C15. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

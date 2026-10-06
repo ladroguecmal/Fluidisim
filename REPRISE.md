@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:37 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:42 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S557 — le lot ; A332, l'énergie discrète de δ linéaire ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S556 — la quinzième revue de méthode (ADR-240) ([journal](notes/JOURNAL.md)). Avant : S555 (C09 : la masse tient, l'énergie naturelle manque le critère)
-Session suivante : **S557 — le lot** (dû ; feuille de route S552–S556) **et un point partiel** (6.6 ou 4.18 : A332, l'énergie discrète de δ, si elle se dérive en une session). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 1 — S556 : la quinzième revue (ADR-240)
-Registres       : dernier lot S554 (ADR-213 D3) ; le prochain au plus tard en S557
+Session en cours : aucune
+Dernière session : S557 — le lot ; l'énergie que le pas linéaire conserve ; A332 levée ([journal](notes/JOURNAL.md)). Avant : S556 (la quinzième revue de méthode)
+Session suivante : **S558 — un point partiel** (6.6, 4.18 : l'énergie du chemin coupé ou du pas couplé, ou un autre ; choisir par la feuille de route). À noter pour la revue de S561 : l'instrument d'énergie de S555 n'avait pas été éprouvé sur un cas connu (L375) — le couvercle compté plein, relevé en S557. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S557 : 4.18 et 13.2 avancent (A332 levée, C09 passé sur δ linéaire)
+Registres       : dernier lot S557 (ADR-213 D3) ; le prochain au plus tard en S560
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

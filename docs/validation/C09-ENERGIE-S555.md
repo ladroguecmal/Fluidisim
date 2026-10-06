@@ -39,3 +39,8 @@ oscille à la période du schéma, et sa moyenne se tient au-dessus de l'énergi
 discrète que le schéma conserve ou dissipe n'est pas connue : **A332**. Aucune dissipation n'est mesurable non plus sur 120 s (S310 en
 mesurait 0,0935 % par seconde sur un autre montage). L'essai affirme le critère (1) et une garde de non-régression posée après coup (les
 moyennes à 1 % l'une de l'autre), pas les critères (2) et (3).
+
+> *Note du 2026-10-06, S557* ([ENERGIE-DISCRETE-S557](ENERGIE-DISCRETE-S557.md)) : **l'énergie cinétique de cette preuve était mal pondérée**
+> — la vitesse au couvercle comptée pour une maille pleine, alors que sa face n'en porte qu'une demie. Avec le bon poids, l'énergie
+> naturelle oscille de ± 1,4 % **autour** de E₀ (non 8,4 % au-dessus) ; l'énergie du schéma (mixte) est conservée à 2·10⁻⁵. Les mesures
+> ci-dessus restent celles de l'instrument de S555 ; « sa moyenne se tient au-dessus de E₀ » était l'instrument.

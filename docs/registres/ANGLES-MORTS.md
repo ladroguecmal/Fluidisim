@@ -4643,3 +4643,7 @@ Aucune instabilité, mais aucun moyen de dire, pas à pas, que l'énergie ne cro
 que par des moyennes par fenêtre. Déclencheur : **avant de déclarer la conservation de l'énergie de δ (4.18) ou de juger une dissipation**.
 Premiers remèdes : la forme discrète que le schéma conserve (les vitesses à la moyenne de deux demi-pas, ou la surface décalée d'un
 demi-pas), dérivée du schéma ; l'énergie sur la carte.
+
+*Note du 2026-10-06, S557, sur A332* ([ENERGIE-DISCRETE-S557](../validation/ENERGIE-DISCRETE-S557.md)) : **levée.** Le pas linéaire est un
+avant-arrière ; son invariant exact est `Q = K(u^{n+1}) + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA`, la face du couvercle comptée pour une
+demi-maille ; mesuré conservé à 2,1·10⁻⁵ de E₀ sur 120 s. Le +8,4 % de S555 venait de l'instrument (le couvercle compté plein).

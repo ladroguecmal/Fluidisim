@@ -2728,7 +2728,9 @@ fn a_compartment_holds_the_same_mass_with_and_without_delta_s544() {
 /// (σ = 0,5 m), 120 s au pas de 10 ms, δ linéaire. À chaque pas : la masse `ρ·Σ(η − z₀)·dA` rapportée à la masse d'eau, et l'énergie
 /// naturelle `½ρ·Σ|u|²·dx³ + ½ρg·Σ(η − z₀)²·dA`. Critères : `|dm/dt|` < 10⁻³ s⁻¹ ; `dE/dt ≤ 0` à chaque pas ; l'énergie finale sous
 /// l'initiale. **Les critères 2 et 3 sont manqués** (l'énergie naturelle d'un schéma décalé oscille ; sa moyenne, constante, se tient
-/// au-dessus de E₀) — seul le critère 1 est affirmé, plus une garde de non-régression posée après coup.
+/// au-dessus de E₀) — seul le critère 1 est affirmé, plus une garde de non-régression posée après coup. *S557* : cette énergie cinétique
+/// compte la face du couvercle pour une maille pleine ; avec la demi-maille, l'énergie naturelle oscille autour de E₀, et l'énergie du
+/// schéma est conservée (`the_linear_step_conserves_its_mixed_energy_s557`).
 #[test]
 fn a_closed_tank_keeps_its_mass_and_loses_energy_s555() {
     let (n, m, k, dx, g, rho) = (16usize, 8usize, 6usize, 0.25f32, 9.81f64, 1025.0f64);

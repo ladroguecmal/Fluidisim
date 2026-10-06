@@ -763,3 +763,12 @@ revue de méthode**.
 (S553) — **élargie** : la constante de temps au plan, ou la trace avant de conclure (D2, L398). Ont tenu : les références indépendantes avant la
 mesure (S552–S554), la mise en garde écrite avant (S555), un écart de définition localisé (S552). Maillons **1**. Suivant : **S557**, le lot
 (dû) et un point partiel.
+
+## S557 — 2026-10-06 — le lot ; l'énergie que le pas linéaire conserve ; A332 levée
+
+**Entrée.** En autonomie ; le lot (feuille de route S552–S556), puis A332. **La dérivation d'abord, depuis le code** : le pas linéaire est un
+avant-arrière ; son invariant est `Q = K(u^{n+1}) + ½ρg·Σ η^n·η^{n+1}·dA`, la face du couvercle pesant une demi-maille, et `Q = E₀`
+exactement ; la formule éprouvée sur l'oscillateur (ADR-239 D1). **Fait** ([preuve](../docs/validation/ENERGIE-DISCRETE-S557.md)).
+**Mesuré** : `Q` conservé à 2,1·10⁻⁵ de E₀ sur 120 s, hausse au pire 4,5·10⁻⁶ ; C09 passe sur l'énergie du schéma. **En route** : le +8,4 %
+de S555 venait de l'instrument — le couvercle compté pour une maille pleine ; au bon poids, l'énergie naturelle oscille de ± 1,4 % autour de
+E₀. Une note l'écrit dans la preuve de S555. Maillons **0** (4.18, 13.2 avancent). Suivant : **S558**, un point partiel.

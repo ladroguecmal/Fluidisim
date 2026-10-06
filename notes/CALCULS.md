@@ -66,7 +66,7 @@ for nd in (8, 12, 16):
 | `20261006-044722-lacet-s502` | S502 | lacet-s502 | `code/target/release/examples/rayonnement_coque.exe --mode lacet --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
 | `20261006-044723-cavalement-s502` | S502 | cavalement-s502 | `code/target/release/examples/rayonnement_coque.exe --mode cavalement --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
 | `20261006-044724-embardee-s502` | S502 | embardee-s502 | `code/target/release/examples/rayonnement_coque.exe --mode embardee --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
-| `20261006-074013-eveil` | S504 | eveil | `python outils/eveil.py 14` | en cours |
+| `20261006-074013-eveil` | S504 | eveil | `python outils/eveil.py 14` | terminé, 2026-10-06 21:40 |
 | `20261006-074606-c23-mesure` | S505 | c23-mesure | `code/target/release/examples/c23_coque.exe 5` | terminé, 2026-10-06 07:46 |
 | `20261006-074926-c23-gouvernant` | S505 | c23-gouvernant | `code/target/release/examples/c23_coque.exe gouvernant` | terminé, 2026-10-06 07:51 |
 | `20261006-075141-c23-rampe` | S505 | c23-rampe | `code/target/release/examples/c23_coque.exe 5` | terminé, 2026-10-06 07:52 |
@@ -94,4 +94,4 @@ for nd in (8, 12, 16):
 | `20261006-164625-conv25-s529` | S529 | conv25-s529 | `SILLAGE_DX=0.25 SILLAGE_NX=224 SILLAGE_NY=160 SILLAGE_NZ=12 DT_US=10000 DUREE=15 SORTIE=calculs/conv_s529_25.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 16:46 |
 | `20261006-164642-conv12-s529` | S529 | conv12-s529 | `SILLAGE_DX=0.125 SILLAGE_NX=448 SILLAGE_NY=320 SILLAGE_NZ=24 DT_US=5000 DUREE=15 SORTIE=calculs/conv_s529_12.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | échec (code 101), 2026-10-06 16:46 |
 | `20261006-164801-conv12b-s529` | S529 | conv12b-s529 | `SILLAGE_DX=0.125 SILLAGE_NX=448 SILLAGE_NY=320 SILLAGE_NZ=24 DT_US=5000 DUREE=15 SORTIE=calculs/conv_s529_12.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 16:51 |
-| `20261006-202153-eveil` | S547 | eveil | `python outils/eveil.py 14` | en cours |
+| `20261006-202153-eveil` | S547 | eveil | `python outils/eveil.py 14` | terminé, 2026-10-06 21:40 |
