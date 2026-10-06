@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [C13 : la remontée des petites bulles — S540](validation/C13-BULLES-S540.md) : Tomiyama contaminé, à −6 à −9 % de SPEC-002 ; selon −g_eff.
 - [La flottabilité d'une poche d'air comprimée : la coque retournée — S539](validation/POCHE-AIR-S539.md) : Boyle à 10⁻¹² ; le point de non-retour à 3,81 m.
 - [C17 : l'inondation limitée par l'air — S538](validation/C17-AIR-S538.md) : la poche isotherme d'un compartiment de V ; Boyle à 1,2·10⁻⁵, Torricelli à 2,9·10⁻⁴.
 - [Le contact d'un corps quelconque : son enveloppe convexe — S537](validation/CORPS-QUELCONQUE-S537.md) : une planche tournante à 1,3·10⁻¹⁰ s ; la sphère englobante 38,8 ms trop tôt.

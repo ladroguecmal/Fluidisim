@@ -49,6 +49,8 @@ pub mod body;
 pub mod rigid_body;
 /// S534 — C1, le champ de courant 2D régional (ADR-011).
 pub mod current_field;
+/// S540 — C13, la remontée des petites bulles (SPEC-002 §2).
+pub mod bulle;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;

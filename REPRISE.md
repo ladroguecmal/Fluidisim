@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 18:06 +02:00
+JETON            : libre
+Battement        : 2026-10-06 18:13 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S540 — C13, la remontée des petites bulles ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S539 — la coque retournée : la poche d'air comprimée ([journal](notes/JOURNAL.md)). Avant : S538 (C17 : l'inondation limitée par l'air)
-Session suivante : **S540 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — la poche qui s'échappe quand la coque bascule (7.5), l'évent à débit limité (5.9), C16 (le ballottement en repère accéléré, 4.17 absent) ou C13 (la remontée de bulle) parmi les cas canoniques non exécutés ; le quantum écrit à côté de chaque seuil (ADR-236 D1), ordres de grandeur calculés (ADR-232). Revue à S541. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S539 : la poche d'air comprimée (7.5)
+Session en cours : aucune
+Dernière session : S540 — C13 : la remontée des petites bulles ([journal](notes/JOURNAL.md)). Avant : S539 (la coque retournée : la poche d'air comprimée)
+Session suivante : **S541 — la douzième revue de méthode** (S536–S540 ; ADR-222 D4) : frictions — une valeur du plan ajustée de tête (S538 : 467 s pour 463,5), une ligne de la liste en retard de vingt-six sessions (13.2 : C20 depuis S512), le décompte affiché qui n'a pas suivi un changement d'état (S538) ; ce qui a tenu (la loi calculée au plan avant le code, S540 ; le point de non-retour, S539). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S540 : C13 passe (7.4, 13.2)
 Registres       : dernier lot S539 (ADR-213 D3) ; le prochain au plus tard en S542
 ```
 

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S540 — **en cours**. En autonomie, **C13 — la remontée d'une bulle** (non exécuté) : des bulles de 0,1, 1 et 5 mm lâchées à 3 m
+Session : S540 — **terminée**. En autonomie, **C13 — la remontée d'une bulle** (non exécuté) : des bulles de 0,1, 1 et 5 mm lâchées à 3 m
 de profondeur ; vitesse terminale à ± 15 % de SPEC-002 §2 (5,5 mm/s ; 0,12–0,25 m/s ; ≈ 0,25 m/s) ; trajectoire selon `−g_eff`, pas selon
 `+Z`. Les grosses bulles d'APIC existent (S479–S485) ; les petites, qui portent les microbulles (7.3, absent) et l'aération, non.
 
@@ -80,8 +80,12 @@ l'arrondi f64, rapport > 10⁶). (2) **C13** : à ± 15 % de la table (la fourch
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — la bulle, les essais ; (1)–(3).
-- [ ] **P3** — preuve ; listes 7.3, 13.2 ; C13 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la bulle, les essais ; (1)–(3).
+- [x] **P3** — preuve ; listes 7.4, 13.2 ; C13 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `bulle.rs` ; essais `s540` : 4,98 mm/s, 0,1124, 0,2309 m/s, intégrées à 10⁻⁶ ; selon −g_eff. Suite 702. C13 est rangé sous
+  7.4 dans la liste (pas 7.3, les microbulles visuelles, qui restent absentes).
+- **P3** — preuve C13-BULLES-S540 ; listes 7.4, 13.2 ; C13 ; index ; journal.
+

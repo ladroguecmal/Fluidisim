@@ -503,7 +503,8 @@ pas recopiée ici (L137).
   (impact) sont la référence du banc.
 - [ ] **7.2 Spray, embruns, gouttelettes** — *absent*.
 - [ ] **7.3 Microbulles visuelles** — *absent*.
-- [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *partiel* depuis S479 : l'air enfermé en poches
+- [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *partiel* depuis S479 (**S540 : C13 passe** — les petites
+  bulles de 0,1 à 5 mm à −6 à −9 % de SPEC-002 §2, selon `−g_eff` ; [preuve](validation/C13-BULLES-S540.md)) : l'air enfermé en poches
   adiabatiques dans la référence APIC 3D, inconnues de la projection ; une bulle oscille à la fréquence de Minnaert (× 1,02) et
   remonte ([POCHES-AIR-S479](validation/POCHES-AIR-S479.md)). **Sur la carte depuis S481** : la bulle suit la référence à 4·10⁻⁵
   (42,47 Hz contre 42,50) ; `--v1` 60 s stable avec poches ([POCHES-CARTE-S481](validation/POCHES-CARTE-S481.md)) — au prix de la
@@ -741,7 +742,7 @@ pas recopiée ici (L137).
   ([preuve](validation/CORPS-RIGIDE-S331.md)). Sur véhicules d'essai : C01, C03, C04, C06 (partiel),
   C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
   aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
-  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). Non exécutés : C05, C09, C11, C13 à C16, C21. **C18 partiel**
+  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)). Non exécutés : C05, C09, C11, C14 à C16, C21. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

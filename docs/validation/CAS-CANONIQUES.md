@@ -729,6 +729,9 @@ entière, ADR-010 §4).
 (SPEC-002 §2) pour les autres.
 **Assertion.** vitesse terminale à ±15 % ; trajectoire verticale selon `−g_eff`, pas selon `+Z`.
 
+> *Note du 2026-10-06, S540, sur C13* ([C13-BULLES-S540](C13-BULLES-S540.md)) : **exécuté et passé** — `bulle.rs` (traînée de Tomiyama,
+> bulles contaminées) : 4,98 mm/s, 0,112 m/s, 0,231 m/s (−9, −6, −8 %) ; la trajectoire selon `−g_eff` sous une pesanteur inclinée.
+
 ## C14 — Couverture de moutons
 
 **Montage.** Haute mer, `U10` de 5 à 25 m/s, mesure de la fraction de surface où le canal actif du

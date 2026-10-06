@@ -636,3 +636,11 @@ plan ajustée de tête (467 s pour 463,5 : ADR-232 D2 rappelée). Maillons **0**
 le point de non-retour calculé au plan (3,811 m) tient — lâché 0,3 m au-dessus, le corps remonte et flotte ; 0,3 m en dessous, il coule.
 Maillons **0** (7.5 devient partiel). Le lot des registres, dû en S539, fait dans la foulée (feuille de route S537–S539). Suivant :
 **S540**, un point partiel ; revue à S541.
+
+## S540 — 2026-10-06 — C13 : la remontée des petites bulles
+
+**Entrée.** En autonomie ; C13 (non exécuté). **La loi d'abord, au plan** : Tomiyama pour bulles contaminées donne 4,99 mm/s, 0,112 et
+0,231 m/s, à moins de 10 % de SPEC-002. **Fait** ([preuve](../docs/validation/C13-BULLES-S540.md)) : `bulle.rs` — poussée selon `−g_eff`,
+masse ajoutée, traînée implicite. **Mesuré** : les vitesses intégrées à 10⁻⁶ de la vitesse terminale, à −6 à −9 % de la table ; la trajectoire
+selon `−g_eff` sous une pesanteur inclinée. **C13 passe.** Maillons **0** (7.4, 13.2). Suivant : **S541, la douzième revue de méthode**.
+
