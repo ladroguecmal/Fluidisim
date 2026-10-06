@@ -55,6 +55,8 @@ pub mod bulle;
 pub mod traversabilite;
 /// S574 — la glace : Stefan, Gold (listes 7.6, 7.7 ; SPEC-002 §4).
 pub mod glace;
+/// S577 — la marée harmonique à phases entières (liste 2.2).
+pub mod maree;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
