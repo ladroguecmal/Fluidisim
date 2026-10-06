@@ -62,35 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S515 — **terminée**. En autonomie, **5.4, la vanne selon son ouverture, les pertes et l'énergie de la pompe** : ADR-199 laissait
-« le `C_d` selon l'ouverture, à calibrer sur la courbe du constructeur », « ni puissance ni énergie consommée, ni pertes de charge » ; son
-§3 dit la voie : une courbe tabulée à la place de la section, une seconde loi plutôt qu'une modification.
+Session : S516 — **en cours**. En autonomie, **la septième revue de méthode** (ADR-222 D4) : les frictions de S512–S515 ; et le lot des
+registres (dû).
 
-**Ce que la session fait.** Deux lois nouvelles de V, les anciennes intactes : `Flow::Valve { area_mm2, curve_pm }` — Torricelli sous une
-courbe d'ouverture tabulée (onze points, de 0 à 1 000 ‰, interpolée linéairement : la courbe du constructeur, linéaire, à pourcentage
-égal…) ; `Flow::PumpLine { …, loss_um_per_l2s2, efficiency_pm }` — la pompe avec perte de charge `K·Q²` sur sa conduite, point de
-fonctionnement `Q = √((n²H₀ − Δh)/(H₀/Q²max + K))`, rendement ; `pump_operating_point` : débit, hauteur, puissance hydraulique et à
-l'arbre, pour que l'hôte cumule l'énergie. L'empreinte et la validation les connaissent.
-
-**Ordre de grandeur, écrit avant.** Une courbe à pourcentage égal de rapport 50 (`f = 50^(x−1)`) : à mi-ouverture, 14 % du débit plein
-(contre 50 % en linéaire) ; tabulée tous les 10 %, l'interpolation linéaire s'en écarte au plus d'≈ 1,9 % du débit plein entre deux points.
-Une pompe de 10 l/s et 10 m de barrage, `K` = 0,05 m/(l/s)² : à `Δh` = 3 m, le débit tombe de 8,37 à 6,32 l/s.
-
-**Critères, écrits avant.** (1) la courbe linéaire rend les débits de l'orifice commandé à 10⁻¹² près ; la courbe à pourcentage égal exacte
-aux points de la table (10⁻¹²) et dans la borne d'interpolation entre eux ; (2) `PumpLine` à `K` = 0 rend `Pump` à 10⁻¹² près ; à `K` > 0, la
-forme fermée à 10⁻⁹ ; (3) l'énergie : en remplissant un bassin, `∫ P_hydraulique dt` égale l'énergie potentielle gagnée par l'eau (plus
-`∫ ρgKQ³ dt` avec pertes) à 0,1 % ; la puissance à l'arbre `P_h/η` ; (4) la masse exacte ; la suite du cœur, l'instantané. 5.4 reste
-partielle par 5.8 (le réseau fermé, v2 d'ADR-010).
+**Critères, écrits avant.** Une protection n'entre ou ne change que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne
+duplique la table ; `etat_projet --check` à zéro.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Valve`, `PumpLine`, `pump_operating_point` ; essais (1)–(4).
-- [x] **P3** — preuve ; note datée à ADR-199 ; liste 5.4 ; rituel.
+- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; lot des registres ; rituel.
 
 ### Notes de reprise
-- **P2** — `Flow::Valve`, `Flow::PumpLine`, `law_size` (partagée pas/instantané), `valve_fraction`, `pump_delivery` (partagée), `pump_line_point`,
-  `pump_operating_point`. (1) au quantum ; borne 0,0157/0,0163 ; (2) au nanolitre, 7,3030 l/s exacte ; (3) 0,002 % et −0,005 %. Ordres de
-  grandeur du plan légèrement faux (1,6 % et 6,83 l/s), l'essai les calcule. 681 essais ; l'afficheur construit.
-- **P3** — preuve VANNE-POMPE-S515 ; note datée ADR-199 ; liste 5.4 ; index ; journal.
-

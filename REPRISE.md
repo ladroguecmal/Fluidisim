@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-06 10:10 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S516 — la septième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S515 — la vanne selon son ouverture, les pertes et l'énergie de la pompe ([journal](notes/JOURNAL.md)). Avant : S514 (l'acteur poussé, renversé ou déplacé par l'eau)
 Session suivante : **S516 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S512–S515 — dont deux corps d'essai mal choisis encore (la bouée qui tangue sous sa traînée, S513 ; la coque qui rebondit hors de l'eau, S512), un hôte d'essai mal recopié (S514), des ordres de grandeur légèrement faux (S515). Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
 Maillons        : 0 — S515 : 5.4 avancée (ne manque que 5.8)
