@@ -6564,3 +6564,9 @@ de stabilité (L384) ne suffisait pas : un corps d'essai n'a que les degrés de 
 **S510, S515 — l'ordre de grandeur de tête.** Une prévision de témoin (« ≈ 100 % » pour 8,6 %), un écart d'interpolation (1,9 % pour 1,6 %),
 un débit de pompe (6,32 l/s pour 6,83) : écrits dans le plan sans calcul. Une ligne de script d'abord (ADR-232 D2).
 
+## L389
+
+**S517, S520 — l'instrument éprouvé ailleurs.** Trois instruments d'angle appliqués au sillage de la coque sans réponse connue (S517) ; le
+premier ne lisait même pas Kelvin sur la théorie (S519). Puis le bord d'Airy, éprouvé sur une source gaussienne à un lobe, lit sur la
+théorie d'une coque un creux d'interférence, stable d'une fenêtre à l'autre (S520). Un instrument s'éprouve sur un cas de sa famille, et
+l'on regarde ce qu'il lit (ADR-233 D1).

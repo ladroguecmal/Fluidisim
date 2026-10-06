@@ -62,47 +62,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S520 — **terminée**. En autonomie, **4.13, le sillage mesuré** : S517 n'a pas pu lire l'angle du sillage de la coque dans δ
-(trois instruments) ; S519 a montré que l'instrument de S517 ne lit pas Kelvin même sur la théorie, et a éprouvé le **bord d'Airy** (19,98°
-sur la théorie, 19,98° sur W). S517 lisait entre 1,7 et 4,2 λ₀ ; le bord d'Airy demande 4–6 λ₀ — un domaine plus long, abordable depuis
-S518 (le pas de la carte à 9,2 ms sur 786 000 mailles).
+Session : S521 — **terminée**. En autonomie, **la huitième revue de méthode** (ADR-222 D4 ; S517–S520) : relire les frictions, changer une
+protection si une erreur s'est répétée sous elle.
 
-**Ce que la session fait.** (a) **La référence de la coque** : la même réponse linéaire exacte en temps (`outils/reference_sillage.py`),
-la source étant la pression hydrostatique de la coque sur son empreinte (un rectangle de 4 × 1,6 m, `p = ρ g d`, `d` = 0,488 m, son
-tirant) menée à 3 m/s ; l'instrument (le bord d'Airy, fenêtre 4–6 λ₀, rayons issus du **centre** de la source) éprouvé sur elle. (b) **La
-coque dans δ** : le banc du sillage (`--lineaire-sillage`) sur 104 × 56 × 4 m (416 × 224 × 16 mailles de 25 cm, 1,49 M), 30 s, le même
-instrument, mêmes rayons, mêmes distances, sur la surface de la carte.
-
-**Ordre de grandeur, calculé.** λ₀ = 5,76 m à 3 m/s : fenêtre 23,1–34,6 m derrière le centre ; le transitoire du départ vers `U·T/2` =
-45 m ; parcours 85,5 m (rampe de 3 s) ; rayons jusqu'à 22,2 m de l'axe à 40°. Une origine des rayons déplacée de 2 m (l'étrave de S517)
-déplace l'angle de 1,2° à 29 m : la même origine des deux côtés. Coût : ≈ 3 000 pas de ≈ 15–25 ms.
-
-**Critères, écrits avant.** (1) Sur la référence de la coque, le bord d'Airy lit 19,47° à 1° (sinon l'instrument ne vaut pas pour cette
-source, et rien n'est conclu de δ). (2) **4.13, le sillage mesuré** : le bord d'Airy sur δ à 2° de 19,47°. (3) Le pas reste borné et fini
-(élévation maximale publiée), son coût publié.
+**Ce que la session fait.** Relu : S517 (trois instruments d'angle sans réponse connue, un remplacement non vérifié), S518 (le profil
+d'abord), S519 (une référence indépendante, l'instrument de S517 qui ne lit pas Kelvin), S520 (un instrument éprouvé sur une source et
+appliqué à une autre, une limite de dispatch, un script cassé par une apostrophe). **ADR-233** : D1, la protection de l'instrument élargie
+(un cas de la même famille, en regardant ce qu'il lit) ; L389 ; BOUSSOLE ; feuille de route S519–S521.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la référence de la coque, l'instrument ; (1).
-- [x] **P3** — la coque dans δ ; (2), (3).
-- [x] **P4** — preuve ; liste 4.13 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-233, METHODE, L389, BOUSSOLE, index, feuille de route).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini — (1) manqué.** La référence de la coque (rectangle 4 × 1,6 m, `ρ g d`, coupure de Nyquist de δ), trois grilles : le bord
-  d'Airy lit **16,40 / 16,40 / 16,36°** à 3 m/s (par λ₀ : 16,3 / 16,1 / 16,3 / 16,4 / 16,6° de 2 à 7 λ₀ — stable). Balayage de la vitesse
-  sur la référence : 19,1° à 1,5 m/s, 14,4° à 2, 21,7° à 2,5, 16,4° à 3, 19,0° à 4 — **l'angle lu sur une coque de 4 m oscille avec
-  L/λ₀** (les ondes d'étrave et de poupe interfèrent) ; 19,47° n'est pas la cible de la théorie à 3 m/s. Les vitesses qui lisent Kelvin
-  sont hors de portée de δ (1,5 m/s : λ₀ = 1,44 m, 6 mailles ; 4 m/s : λ₀ = 10 m, `kh` = 2,4 par 4 m de fond, fenêtre au bord du
-  transitoire). Comme déclaré, rien n'est conclu de δ contre 19,47° à 3 m/s.
-- **Critère nouveau, écrit avant de lancer δ** (ADR-222 : la cible contredite par la mesure est remplacée) : **(2') le bord d'Airy sur δ à
-  1° de celui de la théorie de la même coque, 16,40°**, fenêtre 4–6 λ₀, rayons issus du centre ; et par fenêtre d'1 λ₀ de 3 à 6 λ₀, à
-  1,5°. (3) inchangé. 4.13 « le sillage mesuré » s'entend alors : le sillage de δ est celui de la théorie linéaire de sa coque.
-- **P3 (en cours)** — le banc exporte sa surface (`SORTIE=`), `reference_sillage.py delta <fichier>` y applique l'instrument figé. Calcul
-  lancé : `calculs/20261006-110837-sillage-delta-s520` (416 × 224, 30 s, 3 m/s ; sortie `calculs/delta_s520.bin`). **À la reprise** : lire
-  `sortie.log` (élévation maximale, coût), puis `python outils/reference_sillage.py delta calculs/delta_s520.bin` → (2') contre 16,40°.
-- **P3 fini** — le premier calcul s'est arrêté (71 504 groupes > 65 535) → prédiction, correction, faces du mouvement, dispersion en deux
-  dimensions (au bit en deçà : e41630abd739b189 ; S503, S504 inchangés). δ : 0,957 m, 23,3 ms par pas ; **bord d'Airy 20,56°** contre
-  16,40° → (2') manqué. Diagnostic : sur la théorie, l'instrument lit un creux d'interférence (15° : 0,236 ; 17° : 0,111 ; 19° : 0,164) ;
-  δ 3,5 fois moins ample sur la décroissance extérieure. **A330** ouverte.
-- **P4** — preuve SILLAGE-COQUE-S520 ; A330 ; liste 4.13 ; index ; journal.

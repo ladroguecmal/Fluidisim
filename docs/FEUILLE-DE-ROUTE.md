@@ -377,6 +377,8 @@ courant C0 et C2 derrière la requête de l'eau).
 conduite et son énergie : ne manque que le réseau fermé) ; la septième revue (ADR-232).
 **S517–S518** : 4.13 avancée (la coque en marche et sa vague d'étrave sur la carte ; le sillage stable, son angle non mesuré à 2° par trois
 instruments) ; A329 ouverte puis levée (le recoupage d'une coque qui bouge à 2,2 ms sur 786 000 mailles, au bit ; le pas de la carte 9,2 ms).
+**S519–S521** : C07 en eau profonde passe (W à 0,33 % de la théorie linéaire, 19,98° ; 3.2, 13.2) ; le sillage de la coque dans δ sans
+référence éprouvée (A330 ; la carte au-delà de 65 535 groupes) ; la huitième revue (ADR-233).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

@@ -478,3 +478,12 @@ noyaux par face en deux dimensions, au bit en deçà. δ (30 s, 23,3 ms par pas,
 théorie, l'instrument lit un creux d'interférence — éprouvé sur un profil à un lobe, il ne l'était pas sur une coque ; et δ est 3,5 fois
 moins ample que ce modèle. **A330** ouverte. Friction pour la revue de S521 : *une stabilité d'instrument ne prouve pas qu'il lit le bon
 trait ; un instrument éprouvé sur une source ne l'est pas sur une autre*. Maillons **1**. Suivant : **S521, la revue de méthode**.
+
+## S521 — 2026-10-06 — la huitième revue de méthode (ADR-233)
+
+**Entrée.** En autonomie ; revue due (S517–S520). **Frictions** : un instrument appliqué sans cas de réponse connue de sa famille — trois
+en S517, le bord d'Airy en S520 (éprouvé sur une gaussienne, il lit sur une coque un creux d'interférence, stable d'une fenêtre à l'autre)
+— malgré la protection de l'instrument : **elle est élargie** (ADR-233 D1, L389). La limite de 65 535 groupes (une fois, vérifiée par le
+code désormais), le script cassé par une apostrophe (les protections ont arrêté le dégât) : rien à ajouter. Le profil d'abord (S518) et
+la référence indépendante (S519) ont tenu. Maillons **2** (une revue n'avance aucun point) : la suivante choisit un lot qui fait avancer
+une capacité. Suivant : **S522**, un point partiel ; le lot des registres dû à S522.
