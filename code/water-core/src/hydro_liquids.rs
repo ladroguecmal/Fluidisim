@@ -7,8 +7,10 @@
 //! L'état reste entier (I-10) : `volume_ml` du nœud est le total ; la composition est une ligne de millilitres de l'appelant, une
 //! entrée par liquide de la table, qui somme à `volume_ml`. Aucune allocation (I-06) : au plus [`MAX_LIQUIDS`] liquides.
 //!
-//! S559 : **la pression en un point d'un nœud** (ADR-241 D3). S560 : **le débit par couches** (D4) — [`step_liquids`].
+//! S559 : **la pression en un point d'un nœud** (ADR-241 D3). S560 : **le débit par couches** (D4) — [`step_liquids`]. S562 :
+//! **l'instantané de la composition**, un bloc `WVLQ` à côté de WVST (ADR-140).
 
+use super::snapshot::SnapshotError;
 use super::{along, geometry, step_inner, sub, Error, Flow, HydroNode, Meteo, Opening, Shapes};
 use crate::SimTime;
 
@@ -209,5 +211,110 @@ pub fn step_liquids(nodes: &mut [HydroNode], edges: &mut [Opening], shapes: &Sha
         }
     }
     debug_assert!(nodes.iter().enumerate().all(|(i, node)| composition[i * n..(i + 1) * n].iter().sum::<i64>() == node.volume_ml));
+    Ok(())
+}
+
+// --- S562 — l'instantané de la composition (I-17).
+
+/// En-tête du bloc `WVLQ` : magie, version, réservé, nœuds, liquides, empreinte de la table.
+pub const COMPOSITION_HEADER: usize = 4 + 2 + 2 + 4 + 4 + 8;
+const COMPOSITION_TRAILER: usize = 8;
+const COMPOSITION_MAGIC: &[u8; 4] = b"WVLQ";
+const COMPOSITION_VERSION: u16 = 1;
+
+/// L'empreinte de la table : FNV-1a des densités, par leurs bits.
+fn table_fingerprint(liquids: &[Liquid]) -> u64 {
+    let mut h = crate::hash::Hasher64::new();
+    for l in liquids {
+        h.write_u32(l.density_kg_m3.to_bits());
+    }
+    h.finish()
+}
+
+fn fnv(b: &[u8]) -> u64 {
+    let mut h = crate::hash::Hasher64::new();
+    for &x in b {
+        h.write_u8(x);
+    }
+    h.finish()
+}
+
+/// La longueur du bloc `WVLQ` d'un réseau de `nodes` nœuds et `liquids` liquides.
+pub fn composition_snapshot_len(nodes: usize, liquids: usize) -> usize {
+    COMPOSITION_HEADER + nodes * liquids * 8 + COMPOSITION_TRAILER
+}
+
+/// **S562 — le bloc `WVLQ`** : la composition entière, à côté de l'instantané WVST de V (ADR-140), qui sauve les nœuds. Rend la
+/// longueur écrite. Refus : une composition invalide (`State`), un tampon trop court (`Length`).
+pub fn snapshot_composition_into(nodes: &[HydroNode], composition: &[i64], liquids: &[Liquid], out: &mut [u8])
+    -> Result<usize, SnapshotError> {
+    let n = liquids.len();
+    check_table(liquids).map_err(SnapshotError::State)?;
+    if composition.len() != nodes.len() * n {
+        return Err(SnapshotError::State(Error::Capacity));
+    }
+    for (i, node) in nodes.iter().enumerate() {
+        layers(node, &composition[i * n..(i + 1) * n], liquids).map_err(SnapshotError::State)?;
+    }
+    let len = composition_snapshot_len(nodes.len(), n);
+    if out.len() < len {
+        return Err(SnapshotError::Length);
+    }
+    let b = &mut out[..len];
+    b[..4].copy_from_slice(COMPOSITION_MAGIC);
+    b[4..6].copy_from_slice(&COMPOSITION_VERSION.to_le_bytes());
+    b[6..8].copy_from_slice(&0u16.to_le_bytes());
+    b[8..12].copy_from_slice(&(nodes.len() as u32).to_le_bytes());
+    b[12..16].copy_from_slice(&(n as u32).to_le_bytes());
+    b[16..24].copy_from_slice(&table_fingerprint(liquids).to_le_bytes());
+    for (k, v) in composition.iter().enumerate() {
+        let at = COMPOSITION_HEADER + 8 * k;
+        b[at..at + 8].copy_from_slice(&v.to_le_bytes());
+    }
+    let somme = fnv(&b[..len - COMPOSITION_TRAILER]);
+    b[len - COMPOSITION_TRAILER..].copy_from_slice(&somme.to_le_bytes());
+    Ok(len)
+}
+
+/// **S562 — restaurer la composition** depuis un bloc `WVLQ`, **après** les nœuds (chaque ligne doit sommer au volume restauré).
+/// Refus, sans rien écrire : `Length`, `Version` (magie ou version), `Reserved`, `Configuration` (nombre de nœuds, de liquides, autre
+/// table), `Integrity`, `Record` (une ligne négative ou qui ne somme pas).
+pub fn restore_composition_into(b: &[u8], nodes: &[HydroNode], liquids: &[Liquid], composition: &mut [i64]) -> Result<(), SnapshotError> {
+    let n = liquids.len();
+    let len = composition_snapshot_len(nodes.len(), n);
+    if b.len() != len || composition.len() != nodes.len() * n {
+        return Err(SnapshotError::Length);
+    }
+    if &b[..4] != COMPOSITION_MAGIC || u16::from_le_bytes([b[4], b[5]]) != COMPOSITION_VERSION {
+        return Err(SnapshotError::Version);
+    }
+    if b[6..8] != [0, 0] {
+        return Err(SnapshotError::Reserved);
+    }
+    if fnv(&b[..len - COMPOSITION_TRAILER]) != u64::from_le_bytes(b[len - COMPOSITION_TRAILER..].try_into().unwrap()) {
+        return Err(SnapshotError::Integrity);
+    }
+    let u32_at = |i: usize| u32::from_le_bytes(b[i..i + 4].try_into().unwrap()) as usize;
+    if u32_at(8) != nodes.len() || u32_at(12) != n
+        || u64::from_le_bytes(b[16..24].try_into().unwrap()) != table_fingerprint(liquids) {
+        return Err(SnapshotError::Configuration);
+    }
+    let valeur = |k: usize| i64::from_le_bytes(b[COMPOSITION_HEADER + 8 * k..COMPOSITION_HEADER + 8 * k + 8].try_into().unwrap());
+    for (i, node) in nodes.iter().enumerate() {
+        let mut somme = 0i128;
+        for j in 0..n {
+            let v = valeur(i * n + j);
+            if v < 0 {
+                return Err(SnapshotError::Record);
+            }
+            somme += v as i128;
+        }
+        if somme != node.volume_ml as i128 {
+            return Err(SnapshotError::Record);
+        }
+    }
+    for (k, c) in composition.iter_mut().enumerate() {
+        *c = valeur(k);
+    }
     Ok(())
 }

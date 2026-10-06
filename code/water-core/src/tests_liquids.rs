@@ -4,6 +4,7 @@ use super::*;
 use crate::hydro_network::geometry::{Tetrahedron, VolumeShape};
 use crate::hydro_network::liquids::{self, Liquid};
 use crate::SimTime;
+use crate::hydro_network::snapshot::SnapshotError;
 
 const EAU: Liquid = Liquid { density_kg_m3: 1000.0 };
 const HUILE: Liquid = Liquid { density_kg_m3: 850.0 };
@@ -218,4 +219,80 @@ fn one_liquid_follows_the_present_step_and_bad_inputs_are_refused_s560() {
     assert_eq!(liquids::step_liquids(&mut b, &mut eb, &shapes, g, Meteo::SEC, SimTime(PAS_US), &mut sb, &mut [v], &[EAU], 1)
         .err(), Some(Error::Capacity), "critère 4 : la pluie");
     assert_eq!(b, avant, "critère 4 : rien d'écrit");
+}
+
+// --- S562 — l'écrémeur et l'instantané de la composition. Références écrites au plan.
+
+/// (1) L'écrémeur : la crête du déversoir au-dessus de l'interface — seule l'huile passe ; `H(t) = 1/(1/√0,2 + (1/3)·C_d·b·√(2g)·t)²`.
+#[test]
+fn a_weir_above_the_interface_skims_only_the_oil_s562() {
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mut nodes = [HydroNode { volume_ml: 1_400_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 }];
+    let mut edges = [Opening { from: 0, to: None, flow: Flow::Weir { width_mm: 100 }, position_um: [1_000_000, 500_000, 1_200_000],
+        discharge: 0.62, ..Default::default() }];
+    let mut composition = [1_000_000i64, 400_000];
+    let mut scratch = [0i64; 1];
+    for _ in 0..6_000 {
+        liquids::step_liquids(&mut nodes, &mut edges, &shapes, [0.0, 0.0, -9.81], Meteo::SEC, SimTime(PAS_US), &mut scratch,
+            &mut composition, &[EAU, HUILE], 0).unwrap();
+        assert_eq!(composition[0], 1_000_000, "critère 1 : l'eau intacte");
+    }
+    let taux = (1.0 / 3.0) * 0.62 * 0.1 * (2.0 * 9.81f64).sqrt();
+    let attendu = (0.2 + 1.0 / (1.0 / 0.2f64.sqrt() + taux * 600.0).powi(2)) * 1e6;
+    println!("S562 écrémeur : il reste {} ml d'huile pour {attendu:.1} ml ({:+.1} ml), l'eau {} ml", composition[1],
+        composition[1] as f64 - attendu, composition[0]);
+    assert!((composition[1] as f64 - attendu).abs() < 100.0, "critère 1 : l'huile restante");
+}
+
+/// Le manomètre de S560, `pas` pas depuis l'état donné.
+#[allow(clippy::type_complexity)]
+fn manometre(etat: ([HydroNode; 2], [Opening; 2], [i64; 4]), pas: usize, shapes: &Shapes<'_>) -> ([HydroNode; 2], [Opening; 2], [i64; 4]) {
+    let (mut nodes, mut edges, mut composition) = etat;
+    let mut scratch = [0i64; 2];
+    for _ in 0..pas {
+        liquids::step_liquids(&mut nodes, &mut edges, shapes, [0.0, 0.0, -9.81], Meteo::SEC, SimTime(PAS_US), &mut scratch,
+            &mut composition, &[EAU, HUILE], 0).unwrap();
+    }
+    (nodes, edges, composition)
+}
+
+/// (2) La continuation au bit par le bloc `WVLQ` ; (3) ses refus.
+#[test]
+fn the_composition_snapshot_restores_the_continuation_bit_for_bit_s562() {
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let seuil = [1_000_000, 500_000, 0];
+    let depart = (
+        [HydroNode { volume_ml: 1_500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 },
+         HydroNode { volume_ml: 900_000, capacity_ml: 2_000_000, origin_um: [1_000_000, 0, 0], shape: 0 }],
+        [orifice(0, Some(1), seuil), orifice(1, Some(0), seuil)],
+        [1_500_000i64, 0, 500_000, 400_000],
+    );
+    let milieu = manometre(depart, 1_000, &shapes);
+    let mut bloc = vec![0u8; liquids::composition_snapshot_len(2, 2)];
+    let ecrit = liquids::snapshot_composition_into(&milieu.0, &milieu.2, &[EAU, HUILE], &mut bloc).unwrap();
+    assert_eq!(ecrit, bloc.len());
+    let d_une_traite = manometre(milieu, 5_000, &shapes);
+    // Restaurer : les nœuds et les arêtes (WVST, ADR-140, éprouvé ailleurs) sont recopiés ; la composition vient du bloc.
+    let mut restauree = [-1i64; 4];
+    liquids::restore_composition_into(&bloc, &milieu.0, &[EAU, HUILE], &mut restauree).unwrap();
+    assert_eq!(restauree, milieu.2);
+    let reprise = manometre((milieu.0, milieu.1, restauree), 5_000, &shapes);
+    println!("S562 instantané : {} octets ; d'une traite {:?}, reprise {:?}", bloc.len(), d_une_traite.2, reprise.2);
+    assert_eq!((d_une_traite.0, d_une_traite.2), (reprise.0, reprise.2), "critère 2 : la continuation au bit");
+    // (3) Les refus, rien d'écrit.
+    let mut cible = [7i64; 4];
+    let mut abime = bloc.clone();
+    abime[liquids::COMPOSITION_HEADER + 3] ^= 1;
+    assert_eq!(liquids::restore_composition_into(&abime, &milieu.0, &[EAU, HUILE], &mut cible), Err(SnapshotError::Integrity));
+    assert_eq!(liquids::restore_composition_into(&bloc, &milieu.0, &[EAU, Liquid { density_kg_m3: 800.0 }], &mut cible),
+        Err(SnapshotError::Configuration));
+    let mut autres = milieu.0;
+    autres[0].volume_ml += 1;
+    assert_eq!(liquids::restore_composition_into(&bloc, &autres, &[EAU, HUILE], &mut cible), Err(SnapshotError::Record));
+    assert_eq!(liquids::restore_composition_into(&bloc[..bloc.len() - 1], &milieu.0, &[EAU, HUILE], &mut cible), Err(SnapshotError::Length));
+    assert_eq!(cible, [7; 4], "critère 3 : rien d'écrit");
 }
