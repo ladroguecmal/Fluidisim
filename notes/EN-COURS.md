@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S550 — **en cours**. En autonomie, **6.6 — la stabilité aux grands angles** par l'angle de bande (*loll*) : une barge dont la
+Session : S550 — **terminée**. En autonomie, **6.6 — la stabilité aux grands angles** par l'angle de bande (*loll*) : une barge dont la
 hauteur métacentrique devient négative sous une charge haute ne reste pas droite ; elle gîte jusqu'à `tan θ = √(−2·GM/BM)` (flancs droits,
 pont sec, bouchain noyé) — la frontière du chavirement.
 
@@ -80,8 +80,11 @@ pour `tan²θ = −2·GM/BM` (un calcul, pas un souvenir : ADR-232 D2).
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'essai ; (1), (2).
-- [ ] **P3** — preuve ; liste 6.6 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'essai ; (1), (2).
+- [x] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — essai `s550` : ± 19,310° pour ± 19,084° (1,3 % en tangente) ; droite sans charge. Suite 710.
+- **P3** — preuve ANGLE-BANDE-S550 ; liste 6.6 ; index ; journal.
+

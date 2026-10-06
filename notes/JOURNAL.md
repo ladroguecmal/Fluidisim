@@ -711,3 +711,10 @@ sous la pesanteur vue du navire. **Mesuré** : le centre mouillé au µm ; la g�
 changé le montage pour rien, puis l'ai rétabli. Maillons **0** (6.6 avance). Frictions pour S551 : *une formule d'analyse non vérifiée* ;
 *un diagnostic posé avant de relire sa propre formule*. Suivant : **S550**.
 
+## S550 — 2026-10-06 — l'angle de bande d'une barge instable
+
+**Entrée.** En autonomie ; 6.6, la stabilité aux grands angles. **La formule d'analyse vérifiée avant la mesure** (la leçon de S549) : une
+intégration de la carène inclinée redonne `GZ = sin θ·(GM + BM·tan²θ/2)`. **Fait** ([preuve](../docs/validation/ANGLE-BANDE-S550.md)) :
+la barge de S548 chargée de 100 t à 8 m (`GM` = −0,151 m). **Mesuré** : elle gîte à ± 19,31° pour 19,08° (1,3 % en tangente, l'erreur du
+proxy prévue à 0,8 %), droite sans la charge. Maillons **0** (6.6 avance). Suivant : **S551, la quatorzième revue de méthode**.
+

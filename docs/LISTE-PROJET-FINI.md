@@ -489,9 +489,9 @@ pas recopiée ici (L137).
 - [ ] **6.6 Grands navires** — *partiel* depuis S548 : une barge s'enfonce par un compartiment envahi — le corps rigide et un
   compartiment de V couplés, le tirant final à 0,025 % de la flottabilité perdue, l'eau embarquée à 0,1 %
   ([preuve](validation/BARGE-ENVAHIE-S548.md)) ; **S549 : la carène libre** — le centre de l'eau d'un compartiment suit la surface
-  horizontale, la stabilité perd `i/∇` à 0,34 % près ([preuve](validation/CARENE-LIBRE-S549.md)). Manquent l'eau qui court (le ballottement
-  d'un compartiment), l'assiette, la stabilité jusqu'au chavirement, la poche d'air porteuse, plusieurs compartiments, un navire réel, les
-  brèches en jeu.
+  horizontale, la stabilité perd `i/∇` à 0,34 % près ([preuve](validation/CARENE-LIBRE-S549.md)) ; **S550 : l'angle de bande** d'une barge
+  instable, 19,31° pour 19,08° ([preuve](validation/ANGLE-BANDE-S550.md)). Manquent l'eau qui court (le ballottement d'un compartiment),
+  l'assiette, le chavirement au-delà du pont mouillé, la poche d'air porteuse, plusieurs compartiments, un navire réel, les brèches en jeu.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *partiel* depuis S514 : les règles d'ADR-018 (la
   progression selon la profondeur, le produit d'emportement : 0,5 m à 2 m/s emporte un adulte) et le nageur d'ADR-023 §3 (corps commandé,
   contraint, sa commande dans le repère de la surface) — il cesse de faire route au seuil dérivé `πH/T = 0,7 m/s`, au point près

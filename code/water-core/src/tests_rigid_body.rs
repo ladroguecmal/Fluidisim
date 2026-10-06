@@ -1690,3 +1690,44 @@ fn free_water_in_a_compartment_reduces_stability_s549() {
     );
     assert!((mesure / attendu - 1.).abs() <= 0.03, "critère 3");
 }
+
+/// La barge de S548 (246 t, proxy 4 × 32 × 16), une charge de `charge` kg à 8 m au-dessus de la quille, lâchée à `depart` rad de gîte ;
+/// rend la gîte d'équilibre (rad) après 300 s amorties.
+fn bande_s550(charge: f64, depart: f64) -> f64 {
+    let calme = CalmWater { level: 0. };
+    let mh = 246_000.0f64;
+    let t = (mh + charge) / MER.rho / 160.;
+    let mut barge = RigidBody::cuboid([20., 8., 4.], mh / 640., [0., 0., 2. - t], [4, 32, 16]);
+    barge.orientation = [(0.5 * depart).cos(), (0.5 * depart).sin(), 0., 0.];
+    barge.radiation_damping = [0., 0., 1.0e6];
+    barge.radiation_damping_angular = [5.0e6, 5.0e6, 5.0e6];
+    // La charge à 8 m au-dessus de la quille : 6 m au-dessus du centre de la coque.
+    barge.loads = vec![crate::rigid_body::PointLoad { body: [0., 0., 6.], force: [0., 0., -charge * 9.81] }];
+    for _ in 0..30_000 {
+        barge.step(0.01, &calme, MER);
+    }
+    let q = barge.orientation;
+    2. * q[1].atan2(q[0])
+}
+
+/// **S550 — l'angle de bande.** Avec 100 t à 8 m (`GM` = −0,151 m), la barge lâchée à ± 1° gîte jusqu'à `tan θ = √(−2·GM/BM)` (19,08°) à 3 %
+/// près en tangente, de chaque côté ; sans la charge, elle revient droite (à 0,1°).
+#[test]
+fn an_unstable_barge_settles_at_its_angle_of_loll_s550() {
+    let (rho, b, mh, ml) = (MER.rho, 8.0f64, 246_000.0f64, 100_000.0f64);
+    let m = mh + ml;
+    let t = m / (rho * 160.);
+    let (kb, bm, kg) = (t / 2., b * b / (12. * t), (mh * 2. + ml * 8.) / m);
+    let gm = kb + bm - kg;
+    let attendu = (-2. * gm / bm).sqrt();
+    let un = 1f64.to_radians();
+    let (droite, gauche) = (bande_s550(ml, un), bande_s550(ml, -un));
+    let sans = bande_s550(0., un);
+    println!(
+        "S550 angle de bande : GM {gm:.4} m ; gîte {:.3}° et {:.3}° (attendu ±{:.3}°, écarts {:.2e} {:.2e}) ; sans charge {:.4}°",
+        droite.to_degrees(), gauche.to_degrees(), attendu.atan().to_degrees(), droite.tan().abs() / attendu - 1., gauche.tan().abs() / attendu - 1., sans.to_degrees()
+    );
+    assert!((droite.tan().abs() / attendu - 1.).abs() <= 0.03 && (gauche.tan().abs() / attendu - 1.).abs() <= 0.03, "critère 1");
+    assert!(droite * gauche < 0., "les deux côtés");
+    assert!(sans.to_degrees().abs() <= 0.1, "critère 2");
+}
