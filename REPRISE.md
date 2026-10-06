@@ -17,7 +17,7 @@ Session en cours : aucune
 Dernière session : S545 — C21 en référentiel accéléré ; une raison fausse corrigée ([journal](notes/JOURNAL.md)). Avant : S544 (C21 en référentiel fixe)
 Session suivante : **S546 — la treizième revue de méthode** (S541–S545 ; ADR-222 D4) : frictions — un plan non committé avant le travail (S544), une affirmation de limite écrite sans calcul et fausse (S544 : le débordement des entiers des formes de V), deux usages de δ refusés en route que S375 avait décrits (S544), une limite de V découverte en route (les tables +Z sous g_eff incliné) ; ce qui a tenu (C16 et sa formule recalculée, S542–S543 ; C21 corrigé le lendemain). Puis le lot (dû à S545… voir RAPPEL) et un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S545 : C21 passe (fixe et accéléré)
-Registres       : dernier lot S542 (ADR-213 D3) ; le prochain au plus tard en S545
+Registres       : dernier lot S545 (ADR-213 D3) ; le prochain au plus tard en S548
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

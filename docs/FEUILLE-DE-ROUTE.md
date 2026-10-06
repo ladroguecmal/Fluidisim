@@ -394,6 +394,8 @@ drainage de Brooks–Corey, évaporation ; le cycle de l'eau du sol à la masse 
 partiel) ; la coque retournée et sa poche comprimée, le point de non-retour (7.5 partiel).
 **S540–S541** : **C13 passe** (la remontée des petites bulles, Tomiyama) ; la douzième revue (ADR-237 : un nombre recalculé à chaque
 changement de paramètre).
+**S542–S545** : **C16 passe** (la pesanteur effective inclinée et la rotation dans δ ; 4.17 partiel) ; **C21 passe** (la masse d'un
+compartiment avec et sans δ, fixe et accéléré) ; un plan sauté et une limite affirmée sans calcul, relevés.
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
