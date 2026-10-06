@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 10:29 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 10:37 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S518 — A329, le recoupage d'une coque qui bouge sous budget dans un grand domaine ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S517 — la coque en marche et son sillage ; A329 ([journal](notes/JOURNAL.md)). Avant : S516 (la septième revue de méthode)
 Session suivante : **S518 — A329** : le recoupage d'une coque qui bouge sous budget dans un grand domaine — l'extraction (`decoupee`, terme de paroi, transfert) et la comparaison à l'ombre limitées à la boîte du recoupage, ce qui reste entier dans `set_solid_rigid` mesuré étage par étage ; le banc du sillage (786 000 mailles) en témoin, la coque de la porte D en régression. Ordres de grandeur calculés (ADR-232), enchaînements arrêtés au premier échec (ADR-231). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
 Maillons        : 0 — S517 : 4.13 avance (la coque en marche sur la carte) ; A329 ouverte

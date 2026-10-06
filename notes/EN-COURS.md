@@ -62,37 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S517 — **terminée**. En autonomie, **4.13, la coque en marche et sa vague d'étrave** : la liste dit « Manquent la coque en marche
-et sa vague d'étrave, la gerbe (4.16), la résolution près de la coque (± 43–49 % à 25 cm) et la production GPU ». La coque mobile tourne
-sur la carte depuis S503–S509 ; son sillage dans δ n'a jamais été jugé.
+Session : S518 — **en cours**. En autonomie, **A329** (S517) : le recoupage d'une coque qui bouge coûte 25 ms par pas sur 786 000 mailles,
+où 6.4 le disait sous 1 ms (dans un petit domaine). Le banc du sillage, instrumenté par étage (S518) : **recoupage du cœur 13,1 ms, envoi
+à la carte 11,5 ms**, extraction 0,35 ms, l'hôte 0,07 ms (4 s, 400 pas).
 
-**Ce que la session fait.** Un banc sur la carte (`--lineaire-sillage`) : la coque de la porte D menée à 3 m/s (départ en rampe d'1 s) dans
-un δ de 48 × 24 × 4 m (192 × 96 × 16 mailles de 25 cm), éponges aux bords ; le cœur ne sert que de découpeur (recoupage en boîte, S508).
-Après 10 s, le sillage : pour chaque distance derrière la coque, la position latérale de la plus forte élévation hors de l'axe ; la droite
-de ces points donne le demi-angle.
+**Ce que la session fait.** (a) Le cœur : les ouvertures d'avant le recoupage, aujourd'hui recopiées en entier dans les tampons de
+sauvegarde (que le pas réemploie), deviennent des tableaux de la base, persistants, copiés dans la seule réunion de la boîte du recoupage
+précédent et de la nouvelle (hors d'elle, avant = après) ; la vitesse des faces qui s'ouvrent, les colonnes solides, le transfert de S334 et
+ses poids, `changed_faces` limités à la boîte ; la vérification de finitude et la boîte du solide en une seule passe. (b) La carte :
+`set_motion_parts` prend les tableaux du cœur sans les concaténer, et ne compare à l'ombre que dans la réunion des deux dernières boîtes —
+hors d'elle, rien n'a pu changer (le dépôt, le terme de paroi, le transfert et les faces ne sont non nuls que dans la boîte de leur pas) ; le
+premier appel compare tout.
 
-**Ordre de grandeur, calculé.** Profondeur 4 m : Froude de profondeur `U/√(gh)` = 0,48 (sous-critique : l'angle de Kelvin des eaux
-profondes, 19,47°) ; onde transverse `λ = 2πU²/g` = 5,76 m (`kh` = 4,4 : eau profonde) ; à 20 m derrière, la ligne des cuspides passe à
-7,1 m de l'axe — dans le domaine (12 m de demi-largeur). 295 000 mailles : la carte seule le permet.
+**Ordre de grandeur, calculé.** Ce qui reste entier : la passe sur les 836 000 nœuds (finitude et boîte), le remplissage à zéro du terme de
+paroi (786 000 mailles) et des poids (245 000), les boucles de colonnes (49 000) — ≈ 1,9 M valeurs lues ou écrites une fois, contre
+≈ 20 M aujourd'hui (trois copies et une boucle de 2,4 M faces, 786 000 mailles en colonnes, la concaténation et la comparaison de 6,7 M
+valeurs). À ~1 ns la valeur : ≈ 2 ms. La boîte de la coque : ≈ 28 × 14 × 9 mailles — négligeable.
 
-**Critères, écrits avant.** (1) le demi-angle du sillage à 2° de 19,47° ; (2) aucune instabilité (l'élévation bornée, le volume tenu à
-10⁻⁶ m³ hors éponge) ; (3) le coût par pas publié. 4.13 : la coque en marche et sa vague dans δ, sur la carte.
+**Critères, écrits avant.** (1) **Au bit** : le recoupage en boîte rend les tableaux et la surface du recoupage entier (l'essai S508, plus
+les vitesses des faces) ; la carte, avec l'envoi en boîte, rend la surface du banc du sillage au bit de l'envoi entier (empreinte des bits
+de η). (2) **Le coût** : recoupage + extraction + envoi ≤ 3 ms par pas sur le banc du sillage (786 000 mailles), contre 24,9. (3) La suite
+du cœur, les essais de la carte (`--lineaire-mobile`, `--lineaire-coque`) inchangés. A329 levée si (1) et (2) tiennent.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le banc ; (1)–(3).
-- [x] **P3** — preuve ; liste 4.13 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — le cœur en boîte ; (1) côté cœur, (3).
+- [ ] **P3** — la carte en boîte ; (1) côté carte, (2).
+- [ ] **P4** — preuve ; A329 ; liste 6.4 ; rituel.
 
 ### Notes de reprise
-- **P2 (en cours)** — premier instrument (maximum latéral) : 2° — il prend le champ proche. Second (le bord du coin à un seuil) : domaine
-  64 × 24 m saturé (le coin touche les éponges, les ondes du démarrage remplissent le domaine) → 64 × 48 m, rampe de 3 s : **24,1 / 21,2 /
-  14,6° aux seuils 0,2 / 0,3 / 0,4** — l'instrument ne tranche pas (retenir 0,3 serait choisir après coup). **Troisième instrument, déclaré
-  avant de le lancer** : la moyenne de |η| le long des rayons issus de l'étrave, de 10 à 24 m, pour chaque angle de 5 à 35° (pas de 0,5°) ;
-  l'angle du maximum contre 19,47° à 2°. L'élévation maximale, 0,72 m, est sur l'étrave (la stagnation, `U²/2g` = 0,46 m, amplifiée par le
-  couvercle partiel). Recoupage CPU 25 ms par pas sur 786 000 mailles (les boucles entières du cœur et de la géométrie dominent).
-- **P2 fini** — instrument 3 (déclaré avant) : maximum à 6,5° (transverses), local à 17°, amplitude ÷2 entre 21 et 25° → **(1) manqué**,
-  pas de quatrième instrument. (2) tenu. (3) 25,5 ms : **A329** ouverte (les boucles entières du recoupage sur un grand domaine ; 6.4 à
-  0,82 ms ne vaut que pour un petit domaine — la liste le dit).
-- **P3** — preuve SILLAGE-S517 ; listes 4.13 et 6.4 (limite) ; A329 ; index ; journal.
-
