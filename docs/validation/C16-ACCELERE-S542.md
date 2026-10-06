@@ -37,3 +37,12 @@ s'assècherait) — l'essai prend 0,05 g.
 **4.17 devient partiel ; C16 l'est aussi** : manquent la rotation (la surface d'équilibre cylindrique d'ADR-002 §2.2, une force
 centrifuge qui dépend du point), la pesanteur horizontale sur la carte GPU et dans le pas couplé, une inclinaison au-delà du modèle
 linéaire, et C06 (l'invariance galiléenne) sur le système.
+
+## 5. S543 — la rotation
+
+*S543, 2026-10-06.* `Volume3::set_horizontal_gravity_field(g₀, Ω², centre)` : la part horizontale de `g_eff` affine, `g₀ + Ω²·(x −
+centre)` — dans une cuve d'une station tournante, la force centrifuge s'incline le long de la cuve. Une cuve de 20 m et 2 m d'eau (80 × 1 ×
+8 mailles), à 100 m de l'axe (Ω = 0,3132 rad/s, `g = Ω²R`), quatre périodes du premier mode (36,7 s) : la surface moyenne, ajustée par une
+parabole, a une **courbure de 0,010152 m⁻¹ pour 1/R = 0,010000 (1,5 %)** — une flèche de 0,508 m sur 20 m pour 0,501 (le cylindre). Critère
+(2 % de `1/R`, écrit avant) : tenu. Coriolis n'est pas porté (il n'agit pas sur l'équilibre). **C16 est exécuté** dans ses deux parties,
+dans δ linéaire (`cargo test … s543`).

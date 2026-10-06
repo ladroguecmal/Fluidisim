@@ -657,3 +657,10 @@ S512) relevée une fois ; le décompte arrêté par l'outil. Maillons **1**. Sui
 `set_horizontal_gravity` — la part horizontale de `g_eff`, une force de volume au champ prédit de δ. **Mesuré** : la surface au repos à
 0,003° de la normale à `g_eff`, la période à 0,11 % de la formule. Maillons **0** (4.17 devient partiel, 13.2 avance). Suivant : **S543**.
 
+## S543 — 2026-10-06 — la rotation de C16
+
+**Entrée.** En autonomie ; la seconde part de C16. **Fait** ([preuve](../docs/validation/C16-ACCELERE-S542.md) §5) : la pesanteur horizontale
+affine dans δ (`Ω²·x` : la force centrifuge le long d'une cuve d'une station tournante). **Mesuré** : la surface moyenne prend la courbure
+du cylindre de l'axe à 1,5 % (flèche 0,508 m pour 0,501). **C16 passe dans ses deux parties.** Maillons **0** (4.17, 13.2). Suivant :
+**S544**.
+

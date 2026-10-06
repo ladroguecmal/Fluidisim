@@ -196,6 +196,8 @@ pub struct Volume3 {
     /// **S542 : la composante horizontale de `g_eff`** (m/s², 4.17, C16) — une force de volume au champ prédit du pas linéaire ; nulle par
     /// défaut.
     horizontal_g: [f32; 2],
+    /// **S543 : sa partie affine**, `Ω²` (s⁻²) et le point où elle s'annule (m) — la force centrifuge d'une station tournante.
+    horizontal_g_field: Option<(f32, [f32; 2])>,
     /// Le volume que cette éponge a retiré depuis la configuration, m³ — ce que le bilan doit lui rendre.
     sponge_removed: f64,
     /// **S385 : la multigrille 3D** (ADR-207 D3), préconditionneur du pas mobile ; `None` par défaut — le Jacobi de
@@ -320,6 +322,7 @@ impl Volume3 {
             lid_floor: 1.,
             linear_sponge: None,
             horizontal_g: [0.; 2],
+            horizontal_g_field: None,
             sponge_removed: 0.,
             mg: None,
             graded: None,
@@ -656,6 +659,18 @@ impl Volume3 {
             return Err(Error::NotFinite);
         }
         self.horizontal_g = g;
+        Ok(())
+    }
+
+    /// **S543 — la pesanteur horizontale affine** (ADR-002 §2.2, C16) : `g_h(x) = g₀ + Ω²·(x − centre)` — dans une cuve d'une station
+    /// tournante, la force centrifuge s'incline le long de la cuve ; à l'équilibre, la surface `η = Ω²·|x − centre|²/(2g)` (le cylindre de
+    /// l'axe, au premier ordre). `g₀` comme [`Volume3::set_horizontal_gravity`]. Coriolis n'est pas porté. Refus `NotFinite`.
+    pub fn set_horizontal_gravity_field(&mut self, g0: [f32; 2], omega2: f32, centre: [f32; 2]) -> Result<(), Error> {
+        if !g0.iter().chain(&centre).all(|x| x.is_finite()) || !omega2.is_finite() {
+            return Err(Error::NotFinite);
+        }
+        self.horizontal_g = g0;
+        self.horizontal_g_field = Some((omega2, centre));
         Ok(())
     }
 
@@ -1652,14 +1667,17 @@ impl Volume3 {
         self.vs.copy_from_slice(&self.v);
         self.ws.copy_from_slice(&self.w);
         // S542 : la pesanteur horizontale, une force de volume sur les faces ouvertes (les faces de mur restent à zéro).
-        if self.horizontal_g != [0.; 2] {
-            let [gx, gy] = self.horizontal_g.map(|g| g * dt as f32);
+        if self.horizontal_g != [0.; 2] || self.horizontal_g_field.is_some() {
+            let dtf = dt as f32;
+            let [gx, gy] = self.horizontal_g.map(|g| g * dtf);
+            // S543 : la partie affine, au centre de chaque face.
+            let (o2, c) = self.horizontal_g_field.unwrap_or((0., [0.; 2]));
             for k in 0..nz {
                 for j in 0..ny {
                     for i in 1..nx {
                         let f = self.fu(i, j, k);
                         if self.cut.as_ref().map_or(true, |g| g.open_u[f] > 0.) {
-                            self.us[f] += gx;
+                            self.us[f] += gx + dtf * o2 * (i as f32 * dx - c[0]);
                         }
                     }
                 }
@@ -1667,7 +1685,7 @@ impl Volume3 {
                     for i in 0..nx {
                         let f = self.fv(i, j, k);
                         if self.cut.as_ref().map_or(true, |g| g.open_v[f] > 0.) {
-                            self.vs[f] += gy;
+                            self.vs[f] += gy + dtf * o2 * (j as f32 * dx - c[1]);
                         }
                     }
                 }

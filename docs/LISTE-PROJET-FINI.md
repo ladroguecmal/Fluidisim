@@ -322,8 +322,9 @@ pas recopiée ici (L137).
   Restent les éclaboussures détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *partiel* depuis S542 : la composante horizontale de
   `g_eff` dans le pas linéaire de δ — la surface au repos à 0,003° de la normale à `g_eff`, la période du ballottement à 0,11 % de sa
-  formule (C16 en partie : [preuve](validation/C16-ACCELERE-S542.md)). Manquent la rotation, la carte GPU et le pas couplé, C06 sur le
-  système (partiel sur un véhicule d'essai 1D).
+  formule ; **S543 : la rotation** — la surface cylindrique d'une station tournante à 1,5 % de `1/R` (C16 exécuté :
+  [preuve](validation/C16-ACCELERE-S542.md)). Manquent Coriolis, la carte GPU et le pas couplé, C06 sur le système (partiel sur un
+  véhicule d'essai 1D).
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est
   désormais comptée**. S310 : bilan **exact par télescopage** tenu par les deux pas, plancher
   publié ; cuve fermée à 7,4·10⁻¹² m de dérive sur 5 s, murs à zéro exact ; scène couplée à
@@ -744,8 +745,8 @@ pas recopiée ici (L137).
   ([preuve](validation/CORPS-RIGIDE-S331.md)). Sur véhicules d'essai : C01, C03, C04, C06 (partiel),
   C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
   aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
-  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)) ; **C16 en partie depuis S542** (l'inclinaison et la période, pas la
-  rotation ; [preuve](validation/C16-ACCELERE-S542.md)). Non exécutés : C05, C09, C11, C14, C15, C21. **C18 partiel**
+  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)) ; **C16 depuis S542–S543** (l'inclinaison, la période, la rotation ;
+  [preuve](validation/C16-ACCELERE-S542.md)). Non exécutés : C05, C09, C11, C14, C15, C21. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

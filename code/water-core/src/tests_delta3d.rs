@@ -2615,3 +2615,36 @@ fn a_tank_in_an_accelerated_frame_tilts_and_sloshes_s542() {
     assert!((mesure / periode - 1.).abs() <= 0.01, "critère 3");
     assert_eq!(v.set_horizontal_gravity([f32::NAN, 0.]), Err(Error::NotFinite));
 }
+
+/// **S543 — la rotation de C16** : une cuve de 20 m et 2 m d'eau (80 × 1 × 8 mailles) à 100 m de l'axe d'une station tournante (g = Ω²R) ;
+/// la pesanteur horizontale `Ω²·(x − 10 m)`. La surface moyenne sur quatre périodes, ajustée par une parabole : sa courbure à 2 % de `1/R`.
+#[test]
+fn a_tank_on_a_rotating_station_takes_the_cylindrical_surface_s543() {
+    let (n, dx, g, r) = (80usize, 0.25f32, 9.81f64, 100f64);
+    let (mut v, _) = volume(n, 1, 8, dx, g as f32);
+    v.set_surface(&vec![2.0; n]).unwrap();
+    v.set_horizontal_gravity_field([0.; 2], (g / r) as f32, [10., 0.]).unwrap();
+    let k = std::f64::consts::PI / 20.;
+    let periode = 2. * std::f64::consts::PI / (g * k * (k * 2.0f64).tanh()).sqrt();
+    let pas = (4. * periode / 0.01).round() as usize;
+    let mut moyenne = vec![0f64; n];
+    for _ in 0..pas {
+        v.step_surface_linear(10_000, 2000, &Jobs).unwrap();
+        for (m, e) in moyenne.iter_mut().zip(v.surface()) {
+            *m += *e as f64 / pas as f64;
+        }
+    }
+    // La parabole `a·x'² + c`, x' = x − 10 (symétrique) : moindres carrés sur x'².
+    let (mut s1, mut s2, mut sy, mut s2y) = (0f64, 0f64, 0f64, 0f64);
+    for (i, e) in moyenne.iter().enumerate() {
+        let q = ((i as f64 + 0.5) * dx as f64 - 10.).powi(2);
+        s1 += 1.;
+        s2 += q;
+        sy += e;
+        s2y += q * e;
+    }
+    let s22: f64 = moyenne.iter().enumerate().map(|(i, _)| ((i as f64 + 0.5) * dx as f64 - 10.).powi(4)).sum();
+    let a = (s1 * s2y - s2 * sy) / (s1 * s22 - s2 * s2);
+    println!("S543 C16 rotation : courbure {:.6} m⁻¹ (1/R = {:.6}), écart {:.2e} ; flèche sur 20 m {:.4} m (0,500)", 2. * a, 1. / r, 2. * a * r - 1., a * 100.);
+    assert!((2. * a * r - 1.).abs() <= 0.02, "critère 2");
+}

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S543 — **en cours**. En autonomie, **la rotation de C16** (ADR-002 §2.2) : une cuve de 20 m à 100 m de l'axe d'une station qui
+Session : S543 — **terminée**. En autonomie, **la rotation de C16** (ADR-002 §2.2) : une cuve de 20 m à 100 m de l'axe d'une station qui
 tourne à 0,313 rad/s — la pesanteur est centrifuge (Ω²R = 9,8 m/s²) ; « surface d'équilibre cylindrique de flèche 50 cm ».
 
 **Ce que la session fait.** `Volume3::set_horizontal_gravity_field(g₀, Ω², centre)` : la part horizontale de `g_eff` affine dans le plan,
@@ -78,8 +78,11 @@ parabole : sa courbure à 2 % de `1/R` (la flèche à 2 % de 0,500 m) ; le quant
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — le champ, l'essai ; (1), (2).
-- [ ] **P3** — preuve ; C16 ; liste 4.17 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le champ, l'essai ; (1), (2).
+- [x] **P3** — preuve ; C16 ; liste 4.17 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `set_horizontal_gravity_field` ; essai `s543` : courbure 0,010152 (1,5 %). Suite verte.
+- **P3** — §5 de C16-ACCELERE-S542 ; C16 ; listes 4.17, 13.2 ; journal.
+

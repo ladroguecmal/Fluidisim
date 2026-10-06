@@ -130,7 +130,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **4.14** Plage | B | — | 2.7, 3.5, 4.16 | — | **3** |
 | **4.15** Rochers et obstacles immergés | B | le couplage à B/W sur fond coupé ; un modèle de turbulence | — | 6.2 | **0** |
 | **4.16** Surface non graphe | B | le raccord (A316), puis APIC en 3D | — | 3.3, 4.1, 4.12, 4.13, 4.14, 4.20, 7.2, 7.4 | **0** |
-| **4.17** Référentiel accéléré et invariance galiléenne | B | l'inclinaison dans δ linéaire faite (S542) ; la rotation, la carte, C06 | 1.8 | 13.2 | **1** |
+| **4.17** Référentiel accéléré et invariance galiléenne | B | C16 fait dans δ linéaire (S542–S543) ; Coriolis, la carte, C06 | 1.8 | 13.2 | **1** |
 | **4.18** Conservation de la masse et de l'énergie | C | le compteur sur la carte ; énergie et quantité de mouvement ; C09 | — | 13.2 | **0** |
 | **4.19** Coût de δ compatible avec le budget | B | d'autres scènes ; plusieurs domaines en direct ; un 99ᵉ centile en direct | — | 9.11 | **0** |
 | **4.20** Changement de solveur pendant une simulation | B | — | 4.16 | 4.11 | **1** |

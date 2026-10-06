@@ -794,6 +794,9 @@ puis à une rotation de 0,313 rad/s.
 > *Note du 2026-10-06, S542, sur C16* ([C16-ACCELERE-S542](C16-ACCELERE-S542.md)) : **exécuté en partie** dans δ linéaire — la pente au
 > repos à 0,003° de la normale à `g_eff` (sous 0,05 g : 0,3 g sortirait du modèle linéaire), la période à 0,11 % de la formule. **La
 > formule donne 4,40 s, pas « ≈ 3,5 s »** : la valeur de l'énoncé est fausse, la formule fait foi. La rotation reste à faire.
+>
+> *Note du 2026-10-06, S543, sur C16* : **la rotation exécutée** — la surface d'équilibre d'une cuve de 20 m à 100 m de l'axe, courbure à
+> 1,5 % de `1/R` (flèche 0,508 m pour 0,501). C16 passe dans ses deux parties (Coriolis non porté).
 
 ## C17 — Inondation limitée par l'air
 
