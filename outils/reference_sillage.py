@@ -11,6 +11,7 @@ de W.
 
     python outils/reference_sillage.py instrument        — l'instrument de S517 (maximum des rayons) sur la référence, (σ, U), trois grilles
     python outils/reference_sillage.py instrument_fige   — l'instrument figé (le bord d'Airy, 4–6 λ₀) sur la référence, trois grilles
+    python outils/reference_sillage.py coque             — S520 : l'instrument figé sur la référence de la coque (4 × 1,6 m), trois grilles
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import sys
@@ -30,8 +31,9 @@ def phi(z):
     return out
 
 
-def champ(sigma, u, t, lx, ly, dx, x0, coupure):
-    """η au temps t sur la grille [−lx/2, lx/2) × [−ly/2, ly/2), pas dx ; la source part de (x0, 0)."""
+def champ(sigma, u, t, lx, ly, dx, x0, coupure, spectre=None):
+    """η au temps t sur la grille [−lx/2, lx/2) × [−ly/2, ly/2), pas dx ; la source part de (x0, 0). `spectre(KX, KY)` : la transformée
+    de la pression de la source (N), la gaussienne de `wake_source` par défaut."""
     nx, ny = int(round(lx / dx)), int(round(ly / dx))
     kx = 2 * np.pi * np.fft.fftfreq(nx, dx)
     ky = 2 * np.pi * np.fft.fftfreq(ny, dx)
@@ -43,7 +45,8 @@ def champ(sigma, u, t, lx, ly, dx, x0, coupure):
     i_t = t / (2j * ws) * (np.exp(-1j * om * t) * phi(1j * (ws + om) * t) - np.exp(-1j * ws * t) * phi(1j * (ws - om) * t))
     # La grille commence à −lx/2 : la FFT indexe depuis l'origine de la grille.
     xg0, yg0 = -lx / 2, -ly / 2
-    ph = F * np.exp(-0.5 * (k * sigma) ** 2) * np.exp(-1j * (KX * (x0 - xg0) + KY * (0 - yg0)))
+    forme = F * np.exp(-0.5 * (k * sigma) ** 2) if spectre is None else spectre(KX, KY)
+    ph = forme * np.exp(-1j * (KX * (x0 - xg0) + KY * (0 - yg0)))
     eta_k = -(k / RHO) * ph * i_t
     eta_k[k == 0] = 0
     eta_k[k > coupure] = 0
@@ -146,6 +149,37 @@ def comparer(chemin):
               flush=True)
 
 
+# S520 — la coque de la porte D (4 × 1,6 m, 500 kg/m³) : sa pression hydrostatique `ρ g d` sur son empreinte, `d` son tirant.
+COQUE_L, COQUE_B, COQUE_D, COQUE_U, COQUE_T = 4.0, 1.6, 500.0 / 1025.0, 3.0, 30.0
+
+
+def spectre_coque(KX, KY):
+    """La transformée d'un rectangle `L × B` de pression `ρ g d` : `ρ g d · L B · sinc(kx L/2) · sinc(ky B/2)`."""
+    sx = np.sinc(KX * COQUE_L / 2 / np.pi)
+    sy = np.sinc(KY * COQUE_B / 2 / np.pi)
+    return RHO * G * COQUE_D * COQUE_L * COQUE_B * sx * sy
+
+
+def coque():
+    """S520 P2 — l'instrument figé (le bord d'Airy, 4–6 λ₀, rayons issus du centre) sur la référence de la coque, trois grilles, la
+    coupure au nombre d'onde de Nyquist de δ (π/0,25 m) : critère (1)."""
+    u, t = COQUE_U, COQUE_T
+    x0 = -u * t / 2
+    xs_src = x0 + u * t
+    d0, d1 = fenetre(u, t)
+    for (lx, ly, dx) in [(256.0, 128.0, 0.25), (512.0, 256.0, 0.25), (512.0, 256.0, 0.125)]:
+        xs, ys, eta = champ(0.0, u, t, lx, ly, dx, x0, np.pi / 0.25, spectre_coque)
+        _, angles, prof = rayons(lambda x, y: bilineaire(xs, ys, eta, x, y), xs_src, d0, d1)
+        a_max, a_k = bord_airy(angles, prof)
+        par = []
+        for n in range(2, 7):
+            lam = 2 * np.pi * u * u / G
+            _, ang1, pr1 = rayons(lambda x, y: bilineaire(xs, ys, eta, x, y), xs_src, n * lam, (n + 1) * lam)
+            par.append(f"{n}-{n + 1}:{bord_airy(ang1, pr1)[1]:.2f}")
+        print(f"REF_S520 coque grille={lx:.0f}x{ly:.0f}@{dx} U={u} T={t} fenetre=[{d0:.2f},{d1:.2f}] maximum_deg={a_max:.2f}"
+              f" bord_airy_deg={a_k:.2f} kelvin_deg=19.47 ecart_deg={a_k - 19.47:.2f} par_lambda {' '.join(par)}", flush=True)
+
+
 def instrument():
     t, coupure = 24.0, 6.0
     for sigma in [0.5, 1.0, 2.0]:
@@ -167,4 +201,4 @@ if __name__ == "__main__":
     if sys.argv[1] == "comparer":
         comparer(sys.argv[2])
     else:
-        {"instrument": instrument, "instrument_fige": instrument_fige}[sys.argv[1]]()
+        {"instrument": instrument, "instrument_fige": instrument_fige, "coque": coque}[sys.argv[1]]()

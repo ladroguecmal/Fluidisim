@@ -83,9 +83,19 @@ source, et rien n'est conclu de δ). (2) **4.13, le sillage mesuré** : le bord 
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — la référence de la coque, l'instrument ; (1).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la référence de la coque, l'instrument ; (1).
 - [ ] **P3** — la coque dans δ ; (2), (3).
 - [ ] **P4** — preuve ; liste 4.13 ; rituel.
 
 ### Notes de reprise
+- **P2 fini — (1) manqué.** La référence de la coque (rectangle 4 × 1,6 m, `ρ g d`, coupure de Nyquist de δ), trois grilles : le bord
+  d'Airy lit **16,40 / 16,40 / 16,36°** à 3 m/s (par λ₀ : 16,3 / 16,1 / 16,3 / 16,4 / 16,6° de 2 à 7 λ₀ — stable). Balayage de la vitesse
+  sur la référence : 19,1° à 1,5 m/s, 14,4° à 2, 21,7° à 2,5, 16,4° à 3, 19,0° à 4 — **l'angle lu sur une coque de 4 m oscille avec
+  L/λ₀** (les ondes d'étrave et de poupe interfèrent) ; 19,47° n'est pas la cible de la théorie à 3 m/s. Les vitesses qui lisent Kelvin
+  sont hors de portée de δ (1,5 m/s : λ₀ = 1,44 m, 6 mailles ; 4 m/s : λ₀ = 10 m, `kh` = 2,4 par 4 m de fond, fenêtre au bord du
+  transitoire). Comme déclaré, rien n'est conclu de δ contre 19,47° à 3 m/s.
+- **Critère nouveau, écrit avant de lancer δ** (ADR-222 : la cible contredite par la mesure est remplacée) : **(2') le bord d'Airy sur δ à
+  1° de celui de la théorie de la même coque, 16,40°**, fenêtre 4–6 λ₀, rayons issus du centre ; et par fenêtre d'1 λ₀ de 3 à 6 λ₀, à
+  1,5°. (3) inchangé. 4.13 « le sillage mesuré » s'entend alors : le sillage de δ est celui de la théorie linéaire de sa coque.
+
