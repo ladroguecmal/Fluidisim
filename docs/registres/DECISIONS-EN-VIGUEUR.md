@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**243 ADR** — actée : 192, proposée : 49, rétractée en partie : 2.
+**244 ADR** — actée : 193, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -232,7 +232,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 226 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 | 226 |
 | [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |
@@ -253,4 +253,5 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [240](../adr/ADR-240-quinzieme-revue-de-methode.md) | Quinzième revue de méthode (S551–S555) | actée | S556 | 222 239 | 242 |
 | [241](../adr/ADR-241-les-liquides-de-v.md) | Les liquides de V : non miscibles, en couches | actée | S559 | 010 215 |  |
 | [242](../adr/ADR-242-seizieme-revue-de-methode.md) | Seizième revue de méthode (S556–S560) | actée | S561 | 222 240 | 243 |
-| [243](../adr/ADR-243-dix-septieme-revue-de-methode.md) | Dix-septième revue de méthode (S561–S565) | actée | S566 | 222 242 |  |
+| [243](../adr/ADR-243-dix-septieme-revue-de-methode.md) | Dix-septième revue de méthode (S561–S565) | actée | S566 | 222 242 | 244 |
+| [244](../adr/ADR-244-dix-huitieme-revue-de-methode.md) | Dix-huitième revue de méthode (S566–S570) | actée | S571 | 222 243 |  |

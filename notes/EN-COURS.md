@@ -71,6 +71,6 @@ assertion de route fausse). **ADR-244** : D1, un essai n'affirme que ce que le p
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-244, METHODE, L403, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
