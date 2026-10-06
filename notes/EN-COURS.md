@@ -62,33 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S559 — **terminée**. En autonomie, **5.7 — plusieurs liquides** (absent ; A17) : **ADR-241** (non miscibles, en couches ; l'état
-entier, une composition parallèle ; la pression par couches ; le débit à la session suivante), puis sa première pièce — **la pression en un
-point d'un nœud stratifié** (`hydro_liquids.rs`, sous-module de V).
+Session : S560 — **en cours**. En autonomie, **5.7 — le débit par couches** (ADR-241 D4), après la pression d'un nœud stratifié (S559).
 
-**Ce que la session fait.** `Liquid { density_kg_m3 }` ; `pressure_at(nœud, composition, liquides, formes, g_eff, point)` : les couches
-rangées par densité (stable), chaque interface le plan de la géométrie pour le volume cumulé, la somme des `ρᵢ·|g|·épaisseurᵢ` au-dessus du
-point. Refus : composition qui ne somme pas au volume, densité non positive, plus de 8 liquides.
+**Ce que la session fait.** `step_liquids(…, composition, liquides, pluie)` : (a) un orifice ou une vanne débite sur la différence de
+**pression** au seuil, `Q = C_d·A·√(2Δp/ρ)`, `ρ` le liquide de la couche amont au seuil (la condition `h_amont > h_aval` des surfaces ne
+vaut plus : un côté chargé d'huile a sa surface plus haute à l'équilibre) ; (b) après le pas, la composition suit les transferts entiers :
+chaque arête prend dans la couche à son seuil (le volume sous le plan du seuil, comparé aux volumes cumulés), puis au-dessus, puis
+au-dessous ; les débordements, en dernier, la couche du dessus ; la pluie apporte le liquide `pluie`. Formes volumiques seulement (les
+anciennes tables +Z n'ont pas de volume sous un plan) ; sans air scellé dans cette version. Le pas sans composition reste celui d'avant.
 
-**Références, calculées avant** (ADR-239 D1 : des formes fermées indépendantes de la géométrie du code). (1) Cuve droite 4 × 1 × 2 m,
-eau 4 m³ (1 m) sous huile 2 m³ (0,5 m, ρ = 850) : au fond `9,81·(1000·1 + 850·0,5)` = **13 979,25 Pa** ; à 1,2 m, `9,81·850·0,3` =
-2 501,55 Pa. (2) La même sous `g_eff = (1 ; 0 ; −9,759)` : chaque interface passe par la colonne centrale à la hauteur `V/A` (le plan ne
-touche ni le fond ni le couvercle : pente 0,1025, demi-largeur 2 m → 0,205 m de dénivelé, sous les 0,5 m d'huile et au-dessus du fond),
-d'où la pression au coin bas `x = −2 m` par les distances le long de la verticale. (3) La carène en V des essais de géométrie (section
-`|x| ≤ z`, 1 m de long : `V(h) = h²`) : eau 1 m³ (`h` = 1 m) sous huile 0,69 m³ (`h` = 1,3 m) → à la quille `9,81·(1000 + 850·0,3)` =
-**12 311,55 Pa**. (4) Un seul liquide : `ρ·|g|·(surface − z)`, la surface du pas présent.
+**Références, calculées avant.** *Manomètre en U* : deux cuves de 1 × 1 × 2 m reliées au fond par deux orifices (un par sens, 1 000 mm²,
+`C_d` = 0,62) ; à gauche 1,5 m³ d'eau, à droite 0,5 m³ d'eau sous 0,4 m³ d'huile (ρ = 850). Équilibre `1000·h_g = 1000·h_d + 850·0,4`,
+`h_g + h_d = 2` → **`h_g` = 1,17 m, `h_d` = 0,83 m**, la surface de droite à 1,23 m — plus haute que celle de gauche. La constante de temps
+(ADR-240 D2) : `d√Δ/dt = −C_d·a·√(2g)/A`, Δ₀ = 0,66 m → **295 s** ; l'essai dure 600 s. Le dépassement du pas explicite près de
+l'équilibre, `(2·C_d·a·√(2g)·dt/A)²` = 3·10⁻⁷ m, sous le quantum. *Vidange stratifiée* : une cuve de 1 m², 0,5 m³ d'eau sous 0,5 m³
+d'huile, un orifice au fond vers dehors : l'eau sort seule, sous la charge `h_e + 0,425` ; `t_e = 2·(√0,925 − √0,425)/(C_d·a·√(2g))` =
+**225,7 s**, puis l'huile.
 
-**Quantum** (ADR-236 D1) : l'inversion géométrique tient le demi-millilitre ; sur 4 m² de section, 0,125 µm de hauteur, soit
-≈ 1,2·10⁻³ Pa sur 1,4·10⁴ — 10⁻⁷ relatif. **Critères, écrits avant** : (1)–(4) à 10⁻⁵ relatif (rapport 100) ; (5) les refus ; (6) l'ordre
-des couches ne dépend pas de l'ordre de la table (l'huile déclarée avant l'eau).
+**Quantum** (ADR-236 D1) : 1 ml sur 1 m², 1 µm de hauteur ; la durée, le pas de 0,1 s sur 225 s (4,4·10⁻⁴).
+
+**Critères, écrits avant.** (1) Manomètre : `h_g` à 10⁻⁴ m de 1,17 m (rapport 100) ; l'huile reste entière à droite (400 000 ml, exact) ;
+chaque liquide conservé à l'entier. (2) Vidange : l'huile intacte, au millilitre, tant que l'eau n'est pas épuisée ; l'eau épuisée à 0,5 %
+de 225,7 s (rapport 11). (3) Un seul liquide : les volumes de `step_liquids` à 2 ml de ceux de `step` à chaque pas de la vidange d'eau
+seule. (4) Refus : une table +Z, une composition qui ne somme pas.
 
 ### Plan
 
-- [x] **P1** — jeton ; ADR-241 ; plan.
-- [x] **P2** — `hydro_liquids.rs` et ses essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 5.7 ; A17 ; rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `step_liquids` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — cinq essais `s559` : (1)–(4) à 4·10⁻⁸ au plus, (5), (6) tenus. Suite 721.
-- **P3** — preuve LIQUIDES-COUCHES-S559 ; liste 5.7 (absent → partiel) ; note A17 ; note à ADR-010 (Q4) ; index ; journal.
-
