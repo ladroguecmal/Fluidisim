@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 07:45 +02:00
+JETON            : libre
+Battement        : 2026-10-06 08:05 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S505 — 6.4, C23 sur le système ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S504 — la coque qui perce la surface, en mouvement sur la carte ([journal](notes/JOURNAL.md)). Avant : S503 (un solide qui bouge sur la carte)
-Session suivante : **S505 — C23 sur le système** (6.4) : le pas de δ 3D borné par la vitesse de la paroi — la borne gouvernante `|u − u_p| + c` d'ADR-035 contre la borne absolue ; une coque menée de plus en plus vite sur la carte et dans la référence, le Courant réalisé contre le prévu. Ordre de grandeur contre le terme concurrent (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` relancé à 7 h 40 pour 14 h.
-Maillons        : 0 — S504 : la coque qui perce, en mouvement sur la carte (6.4 avancée)
+Session en cours : aucune
+Dernière session : S505 — C23 sur le système ; A328 ([journal](notes/JOURNAL.md)). Avant : S504 (la coque qui perce la surface, en mouvement sur la carte)
+Session suivante : **S506 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S502–S505 — dont S505 : une référence non convergée jugée deux fois (départ impulsif, régime critique) avant une vérification de convergence sur trois points ; une machine arrêtée pendant le travail. **Sans attendre de « Continue »** ; `outils/eveil.py` relancé à 7 h 40 pour 14 h.
+Maillons        : 0 — S505 : C23 sur le système (6.4 avancée), A328 ouverte
 Registres       : dernier lot S503 (ADR-213 D3) ; le prochain au plus tard en S506
 ```
 

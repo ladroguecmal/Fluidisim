@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**228 ADR** — actée : 177, proposée : 49, rétractée en partie : 2.
+**229 ADR** — actée : 178, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -45,7 +45,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [032](../adr/ADR-032-c08-n-est-pas-executable-tel-qu-enonce.md) | C08 n'est pas exécutable tel qu'énoncé : un ordre est une propriété du couple (solveur, cas) | proposée | S24 |  | 040 |
 | [033](../adr/ADR-033-lambda-cut-a-deux-definitions.md) | `λ_cut` a deux définitions, et la dissipative est mesurable aujourd'hui | proposée | S25 | 005 030 | 034 035 041 |
 | [034](../adr/ADR-034-la-dissipation-est-un-filtre-passe-bas.md) | La dissipation numérique n'est pas une coupure, c'est un filtre passe-bas dont la loi est connue | proposée | S26 | 005 033 | 036 042 |
-| [035](../adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) | Le nombre de Courant : sa définition d'abord, sa borne ensuite, sa valeur en dernier | proposée | S27 | 033 | 046 |
+| [035](../adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) | Le nombre de Courant : sa définition d'abord, sa borne ensuite, sa valeur en dernier | proposée | S27 | 033 | 046 229 |
 | [036](../adr/ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) | δ ne porte pas la houle, il porte l'écart : la réinjection se dissout, le sillage devient le problème | proposée | S31 | 005 034 | 037 |
 | [037](../adr/ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md) | La dissipation est un allié pour la moitié du contenu de δ, et le dimensionnant pour l'autre | proposée | S32 | 001 036 |  |
 | [038](../adr/ADR-038-ce-que-les-deux-premiers-cas-de-solveur-ont-appris.md) | Ce que les deux premiers cas de solveur ont appris | proposée | S35 | 007 030 039 | 039 040 |
@@ -225,7 +225,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [212](../adr/ADR-212-la-bande-etroite-en-profondeur.md) | La bande étroite en profondeur : une hauteur eulérienne sous les particules | actée | S412 | 207 211 |  |
 | [213](../adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) | Accélérer : tolérance, plafond, rituel allégé, bancs courts | actée | S443 | 187 | 214 215 221 |
 | [214](../adr/ADR-214-b-entre-dans-la-bande.md) | B entre dans la bande : `Apic3` et sa carte reçoivent le couplage relatif | actée | S444 | 198 207 213 |  |
-| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 227 |
+| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 227 229 |
 | [216](../adr/ADR-216-le-banc-visuel.md) | Le banc visuel : mesurer plutôt que regarder | actée | S471 | 215 | 217 |
 | [217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md) | Le type d'eau, une option d'édition de la carte ; le ciel qui bouge, à l'atmosphère | actée | S473 | 197 216 |  |
 | [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 222 |
@@ -239,3 +239,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [226](../adr/ADR-226-troisieme-revue-de-methode.md) | Troisième revue de méthode (S492–S495) | actée | S496 | 222 223 224 | 228 |
 | [227](../adr/ADR-227-la-poussee-au-centre-de-la-part-immergee.md) | La poussée du proxy au centre de la part immergée | actée | S500 | 008 215 222 |  |
 | [228](../adr/ADR-228-quatrieme-revue-de-methode.md) | Quatrième revue de méthode (S497–S500) | actée | S501 | 222 226 |  |
+| [229](../adr/ADR-229-la-paroi-dans-la-vitesse-gouvernante.md) | La paroi elle-même dans la vitesse gouvernante d'une grille coupée | actée | S505 | 035 215 |  |
