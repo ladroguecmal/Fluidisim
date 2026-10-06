@@ -62,30 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S513 — **terminée**. En autonomie, **2.6 (niveaux C0 et C2 d'ADR-011) et 6.2, le courant** : 6.2 dit « Manquent le courant, la
-turbulence » ; le courant n'existe nulle part dans l'eau (2.6, absente, conçue par ADR-011). Et le lot des registres (dû).
+Session : S514 — **en cours**. En autonomie, **6.7, l'acteur poussé, renversé ou déplacé par l'eau** — absent. ADR-018 (seuils de
+profondeur humanoïdes 0,15 / 0,50 / 1,00 / 1,30 m ; produit d'emportement `HR = d·(v + 0,5)` et ses classes) et ADR-023 §3 (le nageur :
+un corps commandé en surface bascule en mode contraint quel que soit son `ω·dt`, la commande ajoutée dans le repère de la surface) en
+fixent les règles ; rien ne les construit.
 
-**Ce que la session fait.** `CurrentWater` : une requête qui enveloppe une autre (B, ou B + W) et lui ajoute un courant C0 (vecteur de
-surface constant) et son profil C2 (`u(z) = u_fond + (u_surface − u_fond)·exp(z/D)`) : la vitesse de l'eau augmentée du profil, et le champ
-de vagues **advecté** par le courant de surface (`η(x, t) = η₀(x − U·t, t)`, Galilée : l'effet Doppler d'un courant uniforme). Le champ C0/C2
-en lecture seule (ADR-011 §2). Un corps qui traîne dérive avec lui.
+**Ce que la session fait.** `actor` (cœur) : la classe de progression d'un humanoïde selon la profondeur, le produit d'emportement et sa
+classe, l'adulte emporté (`HR ≥ 1,25`) ; `Floating` d'un corps commandé (toujours contraint) ; le pas contraint commandé (la vitesse
+horizontale relaxée vers la vitesse de l'eau **plus** la commande).
 
-**Ordre de grandeur, écrit avant.** Une houle de 6 s (λ = 56 m, c = 9,37 m/s) sur un courant de 1 m/s : les crêtes vont à 10,37 m/s,
-+10,7 %. La dérive d'un pavé traîné (`C_d` = 1) : la vitesse relative `w(t) = w₀/(1 + k·w₀·t)`, `k = ½ρ·C_d·A/m` — pour la bouée de 0,5 m
-à 500 kg/m³ (A ≈ 0,1 m² immergé de face, m = 50 kg), `k` ≈ 1 m⁻¹ : la moitié de l'écart en ≈ 1 s.
+**Ordre de grandeur, écrit avant (ADR-023 §3.4).** Un nageur à 0,7 m/s ne fait plus route quand la vitesse orbitale de surface `πH/T`
+dépasse sa vitesse : à `T` = 5 s, `H* = 0,7·T/π` = 1,114 m — à la relaxation près (taux `ω` du corps ≫ `2π/T` : quelques pour mille).
 
-**Critères, écrits avant.** (1) sans courant, la requête rend l'enveloppée au bit ; (2) la vitesse d'une crête de houle sous courant :
-`c + U` à 0,5 % ; (3) le profil vertical exact (à 10⁻¹²) ; (4) la dérive d'un pavé traîné en eau calme sous courant : `w(t)` à 1 % de
-l'analytique. 2.6 passe à partiel ; 6.2 garde la turbulence pour seul manque.
+**Critères, écrits avant.** (1) les seuils de profondeur et les classes de `HR` d'ADR-018, de part et d'autre de chaque seuil ; l'exemple
+« 0,5 m à 2 m/s » emporte un adulte, « 0,5 m à 1,4 m/s » non ; (2) un corps commandé est contraint même à `ω·dt` = 0,14 ; (3) le nageur
+commandé à 0,7 m/s face à une houle de 5 s : sa vitesse sur le fond change de signe pour `H` au-dessus de `H*` (corrigé de la relaxation,
+calculé dans l'essai) et jamais en dessous, à 2 % près. 6.7 passe à partiel (manquent la poche d'air, le rouleau plongeant qui décolle le
+nageur).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `CurrentWater` ; essais (1)–(4).
-- [x] **P3** — preuve ; liste 2.6 et 6.2 ; lot des registres ; rituel.
+- [ ] **P2** — `actor` ; le mode contraint commandé ; essais (1)–(3).
+- [ ] **P3** — preuve ; liste 6.7 ; rituel.
 
 ### Notes de reprise
-- **P2** — `Current`, `CurrentWater`. (1) au bit ; (2) 5,42129 s exactement ; (3) profil exact ; (4) **manqué d'abord** sur la bouée flottante
-  (17 % : la traînée sous le centre de gravité la fait tanguer) → pavé neutre immergé : 0,37 %. 675 essais.
-- **P3** — preuve COURANT-S513 ; listes 2.6 (partiel) et 6.2 ; lot : feuille de route (S511–S513, 10 / 69 / 41), index ; journal.
-
