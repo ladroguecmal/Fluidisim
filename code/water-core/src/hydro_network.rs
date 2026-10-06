@@ -38,6 +38,10 @@ use crate::SimTime;
 #[path = "hydro_geometry.rs"]
 pub mod geometry;
 
+/// S559 — les liquides de V (ADR-241).
+#[path = "hydro_liquids.rs"]
+pub mod liquids;
+
 #[path = "hydro_snapshot.rs"]
 pub mod snapshot;
 
@@ -760,6 +764,10 @@ mod tests_infiltration;
 #[cfg(test)]
 #[path = "tests_air.rs"]
 mod tests_air;
+
+#[cfg(test)]
+#[path = "tests_liquids.rs"]
+mod tests_liquids;
 
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
