@@ -373,6 +373,8 @@ dans la vitesse gouvernante, ADR-229) ; A328 ouverte (la convergence en `dt` pr�
 qui change : 0,82 ms par pas) ; **9.5 validée** (le consommateur des impacts prédits, confirmés ou rejetés).
 **S511–S513** : la sixième revue (ADR-231) ; **6.8 validée** (l'impulsion d'entrée dans l'eau, C20) ; 2.6 partielle et 6.2 avancée (le
 courant C0 et C2 derrière la requête de l'eau).
+**S514–S516** : 6.7 partielle (l'acteur poussé ou emporté, le nageur commandé) ; 5.4 avancée (la vanne selon sa courbe, la pompe sur sa
+conduite et son énergie : ne manque que le réseau fermé) ; la septième revue (ADR-232).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

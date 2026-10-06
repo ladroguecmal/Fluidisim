@@ -6553,3 +6553,14 @@ avant de vérifier la convergence de la référence elle-même sur trois pas. Un
 guillemets imbriqués, puis sur une ancre absente ; la commande suivante, sur une ligne nouvelle, a lancé le script d'origine — une
 version fautive appliquée, rattrapée à la main. `&&` entre étapes dépendantes ; corriger le fichier visé, pas le correctif (ADR-231 D1).
 
+## L387
+
+**S512, S513 — le degré de liberté que la référence ignore.** Une bouée flottante tanguait sous sa propre traînée (17 % d'écart à la dérive
+de translation pure) ; une coque sans amortissement rebondissait hors de l'eau et faisait un second impact dans l'essai du seuil. La marge
+de stabilité (L384) ne suffisait pas : un corps d'essai n'a que les degrés de liberté que la référence décrit (ADR-232 D1).
+
+## L388
+
+**S510, S515 — l'ordre de grandeur de tête.** Une prévision de témoin (« ≈ 100 % » pour 8,6 %), un écart d'interpolation (1,9 % pour 1,6 %),
+un débit de pompe (6,32 l/s pour 6,83) : écrits dans le plan sans calcul. Une ligne de script d'abord (ADR-232 D2).
+

@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Trente, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md), une par celle de S501, [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md), une par celle de S506, [ADR-230](../docs/adr/ADR-230-cinquieme-revue-de-methode.md), une par celle de S511, [ADR-231](../docs/adr/ADR-231-sixieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
+Trente et une, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md), une par celle de S501, [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md), une par celle de S506, [ADR-230](../docs/adr/ADR-230-cinquieme-revue-de-methode.md), une par celle de S511, [ADR-231](../docs/adr/ADR-231-sixieme-revue-de-methode.md), une et une élargie par celle de S516, [ADR-232](../docs/adr/ADR-232-septieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -28,7 +28,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | **en construisant l'instrument** | Un instrument s'éprouve sur un cas de réponse connue, et se réépreuve quand ce qu'il mesure s'améliore ; deux représentations se comparent à frontière et point de fonctionnement égaux | L360, L368 | — |
 | | Une grandeur de diagnostic (centre, volume, débit) s'éprouve à sa naissance par un essai du cœur sur un cas de réponse connue | L375 | essai `air_pocket_centroid_is_the_bubble_centre_s486` |
 | | Une référence numérique (pas fin, maille fine) s'éprouve convergée sur trois points avant qu'on juge contre elle ; un départ impulsif ou un régime singulier du modèle n'a pas de référence | L385 | — |
-| | Un corps d'essai se choisit loin de ses limites : sa marge (stabilité de forme, `ω·dt`, rampe d'immersion) se calcule avec le proxy qu'il porte avant de mesurer ; une marge de l'ordre de l'erreur du proxy le disqualifie | L384 | — |
+| | Un corps d'essai se choisit loin de ses limites : sa marge (stabilité de forme, `ω·dt`, rampe d'immersion) se calcule avec le proxy qu'il porte avant de mesurer ; une marge de l'ordre de l'erreur du proxy le disqualifie ; **et il n'a que les degrés de liberté que la référence décrit** (nommer ses hypothèses, puis un corps qui les tient, ou borner l'essai) | L384, L387 | — |
 | | Une valeur attendue se calcule dans l'essai (la formule, puis la tolérance), jamais en dur depuis un calcul de tête | L378 | — |
 | | Un garde-fou nomme ce qu'il autorise (une liste explicite), il ne le déduit pas d'une propriété voisine | L379 | — |
 | | Le compilateur est dans la boucle : une identité flottante du source n'est pas celle du binaire, carte graphique comprise — la vérifier sur la cible | L345, L346 | — |
@@ -44,6 +44,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Un enchaînement de commandes s'arrête au premier échec (`&&`, jamais une ligne nouvelle) ; un correctif de script qui échoue ne laisse pas partir le script corrigé — corriger le fichier visé à la main | L386 | — |
 | **en choisissant la suite** | Un blocage hérité se vérifie dans le code avant d'être contourné ou tranché ; un ordre nomme la dépendance qu'il protège | L176, L243, L343 | — |
 | | Avant de déclarer un remède physique, son ordre de grandeur à l'échelle de la scène : un remède qui n'y pèse pas n'est pas déclaré | L377 | — |
+| | Un ordre de grandeur s'écrit après l'avoir calculé (une ligne de script), jamais de tête | L388 | — |
 | | Un ordre de grandeur se compare au terme concurrent, sur la durée de la mesure : un effet qui s'accumule se compte à la fin ; « négligeable » se dit contre ce qu'il concurrence, pas contre ce qui le produit | L383 | — |
 
 Les contrôles sont ceux de `python outils/etat_projet.py --check`, sauf les avertissements, qui se

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S516 — **en cours**. En autonomie, **la septième revue de méthode** (ADR-222 D4) : les frictions de S512–S515 ; et le lot des
+Session : S516 — **terminée**. En autonomie, **la septième revue de méthode** (ADR-222 D4) : les frictions de S512–S515 ; et le lot des
 registres (dû).
 
 **Critères, écrits avant.** Une protection n'entre ou ne change que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne
@@ -71,6 +71,7 @@ duplique la table ; `etat_projet --check` à zéro.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; lot des registres ; rituel.
+- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; lot des registres ; rituel.
 
 ### Notes de reprise
+- **P2** — ADR-232 : cinq frictions ; une protection élargie (D1, le corps d'essai n'a que les degrés de liberté de sa référence), une nouvelle (D2, l'ordre de grandeur calculé) ; METHODE (31), L387–L388, BOUSSOLE, index ; lot : feuille de route (S514–S516).

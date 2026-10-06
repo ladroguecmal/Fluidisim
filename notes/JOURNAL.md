@@ -432,3 +432,10 @@ constructeur, onze points) et `PumpLine` (pertes `K·Q²`, rendement) — et `pu
 **Mesuré** : la courbe linéaire au quantum de l'orifice commandé ; le point de fonctionnement exact ; l'énergie dépensée égale au gain
 d'énergie potentielle (plus les pertes) à 0,005 %. 5.4 ne manque plus que du réseau fermé (5.8, v2). Maillons **0**. Suivant : **S516, la
 revue de méthode**.
+
+## S516 — 2026-10-06 — la septième revue de méthode
+
+**Entrée.** En autonomie, ADR-222 D4. **Fait** : [ADR-232](../docs/adr/ADR-232-septieme-revue-de-methode.md) — cinq frictions de S512–S515 ;
+une protection élargie : un corps d'essai n'a que les degrés de liberté que la référence décrit (la bouée qui tangue sous sa traînée, la
+coque qui rebondit, malgré ADR-228) ; une nouvelle : un ordre de grandeur calculé avant d'être écrit (trois chiffres de plan faux, de tête).
+METHODE : 31 protections ; L387–L388. Lot des registres. Maillons **1**. Suivant : **S517**, un point partiel proche de son périmètre.
