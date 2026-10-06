@@ -842,3 +842,10 @@ itérations. Maillons **1** (5.8 : absent → partiel). Suivant : **S566, la dix
 nombres d'un plan sont écrits par le script qui les calcule (ADR-243 D1, L402). Un heredoc protégé (S562) n'a rien cassé : la règle reste.
 Ont tenu : le commit gardé par le code du rituel, les références par des méthodes indépendantes, le périmètre non réduit. Maillons **1**.
 Suivant : **S567**, un point partiel.
+
+## S567 — 2026-10-06 — le réseau en charge couplé au pas de V
+
+**Entrée.** En autonomie ; 5.8, la suite de S565 ; les nombres du plan écrits par son script (ADR-243 D1). **Fait**
+([preuve](../docs/validation/RESEAU-COUPLE-S567.md)) : `pas_reseau` — les surfaces des nœuds comme charges fixes, les débits en millilitres
+entiers avec reste. **Mesuré** : deux cuves égalisées à 1 µm d'un Euler indépendant (la loi fermée à l'erreur du pas près, bornée au plan),
+la masse à l'entier, un robinet à 1 ml. Maillons **0** (5.8 avance). Suivant : **S568**, un point partiel.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S567 — **en cours**. En autonomie, **5.8 — le réseau en charge couplé au pas de V** : S565 résout un réseau entre des charges
+Session : S567 — **terminée**. En autonomie, **5.8 — le réseau en charge couplé au pas de V** : S565 résout un réseau entre des charges
 données ; ici, les charges sont les surfaces des nœuds de V, et les débits les vident et les remplissent.
 
 **Ce que la session fait.** `charge::pas_reseau(nœuds, formes, g_eff, dt, raccords, demandes, conduites, …)` : chaque raccord (un nœud de V
@@ -87,7 +87,11 @@ sortis à 2 ml près ; (4) les refus, rien d'écrit.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `pas_reseau` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.8 ; rituel.
+- [x] **P2** — `pas_reseau` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.8 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — Δh à 1 µm de l'Euler, à 1,7·10⁻⁴ m de la loi fermée ; masse à l'entier ; sortie −1 ml sans demande ; robinet 99 999 ml ;
+  refus. Suite 735.
+- **P3** — preuve RESEAU-COUPLE-S567 ; liste 5.8 ; index ; journal.
+
