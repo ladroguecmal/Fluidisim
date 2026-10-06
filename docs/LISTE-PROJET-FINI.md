@@ -792,7 +792,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
-| 5. Volumes finis (V) | 12 | 2 | 6 | 4 |
+| 5. Volumes finis (V) | 12 | 2 | 7 | 3 |
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 3 | 5 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
@@ -801,7 +801,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **74** | **37** |
+| **total** | **121** | **10** | **75** | **36** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
