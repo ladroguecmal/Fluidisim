@@ -820,3 +820,11 @@ pressions au seuil ensemble) : 0,126197 m scellé, 1,074893 m ouvert. **Fait** (
 `step_liquids_air`, les évents partagés avec `step_air`. **Mesuré** : 0,126196 m et 1,074893 m, l'huile en place, tout ouvert au bit. 5.7
 reste partiel : un liquide autre que l'eau hors de V manque, et le périmètre ne se réduit pas sans l'utilisateur. Maillons **0** (5.7
 avance). Suivant : **S564**, un point partiel.
+
+## S564 — 2026-10-06 — le seuil adaptatif à l'échelle du contenant
+
+**Entrée.** En autonomie ; 5.6 (absent). **Décidé** : le seuil est une hauteur de surface, comparée au dernier état publié ; il ne touche
+jamais la masse. **Fait** ([preuve](../docs/validation/SEUIL-ADAPTATIF-S564.md)) : `hydro_seuil.rs`. **Mesuré** : un litre lève un bidon de
+50 000 µm, une piscine de 20 µm, une carène en V de 495 à 505 µm selon 0,99 ou 1,01 L, une piscine inclinée de `500·cos θ` — chaque fois au
+dix-millième ; une fuite lente publiée tous les 25 pas. Maillons **1** (5.6 : absent → partiel). Suivant : **S565**, un point partiel ;
+revue à S566.

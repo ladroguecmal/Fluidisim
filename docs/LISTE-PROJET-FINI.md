@@ -415,7 +415,10 @@ pas recopiée ici (L137).
   **S535 : l'assèchement** — le drainage de Brooks–Corey intégré exactement (7·10⁻⁶ de la forme fermée sur 24 h) et l'évaporation ; le cycle
   de l'eau du sol à la masse exacte ([preuve](validation/ASSECHEMENT-S535.md)). Manquent le calcul de l'exposition depuis les objets
   posés, l'évaporation du sol limitée par son humidité, la météo (à la fin).
-- [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
+- [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *partiel* depuis S564 : le seuil mesuré **en hauteur de surface** (le long de
+  la verticale locale), contre le dernier état publié — un litre compte dans un bidon (5 cm), pas dans une piscine (20 µm) ; exact au
+  dix-millième sur bidon, piscine, carène en V et gravité inclinée, une fuite lente publiée tous les 25 pas, la masse intacte
+  ([preuve](validation/SEUIL-ADAPTATIF-S564.md)). Manque son consommateur (la réplication des volumes, 10.x ; leur rendu).
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *partiel* depuis S559 : **ADR-241** — non miscibles, en couches perpendiculaires à
   `g_eff`, l'état entier (une composition parallèle) ; **la pression d'un nœud stratifié** contre trois formes fermées (cuve droite,
   inclinée, carène en V) à 4·10⁻⁸ ([preuve](validation/LIQUIDES-COUCHES-S559.md)) ; **S560 : le débit par couches** (`step_liquids`) —
@@ -796,7 +799,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
-| 5. Volumes finis (V) | 12 | 2 | 7 | 3 |
+| 5. Volumes finis (V) | 12 | 2 | 8 | 2 |
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 3 | 5 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
@@ -805,7 +808,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **75** | **36** |
+| **total** | **121** | **10** | **76** | **35** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S564 — **en cours**. En autonomie, **5.6 — le seuil adaptatif à l'échelle du contenant** (absent) : « les très petites variations
+Session : S564 — **terminée**. En autonomie, **5.6 — le seuil adaptatif à l'échelle du contenant** (absent) : « les très petites variations
 peuvent être ignorées par un seuil adaptatif ; une quantité significative dans un bidon peut être négligeable dans une piscine »
 (intentions d'origine §2.2).
 
@@ -85,7 +85,10 @@ refus : un volume publié hors de la capacité, un seuil négatif.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le seuil et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 5.6 ; rituel.
+- [x] **P2** — le seuil et ses essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 5.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — six cas au dix-millième de leur référence, verdicts attendus ; la fuite publiée aux pas 25, 50, 75, 100 ; refus. Suite 730.
+- **P3** — preuve SEUIL-ADAPTATIF-S564 ; liste 5.6 (absent → partiel) et décompte ; index ; journal.
+
