@@ -178,3 +178,37 @@ fn the_tide_enters_the_sample_of_b_and_its_composition_s579() {
     assert!(pire_eta <= 2.0 && pire_w <= 2.0, "critère 2");
     assert!(pire_c <= 2.0, "critère 4");
 }
+
+// --- S580 — le courant de marée. Références écrites au plan par son script.
+
+/// (1) Au milieu d'une maille, l'amplitude du courant et `v` nul ; (2) le courant en phase avec le niveau ; (3) `avec_courant` ; (4) refus.
+#[test]
+fn the_tidal_current_follows_the_progressive_wave_s580() {
+    let h = chenal_s578();
+    let carte = CarteCotidale::new(&[M2], [0.0, 0.0], 10_000.0, 11, 2, &h, 0.0).unwrap();
+    let (mut u_max, mut v_max) = (0f32, 0f32);
+    let (mut pic_u, mut pic_eta) = ((f32::MIN, 0.0), (f32::MIN, 0.0));
+    for m in 0..(25 * 60) {
+        let t = m as f64 * 60.0;
+        let st = SimTime((t * 1e6) as u64);
+        let c = carte.courant(55_000.0, 5_000.0, st, 9.81).unwrap();
+        u_max = u_max.max(c[0]);
+        v_max = v_max.max(c[1].abs());
+        if t < M2 * 3600.0 {
+            let e = carte.niveau(55_000.0, 5_000.0, st).unwrap();
+            if c[0] > pic_u.0 { pic_u = (c[0], t); }
+            if e > pic_eta.0 { pic_eta = (e, t); }
+        }
+    }
+    println!("S580 courant au milieu d'une maille : u max {u_max:.6} m/s (0,700062), |v| max {v_max:.2e} ; pics du courant et du niveau à {} et {} s",
+        pic_u.1, pic_eta.1);
+    assert!((u_max as f64 - 0.70006225769345).abs() < 1e-4, "critère 1 : l'amplitude");
+    assert!(v_max < 1e-6, "critère 1 : v nul");
+    assert!((pic_u.1 - pic_eta.1).abs() <= 60.0, "critère 2 : en phase");
+    let s = WaterSample { eta: 0.3, deta_dt: -0.2, u_total: [0.1, 0.2, -0.2], steepness: 0.05, ..WaterSample::default() };
+    let r = avec_courant(s, [0.5, -0.25]);
+    assert_eq!((r.u_total[0], r.u_total[1]), (0.1 + 0.5, 0.2 - 0.25), "critère 3");
+    assert_eq!([r.eta, r.deta_dt, r.u_total[2], r.steepness].map(f32::to_bits), [s.eta, s.deta_dt, s.u_total[2], s.steepness].map(f32::to_bits),
+        "critère 3 : le reste au bit");
+    assert_eq!(carte.courant(-1.0, 0.0, SimTime(0), 9.81), Err(Refus), "critère 4");
+}

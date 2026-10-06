@@ -184,6 +184,45 @@ impl<'a> CarteCotidale<'a> {
         }
         Ok((eta, vit))
     }
+
+    /// **S580 — le courant de marée** au point `(x, y)` à l'instant `t`, m/s, sous la gravité `g` (m/s²) : la quantité de mouvement
+    /// linéaire sans frottement ni Coriolis, `∂u/∂t = −g·∇η` — pour chaque composante `u = −(g/ω)·(∇Re H·sin ωt + ∇Im H·cos ωt)`, le
+    /// gradient étant celui de l'interpolation bilinéaire (la pente de la corde : au milieu d'une maille, l'amplitude × `sinc(kΔx/2)`,
+    /// la phase exacte). Sans la profondeur : la carte porte déjà la propagation. Refus hors de la grille ou sous une gravité non positive.
+    pub fn courant(&self, x: f64, y: f64, t: SimTime, g: f32) -> Result<[f32; 2], Refus> {
+        if !(g > 0.0) || !g.is_finite() {
+            return Err(Refus);
+        }
+        self.niveau(x, y, t)?;
+        let (u, v) = ((x - self.origine[0]) / self.pas_m, (y - self.origine[1]) / self.pas_m);
+        let (i, j) = ((u as usize).min(self.nx - 2), (v as usize).min(self.ny - 2));
+        let (fx, fy) = ((u - i as f64) as f32, (v - j as f64) as f32);
+        let pas = self.pas_m as f32;
+        let mut c = [0.0f32; 2];
+        for k in 0..self.n {
+            let base = k * self.nx * self.ny;
+            let at = |ii: usize, jj: usize| self.h[base + jj * self.nx + ii];
+            let (a, b, cc, d) = (at(i, j), at(i + 1, j), at(i, j + 1), at(i + 1, j + 1));
+            let (s, co) = PhaseQ32::from_time(self.frequences_q32[k], t).sin_cos();
+            let facteur = g / pulsation(self.frequences_q32[k]);
+            for (axe, cv) in c.iter_mut().enumerate() {
+                let grad = |n: usize| if axe == 0 {
+                    ((b[n] - a[n]) * (1.0 - fy) + (d[n] - cc[n]) * fy) / pas
+                } else {
+                    ((cc[n] - a[n]) * (1.0 - fx) + (d[n] - b[n]) * fx) / pas
+                };
+                *cv -= facteur * (grad(0) * s + grad(1) * co);
+            }
+        }
+        Ok(c)
+    }
+}
+
+/// **S580 — le courant de marée dans l'échantillon de B** : ajouté à la vitesse horizontale `u_total[0..2]` ; le reste inchangé.
+pub fn avec_courant(mut s: crate::WaterSample, courant: [f32; 2]) -> crate::WaterSample {
+    s.u_total[0] += courant[0];
+    s.u_total[1] += courant[1];
+    s
 }
 
 #[cfg(test)]
