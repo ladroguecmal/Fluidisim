@@ -62,32 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S508 — **terminée**. En autonomie, **6.4, le coût du recoupage** : une coque qui bouge sur la carte coûte 8 ms de CPU par pas
-(S503–S504) — le `set_solid_rigid` entier du cœur, trois extractions et l'envoi de toute la géométrie — contre 0,7 à 0,9 ms pour la carte.
+Session : S509 — **en cours**. En autonomie (maillons 2), **6.4, l'envoi sous 1 ms** : S508 a ramené le recoupage de 8 à 1,4–1,55 ms par
+pas ; l'envoi à la carte (0,4 à 0,65 ms : 450 Ko par pas, géométrie et tableaux de mouvement entiers) en est le plus gros reste.
 
-**Ce que la session fait.** Mesurer d'abord la part de chaque étage ; puis limiter le recoupage du cœur et les extractions à la boîte que
-le solide occupe (avant et après le pas, une maille de marge), et n'envoyer à la carte que ce qui change.
+**Ce que la session fait.** `Linear3` garde une ombre de ce qu'elle a reçu ; `set_motion` n'envoie que les valeurs qui changent, en paires
+(indice, valeur) ; un noyau de dispersion les écrit dans la géométrie et le tampon de mouvement au début du pas.
 
-**Ordre de grandeur, écrit avant.** La coque de la porte D occupe ≈ 18 × 8 × 6 mailles de 25 cm (avec la marge) sur 48 × 32 × 8 — ≈ 7 % de
-la grille ; un recoupage limité à sa boîte devrait coûter de l'ordre de 7 % de l'entier, ≈ 0,5 ms ; l'envoi de la géométrie entière
-(≈ 1 Mo) pèse ≈ 0,1 à 0,3 ms.
+**Ordre de grandeur, écrit avant.** Ce qui change d'un pas à l'autre : les faces et mailles coupées par la surface de la coque — de l'ordre
+de la surface de la coque en mailles (≈ 2·(16·6 + 16·4 + 6·4) ≈ 370 mailles de 25 cm, autant de faces par famille), quelques milliers de
+valeurs, ≈ 10 à 30 Ko au lieu de 450 ; la comparaison à l'ombre, ≈ 110 000 flottants, ≈ 0,05 ms.
 
-**Critères, écrits avant.** (1) la part de chaque étage publiée ; (2) le recoupage limité rend des tableaux **identiques au bit** à
-l'entier (géométrie, terme de paroi, faces, colonnes, poids du transfert) sur la coque en pilonnement et en roulis ; les bancs de S503 et
-S504 aux mêmes chiffres ; la suite du cœur ; (3) le coût CPU par pas ≤ 1 ms sur la coque de la porte D. Si (2) et (3) tiennent, 6.4 est
-validée (ses manques nommés : la coque qui bouge sur la carte, C23, le coût).
+**Critères, écrits avant.** (1) la carte rend les mêmes bits qu'avec l'envoi entier : les bancs de S503 et S504 aux mêmes chiffres, S358
+identique ; (2) le coût CPU par pas ≤ 1 ms sur la coque de la porte D (le critère de S508) ; si (1) et (2), **6.4 validée**.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la part de chaque étage.
-- [x] **P3** — le recoupage et les extractions limités à la boîte ; l'envoi partiel ; (2)–(3).
-- [x] **P4** — preuve ; liste 6.4 ; rituel.
+- [ ] **P2** — l'ombre, les paires, le noyau de dispersion ; (1)–(2).
+- [ ] **P3** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
-- **P2** — nœuds 0,69, `set_solid_rigid` 6,18, paroi 0,22, faces 0,08, envoi 0,66 ms (roulis).
-- **P3** — boîte du solide (`solid_box`, `check_solid_in`, `add_solid_in`, `prec_cut_in`), vérification unique, terme de paroi en boîte ;
-  banc : nœuds en boîte ; envoi en deux écritures. Au bit (essai s508, 60 pas). Total 1,4 à 1,55 ms : **(3) manqué** (1 ms). Le dépôt
-  gardé entier (il renormalise la somme compensée partout : le limiter changerait des bits). 665 essais.
-- **P4** — preuve RECOUPAGE-S508 ; liste 6.4 ; index ; journal.
-
