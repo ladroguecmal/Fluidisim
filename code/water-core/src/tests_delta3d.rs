@@ -2863,3 +2863,78 @@ fn the_linear_step_conserves_its_mixed_energy_s557() {
     assert!(pire_q < 1e-4, "critère 1 : Q à {pire_q:.2e} de E₀");
     assert!(pire_hausse < 1e-5, "critère 2 : une hausse de {pire_hausse:.2e} de E₀");
 }
+
+
+/// **S558 — l'énergie du chemin coupé** (liste 4.18). Sur un fond coupé, la divergence pèse chaque face par son ouverture et la correction
+/// ne touche que les faces ouvertes entre deux mailles fluides : l'invariant de S557 vit dans le produit scalaire pondéré,
+/// `Q_a = ½ρ·Σ a_f·ω_f·u_f²·dx³ + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA`. Critères : `|Q_a/E₀ − 1|` < 10⁻⁴ à chaque pas ; une hausse d'un pas
+/// à l'autre sous 10⁻⁵ de E₀ ; des ouvertures strictement entre 0 et 1 existent.
+#[test]
+fn the_cut_linear_step_conserves_its_weighted_energy_s558() {
+    let (n, m, k, dx, g, rho) = (16usize, 8usize, 6usize, 0.25f32, 9.81f64, 1025.0f64);
+    let mut fond = vec![0f32; n * m];
+    for j in 0..m {
+        for i in 0..n {
+            let (x, y) = ((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx);
+            let (a, b) = ((x - 2.5) / 0.6, (y - 1.2) / 0.5);
+            fond[j * n + i] = 0.2 + 0.5 * x / 4.0 + 0.3 * (-(a * a + b * b)).exp();
+        }
+    }
+    assert!(fond.iter().all(|f| *f < 1.0), "la couche du couvercle reste entièrement mouillée");
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume3::configure_with_bottom(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx: n, ny: m, nz: k, dx }, 1025., g as f32, &fond).unwrap();
+    let z0 = v.domain().z0() as f64;
+    let mut eta = vec![0f32; n * m];
+    for j in 0..m {
+        for i in 0..n {
+            let (x, y) = ((i as f64 + 0.5) * 0.25 - 2.0, (j as f64 + 0.5) * 0.25 - 1.0);
+            eta[j * n + i] = (z0 + 0.02 * (-(x * x + y * y) / (2. * 0.25)).exp()) as f32;
+        }
+    }
+    v.set_surface(&eta).unwrap();
+    let (ou, ov, ow) = {
+        let (a, b, c) = v.apertures().unwrap();
+        (a.to_vec(), b.to_vec(), c.to_vec())
+    };
+    let partielles = ou.iter().chain(&ov).chain(&ow).filter(|a| **a > 0. && **a < 1.).count();
+    println!("S558 : {partielles} faces en partie ouvertes sur {}", ou.len() + ov.len() + ow.len());
+    assert!(partielles > 0, "critère 3");
+    let (da, dv) = (0.0625f64, 0.015625f64);
+    let couvercle = k * n * m;
+    // L'énergie cinétique, pondérée par les ouvertures (`pondere`) ou non ; le couvercle à sa demi-maille dans les deux cas.
+    let cinetique = |v: &Volume3, pondere: bool| -> f64 {
+        let poids = |o: &[f32], f: usize| if pondere { o[f] as f64 } else { 1. };
+        let su: f64 = v.velocity_u().iter().enumerate().map(|(f, x)| poids(&ou, f) * (*x as f64).powi(2)).sum();
+        let sv: f64 = v.velocity_v().iter().enumerate().map(|(f, x)| poids(&ov, f) * (*x as f64).powi(2)).sum();
+        let sw: f64 = v.velocity_w().iter().enumerate()
+            .map(|(f, x)| poids(&ow, f) * (*x as f64).powi(2) * if f >= couvercle { 0.5 } else { 1. }).sum();
+        (su + sv + sw) * 0.5 * rho * dv
+    };
+    let hauteurs = |v: &Volume3| -> Vec<f64> { v.surface().iter().map(|e| *e as f64 - z0).collect() };
+    let e0 = hauteurs(&v).iter().map(|x| x * x).sum::<f64>() * 0.5 * rho * g * da;
+    let mut avant = hauteurs(&v);
+    let (mut pire_q, mut pire_hausse, mut q_prec) = (0f64, 0f64, None::<f64>);
+    let (mut temoin_lo, mut temoin_hi) = (f64::MAX, 0f64);
+    for _ in 0..12_000 {
+        v.step_surface_linear(10_000, 2000, &Jobs).unwrap();
+        let apres = hauteurs(&v);
+        let mixte: f64 = avant.iter().zip(&apres).map(|(a, b)| a * b).sum::<f64>() * 0.5 * rho * g * da;
+        let q = cinetique(&v, true) + mixte;
+        let temoin = cinetique(&v, false) + mixte;
+        pire_q = pire_q.max((q / e0 - 1.).abs());
+        if let Some(qp) = q_prec {
+            pire_hausse = pire_hausse.max((q - qp) / e0);
+        }
+        q_prec = Some(q);
+        (temoin_lo, temoin_hi) = (temoin_lo.min(temoin), temoin_hi.max(temoin));
+        avant = apres;
+    }
+    println!(
+        "S558 : E₀ = {e0:.5} J ; Q_a au pire à {pire_q:.2e} de E₀, final {:.6} J ; la plus forte hausse {pire_hausse:.2e} de E₀ ; \
+         le témoin sans poids de {:+.3} % à {:+.3} % de E₀",
+        q_prec.unwrap(), 100. * (temoin_lo / e0 - 1.), 100. * (temoin_hi / e0 - 1.)
+    );
+    assert!(pire_q < 1e-4, "critère 1 : Q_a à {pire_q:.2e} de E₀");
+    assert!(pire_hausse < 1e-5, "critère 2 : une hausse de {pire_hausse:.2e} de E₀");
+}
