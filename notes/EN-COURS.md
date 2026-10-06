@@ -62,33 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S564 — **terminée**. En autonomie, **5.6 — le seuil adaptatif à l'échelle du contenant** (absent) : « les très petites variations
-peuvent être ignorées par un seuil adaptatif ; une quantité significative dans un bidon peut être négligeable dans une piscine »
-(intentions d'origine §2.2).
+Session : S565 — **en cours**. En autonomie, **5.8 — le réseau fermé sous pression** (absent ; « reporté en v2 » par ADR-010 §4 — la v1
+est atteinte et la liste entière est l'objectif, ADR-190). Première pièce : **la solution d'un réseau de conduites en charge** — les
+charges aux jonctions et les débits, les réservoirs (les nœuds de V à surface libre) imposant leurs charges.
 
-**Ce que la session fait.** Le seuil se mesure **en hauteur de surface**, le long de la verticale locale : c'est ce que voient le rendu et
-le joueur, et c'est ce qui rend le seuil propre à chaque contenant sans réglage. `ecart_hauteur_um(nœud, volume_publié)` : la différence des
-plans de la géométrie pour les deux volumes (aucune dérivée, deux inversions exactes) ; `changement_significatif(…, seuil_um)` : au moins le
-seuil. La comparaison se fait contre le **dernier état publié**, pas le pas précédent : une fuite lente s'accumule et finit publiée ; rien
-n'est retiré de la masse (V reste exact, I-10) — le seuil décide de ce qu'on montre et transmet, pas de ce qui existe.
+**Ce que la session fait.** `hydro_charge.rs` : des conduites `h_a − h_b = R·Q·|Q|` (une résistance quadratique, Darcy–Weisbach en régime
+turbulent rugueux) entre des sommets fixes (charges données) et des jonctions (inconnues, une demande chacune) ; Newton sur les charges des
+jonctions, la matrice jacobienne (un laplacien pondéré) résolue par élimination de Gauss à pivot partiel dans un tampon de l'appelant
+(I-06), un pas amorti si le résidu croît ; sous 1 µm de perte, une conduite est linéarisée (la dérivée de la racine y est infinie). Une
+jonction sans chemin vers une charge fixe est refusée. Le couplage au pas de V (les réservoirs qui se vident par le réseau) viendra
+ensuite.
 
-**Références, calculées avant.** Seuil 500 µm. Bidon 0,2 × 0,1 m : +1 L → **5e+04 µm** (significatif). Piscine 10 × 5 m : +1 L →
-**2e+01 µm** (non) ; +25 L → 500 µm (significatif, à égalité). Carène en V (`V = h²`) à 1 m³ : +0,99 L → **5e+02 µm** (non),
-+1,01 L → **5e+02 µm** (oui). Piscine sous `g_eff = (1 ; 0 ; −9,759)` : +25 L → `500·cos θ` = **5e+02 µm** (non). Une fuite de 1 L
-par pas dans la piscine : publiée tous les 25 pas.
+**Références, calculées avant, par des méthodes indépendantes** (ADR-239 D1). (1) *Trois réservoirs* (100, 80, 50 m ; `R` = 2 000, 3 000,
+1 500 s²/m⁵) reliés à une jonction — par bissection sur la continuité : **`h_j` = 77,455794994 m**, débits 0,106170158 ; 0,029121613 ;
+−0,135291771 m³/s. (2) *Une maille* — un réservoir à 60 m relié à J0, la maille J0–J1–J2–J3, demandes 0,06 ; 0,08 ; 0,04 m³/s — **par
+Hardy Cross** (une autre méthode : corrections de débit dans la maille) : charges J0 43,800000000, J1 34,964659639, J2 33,231017516, J3
+34,924075772 m ; débits J0→J1 0,093996491217, J0→J3 0,086003508783 m³/s.
 
-**Quantum** (ADR-236 D1) : l'inversion tient le demi-millilitre — 25 µm sur le bidon (rapport 20 au seuil), 0,25 µm sur la carène (marge de
-4,9 µm : rapport 20), 0,01 µm sur la piscine. **Critères, écrits avant.** (1) Chaque écart à 1 µm près de sa référence (au demi-millilitre
-près, plus fin pour la piscine), et le verdict attendu ; (2) la fuite publiée exactement tous les 25 pas, la masse jamais touchée ; (3) les
-refus : un volume publié hors de la capacité, un seuil négatif.
+**Quantum** (ADR-236 D1) : les références publiées à 10⁻⁹ m. **Critères, écrits avant.** (1), (2) les charges à 10⁻⁸ m (rapport 10), les
+débits à 10⁻⁹ m³/s ; la continuité à chaque jonction sous 10⁻¹² m³/s ; moins de 30 itérations. (3) Refus : une jonction isolée des
+charges fixes (`Domain`), une résistance non positive (`Domain`), un tampon trop court (`Capacity`).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le seuil et ses essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 5.6 ; rituel.
+- [ ] **P2** — `hydro_charge.rs` et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 5.8 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — six cas au dix-millième de leur référence, verdicts attendus ; la fuite publiée aux pas 25, 50, 75, 100 ; refus. Suite 730.
-- **P3** — preuve SEUIL-ADAPTATIF-S564 ; liste 5.6 (absent → partiel) et décompte ; index ; journal.
-
