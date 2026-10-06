@@ -72,6 +72,6 @@ D1 et ADR-232 D1), D2 (la référence d'un instrument bruitée comme l'objet) ; 
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-234, METHODE, L390–L391, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise

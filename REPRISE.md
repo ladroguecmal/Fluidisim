@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 16:25 +02:00
+JETON            : libre
+Battement        : 2026-10-06 16:27 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S526 — la neuvième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S525 — la résonance de C07 : W suit la théorie ; l'assertion corrigée ([journal](notes/JOURNAL.md)). Avant : S524 (le lot)
-Session suivante : **S526 — la neuvième revue de méthode** (S521–S525 ; ADR-222 D4) : frictions — un montage hors du domaine honnête de W (S523 : 23–62 %, le rayon lu sur la mauvaise distance), un instrument à maximum local qui prend le bruit f32 (S523), une note de session fausse sur la théorie (S523 : « une source fine »), la taille du nœud rappelée par un essai (S522), une transition de loi plus douce que le critère (S524), une assertion canonique contredite par la théorie (S525). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S525 : C07 exécuté dans ses trois branches (3.2, 13.2)
+Session en cours : aucune
+Dernière session : S526 — la neuvième revue de méthode (ADR-234) ([journal](notes/JOURNAL.md)). Avant : S525 (la résonance de C07 : W suit la théorie)
+Session suivante : **S527 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'angle de C07 à Fr_h = 2,14 (un instrument éprouvé sur une référence bruitée, ADR-234 D2), A330 (une référence de corps pour la coque, Michell), 6.2 la turbulence, 6.7 la poche d'air, 9.3, 2.6 C1 ; le montage dans le domaine de ses outils (ADR-234 D1), ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 1 — S526 : la revue de méthode (ADR-234), sans capacité
 Registres       : dernier lot S524 (ADR-213 D3) ; le prochain au plus tard en S527
 ```
 
