@@ -933,3 +933,10 @@ Maillons **0** (2.2 et 7.7 avancent). Suivant : **S578**, le lot (dû) et un poi
 `CarteCotidale`, l'amplitude complexe interpolée — déterministe, sans `atan2`. **Mesuré** : une onde M2 qui remonte un chenal, exacte aux
 nœuds, creusée au milieu d'une maille de ce que la corde prévoit, la pleine mer une heure plus tard à 50 km. Un signe faux dans la formule
 du plan, noté. Maillons **0** (2.2 avance). Suivant : **S579**, un point partiel.
+
+## S579 — 2026-10-07 — la marée dans la surface de B
+
+**Entrée.** En autonomie ; 2.2, la suite de S577–S578. **Fait** ([preuve](../docs/validation/MAREE-DANS-B-S579.md)) : la vitesse du niveau
+(`Maree`, `CarteCotidale`) ; `avec_maree`, la marée dans l'échantillon de B (`η`, `∂η/∂t`, `w`). **Mesuré** : la vitesse à 2·10⁻¹¹ m/s de
+sa dérivée analytique ; une mer de B réelle plus une marée à 1 ulp ; la composition B + W exacte ; une marée nulle au bit. Maillons **0**
+(2.2 avance). Suivant : **S580**, un point partiel ; revue à S581.

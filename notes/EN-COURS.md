@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S579 — **en cours**. En autonomie, **2.2 — la marée dans la surface de B** : S577–S578 calculent le niveau ; il doit entrer
+Session : S579 — **terminée**. En autonomie, **2.2 — la marée dans la surface de B** : S577–S578 calculent le niveau ; il doit entrer
 dans l'échantillon que B publie (`WaterSample`), que la composition B + W (ADR-062) et ses consommateurs lisent.
 
 **Ce que la session fait.** `Maree::vitesse(t)` et `CarteCotidale::niveau_et_vitesse(x, y, t)` : `∂η/∂t = −Σ Aₖ·ωₖ·sin(ωₖt − gₖ)` (la
@@ -83,7 +83,11 @@ l'échantillon avec marée et rend `η` = celui d'avant + τ, à 2 ulp.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la vitesse, `avec_maree` ; (1)–(4).
-- [ ] **P3** — preuve ; liste 2.2 ; rituel.
+- [x] **P2** — la vitesse, `avec_maree` ; (1)–(4).
+- [x] **P3** — preuve ; liste 2.2 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — vitesse à 1,8·10⁻¹¹ m/s, la carte à 2,5·10⁻¹¹ ; B + marée à 1 ulp, `w` 0,5 ulp ; composée exacte ; marée nulle au bit.
+  `WaterSample` n'est pas comparable : le critère (3) compare champ à champ, par leurs bits. Suite 755.
+- **P3** — preuve MAREE-DANS-B-S579 ; liste 2.2 ; index ; journal.
+

@@ -108,9 +108,10 @@ pas recopiée ici (L137).
   systèmes avec étalement `cos^2s` (ADR-156, S259), houle de 225 m dans la scène déclarée `--houle`,
   verdict R3 attendu. **S577 : la marée harmonique** (`maree.rs`, huit composantes, phases entières au bit ; M2 à la dérive prédite
   près, vives-eaux et mortes-eaux, un gué annoncé ; [preuve](validation/MAREE-S577.md)) ; **S578 : la carte cotidale** (l'amplitude
-  complexe interpolée, déterministe ; une onde progressive à 2·10⁻⁵ m ; [preuve](validation/CARTE-COTIDALE-S578.md)). Manquent l'entrée
-  de la marée dans la surface de B, les corrections nodales, le niveau moyen variable, des houles issues d'une météo et l'adoption par
-  défaut.
+  complexe interpolée, déterministe ; une onde progressive à 2·10⁻⁵ m ; [preuve](validation/CARTE-COTIDALE-S578.md)) ; **S579 : la marée
+  dans la surface de B** (`η`, `∂η/∂t`, `w` de l'échantillon, à 1 ulp ; la composition B + W exacte ;
+  [preuve](validation/MAREE-DANS-B-S579.md)). Manquent le courant de marée, le choix de la marée d'une région par l'hôte (l'adoption par
+  défaut), les corrections nodales, le niveau moyen variable par la météo, des houles issues d'une météo.
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.
