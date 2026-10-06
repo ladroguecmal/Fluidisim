@@ -392,6 +392,8 @@ avec un nom.
 drainage de Brooks–Corey, évaporation ; le cycle de l'eau du sol à la masse exacte) ; la onzième revue (ADR-236).
 **S537–S539** : 9.3, le contact d'un corps quelconque (son enveloppe convexe) ; **C17 passe** — l'inondation limitée par l'air (5.9
 partiel) ; la coque retournée et sa poche comprimée, le point de non-retour (7.5 partiel).
+**S540–S541** : **C13 passe** (la remontée des petites bulles, Tomiyama) ; la douzième revue (ADR-237 : un nombre recalculé à chaque
+changement de paramètre).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

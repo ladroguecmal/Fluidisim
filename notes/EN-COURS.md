@@ -62,15 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S541 — **terminée**. En autonomie, **la douzième revue de méthode** (ADR-222 D4 ; S536–S540).
+Session : S542 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S540–S541), puis **4.17 — le référentiel
+accéléré** (absent) par C16 : « surface au repos perpendiculaire à `g_eff` » ; « échoue immédiatement si un `−9,81·Z` traîne quelque part »
+(I-07). δ reçoit la grandeur de `g_eff` (ADR-007), pas sa direction.
 
-**Ce que la session fait.** Relu : S536 (la revue), S537 (le quantum écrit à côté du seuil, appliqué), S538 (un nombre du plan ajusté à
-vue ; la ligne 13.2 en retard ; le décompte arrêté par l'outil), S539 (le point de non-retour prédit et tenu), S540 (la loi choisie au
-plan). **ADR-237** : D1, un nombre se recalcule à chaque changement de paramètre (élargit ADR-232 D2) ; L394 ; METHODE ; BOUSSOLE.
+**Ce que la session fait.** `Volume3::set_horizontal_gravity([g_x, g_y])` : la composante horizontale de `g_eff` dans le pas linéaire de
+δ, une force de volume ajoutée au champ prédit sur les faces ouvertes — la projection garde alors les murs (une pression posée au seul
+couvercle les violerait) ; à l'équilibre, la surface `η = (g_h/g)·x`, perpendiculaire à `g_eff`. Nulle : le pas d'avant au bit.
+
+**Ordre de grandeur, calculé.** C16 : cuve de 8 m, 1,5 m d'eau. **La formule de C16, `T = 2π/√(g·(π/L)·tanh(πh/L))`, donne 4,40 s — pas
+les « ≈ 3,5 s » de l'énoncé** (2,49 s pour le second mode) ; la formule fait foi. L'inclinaison : 0,3 g de C16 dénivelle la surface de
+± 1,2 m sur 1,5 m d'eau — hors du modèle linéaire (le bord s'assèche) ; **0,05 g** : pente 0,05 (2,862°), ± 0,2 m.
+
+**Critères, écrits avant.** (1) `g_h` nul : la suite au bit. (2) Sous 0,05 g latéral, la pente moyenne de la surface sur quatre
+périodes à 2 % de `g_h/g` — à 1° de la normale à `g_eff` (C16) ; le quantum : l'arrondi f32 de η (10⁻⁷ m sur 0,4 m, rapport 10⁶). (3) La
+période du premier mode, lâché en cosinus sans `g_h`, à 1 % de 4,40 s (C16 : ± 10 %). La rotation de C16 n'est pas de cette session.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-237, METHODE, L394, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — la pesanteur horizontale, les essais ; (1)–(3).
+- [ ] **P3** — preuve ; listes 4.17, 13.2 ; C16 ; rituel (`--lot`).
 
 ### Notes de reprise
