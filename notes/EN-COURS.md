@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S534 — **en cours**. En autonomie, **2.6 C1 — le champ de courant 2D régional** (ADR-011 §1 : une grille précalculée hors ligne,
+Session : S534 — **terminée**. En autonomie, **2.6 C1 — le champ de courant 2D régional** (ADR-011 §1 : une grille précalculée hors ligne,
 en lecture seule, « une lecture de texture » ; embouchures, détroits, littoral, courants d'auteur). C0 et C2 existent depuis S513.
 
 **Ce que la session fait.** `current_field::CurrentField` — une grille de vitesses de surface (f32), origine et pas, échantillonnée
@@ -83,8 +83,12 @@ est bien celle-là).
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — le champ, la requête, les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.6 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le champ, la requête, les essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 2.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `current_field.rs` ; essais `s534` : uniforme = C0, linéaire exact à 10⁻¹² ; le cube neutre à 9,9975–10,0025 m, retour à
+  1,7 mm ; témoin sans pente à 50,6 m. Suite 693.
+- **P3** — preuve COURANT-C1-S534 ; liste 2.6 ; index ; journal.
+

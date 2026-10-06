@@ -591,3 +591,12 @@ ruissellement. **Mesuré** : la lame infiltrée à 2 h à 0,098 % de Mein–Lars
 rétention pleine. **Critère (1) manqué** : la submersion lue à 29,1 min pour 37,67 — le seuil d'1 ml est le quantum de V (ADR-234 D2, que
 j'ai écrite et n'ai pas appliquée à mon propre seuil) ; 10 ml passés à 39,13 min, en diagnostic après coup. Maillons **0** (5.5 avance).
 Le lot des registres, dû en S533 (rappel du rituel), fait dans la foulée (feuille de route S530–S533). Suivant : **S534**, un point partiel.
+
+## S534 — 2026-10-06 — C1, le champ de courant 2D régional
+
+**Entrée.** En autonomie ; 2.6 C1. **Fait** ([preuve](../docs/validation/COURANT-C1-S534.md)) : `CurrentField` (une grille bilinéaire en
+lecture seule, son gradient, `(u·∇)u`) et `RegionalCurrentWater` — la vitesse, **la pente que le courant implique** (`g∇η = −(u·∇)u`) et
+l'accélération. Le calcul au plan a désigné le mécanisme : sans la pente, rien ne fournit la force centripète au corps. **Mesuré** : un cube
+neutre tient une rotation solide à ± 0,025 % (l'oscillation du pas, prévue), revient à 1,7 mm après une période ; le témoin sans pente part
+à 50 m. Maillons **0** (2.6 avance). Suivant : **S535**, un point partiel ; revue à S536.
+

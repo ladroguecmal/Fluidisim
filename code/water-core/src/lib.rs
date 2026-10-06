@@ -47,6 +47,8 @@ pub mod ecume;
 pub mod body;
 /// S331 : le corps rigide du jeu, poussé par B + W (lot 4, I-04).
 pub mod rigid_body;
+/// S534 — C1, le champ de courant 2D régional (ADR-011).
+pub mod current_field;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;

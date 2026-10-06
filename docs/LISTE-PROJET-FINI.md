@@ -114,7 +114,9 @@ pas recopiée ici (L137).
 - [ ] **2.6 Courants macroscopiques à niveau de détail propre**, du vecteur au champ 3D — *partiel* depuis S513 (conçu par ADR-011) : les
   niveaux **C0** (le vecteur de surface) et **C2** (le profil vertical) derrière la requête de l'eau (`CurrentWater`) — les vagues advectées
   (la période de rencontre exacte, `λ/(c + U)`), le profil exact, un corps traîné qui dérive à 0,4 % de l'analytique
-  ([preuve](validation/COURANT-S513.md)). Manquent C1 (le champ 2D régional précalculé), C3 (le champ local de δ), les rivières, les canaux.
+  ([preuve](validation/COURANT-S513.md)) ; **S534 : C1**, le champ 2D régional — une grille bilinéaire, sa pente (`g∇η = −(u·∇)u`) et
+  son accélération : un corps neutre tient une rotation solide à 0,025 % ([preuve](validation/COURANT-C1-S534.md)). Manquent la production
+  et le flux des grilles C1, l'advection des vagues par un courant variable, C3 (le champ local de δ), les rivières, les canaux.
 - [ ] **2.7 Bathymétrie** : hauts-fonds, effet sur les vagues avant la zone physique — *partiel* depuis S362 : la
   **référence** linéaire dans le cœur — profondeur finie, levée, réfraction de Snell sur isobathes droites, phase
   intégrée, profondeur de déferlement (McCowan) —, tenue contre Fenton–McKee et la levée minimale des manuels
