@@ -62,34 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S524 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S522–S523), puis **A331** — W ne dit pas
-quand un point échantillonné sort du domaine honnête de son chemin (S523 : 23–62 % d'erreur silencieuse). Le rayon d'ADR-132
-(`2π·angulaire/(3·coupure)`) a été écrit pour la distance à la source ; S523 suggère qu'il vaut pour **la distance du chemin émetteur aux
-points**. Le calibrer, puis le vérifier.
+Session : S525 — **en cours**. En autonomie, **la résonance de C07** (CAS-CANONIQUES, note S30) : « la pente de `log A` contre
+`log|1 − Fr_h²|` vaut −½ ± 0,15 sur `Fr_h` ∈ {0,3 ; 0,5 ; 0,7 ; 0,9} ». Dernière branche de C07.
 
-**Ce que la session fait.** (a) **La calibration** : le montage de S523 (5 m de fond, 10 m/s, σ 2 m, recette 512 × 256 à coupure 3 :
-rayon 179 m), la zone de 80 à 100 m derrière la source, `|y|` ≤ 100 m ; la durée varie, et avec elle `D`, la plus grande distance d'un point
-du chemin à un point de la zone. W contre la référence (écart quadratique). (b) **La garde** : `spectral_pressure::farthest_emission(chemin,
-min, max)` — la plus grande distance d'une extrémité de segment à un coin de la boîte d'échantillonnage ; l'hôte la compare au rayon
-honnête et l'annonce (comme il annonce déjà la durée, ADR-132).
+**Ce que dit la théorie, calculé avant.** En ondes longues (source large devant le fond), l'équation permanente
+`(1 − Fr²) η_xx + η_yy = −∇²p/ρg` donne sous une source isotrope **exactement** `η(0) = −(p₀/ρg)/√(1 − Fr²)` (la moyenne angulaire de
+`1/((1 − Fr²)cos²θ + sin²θ)` vaut `1/√(1 − Fr²)` : le facteur de Prandtl–Glauert) — d'où la pente −½. **Mais la référence exacte (finie,
+dispersive, en temps fini ; `reference_sillage.py`) ne le donne pas sur les quatre points** : la dépression maximale près de la source,
+rapportée à la statique, vaut 1,052 / 1,167 / 1,441 / **3,21** (σ 20 m, 5 m de fond, 64 s) contre 1,048 / 1,155 / 1,400 / **2,29** ; pente
+**−0,72** (−0,60 à 32 s ; σ 10 m : −0,80 / −0,85). À `Fr_h` = 0,9 le régime n'est pas permanent (le temps d'établissement croît comme
+`σ/((1 − Fr)c)`) et la dispersion y compte ; sur 0,3–0,7, la théorie suit Prandtl–Glauert à 3 % près. (La note de S523, « une source
+fine », était fausse : la loi demande une source **large**.)
 
-**Ordre de grandeur, calculé.** `D` = 128 / 189 / 260 / 335 m à 16 / 24 / 32 / 40 s, soit `D/R` = 0,72 / 1,05 / 1,45 / 1,87. Les montages
-de S523 : le premier `D/R` = 2,96 (62 %), le retenu 0,94 et 0,53 (< 0,4 %).
+**Ce que la session fait.** `c07_profondeur` reçoit σ et une grille devant la source ; W (σ 20 m, recette 512 × 512 à coupure 0,4 : rayon
+honnête 2 681 m) aux quatre `Fr_h`, 64 s ; l'instrument (le maximum de |η| à moins de 3σ de la source) sur W et sur la référence aux mêmes
+points.
 
-**Critères, écrits avant.** (1) **La loi** : écart ≤ 5 % pour `D/R` ≤ 1 ; > 10 % pour `D/R` ≥ 1,4. (2) **La garde** : elle signale chaque
-montage mesuré à plus de 10 % et aucun à moins de 5 % (les quatre de la calibration, les trois de S523, ceux de S519 et S522). (3) La suite
-du cœur, le banc de non-régression inchangés.
+**Critères, écrits avant.** (1) **La théorie** : sur la référence, la pente sur {0,3 ; 0,5 ; 0,7} à −½ ± 0,05 ; sur les quatre points, sa
+valeur publiée (−0,72) — l'assertion de C07 telle qu'écrite n'est pas celle de la théorie à durée finie. (2) **W** : les quatre amplitudes à
+2 % de la référence, la pente sur quatre points à 0,05 de la sienne, sur trois points à −½ ± 0,15 (l'assertion, restreinte au régime
+permanent). (3) La note de C07 corrige l'assertion (ADR-222 : une cible contredite par la mesure est remplacée).
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot (feuille de route S522–S523) ; plan.
-- [x] **P2** — la calibration ; (1).
-- [x] **P3** — la garde ; (2), (3).
-- [x] **P4** — preuve ; A331 ; rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — W et la référence ; (1), (2).
+- [ ] **P3** — preuve ; C07 ; listes 3.2, 13.2 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `D/R` 0,72 / 1,06 / 1,45 / 1,88 → < 10⁻⁴ / 0,32 % / **7,1 %** / 23 % : (1) à moitié (au-delà, plus doux que prévu).
-- **P3 fini** — `farthest_emission` (essai : 335,26 m), l'annonce `WAKE_HORS_RAYON` de l'hôte ; (2) à moitié (fausses alertes à 1,06 et
-  S522 à 1,25) ; suite 685.
-- **P4** — preuve SILLAGE-DOMAINE-S524 ; A331 levée ; index ; journal.
-
