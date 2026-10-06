@@ -1167,6 +1167,13 @@ impl Volume3 {
         Ok(())
     }
 
+    /// **S518 — la boîte du dernier recoupage** `[i0, i1, j0, j1, k0, k1]` (mailles, fins exclues) : hors d'elle, ni les ouvertures, ni
+    /// les fractions, ni le terme de paroi, ni les faces changées, ni les colonnes solides, ni les poids du transfert n'ont changé depuis le
+    /// recoupage précédent. `None` sans solide mobile ou avant le premier recoupage.
+    pub fn recut_box(&self) -> Option<[usize; 6]> {
+        self.cut.as_ref().and_then(|g| g.recut_box)
+    }
+
     /// **S503 — le volume solide de chaque colonne** au dernier `set_solid_rigid` (m³) : la différence d'un pas à l'autre, divisée par
     /// l'aire de la colonne, est l'eau que le solide dépose sur la surface.
     pub fn solid_column_volumes(&self) -> Option<&[f32]> {

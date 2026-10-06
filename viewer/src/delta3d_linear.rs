@@ -118,6 +118,8 @@ pub struct Linear3 {
     ombre: core::cell::RefCell<Vec<f32>>,
     paires: wgpu::Buffer,
     nombre: core::cell::Cell<u32>,
+    /// S518 : la boîte du recoupage du dernier `set_motion_parts` — `None` : tout comparer au suivant.
+    boite_precedente: core::cell::Cell<Option<[usize; 6]>>,
     dispersion: wgpu::ComputePipeline,
     dispersion_liaison: wgpu::BindGroup,
     scalar: wgpu::Buffer,
@@ -308,6 +310,7 @@ impl Linear3 {
             ombre: core::cell::RefCell::new(ombre),
             paires,
             nombre: core::cell::Cell::new(0),
+            boite_precedente: core::cell::Cell::new(None),
             dispersion,
             dispersion_liaison,
             scalar,
@@ -389,36 +392,91 @@ impl Linear3 {
     /// de paroi vaut jusqu'au prochain appel ; faces, dépôt et transfert, pour un pas.
     pub fn set_motion(&self, geo: &[f32], wall: &[f32], faces: &[f32], deposit: &[f32], transfer: &[f32]) -> Result<(), String> {
         let d = self.domain;
-        let (nf, nc, ncol) = (face_total(d), d.cells(), d.columns());
-        if geo.len() != nf + nc || wall.len() != nc || faces.len() != nf || deposit.len() != ncol || transfer.len() != 5 * ncol {
+        let (nu, nv, nf) = ((d.nx + 1) * d.ny * d.nz, d.nx * (d.ny + 1) * d.nz, face_total(d));
+        if geo.len() != nf + d.cells() {
             return Err("formes du mouvement".into());
         }
-        // S509 : la validation porte sur les valeurs qui changent (les autres sont celles de l'ombre, déjà reçues) — dans la boucle.
-        // S509 : seules les valeurs qui changent, comparées bit à bit à l'ombre de ce que la carte a reçu, en paires (indice, bits).
+        self.set_motion_parts([&geo[..nu], &geo[nu..nu + nv], &geo[nu + nv..nf], &geo[nf..]], wall, faces, deposit, transfer, None)
+    }
+
+    /// **S518 — `set_motion` sans concaténation, comparé à l'ombre dans une boîte** : la géométrie en ses quatre parties (ouvertures `u`,
+    /// `v`, `w`, fractions — les tableaux du cœur tels quels), et la boîte du recoupage qui les a produits (`Volume3::recut_box`). Seules
+    /// les valeurs de la réunion de cette boîte et de celle de l'appel précédent sont comparées : hors d'elle, ni la géométrie, ni le terme
+    /// de paroi, ni les faces, ni le dépôt, ni le transfert n'ont pu changer entre les deux appels (chacun n'est écrit ou non nul que dans
+    /// la boîte de son pas). `None`, ou un appel précédent sans boîte : tout est comparé. Mêmes paires, dans le même ordre, que
+    /// `set_motion` sur ce qui change.
+    pub fn set_motion_parts(&self, geo: [&[f32]; 4], wall: &[f32], faces: &[f32], deposit: &[f32], transfer: &[f32],
+        boite: Option<[usize; 6]>) -> Result<(), String> {
+        let d = self.domain;
+        let (nu, nv, nw) = ((d.nx + 1) * d.ny * d.nz, d.nx * (d.ny + 1) * d.nz, d.nx * d.ny * (d.nz + 1));
+        let (nf, nc, ncol) = (nu + nv + nw, d.cells(), d.columns());
+        if geo[0].len() != nu || geo[1].len() != nv || geo[2].len() != nw || geo[3].len() != nc || wall.len() != nc || faces.len() != nf
+            || deposit.len() != ncol || transfer.len() != 5 * ncol {
+            return Err("formes du mouvement".into());
+        }
+        let region = match (boite, self.boite_precedente.get()) {
+            (Some(a), Some(b)) => Some([a[0].min(b[0]), a[1].max(b[1]), a[2].min(b[2]), a[3].max(b[3]), a[4].min(b[4]), a[5].max(b[5])]),
+            _ => None,
+        };
+        // Les rangées contiguës à comparer de chaque tableau, `(début, fin)` locales : tout le tableau sans région.
+        let (nx, ny, nz) = (d.nx, d.ny, d.nz);
+        let rangees = |genre: u8, f: &mut dyn FnMut(usize, usize)| {
+            let Some([i0, i1, j0, j1, k0, k1]) = region else {
+                let n = [nu, nv, nw, nc, ncol, 5 * ncol][genre as usize];
+                f(0, n);
+                return;
+            };
+            match genre {
+                0 => (k0..k1).for_each(|k| (j0..j1).for_each(|j| if i1 > i0 { f((k * ny + j) * (nx + 1) + i0, (k * ny + j) * (nx + 1) + i1 + 1) })),
+                1 => (k0..k1).for_each(|k| (j0..(j1 + 1).min(ny + 1)).for_each(|j| f((k * (ny + 1) + j) * nx + i0, (k * (ny + 1) + j) * nx + i1))),
+                2 => (k0..(k1 + 1).min(nz + 1)).for_each(|k| (j0..j1).for_each(|j| f((k * ny + j) * nx + i0, (k * ny + j) * nx + i1))),
+                3 => (k0..k1).for_each(|k| (j0..j1).for_each(|j| f((k * ny + j) * nx + i0, (k * ny + j) * nx + i1))),
+                4 => (j0..j1).for_each(|j| f(j * nx + i0, j * nx + i1)),
+                _ => (j0..j1).for_each(|j| f(5 * (j * nx + i0), 5 * (j * nx + i1))),
+            }
+        };
+        // S509 : seules les valeurs qui changent, comparées bit à bit à l'ombre de ce que la carte a reçu, en paires (indice, bits) ; la
+        // validation porte sur elles (les autres sont celles de l'ombre, déjà reçues).
         let mut ombre = self.ombre.borrow_mut();
         let mut octets = self.octets.borrow_mut();
         octets.clear();
         octets.extend_from_slice(&[0u8; 8]);
         let mut n = 0u32;
-        let mut indice = 0usize;
-        for (rang, tranche) in [geo, wall, faces, deposit, transfer].into_iter().enumerate() {
-            for v in tranche {
-                if ombre[indice].to_bits() != v.to_bits() {
-                    let valide = match rang {
-                        0 => (0. ..=1.).contains(v),
-                        2 => true,
-                        _ => v.is_finite(),
-                    };
-                    if !valide {
-                        // Rien d'envoyé, l'ombre intacte : elle n'est mise à jour qu'après la boucle.
-                        return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
+        let mut invalide = false;
+        // (tableau, décalage dans l'ombre, genre de rangées, validation : 0 géométrie, 1 finie, 2 libre)
+        let tableaux: [(&[f32], usize, u8, u8); 10] = [
+            (geo[0], 0, 0, 0),
+            (geo[1], nu, 1, 0),
+            (geo[2], nu + nv, 2, 0),
+            (geo[3], nf, 3, 0),
+            (wall, nf + nc, 3, 1),
+            (&faces[..nu], nf + 2 * nc, 0, 2),
+            (&faces[nu..nu + nv], nf + 2 * nc + nu, 1, 2),
+            (&faces[nu + nv..], nf + 2 * nc + nu + nv, 2, 2),
+            (deposit, 2 * nf + 2 * nc, 4, 1),
+            (transfer, 2 * nf + 2 * nc + ncol, 5, 1),
+        ];
+        for (tableau, decalage, genre, validation) in tableaux {
+            rangees(genre, &mut |a, b| {
+                for (l, v) in tableau[a..b].iter().enumerate() {
+                    let indice = decalage + a + l;
+                    if ombre[indice].to_bits() != v.to_bits() {
+                        let valide = match validation {
+                            0 => (0. ..=1.).contains(v),
+                            2 => true,
+                            _ => v.is_finite(),
+                        };
+                        invalide |= !valide;
+                        octets.extend_from_slice(&(indice as u32).to_le_bytes());
+                        octets.extend_from_slice(&v.to_bits().to_le_bytes());
+                        n += 1;
                     }
-                    octets.extend_from_slice(&(indice as u32).to_le_bytes());
-                    octets.extend_from_slice(&v.to_bits().to_le_bytes());
-                    n += 1;
                 }
-                indice += 1;
-            }
+            });
+        }
+        if invalide {
+            // Rien d'envoyé, l'ombre intacte : elle n'est mise à jour qu'après la validation.
+            return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
         }
         // L'ombre suit, depuis les paires, une fois toutes les valeurs validées.
         for paire in octets[8..].chunks_exact(8) {
@@ -430,7 +488,7 @@ impl Linear3 {
         if n > 0 {
             self.queue.write_buffer(&self.paires, 0, &octets);
         }
-        let _ = ncol;
+        self.boite_precedente.set(boite);
         self.nombre.set(n);
         self.moving.set(true);
         Ok(())
@@ -1318,6 +1376,10 @@ pub fn recevoir_sillage() -> Result<(), String> {
             d.nx, d.ny, d.nz, d.dx, vitesse / (9.81 * d.z0() as f64).sqrt(), carte.adapter
         );
         let (mut cpu, mut maxi_moitie) = (0f64, 0f32);
+        // S518 : le coût par étage — l'hôte qui remplit son champ, le recoupage, l'extraction, l'envoi à la carte.
+        let mut etages = [0f64; 4];
+        // S518 : `ENVOI=entier` concatène et compare tout (l'envoi de S509) ; sinon l'envoi en boîte.
+        let envoi_entier = std::env::var("ENVOI").is_ok_and(|v| v == "entier");
         let debut = std::time::Instant::now();
         let mut precedent = centre(0.);
         for n in 1..=pas {
@@ -1327,7 +1389,9 @@ pub fn recevoir_sillage() -> Result<(), String> {
             let (b0, b1) = (boite_de(precedent), boite_de(c));
             remplir(c, [b0[0].min(b1[0]), b0[1].max(b1[1]), b0[2].min(b1[2]), b0[3].max(b1[3]), b0[4].min(b1[4]), b0[5].max(b1[5])], &mut nds);
             precedent = c;
+            let t1 = std::time::Instant::now();
             coeur.set_solid_rigid(&nds, [vitesse_a(t) as f32, 0., 0.], [0.; 3], c.map(|x| x as f32)).map_err(|e| format!("pas {n} : {e:?}"))?;
+            let t2 = std::time::Instant::now();
             coeur.wall_divergence(&mut paroi).map_err(|e| format!("{e:?}"))?;
             coeur.changed_faces_in_place(&mut faces).map_err(|e| format!("{e:?}"))?;
             coeur.lid_transfer_weights(&mut transfert).map_err(|e| format!("{e:?}"))?;
@@ -1336,7 +1400,18 @@ pub fn recevoir_sillage() -> Result<(), String> {
                 depot[k] = (nouvelles[k] - colonnes[k]) / aire;
             }
             colonnes.copy_from_slice(nouvelles);
-            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot, &transfert)?;
+            let t3 = std::time::Instant::now();
+            if envoi_entier {
+                carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot, &transfert)?;
+            } else {
+                let (u, v, w) = coeur.apertures().ok_or("ouvertures")?;
+                let fr = coeur.fluid_fraction().ok_or("fractions")?;
+                carte.set_motion_parts([u, v, w, fr], &paroi, &faces, &depot, &transfert, coeur.recut_box())?;
+            }
+            let t4 = std::time::Instant::now();
+            for (e, (a, b)) in etages.iter_mut().zip([(t0, t1), (t1, t2), (t2, t3), (t3, t4)]) {
+                *e += (b - a).as_secs_f64();
+            }
             cpu += t0.elapsed().as_secs_f64();
             carte.step(cycles);
             if n == pas / 2 {
@@ -1422,6 +1497,14 @@ pub fn recevoir_sillage() -> Result<(), String> {
             angle - 19.47,
             1e3 * cpu / pas as f64,
             1e3 * duree_mur / pas as f64
+        );
+        println!(
+            "SILLAGE_S518 envoi_entier={envoi_entier} empreinte_eta={:016x} etages_ms hote={:.3} recoupage={:.3} extraction={:.3} envoi={:.3}",
+            eta.iter().fold(0xcbf29ce484222325u64, |h, e| (h ^ e.to_bits() as u64).wrapping_mul(0x100000001b3)),
+            1e3 * etages[0] / pas as f64,
+            1e3 * etages[1] / pas as f64,
+            1e3 * etages[2] / pas as f64,
+            1e3 * etages[3] / pas as f64
         );
         Ok(())
     })

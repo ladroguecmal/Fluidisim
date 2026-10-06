@@ -88,7 +88,7 @@ du cœur, les essais de la carte (`--lineaire-mobile`, `--lineaire-coque`) incha
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le cœur en boîte ; (1) côté cœur, (3).
-- [ ] **P3** — la carte en boîte ; (1) côté carte, (2).
+- [x] **P3** — la carte en boîte ; (1) côté carte, (2).
 - [ ] **P4** — preuve ; A329 ; liste 6.4 ; rituel.
 
 ### Notes de reprise
@@ -96,3 +96,7 @@ du cœur, les essais de la carte (`--lineaire-mobile`, `--lineaire-coque`) incha
   boîtes ; faces qui s'ouvrent, colonnes solides, transfert S334, `changed_faces`, poids du transfert en boîte ; finitude + boîte en une
   passe (`solid_box_checked`). L'essai S508 étendu aux vitesses des faces : **au bit** sur 60 pas. Suite du cœur : 681 + 23, verte.
   Banc du sillage (4 s) : **recoupage du cœur 13,1 → 1,71 ms** ; l'envoi reste à 11,2 ms (P3).
+- **P3 fini** — `set_motion_parts` (les tableaux du cœur sans concaténation, la réunion des deux dernières boîtes ; `set_motion` y passe
+  sans boîte) ; `Volume3::recut_box`. Banc du sillage, 15 s : empreinte de η **e41630abd739b189 dans les deux envois** (au bit) ; étages
+  hôte 0,068 / recoupage 1,713 / extraction 0,133 / envoi 0,354 ms → **2,20 ms** (24,9 avant) ; pas complet 27,1 → **9,2 ms** ; l'envoi
+  entier : 13,2 ms. S503 2,205·10⁻⁶ m, S504 1,669·10⁻⁶ m : inchangés.
