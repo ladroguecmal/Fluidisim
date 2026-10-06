@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:15 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S554 — le lot ; 6.6, la poche porteuse d'un compartiment scellé ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S553 — deux compartiments et une cloison percée ([journal](notes/JOURNAL.md)). Avant : S552 (un navire gîte par sa brèche)
-Session suivante : **S554 — le lot des registres (dû à S554), puis un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — le ballottement d'un compartiment (l'eau qui court : un mode de seiche dans un compartiment couplé à la gîte), la poche porteuse d'un compartiment scellé (S538–S539 au navire), Coriolis dans δ, C14/C15, le domaine 5.10 (V qui déclenche δ) ; références indépendantes, durées vérifiées par une trace (ADR-239 D1). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S553 : l'envahissement progressif (6.6)
-Registres       : dernier lot S551 (ADR-213 D3) ; le prochain au plus tard en S554
+Session en cours : aucune
+Dernière session : S554 — le lot ; la poche porteuse d'un compartiment scellé ([journal](notes/JOURNAL.md)). Avant : S553 (deux compartiments et une cloison percée)
+Session suivante : **S555 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — le ballottement d'un compartiment (une seiche de V ? V n'a pas de dynamique interne : δ dans un compartiment couplé à la gîte), Coriolis dans δ, C14/C15, 5.10 (V qui déclenche δ), la pesanteur horizontale sur la carte GPU ; références indépendantes (ADR-239 D1), durées vérifiées par une trace. Revue à S556. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S554 : la poche porteuse (6.6)
+Registres       : dernier lot S554 (ADR-213 D3) ; le prochain au plus tard en S557
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

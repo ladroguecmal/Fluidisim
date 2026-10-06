@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S554 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S553), puis **6.6 — la poche porteuse
+Session : S554 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S553), puis **6.6 — la poche porteuse
 d'un compartiment scellé** : S548 avec le compartiment étanche de S538 — l'air comprimé retient l'eau, et la barge s'enfonce bien moins.
 
 **Ce que la session fait.** L'essai de S548 (barge, compartiment central de 5 × 8 × 4 m, brèche de 0,1 m² au fond, la mer vue du navire)
@@ -78,7 +78,10 @@ masse de V exacte. La durée vérifiée par une trace (la leçon de S553).
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — essai `s554` : scellé 1,6052 m, 16,825 m³ ; ouvert 1,9995 m ; équilibre dès 300 / 600 s (trace) ; masse exacte. Suite 713.
+- **P3** — preuve POCHE-PORTEUSE-S554 ; liste 6.6 ; index ; journal.
+

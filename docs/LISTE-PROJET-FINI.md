@@ -492,7 +492,8 @@ pas recopiée ici (L137).
   horizontale, la stabilité perd `i/∇` à 0,34 % près ([preuve](validation/CARENE-LIBRE-S549.md)) ; **S550 : l'angle de bande** d'une barge
   instable, 19,31° pour 19,08° ([preuve](validation/ANGLE-BANDE-S550.md)) ; **S552 : un navire gîte par sa brèche** — citerne latérale
   envahie, 8,101° pour 8,088° ([preuve](validation/BRECHE-LATERALE-S552.md)) ; **S553 : l'envahissement progressif** par une cloison
-  percée, le tirant à 0,05 % ([preuve](validation/CLOISON-PERCEE-S553.md)). Manquent l'eau qui court (le ballottement d'un compartiment),
+  percée, le tirant à 0,05 % ([preuve](validation/CLOISON-PERCEE-S553.md)) ; **S554 : la poche porteuse** d'un compartiment scellé, le
+  tirant à la référence de Boyle au dix-millième ([preuve](validation/POCHE-PORTEUSE-S554.md)). Manquent l'eau qui court (le ballottement d'un compartiment),
   l'assiette, le chavirement au-delà du pont mouillé, la poche d'air porteuse, plusieurs compartiments, un navire réel, les brèches en jeu.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *partiel* depuis S514 : les règles d'ADR-018 (la
   progression selon la profondeur, le produit d'emportement : 0,5 m à 2 m/s emporte un adulte) et le nageur d'ADR-023 §3 (corps commandé,

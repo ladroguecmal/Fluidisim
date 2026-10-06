@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [La poche porteuse d'un compartiment scellé — S554](validation/POCHE-PORTEUSE-S554.md) : Boyle et le navire couplés ; le tirant au dix-millième.
 - [Deux compartiments et une cloison percée — S553](validation/CLOISON-PERCEE-S553.md) : l'envahissement progressif ; le tirant à 0,05 % de la flottabilité perdue.
 - [Un navire gîte par sa brèche — S552](validation/BRECHE-LATERALE-S552.md) : citerne latérale envahie sous une pesanteur inclinée ; 8,101° pour 8,088°.
 - [L'angle de bande d'une barge instable — S550](validation/ANGLE-BANDE-S550.md) : GM négatif, 19,31° pour 19,08° ; la formule vérifiée par intégration avant la mesure.

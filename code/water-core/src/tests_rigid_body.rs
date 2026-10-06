@@ -1867,3 +1867,52 @@ fn progressive_flooding_through_a_pierced_bulkhead_s553() {
     assert!((av / 120. - 1.).abs() <= 0.02 && (ar / 120. - 1.).abs() <= 0.02, "critère 2");
     assert!(retard, "critère 3");
 }
+
+/// La barge de S548 et son compartiment central (5 × 8 × 4 m, brèche de 0,1 m² au fond), sous `step_air` : `scelle` — une poche isotherme
+/// `p·V = p_atm·160 m³` — ou ouvert. Rend (tirant final, eau embarquée en m³) après `duree` s ; trace toutes les 300 s.
+fn barge_air_s554(scelle: bool, duree: u64) -> (f64, f64) {
+    use crate::hydro_network::{step_air, Air, Flow, HydroNode, Meteo, Opening, Shapes, P_ATM_PA, SHAPE_ENTRIES, SHARP_EDGE_DISCHARGE, STEP_US};
+    let prism = |h: i64| -> [i64; SHAPE_ENTRIES] { core::array::from_fn(|i| h * i as i64 / (SHAPE_ENTRIES - 1) as i64) };
+    let mut table = prism(20_000_000).to_vec();
+    table.extend_from_slice(&prism(4_000_000));
+    let shapes = Shapes::new(&table).unwrap();
+    let calme = CalmWater { level: 0. };
+    let m0 = 246_000.;
+    let mut barge = RigidBody::cuboid([20., 8., 4.], m0 / 640., [0., 0., 0.5], [4, 2, 16]);
+    barge.radiation_damping = [0., 0., 1.0e6];
+    let mut nodes = [
+        HydroNode { volume_ml: 500_000_000_000, capacity_ml: 1_000_000_000_000, origin_um: [0, 0, 0], shape: 0 },
+        HydroNode { volume_ml: 0, capacity_ml: 160_000_000, origin_um: [0, 0, -2_000_000], shape: 1 },
+    ];
+    let mut edges = [Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 100_000 }, position_um: [0, 0, -2_000_000],
+        discharge: SHARP_EDGE_DISCHARGE, ..Default::default() }];
+    let mut scratch = [0i64; 1];
+    let mut air = [Air::Open, if scelle { Air::Sealed { pv_pa_ml: P_ATM_PA * 160_000_000.0 } } else { Air::Open }];
+    let mut tetes = [0f64; 2];
+    let total = nodes[0].volume_ml + nodes[1].volume_ml;
+    for n in 0..duree * 10 {
+        nodes[0].origin_um = [0, 0, ((-barge.position[2] - 10.) * 1e6).round() as i64];
+        step_air(&mut nodes, &mut edges, &shapes, [0., 0., -9.81], Meteo::SEC, SimTime(STEP_US), &mut scratch, &mut air, MER.rho, &mut tetes)
+            .unwrap();
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, total, "masse de V");
+        if n % 3_000 == 0 {
+            println!("S554 trace scellé={scelle} {} s : {} ml, tirant {:.4}", n / 10, nodes[1].volume_ml, 2. - barge.position[2]);
+        }
+        barge.mass = m0 + nodes[1].volume_ml as f64 * 1e-6 * MER.rho;
+        for _ in 0..10 {
+            barge.step(0.01, &calme, MER);
+        }
+    }
+    (2. - barge.position[2], nodes[1].volume_ml as f64 * 1e-6)
+}
+
+/// **S554 — la poche porteuse d'un compartiment scellé.** Scellé, le tirant final à 0,5 % de 1,6052 m et l'eau à 1 % de 16,83 m³ (Boyle et
+/// l'équilibre du navire résolus ensemble hors de l'essai) ; ouvert, la flottabilité perdue de S548 (2,000 m à 1 %) ; la masse exacte.
+#[test]
+fn a_sealed_compartment_keeps_the_barge_up_s554() {
+    let (t_s, eau_s) = barge_air_s554(true, 1_500);
+    let (t_o, _) = barge_air_s554(false, 1_500);
+    println!("S554 : scellé, tirant {t_s:.4} m (1,6052), eau {eau_s:.3} m³ (16,83) ; ouvert, tirant {t_o:.4} m (2,000)");
+    assert!((t_s / 1.6052 - 1.).abs() <= 0.005 && (eau_s / 16.83 - 1.).abs() <= 0.01, "critère 1");
+    assert!((t_o / 2.0 - 1.).abs() <= 0.01, "critère 2");
+}

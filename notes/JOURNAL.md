@@ -740,3 +740,10 @@ chaque compartiment à 0,1 %, l'assiette du transitoire revenue à zéro, l'arri
 en plein envahissement ; la mesure relue d'abord (ADR-239 D1) a montré l'équilibre vers 1 800 s. Maillons **0** (6.6). Suivant : **S554**,
 le lot (dû) et un point partiel.
 
+## S554 — 2026-10-06 — le lot ; la poche porteuse d'un compartiment scellé
+
+**Entrée.** En autonomie ; le lot (feuille de route S552–S553), puis 6.6. **La référence d'abord** : Boyle et l'équilibre du navire résolus
+ensemble — 1,6052 m, 16,83 m³. **Fait** ([preuve](../docs/validation/POCHE-PORTEUSE-S554.md)) : la barge de S548 avec le compartiment
+scellé de S538. **Mesuré** : le tirant au dix-millième, l'eau à 0,02 % ; ouvert, 2,000 m ; la durée vérifiée par la trace. Maillons **0**
+(6.6). Suivant : **S555**.
+
