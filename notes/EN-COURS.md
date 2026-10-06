@@ -62,15 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S536 — **terminée**. En autonomie, **la onzième revue de méthode** (ADR-222 D4 ; S531–S535) et **le lot des registres** (dû).
+Session : S537 — **en cours**. En autonomie, **9.3 — un corps quelconque** : le prédicteur balistique (S405) détecte le contact par la
+sphère englobante ; une planche qui tourne touche l'eau par un coin, bien après sa sphère.
 
-**Ce que la session fait.** Relu : S531 (la revue), S532 (les limites refusées avec un nom), S533 (un seuil au quantum de V, malgré ADR-234
-D2), S534 (la pente cyclostrophique désignée par le calcul au plan), S535 (l'intégration exacte). **ADR-236** : D1, le quantum de l'objet
-écrit au plan à côté de chaque seuil (rend opératoire ADR-234 D2) ; L393 ; METHODE ; BOUSSOLE. Le lot : feuille de route S534–S536.
+**Ce que la session fait.** `ballistic::predict_hull(objet, sommets, …)` : le contact quand le **sommet le plus bas** de l'enveloppe
+convexe (ses sommets dans le repère du corps, tournés par l'orientation intégrée) atteint la surface à sa propre position horizontale ;
+l'instant par la même bisection sur un pas de RK4 que `predict` ; la région utile, la plus grande distance d'un sommet au centre. `predict`
+inchangé.
+
+**Ordre de grandeur, calculé.** Lâchée de 10 m : une boîte alignée (demi-hauteur 0,1 m) touche à **1,420686 s** ; une planche de 4 × 0,2 ×
+0,2 m tournant à 3 rad/s autour de son axe long… — autour de `x` (demi-longueur 2 m selon `y`) — touche par un coin à **1,315550 s** ; sa
+sphère englobante (2,0025 m) la ferait toucher à **1,276902 s**, 38,6 ms trop tôt. Le seuil d'instant (10⁻⁹ s) contre la bisection
+(10⁻¹² s) : un rapport de 1 000 (ADR-236 D1).
+
+**Critères, écrits avant.** (1) La boîte alignée en chute libre : l'instant à 10⁻⁹ s de `√(2(z₀ − h)/g)`. (2) La planche tournante :
+l'instant à 10⁻⁹ s de la racine de `z₀ − ½gt² − (h_y|sin ωt| + h_z|cos ωt|)` (bisection indépendante, f64) ; la sphère englobante publiée
+(38,6 ms d'avance). (3) `predict` au bit (suite).
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-236, METHODE, L393, BOUSSOLE, index) ; le lot (feuille de route).
-- [x] **P2** — rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — la fonction, les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 9.3 ; rituel.
 
 ### Notes de reprise
