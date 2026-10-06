@@ -62,28 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S532 — **terminée**. En autonomie : **ADR-235 D1 appliquée à la carte** — `Linear3::new` s'arrêtait (une assertion, une
-panique de wgpu) au-delà de ses limites matérielles ; elle les calcule et refuse avec un nom.
+Session : S533 — **en cours**. En autonomie ; deux maillons : une capacité. **5.5 — la pluie hors contenant** : la pluie qui tombe sur le
+sol (pas dans un contenant) s'infiltre, puis, quand le sol ne suit plus, remplit la rétention de surface et ruisselle.
 
-**Ce que la session fait.** Après l'obtention de l'adaptateur : les groupes des noyaux de mailles (un par 64 mailles, en une dimension)
-contre `max_compute_workgroups_per_dimension` ; chaque tampon (vitesses, géométrie, mouvement, paires de la dispersion, état, colonnes,
-relecture) contre `max_storage_buffer_binding_size` et `max_buffer_size` — `Err` nommant la limite et la grandeur. Un banc
-`--lineaire-limites` : un domaine au-delà, un en deçà.
+**Ce que la session fait.** Le sol à ciel ouvert en trois pièces de V, sans loi nouvelle : un nœud de **rétention de surface** (la lame
+que les creux du sol retiennent, 0,5 mm) qui reçoit la pluie (`Rain`) ; l'**infiltration** de Green–Ampt (S530) vers le **sol** ; le
+**débordement** de la rétention vers l'extérieur (`Spill`, S489) — le **ruissellement**, que l'hôte dépose où le terrain le mène (δ, la
+mer). Aucune flaque n'est posée par l'auteur : avant la submersion, toute la pluie entre.
 
-**Ordre de grandeur, calculé.** 512 × 512 × 17 = 4,456,448 mailles → 69,632 groupes (> 65 535) : refusé ; 448 × 320 × 24 =
-3 440 640 → 53 760 groupes, le plus gros tampon (les paires, ≈ 16 octets par maille et par face) ≈ 223 Mo : accepté sous les limites de
-l'adaptateur (relevées en S529).
+**Ordre de grandeur, calculé.** Limon sableux (K = 10,9 mm/h, ψ = 11 cm, Δθ = 0,3 : M = 33 mm), pluie de 30 mm/h : **submersion de
+Mein–Larson** `F_p = M K/(i − K)` = **18,84 mm** à `t_p = F_p/i` = **37,67 min** ; ensuite Green–Ampt décalé (`t_s` = 1 299 s) — `F` =
+**48,88 mm** à 2 h, sur 60 mm de pluie : 11,12 mm de rétention et de ruissellement. La rétention (0,5 mm) déplace `M` de 0,45 % (la lame
+`h₀` que la loi compte et que Mein–Larson néglige).
 
-**Critères, écrits avant.** (1) Le domaine au-delà est refusé par une erreur nommée, sans arrêt ; celui en deçà accepté. (2) Les bancs de
-la carte inchangés au bit (sillage `e41630abd739b189`, S503, S504).
+**Critères, écrits avant.** (1) Le début de la submersion (la rétention passe 1 ml) à 1 % de `t_p`. (2) `F` à 2 h à 0,5 % de Green–Ampt
+décalé. (3) La masse exacte : pluie = sol + rétention + ruissellement, au millilitre ; le ruissellement nul avant la rétention pleine.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — les contrôles, le banc ; (1), (2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 5.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — 4 456 448 mailles refusées (69 632 groupes, nommé) ; 3 440 640 acceptées ; sillage, S503, S504 au bit.
-- **P3** — preuve LIMITES-CARTE-S532 ; index ; journal.
-
