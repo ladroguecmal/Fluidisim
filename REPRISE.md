@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 03:50 +02:00
+JETON            : libre
+Battement        : 2026-10-06 03:49 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S497 — 6.3, un corps en marche produit son sillage ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S496 — la troisième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S495 (le sillage d'un objet en marche pousse un corps)
-Session suivante : **S497 — 6.3, un corps en marche produit son sillage** : le corps rigide en mouvement (S331) devient la source de pression de W (ADR-103) que S495 fait sentir aux autres corps — la liste dit « manque le corps en marche couplé à la source ». Ordre de grandeur contre le terme concurrent et sur la durée, chaînes séparées avant tout remède (ADR-226). Le lot des registres y est dû. **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà.
-Maillons        : 1 — S496 : la revue de méthode (ADR-226), sans capacité
-Registres       : dernier lot S494 (ADR-213 D3) ; le prochain au plus tard en S497
+Session en cours : aucune
+Dernière session : S497 — 6.3 validée : un corps en marche produit son sillage ([journal](notes/JOURNAL.md)). Avant : S496 (la troisième revue de méthode)
+Session suivante : **S498 — un point partiel proche de son périmètre** : relire le tableau de bord et la liste (6.1, 6.2 le courant, 6.4, 9.5, 5.4…), choisir celui dont le critère est le plus net ; ordre de grandeur contre le terme concurrent et sur la durée, chaînes séparées avant tout remède (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà.
+Maillons        : 0 — S497 : 6.3 validée (6 sur 120)
+Registres       : dernier lot S497 (ADR-213 D3) ; le prochain au plus tard en S500
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

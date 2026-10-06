@@ -268,3 +268,12 @@ chaînes), deux trajectoires partent du même état vitesses comprises (la boué
 grandeur se compare au terme concurrent et sur la durée (le second ordre cumulé ; la queue d'une source). Cinq frictions sans suite : les
 protections existantes ont joué. METHODE : 27 protections ; L381–L383. Maillons **1** (une revue, sans capacité). Suivant : **S497** —
 un point de la liste (le lot des registres y est dû).
+
+## S497 — 2026-10-06 — 6.3 validée : un corps en marche produit son sillage
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/SILLAGE-EMIS-S497.md)) : `RigidBody::wake_leg` — le tronçon suivant de
+l'émetteur de sillage (ADR-104), visé sur la position prédite du corps, sous sa charge `m·g`. **Mesuré** : la coque de la porte D menée sur
+un cercle à 3 m/s ; le curseur à 0,0560 m du corps (prédit 0,0563), le sillage émis à 1,20 % de la trajectoire déclarée (prévu 2 à 6 %),
+ordres 1,89 et 1,83 en Δ ; tous les critères écrits avant tenus du premier coup — les protections d'ADR-226 appliquées dans le plan.
+**6.3 validée — 6 points sur 120.** Lot des registres : feuille de route (6 / 71 / 43), liste, index. Maillons **0**. Suivant : un autre
+point partiel proche de son périmètre.
