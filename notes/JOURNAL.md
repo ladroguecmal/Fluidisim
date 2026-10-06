@@ -880,3 +880,10 @@ route** : une assertion ajoutée hors du plan, fausse, corrigée — notée pour
 **protection élargie** : un essai n'affirme que ce que le plan a écrit (ADR-244 D1, L403). Un nombre de tête entre parenthèses (S568) et une
 tolérance sous le plancher flottant (S568, corrigée dans le code) : rien à changer. Ont tenu : le script du plan qui refuse un montage
 (S569), le rituel qui refuse un lot dû (S566). Maillons **1**. Suivant : **S572**, le lot (dû) et un point partiel.
+
+## S572 — 2026-10-06 — le lot ; les tuiles de traversabilité
+
+**Entrée.** En autonomie ; le lot (feuille de route S569–S571), puis 7.7 (SPEC-006 §5.2). **Fait**
+([preuve](../docs/validation/TRAVERSABILITE-TUILES-S572.md)) : `TileDesc`, `publier` — séquence par tuile, Morton, prévision par cellule,
+événements de franchissement entre deux publications. **Mesuré** : une plage sous la marée publie exactement les 80 franchissements que le
+script du plan avait comptés ; la prévision d'une cellule à 10⁻³ s. Maillons **0** (7.7 avance). Suivant : **S573**, un point partiel.

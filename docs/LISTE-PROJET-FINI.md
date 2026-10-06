@@ -556,9 +556,10 @@ pas recopiée ici (L137).
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *partiel* depuis S570 : **l'échantillon** (le produit
   de danger `HR = d·(v + 0,5)` et ses classes, la classe de profondeur d'un humanoïde) et **le prochain franchissement** d'une profondeur
-  prévisible, avec sa cause — une marée M2 à 0,3 ms ([preuve](validation/TRAVERSABILITE-S570.md)). Manquent les tuiles et leur
-  publication, les événements de franchissement et leur invalidation, la glace porteuse, la température, le gué d'un véhicule, le tirant
-  d'un bateau, la marée de B (2.2).
+  prévisible, avec sa cause — une marée M2 à 0,3 ms ([preuve](validation/TRAVERSABILITE-S570.md)) ; **S572 : les tuiles** — séquence,
+  Morton, cadence, prévision par cellule, événements de franchissement entre deux publications (80 sur une plage, exactement ;
+  [preuve](validation/TRAVERSABILITE-TUILES-S572.md)). Manquent l'invalidation des prévisions par une commande de V, la glace porteuse, la
+  température, le gué d'un véhicule, le tirant d'un bateau, la marée de B (2.2), la source réelle des échantillons (B, W, V répliqués).
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
   DyingStar (ADR-219).
 

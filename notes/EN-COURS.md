@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S572 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S569–S571), puis **7.7 — les tuiles** (SPEC-006 §5.2) :
+Session : S572 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S569–S571), puis **7.7 — les tuiles** (SPEC-006 §5.2) :
 l'unité de publication de la traversabilité.
 
 **Ce que la session fait.** `TileDesc` (référentiel, code de Morton, classe de cadence `Maree | Debit | NoeudV | Immediat`, subdivision,
@@ -84,7 +84,11 @@ trop courts, subdivision au-delà de 4.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — les tuiles et leurs essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 7.7 ; rituel (`--lot`).
+- [x] **P2** — les tuiles et leurs essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 7.7 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — 80 événements aux colonnes 2, 3, 4, 6, 7 ; la colonne 6 annoncée à 16 368,323 s ; Morton 39 ; séquences ; 1 024
+  échantillons en subdivision 1 ; refus. Suite 745.
+- **P3** — preuve TRAVERSABILITE-TUILES-S572 ; liste 7.7 ; index ; journal ; le lot.
+

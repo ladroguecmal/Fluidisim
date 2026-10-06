@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 23:31 +02:00
+JETON            : libre
+Battement        : 2026-10-06 23:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S572 — le lot ; 7.7, les tuiles de traversabilité ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S571 — la dix-huitième revue de méthode (ADR-244) ([journal](notes/JOURNAL.md)). Avant : S570 (l'échantillon de traversabilité et le prochain franchissement)
-Session suivante : **S572 — le lot** (dû en S572) **et un point partiel** (par la feuille de route et le tableau de bord). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 1 — S571 : la dix-huitième revue (ADR-244)
-Registres       : dernier lot S569 (ADR-213 D3) ; le prochain au plus tard en S572
+Session en cours : aucune
+Dernière session : S572 — le lot ; les tuiles de traversabilité ([journal](notes/JOURNAL.md)). Avant : S571 (la dix-huitième revue de méthode)
+Session suivante : **S573 — un point partiel** (7.7 : l'invalidation des prévisions par une commande de V, le gué d'un véhicule et le tirant d'un bateau ; ou un autre). Revue à S576. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S572 : 7.7 avance (les tuiles)
+Registres       : dernier lot S572 (ADR-213 D3) ; le prochain au plus tard en S575
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
