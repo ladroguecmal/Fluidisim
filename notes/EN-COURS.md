@@ -62,33 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S573 — **terminée**. En autonomie, **7.7** : deux manques de S572.
+Session : S574 — **en cours**. En autonomie, **la glace** — 7.6 (absent) et 7.7 (la glace porteuse, SPEC-006 §5.1 `ice_h`,
+`ice_capacity_kg`). SPEC-002 §4 ; ADR-027 §3 (la glace retenue, bornée aux lacs et baies abritées).
 
-**Ce que la session fait.** (a) **L'invalidation** (SPEC-006 §5.4) : `invalider(tuile, cellules)` — une commande de V à l'amont fait passer
-la tuile en cadence `Immediat` et toutes ses prévisions à `CrossCause::Aucune` (« je ne sais plus » : un résultat, pas un échec) jusqu'à
-la publication suivante qui reçoit une prévision établie. (b) **La praticabilité par agent** (ADR-018 §2) : `Agent::Humanoide` (moins de
-1,30 m et `HR` sous 1,25), `Agent::Vehicule { gue }` (la profondeur sous le gué de son châssis), `Agent::Bateau { tirant, marge }`
-(`profondeur − tirant − marge > 0`) ; `prochain_changement(agent, profondeur(t), …)` — le prochain franchissement du seuil de cet agent,
-par le balayage et la bissection de S570, généralisés à une liste de seuils.
+**Ce que la session fait.** `glace.rs` : la croissance de **Stefan**, `h = √(h₀² + 2·k·ΔT·t/(ρ·L))` (`k` = 2,2 W/m/K, `L` = 334 kJ/kg,
+`ρ` = 917 kg/m³), et son écriture en degrés-jours ; la portance de **Gold**, `P = A·h²`, **A = 3,5 kg/cm²** (la valeur prudente de Gold,
+charges mobiles) ; la fraction émergée (`1 − ρ_glace/ρ_eau`) ; la formation en plaque (`Hs < 0,15 m`). L'échantillon de traversabilité
+reçoit `ice_h` et `ice_capacity_kg` (dérivé une fois, ici : SPEC-006 §5.1) ; un agent de masse donnée traverse si la charge admissible la
+couvre ; l'échéance où la glace portera une charge se prédit par le franchissement de `h_min = √(m/A)`.
 
-**Références, calculées avant** (ce script les écrit). La marée de S570 (`0,8 + 0,4·sin`, 12,42 h). Un véhicule au gué de 0,6 m, depuis
-la mi-marée descendante : praticable dans **3726.000 s** (`T/12`), en descendant. Un bateau de 0,9 m de tirant avec 0,2 m de marge
-de houle, depuis la mi-marée montante : navigable dans **6034.925 s** (`asin(0,75)·T/2π`), en montant. Un humanoïde : la marée
-culmine à 1.2 m, sous la nage — aucun changement.
+**Références, calculées avant** (ce script les écrit). Stefan : `h = 0.035231·√FDD` — à 10, 50, 100, 200 K·jour : **0.1114,
+0.2491, 0.3523, 0.4982 m** (la table de SPEC-002 : 11, 25, 35, 50 cm). Gold : à 5, 10, 20, 30, 50 cm,
+**87.5, 350, 1400, 3150, 8750 kg** — avec les masses de référence 100 kg (une
+personne équipée), 400 kg (un groupe, une motoneige), 1 500 kg (une voiture légère), 5 000 kg (un camion léger), la table de SPEC-002
+est reproduite ligne à ligne (le script l'a vérifié avant d'écrire). L'échéance : depuis 10 cm sous 10 K de gel, une voiture légère
+(`h_min` = 0.20702 m) portée dans **228714.1 s** (2.647 jours). Émergé en eau douce : **8.3 %**.
 
-**Quantum** (ADR-236 D1) : la bissection à 1 ms. **Critères, écrits avant.** (1) les deux délais à 10 ms, le sens ; l'humanoïde `None` ;
-(2) `praticable` aux bornes : véhicule à 0,6 m praticable (borne incluse), à 0,601 m non ; bateau à 1,1 m non, à 1,101 m oui ; humanoïde à
-0,5 m et 2 m/s (`HR` = 1,25) non ; (3) l'invalidation : après elle, cadence `Immediat`, 256 causes `Aucune` ; republiée sans prévision,
-toujours `Aucune` ; avec prévision, `Maree` ; (4) S570 et S572 inchangés.
+**Quantum** (ADR-236 D1) : f64 pour la croissance (`h` à 10⁻⁹) ; la bissection à 1 ms sur des jours (10⁻⁸ relatif). **Critères, écrits
+avant.** (1) Stefan à 10⁻⁶ m de ces valeurs ; (2) Gold à 10⁻⁶ relatif, et la table des charges ; (3) l'échéance à 1 s ; (4) l'émergé à
+10⁻⁶ ; la plaque refusée à `Hs` = 0,15 m, formée à 0,149 ; (5) refus : épaisseur, gel ou temps négatifs.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'invalidation, les agents ; (1)–(4).
-- [x] **P3** — preuve ; liste 7.7 ; rituel.
+- [ ] **P2** — `glace.rs`, l'échantillon ; (1)–(5).
+- [ ] **P3** — preuve ; listes 7.6 et 7.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — véhicule 3 725,9999 s, bateau 6 034,9260 s, humanoïde `None` ; bornes ; invalidation 128 → 256 `Aucune` → 128 rétablies.
-  En route : la praticabilité du bateau et sa prévision ne lisaient pas le même seuil en f32 — corrigé. Suite 747.
-- **P3** — preuve TRAVERSABILITE-AGENTS-S573 ; liste 7.7 ; index ; journal.
-
