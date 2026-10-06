@@ -101,7 +101,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
 | **3.1** Anneaux d'impact dispersifs | A | — | 2.7, 4.12 | — | **3** |
-| **3.2** Sillages de bateaux | A | durées longues ; l'angle à Fr_h = 2,14 ; C07 exécuté dans ses trois branches (S519, S523, S525) | — | 6.6, 13.2 | **0** |
+| **3.2** Sillages de bateaux | A | durées longues ; C07 passe entier (S519–S527) | — | 6.6, 13.2 | **0** |
 | **3.3** Explosions de surface et sous-marines | A | la source d'explosion de W, champ lointain | 4.16, 7.4 | — | **2** |
 | **3.4** Tsunamis | A | — | 2.7, 3.6 | 11.3 | **2** |
 | **3.5** Déferlement | A | — | 2.7, 3.6 | 4.14 | **2** |

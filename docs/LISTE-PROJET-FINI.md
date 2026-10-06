@@ -143,8 +143,9 @@ pas recopiée ici (L137).
   ([preuve](validation/C07-PROFOND-S519.md)). **S523 : C07 peu profond passe à `Fr_h` = 1,43** (W en profondeur uniforme, S522 :
   0,4 % de la théorie, l'angle à 0,5° du coin de Mach) ; à 2,14 l'instrument prend le bruit ([preuve](validation/C07-PEU-PROFOND-S523.md)).
   **S525 : la résonance** — W à 0,03 % de la théorie, la pente −0,544 sur le régime permanent (0,3–0,7) ; l'assertion de C07 corrigée
-  (−0,72 sur quatre points à durée finie, la théorie même) ([preuve](validation/C07-RESONANCE-S525.md)). Manquent les durées longues
-  et l'angle à `Fr_h` = 2,14 (un instrument robuste au bruit).
+  (−0,72 sur quatre points à durée finie, la théorie même) ([preuve](validation/C07-RESONANCE-S525.md)) ; **S527 : l'angle à `Fr_h` = 2,14**
+  (27,00° pour 27,83°, un instrument éprouvé sur la référence bruitée) — **C07 passe entier** ([preuve](validation/C07-PLANCHER-S527.md)).
+  Manquent les durées longues.
 - [ ] **3.3 Explosions de surface et sous-marines** — *absent*.
 - [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *absent*.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.
@@ -720,7 +721,7 @@ pas recopiée ici (L137).
   avec masse ajoutée 1,408 pour 1,414 ± 15 %, par le corps rigide du cœur
   ([preuve](validation/CORPS-RIGIDE-S331.md)). Sur véhicules d'essai : C01, C03, C04, C06 (partiel),
   C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
-  à `Fr_h` = 1,43 depuis S523** ([preuve](validation/C07-PEU-PROFOND-S523.md)), **sa résonance depuis S525**
+  aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
   ([preuve](validation/C07-RESONANCE-S525.md)). Non exécutés : C05, C09, C11, C13 à C17, C20, C21. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au

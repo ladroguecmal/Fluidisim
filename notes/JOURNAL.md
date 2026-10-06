@@ -533,3 +533,10 @@ corps d'essai à leur limite — **protection élargie** à tout le montage (ADR
 plancher f32 (S523) — **protection nouvelle** (D2, L391). Une note théorique fausse (couverte par ADR-232 D2), un critère plus strict que la
 loi (publié tel quel) : rien à ajouter. La théorie calculée avant le montage (S525) a tenu. Maillons **1**. Suivant : **S527**, un point
 partiel.
+
+## S527 — 2026-10-06 — C07 passe entier
+
+**Entrée.** En autonomie ; l'angle à `Fr_h` = 2,14, manqué en S523 par le bruit. **Fait** ([preuve](../docs/validation/C07-PLANCHER-S527.md)) :
+la dernière crête au-dessus d'un plancher (10⁻³ du maximum, déclaré avant), éprouvée sur la référence bruitée au niveau de W (ADR-234 D2) ;
+le témoin sans plancher y lit 79° — l'échec de S523 reproduit. **W : 44,00° et 27,00°.** **C07 passe entier.** Maillons **0** (3.2, 13.2).
+Le lot des registres, dû en S527 (rappel du rituel), fait dans la foulée (feuille de route S524–S527). Suivant : **S528**, un point partiel.

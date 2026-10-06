@@ -1108,3 +1108,6 @@ C02/C18 : 0,227536 / 0,650281 ; seul C04 ordre un reste en échec dans physics.
 > le fond) ; à durée finie, la théorie linéaire exacte en profondeur finie donne −0,72 sur {0,3 ; 0,5 ; 0,7 ; 0,9} (à 0,9, la dépression
 > dépasse Prandtl–Glauert de 40 % et croît encore) et −0,544 sur {0,3 ; 0,5 ; 0,7}. **Assertion retenue** : sur le régime permanent
 > {0,3 ; 0,5 ; 0,7}, −½ ± 0,15 ; et, sur les quatre points, l'accord avec la théorie à durée égale. W : 0,03 % de la théorie, −0,544.
+> *Note du 2026-10-06, S527, sur C07* ([C07-PLANCHER-S527](C07-PLANCHER-S527.md)) : **l'angle à `Fr_h` = 2,14 passe** (27,00° pour 27,83°)
+> par la dernière crête au-dessus d'un plancher (10⁻³ du maximum), éprouvée sur la théorie bruitée au niveau de W. **C07 passe entier** :
+> profond (S519), peu profond aux deux vitesses (S523, S527), résonance (S525).

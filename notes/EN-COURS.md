@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S527 — **en cours**. En autonomie : **l'angle de C07 à `Fr_h` = 2,14** (S523 : la dernière crête des rayons a pris sur W un
+Session : S527 — **terminée**. En autonomie : **l'angle de C07 à `Fr_h` = 2,14** (S523 : la dernière crête des rayons a pris sur W un
 maximum local du plancher f32, 79,75° pour 27,83°). ADR-234 D2 : la référence d'un instrument porte le bruit de l'objet.
 
 **Ce que la session fait.** L'instrument « dernière crête **au-dessus d'un plancher** » : le maximum local le plus extérieur dont la valeur
@@ -79,8 +79,12 @@ vitesses. (2) Sur W (S523), à 2° de 44,46° et de 27,83°. Si (1) tient et (2)
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'instrument, la référence bruitée, W ; (1), (2).
-- [ ] **P3** — preuve ; listes 3.2, 13.2 ; C07 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'instrument, la référence bruitée, W ; (1), (2).
+- [x] **P3** — preuve ; listes 3.2, 13.2 ; C07 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — référence bruitée : 43,75–44,00° et 27,00° (trois tirages, trois grilles) ; témoin sans plancher : 79,0–79,25° (l'échec de
+  S523 reproduit) ; **W : 44,00° et 27,00°** → (1), (2) tenus.
+- **P3** — preuve C07-PLANCHER-S527 ; listes 3.2, 13.2 ; C07 ; index ; journal.
+

@@ -381,6 +381,8 @@ instruments) ; A329 ouverte puis levée (le recoupage d'une coque qui bouge à 2
 référence éprouvée (A330 ; la carte au-delà de 65 535 groupes) ; la huitième revue (ADR-233).
 **S522–S523** : W en profondeur uniforme (2.7 ; le sillage à `Fr_h` = 0,9 à 2,0 % de la théorie) ; C07 peu profond passe à `Fr_h` = 1,43
 (44,00° pour 44,46°) ; A331 (le domaine honnête de W non vérifié).
+**S524–S527** : A331 levée (le domaine honnête de W lu sur la distance du chemin aux points, la garde de l'hôte) ; la résonance de C07 (W à
+0,03 % de la théorie, l'assertion corrigée) ; l'angle à `Fr_h` = 2,14 — **C07 passe entier** ; la neuvième revue (ADR-234).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

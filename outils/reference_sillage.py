@@ -17,6 +17,7 @@ de W.
     python outils/reference_sillage.py supercritique [W10 W15] — S523 : l'angle au-delà du critique, sur la référence (trois grilles) ou W
     python outils/reference_sillage.py calibration <W_T16.bin …> — S524 : l'écart de W contre la distance du chemin aux points (A331)
     python outils/reference_sillage.py resonance [W0.3 W0.5 W0.7 W0.9] — S525 : la résonance de C07 sur la référence ou W
+    python outils/reference_sillage.py plancher [W10 W15]  — S527 : la dernière crête au-dessus du plancher, référence bruitée ou W
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import os
@@ -294,6 +295,50 @@ def supercritique(fichiers=None):
         print(f"C07_S523 U={u} ecart_quadratique_relatif={ecart:.4f} points_zone={zone.sum()} max_ref_zone={np.abs(ref[zone]).max():.4f}", flush=True)
 
 
+def derniere_crete_plancher(angles, prof, plancher=1e-3):
+    """S527 — la dernière crête **au-dessus d'un plancher** : le maximum local le plus extérieur dont la valeur dépasse `plancher` fois le
+    maximum du profil (ADR-234 D2 : ce qui est sous le bruit de l'objet ne compte pas ; seuil déclaré avant la mesure)."""
+    seuil = plancher * prof.max()
+    for i in range(len(prof) - 2, 0, -1):
+        if prof[i] > prof[i - 1] and prof[i] >= prof[i + 1] and prof[i] >= seuil:
+            return angles[i]
+    return float("nan")
+
+
+def plancher(fichiers=None):
+    """S527 — l'angle supercritique par la dernière crête au-dessus du plancher. Sans fichier : la référence (5 m, σ 2 m, coupure 3,
+    `SUPER_T`) **bruitée** d'un bruit gaussien de 10⁻⁷ m par point, trois tirages, trois grilles (critère 1). Avec les fichiers de W de
+    S523 : W et la référence aux mêmes points (critère 2)."""
+    for n, u in enumerate(SUPER_U):
+        attendu = np.degrees(np.arcsin(np.sqrt(G * SUPER_H) / u))
+        x0 = SUPER_XS - u * SUPER_T[u]
+        if fichiers is None:
+            for (lx, ly, dx) in [(2048.0, 768.0, 1.0), (2048.0, 768.0, 0.5), (2560.0, 1024.0, 0.5)]:
+                xs, ys, eta = champ(2.0, u, SUPER_T[u], lx, ly, dx, x0, 3.0, profondeur=SUPER_H)
+                lus = []
+                for tirage in (1, 2, 3):
+                    bruite = eta + np.random.default_rng(tirage).normal(0.0, 1e-7, eta.shape)
+                    _, angles, prof = rayons(lambda x, y: bilineaire(xs, ys, bruite, x, y), SUPER_XS, *SUPER_D, a_max=80.0)
+                    lus.append(derniere_crete_plancher(angles, prof))
+                print(f"PLANCHER_S527 U={u} grille={lx:.0f}x{ly:.0f}@{dx} reference_bruitee_deg={' '.join(f'{a:.2f}' for a in lus)} attendu_deg={attendu:.2f}"
+                      f" pire_ecart_deg={max(abs(a - attendu) for a in lus):.2f}", flush=True)
+            continue
+        with open(fichiers[n], "rb") as f:
+            tete = f.readline().split()
+            nx, ny = int(tete[0]), int(tete[1])
+            gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+            w = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+        gx = gx0 + dx * np.arange(nx)
+        gy = gy0 + dx * np.arange(ny)
+        GX, GY = np.meshgrid(gx, gy)
+        xs, ys, eta = champ(2.0, u, SUPER_T[u], 2048.0, 768.0, 0.5, x0, 3.0, profondeur=SUPER_H)
+        ref = bilineaire(xs, ys, eta, GX.ravel(), GY.ravel()).reshape(ny, nx)
+        for nom, c in [("W", w), ("reference", ref)]:
+            _, angles, prof = rayons(lambda x, y, c=c: bilineaire(gx, gy, c, x, y), xs_src, *SUPER_D, a_max=80.0)
+            a = derniere_crete_plancher(angles, prof)
+            print(f"PLANCHER_S527 U={u} {nom} derniere_crete_plancher_deg={a:.2f} attendu_deg={attendu:.2f} ecart_deg={a - attendu:.2f}", flush=True)
+
+
 def calibration(fichiers):
     """S524 — A331 : W (5 m de fond, 10 m/s, σ 2 m, recette 512 × 256 à coupure 3, rayon honnête 179 m) contre la référence, la zone de 80
     à 100 m derrière la source ; la durée lue dans le nom du fichier (`…_T<durée>.bin`). `D`, la plus grande distance d'un point du chemin
@@ -384,6 +429,8 @@ if __name__ == "__main__":
         delta(sys.argv[2])
     elif sys.argv[1] == "profondeur":
         profondeur(sys.argv[2])
+    elif sys.argv[1] == "plancher":
+        plancher(sys.argv[2:] or None)
     elif sys.argv[1] == "calibration":
         calibration(sys.argv[2:])
     elif sys.argv[1] == "resonance":
