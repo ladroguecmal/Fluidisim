@@ -6653,3 +6653,15 @@ et le commit est parti. Le code de sortie était juste ; la chaîne l'ignorait. 
 **S570 — l'assertion de route.** L'essai de traversabilité portait, en plus des critères du plan, une vérification ajoutée en écrivant :
 « 1,5 m d'eau immobile → dangereux pour la plupart ». HR = 1,5·0,5 = 0,75 : « pour certains ». L'essai a échoué sur un module juste. La valeur
 n'avait été ni écrite au plan ni calculée (ADR-244 D1).
+
+## L404
+
+**S575 — l'état arrondi.** Le pilote de C15 repartait chaque heure de l'épaisseur de glace **quantifiée** (un quantum de 10 µm) : la
+troncature, jusqu'à un quantum par pas, s'accumulait — 2,4 mm en 720 pas, le critère « à un quantum de Stefan » manqué. Repartir du gel
+cumulé (l'état exact) le tient à 9 µm. V le faisait depuis ADR-010 §4 pour ses arêtes (ADR-245 D1).
+
+## L405
+
+**S573 — un seuil, deux arrondis.** La praticabilité d'un bateau calculait `d − tirant − marge > 0`, sa prévision comparait `d` à
+`tirant + marge` ; en f32, 1,1 − 0,9 − 0,2 = 4,5·10⁻⁸ : à la borne, l'une disait « navigable », l'autre non. Une seule fonction de seuil,
+lue par les deux (ADR-245 D2).

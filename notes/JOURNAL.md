@@ -911,3 +911,11 @@ glace comme couche des liquides de V, gelée par quanta exacts (917 ml d'eau →
 la masse à l'entier à chaque pas, l'eau rendue au millilitre, aucune plaque sous la houle — **C15 passe**. **En route** : la première mesure
 manquait un critère de 2,4 mm — un état arrondi pris comme départ du pas suivant ; l'état exact (le gel cumulé) le tient. Maillons **0**
 (7.6, 13.2 avancent). Suivant : **S576, la dix-neuvième revue de méthode**.
+
+## S576 — 2026-10-06 — la dix-neuvième revue de méthode (ADR-245)
+
+**Entrée.** En autonomie ; revue due. **Frictions** : un état arrondi pris comme départ du pas suivant (S575) — **protection nouvelle** :
+l'état exact se garde à part (ADR-245 D1, L404) ; deux expressions f32 d'un même seuil (S573) — **élargie** : un seuil dans une seule
+fonction (D2, L405) ; des heredocs violant sans dommage la lettre d'ADR-240 D1 — **la règle corrigée** (D3) : une règle violée sans dommage
+est mal écrite. Ont tenu : la vérification de route par les notes, le script du plan qui vérifie avant d'écrire. Maillons **1**. Suivant :
+**S577**, un point partiel.

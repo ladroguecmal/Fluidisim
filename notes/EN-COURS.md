@@ -62,36 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S575 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S572–S574 ; la ligne 7.6 de la liste reformulée), puis
-**C15 — la croissance de la glace** (non exécuté ; listes 7.6, 13.2) : « lac abrité, `FDD` imposé, 30 jours ; épaisseur à ± 10 % de
-`0,035·√FDD` ; aucune plaque tant que `Hs > 0,15 m` ; masse conservée sur un cycle gel/dégel complet ». ADR-203 D6 : le gel des contenants
-passe par V.
+Session : S576 — **terminée**. En autonomie, **la dix-neuvième revue de méthode** (ADR-222 D4 ; S571–S575).
 
-**Ce que la session fait.** La glace d'un lac est **une couche des liquides de V** (ADR-241), de densité 917, au-dessus de l'eau — sa
-flottaison est alors l'hydrostatique des couches. `glace::geler(…)` : l'épaisseur visée par Stefan (S574), le volume de glace visé
-`A·h` (l'aire de la surface, fournie), et le gel **par quanta exacts** — 917 ml d'eau deviennent 1 000 ml de glace (`917·1000 = 1000·917` :
-la masse à l'entier) ; la fonte, le chemin inverse. Le nœud gagne 83 ml par quantum (la glace prend plus de place). Pas de prise en plaque
-si `Hs ≥ 0,15 m` (le mécanisme existe : l'assertion n'est plus vide, note S29 de C15).
-
-**Références, calculées avant** (ce script les écrit). Un lac de 10 × 10 m, 2 m d'eau, 30 jours à 10 K de gel (300 K·jour) : Stefan
-**0.610219 m** ; la référence de C15, `0,035·√FDD` = **0.606218 m** (écart +0.66 %) ; **61021 quanta**,
-55956257 ml d'eau gelés ; la surface monte de 50.647 mm. Le dégel complet rend toute l'eau.
-
-**Quantum** (ADR-236 D1) : un quantum de glace, 1 000 ml sur 100 m² = 10 µm d'épaisseur. **Critères, écrits avant.** (1) l'épaisseur
-à ± 10 % de `0,035·√FDD` (et à un quantum de Stefan) ; (2) la masse `ρ_eau·V_eau + ρ_glace·V_glace` exacte à chaque pas, et l'eau rendue
-au millilitre après le dégel complet ; (3) sous `Hs` = 0,2 m, aucune glace en 30 jours ; (4) la composition somme au volume du nœud à chaque
-pas (la place comprise : refus si la capacité manque).
+**Ce que la session fait.** Relu : S571 (la revue), S572 (les tuiles), S573 (deux expressions d'un seuil), S574 (la glace ; la vérification
+par les notes ; un heredoc), S575 (C15 ; l'état arrondi). **ADR-245** : D1, un état quantifié jamais repris comme départ ; D2, un seuil
+dans une seule fonction ; D3, ADR-240 D1 corrigé (le heredoc protégé permis) ; L404, L405 ; METHODE (trente-quatre) ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `geler`, `fondre` et C15 ; (1)–(4).
-- [x] **P3** — preuve ; listes 7.6, 13.2 ; C15 ; rituel (`--lot`).
+- [x] **P1** — jeton ; la revue (ADR-245, METHODE, L404, L405, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — 61 021 quanta, 0,610210 m, la masse exacte, l'eau rendue, rien sous la houle. **La première mesure a manqué « à un quantum
-  de Stefan » de 2,4 mm** : le pilote repartait de l'épaisseur quantifiée (la troncature accumulée) ; l'état exact, le gel cumulé — critère
-  inchangé. Pour la revue de S576 : un état arrondi pris comme départ du pas suivant. Suite 750. (`geler`/`fondre` du plan : une seule
-  fonction, `ajuster_glace`.)
-- **P3** — preuve C15-GLACE-S575 ; listes 7.6, 13.2 ; C15 ; index ; journal ; le lot.
-
