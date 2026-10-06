@@ -919,3 +919,10 @@ l'état exact se garde à part (ADR-245 D1, L404) ; deux expressions f32 d'un m�
 fonction (D2, L405) ; des heredocs violant sans dommage la lettre d'ADR-240 D1 — **la règle corrigée** (D3) : une règle violée sans dommage
 est mal écrite. Ont tenu : la vérification de route par les notes, le script du plan qui vérifie avant d'écrire. Maillons **1**. Suivant :
 **S577**, un point partiel.
+
+## S577 — 2026-10-07 — la marée harmonique
+
+**Entrée.** En autonomie ; 2.2 (la marée manquait) et 7.7 (qui l'attendait). **Fait** ([preuve](../docs/validation/MAREE-S577.md)) :
+`maree.rs` — huit composantes, phases entières par `PhaseQ32::from_time`. **Mesuré** : M2 s'écarte du cosinus idéal de 2,96·10⁻⁴ m en 15
+jours, exactement la dérive que l'arrondi de sa fréquence prédisait ; vives-eaux et mortes-eaux à ±1,4600 m ; un gué annoncé à 0,02 s.
+Maillons **0** (2.2 et 7.7 avancent). Suivant : **S578**, le lot (dû) et un point partiel.

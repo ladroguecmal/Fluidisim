@@ -106,8 +106,9 @@ pas recopiée ici (L137).
   le branchement de la requête au jeu reste au point 10.9.
 - [ ] **2.2 Houles longues, mers croisées, marée, niveau moyen variable** — *partiel* : mer à plusieurs
   systèmes avec étalement `cos^2s` (ADR-156, S259), houle de 225 m dans la scène déclarée `--houle`,
-  verdict R3 attendu. Manquent la marée, le niveau moyen variable, des houles issues d'une météo et
-  l'adoption par défaut.
+  verdict R3 attendu. **S577 : la marée harmonique** (`maree.rs`, huit composantes, phases entières au bit ; M2 à la dérive prédite
+  près, vives-eaux et mortes-eaux, un gué annoncé ; [preuve](validation/MAREE-S577.md)). Manquent la carte cotidale et son entrée dans
+  la surface de B, les corrections nodales, le niveau moyen variable, des houles issues d'une météo et l'adoption par défaut.
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.
@@ -565,8 +566,9 @@ pas recopiée ici (L137).
   [preuve](validation/TRAVERSABILITE-TUILES-S572.md)) ; **S573** : l'invalidation par une commande de V (`Immediat`, `Aucune`) et la
   praticabilité par agent — humanoïde, véhicule et son gué, bateau et son tirant — avec leur prochain changement
   ([preuve](validation/TRAVERSABILITE-AGENTS-S573.md)) ; **S574 : la glace porteuse** — `ice_h`, `ice_capacity_kg` (Gold), l'échéance où
-  elle portera une charge ([preuve](validation/GLACE-S574.md)). Manquent la température, la marée de B (2.2), la source réelle des
-  échantillons (B, W, V répliqués), le danger dans un courant qui varie.
+  elle portera une charge ([preuve](validation/GLACE-S574.md)) ; **S577 : la marée de B** prévoit les gués
+  ([preuve](validation/MAREE-S577.md)). Manquent la température, la source réelle des échantillons (B, W, V répliqués), le danger dans un
+  courant qui varie.
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
   DyingStar (ADR-219).
 

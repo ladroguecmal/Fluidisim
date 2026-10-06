@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S577 — **en cours**. En autonomie, **2.2 — la marée** (« manquent la marée, le niveau moyen variable… ») ; elle sert aussi 7.7
+Session : S577 — **terminée**. En autonomie, **2.2 — la marée** (« manquent la marée, le niveau moyen variable… ») ; elle sert aussi 7.7
 (la prévision des gués, SPEC-006 §5.4 : « la marée, analytique, fiable à l'horizon publié »).
 
 **Ce que la session fait.** `maree.rs` : une marée **harmonique**, `η(t) = Z₀ + Σ Aₖ·cos(ωₖ·t − gₖ)`, au plus huit composantes (M2, S2, N2,
@@ -86,7 +86,11 @@ composantes, une période non positive.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `maree.rs` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; listes 2.2, 7.7 ; rituel.
+- [x] **P2** — `maree.rs` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; listes 2.2, 7.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — M2 à 2,96·10⁻⁴ m de l'idéal (la dérive prédite) ; M2 + S2 de −1,4600 à 1,4600 m ; le gué à 6 974,03 s ; au bit ; refus.
+  Suite 752.
+- **P3** — preuve MAREE-S577 ; listes 2.2, 7.7 ; index ; journal.
+
