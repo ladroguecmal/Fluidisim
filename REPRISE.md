@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 21:20 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 21:21 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S555 — C09, la masse et l'énergie de δ ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S554 — le lot ; la poche porteuse d'un compartiment scellé ([journal](notes/JOURNAL.md)). Avant : S553 (deux compartiments et une cloison percée)
 Session suivante : **S555 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — le ballottement d'un compartiment (une seiche de V ? V n'a pas de dynamique interne : δ dans un compartiment couplé à la gîte), Coriolis dans δ, C14/C15, 5.10 (V qui déclenche δ), la pesanteur horizontale sur la carte GPU ; références indépendantes (ADR-239 D1), durées vérifiées par une trace. Revue à S556. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S554 : la poche porteuse (6.6)

@@ -62,26 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S554 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S553), puis **6.6 — la poche porteuse
-d'un compartiment scellé** : S548 avec le compartiment étanche de S538 — l'air comprimé retient l'eau, et la barge s'enfonce bien moins.
+Session : S555 — **en cours**. En autonomie, **C09 — la conservation de la masse et de l'énergie** (non exécuté ; liste 4.18, 13.2) :
+« domaine clos, sans frottement, perturbation initiale, 120 s ; `|dm/dt| < 10⁻³ s⁻¹` ; `dE/dt ≤ 0` en tout temps ».
 
-**Ce que la session fait.** L'essai de S548 (barge, compartiment central de 5 × 8 × 4 m, brèche de 0,1 m² au fond, la mer vue du navire)
-avec `step_air` et le compartiment scellé (une poche isotherme, `p·V` = `p_atm·160 m³`) ; puis ouvert, en témoin (S548).
+**Ce que la session fait.** Un essai de δ linéaire (le cœur) : une cuve close de 4 × 2 × 1,5 m (16 × 8 × 6 mailles de 25 cm), une bosse
+gaussienne de 2 cm, 120 s au pas de 10 ms ; à chaque pas, la masse (`ρ·Σ(η − z₀)·dA`, rapportée à la masse d'eau totale) et l'énergie
+**naturelle** `E = ½ρ·Σ|u|²·dx³ + ½ρg·Σ(η − z₀)²·dA` (vitesses aux faces, surface aux colonnes, toutes deux en fin de pas).
 
-**Ordre de grandeur, calculé — la référence indépendante** (ADR-239 D1), Boyle et l'équilibre du navire résolus ensemble par bisection :
-`ρ·A·T' = m + ρ·A_c·h` et `p_atm·D/(D − h) − p_atm = ρg·(T' − h)` → **eau 0,4207 m (16,83 m³), tirant 1,6052 m**, l'air à 113,2 kPa ; ouvert,
-2,000 m (S548).
+**Ordre de grandeur, calculé.** Énergie initiale `½ρg·∫η²` de la bosse (2 cm, σ = 0,5 m) : ½·1025·9,81·(0,02²·π·0,25) ≈ 1,58 J ; la
+dissipation mesurée de δ en S310, 0,0935 % par seconde → ≈ 11 % en 120 s. **Mise en garde écrite avant** : dans un schéma décalé, l'énergie
+naturelle mêle des vitesses et une surface à des demi-pas différents ; elle peut osciller d'un pas à l'autre sans qu'aucune instabilité
+n'existe. Si elle le fait, C09 tel qu'écrit est manqué, et l'essai publie l'amplitude des oscillations contre la tendance (l'enveloppe)
+— sans changer le critère.
 
-**Critères, écrits avant.** (1) Scellé : le tirant final à 0,5 % de 1,6052 m ; l'eau à 1 % de 16,83 m³. (2) Ouvert : S548 (2,000 m). (3) La
-masse de V exacte. La durée vérifiée par une trace (la leçon de S553).
+**Critères, écrits avant.** (1) `|dm/dt|` < 10⁻³ s⁻¹ à chaque pas (attendu : l'arrondi f32, S310). (2) `dE/dt ≤ 0` à chaque pas, sur
+l'énergie naturelle. (3) L'énergie finale sous l'initiale (pas de croissance d'ensemble).
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; listes 4.18, 13.2 ; C09 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — essai `s554` : scellé 1,6052 m, 16,825 m³ ; ouvert 1,9995 m ; équilibre dès 300 / 600 s (trace) ; masse exacte. Suite 713.
-- **P3** — preuve POCHE-PORTEUSE-S554 ; liste 6.6 ; index ; journal.
-
