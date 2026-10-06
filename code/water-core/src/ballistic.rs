@@ -190,6 +190,65 @@ pub fn predict(obj: &Ballistic, gravity: f64, step: f64, horizon: f64, surface: 
     None
 }
 
+/// Un vecteur du repère du corps dans le repère du monde, par le quaternion unitaire `q = [w, x, y, z]`.
+fn tourne(q: [f64; 4], v: [f64; 3]) -> [f64; 3] {
+    let (w, u) = (q[0], [q[1], q[2], q[3]]);
+    let c = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    let cc = [u[1] * c[2] - u[2] * c[1], u[2] * c[0] - u[0] * c[2], u[0] * c[1] - u[1] * c[0]];
+    [v[0] + 2. * (w * c[0] + cc[0]), v[1] + 2. * (w * c[1] + cc[1]), v[2] + 2. * (w * c[2] + cc[2])]
+}
+
+/// **S537 — l'impact d'un corps quelconque** (liste 9.3) : comme [`predict`], mais le contact quand le **sommet le plus bas** de
+/// l'enveloppe convexe — `vertices`, dans le repère du corps, autour du centre — atteint la surface à sa propre position horizontale,
+/// l'orientation intégrée en vol ; la région utile, la plus grande distance d'un sommet au centre. Le rayon de la sphère englobante
+/// (`obj.radius`) n'y entre pas. `None` : comme `predict`, ou une enveloppe vide ou non finie.
+pub fn predict_hull(obj: &Ballistic, vertices: &[[f64; 3]], gravity: f64, step: f64, horizon: f64,
+    surface: impl Fn([f64; 2], f64) -> f64) -> Option<Impact> {
+    let valid = |x: f64| x.is_finite() && x > 0.;
+    if !valid(gravity) || !valid(step) || !horizon.is_finite() || !(obj.drag >= 0.) || vertices.is_empty()
+        || !vertices.iter().flatten().all(|x| x.is_finite())
+        || !obj.inertia.iter().all(|i| valid(*i))
+        || !obj.position.iter().chain(&obj.velocity).chain(&obj.orientation).chain(&obj.omega).all(|x| x.is_finite())
+    {
+        return None;
+    }
+    let gap = |s: &State, t: f64| {
+        let mut bas = f64::INFINITY;
+        for v in vertices {
+            let r = tourne(s.q, *v);
+            let p = [s.x[0] + r[0], s.x[1] + r[1], s.x[2] + r[2]];
+            bas = bas.min(p[2] - surface([p[0], p[1]], t));
+        }
+        bas
+    };
+    let region = vertices.iter().map(|v| (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt()).fold(0., f64::max);
+    let mut s = State { x: obj.position, v: obj.velocity, q: obj.orientation, w: obj.omega };
+    if !(gap(&s, 0.) > 0.) {
+        return None;
+    }
+    let mut t = 0.;
+    while t < horizon {
+        let h = step.min(horizon - t);
+        let next = rk4(&s, h, gravity, obj.drag, obj.inertia);
+        if gap(&next, t + h) <= 0. {
+            let (mut lo, mut hi) = (0f64, h);
+            while hi - lo > 1e-12 {
+                let mid = 0.5 * (lo + hi);
+                if gap(&rk4(&s, mid, gravity, obj.drag, obj.inertia), t + mid) <= 0. {
+                    hi = mid;
+                } else {
+                    lo = mid;
+                }
+            }
+            let c = rk4(&s, hi, gravity, obj.drag, obj.inertia);
+            return Some(Impact { time: t + hi, position: c.x, velocity: c.v, orientation: c.q, omega: c.w, region });
+        }
+        s = next;
+        t += h;
+    }
+    None
+}
+
 /// **L'état après `duration` secondes** de vol, par pas de `step` au plus — le même intégrateur que `predict`, sans contact :
 /// ce que la physique de l'hôte ferait de l'objet, pour un banc.
 pub fn advance(obj: &Ballistic, gravity: f64, duration: f64, step: f64) -> Ballistic {

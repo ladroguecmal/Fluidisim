@@ -127,3 +127,41 @@ fn the_useful_region_covers_a_poorly_known_drag_s405() {
     assert!(worst <= imp.region - 0.25 + 1e-9);
     assert!(imp.region > 0.5);
 }
+
+/// Les huit sommets d'une boîte de demi-côtés `h`.
+fn boite(h: [f64; 3]) -> [[f64; 3]; 8] {
+    core::array::from_fn(|n| [if n & 1 == 0 { -h[0] } else { h[0] }, if n & 2 == 0 { -h[1] } else { h[1] }, if n & 4 == 0 { -h[2] } else { h[2] }])
+}
+
+/// **S537, critères 1 et 2 — le contact d'un corps quelconque.** Une boîte alignée lâchée de 10 m touche à `√(2(z₀ − h)/g)` à 10⁻⁹ s ;
+/// une planche de 4 × 0,2 × 0,2 m tournant à 3 rad/s autour de `x` (sa demi-longueur selon `y`) touche par un coin à la racine de
+/// `z₀ − ½gt² − (h_y|sin ωt| + h_z|cos ωt|)`, à 10⁻⁹ s d'une bisection indépendante ; sa sphère englobante, 38,6 ms trop tôt.
+#[test]
+fn a_tumbling_plank_touches_by_its_lowest_corner_s537() {
+    let alignee = Ballistic { position: [0., 0., 10.], velocity: [0.; 3], orientation: IDENTITY, omega: [0.; 3], inertia: [1.; 3], drag: 0., radius: 0. };
+    let imp = predict_hull(&alignee, &boite([0.5, 0.5, 0.1]), G, 0.01, 10., |_, _| 0.).unwrap();
+    let attendu = (2. * (10. - 0.1) / G).sqrt();
+    println!("S537 boîte alignée : {:.12} s (attendu {attendu:.12}), écart {:.1e} s", imp.time, imp.time - attendu);
+    assert!((imp.time - attendu).abs() <= 1e-9, "critère 1");
+    assert!((imp.region - (0.5f64 * 0.5 + 0.5 * 0.5 + 0.1 * 0.1).sqrt()).abs() <= 1e-12);
+    let (hy, hz, w) = (2.0, 0.1, 3.0);
+    // Inertie d'une planche : I_x le plus grand ou le plus petit — une rotation autour d'un axe principal reste constante.
+    let planche = Ballistic { omega: [w, 0., 0.], inertia: [1.0, 0.0034, 1.0], radius: (hy * hy + hz * hz + 0.01f64).sqrt(), ..alignee };
+    let imp = predict_hull(&planche, &boite([0.1, hy, hz]), G, 0.01, 10., |_, _| 0.).unwrap();
+    let f = |t: f64| 10. - 0.5 * G * t * t - (hy * (w * t).sin().abs() + hz * (w * t).cos().abs());
+    let mut t = 0.;
+    while f(t + 1e-4) > 0. {
+        t += 1e-4;
+    }
+    let (mut lo, mut hi) = (t, t + 1e-4);
+    for _ in 0..200 {
+        let m = 0.5 * (lo + hi);
+        if f(m) > 0. { lo = m } else { hi = m }
+    }
+    let sphere = predict(&planche, G, 0.01, 10., |_, _| 0.).unwrap();
+    println!(
+        "S537 planche : {:.12} s (bisection indépendante {lo:.12}), écart {:.1e} s ; la sphère englobante {:.6} s ({:.1} ms trop tôt)",
+        imp.time, imp.time - lo, sphere.time, 1e3 * (lo - sphere.time)
+    );
+    assert!((imp.time - lo).abs() <= 1e-9, "critère 2");
+}

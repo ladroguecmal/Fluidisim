@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S537 — **en cours**. En autonomie, **9.3 — un corps quelconque** : le prédicteur balistique (S405) détecte le contact par la
+Session : S537 — **terminée**. En autonomie, **9.3 — un corps quelconque** : le prédicteur balistique (S405) détecte le contact par la
 sphère englobante ; une planche qui tourne touche l'eau par un coin, bien après sa sphère.
 
 **Ce que la session fait.** `ballistic::predict_hull(objet, sommets, …)` : le contact quand le **sommet le plus bas** de l'enveloppe
@@ -81,8 +81,11 @@ l'instant à 10⁻⁹ s de la racine de `z₀ − ½gt² − (h_y|sin ωt| + h_z
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — la fonction, les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 9.3 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la fonction, les essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 9.3 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `predict_hull` ; boîte 3·10⁻¹³ s, planche 1,3·10⁻¹⁰ s, la sphère 38,8 ms trop tôt. Suite 697.
+- **P3** — preuve CORPS-QUELCONQUE-S537 ; liste 9.3 ; index ; journal.
+

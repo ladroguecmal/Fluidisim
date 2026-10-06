@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Le contact d'un corps quelconque : son enveloppe convexe — S537](validation/CORPS-QUELCONQUE-S537.md) : une planche tournante à 1,3·10⁻¹⁰ s ; la sphère englobante 38,8 ms trop tôt.
 - [L'assèchement du sol : drainage et évaporation dans V — S535](validation/ASSECHEMENT-S535.md) : Brooks–Corey intégré exactement ; le cycle de l'eau du sol à la masse exacte.
 - [C1, le champ de courant 2D régional — S534](validation/COURANT-C1-S534.md) : la pente cyclostrophique porte le corps ; une rotation solide tenue à 0,025 %.
 - [La pluie hors contenant : submersion, infiltration, ruissellement — S533](validation/PLUIE-SOL-S533.md) : 0,1 % de Mein–Larson à 2 h ; la submersion mal lue par un seuil au quantum.

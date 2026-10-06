@@ -625,7 +625,9 @@ pas recopiée ici (L137).
   instant exact à 10⁻¹² s dans le vide, d'ordre 4 sous traînée ; région utile sous une traînée connue à ±30 % ; paliers d'ADR-013
   §2 —, **consommé** par le domaine épars en mer : la région d'impact prête 1,11 s avant l'impact quelle que soit la cadence de
   revue, quand le suivi sans prédiction la laisse hors de l'ensemble une fois sur cinq ([preuve](validation/IMPACT-PREVU-S405.md)).
-  Manquent un corps quelconque (la sphère englobante seule), le vent, l'entrée orientée consommée par δ.
+  **S537 : un corps quelconque** — le contact par le sommet le plus bas de l'enveloppe convexe : une planche tournante à 1,3·10⁻¹⁰ s de
+  l'analytique, quand sa sphère englobante la faisait toucher 38,8 ms trop tôt ([preuve](validation/CORPS-QUELCONQUE-S537.md)). Manquent
+  un corps non convexe, le vent, l'entrée orientée consommée par δ.
 - [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.
 - [x] **9.5 Événement prédit, confirmé ou rétracté**, sans retour arrière du temps — *validé* (S510) :
   cause et confirmation des impacts dans le journal (ADR-056) ; **le consommateur** (`wave_consumer`, le chemin d'image) — confirmation au

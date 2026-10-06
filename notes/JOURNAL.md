@@ -614,3 +614,11 @@ rétention, infiltration, ruissellement, drainage, évaporation — à la masse 
 D2) — **protection changée** : le plan écrit le quantum à côté de chaque seuil, un rapport sous 10 le disqualifie (ADR-236 D1, L393). Les
 limites refusées avec un nom (S532), le calcul au plan qui désigne le mécanisme (S534) et le schéma (S530, S535) ont tenu. Le lot : la
 feuille de route S534–S536. Maillons **1**. Suivant : **S537**, un point partiel.
+
+## S537 — 2026-10-06 — le contact d'un corps quelconque
+
+**Entrée.** En autonomie ; 9.3. **Fait** ([preuve](../docs/validation/CORPS-QUELCONQUE-S537.md)) : `predict_hull` — le contact par le sommet le
+plus bas de l'enveloppe convexe, l'orientation intégrée. **Mesuré** : une boîte à 3·10⁻¹³ s, une planche tournante à 1,3·10⁻¹⁰ s d'une
+bisection indépendante ; la sphère englobante la faisait toucher 38,8 ms trop tôt. Le quantum écrit à côté du seuil, au plan (ADR-236 D1).
+Maillons **0** (9.3 avance). Suivant : **S538**, un point partiel.
+
