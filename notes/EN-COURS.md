@@ -62,32 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S578 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S575–S577), puis **2.2 — la carte cotidale** : la marée de
-S577 vaut en un lieu ; amplitude et phase varient dans l'espace (la marée se propage).
+Session : S579 — **en cours**. En autonomie, **2.2 — la marée dans la surface de B** : S577–S578 calculent le niveau ; il doit entrer
+dans l'échantillon que B publie (`WaterSample`), que la composition B + W (ADR-062) et ses consommateurs lisent.
 
-**Ce que la session fait.** `CarteCotidale` : pour chaque composante, l'amplitude complexe `H = A·e^(−ig)` sur une grille régulière
-(origine, pas, dimensions), **interpolée sous forme complexe** (bilinéaire sur `Re H` et `Im H`) — `η = Z₀ + Σ (Re Hₖ·cos ωₖt + Im Hₖ·sin ωₖt)`
-(avec `H = A·e^(−ig)` : `A·cos(ωt − g)`), le cosinus et le sinus par `PhaseQ32` : tout est fait d'opérations IEEE de base et de nos
-polynômes — déterministe, sans `atan2`, sans saut de phase à 2π. Hors de la grille : refus.
+**Ce que la session fait.** `Maree::vitesse(t)` et `CarteCotidale::niveau_et_vitesse(x, y, t)` : `∂η/∂t = −Σ Aₖ·ωₖ·sin(ωₖt − gₖ)` (la
+pulsation de la fréquence **arrondie**, celle des phases). `maree::avec_maree(échantillon, niveau, vitesse)` : `η += τ`, `∂η/∂t += τ̇`, et la
+vitesse verticale de surface `w += τ̇` (la condition cinématique) ; le reste de l'échantillon inchangé. Une marée nulle laisse
+l'échantillon de B tel quel. **Ne fait pas** : le courant horizontal de marée (il demande la profondeur : `u = η·√(g/h)` pour une onde
+progressive), la pente de la marée (k·A ≈ 10⁻⁵, sous le visible), l'adoption par défaut.
 
-**Références, calculées avant** (ce script les écrit). Une onde M2 progressive dans un chenal de 20 m : `c = √(g·h)` = **14.0071 m/s**,
-longueur d'onde **626.3 km** ; une carte de 10 km de pas (`A` = 1 m, `g = k·x`). Au milieu d'une maille, l'interpolation de la corde
-creuse l'amplitude de `1 − cos(k·Δx/2)` = **1.258e-03** (la phase y reste exacte, par symétrie) ; aux nœuds, l'onde exacte. Le retard
-de la pleine mer entre `x` = 0 et 50 km : **3569.6 s**.
+**Références, calculées avant** (ce script les écrit). M2, 1 m : la fréquence arrondie `96054` (Q32), `ω` = **1.405191332e-04 rad/s**,
+`|∂η/∂t|` ≤ **1.405191e-04 m/s**.
 
-**Quantum** (ADR-236 D1) : η en f32 (10⁻⁷ m) ; la dérive de phase de S577 (3·10⁻⁴ m en 15 jours) — on mesure sur 25 h (2·10⁻⁵ m).
-**Critères, écrits avant.** (1) aux nœuds, η à 10⁻⁴ m de `cos(ωt − kx)` sur 25 h ; (2) au milieu d'une maille, l'amplitude (le maximum
-sur 25 h, pas d'une minute) à 10⁻⁴ de `1 − 1.258e-03` ; (3) le retard de la pleine mer entre 0 et 50 km à 60 s de 3569.6 s (le pas
-d'échantillonnage) ; (4) un point hors de la grille refusé ; au bit à `(x, t)` donnés.
+**Quantum** (ADR-236 D1) : la vitesse en f32, ulp ≈ 1.5e-11 m/s ; la somme B + marée, un ulp de `|η|` (≈ 2.4e-07 m). **Critères,
+écrits avant.** (1) `vitesse(t)` contre `−A·ω·sin(ωt)` (la même `ω`, en f64) à 10⁻⁹ m/s sur 25 h (rapport ≈ 70 à l'ulp) ; la carte de S578
+au nœud contre la même forme ; (2) sur B réel (un fond de S259 ou le plus simple disponible), `η_total − η_B` à 2 ulp de `|η|` de la marée
+et `w_total − w_B` à 2 ulp ; (3) une marée nulle : l'échantillon identique (champ à champ) ; (4) la composition B + W (`compose`) accepte
+l'échantillon avec marée et rend `η` = celui d'avant + τ, à 2 ulp.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — la carte cotidale et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 2.2 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — la vitesse, `avec_maree` ; (1)–(4).
+- [ ] **P3** — preuve ; liste 2.2 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — nœuds 1,98·10⁻⁵ m ; milieu 0,998739 ; retard 3 540 s ; refus, au bit. Le plan avait un signe faux dans sa formule (`+ Im H·sin`
-  pour `H = A·e^(−ig)`) ; la forme voulue (`A·cos(ωt − g)`) implémentée. Suite 753.
-- **P3** — preuve CARTE-COTIDALE-S578 ; liste 2.2 ; index ; journal ; le lot.
-
