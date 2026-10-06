@@ -332,3 +332,11 @@ colonne — et `Linear3::set_motion` applique (deux noyaux, une ligne du second 
 carte à 2,2·10⁻⁶ m de la référence pour 1 cm d'élévation, volumes à 4·10⁻⁹ m³ ; le banc de S358 identique au binaire d'avant. Le recoupage
 CPU coûte 7,7 ms par pas contre 0,71 ms pour la carte : la suite du temps réel. Lot des registres. Maillons **0**. Suivant : **S504, la
 coque qui perce la surface en mouvement sur la carte** (le dépôt sous couvercle partiel, le transfert de S334).
+
+## S504 — 2026-10-06 — la coque qui perce la surface, en mouvement sur la carte
+
+**Entrée.** En autonomie, la suite de S503. **Fait** ([preuve](../docs/validation/COQUE-CARTE-S504.md)) : le dépôt soustrait au couvercle
+partiel et le transfert de S334 portés sur la carte (poids calculés par le cœur ; rassemblement puis application, sans écriture
+concurrente). **Mesuré** : la coque de la porte D en pilonnement et en roulis, la carte à 1,7·10⁻⁶ et 2,4·10⁻⁷ m de la référence pour des
+élévations de 4,5 cm et 8,8 mm ; le témoin sans transfert dérive à 5,6·10⁻⁵ m ; S358, S493, S503 inchangés. 6.4 avance : restent C23 et le
+coût du recoupage (8 ms par pas sur le CPU). Maillons **0**. Suivant : **S505, C23 sur le système**.

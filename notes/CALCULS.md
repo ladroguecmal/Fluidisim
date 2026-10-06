@@ -60,9 +60,10 @@ for nd in (8, 12, 16):
                 print(l, flush=True)
         print('code', r.returncode, flush=True)
 "` | lancé 2026-10-06 00:29 |
-| `20261006-012537-eveil` | S491 | eveil | `python outils/eveil.py 14` | en cours |
+| `20261006-012537-eveil` | S491 | eveil | `python outils/eveil.py 14` | interrompu (pas de fin.txt) |
 | `20261006-043934-roulis-s502` | S502 | roulis-s502 | `code/target/release/examples/rayonnement_coque.exe --mode roulis --omega 2.0,2.5,3.0` | terminé, 2026-10-06 04:44 |
 | `20261006-043936-tangage-s502` | S502 | tangage-s502 | `code/target/release/examples/rayonnement_coque.exe --mode tangage --omega 3.5,4.0,4.5` | terminé, 2026-10-06 04:43 |
 | `20261006-044722-lacet-s502` | S502 | lacet-s502 | `code/target/release/examples/rayonnement_coque.exe --mode lacet --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
 | `20261006-044723-cavalement-s502` | S502 | cavalement-s502 | `code/target/release/examples/rayonnement_coque.exe --mode cavalement --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
 | `20261006-044724-embardee-s502` | S502 | embardee-s502 | `code/target/release/examples/rayonnement_coque.exe --mode embardee --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
+| `20261006-074013-eveil` | S504 | eveil | `python outils/eveil.py 14` | en cours |
