@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S542 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S540–S541), puis **4.17 — le référentiel
+Session : S542 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S540–S541), puis **4.17 — le référentiel
 accéléré** (absent) par C16 : « surface au repos perpendiculaire à `g_eff` » ; « échoue immédiatement si un `−9,81·Z` traîne quelque part »
 (I-07). δ reçoit la grandeur de `g_eff` (ADR-007), pas sa direction.
 
@@ -81,7 +81,10 @@ période du premier mode, lâché en cosinus sans `g_h`, à 1 % de 4,40 s (C16 :
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — la pesanteur horizontale, les essais ; (1)–(3).
-- [ ] **P3** — preuve ; listes 4.17, 13.2 ; C16 ; rituel (`--lot`).
+- [x] **P2** — la pesanteur horizontale, les essais ; (1)–(3).
+- [x] **P3** — preuve ; listes 4.17, 13.2 ; C16 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — `set_horizontal_gravity` ; essai `s542` : pente 0,05005 (10⁻³, 0,003°), période 4,4054 s (1,1·10⁻³). Suite 703.
+- **P3** — preuve C16-ACCELERE-S542 ; liste 4.17 (partiel), 13.2, décompte ; C16 ; dépendances ; index ; journal.
+

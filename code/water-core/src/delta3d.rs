@@ -193,6 +193,9 @@ pub struct Volume3 {
     lid_floor: f32,
     /// **S337 : l'éponge du mode linéaire** — celle du pas couplé (ADR-164) ; `None` par défaut : des murs.
     linear_sponge: Option<Sponge3>,
+    /// **S542 : la composante horizontale de `g_eff`** (m/s², 4.17, C16) — une force de volume au champ prédit du pas linéaire ; nulle par
+    /// défaut.
+    horizontal_g: [f32; 2],
     /// Le volume que cette éponge a retiré depuis la configuration, m³ — ce que le bilan doit lui rendre.
     sponge_removed: f64,
     /// **S385 : la multigrille 3D** (ADR-207 D3), préconditionneur du pas mobile ; `None` par défaut — le Jacobi de
@@ -316,6 +319,7 @@ impl Volume3 {
             full_recut: false,
             lid_floor: 1.,
             linear_sponge: None,
+            horizontal_g: [0.; 2],
             sponge_removed: 0.,
             mg: None,
             graded: None,
@@ -640,6 +644,18 @@ impl Volume3 {
             e.validate(self.domain)?;
         }
         self.linear_sponge = sponge;
+        Ok(())
+    }
+
+    /// **S542 — la composante horizontale de la pesanteur effective** (ADR-002, I-07 ; liste 4.17, C16) : dans un référentiel accéléré,
+    /// `g_eff = g − A` s'incline, et sa part horizontale pousse l'eau. Une force de volume ajoutée au champ prédit du pas linéaire, sur les
+    /// faces ouvertes (les murs gardés par la projection) ; à l'équilibre, la surface `η = (g_h/g)·x`, perpendiculaire à `g_eff`. La
+    /// grandeur verticale reste `g_eff` de la configuration. `[0, 0]` : le pas d'avant au bit. Refus `NotFinite`.
+    pub fn set_horizontal_gravity(&mut self, g: [f32; 2]) -> Result<(), Error> {
+        if !g.iter().all(|x| x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        self.horizontal_g = g;
         Ok(())
     }
 
@@ -1635,6 +1651,28 @@ impl Volume3 {
         self.us.copy_from_slice(&self.u);
         self.vs.copy_from_slice(&self.v);
         self.ws.copy_from_slice(&self.w);
+        // S542 : la pesanteur horizontale, une force de volume sur les faces ouvertes (les faces de mur restent à zéro).
+        if self.horizontal_g != [0.; 2] {
+            let [gx, gy] = self.horizontal_g.map(|g| g * dt as f32);
+            for k in 0..nz {
+                for j in 0..ny {
+                    for i in 1..nx {
+                        let f = self.fu(i, j, k);
+                        if self.cut.as_ref().map_or(true, |g| g.open_u[f] > 0.) {
+                            self.us[f] += gx;
+                        }
+                    }
+                }
+                for j in 1..ny {
+                    for i in 0..nx {
+                        let f = self.fv(i, j, k);
+                        if self.cut.as_ref().map_or(true, |g| g.open_v[f] > 0.) {
+                            self.vs[f] += gy;
+                        }
+                    }
+                }
+            }
+        }
         // S337 : l'éponge amortit les vitesses prédites au bord, comme le pas couplé.
         if let Some(e) = self.linear_sponge {
             let d = self.domain;

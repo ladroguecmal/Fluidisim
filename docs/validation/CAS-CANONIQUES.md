@@ -791,6 +791,10 @@ puis à une rotation de 0,313 rad/s.
 
 Échoue immédiatement si un `−9,81·Z` traîne quelque part (I-07).
 
+> *Note du 2026-10-06, S542, sur C16* ([C16-ACCELERE-S542](C16-ACCELERE-S542.md)) : **exécuté en partie** dans δ linéaire — la pente au
+> repos à 0,003° de la normale à `g_eff` (sous 0,05 g : 0,3 g sortirait du modèle linéaire), la période à 0,11 % de la formule. **La
+> formule donne 4,40 s, pas « ≈ 3,5 s »** : la valeur de l'énoncé est fausse, la formule fait foi. La rotation reste à faire.
+
 ## C17 — Inondation limitée par l'air
 
 **Montage.** Compartiment étanche de 10 m³, brèche de 1 dm² à 2 m sous la flottaison ; deux

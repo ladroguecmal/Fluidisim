@@ -649,3 +649,11 @@ selon `−g_eff` sous une pesanteur inclinée. **C13 passe.** Maillons **0** (7.
 **Entrée.** En autonomie ; revue due (S536–S540). **Friction répétée** : un nombre du plan ajusté à vue après un changement de paramètre
 (S538, la troisième fois sous ADR-232 D2) — **protection élargie** : il se recalcule (ADR-237 D1, L394). La ligne 13.2 en retard (C20 depuis
 S512) relevée une fois ; le décompte arrêté par l'outil. Maillons **1**. Suivant : **S542**, le lot (dû) et un point partiel.
+
+## S542 — 2026-10-06 — le lot ; C16 : la cuve dans un référentiel accéléré
+
+**Entrée.** En autonomie ; le lot (feuille de route S540–S541), puis 4.17 (absent) par C16. **Calculé au plan** : la formule de C16 donne
+4,40 s, pas les « ≈ 3,5 s » de son énoncé ; son 0,3 g sortirait du modèle linéaire. **Fait** ([preuve](../docs/validation/C16-ACCELERE-S542.md)) :
+`set_horizontal_gravity` — la part horizontale de `g_eff`, une force de volume au champ prédit de δ. **Mesuré** : la surface au repos à
+0,003° de la normale à `g_eff`, la période à 0,11 % de la formule. Maillons **0** (4.17 devient partiel, 13.2 avance). Suivant : **S543**.
+

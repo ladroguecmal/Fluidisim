@@ -2561,3 +2561,57 @@ fn the_boxed_recut_is_the_full_recut_s508() {
     }
     println!("S508 : 60 pas, recoupage en boîte et entier identiques au bit");
 }
+
+/// **S542 — C16, le référentiel accéléré** (liste 4.17). Une cuve de 8 m et 1,5 m d'eau (32 × 1 × 6 mailles de 25 cm), pas de 10 ms.
+/// (2) Sous 0,05 g latéral, partie plate, la pente moyenne de la surface sur quatre périodes à 2 % de `g_h/g` (perpendiculaire à `g_eff`).
+/// (3) Sans pesanteur horizontale, le premier mode lâché en cosinus : sa période à 1 % de `2π/√(g·(π/L)·tanh(πh/L))` = 4,40 s.
+#[test]
+fn a_tank_in_an_accelerated_frame_tilts_and_sloshes_s542() {
+    let (n, dx, h, g) = (32usize, 0.25f32, 1.5f64, 9.81f64);
+    let pente = |eta: &[f32]| {
+        let (mut sx, mut sy, mut sxx, mut sxy) = (0f64, 0f64, 0f64, 0f64);
+        for (i, e) in eta.iter().enumerate() {
+            let x = (i as f64 + 0.5) * dx as f64;
+            sx += x;
+            sy += *e as f64;
+            sxx += x * x;
+            sxy += x * *e as f64;
+        }
+        let m = eta.len() as f64;
+        (m * sxy - sx * sy) / (m * sxx - sx * sx)
+    };
+    let k = std::f64::consts::PI / 8.;
+    let periode = 2. * std::f64::consts::PI / (g * k * (k * h).tanh()).sqrt();
+    // (2) La pente sous 0,05 g.
+    let (mut v, _) = volume(n, 1, 6, dx, g as f32);
+    v.set_surface(&vec![1.5; n]).unwrap();
+    v.set_horizontal_gravity([(0.05 * g) as f32, 0.]).unwrap();
+    let pas = (4. * periode / 0.01).round() as usize;
+    let mut somme = 0f64;
+    for _ in 0..pas {
+        v.step_surface_linear(10_000, 2000, &Jobs).unwrap();
+        somme += pente(v.surface());
+    }
+    let moyenne = somme / pas as f64;
+    // (3) La période du premier mode.
+    let (mut w, _) = volume(n, 1, 6, dx, g as f32);
+    let eta0: Vec<f32> = (0..n).map(|i| 1.5 + 0.01 * (std::f64::consts::PI * (i as f64 + 0.5) / n as f64).cos() as f32).collect();
+    w.set_surface(&eta0).unwrap();
+    let (mut avant, mut passages) = (w.surface()[0] as f64 - 1.5, Vec::new());
+    for s in 1..=3000 {
+        w.step_surface_linear(10_000, 2000, &Jobs).unwrap();
+        let e = w.surface()[0] as f64 - 1.5;
+        if avant > 0. && e <= 0. || avant < 0. && e >= 0. {
+            passages.push((s as f64 - 1. + avant / (avant - e)) * 0.01);
+        }
+        avant = e;
+    }
+    let mesure = 2. * (passages[passages.len() - 1] - passages[0]) / (passages.len() - 1) as f64;
+    println!(
+        "S542 C16 : pente moyenne {moyenne:.5} (g_h/g = 0,05, écart {:.2e}, {:.3}°) ; période {mesure:.4} s (formule {periode:.4} s, écart {:.2e})",
+        moyenne / 0.05 - 1., (moyenne.atan() - 0.05f64.atan()).to_degrees(), mesure / periode - 1.
+    );
+    assert!((moyenne / 0.05 - 1.).abs() <= 0.02, "critère 2");
+    assert!((mesure / periode - 1.).abs() <= 0.01, "critère 3");
+    assert_eq!(v.set_horizontal_gravity([f32::NAN, 0.]), Err(Error::NotFinite));
+}

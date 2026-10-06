@@ -69,7 +69,7 @@ D = {
  "4.14": ("B", "—", ["2.7", "3.5", "4.16", "6.5"], None),
  "4.15": ("B", "le couplage à B/W sur fond coupé ; un modèle de turbulence", [], None),
  "4.16": ("B", "le raccord (A316), puis APIC en 3D", [], None),
- "4.17": ("B", "—", ["1.8"], None),
+ "4.17": ("B", "l'inclinaison dans δ linéaire faite (S542) ; la rotation, la carte, C06", ["1.8"], None),
  "4.18": ("C", "le compteur sur la carte ; énergie et quantité de mouvement ; C09", [], None),
  "4.19": ("B", "d'autres scènes ; plusieurs domaines en direct ; un 99ᵉ centile en direct", [], None),
  "4.20": ("B", "—", ["4.16"], None),

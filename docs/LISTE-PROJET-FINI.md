@@ -320,8 +320,10 @@ pas recopiée ici (L137).
   **S415** : le fond qui suit l'écoulement (C6c-3, l'idée de l'utilisateur) — sur un tourbillon enfoui, la vitesse rend l'énergie
   d'APIC seul avec 2,4 à 3 fois moins de particules ; sous une houle, la vitesse relative à B reste à faire ([§6](validation/BANDE-ETROITE-S413.md)).
   Restent les éclaboussures détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
-- [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
-  C06 partiel sur un véhicule d'essai 1D.
+- [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *partiel* depuis S542 : la composante horizontale de
+  `g_eff` dans le pas linéaire de δ — la surface au repos à 0,003° de la normale à `g_eff`, la période du ballottement à 0,11 % de sa
+  formule (C16 en partie : [preuve](validation/C16-ACCELERE-S542.md)). Manquent la rotation, la carte GPU et le pas couplé, C06 sur le
+  système (partiel sur un véhicule d'essai 1D).
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est
   désormais comptée**. S310 : bilan **exact par télescopage** tenu par les deux pas, plancher
   publié ; cuve fermée à 7,4·10⁻¹² m de dérive sur 5 s, murs à zéro exact ; scène couplée à
@@ -742,7 +744,8 @@ pas recopiée ici (L137).
   ([preuve](validation/CORPS-RIGIDE-S331.md)). Sur véhicules d'essai : C01, C03, C04, C06 (partiel),
   C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
   aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
-  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)). Non exécutés : C05, C09, C11, C14 à C16, C21. **C18 partiel**
+  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)) ; **C16 en partie depuis S542** (l'inclinaison et la période, pas la
+  rotation ; [preuve](validation/C16-ACCELERE-S542.md)). Non exécutés : C05, C09, C11, C14, C15, C21. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par
@@ -768,7 +771,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
-| 4. Volumique (δ) | 21 | 0 | 16 | 5 |
+| 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 6 | 4 |
 | 6. Solides | 8 | 5 | 2 | 1 |
 | 7. Secondaires | 8 | 0 | 3 | 5 |
@@ -778,7 +781,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **72** | **39** |
+| **total** | **121** | **10** | **73** | **38** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
