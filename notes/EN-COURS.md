@@ -62,29 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S553 — **terminée**. En autonomie, **6.6 — plusieurs compartiments et leurs cloisons** : l'envahissement progressif — la brèche
-envahit un compartiment, qui envahit le suivant par une cloison percée.
+Session : S554 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S553), puis **6.6 — la poche porteuse
+d'un compartiment scellé** : S548 avec le compartiment étanche de S538 — l'air comprimé retient l'eau, et la barge s'enfonce bien moins.
 
-**Ce que la session fait.** Un essai, sans code neuf (les pièces de S548–S552) : la barge de S548 ; deux compartiments de V de 5 × 8 × 4 m,
-l'avant (`x` ∈ [0 ; 5]) et l'arrière (`x` ∈ [−5 ; 0]), formes volumiques ; une brèche de 0,1 m² au fond de l'avant, un trou de 0,05 m² au
-pied de la cloison qui les sépare (deux arêtes d'orifice, une par sens : l'eau va du plus haut au plus bas) ; la mer volumique recentrée sous
-la brèche (S552) ; la pesanteur du navire ; l'eau de chaque compartiment en son centre mouillé. Pendant l'envahissement la barge prend de
-l'assiette (l'avant d'abord) ; à l'équilibre, tout est symétrique.
+**Ce que la session fait.** L'essai de S548 (barge, compartiment central de 5 × 8 × 4 m, brèche de 0,1 m² au fond, la mer vue du navire)
+avec `step_air` et le compartiment scellé (une poche isotherme, `p·V` = `p_atm·160 m³`) ; puis ouvert, en témoin (S548).
 
-**Ordre de grandeur, calculé.** La flottabilité perdue des deux : `T' = T·A/(A − A₁ − A₂)` = 1,5·160/80 = **3,000 m**, **120 m³** dans
-chacun ; franc-bord 1 m ; `GM` transversal après envahissement 1,278 m (stable : les extrémités intactes portent l'inertie de flottaison).
+**Ordre de grandeur, calculé — la référence indépendante** (ADR-239 D1), Boyle et l'équilibre du navire résolus ensemble par bisection :
+`ρ·A·T' = m + ρ·A_c·h` et `p_atm·D/(D − h) − p_atm = ρg·(T' − h)` → **eau 0,4207 m (16,83 m³), tirant 1,6052 m**, l'air à 113,2 kPa ; ouvert,
+2,000 m (S548).
 
-**Critères, écrits avant.** (1) Le tirant final au centre (vertical) à 1 % de 3,000 m ; l'assiette finale sous 0,1°. (2) L'eau de chaque
-compartiment à 2 % de 120 m³. (3) Pendant l'envahissement, l'arrière en retard sur l'avant (la cloison limite) ; la masse de V exacte.
+**Critères, écrits avant.** (1) Scellé : le tirant final à 0,5 % de 1,6052 m ; l'eau à 1 % de 16,83 m³. (2) Ouvert : S548 (2,000 m). (3) La
+masse de V exacte. La durée vérifiée par une trace (la leçon de S553).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.6 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — à 900 s l'envahissement n'était pas fini (2,64 m) ; la trace : équilibre vers 1 800 s ; à 3 000 s, tirant 2,9985 m, assiette
-  0, 119,88 m³ chacun ; l'arrière en retard ; masse exacte. Suite 712.
-- **P3** — preuve CLOISON-PERCEE-S553 ; liste 6.6 ; index ; journal.
-
