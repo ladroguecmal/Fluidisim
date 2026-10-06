@@ -277,3 +277,12 @@ un cercle à 3 m/s ; le curseur à 0,0560 m du corps (prédit 0,0563), le sillag
 ordres 1,89 et 1,83 en Δ ; tous les critères écrits avant tenus du premier coup — les protections d'ADR-226 appliquées dans le plan.
 **6.3 validée — 6 points sur 120.** Lot des registres : feuille de route (6 / 71 / 43), liste, index. Maillons **0**. Suivant : un autre
 point partiel proche de son périmètre.
+
+## S498 — 2026-10-06 — le petit objet léger : les régimes de flottabilité (C11)
+
+**Entrée.** En autonomie ; 6.1 (« Manquent W derrière la requête, l'amortissement des autres degrés de liberté, C11 et B6 »). **Fait**
+([preuve](../docs/validation/PETIT-OBJET-S498.md)) : les trois régimes d'ADR-008 §3 dans le corps rigide — normal, sous-cyclé, **contraint**
+(projeté sur la surface). **Mesuré** : `ω` à 10⁻⁹ ; la balle de ping-pong contrainte à 30 Hz, l'écart à la surface **exactement nul** sur
+120 s de B et 10 s de W ; le témoin au pas normal diverge à ×3,052 par pas, la prédiction ; navire, barque, caisse : `|G|` = 1 à 10⁻¹².
+Un instrument refait sans toucher au seuil : les maxima paraboliques portaient un bruit de 6·10⁻⁴. **C11 tenu** ; 6.1 avance (restent
+l'amortissement des autres degrés de liberté et B6). Maillons **0**. Suivant : **S499, B6** — le nombre de points du proxy par archétype.

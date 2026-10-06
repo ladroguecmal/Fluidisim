@@ -362,6 +362,110 @@ impl RigidBody {
     }
 }
 
+/// **S498 — le régime d'intégration d'un corps flottant** (ADR-008 §3), selon `ω·dt` : normal jusqu'à 0,3 ; sous-cyclé (2 à 4 sous-pas)
+/// jusqu'à 1 ; au-delà, **contraint** — projeté sur la surface, sans force de flottabilité.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Regime {
+    Normal,
+    Subcycled(u32),
+    Constrained,
+}
+
+/// **S498 — ce qu'un corps flottant calcule à sa création** (ADR-008 §3) : la pulsation de pilonnement `ω = √(k/(m + m_a))` en eau
+/// calme à l'équilibre, le régime au pas `dt` de l'hôte, et l'altitude d'équilibre de son centre au-dessus de la surface, `c`, que le
+/// mode contraint lui impose.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Floating {
+    pub omega: f64,
+    pub regime: Regime,
+    pub offset: f64,
+}
+
+impl RigidBody {
+    /// **S498 : la raideur de flottaison**, `ρg·Σ V/e` sur les points du proxy dans leur rampe (ni secs ni noyés) : pour un pavé droit à
+    /// une couche partielle par colonne, `ρg·A` exactement.
+    pub fn heave_stiffness(&self, water: &dyn WaterQuery, milieu: Milieu) -> f64 {
+        let mut k = 0.;
+        for p in &self.proxy {
+            let x = add(self.position, rotate(self.orientation, p.body));
+            let frac = (water.surface(x[0], x[1]) - (x[2] - 0.5 * p.thickness)) / p.thickness;
+            if frac > 0. && frac < 1. {
+                k += milieu.rho * G * p.volume / p.thickness;
+            }
+        }
+        k
+    }
+
+    /// **S498 : l'altitude d'équilibre du centre au-dessus d'une surface plane**, le corps droit : le volume immergé égal à `m/ρ`, par
+    /// dichotomie sur l'étendue du proxy (soixante itérations : au bit de la précision double).
+    pub fn equilibrium_offset(&self, milieu: Milieu) -> f64 {
+        let mut droit = self.clone();
+        droit.orientation = [1., 0., 0., 0.];
+        let etendue = self.proxy.iter().map(|p| p.body[2].abs() + p.thickness).fold(0., f64::max);
+        let (mut bas, mut haut) = (-etendue, etendue);
+        for _ in 0..60 {
+            let c = 0.5 * (bas + haut);
+            droit.position = [0., 0., c];
+            let v = droit.forces(&CalmWater { level: 0. }, milieu).immersed_volume;
+            if v * milieu.rho > self.mass {
+                bas = c;
+            } else {
+                haut = c;
+            }
+        }
+        0.5 * (bas + haut)
+    }
+
+    /// **S498 : la création d'un corps flottant** (ADR-008 §3) : `ω` en eau calme à l'équilibre, le régime au pas `dt`.
+    pub fn floating(&self, dt: f64, milieu: Milieu) -> Floating {
+        let offset = self.equilibrium_offset(milieu);
+        let mut droit = self.clone();
+        droit.orientation = [1., 0., 0., 0.];
+        droit.position = [0., 0., offset];
+        let omega = (droit.heave_stiffness(&CalmWater { level: 0. }, milieu) / (self.mass + self.added_mass[2])).sqrt();
+        let x = omega * dt;
+        let regime = if x <= 0.3 {
+            Regime::Normal
+        } else if x <= 1. {
+            Regime::Subcycled(((x / 0.3).ceil() as u32).clamp(2, 4))
+        } else {
+            Regime::Constrained
+        };
+        Floating { omega, regime, offset }
+    }
+
+    /// **S498 : un pas selon le régime** (ADR-008 §3). Normal : [`RigidBody::step`] sous `water`, l'eau au début du pas. Sous-cyclé :
+    /// `n` pas de `dt/n` sous la même eau. **Contraint** : aucune force de flottabilité ; la vitesse horizontale relaxée vers celle de
+    /// l'eau au taux `ω`, la position avancée, puis **projetée** sur la surface de `next` — l'eau à la fin du pas — : `z = η + c`,
+    /// l'axe du corps sur la normale, sans rotation propre. Exactement stable, sans coût.
+    pub fn step_floating(&mut self, f: &Floating, dt: f64, water: &dyn WaterQuery, next: &dyn WaterQuery, milieu: Milieu) {
+        match f.regime {
+            Regime::Normal => {
+                self.step(dt, water, milieu);
+            }
+            Regime::Subcycled(n) => {
+                for _ in 0..n {
+                    self.step(dt / n as f64, water, milieu);
+                }
+            }
+            Regime::Constrained => {
+                let [x, y, z] = self.position;
+                let u = next.velocity([x, y, next.surface(x, y)]);
+                let r = (-f.omega * dt).exp();
+                for k in 0..2 {
+                    self.velocity[k] = u[k] + (self.velocity[k] - u[k]) * r;
+                    self.position[k] += dt * self.velocity[k];
+                }
+                let [x, y, _] = self.position;
+                self.position[2] = next.surface(x, y) + f.offset;
+                self.velocity[2] = (self.position[2] - z) / dt;
+                self.orientation = surface_tilt(next.slope(x, y));
+                self.angular_velocity = [0.; 3];
+            }
+        }
+    }
+}
+
 /// **S332 : la distance signée d'un pavé orienté** — centre `c`, quaternion `q`, demi-côtés `h` — au point
 /// `p` du monde, négative dedans : la coque d'un corps, telle que δ la reçoit aux nœuds de sa grille.
 pub fn oriented_box_distance(c: [f64; 3], q: [f64; 4], h: [f64; 3], p: [f64; 3]) -> f64 {

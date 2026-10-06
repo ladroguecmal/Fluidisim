@@ -409,8 +409,9 @@ pas recopiée ici (L137).
   qui la porte ([preuve](validation/PORTE-D-S333.md)) ; **masse ajoutée et amortissement de rayonnement de
   pilonnement** mesurés par δ depuis S336, l'énergie dissipée égale à celle que δ reçoit à 2,3 % près
   ([preuve](validation/RAYONNEMENT-COQUE-S336.md)) ; **porte D reçue** sur la référence CPU en S338, verdict
-  R15 ([preuve](validation/PORTE-D-S333.md) §9). Manquent W derrière la requête, l'amortissement des autres
-  degrés de liberté, C11 et B6 sur ses cinq archétypes.
+  R15 ([preuve](validation/PORTE-D-S333.md) §9) ; **W derrière la requête** depuis S494–S495 (6.2) ; **C11** depuis S498 — les trois
+  régimes d'ADR-008 §3 selon `ω·dt`, la balle de ping-pong contrainte à la surface à l'écart nul, `|G|` = 1 à 10⁻¹² hors mode contraint
+  ([preuve](validation/PETIT-OBJET-S498.md)). Manquent l'amortissement des autres degrés de liberté et B6 sur ses archétypes.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
   du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)) ; **S494** : les **impacts de W** — B et les

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S498 — **en cours**. En autonomie, **6.1, C11 — le petit objet léger** : la liste dit « Manquent W derrière la requête (fait
+Session : S498 — **terminée**. En autonomie, **6.1, C11 — le petit objet léger** : la liste dit « Manquent W derrière la requête (fait
 S494–S495), l'amortissement des autres degrés de liberté, C11 et B6 sur ses cinq archétypes ». ADR-008 §3 fixe trois régimes selon
 `ω·dt` — normal (≤ 0,3), sous-cyclé (≤ 1, 2 à 4 sous-pas), **contraint** (> 1 : projeté sur la surface, orienté sur sa normale, vitesse
 horizontale amortie vers l'orbitale) ; le corps rigide n'en a aucun.
@@ -83,7 +83,11 @@ contraint, `|G| ≤ 1 + 10⁻⁹` par période sur 120 s (caisse sous-cyclée, b
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les régimes et le mode contraint ; essais (1)–(4).
-- [ ] **P3** — preuve ; liste 6.1 ; rituel.
+- [x] **P2** — les régimes et le mode contraint ; essais (1)–(4).
+- [x] **P3** — preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
+- **P2** — `heave_stiffness`, `equilibrium_offset`, `floating`, `step_floating`. (1) tenu ; (2) 0 et ≤ 4,2·10⁻¹⁷ rad ; (3) 3,052 = prédit ;
+  (4) 1 à 10⁻¹². Impasses : témoin à 1 mm sorti de l'eau au premier pas → 0,1 µm ; `|G|` par maxima paraboliques bruité à 6·10⁻⁴ (la
+  barque à 1 + 1,6·10⁻⁹) → enveloppe ajustée à la pulsation exacte du pas ; seuil inchangé. 658 essais.
+- **P3** — preuve PETIT-OBJET-S498 ; liste 6.1 ; index ; journal.

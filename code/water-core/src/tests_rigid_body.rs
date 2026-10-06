@@ -881,3 +881,215 @@ fn a_moving_body_emits_its_wake_s497() {
     assert!(r[1][2] <= 0.1 * r[1][3], "critère 3 : {} contre {}", r[1][2], r[1][3]);
     assert!(o1 >= 1.7 && o2 >= 1.7, "critère 3, ordre : {o1} {o2}");
 }
+
+/// Les archétypes d'ADR-008 §3 en pavés droits — aire de flottaison et masse du tableau : navire de 60 m, barque, caisse flottante,
+/// balle de ping-pong (un cube de même aire et de même masse).
+fn archetypes_s498() -> [(&'static str, RigidBody, f64, f64); 4] {
+    let pave = |l: f64, b: f64, h: f64, m: f64, couches: [usize; 3]| RigidBody::cuboid([l, b, h], m / (l * b * h), [0.; 3], couches);
+    let cote = 1.3e-3f64.sqrt();
+    [
+        ("navire", pave(60., 10., 8., 1.2e6, [8, 4, 4]), 600., 1.2e6),
+        ("barque", pave(3., 2., 0.6, 400., [6, 4, 4]), 6., 400.),
+        ("caisse", pave(1., 1., 0.2, 50., [4, 4, 4]), 1., 50.),
+        ("ping-pong", pave(cote, cote, cote, 2.7e-3, [4, 4, 4]), 1.3e-3, 2.7e-3),
+    ]
+}
+
+/// **S498, critère 1 — les régimes d'ADR-008 §3.** La pulsation que le corps mesure sur son proxy à l'équilibre est `√(ρgA/(m + m_a))`
+/// à 10⁻⁹ près, et le régime bascule aux seuils `ω·dt` = 0,3 et 1, de part et d'autre (à 10⁻⁶ près). À 30 Hz : le navire normal, la
+/// barque et la caisse sous-cyclées (2 sous-pas : leur `m_a` est nul ici, plus raides que le tableau d'ADR-008), la balle contrainte.
+#[test]
+fn the_floating_regimes_follow_omega_dt_s498() {
+    for (nom, corps, aire, masse) in archetypes_s498() {
+        let f = corps.floating(1. / 30., MER);
+        let attendu = (MER.rho * G * aire / masse).sqrt();
+        println!("S498 {nom} : ω {:.4} rad/s (attendu {attendu:.4}), ω·dt à 30 Hz {:.3}, régime {:?}, c {:.5} m", f.omega, f.omega / 30., f.regime, f.offset);
+        assert!((f.omega / attendu - 1.).abs() <= 1e-9, "{nom} : {} contre {attendu}", f.omega);
+        for (x, regime) in [(0.3 * (1. - 1e-6), Regime::Normal), (0.3 * (1. + 1e-6), Regime::Subcycled(2)), (1. - 1e-6, Regime::Subcycled(4)), (1. + 1e-6, Regime::Constrained)] {
+            assert_eq!(corps.floating(x / attendu, MER).regime, regime, "{nom} à ω·dt = {x}");
+        }
+    }
+    let r: Vec<Regime> = archetypes_s498().iter().map(|a| a.1.floating(1. / 30., MER).regime).collect();
+    assert_eq!(r, [Regime::Normal, Regime::Subcycled(2), Regime::Subcycled(2), Regime::Constrained]);
+}
+
+/// L'écart d'un corps contraint à la surface de `eau` : `|z − (η + c)|`, et l'angle entre son axe et la normale (rad).
+fn ecart_contraint(c: &RigidBody, f: &Floating, eau: &dyn WaterQuery) -> (f64, f64) {
+    let [x, y, z] = c.position;
+    let s = eau.slope(x, y);
+    let n = (1. + s[0] * s[0] + s[1] * s[1]).sqrt();
+    let normale = [-s[0] / n, -s[1] / n, 1. / n];
+    let axe = rotate(c.orientation, [0., 0., 1.]);
+    let croix = [axe[1] * normale[2] - axe[2] * normale[1], axe[2] * normale[0] - axe[0] * normale[2], axe[0] * normale[1] - axe[1] * normale[0]];
+    ((z - (eau.surface(x, y) + f.offset)).abs(), norm(croix).asin())
+}
+
+/// **S498, critère 2 — le mode contraint.** La balle de ping-pong à 30 Hz : 120 s sur une houle de B (5 cm, 6 s), puis 10 s près d'un
+/// impact de W d'1 kJ (λ = 4 m) — `max|z − (η + c)| = 0` et son axe sur la normale à 10⁻¹² rad ; sa vitesse horizontale suit celle de
+/// l'eau. **Critère 3 — le témoin** : la même balle au pas normal diverge, `|G|` > 1 par pas (prédit ≈ 2,7).
+#[test]
+fn a_small_light_object_rides_the_surface_exactly_s498() {
+    let cote = 1.3e-3f64.sqrt();
+    let balle = |x: f64| RigidBody::cuboid([cote; 3], 2.7e-3 / cote.powi(3), [x, 0., 0.], [4, 4, 4]);
+    let f = balle(0.).floating(1. / 30., MER);
+    assert_eq!(f.regime, Regime::Constrained);
+    // 120 s sur B.
+    let b = houle(0.05, 6.);
+    let mut c = balle(5.);
+    c.position[2] = f.offset;
+    let (mut pire_z, mut pire_angle, mut pire_u) = (0f64, 0f64, 0f64);
+    for n in 0..3600u64 {
+        let t = |k: u64| SimTime(k * 1_000_000 / 30);
+        let (eau, suivante) = (BackgroundWater { background: &b, time: t(n) }, BackgroundWater { background: &b, time: t(n + 1) });
+        c.step_floating(&f, 1. / 30., &eau, &suivante, MER);
+        let (dz, angle) = ecart_contraint(&c, &f, &suivante);
+        pire_z = pire_z.max(dz);
+        pire_angle = pire_angle.max(angle);
+        if n > 30 {
+            let u = suivante.velocity([c.position[0], c.position[1], 0.]);
+            pire_u = pire_u.max((c.velocity[0] - u[0]).hypot(c.velocity[1] - u[1]));
+        }
+    }
+    println!("S498 balle sur B, 120 s : max|z − (η + c)| {pire_z:.1e} m, angle à la normale {pire_angle:.1e} rad, |v − u| {pire_u:.1e} m/s");
+    assert_eq!(pire_z, 0., "critère 2");
+    assert!(pire_angle <= 1e-12, "critère 2 : {pire_angle}");
+    // 10 s près d'un impact de W.
+    let mut sous_w = (0f64, 0f64);
+    let mut deplacement = 0f64;
+    {
+        use crate::prepared_water::{BoundBackground, Context, Prepared};
+        use crate::radial_impact::{Domain, RadialImpact};
+        use crate::wave_event::{Impact, Origin, WaveEvent};
+        use crate::wave_journal::{Cause, Journal};
+        use crate::FrameId;
+        let b = houle(0.02, 6.);
+        let bound = BoundBackground::new(&b, FrameId(0), 0);
+        let mut records = [None; 1];
+        let mut journal = Journal::new(0, &mut records);
+        let event = WaveEvent::impact(Impact {
+            id: 1,
+            frame: FrameId(0),
+            cell: 0,
+            birth: SimTime(0),
+            ttl_us: 12_000_000,
+            position: [0.; 3],
+            energy_j: 1000.,
+            wavelength_m: 4.,
+            direction_turns: 0.,
+            anisotropy: 0.,
+            displaced_l: 0.,
+            material: 0,
+            origin: Origin::Server,
+            above_surface: true,
+        })
+        .unwrap();
+        journal.confirm(0, Cause { entity: 1, command: 1, emission: 0 }, event).unwrap();
+        let ctx = Context {
+            frame: FrameId(0),
+            cell: 0,
+            medium: crate::impact_field::Medium { gravity: b.gravity(), density: 1025., depth: 50., max_slope: 0.5 },
+            domain: Domain { radius: 32., age_us: 12_000_000 },
+        };
+        let mut pool: [Option<RadialImpact<256>>; 1] = [const { None }; 1];
+        let impacts = Prepared::<256>::build(&journal, &mut pool, ctx).unwrap();
+        let eau_a = |k: u64| MixedWater {
+            bound: &bound,
+            impacts: &impacts,
+            pressure: None,
+            time: SimTime(k * 1_000_000 / 30),
+            max_slope: 0.5,
+            refusals: core::cell::Cell::new(0),
+        };
+        let mut c = balle(5.);
+        c.position[2] = f.offset;
+        for n in 0..300u64 {
+            let (eau, suivante) = (eau_a(n), eau_a(n + 1));
+            c.step_floating(&f, 1. / 30., &eau, &suivante, MER);
+            let (dz, angle) = ecart_contraint(&c, &f, &suivante);
+            sous_w = (sous_w.0.max(dz), sous_w.1.max(angle));
+            assert_eq!(eau.refusals.get() + suivante.refusals.get(), 0);
+        }
+        deplacement = deplacement.max((c.position[0] - 5.).abs());
+    }
+    println!("S498 balle près d'un impact, 10 s : max|z − (η + c)| {:.1e} m, angle {:.1e} rad, déplacement radial {deplacement:.3} m", sous_w.0, sous_w.1);
+    assert_eq!(sous_w.0, 0., "critère 2, W");
+    assert!(sous_w.1 <= 1e-12, "critère 2, W : {}", sous_w.1);
+    // Le témoin : au pas normal, 0,1 µm sous l'équilibre — la rampe des points reste linéaire sur huit pas (±4,5 mm).
+    let mut t = balle(0.);
+    t.position[2] = f.offset - 1e-7;
+    let calme = CalmWater { level: 0. };
+    let mut ecarts = vec![1e-7];
+    for _ in 0..8 {
+        t.step(1. / 30., &calme, MER);
+        ecarts.push((t.position[2] - f.offset).abs());
+    }
+    let facteur = (ecarts[8] / ecarts[4]).powf(0.25);
+    let x: f64 = f.omega / 30.;
+    let predit = (1. - x * x / 2. - ((1. - x * x / 2.).powi(2) - 1.).sqrt()).abs();
+    println!("S498 témoin au pas normal : écarts {ecarts:?} m, |G| par pas {facteur:.3} (prédit {predit:.3})");
+    assert!(facteur > 1.5, "critère 3 : {facteur}");
+    assert!((facteur / predit - 1.).abs() <= 0.05, "critère 3 : {facteur} contre {predit}");
+}
+
+/// **S498, critère 4 — hors mode contraint, rien n'amplifie.** Le navire (normal), la barque et la caisse (sous-cyclées) à 30 Hz, lâchés
+/// 1 cm au-dessus de leur équilibre en eau calme, 120 s : le facteur par période `|G|`, tiré de l'enveloppe ajustée à la pulsation
+/// exacte du pas, ≤ 1 + 10⁻⁹. (Les maxima interpolés par une parabole, essayés d'abord, portent un bruit d'échantillonnage de 6·10⁻⁴.)
+#[test]
+fn nothing_amplifies_outside_the_constrained_mode_s498() {
+    for (nom, corps, _, _) in archetypes_s498().into_iter().take(3) {
+        let f = corps.floating(1. / 30., MER);
+        let mut c = corps.clone();
+        c.position[2] = f.offset + 0.01;
+        let calme = CalmWater { level: 0. };
+        let z: Vec<f64> = (0..3600)
+            .map(|_| {
+                c.step_floating(&f, 1. / 30., &calme, &calme, MER);
+                c.position[2] - f.offset
+            })
+            .collect();
+        // Une application linéaire de module 1 rend une sinusoïde exacte aux pas, de pulsation `ω'` : `cos(ω'·dt/n) = 1 − (ω·dt/n)²/2`
+        // par sous-pas. Ajuster `z = (a + b·t)·cos ω't + (c + d·t)·sin ω't` ; le facteur par période est `1 + T·(ab + cd)/(a² + c²)` —
+        // une erreur de pulsation y entre au second ordre seulement.
+        let sous = match f.regime { Regime::Subcycled(n) => n as f64, _ => 1. };
+        let h = 1. / 30. / sous;
+        let w = (1. - (f.omega * h).powi(2) / 2.).acos() / h;
+        let mut m = [[0f64; 4]; 4];
+        let mut r = [0f64; 4];
+        for (i, zi) in z.iter().enumerate() {
+            let t = (i + 1) as f64 / 30.;
+            let v = [(w * t).cos(), t * (w * t).cos(), (w * t).sin(), t * (w * t).sin()];
+            for p in 0..4 {
+                r[p] += v[p] * zi;
+                for q in 0..4 {
+                    m[p][q] += v[p] * v[q];
+                }
+            }
+        }
+        // Gauss avec pivot partiel, 4 × 4.
+        for col in 0..4 {
+            let piv = (col..4).max_by(|&i, &j| m[i][col].abs().total_cmp(&m[j][col].abs())).unwrap();
+            m.swap(col, piv);
+            r.swap(col, piv);
+            for row in col + 1..4 {
+                let k = m[row][col] / m[col][col];
+                for q in col..4 {
+                    m[row][q] -= k * m[col][q];
+                }
+                r[row] -= k * r[col];
+            }
+        }
+        let mut sol = [0f64; 4];
+        for row in (0..4).rev() {
+            sol[row] = (r[row] - (row + 1..4).map(|q| m[row][q] * sol[q]).sum::<f64>()) / m[row][row];
+        }
+        let [a0, b0, c0, d0] = sol;
+        let periode = core::f64::consts::TAU / w;
+        let g = 1. + periode * (a0 * b0 + c0 * d0) / (a0 * a0 + c0 * c0);
+        let residu = z.iter().enumerate().map(|(i, zi)| {
+            let t = (i + 1) as f64 / 30.;
+            (zi - (a0 + b0 * t) * (w * t).cos() - (c0 + d0 * t) * (w * t).sin()).abs()
+        }).fold(0f64, f64::max);
+        println!("S498 {nom} ({:?}) : {:.0} périodes, |G| {g:.12}, amplitude {:.4} m, résidu de l'ajustement {residu:.1e} m", f.regime, 120. / periode, a0.hypot(c0));
+        assert!(g <= 1. + 1e-9, "critère 4, {nom} : {g}");
+    }
+}
