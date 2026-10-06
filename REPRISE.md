@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 18:14 +02:00
+JETON            : libre
+Battement        : 2026-10-06 18:16 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S541 — la douzième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S540 — C13 : la remontée des petites bulles ([journal](notes/JOURNAL.md)). Avant : S539 (la coque retournée : la poche d'air comprimée)
-Session suivante : **S541 — la douzième revue de méthode** (S536–S540 ; ADR-222 D4) : frictions — une valeur du plan ajustée de tête (S538 : 467 s pour 463,5), une ligne de la liste en retard de vingt-six sessions (13.2 : C20 depuis S512), le décompte affiché qui n'a pas suivi un changement d'état (S538) ; ce qui a tenu (la loi calculée au plan avant le code, S540 ; le point de non-retour, S539). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S540 : C13 passe (7.4, 13.2)
+Session en cours : aucune
+Dernière session : S541 — la douzième revue de méthode (ADR-237) ([journal](notes/JOURNAL.md)). Avant : S540 (C13 : la remontée des petites bulles)
+Session suivante : **S542 — le lot des registres (dû à S542), puis un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — C16 (le ballottement en repère accéléré : 4.17, g_eff vectoriel dans δ), les bulles dans un écoulement (C13 branché sur W ou δ), la poche qui s'échappe quand la coque bascule (7.5), l'évent à débit limité (5.9) ; nombres recalculés (ADR-237 D1), quantum écrit à côté des seuils (ADR-236 D1). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 1 — S541 : la revue de méthode (ADR-237), sans capacité
 Registres       : dernier lot S539 (ADR-213 D3) ; le prochain au plus tard en S542
 ```
 

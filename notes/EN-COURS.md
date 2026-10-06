@@ -71,6 +71,6 @@ plan). **ADR-237** : D1, un nombre se recalcule à chaque changement de paramèt
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-237, METHODE, L394, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
