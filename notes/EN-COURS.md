@@ -62,37 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S502 — **terminée**. En autonomie, **6.1, l'amortissement des autres degrés de liberté** : S336 a mesuré par δ la masse ajoutée
-et l'amortissement de rayonnement de la coque de la porte D **en pilonnement** seulement ; elle roule et tangue sans perte.
+Session : S503 — **en cours**. En autonomie, **6.4, un solide qui bouge sur la carte** (première part) : `Linear3` (S358, S493) n'accepte
+qu'une géométrie fixe ; la référence (`Volume3::set_solid_rigid`) recoupe à chaque pas, ajoute au second membre le flux de la part des
+faces que la paroi couvre, donne aux faces qui s'ouvrent la vitesse de la paroi et dépose sur la surface l'eau que le solide déplace.
+S503 : un solide **immergé** ; S504 : la coque qui perce la surface (le transfert de S334).
 
-**Ce que la session fait.** (a) δ rend le **moment** de sa pression sur la paroi (`solid_wall_force` → force et moment, la force au bit) ;
-(b) `rayonnement_coque` impose un roulis puis un tangage `θ = Θ·sin ωt` et ajuste le moment `M = −A·θ̈ − B·θ̇` ; (c) le corps reçoit un
-amortissement angulaire (constante d'archétype), relatif à la rotation de la surface qui le porte ; un essai de lâcher en eau calme.
+**Ce que la session fait.** Le cœur reste le découpeur : après `set_solid_rigid`, il expose le terme de paroi par maille, les faces qui
+changent d'ouverture (et leur vitesse) et les volumes solides par colonne. `Linear3::set_motion` reçoit géométrie, terme de paroi,
+faces et dépôt ; deux noyaux (faces, dépôt) et une ligne du second membre les appliquent. Un banc : une sphère immergée menée à vitesse
+imposée, la carte contre la référence depuis le même état.
 
-**Ordre de grandeur, écrit avant.** La coque 4 × 1,6 × 1 m, 3 200 kg, tirant 0,488 m : roulis `GM` = 0,18 m, `C₄₄` ≈ 5,7 kN·m/rad,
-`I₄₄` ≈ 950 kg·m², `ω` ≈ 2,45 rad/s ; tangage `GM` = 2,48 m, `C₅₅` ≈ 78 kN·m/rad, `I₅₅` ≈ 4 530 kg·m², `ω` ≈ 4,2 rad/s. Le roulis d'une
-barge rayonne peu (la coque déplace peu d'eau en tournant autour de son axe long) : `ζ₄₄` attendu de l'ordre de 0,01 à 0,05 ; le tangage
-pousse l'eau comme le pilonnement aux extrémités : `ζ₅₅` de l'ordre de celui du pilonnement (0,16).
+**Ordre de grandeur, écrit avant (ADR-226 D3).** Le terme concurrent est l'élévation que la sphère produit : une sphère de 0,3 m à
+0,5 m/s sous 0,5 m d'eau soulève la surface de l'ordre du millimètre ; la carte suit la référence à 1,3·10⁻⁵ m sur un solide fixe (S358) —
+l'écart attendu reste de cet ordre, loin du millimètre. Coût : un recoupage CPU par pas (≈ 1 à 5 ms à 64 × 64 × 8) — à mesurer.
 
-**Critères, écrits avant.** (1) la force de δ inchangée au bit (les essais de S330–S336) ; le moment d'une pression hydrostatique sur un
-pavé incliné contre l'analytique `ρgV·(KB − …)` à 1 % (cas de réponse connue) ; (2) `A` et `B` en roulis et tangage à trois pulsations
-autour de leur `ω` propre, résidu d'ajustement ≤ 10 %, `B` > 0 ; (3) le corps amorti : lâché à 0,1 rad en eau calme, période et décrément
-à ±2 % de l'oscillateur `(I + A)·θ̈ + B·θ̇ + C·θ = 0` ; sans amortissement, ses crêtes ne décroissent pas.
+**Critères, écrits avant.** (1) le banc de S358 (solide fixe) inchangé au bit ; (2) sphère menée : la carte à 10⁻⁴ m de la référence sur
+toute la course (le critère de S358), et l'élévation produite ≥ 10× l'écart ; (3) la masse : le volume d'eau de la carte suit celui de la
+référence à 10⁻⁶ m³ près ; (4) le coût par pas (recoupage CPU et carte), publié.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le moment de δ ; son essai hydrostatique.
-- [x] **P3** — roulis et tangage imposés (calcul détaché) ; `A`, `B`.
-- [x] **P4** — l'amortissement angulaire du corps ; l'essai de lâcher ; preuve ; liste 6.1 ; rituel.
+- [ ] **P2** — le cœur expose le terme de paroi, les faces, les colonnes solides ; `set_motion` et ses noyaux.
+- [ ] **P3** — le banc de la sphère menée ; (1)–(4).
+- [ ] **P4** — preuve ; liste 6.4 ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
-- **P2** — `solid_wall_load` / `Volume3::solid_load` ; pavé incliné noyé : moment contre `r_c × F` à 7,4·10⁻⁴, 1,5·10⁻⁴, 9,9·10⁻⁶ (n = 24, 48, 96), force au bit. (Critère 1 réécrit avant mesure : `r_c × F`, plus simple que `ρgV·KB`.)
-- **P3** — roulis A₄₄ 214 / 209 / 204 kg·m², B₄₄ 71 / 99 / 130 (ω 2 / 2,5 / 3), résidus 8,4 / **15,8** / 6,0 % — manqué à 2,5 : dix sauts
-  jusqu'à 15 N·m (moment de 69 N·m) aux franchissements de faces, comme S336 ; tangage A₅₅ 2 941 / 2 745 / 2 674, B₅₅ 4 780 / 4 738 / 4 353
-  (ω 3,5 / 4 / 4,5), résidus 8,6–9,7 %. En plus (hors critères) : cavalement A 615 / 461 / 320 kg, B 450 / 924 / 1 668 (2 / 3 / 4 rad/s,
-  ≤ 9,6 %) ; embardée 2 477 / 1 939 / 923 kg, 1 692 / 4 958 / 6 761 (16–17 % à 2 et 3) ; lacet 1 809 / 2 228 / 1 534 kg·m², 264 / 1 933 /
-  7 001 (71 / 28 / 7,7 % : les ondes longues reviennent des murs du domaine de 16 m).
-- **P4 (en cours)** — `added_inertia`, `radiation_damping_angular` (relatif à la rotation de la surface). Lâchers : roulis période 0,43 %,
-  décrément 0,9 % ; tangage 0,07 / 0,03 % ; sans amortissement crêtes constantes ; glissades à 0,1 %. 663 essais.
-- **P4** — preuve RAYONNEMENT-6DDL-S502 ; **6.1 validée** (7 / 120) ; index ; journal.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 04:59 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 05:03 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S503 — 6.4, un solide qui bouge sur la carte (immergé) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S502 — 6.1 validée : la coque amortie sur ses six degrés de liberté ([journal](notes/JOURNAL.md)). Avant : S501 (la quatrième revue de méthode)
 Session suivante : **S503 — un point partiel proche de son périmètre** : relire le tableau de bord et la liste (6.2 le courant, 6.4, 4.13, 9.5, 5.4…), choisir celui dont le critère est le plus net ; un corps d'essai loin de ses limites (ADR-228), ordre de grandeur contre le terme concurrent (ADR-226). Le lot des registres y est dû. **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
 Maillons        : 0 — S502 : 6.1 validée (7 sur 120)
