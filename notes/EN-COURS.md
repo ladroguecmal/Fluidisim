@@ -62,29 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S542 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S540–S541), puis **4.17 — le référentiel
-accéléré** (absent) par C16 : « surface au repos perpendiculaire à `g_eff` » ; « échoue immédiatement si un `−9,81·Z` traîne quelque part »
-(I-07). δ reçoit la grandeur de `g_eff` (ADR-007), pas sa direction.
+Session : S543 — **en cours**. En autonomie, **la rotation de C16** (ADR-002 §2.2) : une cuve de 20 m à 100 m de l'axe d'une station qui
+tourne à 0,313 rad/s — la pesanteur est centrifuge (Ω²R = 9,8 m/s²) ; « surface d'équilibre cylindrique de flèche 50 cm ».
 
-**Ce que la session fait.** `Volume3::set_horizontal_gravity([g_x, g_y])` : la composante horizontale de `g_eff` dans le pas linéaire de
-δ, une force de volume ajoutée au champ prédit sur les faces ouvertes — la projection garde alors les murs (une pression posée au seul
-couvercle les violerait) ; à l'équilibre, la surface `η = (g_h/g)·x`, perpendiculaire à `g_eff`. Nulle : le pas d'avant au bit.
+**Ce que la session fait.** `Volume3::set_horizontal_gravity_field(g₀, Ω², centre)` : la part horizontale de `g_eff` affine dans le plan,
+`g_h(x) = g₀ + Ω²·(x − centre)` — dans la cuve, la force centrifuge a une composante horizontale `Ω²·x` le long de la cuve (le rayon
+s'incline de `x/R`) ; la verticale reste `g = Ω²R` de la configuration. La même force de volume au champ prédit (S542). Coriolis n'est pas
+porté : il n'agit pas sur l'équilibre (l'eau au repos dans le repère tournant), seulement sur le ballottement.
 
-**Ordre de grandeur, calculé.** C16 : cuve de 8 m, 1,5 m d'eau. **La formule de C16, `T = 2π/√(g·(π/L)·tanh(πh/L))`, donne 4,40 s — pas
-les « ≈ 3,5 s » de l'énoncé** (2,49 s pour le second mode) ; la formule fait foi. L'inclinaison : 0,3 g de C16 dénivelle la surface de
-± 1,2 m sur 1,5 m d'eau — hors du modèle linéaire (le bord s'assèche) ; **0,05 g** : pente 0,05 (2,862°), ± 0,2 m.
+**Ordre de grandeur, calculé.** R = 100 m, g = 9,81 : Ω = 0,3132 rad/s ; la flèche exacte du cylindre sur 20 m, 0,5013 m, la parabole du
+modèle linéaire `x²/(2R)` : 0,500 m. Cuve de 20 m, 2 m d'eau (80 × 1 × 8 mailles de 25 cm) : premier mode 9,18 s ; quatre périodes 36,7 s.
 
-**Critères, écrits avant.** (1) `g_h` nul : la suite au bit. (2) Sous 0,05 g latéral, la pente moyenne de la surface sur quatre
-périodes à 2 % de `g_h/g` — à 1° de la normale à `g_eff` (C16) ; le quantum : l'arrondi f32 de η (10⁻⁷ m sur 0,4 m, rapport 10⁶). (3) La
-période du premier mode, lâché en cosinus sans `g_h`, à 1 % de 4,40 s (C16 : ± 10 %). La rotation de C16 n'est pas de cette session.
+**Critères, écrits avant.** (1) Sans champ : le pas d'avant au bit. (2) La surface moyenne sur quatre périodes, ajustée par une
+parabole : sa courbure à 2 % de `1/R` (la flèche à 2 % de 0,500 m) ; le quantum : l'arrondi f32 (10⁻⁷ m sur 0,5 m).
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — la pesanteur horizontale, les essais ; (1)–(3).
-- [x] **P3** — preuve ; listes 4.17, 13.2 ; C16 ; rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — le champ, l'essai ; (1), (2).
+- [ ] **P3** — preuve ; C16 ; liste 4.17 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `set_horizontal_gravity` ; essai `s542` : pente 0,05005 (10⁻³, 0,003°), période 4,4054 s (1,1·10⁻³). Suite 703.
-- **P3** — preuve C16-ACCELERE-S542 ; liste 4.17 (partiel), 13.2, décompte ; C16 ; dépendances ; index ; journal.
-
