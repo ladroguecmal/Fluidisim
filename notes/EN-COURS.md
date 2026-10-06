@@ -62,17 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S521 — **terminée**. En autonomie, **la huitième revue de méthode** (ADR-222 D4 ; S517–S520) : relire les frictions, changer une
-protection si une erreur s'est répétée sous elle.
+Session : S522 — **en cours**. En autonomie ; deux maillons : un lot qui fait avancer une capacité. **W en profondeur finie** : la pression
+de W (sillages, impacts de pression) suppose l'eau profonde (`ω² = g k`, aucune `tanh`) ; C07 peu profond, les anneaux en eau peu profonde
+(K2-12) et 2.7 l'attendent.
 
-**Ce que la session fait.** Relu : S517 (trois instruments d'angle sans réponse connue, un remplacement non vérifié), S518 (le profil
-d'abord), S519 (une référence indépendante, l'instrument de S517 qui ne lit pas Kelvin), S520 (un instrument éprouvé sur une source et
-appliqué à une autre, une limite de dispatch, un script cassé par une apostrophe). **ADR-233** : D1, la protection de l'instrument élargie
-(un cas de la même famille, en regardant ce qu'il lit) ; L389 ; BOUSSOLE ; feuille de route S519–S521.
+**Ce que la session fait.** (a) **Le cœur** : `ModalPressure::new_in_depth(k, g, ρ, profondeur, …)` — une profondeur uniforme `h`
+(`Option`, `None` : le chemin profond, inchangé au bit) ; le nombre d'onde effectif `κ = |k|·tanh(|k|h)` remplace `|k|` dans la
+pulsation (`ω² = g κ`), le forçage (`−κ p/ρ` : `η_t = κ φ` en surface) et, dans les échantillons, la conversion de la vitesse verticale
+en potentiel et en vitesse horizontale, et l'énergie (`|w|²/κ`). `tanh` sans libm, par l'exponentielle déterministe du cœur (`decay`) ;
+`tanh` = 1 exactement au-delà de `2|k|h` = 32. `spectral_pressure::prepare_in_depth` ; `prepare` y passe sans profondeur. (b) **La
+référence** (`outils/reference_sillage.py`) en profondeur finie : `ω = √(g k tanh kh)`, forçage `k tanh kh`. (c) **W contre elle**.
+
+**Ordre de grandeur, calculé.** Par 5 m de fond, `√(gh)` = 7,00 m/s ; à `Fr_h` = 0,9 (U = 6,3 m/s), l'onde transverse fait **36,6 m**
+contre 25,4 m en eau profonde (`kh` = 0,86) — l'écart que la mesure doit voir ; à `Fr_h` = 0,5, 7,9 m des deux côtés. Zone établie à
+`T` = 40 s : `U·T/2` = 126 m (3,4 λ). Recette 512 × 256 à coupure 3 (σ = 2 m) : rayon honnête 179 m ; en eau peu profonde, `c_g` ≤ 7 m/s,
+la récurrence `2π/dk` = 1 072 m n'est pas atteinte.
+
+**Critères, écrits avant.** (1) **Au bit** : sans profondeur, la suite du cœur et les bancs inchangés ; une profondeur où `2|k|h` > 32
+pour tous les nœuds rend le chemin profond au bit. (2) **Un mode** : la pulsation libre après le forçage, mesurée sur le signal du mode,
+à 10⁻⁴ relatif de `√(g k tanh kh)` pour `kh` ∈ {0,1 ; 0,5 ; 1 ; 3} ; la hauteur statique sous une pression tenue, `−p/ρg`, inchangée par
+la profondeur. (3) **Le sillage** à `Fr_h` = 0,9 (h = 5 m, U = 6,3 m/s, σ = 2 m, 40 s) : W contre la référence en profondeur finie,
+écart quadratique ≤ 10 % sur la zone établie (de 1 λ à `U·T/2` − 1 λ, coin de 60°) ; la référence profonde, elle, à plus de deux fois cet
+écart (la profondeur se voit). La référence convergée sur trois grilles (ADR-230).
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-233, METHODE, L389, BOUSSOLE, index, feuille de route).
-- [x] **P2** — rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — le cœur en profondeur finie ; (1), (2).
+- [ ] **P3** — la référence et le sillage ; (3).
+- [ ] **P4** — preuve ; listes 2.7, 3.2 ; rituel (lot dû à S522 : fait en S521, `--lot` non requis).
 
 ### Notes de reprise
