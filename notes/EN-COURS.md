@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S574 — **en cours**. En autonomie, **la glace** — 7.6 (absent) et 7.7 (la glace porteuse, SPEC-006 §5.1 `ice_h`,
+Session : S574 — **terminée**. En autonomie, **la glace** — 7.6 (absent) et 7.7 (la glace porteuse, SPEC-006 §5.1 `ice_h`,
 `ice_capacity_kg`). SPEC-002 §4 ; ADR-027 §3 (la glace retenue, bornée aux lacs et baies abritées).
 
 **Ce que la session fait.** `glace.rs` : la croissance de **Stefan**, `h = √(h₀² + 2·k·ΔT·t/(ρ·L))` (`k` = 2,2 W/m/K, `L` = 334 kJ/kg,
@@ -85,7 +85,14 @@ avant.** (1) Stefan à 10⁻⁶ m de ces valeurs ; (2) Gold à 10⁻⁶ relatif,
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `glace.rs`, l'échantillon ; (1)–(5).
-- [ ] **P3** — preuve ; listes 7.6 et 7.7 ; rituel.
+- [x] **P2** — `glace.rs`, l'échantillon ; (1)–(5).
+- [x] **P3** — preuve ; listes 7.6 et 7.7 ; rituel.
 
 ### Notes de reprise
+- **Vérification ajoutée en route** (ADR-244 D1, avant l'essai) : `porte_par_la_glace` — sur 30 cm de glace (Gold : 3 150 kg, la valeur du
+  plan), une voiture de 1 500 kg est portée, un camion de 5 000 kg non ; sans glace, rien n'est porté.
+- **P2 fini** — Stefan et Gold à leurs références, la table de SPEC-002 reproduite, l'échéance à 0,1 s, l'émergé, la plaque, les refus ;
+  la vérification de route tenue. Suite 749. Pour la revue de S576 : deux scripts encore écrits par heredoc (S566, S574), contre la lettre
+  d'ADR-240 D1.
+- **P3** — preuve GLACE-S574 ; listes 7.6 (absent → partiel) et 7.7 ; décompte ; index ; journal.
+

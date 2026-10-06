@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 78 — absents : 32.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 79 — absents : 31.
 
 ## Par campagne
 
@@ -23,7 +23,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K9** Réseau et persistance | 0 | 9 | 2 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ·10.5 ◐10.6 ◐10.8 ◐10.9 ·1.5 ◐3.7 ◐3.8 |
 | **K10** Grande échelle | 0 | 3 | 3 | ◐11.1 ·11.2 ·11.3 ·3.4 ◐2.1 ◐2.2 |
 | **K11** Outillage | 0 | 1 | 3 | ◐12.1 ·12.3 ·12.4 ·12.5 |
-| **K12** La fin de l'eau | 0 | 4 | 3 | ·2.8 ◐7.1 ·7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
+| **K12** La fin de l'eau | 0 | 5 | 2 | ·2.8 ◐7.1 ◐7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
 | **K13** La validation du système, et l'eau dans le jeu | 0 | 4 | 2 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ·11.5 |
 
 **Points ouverts hors de toute campagne : 0**.
@@ -95,7 +95,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 7.3 | absent | Microbulles visuelles |
 | 7.4 | partiel | Grosses bulles et poches d'air physiques |
 | 7.5 | partiel | Air comprimé, vide, eau dans le vide |
-| 7.6 | absent | Glace et vapeur |
+| 7.6 | partiel | Glace et vapeur |
 | 7.7 | partiel | Danger et traversabilité |
 | 7.8 | absent | Audio de l'eau |
 | 8.1 | partiel | Rendu temps réel de la surface sur GPU |
@@ -245,4 +245,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S571 | 2026-10-06 | 10 | 78 | 32 | 120 |
 | S572 | 2026-10-06 | 10 | 78 | 32 | 120 |
 | S573 | 2026-10-06 | 10 | 78 | 32 | 120 |
+| S574 | 2026-10-06 | 10 | 79 | 31 | 120 |
 <!-- fin de l'historique -->

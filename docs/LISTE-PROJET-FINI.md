@@ -552,7 +552,9 @@ pas recopiée ici (L137).
   (la coque retournée d'ADR-015 §2) — sa poussée à 10⁻¹² de Boyle, et le point de non-retour : lâché 0,3 m au-dessus il remonte, 0,3 m
   en dessous il coule ([preuve](validation/POCHE-AIR-S539.md)). Manquent la poche adiabatique, la poche qui s'échappe quand le corps
   bascule, la bulle libre (7.4), le vide et l'eau dans le vide.
-- [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*. L'évaporation et le gel des contenants, par V
+- [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *partiel* depuis S574 : **la glace** — la croissance de Stefan, la portance de Gold (la table de SPEC-002
+  reproduite ligne à ligne), la flottaison, la formation en plaque ([preuve](validation/GLACE-S574.md)). Manquent la vapeur, la glace
+  dans les couches (un plan d'eau qui gèle, sa fonte), le gel borné aux plans d'eau gelables (ADR-027 §3), le rendu. L'évaporation et le gel des contenants, par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *partiel* depuis S570 : **l'échantillon** (le produit
   de danger `HR = d·(v + 0,5)` et ses classes, la classe de profondeur d'un humanoïde) et **le prochain franchissement** d'une profondeur
@@ -560,8 +562,9 @@ pas recopiée ici (L137).
   Morton, cadence, prévision par cellule, événements de franchissement entre deux publications (80 sur une plage, exactement ;
   [preuve](validation/TRAVERSABILITE-TUILES-S572.md)) ; **S573** : l'invalidation par une commande de V (`Immediat`, `Aucune`) et la
   praticabilité par agent — humanoïde, véhicule et son gué, bateau et son tirant — avec leur prochain changement
-  ([preuve](validation/TRAVERSABILITE-AGENTS-S573.md)). Manquent la glace porteuse, la température, la marée de B (2.2), la source réelle
-  des échantillons (B, W, V répliqués), le danger dans un courant qui varie.
+  ([preuve](validation/TRAVERSABILITE-AGENTS-S573.md)) ; **S574 : la glace porteuse** — `ice_h`, `ice_capacity_kg` (Gold), l'échéance où
+  elle portera une charge ([preuve](validation/GLACE-S574.md)). Manquent la température, la marée de B (2.2), la source réelle des
+  échantillons (B, W, V répliqués), le danger dans un courant qui varie.
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
   DyingStar (ADR-219).
 
@@ -815,14 +818,14 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
-| 7. Secondaires | 8 | 0 | 4 | 4 |
+| 7. Secondaires | 8 | 0 | 5 | 3 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **78** | **33** |
+| **total** | **121** | **10** | **79** | **32** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

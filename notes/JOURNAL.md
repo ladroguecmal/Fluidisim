@@ -895,3 +895,11 @@ script du plan avait comptés ; la prévision d'une cellule à 10⁻³ s. Maillo
 formes fermées ; l'invalidation puis le rétablissement des prévisions. **En route** : la borne du bateau a révélé deux expressions f32 du
 même seuil (praticabilité et prévision en désaccord de 4,5·10⁻⁸) — unifiées. Maillons **0** (7.7 avance). Suivant : **S574**, un point
 partiel.
+
+## S574 — 2026-10-06 — la glace : croissance et portance
+
+**Entrée.** En autonomie ; 7.6 (absent) et 7.7 (la glace porteuse). **Le script du plan a vérifié avant d'écrire** que Gold à 3,5 kg/cm²,
+avec des masses de référence, reproduit la table de SPEC-002. **Fait** ([preuve](../docs/validation/GLACE-S574.md)) : `glace.rs` (Stefan,
+Gold, flottaison, plaque) ; l'échantillon porte la glace et sa charge. **Mesuré** : chaque référence au 10⁻⁶ ; « une voiture passera dans
+2,647 jours de ce gel » à 0,1 s. Une vérification ajoutée en route est passée d'abord par les notes (ADR-244 D1). Maillons **1** (7.6 :
+absent → partiel). Suivant : **S575**, le lot (dû) et un point partiel ; revue à S576.
