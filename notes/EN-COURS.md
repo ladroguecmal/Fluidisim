@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S563 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S561–S562), puis **5.7 — l'air scellé avec
+Session : S563 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S561–S562), puis **5.7 — l'air scellé avec
 plusieurs liquides** : `step_liquids` ignore l'air des compartiments ; un compartiment étanche qui contient du carburant et que la mer
 envahit par le fond doit comprimer son air comme en S538.
 
@@ -84,7 +84,11 @@ entière dans le compartiment, au millilitre. (2) Ouvert : à 10⁻⁴ m de 1,07
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `step_liquids_air` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.7 ; rituel (`--lot`).
+- [x] **P2** — `step_liquids_air` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.7 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — scellé 0,126196 m (référence 0,126197), ouvert 1,074893 m (exact), l'huile en place, tout ouvert au bit ; suite 728.
+- **P3** — preuve LIQUIDES-AIR-S563 ; liste 5.7 (reste partiel : un liquide autre que l'eau hors de V manque — pas de réduction de
+  périmètre sans l'utilisateur) ; index ; journal ; le lot.
+

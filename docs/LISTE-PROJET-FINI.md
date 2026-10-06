@@ -421,8 +421,9 @@ pas recopiée ici (L137).
   inclinée, carène en V) à 4·10⁻⁸ ([preuve](validation/LIQUIDES-COUCHES-S559.md)) ; **S560 : le débit par couches** (`step_liquids`) —
   le manomètre en U à l'entier (1,17 m), la vidange stratifiée à 0,02 %, un liquide identique au pas présent
   ([preuve](validation/LIQUIDES-DEBIT-S560.md)) ; **S562** : l'écrémeur (un déversoir sort l'huile, l'eau intacte, à 0,1 ml) et
-  l'instantané de la composition (bloc `WVLQ`, la continuation au bit ; [preuve](validation/LIQUIDES-ECREMEUR-S562.md)). Manquent l'air
-  scellé avec plusieurs liquides, la sortie d'un liquide autre que l'eau vers δ ou la mer.
+  l'instantané de la composition (bloc `WVLQ`, la continuation au bit ; [preuve](validation/LIQUIDES-ECREMEUR-S562.md)) ; **S563** :
+  l'air scellé avec plusieurs liquides (`step_liquids_air` — 0,126196 m pour 0,126197 ; [preuve](validation/LIQUIDES-AIR-S563.md)).
+  Manque, hors de V : un liquide autre que l'eau qui sort vers la mer, δ ou le sol (sa nappe, son rendu ; ADR-241 D5).
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
   d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle

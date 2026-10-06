@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 22:29 +02:00
+JETON            : libre
+Battement        : 2026-10-06 22:37 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S563 — le lot ; 5.7, l'air scellé avec plusieurs liquides ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S562 — l'écrémeur et l'instantané de la composition ([journal](notes/JOURNAL.md)). Avant : S561 (la seizième revue de méthode)
-Session suivante : **S563 — le lot** (dû en S563) **et un point partiel** (5.7 : l'air scellé avec plusieurs liquides ; ou un autre, par la feuille de route). Revue à S566. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S562 : 5.7 avance (l'écrémeur, l'instantané)
-Registres       : dernier lot S560 (ADR-213 D3) ; le prochain au plus tard en S563
+Session en cours : aucune
+Dernière session : S563 — le lot ; l'air scellé avec plusieurs liquides ([journal](notes/JOURNAL.md)). Avant : S562 (l'écrémeur et l'instantané de la composition)
+Session suivante : **S564 — un point partiel** (choisir par la feuille de route et le tableau de bord ; 5.7 n'a plus que sa part hors de V). Revue à S566. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S563 : 5.7 avance (l'air scellé avec plusieurs liquides)
+Registres       : dernier lot S563 (ADR-213 D3) ; le prochain au plus tard en S566
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

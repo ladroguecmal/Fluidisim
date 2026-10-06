@@ -812,3 +812,11 @@ un déversoir à crête au-dessus de l'interface — et le bloc d'instantané `W
 déversoir, l'eau intacte à chaque pas ; la continuation au bit après restauration, les refus. **En route** : une valeur du plan écrite de tête
 (190 s pour 220 s calculées), et un heredoc contre la lettre d'ADR-240 D1 — notés pour la revue de S566. Maillons **0** (5.7 avance).
 Suivant : **S563**, le lot (dû) et un point partiel.
+
+## S563 — 2026-10-06 — le lot ; l'air scellé avec plusieurs liquides
+
+**Entrée.** En autonomie ; le lot (feuille de route S561–S562), puis 5.7. **Les références d'abord**, résolues à part (Boyle et l'équilibre des
+pressions au seuil ensemble) : 0,126197 m scellé, 1,074893 m ouvert. **Fait** ([preuve](../docs/validation/LIQUIDES-AIR-S563.md)) :
+`step_liquids_air`, les évents partagés avec `step_air`. **Mesuré** : 0,126196 m et 1,074893 m, l'huile en place, tout ouvert au bit. 5.7
+reste partiel : un liquide autre que l'eau hors de V manque, et le périmètre ne se réduit pas sans l'utilisateur. Maillons **0** (5.7
+avance). Suivant : **S564**, un point partiel.
