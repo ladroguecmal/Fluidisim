@@ -62,25 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S493 — **terminée**. En autonomie, **6.5 sur la carte** : le δ linéaire de la carte (`Linear3`, S358) refuse un couvercle
-qui n'est pas entièrement ouvert ; un décor fixe qui perce la surface y manque.
+Session : S494 — **en cours**. En autonomie, **6.2, les forces de W sur un corps** : le corps rigide (S331–S336) n'interroge que B
+(`BackgroundWater`) ; « Manquent W, le courant, la turbulence ». Les impacts de W (`RadialImpact`, composés à B par
+`composition::compose`, ADR-077) n'entrent pas dans sa requête.
 
-**Ce que la session fait.** Le couvercle partiel d'un décor fixe porté sur la carte (la pression `ρg·η/max(a, plancher)` de S334, sans
-le dépôt ni le transfert d'une coque qui bouge) ; un banc `--lineaire-cloison` : la cloison de S490 (alignée, et en milieu de maille), la
-référence et la carte depuis le même état.
+**Ce que la session fait.** Une requête `MixedWater` (B + impacts confirmés, par la composition autoritaire, refus comptés et repliés
+sur B) derrière `WaterQuery` ; l'accélération de W par différence centrée de 1 ms. Un essai : une bouée de 0,5 × 0,5 × 0,4 m à
+500 kg/m³ à 5 m d'un impact d'1 kJ (λ = 4 m), sur une houle de B.
 
-**Critères, écrits avant.** (1) les bancs de S358 inchangés (couvercle plein : la valeur d'avant, au bit) ; (2) la carte suit la référence
-sur la cloison à 10⁻⁴ m (le critère de S358, `CRITERE_ETA`), alignée et en milieu de maille ; (3) la moitié droite sous 10⁻⁶ m sur la carte ;
-la période à 3 %. 6.5 validée si (1)–(3).
+**Ordre de grandeur, écrit avant.** Un impact d'1 kJ sur ≈ 4 m de rayon : `a ≈ √(2E/(ρgπR²))` ≈ 6 cm au centre, ≈ 1 à 3 cm à 5 m ;
+pente `k·a` ≈ 0,03 à 0,1. La bouée : tirant 0,195 m, `ωₙ = √(g/tirant)` ≈ 7,1 rad/s contre `ω` ≈ 3,9 pour λ = 4 m — elle suit
+la surface amplifiée de ≈ 1,4 ; son empreinte voit la pente à `sin(kL/2)/(kL/2)` ≈ 0,975.
+
+**Critères, écrits avant.** (1) sans impact, la requête mixte rend la trajectoire de `BackgroundWater` à 10⁻⁶ m sur 20 s (la seule
+renormalisation de la normale) ; (2) le pilonnement suit l'oscillateur de référence `m·z'' = ρgA(η̄ − z)` forcé par la surface moyenne
+sous l'empreinte (RK4 à 0,1 ms) à 3 % de max|η̄| (prévu < 1 %), et l'impact fait bouger la bouée d'au moins 30 % de son amplitude ;
+(3) le déplacement horizontal suit l'excursion de la particule de surface `∫u dt` à 5 % de son maximum (prévu ≈ 2,5 %, l'empreinte) ;
+(4) aucun refus de la composition. 6.2 reste partielle (le sillage de pression, le courant, la turbulence).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le couvercle partiel sur la carte ; le banc ; (1)–(3).
-- [x] **P3** — preuve ; 6.5 ; rituel.
+- [ ] **P2** — `Prepared::sample_local`, `MixedWater` ; essais (1)–(4).
+- [ ] **P3** — preuve ; liste 6.2 ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
-- **P2** — `lid_partial` aux deux usages (second membre, correction), `lid_floor` dans le mot libre des paramètres, le refus du
-  couvercle partiel levé. Première écriture (branche dans `lid`) : le banc S358 changé (résidu 8,874 → 8,941·10⁻⁵, les deux versions
-  déterministes) ; seconde : au bit. Cloisons : 5,96·10⁻⁸ m, droite 0, périodes 0,16 / 0,27 %.
-- **P3** — preuve DECOR-CARTE-S493 ; **6.5 validée** (décompte 5 / 72 / 44) ; index ; journal.
