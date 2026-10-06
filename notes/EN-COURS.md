@@ -62,15 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S566 — **terminée**. En autonomie, **la dix-septième revue de méthode** (ADR-222 D4 ; S561–S565).
+Session : S567 — **en cours**. En autonomie, **5.8 — le réseau en charge couplé au pas de V** : S565 résout un réseau entre des charges
+données ; ici, les charges sont les surfaces des nœuds de V, et les débits les vident et les remplissent.
 
-**Ce que la session fait.** Relu : S561 (la revue), S562 (l'écrémeur ; une valeur de tête ; un heredoc), S563 (l'air avec plusieurs
-liquides ; le périmètre gardé), S564 (le seuil ; les nombres écrits par le script du plan), S565 (le réseau en charge ; deux méthodes
-indépendantes). **ADR-243** : D1, les nombres d'un plan écrits par le script qui les calcule ; L402 ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** `charge::pas_reseau(nœuds, formes, g_eff, dt, raccords, demandes, conduites, …)` : chaque raccord (un nœud de V
+en un point) donne une charge fixe — la cote de la surface du nœud le long de la verticale locale ; le réseau est résolu (S565, départ chaud
+sur les charges du pas précédent) ; le débit net de chaque raccord, intégré sur le pas, devient des millilitres entiers avec un reste par
+raccord (comme les arêtes de V). Le réseau ne stocke rien : ce qu'il soutire aux jonctions (les demandes) sort, et la masse se compte
+nœuds + sortie, à l'entier. Refus atomiques : un raccord hors de l'eau (le réseau aspirerait de l'air ; `Domain`), un nœud qui donnerait
+plus qu'il n'a ou recevrait plus que sa place (`Capacity`). Les résistances sont celles de la gravité locale ; l'air des poches n'entre
+pas (version suivante).
+
+**Références, calculées avant** (ce script les écrit). Deux cuves de 1 m², l'eau à 1,5 et 0,5 m, reliées par trois conduites en série
+(A–J0–J1–B, `R` = 10⁴ + 2·10⁴ + 10⁴ = 40000 s²/m⁵) : `d√Δh/dt = −(1/A + 1/B)/(2√R)` = −0.0050 s⁻¹, égalisées à **200 s**
+(constante de temps, ADR-240 D2 ; l'essai dure 300 s). `Δh` à 50, 100, 150 s : **0.5625, 0.2500, 0.0625 m**. L'erreur
+d'Euler au pas de 0.1 s, bornée par `dt·T·max|Δh''|/2` = **3.75e-04 m** à 150 s. Le robinet : 1 L/s soutiré à J0 pendant 100 s →
+**100000 ml** sortis.
+
+**Quantum** (ADR-236 D1) : 1 ml sur 1 m² = 1 µm. **Critères, écrits avant.** (1) `Δh` à 10⁻³ m de la loi fermée aux trois instants
+(rapport 2.7 à la borne d'Euler), et à 10 µm d'un Euler f64 indépendant au même pas ; (2) la masse : nœuds + sortie
+constants à l'entier à chaque pas, la sortie sans demande bornée par le nombre de raccords (2 ml) ; (3) le robinet : 100000 ml
+sortis à 2 ml près ; (4) les refus, rien d'écrit.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-243, METHODE, L402, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `pas_reseau` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.8 ; rituel.
 
 ### Notes de reprise
