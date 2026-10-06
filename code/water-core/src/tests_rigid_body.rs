@@ -1630,3 +1630,63 @@ fn a_barge_sinks_by_its_flooded_compartment_s548() {
     assert!((eau / 80. - 1.).abs() <= 0.01, "critère 2, eau");
     assert!(interieur.abs() <= 0.01, "critère 2, surface intérieure");
 }
+
+/// La barge de S548 (246 t, centre de masse décalé latéralement de `DECALAGE_S549`), son compartiment central de 5 × 8 × 4 m à 1 m d'eau (41 t) qui
+/// pèse en son centre — calculé à chaque pas sous la pesanteur vue du navire (`libre`) ou fixe au repos ; rend la gîte d'équilibre (rad).
+const DECALAGE_S549: f64 = 0.1;
+
+fn gite_s549(libre: bool) -> f64 {
+    use crate::hydro_network::geometry::{Tetrahedron, VolumeShape};
+    let v: [[i64; 3]; 8] = core::array::from_fn(|b| core::array::from_fn(|a| {
+        let (lo, hi) = ([-2_500_000i64, -4_000_000, 0], [2_500_000i64, 4_000_000, 4_000_000]);
+        if b & (1 << a) == 0 { lo[a] } else { hi[a] }
+    }));
+    let cells = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
+        .map(|p| Tetrahedron::new([v[0], v[1 << p[0]], v[(1 << p[0]) | (1 << p[1])], v[7]]).unwrap());
+    let forme = VolumeShape::new(&cells).unwrap();
+    let calme = CalmWater { level: 0. };
+    let (mh, mw) = (246_000.0f64, 41_000.0f64);
+    let t = (mh + mw) / MER.rho / 160.;
+    let mut barge = RigidBody::cuboid([20., 8., 4.], mh / 640., [0., 0., 2. - t], [4, 8, 16]);
+    for p in barge.proxy.iter_mut() {
+        p.body[1] -= DECALAGE_S549;
+    }
+    barge.radiation_damping = [0., 0., 1.0e6];
+    barge.radiation_damping_angular = [5.0e6, 5.0e6, 5.0e6];
+    let origine = [0., 0., -2.];
+    for _ in 0..12_000 {
+        let centre = if libre {
+            let q = barge.orientation;
+            let g = rotate([q[0], -q[1], -q[2], -q[3]], [0., 0., -9.81]);
+            let plan = forme.plane(40_000_000, g.map(|x| x as f32)).unwrap();
+            let c = forme.centroid_below_um(plan).unwrap();
+            [origine[0] + c[0] * 1e-6, origine[1] + c[1] * 1e-6, origine[2] + c[2] * 1e-6]
+        } else {
+            [0., 0., -1.5]
+        };
+        barge.loads = vec![crate::rigid_body::PointLoad { body: centre, force: [0., 0., -mw * 9.81] }];
+        barge.step(0.01, &calme, MER);
+    }
+    let q = barge.orientation;
+    2. * q[1].atan2(q[0])
+}
+
+/// **S549, critère 3 — la carène libre.** Le rapport des tangentes de gîte libre / figée à 3 % de `GM_f/(GM_f − i/∇)`, `GM_f` mesuré sur la
+/// gîte figée (`tan θ = Δy/GM` : toute la poussée est décalée), `i = l·b³/12`.
+#[test]
+fn free_water_in_a_compartment_reduces_stability_s549() {
+    let (fige, libre) = (gite_s549(false), gite_s549(true));
+    let m = 287_000.0f64;
+    // Le proxy décalé de Δy déplace toute la poussée — qui porte la coque et l'eau : le moment inclinant vaut `m·g·Δy`, d'où
+    // `GM_f = Δy/tan θ` (le plan écrivait `m_h·Δy/(m·GM)` : faux, il manquait le critère de 10 %). En valeur absolue (le sens de la
+    // gîte suit la convention du quaternion).
+    let gm_f = DECALAGE_S549 / fige.tan().abs();
+    let i_sur_nabla = 5. * 8f64.powi(3) / 12. / (m / MER.rho);
+    let attendu = gm_f / (gm_f - i_sur_nabla);
+    let mesure = (libre.tan() / fige.tan()).abs();
+    println!(
+        "S549 carène libre : gîte figée {:.3}°, libre {:.3}° ; GM figé mesuré {gm_f:.4} m, i/∇ {i_sur_nabla:.4} m ; rapport {mesure:.4} (attendu {attendu:.4}, écart {:.2e})",
+        fige.to_degrees(), libre.to_degrees(), mesure / attendu - 1.
+    );
+    assert!((mesure / attendu - 1.).abs() <= 0.03, "critère 3");
+}

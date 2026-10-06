@@ -702,3 +702,12 @@ et un point partiel.
 mer replacée dans le repère du navire, l'eau du compartiment ajoutée à la masse portée. **Mesuré** : le tirant à 0,025 %, l'eau à 0,1 %, la
 surface intérieure à 1,6 mm de la flottaison, la masse de V exacte. Maillons **0** (6.6 devient partiel). Suivant : **S549**.
 
+## S549 — 2026-10-06 — la carène libre
+
+**Entrée.** En autonomie ; 6.6, la carène libre. **Fait** ([preuve](../docs/validation/CARENE-LIBRE-S549.md)) : le centre de la part mouillée
+d'une forme de V (le découpage des tétraèdres) et des charges ponctuelles sur le corps rigide ; l'eau d'un compartiment pèse en son centre
+sous la pesanteur vue du navire. **Mesuré** : le centre mouillé au µm ; la gîte libre 57 % plus forte que figée, à 0,34 % de `GM/(GM − i/∇)`.
+**En route** : la formule d'analyse du plan était fausse (le moment inclinant compte toute la poussée), et j'ai d'abord accusé le proxy,
+changé le montage pour rien, puis l'ai rétabli. Maillons **0** (6.6 avance). Frictions pour S551 : *une formule d'analyse non vérifiée* ;
+*un diagnostic posé avant de relire sa propre formule*. Suivant : **S550**.
+

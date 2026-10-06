@@ -172,6 +172,69 @@ impl<'a> VolumeShape<'a> {
         Ok(result)
     }
 
+    /// **S549 — le centre de la part mouillée** (sous `plane`), en µm dans le repère local de la forme : chaque tétraèdre découpé par le
+    /// plan — un sommet mouillé (le petit tétraèdre), deux (le coin, en trois tétraèdres), trois (le tétraèdre moins le petit du sommet
+    /// sec). Pour la carène libre (6.6) : l'eau d'un compartiment pèse en ce point. `Capacity` sans eau ; `Domain` sur un plan invalide.
+    pub fn centroid_below_um(&self, plane: SurfacePlane) -> Result<[f64; 3], Error> {
+        if !plane.offset_um.is_finite() || !plane.up.iter().all(|x| x.is_finite()) || plane.up == [0.0; 3] {
+            return Err(Error::Domain);
+        }
+        let (mut v_tot, mut m) = (0.0f64, [0.0f64; 3]);
+        let mut ajoute = |q: [[f64; 3]; 4], signe: f64| {
+            let d = |a: [f64; 3], b: [f64; 3]| [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+            let (a, b, c) = (d(q[0], q[1]), d(q[0], q[2]), d(q[0], q[3]));
+            let v = (a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0])).abs() / 6.0;
+            v_tot += signe * v;
+            for k in 0..3 {
+                m[k] += signe * v * (q[0][k] + q[1][k] + q[2][k] + q[3][k]) / 4.0;
+            }
+        };
+        for cell in self.cells {
+            let p = cell.vertices.map(|v| v.map(|x| x as f64));
+            let z = cell.vertices.map(|v| projection(v, plane.up) - plane.offset_um);
+            // Sans allocation (I-06) : les indices mouillés, puis les secs.
+            let (mut mouilles, mut secs, mut nm, mut ns) = ([0usize; 4], [0usize; 4], 0usize, 0usize);
+            for i in 0..4 {
+                if z[i] < 0.0 { mouilles[nm] = i; nm += 1; } else { secs[ns] = i; ns += 1; }
+            }
+            // Le point du plan sur l'arête (i, j), i mouillé, j sec.
+            let coupe = |i: usize, j: usize| {
+                let t = z[i] / (z[i] - z[j]);
+                [p[i][0] + t * (p[j][0] - p[i][0]), p[i][1] + t * (p[j][1] - p[i][1]), p[i][2] + t * (p[j][2] - p[i][2])]
+            };
+            match nm {
+                0 => {}
+                4 => ajoute(p, 1.0),
+                1 => {
+                    let a = mouilles[0];
+                    ajoute([p[a], coupe(a, secs[0]), coupe(a, secs[1]), coupe(a, secs[2])], 1.0);
+                }
+                3 => {
+                    let d = secs[0];
+                    ajoute(p, 1.0);
+                    let c = |w: usize| coupe(w, d);
+                    ajoute([p[d], c(mouilles[0]), c(mouilles[1]), c(mouilles[2])], -1.0);
+                }
+                _ => {
+                    // Le coin : le prisme (A, P_AC, P_AD) – (B, P_BC, P_BD), en trois tétraèdres.
+                    let (a, b, c, d) = (mouilles[0], mouilles[1], secs[0], secs[1]);
+                    let (pac, pad, pbc, pbd) = (coupe(a, c), coupe(a, d), coupe(b, c), coupe(b, d));
+                    ajoute([p[a], pac, pad, p[b]], 1.0);
+                    ajoute([p[b], pac, pad, pbd], 1.0);
+                    ajoute([p[b], pac, pbd, pbc], 1.0);
+                }
+            }
+        }
+        if !(v_tot > 0.0) {
+            return Err(Error::Capacity);
+        }
+        let c = m.map(|x| x / v_tot);
+        if !c.iter().all(|x| x.is_finite()) {
+            return Err(Error::NonFinite);
+        }
+        Ok(c)
+    }
+
     pub fn plane(&self, volume_ml: i64, g_eff: [f32; 3]) -> Result<SurfacePlane, Error> {
         let (up, _) = vertical(g_eff)?;
         self.plane_up(volume_ml, up)

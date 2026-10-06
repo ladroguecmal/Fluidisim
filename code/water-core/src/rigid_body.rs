@@ -279,6 +279,16 @@ pub struct RigidBody {
     pub last_slam: Option<SlamEvent>,
     /// **S539 : la poche d'air que le corps emprisonne** (ADR-015 §2–3, liste 7.5) — `None` : aucune.
     pub air_pocket: Option<AirPocket>,
+    /// **S549 : des charges ponctuelles** — un point du corps (repère du corps, m) et une force du monde (N) : l'eau d'un compartiment, une
+    /// cargaison. Vide par défaut.
+    pub loads: Vec<PointLoad>,
+}
+
+/// S549 — une charge ponctuelle portée par le corps.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PointLoad {
+    pub body: [f64; 3],
+    pub force: [f64; 3],
 }
 
 /// **S539 — une poche d'air portée par un corps** (la coque retournée d'ADR-015 §2) : son centre dans le repère du corps (m), son volume à la
@@ -383,6 +393,7 @@ impl RigidBody {
             slam: None,
             last_slam: None,
             air_pocket: None,
+            loads: Vec::new(),
         }
     }
 
@@ -423,6 +434,12 @@ impl RigidBody {
             // (B6, S499). La force ne change pas ; un point noyé, ni son moment.
             let bras = if frac < 1. { add(r, rotate(self.orientation, [0., 0., -(1. - frac) * 0.5 * p.thickness])) } else { r };
             torque = add(torque, cross(bras, f));
+        }
+        // S549 : les charges ponctuelles, en leur point.
+        for l in &self.loads {
+            let r = rotate(self.orientation, l.body);
+            force = add(force, l.force);
+            torque = add(torque, cross(r, l.force));
         }
         // S539 : la poche d'air — sa poussée, celle de son volume comprimé à la profondeur de son centre, en son centre.
         if let Some(a) = self.air_pocket {

@@ -186,3 +186,23 @@ fn local_translation_thin_geometry_and_resolution_refusal_s228() {
     let shape = VolumeShape::new(&large).unwrap();
     assert_eq!(shape.plane((1i64 << 53) + 1, [0., 0., -9.81]).err(), Some(Error::Resolution));
 }
+
+/// **S549, critère 1 — le centre mouillé d'une boîte inclinée.** Une boîte de 5 × 8 × 4 m à 1 m d'eau, la pesanteur inclinée de θ = 3°
+/// autour de x : le centre se déplace latéralement de `b²·tan θ/(12 h)` (le coin d'eau qui passe d'un bord à l'autre), à 10⁻⁹ près.
+#[test]
+fn the_wet_centroid_of_a_tilted_box_s549() {
+    let cells = box_cells([-2_500_000, -4_000_000, 0], [2_500_000, 4_000_000, 4_000_000]);
+    let shape = VolumeShape::new(&cells).unwrap();
+    for deg in [0.0f64, 1.0, 3.0, 5.0] {
+        let t = deg.to_radians();
+        let g = [0.0f32, (9.81 * t.sin()) as f32, (-9.81 * t.cos()) as f32];
+        let plane = shape.plane(40_000_000, g).unwrap();
+        let c = shape.centroid_below_um(plane).unwrap();
+        // La tangente vraie de l'inclinaison passée en f32.
+        let tan = (g[1] as f64) / (-(g[2] as f64));
+        let attendu = 8.0f64.powi(2) * tan / (12. * 1.0) * 1e6;
+        println!("S549 centre mouillé à {deg}° : y = {:.3} µm (attendu {attendu:.3}), x = {:.3e}", c[1], c[0]);
+        assert!((c[1] - attendu).abs() <= 1e-9 * 1e6 * 8. + 1e-6 * attendu.abs(), "à {deg}° : {} contre {attendu}", c[1]);
+        assert!(c[0].abs() <= 1e-3);
+    }
+}

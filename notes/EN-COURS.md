@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S549 — **en cours**. En autonomie, **6.6 — la carène libre** : l'eau d'un compartiment à demi plein garde sa surface horizontale
+Session : S549 — **terminée**. En autonomie, **6.6 — la carène libre** : l'eau d'un compartiment à demi plein garde sa surface horizontale
 quand la coque gîte ; son centre se déplace vers le bord bas, et la stabilité perd `i/∇` (la hauteur métacentrique, `GM → GM − i/∇`,
 `i` le moment d'inertie de la surface libre) — un navire qui chavire par l'eau qu'il embarque.
 
@@ -82,8 +82,13 @@ l'arrondi f64 > 10⁶). (2) Sans charges, la suite au bit. (3) Le rapport des ta
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — le centre mouillé, les charges, les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.6 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le centre mouillé, les charges, les essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `centroid_below_um` (au µm de `b² tan θ/12h`), `RigidBody::loads` ; carène libre : rapport 1,5672 pour 1,5725 (0,34 %). En
+  route : la formule d'analyse du plan fausse (`m_h·Δy/(m·GM)` au lieu de `Δy/GM`) ; un diagnostic faux (le proxy) et un montage changé
+  pour rien, revenu au déclaré. Suite 709.
+- **P3** — preuve CARENE-LIBRE-S549 ; liste 6.6 ; index ; journal.
+
