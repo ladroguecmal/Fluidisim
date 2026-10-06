@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S552 — **en cours**. En autonomie, **6.6 — S548 et S549 ensemble** : une citerne latérale s'envahit par une brèche, la coque gîte
+Session : S552 — **terminée**. En autonomie, **6.6 — S548 et S549 ensemble** : une citerne latérale s'envahit par une brèche, la coque gîte
 vers elle et s'enfonce — l'eau entre sous une pesanteur que la gîte incline, et pèse là où elle se tient.
 
 **Ce que la session fait.** Un essai, sans code neuf : la barge de S548 (20 × 8 × 4 m, 246 t) ; une citerne latérale de V à tribord
@@ -80,8 +80,12 @@ n'aurait aucun équilibre avant 40° (calculé) : elle n'est pas prise.
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.6 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — essai `s552` : gîte 8,101° (8,088), tirant 1,6192 m (1,6355 le long de l'axe ; `cos θ` : 1,6193 vertical), eau 21,689 m³
+  (21,68) ; masse exacte. Suite 711.
+- **P3** — preuve BRECHE-LATERALE-S552 ; liste 6.6 ; index ; journal.
+

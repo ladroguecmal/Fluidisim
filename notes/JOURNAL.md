@@ -725,3 +725,10 @@ proxy prévue à 0,8 %), droite sans la charge. Maillons **0** (6.6 avance). Sui
 devant un écart (ADR-239 D1, L397) ; S550 l'a déjà fait. Le rituel qui exige le plan et la reprise à chaud ont tenu. Le lot : feuille de
 route S548–S551. Maillons **1**. Suivant : **S552**, un point partiel.
 
+## S552 — 2026-10-06 — un navire gîte par sa brèche
+
+**Entrée.** En autonomie ; 6.6, S548 et S549 ensemble. **La référence d'abord, indépendante** (ADR-239 D1) : la flottabilité perdue en section
+intégrée — 8,088°, 1,6355 m, 21,68 m³ ; une citerne de 2 m n'aurait pas d'équilibre (calculé, écartée). **Fait** ([preuve](../docs/validation/BRECHE-LATERALE-S552.md)) :
+la citerne latérale de V et la mer en formes volumiques, la pesanteur du navire, le centre mouillé. **Mesuré** : gîte 8,101°, eau à 0,04 % ;
+le tirant à 0,997 % — un écart de définition (`cos θ`), 0,01 % à définition égale, écrit tel quel. Maillons **0** (6.6). Suivant : **S553**.
+

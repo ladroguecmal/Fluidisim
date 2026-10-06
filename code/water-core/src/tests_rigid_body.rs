@@ -1731,3 +1731,69 @@ fn an_unstable_barge_settles_at_its_angle_of_loll_s550() {
     assert!(droite * gauche < 0., "les deux côtés");
     assert!(sans.to_degrees().abs() <= 0.1, "critère 2");
 }
+
+/// **S552 — un navire qui gîte par sa brèche.** La barge de S548 (246 t, proxy 4 × 32 × 16) ; une citerne latérale de V à tribord
+/// (20 × 0,5 × 4 m, forme volumique), une brèche de 0,1 m² à son fond ; la mer vue du navire, une forme volumique de 400 × 400 × 20 m centrée
+/// sur la verticale de la brèche, replacée à chaque pas sur la surface du monde ; V sous la pesanteur du navire ; l'eau de la citerne pèse
+/// en son centre mouillé. Critères, contre la flottabilité perdue en section (intégrée hors de l'essai) : la gîte à 3 % de 8,088° ; le
+/// tirant au centre à 1 % de 1,6355 m, l'eau à 2 % de 21,68 m³ ; la masse de V exacte.
+#[test]
+fn a_ship_heels_by_its_flooded_wing_tank_s552() {
+    use crate::hydro_network::geometry::{Tetrahedron, VolumeShape};
+    use crate::hydro_network::{step, Flow, HydroNode, Opening, Shapes, SHARP_EDGE_DISCHARGE, STEP_US};
+    let boite = |lo: [i64; 3], hi: [i64; 3]| -> [Tetrahedron; 6] {
+        let v: [[i64; 3]; 8] = core::array::from_fn(|b| core::array::from_fn(|a| if b & (1 << a) == 0 { lo[a] } else { hi[a] }));
+        [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
+            .map(|p| Tetrahedron::new([v[0], v[1 << p[0]], v[(1 << p[0]) | (1 << p[1])], v[7]]).unwrap())
+    };
+    let mer_t = boite([-200_000_000, -200_000_000, -10_000_000], [200_000_000, 200_000_000, 10_000_000]);
+    let cit_t = boite([-10_000_000, 3_500_000, -2_000_000], [10_000_000, 4_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&mer_t).unwrap(), VolumeShape::new(&cit_t).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let calme = CalmWater { level: 0. };
+    let mh = 246_000.;
+    let mut barge = RigidBody::cuboid([20., 8., 4.], mh / 640., [0., 0., 2. - mh / MER.rho / 160.], [4, 32, 16]);
+    barge.radiation_damping = [0., 0., 1.0e6];
+    barge.radiation_damping_angular = [5.0e6, 5.0e6, 5.0e6];
+    let breche = [0., 3.75, -2.];
+    let mut nodes = [
+        HydroNode { volume_ml: formes[0].capacity_ml() / 2, capacity_ml: formes[0].capacity_ml(), origin_um: [0, 0, 0], shape: 0 },
+        HydroNode { volume_ml: 0, capacity_ml: formes[1].capacity_ml(), origin_um: [0, 0, 0], shape: 1 },
+    ];
+    let mut edges = [Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 100_000 }, position_um: breche.map(|x| (x * 1e6) as i64),
+        discharge: SHARP_EDGE_DISCHARGE, ..Default::default() }];
+    let mut scratch = [0i64; 1];
+    let total = nodes[0].volume_ml + nodes[1].volume_ml;
+    let inverse = |q: [f64; 4]| [q[0], -q[1], -q[2], -q[3]];
+    for _ in 0..6_000 {
+        let q = barge.orientation;
+        // La mer : son centre sur la surface du monde, à la verticale de la brèche, exprimé dans le repère du navire.
+        let w = add(barge.position, rotate(q, breche));
+        let p = rotate(inverse(q), sub([w[0], w[1], 0.], barge.position));
+        nodes[0].origin_um = p.map(|x| (x * 1e6).round() as i64);
+        let g = rotate(inverse(q), [0., 0., -9.81]).map(|x| x as f32);
+        step(&mut nodes, &mut edges, &shapes, g, SimTime(STEP_US), &mut scratch).unwrap();
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, total, "masse de V");
+        let eau = nodes[1].volume_ml as f64 * 1e-6;
+        barge.loads = if nodes[1].volume_ml > 0 {
+            let c = formes[1].centroid_below_um(formes[1].plane(nodes[1].volume_ml, g).unwrap()).unwrap().map(|x| x * 1e-6);
+            vec![crate::rigid_body::PointLoad { body: c, force: [0., 0., -eau * MER.rho * 9.81] }]
+        } else {
+            Vec::new()
+        };
+        for _ in 0..10 {
+            barge.step(0.01, &calme, MER);
+        }
+    }
+    let q = barge.orientation;
+    let gite = (2. * q[1].atan2(q[0])).abs();
+    let tirant = -(barge.position[2] + rotate(q, [0., 0., -2.])[2]);
+    let eau = nodes[1].volume_ml as f64 * 1e-6;
+    println!(
+        "S552 brèche latérale : gîte {:.3}° (référence 8,088°, écart {:.2e}) ; tirant au centre {tirant:.4} m (1,6355) ; {eau:.3} m³ dans la citerne (21,68)",
+        gite.to_degrees(), gite.to_degrees() / 8.088 - 1.
+    );
+    assert!((gite.to_degrees() / 8.088 - 1.).abs() <= 0.03, "critère 1");
+    assert!((tirant / 1.6355 - 1.).abs() <= 0.01, "critère 2, tirant");
+    assert!((eau / 21.68 - 1.).abs() <= 0.02, "critère 2, eau");
+}
