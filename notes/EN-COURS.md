@@ -62,36 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S567 — **terminée**. En autonomie, **5.8 — le réseau en charge couplé au pas de V** : S565 résout un réseau entre des charges
-données ; ici, les charges sont les surfaces des nœuds de V, et les débits les vident et les remplissent.
+Session : S568 — **en cours**. En autonomie, **5.8 — les pompes et les clapets du réseau en charge**.
 
-**Ce que la session fait.** `charge::pas_reseau(nœuds, formes, g_eff, dt, raccords, demandes, conduites, …)` : chaque raccord (un nœud de V
-en un point) donne une charge fixe — la cote de la surface du nœud le long de la verticale locale ; le réseau est résolu (S565, départ chaud
-sur les charges du pas précédent) ; le débit net de chaque raccord, intégré sur le pas, devient des millilitres entiers avec un reste par
-raccord (comme les arêtes de V). Le réseau ne stocke rien : ce qu'il soutire aux jonctions (les demandes) sort, et la masse se compte
-nœuds + sortie, à l'entier. Refus atomiques : un raccord hors de l'eau (le réseau aspirerait de l'air ; `Domain`), un nœud qui donnerait
-plus qu'il n'a ou recevrait plus que sa place (`Capacity`). Les résistances sont celles de la gravité locale ; l'air des poches n'entre
-pas (version suivante).
+**Ce que la session fait.** Une conduite porte un organe : aucun, un **clapet** (le débit de `a` vers `b` seulement ; fermé, une fuite
+linéaire de 10⁻¹² m²/s garde la jacobienne inversible — 0,1 ml par jour sous 1 m), ou une **pompe** centrifuge avec son clapet (la loi de
+V, ADR-199 D3 : `H(Q) = H₀·(1 − (Q/Q_max)²)`, soit `h_a − h_b + H₀ = (R + H₀/Q_max²)·Q²`, `Q ≥ 0`).
 
-**Références, calculées avant** (ce script les écrit). Deux cuves de 1 m², l'eau à 1,5 et 0,5 m, reliées par trois conduites en série
-(A–J0–J1–B, `R` = 10⁴ + 2·10⁴ + 10⁴ = 40000 s²/m⁵) : `d√Δh/dt = −(1/A + 1/B)/(2√R)` = −0.0050 s⁻¹, égalisées à **200 s**
-(constante de temps, ADR-240 D2 ; l'essai dure 300 s). `Δh` à 50, 100, 150 s : **0.5625, 0.2500, 0.0625 m**. L'erreur
-d'Euler au pas de 0.1 s, bornée par `dt·T·max|Δh''|/2` = **3.75e-04 m** à 150 s. Le robinet : 1 L/s soutiré à J0 pendant 100 s →
-**100000 ml** sortis.
+**Références, calculées avant par bissection ou forme fermée** (ce script les écrit). (1) Une pompe (`H₀` = 30 m, `Q_max` = 0,05 m³/s,
+`R` = 2 000) d'un réservoir à 0 m vers une jonction reliée (`R` = 3 000) à un réservoir à 20 m : **`h_j` = 21.764705882 m, `Q` = 0.024253563
+m³/s**. (2) Les trois réservoirs de S565, la branche de 80 m munie d'un clapet qui ne laisse passer que vers le réservoir : il se ferme,
+**`h_j` = 71.428571429 m** (`1500·(100 − h) = 2000·(h − 50)`). (3) Couplé : deux cuves de 1 m² (1,5 et 0,2 m), une pompe (`H₀` = 1 m,
+`Q_max` = 0,01 m³/s, `R` = 10⁴) de la basse vers la haute : l'équilibre au refoulement nul, **0,35 et 1,35 m**, atteint à 10⁻⁴ m vers
+**213 s** (un Euler fin, ADR-240 D2) ; l'essai dure 426 s ; ensuite rien ne revient (le clapet).
 
-**Quantum** (ADR-236 D1) : 1 ml sur 1 m² = 1 µm. **Critères, écrits avant.** (1) `Δh` à 10⁻³ m de la loi fermée aux trois instants
-(rapport 2.7 à la borne d'Euler), et à 10 µm d'un Euler f64 indépendant au même pas ; (2) la masse : nœuds + sortie
-constants à l'entier à chaque pas, la sortie sans demande bornée par le nombre de raccords (2 ml) ; (3) le robinet : 100000 ml
-sortis à 2 ml près ; (4) les refus, rien d'écrit.
+**Quantum** (ADR-236 D1) : les références à 10⁻⁹ ; 1 µm en V. **Critères, écrits avant.** (1) `h_j` et `Q` à 10⁻⁸ ; (2) `h_j` à 10⁻⁸ m
+(la fuite du clapet la déplace de ~4·10⁻⁹ m, calculé : `10⁻¹²·8,6/2,1·10⁻³`) ; (3) les cuves à 2·10⁻⁴ m de 0,35 et 1,35 m, la masse à
+l'entier, aucun retour une fois l'équilibre atteint (la haute ne baisse plus) ; (4) sans organe, S565 et S567 inchangés (la suite).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `pas_reseau` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.8 ; rituel.
+- [ ] **P2** — les organes et leurs essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.8 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — Δh à 1 µm de l'Euler, à 1,7·10⁻⁴ m de la loi fermée ; masse à l'entier ; sortie −1 ml sans demande ; robinet 99 999 ml ;
-  refus. Suite 735.
-- **P3** — preuve RESEAU-COUPLE-S567 ; liste 5.8 ; index ; journal.
-
