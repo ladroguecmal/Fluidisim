@@ -7,7 +7,7 @@
 //!
 //! S523 : `[U T xs arrière demi_y dx]` en arguments (défauts : ceux de S522 — 6,3 40 63 128 155 1) ; `T` multiple de 8 s.
 //!
-//! `cargo run -p water-core --release --example c07_profondeur -- <sortie> [U T xs arrière demi_y dx coupure radial angulaire]`
+//! `cargo run -p water-core --release --example c07_profondeur -- <sortie> [U T xs arrière demi_y dx coupure radial angulaire σ devant]`
 use water_core::{
     bound_pressure::Settings,
     gaussian_spectrum::{bake, Recipe},
@@ -23,7 +23,9 @@ fn main() {
     let sortie = args.get(1).expect("sortie").clone();
     let arg = |i: usize, defaut: f32| args.get(i).map(|v| v.parse::<f32>().expect("nombre")).unwrap_or(defaut);
     let (u, t_s, xs, arriere, demi_y, dx) = (arg(2, 6.3), arg(3, 40.0), arg(4, 63.0), arg(5, 128.0), arg(6, 155.0), arg(7, 1.0));
-    let (sigma, profondeur, force) = (2.0f32, 5.0f32, 19_620.0f32);
+    // S525 : σ en argument 11 (défaut 2 m), l'étendue devant la source en argument 12 (défaut 0).
+    let (sigma, profondeur, force) = (arg(11, 2.0), 5.0f32, 19_620.0f32);
+    let avant = arg(12, 0.0);
     let fin_us = (t_s * 1e6).round() as u64;
     let x0 = xs - u * t_s;
     // S523 : la recette en arguments 8 à 10 (coupure, radial, angulaire ; défauts 3, 512, 256).
@@ -59,7 +61,7 @@ fn main() {
     )
     .expect("préparation");
     let (gx0, gy0) = (xs - arriere, -demi_y);
-    let (nx, ny) = ((arriere / dx).round() as usize + 1, (2.0 * demi_y / dx).round() as usize + 1);
+    let (nx, ny) = (((arriere + avant) / dx).round() as usize + 1, (2.0 * demi_y / dx).round() as usize + 1);
     let debut = std::time::Instant::now();
     let mut eta = vec![0f32; nx * ny];
     let fils = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4);

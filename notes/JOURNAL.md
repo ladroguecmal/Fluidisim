@@ -516,3 +516,12 @@ la calibration — W contre la théorie à quatre durées, l'écart en fonction 
 (`farthest_emission`, annoncée par l'hôte) ne laisse plus d'erreur forte silencieuse mais alerte à tort deux fois (0,3 %, 2 %). **A331
 levée** pour sa conséquence. Maillons **1** (une garde, aucun point n'avance). Suivant : **S525**, une capacité — la résonance de C07
 (source fine), A330, 6.2, 6.7.
+
+## S525 — 2026-10-06 — la résonance de C07 : W suit la théorie ; l'assertion corrigée
+
+**Entrée.** En autonomie ; la dernière branche de C07. **La théorie d'abord** : en ondes longues, la dépression sous une source isotrope
+vaut exactement `(p₀/ρg)/√(1 − Fr²)` (Prandtl–Glauert) — la loi demande une source **large** (la note de S523 disait l'inverse) ; mais la
+référence exacte à durée finie donne −0,72 sur les quatre points (à 0,9 le régime n'est pas permanent). **Fait**
+([preuve](../docs/validation/C07-RESONANCE-S525.md)) : W (σ 20 m, 64 s) à **0,03 %** de la théorie, −0,544 sur 0,3–0,7. L'assertion de
+C07 corrigée par note. **C07 exécuté dans ses trois branches.** Maillons **0** (3.2, 13.2). Suivant : **S526, la neuvième revue de
+méthode** (S521–S525).

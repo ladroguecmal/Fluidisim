@@ -1103,3 +1103,8 @@ C02/C18 : 0,227536 / 0,650281 ; seul C04 ordre un reste en échec dans physics.
 > passe à `Fr_h` = 1,43** (W par 5 m de fond, 44,00° pour 44,46°, le champ à 0,4 % de la théorie) ; à 2,14, l'instrument (la dernière
 > crête des rayons, éprouvé sur la théorie) prend une crête du bruit f32. La pente de la résonance demande une source plus fine que σ 2 m :
 > à cette largeur, le facteur de la source à l'onde transverse varie de 5·10⁻⁵ à 0,94 sur le balayage et masquerait la pente.
+> *Note du 2026-10-06, S525, sur C07* ([C07-RESONANCE-S525](C07-RESONANCE-S525.md)) : **la résonance est exécutée, et l'assertion de S30
+> corrigée.** La pente −½ est celle du régime permanent en ondes longues (Prandtl–Glauert, exacte sous une source isotrope large devant
+> le fond) ; à durée finie, la théorie linéaire exacte en profondeur finie donne −0,72 sur {0,3 ; 0,5 ; 0,7 ; 0,9} (à 0,9, la dépression
+> dépasse Prandtl–Glauert de 40 % et croît encore) et −0,544 sur {0,3 ; 0,5 ; 0,7}. **Assertion retenue** : sur le régime permanent
+> {0,3 ; 0,5 ; 0,7}, −½ ± 0,15 ; et, sur les quatre points, l'accord avec la théorie à durée égale. W : 0,03 % de la théorie, −0,544.

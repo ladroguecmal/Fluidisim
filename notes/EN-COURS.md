@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S525 — **en cours**. En autonomie, **la résonance de C07** (CAS-CANONIQUES, note S30) : « la pente de `log A` contre
+Session : S525 — **terminée**. En autonomie, **la résonance de C07** (CAS-CANONIQUES, note S30) : « la pente de `log A` contre
 `log|1 − Fr_h²|` vaut −½ ± 0,15 sur `Fr_h` ∈ {0,3 ; 0,5 ; 0,7 ; 0,9} ». Dernière branche de C07.
 
 **Ce que dit la théorie, calculé avant.** En ondes longues (source large devant le fond), l'équation permanente
@@ -85,8 +85,12 @@ permanent). (3) La note de C07 corrige l'assertion (ADR-222 : une cible contredi
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — W et la référence ; (1), (2).
-- [ ] **P3** — preuve ; C07 ; listes 3.2, 13.2 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — W et la référence ; (1), (2).
+- [x] **P3** — preuve ; C07 ; listes 3.2, 13.2 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — W aux quatre `Fr_h` (4 s chacun) : 1,0529 / 1,1672 / 1,4418 / 3,2071 contre 1,0531 / 1,1674 / 1,4422 / 3,2077 (0,03 %) ;
+  pentes −0,721 et −0,544 des deux côtés → (1), (2) tenus.
+- **P3** — preuve C07-RESONANCE-S525 ; note C07 ; listes 3.2, 13.2 ; index ; journal.
+

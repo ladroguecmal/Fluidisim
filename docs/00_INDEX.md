@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [La résonance de C07 en deçà du critique — S525](validation/C07-RESONANCE-S525.md) : W à 0,03 % de la théorie, −0,544 sur le régime permanent ; l'assertion de C07 corrigée.
 - [Le domaine honnête d'un sillage de W : la distance du chemin aux points — S524](validation/SILLAGE-DOMAINE-S524.md) : < 0,4 % sous le rayon, 7 % à 1,45 R, 23 % à 1,88 R ; la garde de l'hôte ; A331 levée.
 - [C07 peu profond : l'angle du sillage de W au-delà du critique — S523](validation/C07-PEU-PROFOND-S523.md) : 44,00° pour 44,46° à `Fr_h` = 1,43 ; à 2,14 l'instrument prend le bruit ; A331.
 - [La pression de W en profondeur uniforme — S522](validation/W-PROFONDEUR-S522.md) : `k·tanh kh`, le chemin profond au bit ; le sillage à `Fr_h` = 0,9 à 2,0 % de la référence par 5 m de fond.

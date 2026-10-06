@@ -16,6 +16,7 @@ de W.
     python outils/reference_sillage.py profondeur <fichier> — S522 : W par 5 m de fond (`c07_profondeur`) contre la référence finie et profonde
     python outils/reference_sillage.py supercritique [W10 W15] — S523 : l'angle au-delà du critique, sur la référence (trois grilles) ou W
     python outils/reference_sillage.py calibration <W_T16.bin …> — S524 : l'écart de W contre la distance du chemin aux points (A331)
+    python outils/reference_sillage.py resonance [W0.3 W0.5 W0.7 W0.9] — S525 : la résonance de C07 sur la référence ou W
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import os
@@ -318,6 +319,47 @@ def calibration(fichiers):
         print(f"CALIB_S524 T={t:.0f} D_m={dist:.1f} D_sur_R={dist / r_honnete:.2f} ecart_quadratique_relatif={ecart:.4f}", flush=True)
 
 
+def resonance(fichiers=None):
+    """S525 — la résonance de C07 : la dépression maximale à moins de 3σ de la source (σ 20 m, 5 m de fond, 64 s, coupure 0,4), rapportée
+    à la statique `p₀/ρg`, à `Fr_h` ∈ {0,3 ; 0,5 ; 0,7 ; 0,9} ; la pente de `log A` contre `log|1 − Fr_h²|` sur quatre et sur trois points.
+    Sans fichier : la référence sur sa grille ; avec les quatre fichiers de W (`c07_profondeur`), W et la référence aux mêmes points."""
+    sigma, h, t, coupure = 20.0, 5.0, 64.0, 0.4
+    c = np.sqrt(G * h)
+    nombres = [0.3, 0.5, 0.7, 0.9]
+    statique = F / (2 * np.pi * sigma**2) / (RHO * G)
+    series = {}
+    for n, fr in enumerate(nombres):
+        u = fr * c
+        if fichiers is None:
+            x0 = -u * t / 2
+            xs, ys, eta = champ(sigma, u, t, 2048.0, 1024.0, 2.0, x0, coupure, profondeur=h)
+            xsrc = x0 + u * t
+            m = (np.abs(xs[None, :] - xsrc) < 3 * sigma) & (np.abs(ys[:, None]) < 3 * sigma)
+            series.setdefault("reference", []).append(np.abs(eta[m]).max() / statique)
+            continue
+        with open(fichiers[n], "rb") as f:
+            tete = f.readline().split()
+            nx, ny = int(tete[0]), int(tete[1])
+            gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+            w = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+        x0 = xs_src - u * t
+        gx = gx0 + dx * np.arange(nx)
+        gy = gy0 + dx * np.arange(ny)
+        GX, GY = np.meshgrid(gx, gy)
+        xs, ys, eta = champ(sigma, u, t, 2048.0, 1024.0, 2.0, x0, coupure, profondeur=h)
+        ref = bilineaire(xs, ys, eta, GX.ravel(), GY.ravel()).reshape(ny, nx)
+        m = (np.abs(GX - xs_src) < 3 * sigma) & (np.abs(GY) < 3 * sigma)
+        series.setdefault("W", []).append(np.abs(w[m]).max() / statique)
+        series.setdefault("reference", []).append(np.abs(ref[m]).max() / statique)
+    X = np.log(np.abs(1 - np.array(nombres) ** 2))
+    for nom, a in series.items():
+        a = np.array(a)
+        p4 = np.polyfit(X, np.log(a), 1)[0]
+        p3 = np.polyfit(X[:3], np.log(a[:3]), 1)[0]
+        print(f"RES_S525 {nom} A_sur_statique {' '.join(f'{v:.4f}' for v in a)} prandtl_glauert "
+              f"{' '.join(f'{1 / np.sqrt(1 - f * f):.4f}' for f in nombres)} pente_4={p4:.3f} pente_3={p3:.3f}", flush=True)
+
+
 def instrument():
     t, coupure = 24.0, 6.0
     for sigma in [0.5, 1.0, 2.0]:
@@ -344,6 +386,8 @@ if __name__ == "__main__":
         profondeur(sys.argv[2])
     elif sys.argv[1] == "calibration":
         calibration(sys.argv[2:])
+    elif sys.argv[1] == "resonance":
+        resonance(sys.argv[2:] or None)
     elif sys.argv[1] == "supercritique":
         supercritique(sys.argv[2:] or None)
     else:
