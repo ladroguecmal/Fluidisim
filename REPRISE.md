@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 17:06 +02:00
+JETON            : libre
+Battement        : 2026-10-06 17:07 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S531 — la dixième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S530 — le lot ; l'absorption par le sol (Green–Ampt dans V) ([journal](notes/JOURNAL.md)). Avant : S529 (A330 localisée : l'amplitude de δ stable en maille)
-Session suivante : **S531 — la dixième revue de méthode** (S526–S530 ; ADR-222 D4) : frictions — deux limites matérielles de la carte trouvées au premier grand domaine (S520 les groupes, S529 la liaison de 128 Mo), un critère de convergence point par point manqué alors que l'amplitude converge (S529), un montage refusé par la garde de résolution (S528), l'ordre de grandeur au plan qui a changé la construction (S530). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S530 : l'absorption par le sol (5.5)
+Session en cours : aucune
+Dernière session : S531 — la dixième revue de méthode (ADR-235) ([journal](notes/JOURNAL.md)). Avant : S530 (le lot)
+Session suivante : **S532 — la carte qui refuse ses limites avec un nom (ADR-235 D1), puis un point partiel** : Linear3::new calcule groupes de dispatch, liaisons et tampons contre les limites de l'adaptateur et refuse (Err nommé) au lieu de s'arrêter ; candidats ensuite — A330 (une référence de corps : Michell), la convergence de δ en pas seul (A328), 6.2 la turbulence, 6.7 la poche d'air, la pluie hors contenant (5.5). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 1 — S531 : la revue de méthode (ADR-235), sans capacité
 Registres       : dernier lot S530 (ADR-213 D3) ; le prochain au plus tard en S533
 ```
 

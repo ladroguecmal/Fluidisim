@@ -72,6 +72,6 @@ d'agrandir un domaine, refusées avec un nom ; L392 ; METHODE (trente-trois) ; B
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-235, METHODE, L392, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
