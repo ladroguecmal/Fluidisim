@@ -17,7 +17,7 @@ Session en cours : aucune
 Dernière session : S539 — la coque retournée : la poche d'air comprimée ([journal](notes/JOURNAL.md)). Avant : S538 (C17 : l'inondation limitée par l'air)
 Session suivante : **S540 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — la poche qui s'échappe quand la coque bascule (7.5), l'évent à débit limité (5.9), C16 (le ballottement en repère accéléré, 4.17 absent) ou C13 (la remontée de bulle) parmi les cas canoniques non exécutés ; le quantum écrit à côté de chaque seuil (ADR-236 D1), ordres de grandeur calculés (ADR-232). Revue à S541. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S539 : la poche d'air comprimée (7.5)
-Registres       : dernier lot S536 (ADR-213 D3) ; le prochain au plus tard en S539
+Registres       : dernier lot S539 (ADR-213 D3) ; le prochain au plus tard en S542
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
