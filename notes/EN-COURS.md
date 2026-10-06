@@ -62,15 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S546 — **terminée**. En autonomie, **la treizième revue de méthode** (ADR-222 D4 ; S541–S545).
+Session : S547 — **en cours**. En autonomie, **5.9 — l'évent à débit limité** (ADR-015 §2 : « l'inondation d'un compartiment fermé est
+limitée par la sortie de l'air ; `Q_eau ≤ Q_air` ») : S538 n'a qu'un nœud scellé ou ouvert.
 
-**Ce que la session fait.** Relu : S541 (la revue), S542–S543 (C16, la formule recalculée), S544 (le plan sauté ; une limite supposée et
-fausse ; deux usages de δ décrits par S375), S545 (C21 corrigé). **ADR-238** : D1, le rituel refuse une session sans commit « Snnn P1 »
-(`outils/rituel.py`, `--sans-plan`) ; D2, un blocage supposé se vérifie avant d'être écrit ; L395, L396 ; METHODE ; BOUSSOLE.
+**Ce que la session fait.** `Flow::Vent { area_mm2 }` : l'évent d'un nœud scellé vers l'air libre — aucune eau n'y passe ; dans `step_air`,
+l'air de la poche en sort à `Q_a = C_d·A·√(2Δp/ρ_a)`, `ρ_a = 1,2·p/p_atm` (isotherme), et le produit `p·V_air` de la poche baisse de
+`p·Q_a·dt` (les moles qui sortent). `air` devient mutable. Sans évent, S538 au bit.
+
+**Ordre de grandeur, calculé (incompressible, quasi permanent).** Le débit d'eau par la brèche égale le débit d'air par l'évent :
+`k = √((C²A_v²/ρ_a)/(C²A_v²/ρ_a + C²a²/ρ))`, le remplissage de Torricelli ralenti de `k`. C17 (brèche 1 dm², 99 % en 463,5 s ouvert) :
+évent de **5 cm²** → `k` = 0,8253, **99 % en 561,6 s**, surpression initiale 6,4 kPa (6,3 % de p_atm) ; 1 cm² → `k` = 0,2805, 1 652 s,
+18,5 kPa (18 %). La compressibilité de l'air, négligée par cette loi, compte de l'ordre de la surpression rapportée à p_atm.
+
+**Critères, écrits avant.** (1) Sans évent, `step_air` au bit de S538 (ses essais). (2) Évent de 5 cm² : 99 % à 5 % de 561,6 s (la
+compressibilité, ≈ 6 %, en marge). (3) Évent de 1 cm² : plus de trois fois plus lent qu'ouvert (`1/k` = 3,6) ; un compartiment scellé ne se
+remplit pas (S538). (4) La masse d'eau exacte.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-238, rituel, METHODE, L395–L396, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'évent, les essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.9 ; rituel.
 
 ### Notes de reprise
