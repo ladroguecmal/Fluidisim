@@ -531,9 +531,17 @@ pub(crate) fn check_solid(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: 
 /// hydrostatique rend donc exactement `ρ·g·V` du polyèdre discret : c'est Archimède, et c'est le théorème
 /// de la divergence de la découpe.
 pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 3], usize) -> f64) -> [f64; 3] {
+    solid_wall_load(domain, solid, p, [0.; 3]).0
+}
+
+/// **S502 : la force et le moment** de la pression sur la paroi du solide, le moment autour de `centre` — chaque triangle de coupe porte
+/// sa pression en son centre de gravité, et son moment `(g − centre) × p·dA`. La force est celle de [`solid_wall_force`], aux mêmes
+/// opérations dans le même ordre : au bit.
+pub(crate) fn solid_wall_load(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 3], usize) -> f64, centre_moment: [f64; 3]) -> ([f64; 3], [f64; 3]) {
     let Domain3 { nx, ny, nz, dx } = domain;
     let dx = dx as f64;
     let mut force = [0f64; 3];
+    let mut couple = [0f64; 3];
     let sub = |a: [f64; 3], b: [f64; 3]| [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
     let cross = |a: [f64; 3], b: [f64; 3]| [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
     let dot = |a: [f64; 3], b: [f64; 3]| a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -576,6 +584,7 @@ pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 
                             negatives.iter().map(|&q| cut(q, positives[0])).collect()
                         };
                         let (mut area, mut moment) = ([0f64; 3], [0f64; 3]);
+                        let mut tourne = [0f64; 3];
                         for t in 1..poly.len() - 1 {
                             let a = cross(sub(poly[t], poly[0]), sub(poly[t + 1], poly[0]));
                             let half = [0.5 * a[0], 0.5 * a[1], 0.5 * a[2]];
@@ -586,19 +595,24 @@ pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 
                                 area[q] += half[q];
                                 moment[q] += pg * half[q];
                             }
+                            let t = cross(sub(g, centre_moment), [pg * half[0], pg * half[1], pg * half[2]]);
+                            for q in 0..3 {
+                                tourne[q] += t[q];
+                            }
                         }
                         // Orientée vers le solide : du côté d'un sommet négatif.
                         let into = sub(verts[negatives[0]].0, poly[0]);
                         let sign = if dot(area, into) < 0. { -1. } else { 1. };
                         for q in 0..3 {
                             force[q] += sign * moment[q];
+                            couple[q] += sign * tourne[q];
                         }
                     }
                 }
             }
         }
     }
-    force
+    (force, couple)
 }
 
 /// S329 : la part solide d'une maille, pour les essais et le banc — `1 − fraction` du solide seul.

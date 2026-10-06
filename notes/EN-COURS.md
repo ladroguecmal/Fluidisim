@@ -82,8 +82,9 @@ autour de leur `ω` propre, résidu d'ajustement ≤ 10 %, `B` > 0 ; (3) le corp
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le moment de δ ; son essai hydrostatique.
+- [x] **P2** — le moment de δ ; son essai hydrostatique.
 - [ ] **P3** — roulis et tangage imposés (calcul détaché) ; `A`, `B`.
 - [ ] **P4** — l'amortissement angulaire du corps ; l'essai de lâcher ; preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
+- **P2** — `solid_wall_load` / `Volume3::solid_load` ; pavé incliné noyé : moment contre `r_c × F` à 7,4·10⁻⁴, 1,5·10⁻⁴, 9,9·10⁻⁶ (n = 24, 48, 96), force au bit. (Critère 1 réécrit avant mesure : `r_c × F`, plus simple que `ρgV·KB`.)

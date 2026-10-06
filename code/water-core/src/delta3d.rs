@@ -543,6 +543,19 @@ impl Volume3 {
         Ok(cut::solid_wall_force(self.domain, solid, &|_, c| self.p[c] as f64))
     }
 
+    /// **S502 : la force et le moment** de la pression de δ sur la paroi du solide, le moment autour de `centre` (N, N·m). Mêmes refus
+    /// que [`Volume3::solid_force`] ; la force au bit de la sienne.
+    pub fn solid_load(&self, solid: &[f32], centre: [f64; 3]) -> Result<([f64; 3], [f64; 3]), Error> {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        if self.cut.is_none() {
+            return Err(Error::Domain);
+        }
+        if solid.len() != (nx + 1) * (ny + 1) * (nz + 1) {
+            return Err(Error::Shape);
+        }
+        Ok(cut::solid_wall_load(self.domain, solid, &|_, c| self.p[c] as f64, centre))
+    }
+
     /// S326 : active ou coupe le Jacobi du chemin coupé — pour la mesure ; actif par défaut.
     pub fn set_precondition_cut(&mut self, on: bool) {
         self.precondition_cut = on;

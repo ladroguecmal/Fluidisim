@@ -383,3 +383,42 @@ fn the_covered_part_of_a_face_has_its_exact_centroid_s335() {
     }
 }
 
+
+/// **S502 — le moment de la pression sur la paroi**, cas de réponse connue : un pavé de 0,8 × 0,4 × 0,3 m incliné de 0,3 rad autour de x
+/// et de 0,2 autour de y, noyé sous une pression hydrostatique. La force vaut `ρg` fois le volume du polyèdre (S329) ; son moment autour
+/// de l'origine, `r_c × F`, `r_c` le centre du pavé — à 1 % près, aux mailles de 5, 2,5 et 1,25 cm ; la force au bit de `solid_wall_force`.
+#[test]
+fn the_wall_pressure_moment_of_a_tilted_box_s502() {
+    use crate::rigid_body::oriented_box_distance;
+    let (rho, g_eff, surface) = (1025f64, 9.81f64, 1.2f64);
+    let c = [0.61, 0.58, 0.55];
+    let (ax, ay) = (0.3f64, 0.2f64);
+    let qx = [(ax / 2.).cos(), (ax / 2.).sin(), 0., 0.];
+    let qy = [(ay / 2.).cos(), 0., (ay / 2.).sin(), 0.];
+    let q = [
+        qy[0] * qx[0] - qy[1] * qx[1] - qy[2] * qx[2] - qy[3] * qx[3],
+        qy[0] * qx[1] + qy[1] * qx[0] + qy[2] * qx[3] - qy[3] * qx[2],
+        qy[0] * qx[2] - qy[1] * qx[3] + qy[2] * qx[0] + qy[3] * qx[1],
+        qy[0] * qx[3] + qy[1] * qx[2] - qy[2] * qx[1] + qy[3] * qx[0],
+    ];
+    for n in [24usize, 48, 96] {
+        let dx = 1.2 / n as f32;
+        let d = Domain3 { nx: n, ny: n, nz: n, dx };
+        let mut s = Vec::with_capacity((n + 1).pow(3));
+        for k in 0..=n {
+            for j in 0..=n {
+                for i in 0..=n {
+                    let p = [i as f64 * dx as f64, j as f64 * dx as f64, k as f64 * dx as f64];
+                    s.push(oriented_box_distance(c, q, [0.4, 0.2, 0.15], p) as f32);
+                }
+            }
+        }
+        let pression = |p: [f64; 3], _: usize| rho * g_eff * (surface - p[2]);
+        let (f, m) = solid_wall_load(d, &s, &pression, [0.; 3]);
+        assert_eq!(f.map(f64::to_bits), solid_wall_force(d, &s, &pression).map(f64::to_bits));
+        let attendu = [c[1] * f[2] - c[2] * f[1], c[2] * f[0] - c[0] * f[2], c[0] * f[1] - c[1] * f[0]];
+        let ecart = (0..3).map(|k| (m[k] - attendu[k]).abs()).fold(0f64, f64::max) / attendu.iter().map(|v| v.abs()).fold(0f64, f64::max);
+        println!("S502 : n={n} poussée/ρg {:.6e} m³ (pavé 9,6e-2), moment {m:.3?} contre r_c × F {attendu:.3?}, écart {ecart:.2e}", f[2] / (rho * g_eff));
+        assert!(ecart <= 0.01, "n {n} : {ecart}");
+    }
+}
