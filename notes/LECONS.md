@@ -6517,3 +6517,21 @@ aurait calculé faux en silence. Un garde-fou nomme ce qu'il autorise (ADR-224 D
 **S490 — l'édition à moitié appliquée.** Un script ancré sur un texte coupé autrement à la ligne : une partie écrite, l'autre non. Toutes les
 ancres d'abord, l'écriture ensuite (ADR-224 D4).
 
+## L381
+
+**S495 — trois remèdes avant le diagnostic.** Un écart de 40 % entre une bouée et l'eau du sillage : une recette plus fine, une bouée plus
+loin, une coupure plus haute — trois essais de 8 min, trois explications fausses. Un essai de 20 s, le champ seul au point de la bouée, a
+séparé les chaînes : le champ cohérent, le corps exact, l'écart dans le départ. Localiser avant de remédier (ADR-226 D1).
+
+## L382
+
+**S494, S495 — la bouée au repos dans une eau qui bouge.** Deux fois, le retard `u₀·t` d'un corps lâché au repos a été pris pour un défaut
+(sous la houle de B, puis sous le sillage, dont l'eau bouge dès la naissance de la source). Même état de départ, vitesses comprises
+(ADR-226 D2).
+
+## L383
+
+**S494, S495 — l'ordre de grandeur incomplet.** Le second ordre jugé sur `k·a` (0,1) alors qu'il s'accumule en `k·a·ω·t` (≈ 1 sur dix
+secondes) ; la queue d'une gaussienne à 3σ dite négligeable contre la source (1 %), alors qu'elle concurrence la pente du sillage, née de
+la même source et petite elle aussi. Comparer au terme concurrent, sur la durée (ADR-226 D3).
+

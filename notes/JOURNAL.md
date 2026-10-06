@@ -259,3 +259,12 @@ la gaussienne l'emporte sur la pente du sillage ; puis la bouée partait au repo
 champ, départ) n'ont été séparées qu'au troisième essai — friction pour la revue de S496. Non tranché : la coupure 3 du sillage de
 production. W entier derrière la requête du corps ; 6.2 reste partielle (courant, turbulence). Maillons **0**. Suivant : **S496, la revue
 de méthode** (ADR-222).
+
+## S496 — 2026-10-06 — la troisième revue de méthode
+
+**Entrée.** En autonomie, ADR-222 D4. **Fait** : [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md) — huit frictions de S492–S495 ;
+trois protections : un écart se localise avant tout remède (S495 : trois remèdes de 8 min avant l'essai de 20 s qui séparait les
+chaînes), deux trajectoires partent du même état vitesses comprises (la bouée au repos dans une eau qui bouge, deux fois), un ordre de
+grandeur se compare au terme concurrent et sur la durée (le second ordre cumulé ; la queue d'une source). Cinq frictions sans suite : les
+protections existantes ont joué. METHODE : 27 protections ; L381–L383. Maillons **1** (une revue, sans capacité). Suivant : **S497** —
+un point de la liste (le lot des registres y est dû).

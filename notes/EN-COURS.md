@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S496 — **en cours**. En autonomie, **la troisième revue de méthode** (ADR-222 D4, toutes les cinq sessions) : les frictions de
+Session : S496 — **terminée**. En autonomie, **la troisième revue de méthode** (ADR-222 D4, toutes les cinq sessions) : les frictions de
 S492–S495.
 
 **Ce que la session fait.** Relire les journaux et notes de S492–S495 ; pour chaque friction, son coût et sa suite (protection nouvelle,
@@ -74,6 +74,7 @@ leçon ; aucune protection existante n'est dupliquée (relire la table avant d'�
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
+- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
 
 ### Notes de reprise
+- **P2** — ADR-226 : huit frictions, trois protections (D1 localiser avant de remédier, D2 même état de départ vitesses comprises, D3 l'ordre de grandeur contre le terme concurrent et sur la durée) ; METHODE (27), L381–L383, BOUSSOLE, index.

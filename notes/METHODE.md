@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Vingt-quatre, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
+Vingt-sept, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -23,6 +23,8 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Un montage simplifié (symétrie, quart, paroi prise pour un plan de symétrie) s'éprouve une fois contre le montage entier avant de servir ; un modèle neuf n'est tenu qu'après une scène de jeu | L374 | — |
 | | Une erreur systématique ne s'annule que si les deux côtés la portent également | L278 | — |
 | | Critère et prédiction s'écrivent avant la mesure ; un seuil ne se relève jamais pour faire passer ; un fait mesuré et son explication se publient séparément | L177 | — |
+| | Un écart à une référence se localise avant tout remède : séparer les chaînes (le modèle contre sa propre équation, la référence contre la sienne, l'état de départ) par le montage le moins cher qui les isole | L381 | — |
+| | Deux trajectoires se comparent depuis le même état, positions **et** vitesses : un corps lâché dans une eau qui bouge part à sa vitesse, toutes ses parts composées | L382 | — |
 | **en construisant l'instrument** | Un instrument s'éprouve sur un cas de réponse connue, et se réépreuve quand ce qu'il mesure s'améliore ; deux représentations se comparent à frontière et point de fonctionnement égaux | L360, L368 | — |
 | | Une grandeur de diagnostic (centre, volume, débit) s'éprouve à sa naissance par un essai du cœur sur un cas de réponse connue | L375 | essai `air_pocket_centroid_is_the_bubble_centre_s486` |
 | | Une valeur attendue se calcule dans l'essai (la formule, puis la tolérance), jamais en dur depuis un calcul de tête | L378 | — |
@@ -39,6 +41,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Une édition par script vérifie toutes ses ancres avant d'écrire, et s'ancre sur une ligne courte | L380 | — |
 | **en choisissant la suite** | Un blocage hérité se vérifie dans le code avant d'être contourné ou tranché ; un ordre nomme la dépendance qu'il protège | L176, L243, L343 | — |
 | | Avant de déclarer un remède physique, son ordre de grandeur à l'échelle de la scène : un remède qui n'y pèse pas n'est pas déclaré | L377 | — |
+| | Un ordre de grandeur se compare au terme concurrent, sur la durée de la mesure : un effet qui s'accumule se compte à la fin ; « négligeable » se dit contre ce qu'il concurrence, pas contre ce qui le produit | L383 | — |
 
 Les contrôles sont ceux de `python outils/etat_projet.py --check`, sauf les avertissements, qui se
 lisent à la construction.
