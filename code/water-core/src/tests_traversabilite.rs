@@ -95,3 +95,49 @@ fn a_subdivided_tile_has_more_samples_and_short_buffers_are_refused_s572() {
     assert_eq!(publier(&mut tuile, true, &|_, _| (-1.0, 1.0), None, &mut cellules, &mut evenements), Err(Refus), "critère 4 : profondeur");
     assert_eq!(tuile.sequence, 8, "critère 4 : rien d'écrit");
 }
+
+// --- S573 — l'invalidation ; la praticabilité par agent. Références écrites au plan par son script.
+
+/// (1) Le prochain changement d'un véhicule, d'un bateau, d'un humanoïde sous la marée de S570 ; (2) les bornes.
+#[test]
+fn each_agent_has_its_own_next_change_s573() {
+    let periode = 12.42 * 3600.0;
+    let maree = |t: f64| 0.8 + 0.4 * (2.0 * std::f64::consts::PI * t / periode).sin();
+    let vehicule = Agent::Vehicule { gue_m: 0.6 };
+    let bateau = Agent::Bateau { tirant_m: 0.9, marge_m: 0.2 };
+    let v = prochain_changement(vehicule, &maree, periode / 2.0, periode, 60.0, CrossCause::Maree).unwrap().unwrap();
+    let b = prochain_changement(bateau, &maree, 0.0, periode, 60.0, CrossCause::Maree).unwrap().unwrap();
+    let h = prochain_changement(Agent::Humanoide, &maree, 0.0, periode, 60.0, CrossCause::Maree).unwrap();
+    println!("S573 véhicule {v:?} (3 726 s) ; bateau {b:?} (6 034,925 s) ; humanoïde {h:?}");
+    assert!((v.delai_s - 3726.0).abs() < 1e-2 && v.trend == -1, "critère 1 : le véhicule");
+    assert!((b.delai_s - 6034.92493402856).abs() < 1e-2 && b.trend == 1, "critère 1 : le bateau");
+    assert_eq!(h, None, "critère 1 : l'humanoïde");
+    let e = |d: f32, v: f32| echantillon(d, v).unwrap();
+    assert!(praticable(vehicule, &e(0.6, 0.0)) && !praticable(vehicule, &e(0.601, 0.0)), "critère 2 : le gué");
+    assert!(!praticable(bateau, &e(1.1, 0.0)) && praticable(bateau, &e(1.101, 0.0)), "critère 2 : le tirant");
+    assert!(!praticable(Agent::Humanoide, &e(0.5, 2.0)), "critère 2 : HR = 1,25");
+}
+
+/// (3) Une commande de V invalide les prévisions d'une tuile : `Immediat`, `Aucune`, jusqu'à une prévision établie.
+#[test]
+fn a_command_upstream_invalidates_the_tile_forecasts_s573() {
+    let periode = 12.42 * 3600.0;
+    let mut tuile = TileDesc { frame: 0, tile_morton: 0, cadence: Cadence::Maree, subdivision: 0, sequence: 0 };
+    let vide = Cellule { echantillon: echantillon(0.0, 0.0).unwrap(), t_next_cross: 0.0, cause: CrossCause::Aucune };
+    let ev = CrossingEvent { cellule: 0, avant: (Profondeur::Negligeable, Danger::Faible), apres: (Profondeur::Negligeable, Danger::Faible) };
+    let (mut cellules, mut evenements) = (vec![vide; 256], vec![ev; 256]);
+    let prevision = Prevision { profondeur: &|i, _, t| plage_s572(i, t), t: 0.0, horizon_s: periode, pas_s: 60.0, cause: CrossCause::Maree };
+    let echantillons = |i: usize, _: usize| (plage_s572(i, 0.0) as f32, 0.0);
+    publier(&mut tuile, true, &echantillons, Some(&prevision), &mut cellules, &mut evenements).unwrap();
+    let avec_maree = cellules.iter().filter(|c| c.cause == CrossCause::Maree).count();
+    invalider(&mut tuile, &mut cellules);
+    let apres = cellules.iter().filter(|c| c.cause == CrossCause::Aucune).count();
+    publier(&mut tuile, false, &echantillons, None, &mut cellules, &mut evenements).unwrap();
+    let sans_prevision = cellules.iter().filter(|c| c.cause == CrossCause::Aucune).count();
+    publier(&mut tuile, false, &echantillons, Some(&prevision), &mut cellules, &mut evenements).unwrap();
+    let retablies = cellules.iter().filter(|c| c.cause == CrossCause::Maree).count();
+    println!("S573 invalidation : {avec_maree} prévisions Marée, puis {apres} Aucune ({:?}), {sans_prevision} sans prévision, {retablies} rétablies",
+        tuile.cadence);
+    assert_eq!((tuile.cadence, apres, sans_prevision), (Cadence::Immediat, 256, 256), "critère 3");
+    assert_eq!(retablies, avec_maree, "critère 3 : rétablies");
+}

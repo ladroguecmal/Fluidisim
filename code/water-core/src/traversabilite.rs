@@ -95,7 +95,14 @@ pub struct Franchissement {
 /// compte.
 pub fn prochain_franchissement(profondeur: &dyn Fn(f64) -> f64, t0: f64, horizon_s: f64, pas_s: f64, cause: CrossCause)
     -> Result<Option<Franchissement>, Refus> {
-    if !(horizon_s > 0.0) || !(pas_s > 0.0) || !t0.is_finite() || !horizon_s.is_finite() {
+    prochain_franchissement_de(&SEUILS_PROFONDEUR, profondeur, t0, horizon_s, pas_s, cause)
+}
+
+/// S573 : [`prochain_franchissement`] pour une liste de seuils croissants quelconque (le gué d'un véhicule, le tirant d'un bateau).
+pub fn prochain_franchissement_de(seuils: &[f32], profondeur: &dyn Fn(f64) -> f64, t0: f64, horizon_s: f64, pas_s: f64,
+    cause: CrossCause) -> Result<Option<Franchissement>, Refus> {
+    if !(horizon_s > 0.0) || !(pas_s > 0.0) || !t0.is_finite() || !horizon_s.is_finite() || seuils.is_empty()
+        || seuils.windows(2).any(|w| !(w[0] < w[1])) {
         return Err(Refus);
     }
     let cote = |t: f64| -> Result<usize, Refus> {
@@ -103,7 +110,7 @@ pub fn prochain_franchissement(profondeur: &dyn Fn(f64) -> f64, t0: f64, horizon
         if !d.is_finite() {
             return Err(Refus);
         }
-        Ok(SEUILS_PROFONDEUR.iter().take_while(|s| d >= **s as f64).count())
+        Ok(seuils.iter().take_while(|s| d >= **s as f64).count())
     };
     let depart = cote(t0)?;
     let (mut a, mut k) = (t0, 1u64);
@@ -118,7 +125,7 @@ pub fn prochain_franchissement(profondeur: &dyn Fn(f64) -> f64, t0: f64, horizon
                 if cote(m)? == depart { lo = m } else { hi = m }
             }
             let monte = cb > depart;
-            let seuil = SEUILS_PROFONDEUR[if monte { depart } else { depart - 1 }];
+            let seuil = seuils[if monte { depart } else { depart - 1 }];
             return Ok(Some(Franchissement { delai_s: 0.5 * (lo + hi) - t0, seuil_m: seuil, trend: if monte { 1 } else { -1 }, cause }));
         }
         if b >= t0 + horizon_s {
@@ -239,6 +246,62 @@ pub fn publier(tuile: &mut TileDesc, premiere: bool, echantillonner: &dyn Fn(usi
     }
     tuile.sequence = tuile.sequence.wrapping_add(1);
     Ok(k)
+}
+
+/// **S573 — invalider une tuile** (SPEC-006 §5.4) : une commande de V à l'amont (vanne, rupture, brèche). La tuile passe en cadence
+/// `Immediat` et toutes ses prévisions à `CrossCause::Aucune` — « je ne sais plus », un résultat — jusqu'à une publication qui reçoit une
+/// prévision établie. Quelles tuiles sont à l'aval : l'hôte le sait (le squelette hydrographique), pas ce module.
+pub fn invalider(tuile: &mut TileDesc, cellules: &mut [Cellule]) {
+    tuile.cadence = Cadence::Immediat;
+    let n = tuile.echantillons().min(cellules.len());
+    for c in &mut cellules[..n] {
+        c.cause = CrossCause::Aucune;
+        c.t_next_cross = 0.0;
+    }
+}
+
+/// **S573 — l'agent qui traverse** (ADR-018 §2).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Agent {
+    /// Praticable sous la nage (1,30 m) et sous « dangereux pour la plupart » (`HR` < 1,25).
+    Humanoide,
+    /// Praticable tant que la profondeur ne dépasse pas le gué de son châssis (m).
+    Vehicule { gue_m: f32 },
+    /// Navigable quand `profondeur − tirant − marge de houle > 0` (m).
+    Bateau { tirant_m: f32, marge_m: f32 },
+}
+
+impl Agent {
+    /// Le seuil de profondeur qui décide pour cet agent.
+    pub fn seuil_m(&self) -> f32 {
+        match *self {
+            Agent::Humanoide => SEUILS_PROFONDEUR[3],
+            Agent::Vehicule { gue_m } => gue_m,
+            Agent::Bateau { tirant_m, marge_m } => tirant_m + marge_m,
+        }
+    }
+}
+
+/// **Praticable ?** — pour cet agent, sur cet échantillon.
+pub fn praticable(agent: Agent, e: &Echantillon) -> bool {
+    match agent {
+        Agent::Humanoide => e.profondeur < Profondeur::Nage && e.danger < Danger::PourLaPlupart,
+        Agent::Vehicule { gue_m } => e.depth <= gue_m,
+        // Le seuil même de la prévision (`seuil_m`) : en f32, `d − tirant − marge > 0` ne coïncide pas avec `d > tirant + marge`
+        // (1,1 − 0,9 − 0,2 = 4,5·10⁻⁸), et la praticabilité contredirait la prévision à sa borne.
+        Agent::Bateau { .. } => e.depth > agent.seuil_m(),
+    }
+}
+
+/// **Le prochain changement de praticabilité** d'un agent : le prochain franchissement de son seuil de profondeur (la profondeur seule —
+/// le danger d'un humanoïde dépend aussi du courant, que cette prévision ne suit pas).
+pub fn prochain_changement(agent: Agent, profondeur: &dyn Fn(f64) -> f64, t0: f64, horizon_s: f64, pas_s: f64, cause: CrossCause)
+    -> Result<Option<Franchissement>, Refus> {
+    let seuil = agent.seuil_m();
+    if !(seuil > 0.0) || !seuil.is_finite() {
+        return Err(Refus);
+    }
+    prochain_franchissement_de(&[seuil], profondeur, t0, horizon_s, pas_s, cause)
 }
 
 #[cfg(test)]
