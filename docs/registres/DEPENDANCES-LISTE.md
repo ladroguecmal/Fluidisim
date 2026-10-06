@@ -167,7 +167,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **7.2** Spray, embruns, gouttelettes | B | — | 4.16 | 8.4, 9.9 | **1** |
 | **7.3** Microbulles visuelles | B | — | 4.12 | 8.4 | **3** |
 | **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 8.4, 13.2 | **1** |
-| **7.5** Air comprimé, vide, eau dans le vide | B | — | 7.4 | 5.9 | **2** |
+| **7.5** Air comprimé, vide, eau dans le vide | B | la poche comprimée d'un corps faite (S539) ; l'adiabatique, la poche qui s'échappe, le vide | 7.4 | 5.9 | **2** |
 | **7.6** Glace et vapeur | H | — | — | 13.2 | **0** |
 | **7.7** Danger et traversabilité | H | la publication par tuiles depuis B, W et V (ADR-018) | — | — | **0** |
 | **7.8** Audio de l'eau | H | les événements et paramètres publiés (ADR-016) | — | — | **E** — la fin du projet, par Wwise, l'audio du jeu (ADR-197 D5, ADR-219) |

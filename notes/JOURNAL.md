@@ -629,3 +629,10 @@ scellée par nœud de V, sa pression de jauge dans les charges des arêtes ; tou
 brèche n'embarque que 0,2901 m sur 2 m (Boyle à 1,2·10⁻⁵), jamais plein ; avec évent, Torricelli à 2,9·10⁻⁴ — **C17 passe**. Une valeur du
 plan ajustée de tête (467 s pour 463,5 : ADR-232 D2 rappelée). Maillons **0** (5.9 devient partiel, 13.2 avance). Suivant : **S539**.
 
+## S539 — 2026-10-06 — la coque retournée : la poche d'air comprimée
+
+**Entrée.** En autonomie ; 7.5 (absent), le cas d'ADR-015 §2. **Fait** ([preuve](../docs/validation/POCHE-AIR-S539.md)) : `RigidBody::air_pocket`
+— une poche isotherme portée par le corps, sa poussée celle du volume comprimé à la profondeur de son centre. **Mesuré** : Boyle à 10⁻¹² ;
+le point de non-retour calculé au plan (3,811 m) tient — lâché 0,3 m au-dessus, le corps remonte et flotte ; 0,3 m en dessous, il coule.
+Maillons **0** (7.5 devient partiel). Suivant : **S540**, un point partiel ; revue à S541.
+

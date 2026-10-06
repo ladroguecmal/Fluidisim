@@ -513,7 +513,10 @@ pas recopiée ici (L137).
   symétrie ; **cuve entière, U = 0,90 de Davies et Taylor** ([REMONTEE-S485](validation/REMONTEE-S485.md)). Manquent la convergence
   en maille de U (S487 : × 0,90 à R/dx = 4, × 0,85 à 6, la bulle s'y scinde — [REMONTEE-S487](validation/REMONTEE-S487.md)), la
   fragmentation, C13.
-- [ ] **7.5 Air comprimé, vide, eau dans le vide** (ADR-015) — *absent*.
+- [ ] **7.5 Air comprimé, vide, eau dans le vide** (ADR-015) — *partiel* depuis S539 : la poche d'air comprimée portée par un corps
+  (la coque retournée d'ADR-015 §2) — sa poussée à 10⁻¹² de Boyle, et le point de non-retour : lâché 0,3 m au-dessus il remonte, 0,3 m
+  en dessous il coule ([preuve](validation/POCHE-AIR-S539.md)). Manquent la poche adiabatique, la poche qui s'échappe quand le corps
+  bascule, la bulle libre (7.4), le vide et l'eau dans le vide.
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*. L'évaporation et le gel des contenants, par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *absent*.
@@ -767,14 +770,14 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 2 | 6 | 4 |
 | 6. Solides | 8 | 5 | 2 | 1 |
-| 7. Secondaires | 8 | 0 | 2 | 6 |
+| 7. Secondaires | 8 | 0 | 3 | 5 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **71** | **40** |
+| **total** | **121** | **10** | **72** | **39** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

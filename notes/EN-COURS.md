@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S539 — **en cours**. En autonomie, **7.5 — l'air comprimé** (absent) par le cas d'ADR-015 §2–3 : « une coque retournée flotte
+Session : S539 — **terminée**. En autonomie, **7.5 — l'air comprimé** (absent) par le cas d'ADR-015 §2–3 : « une coque retournée flotte
 grâce à l'air qu'elle emprisonne » ; la poche se comprime avec la profondeur, « un bateau chaviré flotte, puis passe un point de non-retour
 et coule d'un coup ».
 
@@ -81,8 +81,11 @@ ADR-236 D1). (2) Lâché au repos à `d*` − 0,3 m, le corps remonte (centre au
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — la poche, les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 7.5 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la poche, les essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 7.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `AirPocket` ; essai `s539` : Boyle à 10⁻¹² ; à 3,51 m il remonte (−0,22 m), à 4,11 m il coule (−272 m). Suite 700.
+- **P3** — preuve POCHE-AIR-S539 ; liste 7.5 (partiel), décompte ; dépendances ; index ; journal.
+

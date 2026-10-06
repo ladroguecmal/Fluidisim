@@ -1551,3 +1551,39 @@ fn a_swimmer_stops_making_way_in_a_swell_s514() {
     assert!(dessous > 0., "critère 3, sous H* : {dessous}");
     assert!(dessus < 0., "critère 3, au-dessus : {dessus}");
 }
+
+/// Un corps de 2 000 kg et 0,5 m³ de matière (4 000 kg/m³, un point de proxy) portant 2 m³ d'air à la surface (épaisseur 1 m), son centre
+/// à `z`.
+fn chavire(z: f64) -> RigidBody {
+    let mut c = RigidBody::cuboid([1., 1., 0.5], 4000., [0., 0., z], [1, 1, 1]);
+    c.air_pocket = Some(crate::rigid_body::AirPocket { body: [0.; 3], volume_surface: 2.0, thickness: 1.0 });
+    c.drag = 1.;
+    c
+}
+
+/// **S539, critères 1 et 2 — la poche d'air comprimée.** Sa poussée à 0,5 (noyée), 10, 20, 30 m à 10⁻¹² de Boyle ; lâché au repos à
+/// `d*` − 0,3 m le corps remonte, à `d*` + 0,3 m il coule — `d*` = (p_atm/ρg)·(V₀/(m/ρ − V_s) − 1), le point de non-retour.
+#[test]
+fn a_capsized_hull_floats_on_its_air_until_the_point_of_no_return_s539() {
+    let calme = CalmWater { level: 0. };
+    let (patm, rg) = (crate::hydro_network::P_ATM_PA, MER.rho * 9.81);
+    for d in [0.5f64, 10., 20., 30.] {
+        let c = chavire(-d);
+        let f = c.forces(&calme, MER).force[2];
+        // Le poids, la poussée de la matière (noyée), et celle de la poche.
+        let attendu = -c.mass * 9.81 + rg * 0.5 + rg * 2.0 * patm / (patm + rg * d);
+        assert!((f / attendu - 1.).abs() <= 1e-12, "poussée à {d} m : {f} contre {attendu}");
+    }
+    let d_star = patm / rg * (2.0 / (2000. / MER.rho - 0.5) - 1.);
+    let lacher = |d: f64| {
+        let mut c = chavire(-d);
+        for _ in 0..6000 {
+            c.step(0.01, &calme, MER);
+        }
+        c.position[2]
+    };
+    let (haut, bas) = (lacher(d_star - 0.3), lacher(d_star + 0.3));
+    println!("S539 : point de non-retour {d_star:.4} m ; lâché à −{:.2} m → {haut:.2} m à 60 s ; à −{:.2} m → {bas:.2} m", d_star - 0.3, d_star + 0.3);
+    assert!(haut > -1., "critère 2 : remonte");
+    assert!(bas < -20., "critère 2 : coule");
+}

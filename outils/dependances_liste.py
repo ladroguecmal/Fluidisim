@@ -97,7 +97,7 @@ D = {
  "7.2": ("B", "—", ["4.16"], None),
  "7.3": ("B", "—", ["4.12"], None),
  "7.4": ("B", "—", ["4.16"], None),
- "7.5": ("B", "—", ["7.4"], None),
+ "7.5": ("B", "la poche comprimée d'un corps faite (S539) ; l'adiabatique, la poche qui s'échappe, le vide", ["7.4"], None),
  "7.6": ("H", "—", ["6.1"], None),
  "7.7": ("H", "la publication par tuiles depuis B, W et V (ADR-018)", [], None),
  "7.8": ("H", "les événements et paramètres publiés (ADR-016)", [], "la fin du projet, par Wwise, l'audio du jeu (ADR-197 D5, ADR-219)"),

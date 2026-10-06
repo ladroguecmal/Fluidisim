@@ -277,7 +277,22 @@ pub struct RigidBody {
     pub slam: Option<SlamArchetype>,
     /// S512 : l'impact du dernier pas, s'il y en a eu un.
     pub last_slam: Option<SlamEvent>,
+    /// **S539 : la poche d'air que le corps emprisonne** (ADR-015 §2–3, liste 7.5) — `None` : aucune.
+    pub air_pocket: Option<AirPocket>,
 }
+
+/// **S539 — une poche d'air portée par un corps** (la coque retournée d'ADR-015 §2) : son centre dans le repère du corps (m), son volume à la
+/// pression atmosphérique (m³), son épaisseur verticale (m, la fraction d'immersion comme un point du proxy). Noyée à la profondeur `d` de
+/// son centre, elle déplace `V₀·p_atm/(p_atm + ρ g d)` — isotherme, ADR-015 §3 « lente ».
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct AirPocket {
+    pub body: [f64; 3],
+    pub volume_surface: f64,
+    pub thickness: f64,
+}
+
+/// S539 : la pression atmosphérique, Pa (celle de V, `hydro_network::P_ATM_PA`).
+const P_ATM: f64 = crate::hydro_network::P_ATM_PA;
 
 /// **S512 — l'archétype d'impact d'une coque** (ADR-023 §2.5 : une propriété d'archétype, pas une mesure à l'exécution) : relèvement de
 /// fond `beta` (rad), demi-largeur mouillée `half_width` (m) et longueur mouillée `length` (m) à la fin de la pénétration, seuil de vitesse
@@ -367,6 +382,7 @@ impl RigidBody {
             radiation_damping_angular: [0.; 3],
             slam: None,
             last_slam: None,
+            air_pocket: None,
         }
     }
 
@@ -407,6 +423,27 @@ impl RigidBody {
             // (B6, S499). La force ne change pas ; un point noyé, ni son moment.
             let bras = if frac < 1. { add(r, rotate(self.orientation, [0., 0., -(1. - frac) * 0.5 * p.thickness])) } else { r };
             torque = add(torque, cross(bras, f));
+        }
+        // S539 : la poche d'air — sa poussée, celle de son volume comprimé à la profondeur de son centre, en son centre.
+        if let Some(a) = self.air_pocket {
+            let r = rotate(self.orientation, a.body);
+            let x = add(self.position, r);
+            let eta = water.surface(x[0], x[1]);
+            let frac = ((eta - (x[2] - 0.5 * a.thickness)) / a.thickness).clamp(0., 1.);
+            if frac > 0. {
+                let profondeur = (eta - x[2]).max(0.);
+                let volume = a.volume_surface * P_ATM / (P_ATM + milieu.rho * G * profondeur) * frac;
+                immersed_volume += volume;
+                let poussee = milieu.rho * G * volume;
+                let mut f = [0., 0., poussee];
+                let pente = water.slope(x[0], x[1]);
+                if pente != [0.; 2] {
+                    f[0] = -poussee * pente[0];
+                    f[1] = -poussee * pente[1];
+                }
+                force = add(force, f);
+                torque = add(torque, cross(r, f));
+            }
         }
         // S336 : l'eau que la coque met en mouvement emporte son énergie en ondes — un amortissement linéaire en la
         // vitesse relative à l'eau au centre de masse. Nul par défaut : rien ne change.
