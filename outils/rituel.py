@@ -189,7 +189,8 @@ def fin(argv) -> int:
     # S511 (ADR-231 D2) : le rappel aussi en dernière ligne — une lecture de la fin de la sortie ne le manque plus.
     if rappel:
         print(rappel)
-    return controle.returncode
+    # S561 (ADR-242 D2) : un lot dû et non fait est un refus, pas un rappel — le commit gardé par ce code ne part pas.
+    return controle.returncode or (3 if rappel else 0)
 
 
 def main(argv) -> int:

@@ -796,3 +796,11 @@ composition suit les transferts couche par couche. **Mesuré** : le manomètre e
 haut), la vidange stratifiée à 0,02 % (l'eau d'abord, l'huile intacte), un seul liquide identique au pas présent. **En route** (S559) : le
 rituel avait rendu une anomalie de décompte et le commit était parti, la chaîne en `;` — noté pour la revue. Maillons **0** (5.7 avance).
 Suivant : **S561, la seizième revue de méthode**.
+
+## S561 — 2026-10-06 — la seizième revue de méthode (ADR-242)
+
+**Entrée.** En autonomie ; revue due. **Frictions** : un instrument d'énergie aux mauvais poids (S555, relevé en S557) — **protection
+élargie** : une grandeur intégrale d'un schéma se mesure avec les poids de son produit scalaire, éprouvée d'abord sur un invariant connu
+(ADR-242 D1, L400) ; un commit parti après une anomalie du rituel (S559, la chaîne en `;`) — **élargie, et un outil** : le commit se garde
+par le code du rituel, qui sort désormais en erreur aussi quand le lot est dû (D2, L401). Ont tenu : les dérivations depuis le code, la
+constante de temps au plan, les scripts en fichiers. Maillons **1**. Suivant : **S562**, un point partiel.

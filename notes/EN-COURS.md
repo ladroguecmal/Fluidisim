@@ -62,38 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S560 — **terminée**. En autonomie, **5.7 — le débit par couches** (ADR-241 D4), après la pression d'un nœud stratifié (S559).
+Session : S561 — **terminée**. En autonomie, **la seizième revue de méthode** (ADR-222 D4 ; S556–S560).
 
-**Ce que la session fait.** `step_liquids(…, composition, liquides, pluie)` : (a) un orifice ou une vanne débite sur la différence de
-**pression** au seuil, `Q = C_d·A·√(2Δp/ρ)`, `ρ` le liquide de la couche amont au seuil (la condition `h_amont > h_aval` des surfaces ne
-vaut plus : un côté chargé d'huile a sa surface plus haute à l'équilibre) ; (b) après le pas, la composition suit les transferts entiers :
-chaque arête prend dans la couche à son seuil (le volume sous le plan du seuil, comparé aux volumes cumulés), puis au-dessus, puis
-au-dessous ; les débordements, en dernier, la couche du dessus ; la pluie apporte le liquide `pluie`. Formes volumiques seulement (les
-anciennes tables +Z n'ont pas de volume sous un plan) ; sans air scellé dans cette version. Le pas sans composition reste celui d'avant.
-
-**Références, calculées avant.** *Manomètre en U* : deux cuves de 1 × 1 × 2 m reliées au fond par deux orifices (un par sens, 1 000 mm²,
-`C_d` = 0,62) ; à gauche 1,5 m³ d'eau, à droite 0,5 m³ d'eau sous 0,4 m³ d'huile (ρ = 850). Équilibre `1000·h_g = 1000·h_d + 850·0,4`,
-`h_g + h_d = 2` → **`h_g` = 1,17 m, `h_d` = 0,83 m**, la surface de droite à 1,23 m — plus haute que celle de gauche. La constante de temps
-(ADR-240 D2) : `d√Δ/dt = −C_d·a·√(2g)/A`, Δ₀ = 0,66 m → **295 s** ; l'essai dure 600 s. Le dépassement du pas explicite près de
-l'équilibre, `(2·C_d·a·√(2g)·dt/A)²` = 3·10⁻⁷ m, sous le quantum. *Vidange stratifiée* : une cuve de 1 m², 0,5 m³ d'eau sous 0,5 m³
-d'huile, un orifice au fond vers dehors : l'eau sort seule, sous la charge `h_e + 0,425` ; `t_e = 2·(√0,925 − √0,425)/(C_d·a·√(2g))` =
-**225,7 s**, puis l'huile.
-
-**Quantum** (ADR-236 D1) : 1 ml sur 1 m², 1 µm de hauteur ; la durée, le pas de 0,1 s sur 225 s (4,4·10⁻⁴).
-
-**Critères, écrits avant.** (1) Manomètre : `h_g` à 10⁻⁴ m de 1,17 m (rapport 100) ; l'huile reste entière à droite (400 000 ml, exact) ;
-chaque liquide conservé à l'entier. (2) Vidange : l'huile intacte, au millilitre, tant que l'eau n'est pas épuisée ; l'eau épuisée à 0,5 %
-de 225,7 s (rapport 11). (3) Un seul liquide : les volumes de `step_liquids` à 2 ml de ceux de `step` à chaque pas de la vidange d'eau
-seule. (4) Refus : une table +Z, une composition qui ne somme pas.
+**Ce que la session fait.** Relu : S556 (la revue), S557 (l'invariant du pas linéaire ; l'instrument de S555 aux mauvais poids), S558 (le
+chemin coupé ; le témoin sans poids à 1,8 %), S559 (les liquides ; un commit parti après une anomalie du rituel), S560 (le débit par
+couches ; le lot rappelé). **ADR-242** : D1, une grandeur intégrale aux poids du schéma, éprouvée sur un invariant connu ; D2, le commit
+gardé par le code du rituel, qui sort en erreur (3) sur un lot dû ; L400, L401 ; METHODE ; BOUSSOLE ; index ; `outils/rituel.py`.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `step_liquids` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.7 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-242, METHODE, L400, L401, BOUSSOLE, index, le rituel).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — manomètre 1,170000 m (exact), vidange 225,7 s pour 225,65 (+0,021 %), un liquide à 0 ml, refus tenus. Suite 724.
-- **P3** — preuve LIQUIDES-DEBIT-S560 ; liste 5.7 ; index ; journal. **Pour la revue S561** : en S559, le rituel a rendu une anomalie
-  (le décompte de la liste) et le commit est parti quand même — la chaîne était en `;` après le rituel (corrigé au commit suivant).
-

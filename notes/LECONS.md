@@ -6629,3 +6629,15 @@ vérifié sa durée par la trace (ADR-240 D2).
 **S520, S555 — la clôture écrite en ligne.** Deux scripts de clôture passés en heredoc dans une seule commande : une apostrophe française
 (« l'énergie ») ferme la chaîne, l'interpréteur attend la fin, rien ne part — en S555, au moment où le contexte se résumait. Les plans, écrits
 en fichiers, n'ont jamais cassé (ADR-240 D1).
+
+## L400
+
+**S555 — l'énergie aux mauvais poids.** L'énergie cinétique de C09 sommait toutes les faces à `dx³` ; la face du couvercle n'en porte qu'une
+demie dans le produit scalaire du schéma. L'énergie « 8,4 % au-dessus de E₀ » était l'instrument — publié tel quel, A332 ouverte sur une
+fausse prémisse. S557 a dérivé l'invariant du code et l'a trouvé conservé ; S558, sur fond coupé, a mesuré 1,8 % d'erreur sans le poids des
+ouvertures (ADR-242 D1).
+
+## L401
+
+**S559 — le commit après l'anomalie.** `rituel … > fichier; tail …; git commit` : le rituel a rendu « --check = 1 » (le décompte de la liste)
+et le commit est parti. Le code de sortie était juste ; la chaîne l'ignorait. S560 a gardé son commit par le code (ADR-242 D2).

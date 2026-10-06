@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 22:17 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 22:18 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S561 — la seizième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S560 — le débit par couches (ADR-241 D4) ([journal](notes/JOURNAL.md))
 Session suivante : **S561 — la seizième revue de méthode** (S556–S560 ; ADR-222 D4) : frictions — l'instrument d'énergie de S555 non éprouvé sur un cas connu (le couvercle compté plein, relevé en S557 ; L375) ; le rituel à une anomalie suivi d'un commit (S559, la chaîne en « ; ») ; ce qui a tenu (les dérivations depuis le code avant la mesure, S557–S558 ; la constante de temps au plan, S560 ; les scripts en fichiers, S556–S560). Puis un point partiel (5.7 : le déversoir par couches, l'instantané ; ou un autre). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S560 : 5.7 avance (le débit par couches)
