@@ -23,12 +23,29 @@ pub enum Sommet {
     Jonction(usize),
 }
 
-/// Une conduite de `a` vers `b` (le sens positif du débit), de résistance `R` (s²/m⁵, finie et positive).
+/// S568 — la fuite d'un clapet fermé, m²/s : `Q = FUITE_CLAPET·Δh` ; elle garde la jacobienne inversible (0,1 ml par jour sous 1 m).
+pub const FUITE_CLAPET: f64 = 1e-12;
+
+/// **S568 — l'organe d'une conduite.**
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum Organe {
+    /// Une conduite nue.
+    #[default]
+    Aucun,
+    /// Un clapet : le débit de `a` vers `b` seulement ; fermé, la fuite [`FUITE_CLAPET`].
+    Clapet,
+    /// Une pompe centrifuge et son clapet, refoulant de `a` vers `b` : la loi de V (ADR-199 D3), `H(Q) = H₀·(1 − (Q/Q_max)²)`, soit
+    /// `h_a − h_b + H₀ = (R + H₀/Q_max²)·Q²`, `Q ≥ 0`. `H₀` en m, `Q_max` en m³/s, finis et positifs.
+    Pompe { h0_m: f64, qmax_m3s: f64 },
+}
+
+/// Une conduite de `a` vers `b` (le sens positif du débit), de résistance `R` (s²/m⁵, finie et positive), et son organe (S568).
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Conduite {
     pub a: Sommet,
     pub b: Sommet,
     pub resistance: f64,
+    pub organe: Organe,
 }
 
 /// Ce que la résolution a fait.
@@ -54,6 +71,20 @@ fn debit(dh: f64, r: f64) -> (f64, f64) {
     }
 }
 
+/// Le clapet : la loi quadratique dans le sens permis, la fuite à rebours.
+fn clapet(dh: f64, r: f64) -> (f64, f64) {
+    if dh > 0.0 { debit(dh, r) } else { (FUITE_CLAPET * dh, FUITE_CLAPET) }
+}
+
+/// Le débit d'une conduite et sa dérivée en `Δh = h_a − h_b`, son organe compris.
+fn debit_conduite(c: &Conduite, dh: f64) -> (f64, f64) {
+    match c.organe {
+        Organe::Aucun => debit(dh, c.resistance),
+        Organe::Clapet => clapet(dh, c.resistance),
+        Organe::Pompe { h0_m, qmax_m3s } => clapet(dh + h0_m, c.resistance + h0_m / (qmax_m3s * qmax_m3s)),
+    }
+}
+
 fn charge(s: Sommet, fixes: &[f64], h: &[f64]) -> f64 {
     match s {
         Sommet::Fixe(i) => fixes[i],
@@ -67,7 +98,7 @@ fn residus(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], h: &[f64], f
         *fj = -d;
     }
     for c in conduites {
-        let (q, _) = debit(charge(c.a, fixes, h) - charge(c.b, fixes, h), c.resistance);
+        let (q, _) = debit_conduite(c, charge(c.a, fixes, h) - charge(c.b, fixes, h));
         if let Sommet::Jonction(j) = c.b {
             f[j] += q;
         }
@@ -93,7 +124,12 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         Sommet::Fixe(i) => i < fixes.len(),
         Sommet::Jonction(j) => j < n,
     };
-    if conduites.iter().any(|c| !valide(c.a) || !valide(c.b) || !(c.resistance > 0.0) || !c.resistance.is_finite())
+    let organe_valide = |o: Organe| match o {
+        Organe::Pompe { h0_m, qmax_m3s } => h0_m > 0.0 && h0_m.is_finite() && qmax_m3s > 0.0 && qmax_m3s.is_finite(),
+        _ => true,
+    };
+    if conduites.iter().any(|c| !valide(c.a) || !valide(c.b) || !(c.resistance > 0.0) || !c.resistance.is_finite()
+        || !organe_valide(c.organe))
         || fixes.iter().chain(demandes).chain(charges.iter()).any(|x| !x.is_finite()) || !(tolerance_m3s > 0.0) {
         return Err(Error::Domain);
     }
@@ -137,7 +173,7 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         // La jacobienne.
         jac.fill(0.0);
         for c in conduites {
-            let (_, d) = debit(charge(c.a, fixes, charges) - charge(c.b, fixes, charges), c.resistance);
+            let (_, d) = debit_conduite(c, charge(c.a, fixes, charges) - charge(c.b, fixes, charges));
             for (s, signe) in [(c.b, 1.0), (c.a, -1.0)] {
                 let Sommet::Jonction(j) = s else { continue };
                 if let Sommet::Jonction(k) = c.a {
@@ -177,6 +213,11 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
             let s = (col + 1..n).fold(dx[col], |s, k| s - jac[col * n + k] * dx[k]);
             dx[col] = s / jac[col * n + col];
         }
+        // S568 : au plancher flottant, le pas de Newton tombe sous la résolution des charges — une conduite presque sans résistance
+        // amplifie l'ulp de la charge au-delà de la tolérance de continuité, qui ne s'atteint plus. Arrêt, le résidu publié tel quel.
+        if dx.iter().zip(charges.iter()).all(|(d, h)| d.abs() <= 4.0 * f64::EPSILON * h.abs().max(1.0)) {
+            break;
+        }
         // Le pas, amorti tant qu'il n'abaisse pas le résidu.
         let mut t = 1.0;
         loop {
@@ -196,7 +237,7 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         }
     }
     for (q, c) in debits.iter_mut().zip(conduites) {
-        *q = debit(charge(c.a, fixes, charges) - charge(c.b, fixes, charges), c.resistance).0;
+        *q = debit_conduite(c, charge(c.a, fixes, charges) - charge(c.b, fixes, charges)).0;
     }
     Ok(Rapport { iterations: it, residu_m3s: r })
 }

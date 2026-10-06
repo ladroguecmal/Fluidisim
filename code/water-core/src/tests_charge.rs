@@ -1,7 +1,7 @@
 //! S565 — la solution d'un réseau en charge contre deux références indépendantes, écrites au plan (bissection ; Hardy Cross).
 
 use super::*;
-use crate::hydro_network::charge::{resoudre, tampon, Conduite, Sommet};
+use crate::hydro_network::charge::{resoudre, tampon, Conduite, Organe, Sommet};
 
 const TOL: f64 = 1e-13;
 
@@ -10,9 +10,9 @@ const TOL: f64 = 1e-13;
 fn three_reservoirs_meet_at_the_head_of_the_bisection_s565() {
     let fixes = [100.0, 80.0, 50.0];
     let conduites = [
-        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0 },
-        Conduite { a: Sommet::Fixe(1), b: Sommet::Jonction(0), resistance: 3000.0 },
-        Conduite { a: Sommet::Fixe(2), b: Sommet::Jonction(0), resistance: 1500.0 },
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0, organe: Organe::Aucun },
+        Conduite { a: Sommet::Fixe(1), b: Sommet::Jonction(0), resistance: 3000.0, organe: Organe::Aucun },
+        Conduite { a: Sommet::Fixe(2), b: Sommet::Jonction(0), resistance: 1500.0, organe: Organe::Aucun },
     ];
     let (mut h, mut q, mut w) = ([75.0], [0.0; 3], vec![0.0; tampon(1)]);
     let rapport = resoudre(&fixes, &[0.0], &conduites, &mut h, &mut q, &mut w, TOL, 30).unwrap();
@@ -30,11 +30,11 @@ fn a_loop_matches_hardy_cross_s565() {
     let fixes = [60.0];
     let j = Sommet::Jonction;
     let conduites = [
-        Conduite { a: Sommet::Fixe(0), b: j(0), resistance: 500.0 },
-        Conduite { a: j(0), b: j(1), resistance: 1000.0 },
-        Conduite { a: j(1), b: j(2), resistance: 1500.0 },
-        Conduite { a: j(0), b: j(3), resistance: 1200.0 },
-        Conduite { a: j(3), b: j(2), resistance: 800.0 },
+        Conduite { a: Sommet::Fixe(0), b: j(0), resistance: 500.0, organe: Organe::Aucun },
+        Conduite { a: j(0), b: j(1), resistance: 1000.0, organe: Organe::Aucun },
+        Conduite { a: j(1), b: j(2), resistance: 1500.0, organe: Organe::Aucun },
+        Conduite { a: j(0), b: j(3), resistance: 1200.0, organe: Organe::Aucun },
+        Conduite { a: j(3), b: j(2), resistance: 800.0, organe: Organe::Aucun },
     ];
     let demandes = [0.0, 0.06, 0.08, 0.04];
     let (mut h, mut q, mut w) = ([60.0; 4], [0.0; 5], vec![0.0; tampon(4)]);
@@ -52,8 +52,8 @@ fn a_loop_matches_hardy_cross_s565() {
 /// (3) Les refus.
 #[test]
 fn an_isolated_junction_or_a_bad_pipe_is_refused_s565() {
-    let ok = Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 100.0 };
-    let ile = Conduite { a: Sommet::Jonction(1), b: Sommet::Jonction(2), resistance: 100.0 };
+    let ok = Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 100.0, organe: Organe::Aucun };
+    let ile = Conduite { a: Sommet::Jonction(1), b: Sommet::Jonction(2), resistance: 100.0, organe: Organe::Aucun };
     let (mut h, mut q, mut w) = ([0.0; 3], [0.0; 2], vec![0.0; tampon(3)]);
     assert_eq!(resoudre(&[10.0], &[0.0; 3], &[ok, ile], &mut h, &mut q, &mut w, TOL, 30).err(), Some(Error::Domain), "une île");
     let nulle = Conduite { resistance: 0.0, ..ok };
@@ -89,9 +89,9 @@ fn deux_cuves(pas: usize, robinet: f64) -> (Vec<(i64, i64)>, i64) {
     ];
     let raccords = [Raccord { noeud: 0, position_um: [500_000, 500_000, 0] }, Raccord { noeud: 1, position_um: [5_500_000, 500_000, 0] }];
     let conduites = [
-        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4 },
-        Conduite { a: Sommet::Jonction(0), b: Sommet::Jonction(1), resistance: 2e4 },
-        Conduite { a: Sommet::Jonction(1), b: Sommet::Fixe(1), resistance: 1e4 },
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Aucun },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Jonction(1), resistance: 2e4, organe: Organe::Aucun },
+        Conduite { a: Sommet::Jonction(1), b: Sommet::Fixe(1), resistance: 1e4, organe: Organe::Aucun },
     ];
     let (mut charges, mut debits, mut fixes, mut restes, mut w) = ([1.0; 2], [0.0; 3], [0.0; 2], [0i64; 2], vec![0.0; tampon(2)]);
     let mut sortie = 0i64;
@@ -139,7 +139,7 @@ fn a_tap_on_the_network_draws_exactly_its_demand_s567() {
     let shapes = Shapes::from_volumes(&formes).unwrap();
     let mut nodes = [HydroNode { volume_ml: 500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 }];
     let avant = nodes;
-    let conduites = [Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4 }];
+    let conduites = [Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Aucun }];
     let (mut charges, mut debits, mut fixes, mut restes, mut w, mut sortie) = ([0.0], [0.0], [0.0], [0i64], vec![0.0; tampon(1)], 0i64);
     let sec = [Raccord { noeud: 0, position_um: [500_000, 500_000, 1_900_000] }];
     assert_eq!(pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &sec, &[0.0], &conduites, &mut charges, &mut debits,
@@ -148,4 +148,67 @@ fn a_tap_on_the_network_draws_exactly_its_demand_s567() {
     assert_eq!(pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &ailleurs, &[0.0], &conduites, &mut charges,
         &mut debits, &mut fixes, &mut restes, &mut w, &mut sortie).err(), Some(Error::Capacity), "critère 4 : un nœud absent");
     assert_eq!((nodes, restes, sortie), (avant, [0], 0), "critère 4 : rien d'écrit");
+}
+
+// --- S568 — les pompes et les clapets. Références écrites au plan par son script.
+
+/// (1) Une pompe refoule d'un réservoir bas vers un haut par une jonction.
+#[test]
+fn a_pump_lifts_water_to_the_operating_point_s568() {
+    let conduites = [
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0, organe: Organe::Pompe { h0_m: 30.0, qmax_m3s: 0.05 } },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Fixe(1), resistance: 3000.0, organe: Organe::Aucun },
+    ];
+    let (mut h, mut q, mut w) = ([10.0], [0.0; 2], vec![0.0; tampon(1)]);
+    let rapport = resoudre(&[0.0, 20.0], &[0.0], &conduites, &mut h, &mut q, &mut w, TOL, 50).unwrap();
+    println!("S568 pompe : h_j = {:.9} m (21,764705882), Q = {:.9} m³/s (0,024253563), {rapport:?}", h[0], q[0]);
+    assert!((h[0] - 21.764705882).abs() < 1e-8, "critère 1 : la charge");
+    assert!((q[0] - 0.024253563).abs() < 1e-8 && (q[1] - q[0]).abs() < 1e-12, "critère 1 : le débit");
+}
+
+/// (2) Un clapet se ferme : la branche de 80 m ne laisse passer que vers son réservoir, et la jonction ne voit plus que 100 et 50 m.
+#[test]
+fn a_check_valve_closes_against_the_flow_s568() {
+    let conduites = [
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0, organe: Organe::Aucun },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Fixe(1), resistance: 3000.0, organe: Organe::Clapet },
+        Conduite { a: Sommet::Fixe(2), b: Sommet::Jonction(0), resistance: 1500.0, organe: Organe::Aucun },
+    ];
+    let (mut h, mut q, mut w) = ([75.0], [0.0; 3], vec![0.0; tampon(1)]);
+    let rapport = resoudre(&[100.0, 80.0, 50.0], &[0.0], &conduites, &mut h, &mut q, &mut w, TOL, 50).unwrap();
+    println!("S568 clapet : h_j = {:.9} m (71,428571429), débits {q:?}, {rapport:?}", h[0]);
+    assert!((h[0] - 71.428571429).abs() < 1e-8, "critère 2 : la charge");
+    assert!(q[1].abs() < 1e-10, "critère 2 : le clapet fermé ne laisse que sa fuite");
+}
+
+/// (3) Couplé : une pompe remplit la cuve haute jusqu'à son refoulement nul, puis rien ne revient.
+#[test]
+fn a_pump_fills_a_tank_until_shutoff_and_the_valve_holds_s568() {
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mut nodes = [
+        HydroNode { volume_ml: 1_500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 },
+        HydroNode { volume_ml: 200_000, capacity_ml: 2_000_000, origin_um: [5_000_000, 0, 0], shape: 0 },
+    ];
+    let raccords = [Raccord { noeud: 0, position_um: [500_000, 500_000, 0] }, Raccord { noeud: 1, position_um: [5_500_000, 500_000, 0] }];
+    let conduites = [
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Pompe { h0_m: 1.0, qmax_m3s: 0.01 } },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Fixe(1), resistance: 1e-6, organe: Organe::Aucun },
+    ];
+    let (mut charges, mut debits, mut fixes, mut restes, mut w) = ([1.0], [0.0; 2], [0.0; 2], [0i64; 2], vec![0.0; tampon(1)]);
+    let mut sortie = 0i64;
+    let mut haut_max = 0i64;
+    for pas in 0..4_300 {
+        pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &raccords, &[0.0], &conduites, &mut charges, &mut debits,
+            &mut fixes, &mut restes, &mut w, &mut sortie).unwrap();
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml + sortie, 1_700_000, "critère 3 : la masse");
+        if pas >= 2_200 {
+            assert!(nodes[1].volume_ml >= haut_max - 1, "critère 3 : rien ne revient (pas {pas})");
+        }
+        haut_max = haut_max.max(nodes[1].volume_ml);
+    }
+    let (bas, haut) = (nodes[0].volume_ml as f64 * 1e-6, nodes[1].volume_ml as f64 * 1e-6);
+    println!("S568 pompe couplée : basse {bas:.6} m (0,35), haute {haut:.6} m (1,35) ; sortie {sortie} ml");
+    assert!((bas - 0.35).abs() < 2e-4 && (haut - 1.35).abs() < 2e-4, "critère 3 : l'équilibre au refoulement nul");
 }
