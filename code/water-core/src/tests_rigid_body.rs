@@ -1406,3 +1406,97 @@ fn below_the_threshold_there_is_no_slam_c20_s512() {
     }
     assert!(entree, "la coque est entrée dans l'eau");
 }
+
+
+/// **S513, critère 1 — sans courant, l'enveloppée au bit.** Sur une houle de B (5 cm, 6 s), en quarante points et dix instants : surface,
+/// pente, vitesse et accélération de `CurrentWater` (courant nul) égales au bit à celles de `BackgroundWater`.
+#[test]
+fn a_zero_current_is_the_inner_water_s513() {
+    let b = houle(0.05, 6.);
+    let nul = Current { surface: [0.; 2], bottom: [0.; 2], decay: 10. };
+    for n in 0..10u64 {
+        let w = BackgroundWater { background: &b, time: SimTime(n * 370_000) };
+        let c = CurrentWater { inner: &w, current: nul, time: n as f64 * 0.37 };
+        for i in 0..40 {
+            let (x, y) = (i as f64 * 1.3 - 20., (i as f64 * 0.7).sin() * 5.);
+            assert_eq!(c.surface(x, y).to_bits(), w.surface(x, y).to_bits());
+            assert_eq!(c.slope(x, y).map(f64::to_bits), w.slope(x, y).map(f64::to_bits));
+            assert_eq!(c.velocity([x, y, -0.3]).map(f64::to_bits), w.velocity([x, y, -0.3]).map(f64::to_bits));
+            assert_eq!(c.acceleration([x, y, 0.]).map(f64::to_bits), w.acceleration([x, y, 0.]).map(f64::to_bits));
+        }
+    }
+}
+
+/// **S513, critères 2 et 3 — l'effet Doppler et le profil.** Une houle de 6 s vers +x sous un courant de surface de 1 m/s dans son sens :
+/// au point fixe, la période de rencontre vaut `λ/(c + U)` à 0,5 % (mesurée sur les passages à zéro de dix périodes) ; la vitesse de l'eau
+/// à 2 m sous la surface porte exactement `u_fond + (u_surface − u_fond)·exp(z/D)`.
+#[test]
+fn a_current_carries_the_waves_and_has_a_profile_s513() {
+    let b = houle(0.05, 6.);
+    let comp = b.components()[0];
+    let k = comp.k_turns_per_m as f64 * core::f64::consts::TAU;
+    let omega = comp.freq_q32 as f64 / 4_294_967_296. * core::f64::consts::TAU;
+    let courant = Current { surface: [1., 0.], bottom: [0.2, 0.], decay: 5. };
+    let attendue = core::f64::consts::TAU / k / (omega / k + courant.surface[0]);
+    let eta = |t: f64| {
+        let w = BackgroundWater { background: &b, time: SimTime((t * 1e6).round() as u64) };
+        CurrentWater { inner: &w, current: courant, time: (t * 1e6).round() * 1e-6 }.surface(0., 0.)
+    };
+    let mut passages = Vec::new();
+    let (mut t, h) = (0f64, 0.001);
+    let mut avant = eta(0.);
+    while passages.len() < 11 && t < 120. {
+        t += h;
+        let e = eta(t);
+        if avant < 0. && e >= 0. {
+            passages.push(t - h + h * avant / (avant - e));
+        }
+        avant = e;
+    }
+    let mesuree = (passages[10] - passages[0]) / 10.;
+    // Le profil : à 2 m sous la surface.
+    let w = BackgroundWater { background: &b, time: SimTime(1_000_000) };
+    let c = CurrentWater { inner: &w, current: courant, time: 1. };
+    let (x, y) = (3., 1.);
+    let eta1 = c.surface(x, y);
+    let u = c.velocity([x, y, eta1 - 2.]);
+    let u0 = w.velocity([x - 1., y, eta1 - 2.]);
+    let profil = 0.2 + 0.8 * (-2f64 / 5.).exp();
+    println!(
+        "S513 : période de rencontre {mesuree:.5} s (attendue λ/(c + U) = {attendue:.5}, sans courant {:.5}) ; courant à 2 m {:.6} m/s (profil {profil:.6})",
+        core::f64::consts::TAU / omega,
+        u[0] - u0[0]
+    );
+    assert!((mesuree / attendue - 1.).abs() <= 0.005, "critère 2 : {mesuree} contre {attendue}");
+    assert!((u[0] - u0[0] - profil).abs() <= 1e-12, "critère 3 : {} contre {profil}", u[0] - u0[0]);
+}
+
+/// **S513, critère 4 — la dérive dans le courant.** Un pavé de 0,5 × 0,5 × 0,2 m **neutre et entièrement immergé** (traînée `C_d` = 1 par
+/// point) au repos en eau calme sous un courant uniforme de 1 m/s : sa vitesse relative suit `w(t) = w₀/(1 + k·w₀·t)`,
+/// `k = ½ρ·C_d·Σ(aire·immersion)/m` (calculé sur son proxy), à 1 % sur 3 s. **Manqué d'abord** sur la bouée flottante (17 %) : la traînée
+/// s'applique sous son centre de gravité et la fait tanguer, et le tangage module la traînée — un couplage réel que l'analytique de
+/// translation pure n'a pas ; le pavé neutre immergé, traîné symétriquement, n'a aucun couple.
+#[test]
+fn a_dragged_body_drifts_with_the_current_s513() {
+    let mut c = RigidBody::cuboid([0.5, 0.5, 0.2], MER.rho, [0., 0., -0.5], [4, 4, 4]);
+    c.drag = 1.;
+    let calme = CalmWater { level: 0. };
+    let courant = Current { surface: [1., 0.], bottom: [1., 0.], decay: 5. };
+    let mut aire = 0.;
+    for p in &c.proxy {
+        let x = add(c.position, rotate(c.orientation, p.body));
+        aire += p.area * ((0. - (x[2] - 0.5 * p.thickness)) / p.thickness).clamp(0., 1.);
+    }
+    let k = 0.5 * MER.rho * 1. * aire / c.mass;
+    let dt = 0.001;
+    let mut pire = 0f64;
+    for n in 1..=3000 {
+        let eau = CurrentWater { inner: &calme, current: courant, time: n as f64 * dt };
+        c.step(dt, &eau, MER);
+        let t = n as f64 * dt;
+        let attendue = 1. / (1. + k * t);
+        pire = pire.max(((1. - c.velocity[0]) - attendue).abs() / attendue);
+    }
+    println!("S513 : k = {k:.4} m⁻¹ ; dérive à 3 s {:.5} m/s (attendue {:.5}) ; écart au pire {:.3} %", c.velocity[0], 1. - 1. / (1. + 3. * k), 100. * pire);
+    assert!(pire <= 0.01, "critère 4 : {pire}");
+}

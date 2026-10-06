@@ -406,3 +406,12 @@ entraînée d'une même quantité de mouvement), un événement autoritaire. **M
 corps lourd ; la même impulsion à 2·10⁻¹⁶ près sur vingt phases de tick, quand l'échantillonnage au tick disperse de 5,3 %. Un premier
 manqué (les pas symplectiques en l'air faisaient manquer le passage), localisé et réparé. **6.8 validée — 10 points sur 120.** Maillons
 **0**. Suivant : un point partiel proche de son périmètre.
+
+## S513 — 2026-10-06 — le courant derrière la requête de l'eau
+
+**Entrée.** En autonomie ; 6.2 attendait le courant, qui n'existait nulle part (2.6 absente, conçue par ADR-011). **Fait**
+([preuve](../docs/validation/COURANT-S513.md)) : `Current` (C0, le vecteur de surface ; C2, le profil vertical) et `CurrentWater`, qui
+enveloppe B ou B + W — les vagues advectées par le courant, la vitesse augmentée du profil. **Mesuré** : au bit sans courant ; la période de
+rencontre exacte (`λ/(c + U)`) ; le profil exact ; un corps traîné qui dérive à 0,37 % de l'analytique — après une bouée flottante qui
+tanguait sous sa traînée (17 %), un corps d'essai mal choisi. **2.6 partielle, 6.2 n'attend plus que la turbulence.** Lot des registres.
+Maillons **0**. Suivant : un point partiel proche de son périmètre.

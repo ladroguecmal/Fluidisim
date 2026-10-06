@@ -318,8 +318,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **9 points validés sur 120**, 68 partiels,
-43 absents (S510 ; 5.3 en S489, 6.5 en S493, 6.3 en S497, 6.1 en S502, 6.4 en S509, 9.5 en S510) — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378), 8.4 (S380), 4.3 (S386), 4.16 (S393), 4.9 (S396), 9.2 (S401), 9.3 (S405), 4.10 (S408) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **10 points validés sur 120**, 69 partiels,
+41 absents (S513 ; 5.3 en S489, 6.5 en S493, 6.3 en S497, 6.1 en S502, 6.4 en S509, 9.5 en S510, 6.8 en S512) — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378), 8.4 (S380), 4.3 (S386), 4.16 (S393), 4.9 (S396), 9.2 (S401), 9.3 (S405), 4.10 (S408) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -371,6 +371,8 @@ liberté, mesuré par δ) ; 6.4 avancée (un solide immergé qui bouge sur la ca
 dans la vitesse gouvernante, ADR-229) ; A328 ouverte (la convergence en `dt` près d'une coque mobile) ; la cinquième revue (ADR-230).
 **S507–S510** : A328 réattribuée (l'ordre 1 en temps) ; **6.4 validée** (le recoupage dans la boîte du solide, la carte ne recevant que ce
 qui change : 0,82 ms par pas) ; **9.5 validée** (le consommateur des impacts prédits, confirmés ou rejetés).
+**S511–S513** : la sixième revue (ADR-231) ; **6.8 validée** (l'impulsion d'entrée dans l'eau, C20) ; 2.6 partielle et 6.2 avancée (le
+courant C0 et C2 derrière la requête de l'eau).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

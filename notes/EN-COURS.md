@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S513 — **en cours**. En autonomie, **2.6 (niveaux C0 et C2 d'ADR-011) et 6.2, le courant** : 6.2 dit « Manquent le courant, la
+Session : S513 — **terminée**. En autonomie, **2.6 (niveaux C0 et C2 d'ADR-011) et 6.2, le courant** : 6.2 dit « Manquent le courant, la
 turbulence » ; le courant n'existe nulle part dans l'eau (2.6, absente, conçue par ADR-011). Et le lot des registres (dû).
 
 **Ce que la session fait.** `CurrentWater` : une requête qui enveloppe une autre (B, ou B + W) et lui ajoute un courant C0 (vecteur de
@@ -81,7 +81,11 @@ l'analytique. 2.6 passe à partiel ; 6.2 garde la turbulence pour seul manque.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `CurrentWater` ; essais (1)–(4).
-- [ ] **P3** — preuve ; liste 2.6 et 6.2 ; lot des registres ; rituel.
+- [x] **P2** — `CurrentWater` ; essais (1)–(4).
+- [x] **P3** — preuve ; liste 2.6 et 6.2 ; lot des registres ; rituel.
 
 ### Notes de reprise
+- **P2** — `Current`, `CurrentWater`. (1) au bit ; (2) 5,42129 s exactement ; (3) profil exact ; (4) **manqué d'abord** sur la bouée flottante
+  (17 % : la traînée sous le centre de gravité la fait tanguer) → pavé neutre immergé : 0,37 %. 675 essais.
+- **P3** — preuve COURANT-S513 ; listes 2.6 (partiel) et 6.2 ; lot : feuille de route (S511–S513, 10 / 69 / 41), index ; journal.
+

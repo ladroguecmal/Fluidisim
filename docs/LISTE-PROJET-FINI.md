@@ -111,8 +111,10 @@ pas recopiée ici (L137).
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.
-- [ ] **2.6 Courants macroscopiques à niveau de détail propre**, du vecteur au champ 3D — *absent*,
-  conçu (ADR-011).
+- [ ] **2.6 Courants macroscopiques à niveau de détail propre**, du vecteur au champ 3D — *partiel* depuis S513 (conçu par ADR-011) : les
+  niveaux **C0** (le vecteur de surface) et **C2** (le profil vertical) derrière la requête de l'eau (`CurrentWater`) — les vagues advectées
+  (la période de rencontre exacte, `λ/(c + U)`), le profil exact, un corps traîné qui dérive à 0,4 % de l'analytique
+  ([preuve](validation/COURANT-S513.md)). Manquent C1 (le champ 2D régional précalculé), C3 (le champ local de δ), les rivières, les canaux.
 - [ ] **2.7 Bathymétrie** : hauts-fonds, effet sur les vagues avant la zone physique — *partiel* depuis S362 : la
   **référence** linéaire dans le cœur — profondeur finie, levée, réfraction de Snell sur isobathes droites, phase
   intégrée, profondeur de déferlement (McCowan) —, tenue contre Fenton–McKee et la levée minimale des manuels
@@ -423,7 +425,8 @@ pas recopiée ici (L137).
   impacts confirmés composés par la composition autoritaire derrière la requête du corps (`MixedWater`) ; une bouée pilonne à
   0,81 % de l'oscillateur forcé par la surface sous elle et dérive avec l'anneau au second ordre ([preuve](validation/FORCES-W-S494.md)) ;
   **S495** : le **sillage** d'un objet en marche — une bouée dans le bras de Kelvin suit l'eau à 0,85 %
-  ([preuve](validation/SILLAGE-CORPS-S495.md)) : W entier derrière la requête du corps. Manquent le courant, la turbulence.
+  ([preuve](validation/SILLAGE-CORPS-S495.md)) : W entier derrière la requête du corps ; **S513** : le **courant** (2.6, C0 et C2) — un corps
+  traîné dérive avec lui à 0,4 % de l'analytique ([preuve](validation/COURANT-S513.md)). Manque la turbulence.
 - [x] **6.3 Un objet en mouvement produit son sillage** — *validé* (S497) : mouvement et charge prescrits
   vers la source de pression (ADR-103) ; **le corps du jeu en marche émet sa source** (`RigidBody::wake_leg`, tronçons visés sur sa
   position prédite, charge `m·g`) — une coque menée sur un cercle à 3 m/s, son sillage à 1,20 % de la trajectoire déclarée, en `Δ²`
@@ -725,7 +728,7 @@ pas recopiée ici (L137).
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
-| 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
+| 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 2 | 5 | 5 |
@@ -737,7 +740,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **68** | **43** |
+| **total** | **121** | **10** | **69** | **42** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

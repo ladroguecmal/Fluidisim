@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 09:40 +02:00
+JETON            : libre
+Battement        : 2026-10-06 09:49 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S513 — 2.6 et 6.2, le courant ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S512 — 6.8 validée : l'impulsion d'entrée dans l'eau ([journal](notes/JOURNAL.md)). Avant : S511 (la sixième revue de méthode)
-Session suivante : **S513 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 le courant, 6.7 l'acteur poussé par l'eau, 4.13, 5.4…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228), enchaînements arrêtés au premier échec (ADR-231). Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
-Maillons        : 0 — S512 : 6.8 validée (10 sur 120)
-Registres       : dernier lot S510 (ADR-213 D3) ; le prochain au plus tard en S513
+Session en cours : aucune
+Dernière session : S513 — le courant derrière la requête de l'eau ([journal](notes/JOURNAL.md)). Avant : S512 (6.8 validée : l'impulsion d'entrée dans l'eau)
+Session suivante : **S514 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 la turbulence, 6.7 l'acteur poussé par l'eau, 4.13, 5.4…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites et des couplages non jugés (ADR-228), enchaînements arrêtés au premier échec (ADR-231). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
+Maillons        : 0 — S513 : 2.6 partielle (le courant C0 et C2), 6.2 avancée
+Registres       : dernier lot S513 (ADR-213 D3) ; le prochain au plus tard en S516
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

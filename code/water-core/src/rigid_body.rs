@@ -148,6 +148,82 @@ impl<const N: usize> WaterQuery for MixedWater<'_, '_, N> {
     }
 }
 
+/// **S513 — un courant macroscopique**, niveaux C0 et C2 d'[ADR-011](../../../docs/adr/ADR-011-courants-et-ecoulements-diriges.md) : le
+/// vecteur de surface (C0, m/s), le vecteur au fond et l'échelle de décroissance `D` (m) du profil vertical
+/// `u(z) = u_fond + (u_surface − u_fond)·exp(z/D)`, `z ≤ 0` la profondeur sous la surface (C2). En lecture seule pour les solveurs
+/// (ADR-011 §2) : une donnée d'auteur ou de l'hôte, jamais modifiée par une perturbation.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Current {
+    pub surface: [f64; 2],
+    pub bottom: [f64; 2],
+    pub decay: f64,
+}
+
+impl Current {
+    /// Le courant à la profondeur `z` sous la surface (`z ≤ 0` ; au-dessus, celui de la surface).
+    pub fn at_depth(&self, z: f64) -> [f64; 2] {
+        if z >= 0. {
+            return self.surface;
+        }
+        let f = (z / self.decay).exp();
+        [self.bottom[0] + (self.surface[0] - self.bottom[0]) * f, self.bottom[1] + (self.surface[1] - self.bottom[1]) * f]
+    }
+
+    fn is_zero(&self) -> bool {
+        self.surface == [0.; 2] && self.bottom == [0.; 2]
+    }
+}
+
+/// **S513 — l'eau d'une requête sous un courant** (2.6, C0 et C2) : la requête enveloppée (B, ou B + W) vue dans un courant uniforme — le
+/// champ de vagues **advecté** par le courant de surface, `η(x, t) = η₀(x − U·t, t)` (Galilée : pour un courant uniforme, c'est l'effet
+/// Doppler, `ω = ω₀ + k·U`), et la vitesse de l'eau augmentée du profil C2 à la profondeur du point. `time` (s) est l'instant de la
+/// requête enveloppée. Sans courant, l'enveloppée telle quelle, au bit. Le gradient de vitesse d'un courant uniforme est nul :
+/// l'accélération est celle de l'enveloppée.
+pub struct CurrentWater<'a> {
+    pub inner: &'a dyn WaterQuery,
+    pub current: Current,
+    pub time: f64,
+}
+
+impl CurrentWater<'_> {
+    fn shift(&self, x: f64, y: f64) -> (f64, f64) {
+        (x - self.current.surface[0] * self.time, y - self.current.surface[1] * self.time)
+    }
+}
+
+impl WaterQuery for CurrentWater<'_> {
+    fn surface(&self, x: f64, y: f64) -> f64 {
+        if self.current.is_zero() {
+            return self.inner.surface(x, y);
+        }
+        let (a, b) = self.shift(x, y);
+        self.inner.surface(a, b)
+    }
+    fn slope(&self, x: f64, y: f64) -> [f64; 2] {
+        if self.current.is_zero() {
+            return self.inner.slope(x, y);
+        }
+        let (a, b) = self.shift(x, y);
+        self.inner.slope(a, b)
+    }
+    fn velocity(&self, p: [f64; 3]) -> [f64; 3] {
+        if self.current.is_zero() {
+            return self.inner.velocity(p);
+        }
+        let (a, b) = self.shift(p[0], p[1]);
+        let u = self.inner.velocity([a, b, p[2]]);
+        let c = self.current.at_depth(p[2] - self.inner.surface(a, b));
+        [u[0] + c[0], u[1] + c[1], u[2]]
+    }
+    fn acceleration(&self, p: [f64; 3]) -> [f64; 3] {
+        if self.current.is_zero() {
+            return self.inner.acceleration(p);
+        }
+        let (a, b) = self.shift(p[0], p[1]);
+        self.inner.acceleration([a, b, p[2]])
+    }
+}
+
 /// Un point du proxy de flottabilité, dans le repère du corps : position par rapport au centre de masse,
 /// volume représenté, épaisseur sur laquelle son immersion passe de 0 à 1, aire qu'il oppose à la traînée.
 #[derive(Clone, Copy, Debug, PartialEq)]
