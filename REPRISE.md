@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 04:30 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 04:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S501 — la quatrième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S500 — la poussée du proxy au centre de la part immergée ([journal](notes/JOURNAL.md)). Avant : S499 (B6 : combien de points pour le proxy de flottabilité)
 Session suivante : **S501 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S497–S500 — dont une poussée fausse qui stabilisait à tort une bouée d'essai (S494–S500 : une conclusion publiée sur un instrument qui compensait) et un estimateur bruité de |G| refait sans toucher au seuil. **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
 Maillons        : 0 — S500 : la poussée au centre de la part immergée (6.1 avancée)

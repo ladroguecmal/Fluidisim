@@ -62,29 +62,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S500 — **terminée**. En autonomie, **6.1 — pousser au centre de la part immergée** : S499 a montré que tout le surcoût des
-couches du proxy vient de la couche partielle, qui pousse en son milieu (`z_F` faux de `(1 − f)·f·e²/(2d)`).
+Session : S501 — **en cours**. En autonomie, **la quatrième revue de méthode** (ADR-222 D4) : les frictions de S497–S500.
 
-**Ce que la session fait.** Dans `RigidBody::forces`, la poussée d'un point partiellement immergé s'applique au centre de sa part immergée
-— son milieu abaissé de `(1 − f)·e/2` le long de l'axe du corps ; les forces (et donc la translation) ne changent pas, le moment seul.
-ADR-227. B6 refait avec ce modèle.
+**Ce que la session fait.** Relire journaux et notes de S497–S500 ; pour chaque friction, son coût et sa suite ; un ADR ; METHODE et LECONS
+pour les protections nouvelles seulement ; la boussole.
 
-**Ordre de grandeur, écrit avant.** Sur la coque de la porte D (16 × 8 × 4 points, `e` = 0,25 m, tirant 0,49 m) : l'erreur de `KB` qui
-disparaît, au plus `e²/(8d)` ≈ 1,6 cm, contre `GM` de tangage ≈ 2,7 m — 0,6 % : les essais du corps (S331–S499) doivent tenir à leurs
-tolérances ; le pilonnement droit ne change pas au bit (moment nul par symétrie).
-
-**Critères, écrits avant.** (1) à l'équilibre droit, `z_F = KB − KG` à 10⁻⁹ pour toute grille ; (2) B6 refait : la prédiction
-`BM·(1 − 1/n²) + z_F` à 10⁻³ ; les plus petits proxys sans compensation = avec, attendus 7 × 10 × 1 (navire), 7 × 7 × 1 (barque, caisse) ;
-(3) toute la suite du cœur tient ; les valeurs publiées des essais du corps qui changent, relevées.
+**Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
+table ; `etat_projet --check` à zéro.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la poussée au centre de la part immergée ; B6 refait ; la suite.
-- [x] **P3** — ADR-227 ; preuve ; liste 6.1 ; rituel.
+- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
 
 ### Notes de reprise
-- **P2** — (1) ≤ 2,4·10⁻¹⁴ m ; (2) 70 / 49 / 49 points, prédiction à 8,6·10⁻⁸ ; (3) une régression : la bouée haute de S494 (GM vrai
-  +2,2 mm, proxy −1,2 mm) roule → bouées plates (ADR-227 D3) ; à 1 kJ, l'écart horizontal de S494 tombe de 102 à 35 % (une part était le
-  roulis). 660 essais ; l'essai long du sillage relancé.
-- **P3** — ADR-227 ; preuve POUSSEE-S500 ; liste 6.1 ; index ; lot : feuille de route (S498–S500) ; l'essai long du sillage inchangé (0,85 %) ; journal.
