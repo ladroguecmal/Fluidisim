@@ -62,35 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S528 — **terminée**. En autonomie, **3.1 — les anneaux d'impact en eau peu profonde** (K2-12) : `RadialImpact` refuse le
-régime peu profond (`Error::Regime`, profondeur ≤ π/k_min) ; W porte la profondeur uniforme depuis S522.
+Session : S529 — **en cours**. En autonomie, **A330 localisée avant tout remède** (ADR-226 D1) : le sillage de la coque dans δ est 3,5 fois
+moins ample que la théorie d'une pression `ρ g d` sur son empreinte (S520). Deux causes possibles : δ sous-résolu près de la coque
+(A317 : ± 43–49 % à 25 cm) ou un modèle de référence inadapté (une pression n'est pas un corps qui perce la surface). Une convergence en
+maille les sépare.
 
-**Ce que la session fait.** `RadialImpact::new_in_depth(événement, milieu, domaine)` : le nombre d'onde effectif `κ = k tanh(kh)` de
-S522 dans la pulsation (`ω² = g κ`), le potentiel (`η_t / κ`) et la vitesse horizontale (`k/κ` fois celle de l'eau profonde) ; pas de refus
-de régime ; la borne de pente resserrée (`RHO_DISPERSION`, mesurée en eau profonde) n'y resserre pas (`slope_max_at` = `slope_max`) — la
-borne de couronne, indépendante de la dispersion, reste. `new` inchangé. **La référence** : le champ initial de W (t = 0) sur une grille,
-propagé par FFT avec la dispersion exacte `cos(√(g k tanh kh) t)` (`outils/reference_anneaux.py`), indépendante de la somme de Bessel.
+**Ce que la session fait.** Le banc du sillage (`--lineaire-sillage`) reçoit `SILLAGE_DX`, `SILLAGE_NZ`, `DT_US` ; trois mailles — 50, 25,
+12,5 cm — sur 56 × 40 × 3 m (53 760 / 430 080 / 3 440 640 mailles : sous la limite de 4,19 M des noyaux de mailles), 15 s à 3 m/s, le pas
+de temps proportionnel à la maille (20 / 10 / 5 ms). La surface exportée ; `reference_sillage.py convergence` : les écarts entre mailles
+sur un réseau commun (tous les 50 cm, de 4 à 22 m derrière la coque, `|y|` ≤ 12 m), et le profil des rayons de 10 à 20 m.
 
-**Ordre de grandeur, calculé.** λ = 4 m (k₀ = 1,57, nœuds de 0,785 à 3,14 rad/m), 1 m de fond : `tanh(k₀h)` = 0,917, la pulsation 4,2 %
-sous l'eau profonde ; à 10 s, le déphasage au pic vaut **1.66 rad** — l'eau profonde est visiblement fausse. Domaine 40 m, 10 s.
+**Ordre de grandeur, calculé.** λ₀ = 5,76 m (11,5 / 23 / 46 mailles par longueur d'onde) ; `kh` = 3,3 par 3 m de fond (profond) ; la coque
+au bout de 15 s à 46,6 m, l'éponge à 53 m ; les rayons à 35° et 24 m passent à 13,8 m de l'axe (l'éponge à 17 m).
 
-**Critères, écrits avant.** (1) `new` au bit (suite) ; `new_in_depth` avec `2 k_min h` > 32 rend les échantillons de `new` au bit. (2) W
-par 1 m de fond contre la référence FFT (convergée sur trois grilles) : écart quadratique ≤ 2 % sur le disque de 40 m à 5 et 10 s ; l'eau
-profonde (le même champ initial) à plus de 5 fois cet écart. (3) La pente réelle de W à 0–10 s sous `slope_max_at` et `slope_max_beyond`
-(la sûreté des bornes en eau peu profonde).
+**Critères, écrits avant.** (1) **La convergence** : `‖η₂₅ − η₁₂,₅‖ < ‖η₅₀ − η₂₅‖`, d'ordre observé `log₂` du rapport ≥ 0,5. (2) **L'attribution,
+règle déclarée avant** : si le maximum du profil des rayons à 12,5 cm dépasse celui à 25 cm de plus de 30 %, A330 revient à la résolution de
+δ (A317) ; à moins de 10 %, δ est convergé et l'écart à la théorie revient au modèle de référence ; entre les deux, non tranché.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le cœur ; (1).
-- [x] **P3** — la référence, W ; (2), (3).
-- [x] **P4** — preuve ; liste 3.1 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — les paramètres du banc, trois calculs ; (1), (2).
+- [ ] **P3** — preuve ; A330 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `RadialImpact::new_in_depth` (`κ`, potentiel, vitesse horizontale ; pas de resserrement) ; essais `s528` : au bit de `new`
-  à 30 m (N 128 : 64 modes refusés par la résolution à 40 m et 10 s), le régime peu profond accepté ; la pente réelle au plus 0,990 de
-  `slope_max_at` par 1 m de fond (le critère 3, en avance). Suite verte.
-- **P3 fini** — le champ initial limité à ± 80 m (la portée de la somme à 128 modes ; 280 m refusé par la résolution) ; W contre la FFT
-  exacte par 1 m de fond : **0,44 %** à 5 et 10 s sur les trois grilles ; l'eau profonde 51 % et 94 % → (2) tenu.
-- **P4** — preuve ANNEAUX-PROFONDEUR-S528 ; liste 3.1 ; index ; journal.
-
