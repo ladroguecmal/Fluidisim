@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S507 — **en cours**. En autonomie, **A328** — le δ 3D à coque mobile converge lentement en `dt` près de la coque (S505). Et le lot
+Session : S507 — **terminée**. En autonomie, **A328** — le δ 3D à coque mobile converge lentement en `dt` près de la coque (S505). Et le lot
 des registres, dû en S506.
 
 **Ce que la session fait.** Localiser avant de remédier (ADR-226 D1) : la coque en translation sous-critique (0,5 et 2 m/s, départ en
@@ -82,7 +82,12 @@ fixe, de résolution : A317) — levée, réécrite ; sinon, la suite : éteindr
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les trois normes, quatre pas, deux vitesses (calcul détaché).
-- [ ] **P3** — verdict sur A328 ; preuve ; lot des registres ; rituel.
+- [x] **P2** — les trois normes, quatre pas, deux vitesses (calcul détaché).
+- [x] **P3** — verdict sur A328 ; preuve ; lot des registres ; rituel.
 
 ### Notes de reprise
+- **P2** — ordres 1,1 à 1,6 aux deux vitesses, trois normes ; `MILIEU` sans effet d'ordre ; témoin `BOSSE` 0,4 / 2 / 5 / 11 % (ordre 1,2 à
+  2,1). Impasses : une variable préfixée dans le shell ne passe pas au calcul détaché (`calcul.py lancer nom VAR=val -- …`) ; une édition
+  ancrée sur un texte qui n'était pas celui du fichier (rien d'écrit : les ancres d'abord).
+- **P3** — A328 levée, réattribuée ; preuve A328-S507 ; liste 6.4 ; index ; lot : feuille de route (S504–S506) ; journal.
+

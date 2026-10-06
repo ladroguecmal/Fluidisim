@@ -75,3 +75,11 @@ for nd in (8, 12, 16):
 | `20261006-075506-c23-localise-5` | S505 | c23-localise-5 | `code/target/release/examples/c23_coque.exe localise 5` | terminé, 2026-10-06 07:56 |
 | `20261006-075709-c23-souscritique` | S505 | c23-souscritique | `code/target/release/examples/c23_coque.exe 2 0.0625,0.125,0.25,0.5,1` | terminé, 2026-10-06 07:57 |
 | `20261006-075710-c23-gouvernant-souscritique` | S505 | c23-gouvernant-souscritique | `code/target/release/examples/c23_coque.exe gouvernant 0.5,1,2,3` | terminé, 2026-10-06 07:58 |
+| `20261006-081101-a328-0.5` | S507 | a328-0.5 | `code/target/release/examples/c23_coque.exe localise 0.5` | terminé, 2026-10-06 08:12 |
+| `20261006-081102-a328-2` | S507 | a328-2 | `code/target/release/examples/c23_coque.exe localise 2` | terminé, 2026-10-06 08:12 |
+| `20261006-081300-a328-milieu-0.5` | S507 | a328-milieu-0.5 | `code/target/release/examples/c23_coque.exe localise 0.5` | terminé, 2026-10-06 08:14 |
+| `20261006-081300-a328-milieu-2` | S507 | a328-milieu-2 | `code/target/release/examples/c23_coque.exe localise 2` | terminé, 2026-10-06 08:14 |
+| `20261006-081311-a328-milieu2-0.5` | S507 | a328-milieu2-0.5 | `MILIEU=1 code/target/release/examples/c23_coque.exe localise 0.5` | terminé, 2026-10-06 08:14 |
+| `20261006-081312-a328-milieu2-2` | S507 | a328-milieu2-2 | `MILIEU=1 code/target/release/examples/c23_coque.exe localise 2` | terminé, 2026-10-06 08:14 |
+| `20261006-081538-a328-bosse` | S507 | a328-bosse | `BOSSE=1 code/target/release/examples/c23_coque.exe localise 0` | terminé, 2026-10-06 08:15 |
+| `20261006-081612-a328-bosse2` | S507 | a328-bosse2 | `BOSSE=1 code/target/release/examples/c23_coque.exe localise 0` | terminé, 2026-10-06 08:17 |

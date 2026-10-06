@@ -5,7 +5,7 @@
 suites datées ; l'état est lu par mots sur la dernière suite qui tranche (voir l'outil). Les entrées plus anciennes, au tableau
 général du registre, ne sont pas lues ici.
 
-**43 entrées lues — 25 ouvertes, 18 closes.** Sévérité : 1 = refonte d'architecture si découvert
+**43 entrées lues — 24 ouvertes, 19 closes.** Sévérité : 1 = refonte d'architecture si découvert
 tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 
 ## Ouvertes
@@ -35,7 +35,6 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A319 | 2 | S351 | « Rétrécir ou détruire un domaine perturbatif est visuellement gratuit » n'a jamais été mesuré | — |
 | A323 | 2 | S409 | Au pas long, la cuve fermée gagne de l'énergie | — |
 | A325 | 2 | S485 | Les parois d'APIC ne sont pas des plans de symétrie pour l'écoulement qui les longe | — |
-| A328 | 2 | S505 | Le δ 3D linéaire à coque mobile converge lentement en `dt` près de la coque | — |
 | A320 | 3 | S369 | Sous une houle raide, une perturbation de δ croît | S443–S445 : la bascule des défauts (S443) fait du mode relatif la production ; A320 l'y accompagne, plafonnée (ADR-213 D2), sa limite écrite (MER-S369 §9–11) ; rien en … |
 
 ## Closes
@@ -60,3 +59,4 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A324 | 3 | S435 | S436 | En mode relatif, la surface de B qui franchit un centre de maille amplifie δ |
 | A326 | 2 | S485 | S487 | La carte ne lance pas plus de 65 535 groupes par passe |
 | A327 | 2 | S490 | S492 | Un mur de décor aligné sur la grille fait échouer la projection linéaire de δ |
+| A328 | 2 | S505 | S507 | Le δ 3D linéaire à coque mobile converge lentement en `dt` près de la coque |

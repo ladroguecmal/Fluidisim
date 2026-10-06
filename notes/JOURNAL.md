@@ -357,3 +357,11 @@ en `dt` près de la coque). Maillons **0**. Suivant : **S506, la revue de métho
 une protection : une référence numérique s'éprouve convergée sur trois points avant qu'on juge contre elle (S505 : un départ impulsif, puis
 un régime critique, jugés comme des vérités) ; une pratique : l'éveil vérifié à chaque reprise (la machine arrêtée pendant S504). METHODE :
 29 protections ; L385. Maillons **1**. Suivant : **S507, A328** — la convergence en `dt` du δ 3D près d'une coque mobile.
+
+## S507 — 2026-10-06 — A328 réattribuée : l'ordre 1 en temps près d'une coque mobile
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/A328-S507.md)) : trois normes, quatre pas, deux vitesses, contre une référence
+vraiment plus fine ; la pose au milieu du pas ; un témoin à coque fixe. **Mesuré** : tout converge, ordre 1 à 1,6 ; le δ linéaire est d'ordre 1
+en temps (témoin : 5 % à 12,5 ms), la coque mobile multiplie la constante par cinq. S505 jugeait contre une référence deux fois plus fine
+seulement. **A328 levée, réattribuée.** Lot des registres (dû en S506). Maillons **1** (un défaut levé, sans capacité nouvelle). Suivant : un
+point de la liste qui fasse avancer une capacité.

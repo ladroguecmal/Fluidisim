@@ -31,7 +31,8 @@ fn parcouru(u_p: f64, t: f64) -> f64 {
 fn course(d: Domain3, u_p: f64, dt: f64) -> Result<(Vec<f32>, f64), String> {
     let dx = d.dx as f64;
     let z_r = 0.5 - 500. / Milieu::MER.rho;
-    let centre = |t: f64| [4.1 + parcouru(u_p, t), 3.875, d.z0() as f64 + z_r];
+    let fixe = std::env::var("BOSSE").is_ok();
+    let centre = |t: f64| [4.1 + if fixe { 0. } else { parcouru(u_p, t) }, 3.875, d.z0() as f64 + z_r];
     let noeuds = |c: [f64; 3], out: &mut Vec<f32>| {
         out.clear();
         for k in 0..=d.nz {
@@ -50,13 +51,28 @@ fn course(d: Domain3, u_p: f64, dt: f64) -> Result<(Vec<f32>, f64), String> {
         d, Milieu::MER.rho as f32, G as f32, &vec![0.; d.columns()], &nds,
     )
     .map_err(|e| format!("configuration : {e:?}"))?;
-    v.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+    // S507 (A328) : `BOSSE` — le témoin : la coque fixe et une bosse gaussienne de 5 cm à 6 m devant elle, au repos.
+    let bosse = std::env::var("BOSSE").is_ok();
+    if bosse {
+        let eta: Vec<f32> = (0..d.columns())
+            .map(|c| {
+                let (x, y) = (((c % d.nx) as f64 + 0.5) * dx, ((c / d.nx) as f64 + 0.5) * dx);
+                d.z0() + (0.05 * (-((x - 10.1).powi(2) + (y - 3.875).powi(2)) / 0.5).exp()) as f32
+            })
+            .collect();
+        v.set_surface(&eta).map_err(|e| format!("{e:?}"))?;
+    } else {
+        v.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+    }
     let pas = (DUREE / dt).round() as usize;
     let dt_us = (dt * 1e6).round() as u64;
+    // S507 (A328) : `MILIEU` — la pose au milieu du pas plutôt qu'à sa fin.
+    let decalage = if std::env::var("MILIEU").is_ok() { 0.5 } else { 0. };
     for n in 1..=pas {
-        let c = centre(n as f64 * dt);
+        let t = (n as f64 - decalage) * dt;
+        let c = centre(t);
         noeuds(c, &mut nds);
-        let u = vitesse(u_p, n as f64 * dt) as f32;
+        let u = if bosse { 0. } else { vitesse(u_p, t) as f32 };
         v.set_solid_rigid(&nds, [u, 0., 0.], [0.; 3], c.map(|x| x as f32)).map_err(|e| format!("pas {n} : paroi {e:?}"))?;
         v.step_surface_linear(dt_us, 8000, &host_impl::SequentialJobs).map_err(|e| format!("pas {n} : δ {e:?}"))?;
     }
@@ -64,31 +80,35 @@ fn course(d: Domain3, u_p: f64, dt: f64) -> Result<(Vec<f32>, f64), String> {
     Ok((v.surface().to_vec(), vol))
 }
 
-/// S505, localisation : l'écart entre deux pas, où il est, et ce qu'il vaut hors des colonnes que la coque couvre ou touche (à une maille
-/// près de son empreinte à la fin).
-fn localise(d: Domain3, u_p: f64, dt_fin: f64, dt: f64) -> Result<(), String> {
+/// S505, localisation ; **S507** (A328) : trois normes de l'écart au plus fin — le maximum sur la surface, le maximum hors des colonnes
+/// que la coque couvre ou touche (à une maille près de son empreinte à la fin), l'écart quadratique —, rapportées à l'élévation hors coque
+/// (les deux maximums) et à la perturbation quadratique (la troisième).
+fn localise(d: Domain3, u_p: f64, dt_fin: f64, pas: &[f64]) -> Result<(), String> {
     let (fin, _) = course(d, u_p, dt_fin)?;
-    let (eta, _) = course(d, u_p, dt)?;
-    let xc = 4.1 + parcouru(u_p, DUREE);
-    let (mut pire, mut ou, mut loin, mut ampl_loin) = (0f32, 0usize, 0f32, 0f32);
-    for c in 0..d.columns() {
+    let xc = 4.1 + if std::env::var("BOSSE").is_ok() { 0. } else { parcouru(u_p, DUREE) };
+    let pres = |c: usize| {
         let (x, y) = (((c % d.nx) as f64 + 0.5) * 0.25, ((c / d.nx) as f64 + 0.5) * 0.25);
-        let e = (eta[c] - fin[c]).abs();
-        if e > pire {
-            pire = e;
-            ou = c;
+        (x - xc).abs() <= 2. + 0.25 && (y - 3.875).abs() <= 0.8 + 0.25
+    };
+    let ampl_loin = (0..d.columns()).filter(|c| !pres(*c)).fold(0f32, |m, c| m.max((fin[c] - d.z0()).abs())) as f64;
+    let rms_fin = ((0..d.columns()).map(|c| ((fin[c] - d.z0()) as f64).powi(2)).sum::<f64>() / d.columns() as f64).sqrt();
+    let mut prec: Option<[f64; 3]> = None;
+    for &dt in pas {
+        let (eta, _) = course(d, u_p, dt)?;
+        let (mut tout, mut loin, mut q) = (0f64, 0f64, 0f64);
+        for c in 0..d.columns() {
+            let e = (eta[c] - fin[c]).abs() as f64;
+            tout = tout.max(e);
+            if !pres(c) {
+                loin = loin.max(e);
+            }
+            q += e * e;
         }
-        let pres = (x - xc).abs() <= 2. + 0.25 && (y - 3.875).abs() <= 0.8 + 0.25;
-        if !pres {
-            loin = loin.max(e);
-            ampl_loin = ampl_loin.max((fin[c] - d.z0()).abs());
-        }
+        let r = [tout / ampl_loin, loin / ampl_loin, (q / d.columns() as f64).sqrt() / rms_fin];
+        let ordres = prec.map_or(String::new(), |p| format!(" ordres={:.2},{:.2},{:.2}", (r[0] / p[0]).log2(), (r[1] / p[1]).log2(), (r[2] / p[2]).log2()));
+        println!("C23_LOCALISE u_p={u_p} dt_fin={dt_fin:.6} dt={dt:.6} max={:.4} hors_coque={:.4} quadratique={:.4}{ordres}", r[0], r[1], r[2]);
+        prec = Some(r);
     }
-    let (x, y) = (((ou % d.nx) as f64 + 0.5) * 0.25, ((ou / d.nx) as f64 + 0.5) * 0.25);
-    println!(
-        "C23_LOCALISE u_p={u_p} dt_fin={dt_fin:.5} dt={dt:.5} pire_m={pire:.4e} en_x={x:.3} en_y={y:.3} (coque x={xc:.3} y=3.875) hors_coque_m={loin:.4e} elevation_hors_coque_m={ampl_loin:.4e} relatif_hors_coque={:.4}",
-        loin / ampl_loin
-    );
     Ok(())
 }
 
@@ -97,9 +117,7 @@ fn main() -> Result<(), String> {
     if a.get(1).map(|s| s.as_str()) == Some("localise") {
         let d = Domain3 { nx: 64, ny: 32, nz: 8, dx: 0.25 };
         let u_p: f64 = a.get(2).and_then(|v| v.parse().ok()).unwrap_or(0.5);
-        for (fin, gros) in [(0.003125, 0.00625), (0.003125, 0.0125), (0.003125, 0.025)] {
-            localise(d, u_p, fin, gros)?;
-        }
+        localise(d, u_p, 0.0015625, &[0.003125, 0.00625, 0.0125, 0.025])?;
         return Ok(());
     }
     // S505, critère 3 : sous la borne gouvernante, `gouvernant <u1,u2,…>` — le pas `ν·dx/(u_p + c)` arrondi à un diviseur de la durée,

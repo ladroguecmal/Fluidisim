@@ -4585,3 +4585,8 @@ qui suit la houle, ≈ 0,5 m/s, 10 ms) en porte une part. Premiers suspects : la
 vitesse de la paroi, dépôt et transfert de S334 appliqués d'un coup à chaque pas). À 5 m/s (au-delà de `√(gh)` = 4,43 m/s), la réponse
 linéaire n'a pas de limite — hors du modèle, pas un défaut. Déclencheur : **avant toute mesure du champ proche d'une coque en marche** (4.13,
 6.4). Reproduction : `cargo run -p water-core --release --offline --example c23_coque -- localise 0.5` (≈ 1 min).
+
+*Note du 2026-10-06, S507, sur A328* ([A328-S507](../validation/A328-S507.md)) : **levée, et réattribuée** — la convergence n'est pas lente.
+Contre une référence vraiment plus fine (1,56 ms), toutes les normes convergent à l'ordre 1 à 1,6 ; le δ linéaire est d'ordre 1 en temps (le
+témoin, coque fixe : 5 % à 12,5 ms), et la coque mobile multiplie la constante par cinq (25 %). S505 jugeait contre une référence deux fois
+plus fine seulement. Pour 10 % sur le champ proche, un pas de ≈ 6 ms.

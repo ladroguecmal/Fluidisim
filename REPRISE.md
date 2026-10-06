@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 08:10 +02:00
+JETON            : libre
+Battement        : 2026-10-06 08:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S507 — A328, la convergence en dt près d'une coque mobile ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S506 — la cinquième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S505 (C23 sur le système)
-Session suivante : **S507 — A328** : la convergence en `dt` du δ 3D près d'une coque mobile — localiser avant de remédier (ADR-226 D1) : la coque en translation lente (0,5 m/s, sous-critique), trois pas au moins (ADR-230 D1) ; éteindre un à un les termes de la mise à jour par pas (faces ouvertes à la vitesse de la paroi, dépôt, transfert de S334) contre un témoin. Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (`calcul.py etat`).
-Maillons        : 1 — S506 : la revue de méthode (ADR-230), sans capacité
-Registres       : dernier lot S503 (ADR-213 D3) ; le prochain au plus tard en S506
+Session en cours : aucune
+Dernière session : S507 — A328 réattribuée : l'ordre 1 en temps près d'une coque mobile ([journal](notes/JOURNAL.md)). Avant : S506 (la cinquième revue de méthode)
+Session suivante : **S508 — un point de la liste qui fasse avancer une capacité** (maillons 1) : relire le tableau de bord (6.2 le courant, 6.4 le coût du recoupage, 4.13, 9.5, 5.4…), choisir le critère le plus net ; ordre de grandeur contre le terme concurrent, référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
+Maillons        : 1 — S507 : A328 levée, réattribuée (sans capacité)
+Registres       : dernier lot S507 (ADR-213 D3) ; le prochain au plus tard en S510
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

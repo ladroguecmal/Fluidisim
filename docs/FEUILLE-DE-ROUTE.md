@@ -367,6 +367,8 @@ avant de remédier) ; **6.3 validée** (le corps en marche émet son sillage).
 d'erreur du proxy), la poussée au centre de la part immergée (ADR-227 : une couche suffit, 70 points pour un navire de 60 m).
 **S501–S503** : la quatrième revue (ADR-228 : un corps d'essai loin de ses limites) ; **6.1 validée** (l'amortissement des six degrés de
 liberté, mesuré par δ) ; 6.4 avancée (un solide immergé qui bouge sur la carte).
+**S504–S506** : 6.4 avancée — la coque qui perce la surface en mouvement sur la carte (dépôt, transfert de S334), C23 sur le système (la paroi
+dans la vitesse gouvernante, ADR-229) ; A328 ouverte (la convergence en `dt` près d'une coque mobile) ; la cinquième revue (ADR-230).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
