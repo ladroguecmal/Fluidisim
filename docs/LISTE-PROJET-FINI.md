@@ -453,7 +453,9 @@ pas recopiée ici (L137).
   référence, aucune fuite, au bit sur le couvercle plein ([DECOR-CARTE-S493](validation/DECOR-CARTE-S493.md)).
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.
-- [ ] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *absent*.
+- [x] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *validé* (S512) : l'impulsion de masse ajoutée d'ADR-023 §2 à l'instant
+  exact où la quille passe sous la surface, corps et eau entraînée d'une même quantité de mouvement ; la même à 2·10⁻¹⁶ près quelle que
+  soit la phase du tick (l'échantillonnage au tick : 5,3 % de dispersion) ([preuve](validation/IMPACT-ENTREE-S512.md)).
 
 ## 7. Phénomènes secondaires
 
@@ -727,7 +729,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 2 | 5 | 5 |
-| 6. Solides | 8 | 4 | 1 | 3 |
+| 6. Solides | 8 | 5 | 1 | 2 |
 | 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
@@ -735,7 +737,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **9** | **68** | **44** |
+| **total** | **121** | **10** | **68** | **43** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

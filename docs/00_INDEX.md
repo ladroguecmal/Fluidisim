@@ -156,6 +156,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le coût du recoupage — S508](validation/RECOUPAGE-S508.md) : le recoupage dans la boîte du solide, au bit ; 8 → 1,5 ms par pas (1 ms visé, manqué).
 - [La coque qui bouge sous 1 ms — S509](validation/ENVOI-S509.md) : la carte ne reçoit que ce qui change ; 0,82 ms par pas ; **liste 6.4 validée**.
 - [Le consommateur des impacts prédits — S510](validation/CONSOMMATEUR-S510.md) : `wave_consumer`, le chemin d'image — confirmation au bit, rejet et correction en fondu ; **liste 9.5 validée**.
+- [L'impulsion d'entrée dans l'eau — S512](validation/IMPACT-ENTREE-S512.md) : C20, l'impulsion de masse ajoutée à l'instant exact du passage, indépendante de la phase du tick ; **liste 6.8 validée**.
 - [A327 réattribuée et levée — S492](validation/A327-S492.md) : la projection refusée au point mort d'une seiche (la divergence relative à une vitesse quasi nulle) ; [ADR-225](adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md).
 - [Un décor fixe qui perce la surface — S490](validation/DECOR-S490.md) : 6.5 — la cloison tient en milieu de maille ; alignée sur la grille, la projection échoue (A327).
 - [Le débordement vers l'extérieur — S489](validation/DEBORDEMENT-S489.md) : V, `Flow::Spill` — un contenant plein déverse exactement ce qu'il reçoit ; **liste 5.3 validée**.

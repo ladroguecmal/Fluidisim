@@ -397,3 +397,12 @@ Maillons **0**. Suivant : **S511, la revue de méthode** (ADR-222).
 une protection : un enchaînement de commandes s'arrête au premier échec (S509 : deux correctifs échoués suivis du script fautif) ; un outil :
 le rappel du lot dû répété en dernière ligne du rituel ; la boussole dit comment passer une variable au calcul détaché. METHODE : 30
 protections ; L386. Maillons **1**. Suivant : **S512**, un point partiel proche de son périmètre.
+
+## S512 — 2026-10-06 — 6.8 validée : l'impulsion d'entrée dans l'eau
+
+**Entrée.** En autonomie (maillons 1). **Fait** ([preuve](../docs/validation/IMPACT-ENTREE-S512.md)) : l'archétype d'impact du corps rigide,
+la chute libre exacte tant que la quille est en l'air, l'instant exact du passage sous la surface, l'impulsion de masse ajoutée (corps et eau
+entraînée d'une même quantité de mouvement), un événement autoritaire. **Mesuré** : le bilan à 10⁻¹⁶ relatif ; `J` à 2 % d'ADR-023 pour un
+corps lourd ; la même impulsion à 2·10⁻¹⁶ près sur vingt phases de tick, quand l'échantillonnage au tick disperse de 5,3 %. Un premier
+manqué (les pas symplectiques en l'air faisaient manquer le passage), localisé et réparé. **6.8 validée — 10 points sur 120.** Maillons
+**0**. Suivant : un point partiel proche de son périmètre.

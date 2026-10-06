@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S512 — **en cours**. En autonomie, **6.8, l'impulsion d'entrée dans l'eau** (*slamming*, C20, ADR-023 §2) — absente : une
+Session : S512 — **terminée**. En autonomie, **6.8, l'impulsion d'entrée dans l'eau** (*slamming*, C20, ADR-023 §2) — absente : une
 entrée dans l'eau dure moins d'un tick (17 à 73 ms) ; la flottabilité échantillonnée la rate ou la double selon la phase du tick.
 
 **Ce que la session fait.** Le corps rigide reçoit un archétype d'impact (relèvement `β`, demi-largeur `b`, longueur `L`, seuil de
@@ -83,7 +83,13 @@ la vitesse de ce tick) disperse de plusieurs pour cent ; (3) sous le seuil de 2 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'archétype d'impact, la détection exacte, l'impulsion ; essais (1)–(4).
-- [ ] **P3** — preuve ; liste 6.8 ; rituel.
+- [x] **P2** — l'archétype d'impact, la détection exacte, l'impulsion ; essais (1)–(4).
+- [x] **P3** — preuve ; liste 6.8 ; rituel.
 
 ### Notes de reprise
+- **P2** — `SlamArchetype`, `SlamEvent`, `slam_entry`, `integrate`, `advance_orientation` (partagée). (1) bilan 1,5·10⁻¹¹ ; 0,980 ; coque
+  `J = m_a·v/(1 + m_a/m)`. (2) **manqué d'abord** : `J` à 1,1·10⁻³ près, instants à 2,3 s près — les pas en l'air symplectiques descendaient
+  plus vite que la chute libre et faisaient manquer le passage ; chute libre exacte en l'air : 2·10⁻¹⁶ ; témoin 5,3 %. (3) un « impact sous
+  le seuil » : un vrai second impact (rebond sans amortissement, rentrée à 2,01 m/s) — l'essai borné à la première entrée. 672 essais.
+- **P3** — preuve IMPACT-ENTREE-S512 ; **6.8 validée** (10 / 120) ; index ; journal.
+

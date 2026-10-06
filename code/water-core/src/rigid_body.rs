@@ -197,6 +197,33 @@ pub struct RigidBody {
     /// **S502 : amortissement de rayonnement angulaire**, diagonal, axes principaux du corps, N·m·s/rad — linéaire en la vitesse
     /// angulaire relative à la rotation de la surface qui le porte. Constante de l'archétype, mesurée par δ ; 0 : aucun.
     pub radiation_damping_angular: [f64; 3],
+    /// **S512 : l'archétype d'impact** (ADR-023 §2, C20) — `None` : aucun terme d'impact.
+    pub slam: Option<SlamArchetype>,
+    /// S512 : l'impact du dernier pas, s'il y en a eu un.
+    pub last_slam: Option<SlamEvent>,
+}
+
+/// **S512 — l'archétype d'impact d'une coque** (ADR-023 §2.5 : une propriété d'archétype, pas une mesure à l'exécution) : relèvement de
+/// fond `beta` (rad), demi-largeur mouillée `half_width` (m) et longueur mouillée `length` (m) à la fin de la pénétration, seuil de vitesse
+/// relative normale `threshold` (m/s ; 2 au départ, ADR-023 §2.5 — une donnée répliquée).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SlamArchetype {
+    pub beta: f64,
+    pub half_width: f64,
+    pub length: f64,
+    pub threshold: f64,
+}
+
+/// **S512 — un impact d'entrée dans l'eau** : l'instant dans le pas (s), l'impulsion verticale reçue par le corps (N·s, vers le haut),
+/// la vitesse relative normale d'entrée (m/s, négative en descendant), la masse ajoutée entraînée (kg) et la durée de pénétration de
+/// Wagner `2b·tanβ/(π·|v|)` (s). Autoritaire (ADR-023 §2.4) : l'hôte en tire dégâts, sons, gerbes.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SlamEvent {
+    pub time_in_step: f64,
+    pub impulse: f64,
+    pub v_rel: f64,
+    pub added_mass: f64,
+    pub t_impact: f64,
 }
 
 fn add(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
@@ -262,6 +289,8 @@ impl RigidBody {
             radiation_damping: [0.; 3],
             added_inertia: [0.; 3],
             radiation_damping_angular: [0.; 3],
+            slam: None,
+            last_slam: None,
         }
     }
 
@@ -341,6 +370,99 @@ impl RigidBody {
     /// **Un pas symplectique** : vitesses d'abord, sous les forces de l'état présent ; positions et
     /// orientation ensuite, avec les vitesses nouvelles. Rend les forces employées.
     pub fn step(&mut self, dt: f64, water: &dyn WaterQuery, milieu: Milieu) -> Forces {
+        self.last_slam = None;
+        // S512 (ADR-023 §2, C20) : l'entrée dans l'eau, à l'instant exact où la quille passe sous la surface dans ce pas — pas au tick.
+        if let Some(a) = self.slam {
+            if let Some(tau) = self.slam_entry(dt, water, milieu, a) {
+                if tau >= dt {
+                    // Tout le pas en l'air : la chute libre exacte, déjà faite.
+                    return self.forces(water, milieu);
+                }
+                return self.integrate(dt - tau, water, milieu);
+            }
+        }
+        self.integrate(dt, water, milieu)
+    }
+
+    /// **S512 — l'entrée dans l'eau** : la quille (le point du proxy le plus bas) au-dessus de la surface, le corps en chute libre (aucun
+    /// point immergé, donc la pesanteur seule) ; si elle passe sous la surface `η` (tenue fixe sur le pas) dans `dt`, à une vitesse relative
+    /// normale au-delà du seuil, le corps avance en chute libre exacte jusqu'à cet instant `τ`, reçoit l'impulsion de masse ajoutée — la
+    /// quantité de mouvement du corps et de l'eau entraînée conservée, `v' = m·v/(m + m_a)`, `m_a = ½πρb²L` —, et `τ` est rendu. Si la
+    /// quille reste au-dessus de l'eau tout le pas, la chute libre exacte de tout le pas, et `dt` est rendu : le pas symplectique descend
+    /// plus vite que la chute libre (`g·dt²` au lieu de `½g·dt²`) et ferait manquer, selon la phase du tick, l'instant où la quille passe.
+    fn slam_entry(&mut self, dt: f64, water: &dyn WaterQuery, milieu: Milieu, a: SlamArchetype) -> Option<f64> {
+        let quille = self
+            .proxy
+            .iter()
+            .map(|p| {
+                let x = add(self.position, rotate(self.orientation, p.body));
+                [x[0], x[1], x[2] - 0.5 * p.thickness]
+            })
+            .min_by(|u, v| u[2].total_cmp(&v[2]))?;
+        let eta = water.surface(quille[0], quille[1]);
+        let hauteur = quille[2] - eta;
+        if hauteur <= 0. {
+            return None;
+        }
+        let v = self.velocity[2];
+        // `hauteur + v·τ − ½gτ² = 0` : la racine positive.
+        let tau = (v + (v * v + 2. * G * hauteur).sqrt()) / G;
+        if !(tau <= dt) {
+            // En l'air tout le pas.
+            for k in 0..3 {
+                self.position[k] += self.velocity[k] * dt;
+            }
+            self.position[2] -= 0.5 * G * dt * dt;
+            self.velocity[2] -= G * dt;
+            self.advance_orientation(dt);
+            return Some(dt);
+        }
+        let w = water.velocity([quille[0], quille[1], eta])[2];
+        let v_rel = v - G * tau - w;
+        if v_rel > -a.threshold {
+            return None;
+        }
+        // La chute libre exacte jusqu'à `τ`.
+        for k in 0..3 {
+            self.position[k] += self.velocity[k] * tau;
+        }
+        self.position[2] -= 0.5 * G * tau * tau;
+        self.velocity[2] -= G * tau;
+        self.advance_orientation(tau);
+        // L'impulsion : corps et eau entraînée, une seule quantité de mouvement.
+        let m_a = 0.5 * core::f64::consts::PI * milieu.rho * a.half_width * a.half_width * a.length;
+        let v_apres = self.mass * v_rel / (self.mass + m_a);
+        let impulse = self.mass * (v_apres - v_rel);
+        self.velocity[2] += impulse / self.mass;
+        self.last_slam = Some(SlamEvent {
+            time_in_step: tau,
+            impulse,
+            v_rel,
+            added_mass: m_a,
+            t_impact: 2. * a.half_width * a.beta.tan() / (core::f64::consts::PI * v_rel.abs()),
+        });
+        Some(tau)
+    }
+
+    /// S512 : l'orientation avancée de `dt` à vitesse angulaire constante — l'écriture du pas, partagée.
+    fn advance_orientation(&mut self, dt: f64) {
+        let (q, w) = (self.orientation, self.angular_velocity);
+        let dq = [
+            -0.5 * (w[0] * q[1] + w[1] * q[2] + w[2] * q[3]),
+            0.5 * (w[0] * q[0] + w[1] * q[3] - w[2] * q[2]),
+            0.5 * (w[1] * q[0] + w[2] * q[1] - w[0] * q[3]),
+            0.5 * (w[2] * q[0] + w[0] * q[2] - w[1] * q[1]),
+        ];
+        let mut n = [q[0] + dt * dq[0], q[1] + dt * dq[1], q[2] + dt * dq[2], q[3] + dt * dq[3]];
+        let len = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2] + n[3] * n[3]).sqrt();
+        for x in &mut n {
+            *x /= len;
+        }
+        self.orientation = n;
+    }
+
+    /// Le pas symplectique lui-même (S331–S502), sans le terme d'impact.
+    fn integrate(&mut self, dt: f64, water: &dyn WaterQuery, milieu: Milieu) -> Forces {
         let fr = self.forces(water, milieu);
         for a in 0..3 {
             self.velocity[a] += dt * fr.force[a] / (self.mass + self.added_mass[a]);
@@ -372,20 +494,8 @@ impl RigidBody {
         for a in 0..3 {
             self.position[a] += dt * self.velocity[a];
         }
-        let w = self.angular_velocity;
         // `q̇ = ½ (0, ω) ⊗ q`, puis renormalisation.
-        let dq = [
-            -0.5 * (w[0] * q[1] + w[1] * q[2] + w[2] * q[3]),
-            0.5 * (w[0] * q[0] + w[1] * q[3] - w[2] * q[2]),
-            0.5 * (w[1] * q[0] + w[2] * q[1] - w[0] * q[3]),
-            0.5 * (w[2] * q[0] + w[0] * q[2] - w[1] * q[1]),
-        ];
-        let mut n = [q[0] + dt * dq[0], q[1] + dt * dq[1], q[2] + dt * dq[2], q[3] + dt * dq[3]];
-        let len = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2] + n[3] * n[3]).sqrt();
-        for x in &mut n {
-            *x /= len;
-        }
-        self.orientation = n;
+        self.advance_orientation(dt);
         fr
     }
 }

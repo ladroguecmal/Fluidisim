@@ -1300,3 +1300,109 @@ fn the_hull_glides_down_at_its_radiation_rate_s502() {
         assert!((taux / attendu - 1.).abs() <= 0.02, "{nom} : {taux} contre {attendu}");
     }
 }
+
+/// L'archétype d'impact de la coque de la porte D lâchée à plat : relèvement de 10°, demi-largeur 0,8 m, longueur 4 m, seuil 2 m/s.
+const CLAQUE: SlamArchetype = SlamArchetype { beta: 10. * core::f64::consts::PI / 180., half_width: 0.8, length: 4., threshold: 2. };
+
+/// Une chute : le corps lâché au repos, sa quille à `hauteur` au-dessus de l'eau calme ; un premier pas de `phase·dt`, puis des pas de
+/// `dt`, jusqu'au premier impact. Rend l'impact, l'instant absolu de l'impact (s) et la quantité de mouvement verticale du corps juste
+/// avant (kg·m/s).
+fn chute(c: &RigidBody, hauteur: f64, dt: f64, phase: f64) -> (SlamEvent, f64, f64) {
+    let mut c = c.clone();
+    c.position[2] += hauteur;
+    let calme = CalmWater { level: 0. };
+    let mut t = 0.;
+    let mut premier = true;
+    loop {
+        let h = if premier { phase * dt } else { dt };
+        premier = false;
+        if h == 0. {
+            continue;
+        }
+        let avant = c.mass * c.velocity[2];
+        c.step(h, &calme, MER);
+        if let Some(e) = c.last_slam {
+            return (e, t + e.time_in_step, avant - c.mass * G * e.time_in_step);
+        }
+        t += h;
+        assert!(t < 10., "aucun impact");
+    }
+}
+
+/// **S512, critère 1 — le bilan.** Un corps lourd (1 × 1 × 1 m à 20 000 kg/m³ ; `b` = 0,5 m, `L` = 1 m : `m_a/m` = 2 %) lâché de 1,25 m :
+/// la quantité de mouvement du corps et de l'eau entraînée (`m_a·v'`) conservée à 10⁻¹² près ; `J` à 5 % de `Δm_a·v_rel` (ADR-023). La coque
+/// de la porte D (`m_a/m` ≈ 1,3) : le bilan tient, et `J` vaut `m_a·v_rel/(1 + m_a/m)`.
+#[test]
+fn the_slam_impulse_conserves_momentum_c20_s512() {
+    let mut lourd = RigidBody::cuboid([1., 1., 1.], 20_000., [0., 0., 0.5], [4, 4, 4]);
+    lourd.slam = Some(SlamArchetype { half_width: 0.5, length: 1., ..CLAQUE });
+    let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., 0.5], [16, 8, 4]);
+    coque.slam = Some(CLAQUE);
+    for (nom, corps, borne) in [("lourd", &lourd, true), ("coque", &coque, false)] {
+        let (e, _, p_avant) = chute(corps, 1.25, 1. / 30., 0.37);
+        let v_apres = e.v_rel + e.impulse / corps.mass;
+        let bilan = corps.mass * e.v_rel - (corps.mass * v_apres + e.added_mass * v_apres);
+        let adr = e.added_mass * e.v_rel.abs();
+        println!(
+            "S512 {nom} : m_a/m {:.3}, v_rel {:.4} m/s, J {:.1} N·s (Δm_a·v_rel {adr:.1}, rapport {:.4}), bilan {bilan:.2e} kg·m/s, t_impact {:.1} ms",
+            e.added_mass / corps.mass, e.v_rel, e.impulse, e.impulse / adr, 1e3 * e.t_impact
+        );
+        assert!((p_avant - corps.mass * e.v_rel).abs() <= 1e-9 * p_avant.abs(), "la vitesse d'entrée : {p_avant} {}", corps.mass * e.v_rel);
+        assert!(bilan.abs() <= 1e-12 * (corps.mass * e.v_rel).abs(), "critère 1, bilan : {bilan}");
+        if borne {
+            assert!((e.impulse / adr - 1.).abs() <= 0.05, "critère 1 : {} contre {adr}", e.impulse);
+        }
+        assert!((e.impulse - adr / (1. + e.added_mass / corps.mass)).abs() <= 1e-9 * adr, "von Kármán");
+    }
+}
+
+/// **S512, critère 2 — l'indépendance à la phase du tick.** La coque de la porte D lâchée de 1,25 m à 30 Hz, le premier pas décalé de vingt
+/// phases : le même `J` et le même instant d'impact à 10⁻⁹ près. Le témoin échantillonné au tick — l'impulsion à la vitesse du premier tick
+/// où la quille est sous l'eau — disperse de plusieurs pour cent.
+#[test]
+fn the_slam_does_not_depend_on_the_tick_phase_c20_s512() {
+    let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., 0.5], [16, 8, 4]);
+    coque.slam = Some(CLAQUE);
+    let dt = 1. / 30.;
+    let (mut j, mut t, mut naif) = (Vec::new(), Vec::new(), Vec::new());
+    for k in 0..20 {
+        let phase = (k as f64 + 0.5) / 20.;
+        let (e, ti, _) = chute(&coque, 1.25, dt, phase);
+        j.push(e.impulse);
+        t.push(ti);
+        // Le témoin : la quille repérée au tick où elle est déjà sous l'eau, la vitesse de ce tick.
+        let tick = ((ti - phase * dt) / dt).ceil() * dt + phase * dt;
+        let v_tick = (-G * tick).min(e.v_rel);
+        naif.push(e.added_mass * coque.mass * v_tick.abs() / (coque.mass + e.added_mass));
+    }
+    let ecart = |v: &[f64]| v.iter().fold(0f64, |m, x| m.max((x / v[0] - 1.).abs()));
+    let ecart_t = t.iter().fold(0f64, |m, x| m.max((x - t[0]).abs()));
+    println!(
+        "S512 : J {:.3} N·s à {:.1e} près sur vingt phases ; instant {:.6} s à {ecart_t:.1e} s ; témoin au tick : dispersion {:.1} %",
+        j[0], ecart(&j), t[0], 100. * ecart(&naif)
+    );
+    assert!(ecart(&j) <= 1e-9, "critère 2, J : {}", ecart(&j));
+    assert!(ecart_t <= 1e-9, "critère 2, instant : {ecart_t}");
+    assert!(ecart(&naif) >= 0.02, "le témoin : {}", ecart(&naif));
+}
+
+/// **S512, critère 3 — le seuil.** Lâchée de 0,1 m (1,4 m/s à l'entrée, sous 2 m/s), la coque n'a aucun impact à son entrée ; elle entre
+/// dans l'eau par la seule flottabilité.
+#[test]
+fn below_the_threshold_there_is_no_slam_c20_s512() {
+    let mut c = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., 0.5 + 0.1], [16, 8, 4]);
+    c.slam = Some(CLAQUE);
+    let calme = CalmWater { level: 0. };
+    // La première entrée, jusqu'au plus bas de la descente (sans amortissement, la coque rebondit ensuite hors de l'eau et y rentre à
+    // plus de 2 m/s : un vrai second impact).
+    let mut entree = false;
+    for _ in 0..120 {
+        c.step(1. / 30., &calme, MER);
+        assert!(c.last_slam.is_none(), "un impact sous le seuil");
+        entree |= c.position[2] < 0.5;
+        if entree && c.velocity[2] > 0. {
+            break;
+        }
+    }
+    assert!(entree, "la coque est entrée dans l'eau");
+}
