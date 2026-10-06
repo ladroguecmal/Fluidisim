@@ -76,6 +76,32 @@ impl Maree {
         }
         eta
     }
+
+    /// **S579 — la vitesse du niveau** à l'instant `t`, m/s : `−Σ Aₖ·ωₖ·sin(ωₖt − gₖ)`, `ωₖ` la pulsation de la fréquence **arrondie**
+    /// (celle des phases).
+    pub fn vitesse(&self, t: SimTime) -> f32 {
+        let mut v = 0.0f32;
+        for k in 0..self.n {
+            let phase = PhaseQ32::from_time(self.frequences_q32[k], t);
+            v -= self.amplitudes_m[k] * pulsation(self.frequences_q32[k]) * PhaseQ32(phase.0.wrapping_sub(self.phases[k].0)).sin();
+        }
+        v
+    }
+}
+
+/// La pulsation d'une fréquence Q32, rad/s — l'écriture de `Background::eval_local`.
+fn pulsation(freq_q32: u64) -> f32 {
+    (freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32
+}
+
+/// **S579 — la marée dans l'échantillon de B** : `η += niveau`, `∂η/∂t += vitesse`, et la vitesse verticale de surface `w += vitesse` (la
+/// condition cinématique) ; le reste inchangé. Le courant horizontal de marée (il demande la profondeur) et la pente de la marée
+/// (`k·A` ≈ 10⁻⁵) n'y sont pas.
+pub fn avec_maree(mut s: crate::WaterSample, niveau: f32, vitesse: f32) -> crate::WaterSample {
+    s.eta += niveau;
+    s.deta_dt += vitesse;
+    s.u_total[2] += vitesse;
+    s
 }
 
 // --- S578 — la carte cotidale.
@@ -137,6 +163,26 @@ impl<'a> CarteCotidale<'a> {
             eta += re * co - im * s;
         }
         Ok(eta)
+    }
+
+    /// **S579 — le niveau et sa vitesse** au point `(x, y)` à l'instant `t` : `∂η/∂t = −Σ ωₖ·(Re Hₖ·sin ωₖt + Im Hₖ·cos ωₖt)`.
+    pub fn niveau_et_vitesse(&self, x: f64, y: f64, t: SimTime) -> Result<(f32, f32), Refus> {
+        let eta = self.niveau(x, y, t)?;
+        let (u, v) = ((x - self.origine[0]) / self.pas_m, (y - self.origine[1]) / self.pas_m);
+        let (i, j) = ((u as usize).min(self.nx - 2), (v as usize).min(self.ny - 2));
+        let (fx, fy) = ((u - i as f64) as f32, (v - j as f64) as f32);
+        let mut vit = 0.0f32;
+        for k in 0..self.n {
+            let base = k * self.nx * self.ny;
+            let at = |ii: usize, jj: usize| self.h[base + jj * self.nx + ii];
+            let (a, b, c, d) = (at(i, j), at(i + 1, j), at(i, j + 1), at(i + 1, j + 1));
+            let lerp = |p: f32, q: f32, f: f32| p + (q - p) * f;
+            let re = lerp(lerp(a[0], b[0], fx), lerp(c[0], d[0], fx), fy);
+            let im = lerp(lerp(a[1], b[1], fx), lerp(c[1], d[1], fx), fy);
+            let (s, co) = PhaseQ32::from_time(self.frequences_q32[k], t).sin_cos();
+            vit -= pulsation(self.frequences_q32[k]) * (re * s + im * co);
+        }
+        Ok((eta, vit))
     }
 }
 

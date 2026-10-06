@@ -96,3 +96,85 @@ fn a_cotidal_map_carries_a_progressive_tide_s578() {
     let st = SimTime(987_654_321_000);
     assert_eq!(carte.niveau(12_345.0, 6_789.0, st).unwrap().to_bits(), carte.niveau(12_345.0, 6_789.0, st).unwrap().to_bits(), "critère 4");
 }
+
+// --- S579 — la marée dans la surface de B. Références écrites au plan par son script.
+
+use crate::host::{AllocStats, Allocator, JobSystem, Sink};
+use crate::{AllocError, HostServices, SeaState, WaterSample, WorldPos};
+
+struct Hote;
+impl Allocator for Hote {
+    fn alloc_persistent(&mut self, _: usize) -> Result<usize, AllocError> { Ok(0) }
+    fn seal(&mut self) {}
+    fn is_sealed(&self) -> bool { false }
+    fn stats(&self) -> AllocStats { AllocStats::default() }
+}
+impl Sink for Hote { fn warn(&self, _: &str) {} fn metric(&self, _: &str, _: f64) {} }
+impl JobSystem for Hote {
+    fn worker_count(&self) -> u32 { 1 }
+    fn parallel_reduce_ordered_f64(&self, n: usize, _: usize, r: &dyn Fn(usize, usize) -> f64, m: &dyn Fn(f64, f64) -> f64, v: f64) -> f64 {
+        m(v, r(0, n))
+    }
+}
+
+fn mer_s579() -> crate::Background {
+    use crate::background_spectrum::{bake, Recipe};
+    let r = Recipe { sea: SeaState { hs: 0.2, tp: 6.0, theta_turns: 0.0, components: 32, graine: 42 }, gravity: 9.81, gamma: 3.3,
+        min_ratio: 0.5, max_ratio: 4.0, spread_turns: 30.0 / 360.0 };
+    let c = bake(r).unwrap();
+    let (mut a, h) = (Hote, Hote);
+    crate::Background::from_spectrum(&mut HostServices { alloc: &mut a, jobs: &h, sink: &h }, &c, WorldPos::from_metres(0., 0., 0.)).unwrap()
+}
+
+/// (1) La vitesse du niveau contre `−A·ω·sin(ωt)` ; la carte au nœud ; (3) une marée nulle.
+#[test]
+fn the_tide_level_rate_is_the_derivative_s579() {
+    let m2 = Maree::new(&[Composante { periode_h: M2, amplitude_m: 1.0, phase_tours: 0.0 }], 0.0).unwrap();
+    let h = chenal_s578();
+    let carte = CarteCotidale::new(&[M2], [0.0, 0.0], 10_000.0, 11, 2, &h, 0.0).unwrap();
+    let omega = 96054.0 / 4_294_967_296.0 * std::f64::consts::TAU;
+    let k = 2.0 * std::f64::consts::PI / (14.007141035914502 * M2 * 3600.0);
+    let (mut pire, mut pire_carte) = (0f64, 0f64);
+    for m in 0..(25 * 60) {
+        let t = m as f64 * 60.0;
+        let st = SimTime((t * 1e6) as u64);
+        pire = pire.max((m2.vitesse(st) as f64 + omega * (omega * t).sin()).abs());
+        let x = 30_000.0;
+        let (_, v) = carte.niveau_et_vitesse(x, 0.0, st).unwrap();
+        pire_carte = pire_carte.max((v as f64 + omega * (omega * t - k * x).sin()).abs());
+    }
+    println!("S579 vitesse : au pire {pire:.2e} m/s ; la carte au nœud {pire_carte:.2e} m/s (|dη/dt| ≤ 1,405·10⁻⁴)");
+    assert!(pire < 1e-9 && pire_carte < 1e-9, "critère 1");
+    let s = WaterSample { eta: 0.3, deta_dt: -0.2, u_total: [0.1, 0.2, -0.2], ..WaterSample::default() };
+    let nulle = Maree::new(&[], 0.0).unwrap();
+    let t = SimTime(5_000_000);
+    // `WaterSample` n'est pas comparable : champ à champ, par leurs bits.
+    let champs = |w: WaterSample| [w.eta, w.deta_dt, w.steepness, w.aeration, w.u_total[0], w.u_total[1], w.u_total[2], w.normal[0],
+        w.normal[1], w.normal[2]].map(f32::to_bits);
+    assert_eq!(champs(avec_maree(s, nulle.niveau(t), nulle.vitesse(t))), champs(s), "critère 3");
+}
+
+/// (2) Sur une mer de B réelle, la marée s'ajoute ; (4) la composition B + W l'accepte.
+#[test]
+fn the_tide_enters_the_sample_of_b_and_its_composition_s579() {
+    let mer = mer_s579();
+    let m2 = Maree::new(&[Composante { periode_h: M2, amplitude_m: 1.2, phase_tours: 0.1 }], 0.05).unwrap();
+    let mut slots = [None; 1];
+    let journal = crate::wave_journal::Journal::new(0, &mut slots);
+    let (mut pire_eta, mut pire_w, mut pire_c) = (0f32, 0f32, 0f32);
+    for m in 0..200 {
+        let t = SimTime(m * 3_600_000_000 / 8 + 123_456);
+        let b = mer.eval(WorldPos::from_metres(3.0, 1.0, 0.0), t).unwrap();
+        let (tau, tau_dot) = (m2.niveau(t), m2.vitesse(t));
+        let s = avec_maree(b, tau, tau_dot);
+        let ulp = |x: f32| f32::from_bits(x.abs().to_bits() + 1) - x.abs();
+        pire_eta = pire_eta.max(((s.eta - b.eta) - tau).abs() / ulp(s.eta));
+        pire_w = pire_w.max(((s.u_total[2] - b.u_total[2]) - tau_dot).abs() / ulp(s.u_total[2]));
+        let c = crate::composition::compose(s, &journal, core::iter::empty::<&crate::radial_impact::RadialImpact<64>>(), crate::FrameId(0), 0,
+            [3.0, 1.0], t, 1.0).unwrap();
+        pire_c = pire_c.max((c.eta - (b.eta + tau)).abs() / ulp(c.eta));
+    }
+    println!("S579 B + marée : η au pire {pire_eta} ulp, w {pire_w} ulp ; composée {pire_c} ulp");
+    assert!(pire_eta <= 2.0 && pire_w <= 2.0, "critère 2");
+    assert!(pire_c <= 2.0, "critère 4");
+}
