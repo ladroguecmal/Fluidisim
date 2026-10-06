@@ -62,16 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S531 — **terminée**. En autonomie, **la dixième revue de méthode** (ADR-222 D4 ; S526–S530).
+Session : S532 — **en cours**. En autonomie : **ADR-235 D1 appliquée à la carte** — `Linear3::new` s'arrêtait (une assertion, une
+panique de wgpu) au-delà de ses limites matérielles ; elle les calcule et refuse avec un nom.
 
-**Ce que la session fait.** Relu : S526 (la revue), S527 (la référence bruitée, appliquée : elle a reproduit l'échec de S523), S528 (la
-garde de résolution qui refuse un montage), S529 (la liaison de 128 Mo ; un critère de convergence point par point manqué, maille et pas
-variant ensemble), S530 (l'ordre de grandeur qui change la construction). **ADR-235** : D1, les limites matérielles calculées avant
-d'agrandir un domaine, refusées avec un nom ; L392 ; METHODE (trente-trois) ; BOUSSOLE.
+**Ce que la session fait.** Après l'obtention de l'adaptateur : les groupes des noyaux de mailles (un par 64 mailles, en une dimension)
+contre `max_compute_workgroups_per_dimension` ; chaque tampon (vitesses, géométrie, mouvement, paires de la dispersion, état, colonnes,
+relecture) contre `max_storage_buffer_binding_size` et `max_buffer_size` — `Err` nommant la limite et la grandeur. Un banc
+`--lineaire-limites` : un domaine au-delà, un en deçà.
+
+**Ordre de grandeur, calculé.** 512 × 512 × 17 = 4,456,448 mailles → 69,632 groupes (> 65 535) : refusé ; 448 × 320 × 24 =
+3 440 640 → 53 760 groupes, le plus gros tampon (les paires, ≈ 16 octets par maille et par face) ≈ 223 Mo : accepté sous les limites de
+l'adaptateur (relevées en S529).
+
+**Critères, écrits avant.** (1) Le domaine au-delà est refusé par une erreur nommée, sans arrêt ; celui en deçà accepté. (2) Les bancs de
+la carte inchangés au bit (sillage `e41630abd739b189`, S503, S504).
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-235, METHODE, L392, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — les contrôles, le banc ; (1), (2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
