@@ -173,4 +173,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S495 | 2026-10-06 | 5 | 72 | 43 | 120 |
 | S496 | 2026-10-06 | 5 | 72 | 43 | 120 |
 | S497 | 2026-10-06 | 6 | 71 | 43 | 120 |
+| S498 | 2026-10-06 | 6 | 71 | 43 | 120 |
 <!-- fin de l'historique -->
