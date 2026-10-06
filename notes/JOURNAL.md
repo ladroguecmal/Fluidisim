@@ -926,3 +926,10 @@ est mal écrite. Ont tenu : la vérification de route par les notes, le script d
 `maree.rs` — huit composantes, phases entières par `PhaseQ32::from_time`. **Mesuré** : M2 s'écarte du cosinus idéal de 2,96·10⁻⁴ m en 15
 jours, exactement la dérive que l'arrondi de sa fréquence prédisait ; vives-eaux et mortes-eaux à ±1,4600 m ; un gué annoncé à 0,02 s.
 Maillons **0** (2.2 et 7.7 avancent). Suivant : **S578**, le lot (dû) et un point partiel.
+
+## S578 — 2026-10-07 — le lot ; la carte cotidale
+
+**Entrée.** En autonomie ; le lot (feuille de route S575–S577), puis 2.2. **Fait** ([preuve](../docs/validation/CARTE-COTIDALE-S578.md)) :
+`CarteCotidale`, l'amplitude complexe interpolée — déterministe, sans `atan2`. **Mesuré** : une onde M2 qui remonte un chenal, exacte aux
+nœuds, creusée au milieu d'une maille de ce que la corde prévoit, la pleine mer une heure plus tard à 50 km. Un signe faux dans la formule
+du plan, noté. Maillons **0** (2.2 avance). Suivant : **S579**, un point partiel.

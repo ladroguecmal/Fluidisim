@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S578 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S575–S577), puis **2.2 — la carte cotidale** : la marée de
+Session : S578 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S575–S577), puis **2.2 — la carte cotidale** : la marée de
 S577 vaut en un lieu ; amplitude et phase varient dans l'espace (la marée se propage).
 
 **Ce que la session fait.** `CarteCotidale` : pour chaque composante, l'amplitude complexe `H = A·e^(−ig)` sur une grille régulière
@@ -83,7 +83,11 @@ d'échantillonnage) ; (4) un point hors de la grille refusé ; au bit à `(x, t)
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — la carte cotidale et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 2.2 ; rituel (`--lot`).
+- [x] **P2** — la carte cotidale et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 2.2 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — nœuds 1,98·10⁻⁵ m ; milieu 0,998739 ; retard 3 540 s ; refus, au bit. Le plan avait un signe faux dans sa formule (`+ Im H·sin`
+  pour `H = A·e^(−ig)`) ; la forme voulue (`A·cos(ωt − g)`) implémentée. Suite 753.
+- **P3** — preuve CARTE-COTIDALE-S578 ; liste 2.2 ; index ; journal ; le lot.
+
