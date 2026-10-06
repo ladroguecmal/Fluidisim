@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**226 ADR** — actée : 175, proposée : 49, rétractée en partie : 2.
+**227 ADR** — actée : 176, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -18,7 +18,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [005](../adr/ADR-005-zone-de-transition.md) | Zone de transition : éponge perturbative et transduction δ → W | proposée | S01 | 001 | 007 009 013 014 021 024 033 034 036 042 046 210 |
 | [006](../adr/ADR-006-cellules-domaines-solveurs.md) | Cellules, domaines et solveurs : trois structures distinctes | proposée | S01 | 001 002 | 007 012 013 207 210 |
 | [007](../adr/ADR-007-interface-solveur.md) | Interface de solveur et stratégie de remplacement | proposée | S01 | 001 005 006 | 008 012 020 022 030 031 038 118 124 125 175 220 |
-| [008](../adr/ADR-008-flottabilite-et-autorite.md) | Flottabilité, forces sur les solides et frontière d'autorité | proposée | S01 | 001 003 007 | 009 015 021 023 025 189 193 |
+| [008](../adr/ADR-008-flottabilite-et-autorite.md) | Flottabilité, forces sur les solides et frontière d'autorité | proposée | S01 | 001 003 007 | 009 015 021 023 025 189 193 227 |
 | [009](../adr/ADR-009-reseau-autorite-et-replication.md) | Réseau : réplication d'événements, pas de champs | proposée | S01 | 001 003 005 008 | 010 016 021 024 |
 | [010](../adr/ADR-010-reseau-hydraulique-volumes-finis.md) | Réseau hydraulique des volumes finis (couche V) | proposée | S01 | 001 002 009 | 011 015 017 018 022 023 025 027 139 140 199 202 203 204 |
 | [011](../adr/ADR-011-courants-et-ecoulements-diriges.md) | Courants et écoulements dirigés | proposée | S01 | 004 010 | 018 027 |
@@ -225,15 +225,16 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [212](../adr/ADR-212-la-bande-etroite-en-profondeur.md) | La bande étroite en profondeur : une hauteur eulérienne sous les particules | actée | S412 | 207 211 |  |
 | [213](../adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) | Accélérer : tolérance, plafond, rituel allégé, bancs courts | actée | S443 | 187 | 214 215 221 |
 | [214](../adr/ADR-214-b-entre-dans-la-bande.md) | B entre dans la bande : `Apic3` et sa carte reçoivent le couplage relatif | actée | S444 | 198 207 213 |  |
-| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 |
+| [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 227 |
 | [216](../adr/ADR-216-le-banc-visuel.md) | Le banc visuel : mesurer plutôt que regarder | actée | S471 | 215 | 217 |
 | [217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md) | Le type d'eau, une option d'édition de la carte ; le ciel qui bouge, à l'atmosphère | actée | S473 | 197 216 |  |
 | [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 222 |
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 226 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 | 226 |
 | [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |
 | [226](../adr/ADR-226-troisieme-revue-de-methode.md) | Troisième revue de méthode (S492–S495) | actée | S496 | 222 223 224 |  |
+| [227](../adr/ADR-227-la-poussee-au-centre-de-la-part-immergee.md) | La poussée du proxy au centre de la part immergée | actée | S500 | 008 215 222 |  |
