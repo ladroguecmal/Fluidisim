@@ -360,7 +360,7 @@ fn the_added_mass_follows_the_accelerating_water_s336() {
 
 
 /// **S494 — W derrière la requête du corps.** Le montage : la houle de B (`a`, 6 s) et, si `energie > 0`, un impact
-/// confirmé de W à l'origine — `energie` J, λ = 4 m, né à 0 —, domaine de 32 m sur 12 s, 256 modes ; la bouée — 0,5 × 0,5 × 0,4 m,
+/// confirmé de W à l'origine — `energie` J, λ = 4 m, né à 0 —, domaine de 32 m sur 12 s, 256 modes ; la bouée — 0,5 × 0,5 × 0,2 m (plate depuis S500 ; 0,4 m en S494),
 /// 500 kg/m³, proxy 4 × 4 × 4 — lâchée à son tirant en `(x0, 0)`, à la vitesse horizontale de B (l'impact naît au repos), `pas` pas de 2 ms sous `MixedWater` (`mixte`) ou
 /// sous `BackgroundWater`. `visite` reçoit l'instant (µs), la bouée et la requête à cet instant : avant le premier pas, puis
 /// après chacun. Rend le nombre de refus de la composition.
@@ -410,7 +410,9 @@ fn bouee_sous_w(
     };
     let mut pool: [Option<RadialImpact<256>>; 1] = [const { None }; 1];
     let impacts = Prepared::<256>::build(&journal, &mut pool, ctx).unwrap();
-    let haut = 0.8 * cote;
+    // S500 : plate — hauteur 0,4 × le côté. À 0,8, son GM vrai est de 2 mm pour 0,25 m de côté, et le proxy de 4 × 4 points le rend
+    // négatif dès que la poussée s'applique au centre de la part immergée (ADR-227, B6) : la bouée roule.
+    let haut = 0.4 * cote;
     let z_eq = haut * (0.5 - 500. / MER.rho);
     let mut bouee = RigidBody::cuboid([cote, cote, haut], 500., [x0, 0., z_eq], [4, 4, 4]);
     let mut refus = 0;
@@ -482,7 +484,7 @@ fn mesure_s494(a: f64, energie: f32, cote: f64) -> [f64; 7] {
     };
     let (serie, refus) = serie_de(energie);
     let (sans, _) = serie_de(0.);
-    analyse_s494(&serie, &sans, 0.8 * cote, refus)
+    analyse_s494(&serie, &sans, 0.4 * cote, refus)
 }
 
 /// L'analyse d'une série de relevés au pas de 2 ms contre la même scène sans la part de W étudiée (`sans`) ; `haut` la hauteur de
@@ -1096,7 +1098,8 @@ fn nothing_amplifies_outside_the_constrained_mode_s498() {
 
 /// La mesure de B6 sur un pavé `l × b × h` de masse `m` et de proxy `n` : `[raideur de pilonnement / ρgA, GM roulis, GM tangage, GM
 /// roulis prédit, GM tangage prédit]` — GM tiré du moment de rappel d'une inclinaison de 10⁻⁴ rad à l'équilibre en eau calme ; la
-/// prédiction `BM·(1 − 1/n²) + z_F`, `z_F` la hauteur, rapportée au centre, des points pondérés par leur poussée à l'équilibre.
+/// prédiction `BM·(1 − 1/n²) + z_F`, `z_F` la hauteur, rapportée au centre, des poussées à l'équilibre — depuis S500 (ADR-227) au
+/// centre de la part immergée de chaque point (en S499, en son milieu).
 fn b6_mesure(l: f64, b: f64, h: f64, m: f64, n: [usize; 3]) -> [f64; 5] {
     let corps = RigidBody::cuboid([l, b, h], m / (l * b * h), [0.; 3], n);
     let c = corps.equilibrium_offset(MER);
@@ -1108,7 +1111,8 @@ fn b6_mesure(l: f64, b: f64, h: f64, m: f64, n: [usize; 3]) -> [f64; 5] {
     for p in &droit.proxy {
         let frac = ((0. - (c + p.body[2] - 0.5 * p.thickness)) / p.thickness).clamp(0., 1.);
         poussee += p.volume * frac;
-        moment_z += p.volume * frac * p.body[2];
+        // S500 (ADR-227) : la poussée au centre de la part immergée.
+        moment_z += p.volume * frac * (p.body[2] - (1. - frac) * 0.5 * p.thickness);
     }
     let z_f = moment_z / poussee;
     let d = m / (MER.rho * l * b);
@@ -1176,5 +1180,35 @@ fn b6_how_many_proxy_points_per_archetype_s499() {
         );
         assert!(pire_prediction <= 1e-3, "critère 2, {nom} : {pire_prediction}");
         assert!(meilleur.is_some(), "critère 3, {nom} : aucune grille jusqu'à 16 × 16 × 8");
+    }
+}
+
+/// **S500 — la poussée au centre de la part immergée** (ADR-227). (1) À l'équilibre droit, la hauteur des poussées est celle du centre
+/// de carène, `z_F = KB − KG`, à 10⁻⁹ près pour toute grille ; (2) B6 refait (l'essai de S499, son modèle mis à jour) : les plus petits
+/// proxys n'ont plus besoin de compensation — une couche suffit : navire 7 × 10 × 1, barque et caisse 7 × 7 × 1.
+#[test]
+fn the_buoyancy_acts_at_the_immersed_centroid_s500() {
+    for (nom, l, b, h, m) in [("navire", 60., 10., 8., 1.2e6), ("barque", 3., 2., 0.6, 400.), ("caisse", 1., 1., 0.2, 50.)] {
+        let d = m / (MER.rho * l * b);
+        let mut pire = 0f64;
+        for nz in 1..=8 {
+            for (nx, ny) in [(4, 4), (7, 10), (16, 8)] {
+                let r = b6_mesure(l, b, h, m, [nx, ny, nz]);
+                let z_f = r[3] - b * b / (12. * d) * (1. - 1. / (ny * ny) as f64);
+                pire = pire.max((z_f - (d / 2. - h / 2.)).abs());
+            }
+        }
+        println!("S500 {nom} : |z_F − (KB − KG)| ≤ {pire:.1e} m");
+        assert!(pire <= 1e-9, "critère 1, {nom} : {pire}");
+    }
+    // Le plus petit proxy sans compensation, comme en S499, à une couche.
+    let attendu = [("navire", 60., 10., 8., 1.2e6, [7, 10, 1]), ("barque", 3., 2., 0.6, 400., [7, 7, 1]), ("caisse", 1., 1., 0.2, 50., [7, 7, 1])];
+    for (nom, l, b, h, m, grille) in attendu {
+        let d = m / (MER.rho * l * b);
+        let analytique = |largeur: f64| d / 2. + largeur * largeur / (12. * d) - h / 2.;
+        let r = b6_mesure(l, b, h, m, grille);
+        let e = [(r[1] / analytique(b) - 1.).abs(), (r[2] / analytique(l) - 1.).abs()];
+        println!("S500 {nom} {grille:?} ({} points) : GM roulis {:+.2} %, tangage {:+.2} %", grille[0] * grille[1] * grille[2], 100. * (r[1] / analytique(b) - 1.), 100. * (r[2] / analytique(l) - 1.));
+        assert!(e[0] <= 0.05 && e[1] <= 0.05, "critère 2, {nom} : {e:?}");
     }
 }

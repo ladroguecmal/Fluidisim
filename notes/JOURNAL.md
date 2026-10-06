@@ -295,3 +295,13 @@ l'amortissement des autres degrés de liberté et B6). Maillons **0**. Suivant :
 barque et caisse 49 — mais à une couche par compensation ; sans compensation 560 / 196 / 147. Le surcoût vient de la couche partielle qui
 pousse en son milieu. 6.1 avance. Maillons **0**. Suivant : **S500, pousser au centre de la part immergée** — `z_F` exact à une couche,
 B6 refait.
+
+## S500 — 2026-10-06 — la poussée du proxy au centre de la part immergée
+
+**Entrée.** En autonomie, la suite de B6. **Fait** ([preuve](../docs/validation/POUSSEE-S500.md),
+[ADR-227](../docs/adr/ADR-227-la-poussee-au-centre-de-la-part-immergee.md)) : la poussée d'un point en partie immergé appliquée au centre
+de sa part immergée. **Mesuré** : la hauteur des poussées égale au centre de carène à 2·10⁻¹⁴ m pour toute grille ; une couche suffit —
+70 points pour le navire (S499 : 560 sans compensation), 49 pour la barque et la caisse. **Une régression vue et expliquée** : la bouée
+haute de S494 (GM vrai +2 mm) devient instable avec un proxy de 4 × 4 — l'ancienne poussée la stabilisait à tort ; bouées d'essai plates
+(ADR-227 D3). Avec elles, l'écart horizontal de S494 à 1 kJ tombe de 102 à 35 % : une part de sa « dérive » était le roulis. 660 essais.
+Lot des registres. Maillons **0**. Suivant : **S501, la revue de méthode** (ADR-222).

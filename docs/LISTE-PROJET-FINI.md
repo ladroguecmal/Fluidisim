@@ -412,8 +412,9 @@ pas recopiée ici (L137).
   R15 ([preuve](validation/PORTE-D-S333.md) §9) ; **W derrière la requête** depuis S494–S495 (6.2) ; **C11** depuis S498 — les trois
   régimes d'ADR-008 §3 selon `ω·dt`, la balle de ping-pong contrainte à la surface à l'écart nul, `|G|` = 1 à 10⁻¹² hors mode contraint
   ([preuve](validation/PETIT-OBJET-S498.md)) ; **B6 mesuré** en S499 — la hauteur métacentrique d'un proxy en grille suit
-  `BM·(1 − 1/n²) + z_F` à 3·10⁻⁸ ; le navire demande 224 points, barque et caisse 49 ([preuve](validation/B6-PROXY-S499.md)).
-  Manquent l'amortissement des autres degrés de liberté et la poussée au centre de la part immergée (B6 sans compensation).
+  `BM·(1 − 1/n²) + z_F` à 3·10⁻⁸ ([preuve](validation/B6-PROXY-S499.md)) ; **S500** : la poussée au centre de la part immergée
+  ([ADR-227](adr/ADR-227-la-poussee-au-centre-de-la-part-immergee.md)) — une couche suffit, 70 points pour le navire, 49 pour la barque
+  et la caisse ([preuve](validation/POUSSEE-S500.md)). Manque l'amortissement des autres degrés de liberté.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
   du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)) ; **S494** : les **impacts de W** — B et les

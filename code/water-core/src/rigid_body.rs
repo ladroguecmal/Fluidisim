@@ -289,7 +289,11 @@ impl RigidBody {
                 f = add(f, scale(rel, k));
             }
             force = add(force, f);
-            torque = add(torque, cross(r, f));
+            // S500 (ADR-227) : la poussée d'un point en partie immergé s'applique au centre de sa part immergée — son milieu abaissé
+            // de `(1 − f)·e/2` le long de l'axe du corps —, pas en son milieu : la hauteur du centre de carène exacte à une couche
+            // (B6, S499). La force ne change pas ; un point noyé, ni son moment.
+            let bras = if frac < 1. { add(r, rotate(self.orientation, [0., 0., -(1. - frac) * 0.5 * p.thickness])) } else { r };
+            torque = add(torque, cross(bras, f));
         }
         // S336 : l'eau que la coque met en mouvement emporte son énergie en ondes — un amortissement linéaire en la
         // vitesse relative à l'eau au centre de masse. Nul par défaut : rien ne change.

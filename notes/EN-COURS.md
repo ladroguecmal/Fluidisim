@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S500 — **en cours**. En autonomie, **6.1 — pousser au centre de la part immergée** : S499 a montré que tout le surcoût des
+Session : S500 — **terminée**. En autonomie, **6.1 — pousser au centre de la part immergée** : S499 a montré que tout le surcoût des
 couches du proxy vient de la couche partielle, qui pousse en son milieu (`z_F` faux de `(1 − f)·f·e²/(2d)`).
 
 **Ce que la session fait.** Dans `RigidBody::forces`, la poussée d'un point partiellement immergé s'applique au centre de sa part immergée
@@ -80,7 +80,11 @@ tolérances ; le pilonnement droit ne change pas au bit (moment nul par symétri
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la poussée au centre de la part immergée ; B6 refait ; la suite.
-- [ ] **P3** — ADR-227 ; preuve ; liste 6.1 ; rituel.
+- [x] **P2** — la poussée au centre de la part immergée ; B6 refait ; la suite.
+- [x] **P3** — ADR-227 ; preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
+- **P2** — (1) ≤ 2,4·10⁻¹⁴ m ; (2) 70 / 49 / 49 points, prédiction à 8,6·10⁻⁸ ; (3) une régression : la bouée haute de S494 (GM vrai
+  +2,2 mm, proxy −1,2 mm) roule → bouées plates (ADR-227 D3) ; à 1 kJ, l'écart horizontal de S494 tombe de 102 à 35 % (une part était le
+  roulis). 660 essais ; l'essai long du sillage relancé.
+- **P3** — ADR-227 ; preuve POUSSEE-S500 ; liste 6.1 ; index ; lot : feuille de route (S498–S500) ; l'essai long du sillage inchangé (0,85 %) ; journal.

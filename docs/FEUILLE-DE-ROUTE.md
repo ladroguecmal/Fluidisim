@@ -363,6 +363,8 @@ n'est pas une symétrie ; A326 : la carte bornée à 8 M particules) ; la premi�
 la surface, sur la carte) ; 6.2 avancée (les impacts de W derrière la requête du corps).
 **S495–S497** : 6.2 avancée (le sillage pousse les corps : W entier derrière la requête du corps) ; la troisième revue (ADR-226 : localiser
 avant de remédier) ; **6.3 validée** (le corps en marche émet son sillage).
+**S498–S500** : 6.1 avancée — C11 (les régimes de flottabilité d'ADR-008 §3, le petit objet contraint à la surface), B6 (le modèle
+d'erreur du proxy), la poussée au centre de la part immergée (ADR-227 : une couche suffit, 70 points pour un navire de 60 m).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
