@@ -62,33 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S514 — **terminée**. En autonomie, **6.7, l'acteur poussé, renversé ou déplacé par l'eau** — absent. ADR-018 (seuils de
-profondeur humanoïdes 0,15 / 0,50 / 1,00 / 1,30 m ; produit d'emportement `HR = d·(v + 0,5)` et ses classes) et ADR-023 §3 (le nageur :
-un corps commandé en surface bascule en mode contraint quel que soit son `ω·dt`, la commande ajoutée dans le repère de la surface) en
-fixent les règles ; rien ne les construit.
+Session : S515 — **en cours**. En autonomie, **5.4, la vanne selon son ouverture, les pertes et l'énergie de la pompe** : ADR-199 laissait
+« le `C_d` selon l'ouverture, à calibrer sur la courbe du constructeur », « ni puissance ni énergie consommée, ni pertes de charge » ; son
+§3 dit la voie : une courbe tabulée à la place de la section, une seconde loi plutôt qu'une modification.
 
-**Ce que la session fait.** `actor` (cœur) : la classe de progression d'un humanoïde selon la profondeur, le produit d'emportement et sa
-classe, l'adulte emporté (`HR ≥ 1,25`) ; `Floating` d'un corps commandé (toujours contraint) ; le pas contraint commandé (la vitesse
-horizontale relaxée vers la vitesse de l'eau **plus** la commande).
+**Ce que la session fait.** Deux lois nouvelles de V, les anciennes intactes : `Flow::Valve { area_mm2, curve_pm }` — Torricelli sous une
+courbe d'ouverture tabulée (onze points, de 0 à 1 000 ‰, interpolée linéairement : la courbe du constructeur, linéaire, à pourcentage
+égal…) ; `Flow::PumpLine { …, loss_um_per_l2s2, efficiency_pm }` — la pompe avec perte de charge `K·Q²` sur sa conduite, point de
+fonctionnement `Q = √((n²H₀ − Δh)/(H₀/Q²max + K))`, rendement ; `pump_operating_point` : débit, hauteur, puissance hydraulique et à
+l'arbre, pour que l'hôte cumule l'énergie. L'empreinte et la validation les connaissent.
 
-**Ordre de grandeur, écrit avant (ADR-023 §3.4).** Un nageur à 0,7 m/s ne fait plus route quand la vitesse orbitale de surface `πH/T`
-dépasse sa vitesse : à `T` = 5 s, `H* = 0,7·T/π` = 1,114 m — à la relaxation près (taux `ω` du corps ≫ `2π/T` : quelques pour mille).
+**Ordre de grandeur, écrit avant.** Une courbe à pourcentage égal de rapport 50 (`f = 50^(x−1)`) : à mi-ouverture, 14 % du débit plein
+(contre 50 % en linéaire) ; tabulée tous les 10 %, l'interpolation linéaire s'en écarte au plus d'≈ 1,9 % du débit plein entre deux points.
+Une pompe de 10 l/s et 10 m de barrage, `K` = 0,05 m/(l/s)² : à `Δh` = 3 m, le débit tombe de 8,37 à 6,32 l/s.
 
-**Critères, écrits avant.** (1) les seuils de profondeur et les classes de `HR` d'ADR-018, de part et d'autre de chaque seuil ; l'exemple
-« 0,5 m à 2 m/s » emporte un adulte, « 0,5 m à 1,4 m/s » non ; (2) un corps commandé est contraint même à `ω·dt` = 0,14 ; (3) le nageur
-commandé à 0,7 m/s face à une houle de 5 s : sa vitesse sur le fond change de signe pour `H` au-dessus de `H*` (corrigé de la relaxation,
-calculé dans l'essai) et jamais en dessous, à 2 % près. 6.7 passe à partiel (manquent la poche d'air, le rouleau plongeant qui décolle le
-nageur).
+**Critères, écrits avant.** (1) la courbe linéaire rend les débits de l'orifice commandé à 10⁻¹² près ; la courbe à pourcentage égal exacte
+aux points de la table (10⁻¹²) et dans la borne d'interpolation entre eux ; (2) `PumpLine` à `K` = 0 rend `Pump` à 10⁻¹² près ; à `K` > 0, la
+forme fermée à 10⁻⁹ ; (3) l'énergie : en remplissant un bassin, `∫ P_hydraulique dt` égale l'énergie potentielle gagnée par l'eau (plus
+`∫ ρgKQ³ dt` avec pertes) à 0,1 % ; la puissance à l'arbre `P_h/η` ; (4) la masse exacte ; la suite du cœur, l'instantané. 5.4 reste
+partielle par 5.8 (le réseau fermé, v2 d'ADR-010).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `actor` ; le mode contraint commandé ; essais (1)–(3).
-- [x] **P3** — preuve ; liste 6.7 ; rituel.
+- [ ] **P2** — `Valve`, `PumpLine`, `pump_operating_point` ; essais (1)–(4).
+- [ ] **P3** — preuve ; note datée à ADR-199 ; liste 5.4 ; rituel.
 
 ### Notes de reprise
-- **P2** — `actor` ; `floating_controlled`, `step_controlled`, `constrained_step` partagé. (1) tenu ; (2) passif Normal, commandé Constrained ;
-  (3) H* = 1,1399 m, +0,0136 / −0,0143 m/s. Un hôte d'essai mal recopié (la signature de `JobSystem`) → les essais du nageur dans ceux du corps.
-  678 essais.
-- **P3** — preuve ACTEUR-S514 ; liste 6.7 (partiel) ; index ; journal.
-
