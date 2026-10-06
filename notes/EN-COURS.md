@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S495 — **en cours**. En autonomie, **6.2, le sillage de pression derrière la requête du corps** : `MixedWater` (S494) compose
+Session : S495 — **terminée**. En autonomie, **6.2, le sillage de pression derrière la requête du corps** : `MixedWater` (S494) compose
 B et les impacts ; l'autre part de W, la pression d'un objet en marche (`bound_pressure`, ADR-103), n'y entre pas. Un corps ne sent pas
 le sillage d'un autre.
 
@@ -84,7 +84,7 @@ courant, la turbulence).
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'extraction au bit ; `MixedWater` avec la pression ; essais (1)–(4).
-- [ ] **P3** — preuve ; liste 6.2 ; rituel.
+- [x] **P3** — preuve ; liste 6.2 ; rituel.
 
 ### Notes de reprise
 - **P2 (en cours)** — l'extraction (`compose_local`, `mixed::sample_local`) : 11 560 points au bit contre `Prepared::sample_local` ;
@@ -106,4 +106,4 @@ courant, la turbulence).
 - **P2 fait** — lâchée à la vitesse de l'eau : (3) **0,85 %** à 2 Pa (0,25 m) ; à 200 Pa 12,5 % (second ordre, publié). (2) 0,05 % et
   0,03 % ; sillage : 9,6 mm de pilonnement pour 8,4 mm de surface. (4) 0. L'essai du sillage `#[ignore]` (≈ 8,5 min). Suite : 654
   essais, 17 ignorés.
-
+- **P3** — preuve SILLAGE-CORPS-S495 ; liste 6.2 ; index ; journal.

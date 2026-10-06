@@ -248,3 +248,14 @@ la moitié droite nulle, la période à 0,16 % (alignée) et 0,27 % (milieu de m
 ce que l'ordre de grandeur n'avait pas compté (`k·a·ω·t`, pas `k·a`) ; au linéaire, l'empreinte (4,9 % → 1,26 % en L²). Lot des
 registres : feuille de route (décompte 5 / 72 / 43), liste, index. Maillons **0** (les corps sentent les impacts de W ; la preuve).
 Suivant : **S495, le sillage de pression derrière la requête du corps** — l'autre part de W.
+
+## S495 — 2026-10-06 — le sillage d'un objet en marche pousse un corps (6.2)
+
+**Entrée.** En autonomie, la suite de S494. **Fait** ([preuve](../docs/validation/SILLAGE-CORPS-S495.md)) : la composition mixte (B,
+impacts, pression) extraite par point, au bit, et exposée au point local ; `MixedWater` prend la pression publiée. **Mesuré** : 11 560
+points au bit ; une bouée dans le bras de Kelvin d'une source à 3 m/s pilonne à 0,05 % de l'oscillateur et suit l'eau à 0,85 % au régime
+linéaire. **Trois manqués avant le diagnostic** : la recette d'essai 16 × 24 replie la pression au-delà de 4 m ; à 3σ, la vraie queue de
+la gaussienne l'emporte sur la pente du sillage ; puis la bouée partait au repos dans une eau déjà en mouvement. Les chaînes (corps,
+champ, départ) n'ont été séparées qu'au troisième essai — friction pour la revue de S496. Non tranché : la coupure 3 du sillage de
+production. W entier derrière la requête du corps ; 6.2 reste partielle (courant, turbulence). Maillons **0**. Suivant : **S496, la revue
+de méthode** (ADR-222).
