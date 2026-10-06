@@ -62,34 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S512 — **terminée**. En autonomie, **6.8, l'impulsion d'entrée dans l'eau** (*slamming*, C20, ADR-023 §2) — absente : une
-entrée dans l'eau dure moins d'un tick (17 à 73 ms) ; la flottabilité échantillonnée la rate ou la double selon la phase du tick.
+Session : S513 — **en cours**. En autonomie, **2.6 (niveaux C0 et C2 d'ADR-011) et 6.2, le courant** : 6.2 dit « Manquent le courant, la
+turbulence » ; le courant n'existe nulle part dans l'eau (2.6, absente, conçue par ADR-011). Et le lot des registres (dû).
 
-**Ce que la session fait.** Le corps rigide reçoit un archétype d'impact (relèvement `β`, demi-largeur `b`, longueur `L`, seuil de
-2 m/s) ; à chaque pas, l'instant **exact** où sa quille passe sous la surface (chute libre résolue dans le pas), et, au-delà du seuil,
-l'impulsion de masse ajoutée appliquée à cet instant : `m_a = ½πρb²L`, la quantité de mouvement du corps et de l'eau entraînée conservée —
-`v' = m·v/(m + m_a)`, `J = m_a·v'` (→ `m_a·v` d'ADR-023 quand `m_a ≪ m`) ; un événement publié (instant, `J`, `v_rel`, `t_impact`).
+**Ce que la session fait.** `CurrentWater` : une requête qui enveloppe une autre (B, ou B + W) et lui ajoute un courant C0 (vecteur de
+surface constant) et son profil C2 (`u(z) = u_fond + (u_surface − u_fond)·exp(z/D)`) : la vitesse de l'eau augmentée du profil, et le champ
+de vagues **advecté** par le courant de surface (`η(x, t) = η₀(x − U·t, t)`, Galilée : l'effet Doppler d'un courant uniforme). Le champ C0/C2
+en lecture seule (ADR-011 §2). Un corps qui traîne dérive avec lui.
 
-**Ordre de grandeur, écrit avant.** La coque de la porte D lâchée à plat (`b` = 0,8 m, `L` = 4 m) : `m_a` = ½·π·1025·0,64·4 ≈ 4 100 kg —
-plus que sa masse (3 200 kg) : l'impulsion d'ADR-023 (`m_a·v`) y surestimerait `J` de `1 + m_a/m` ≈ 2,3 ; le bilan (von Kármán) le borne.
-Pour un corps lourd (`m_a/m` < 5 %), les deux à 5 % près. `t_impact = 2b·tanβ/(πv)` : 10 à 70 ms.
+**Ordre de grandeur, écrit avant.** Une houle de 6 s (λ = 56 m, c = 9,37 m/s) sur un courant de 1 m/s : les crêtes vont à 10,37 m/s,
++10,7 %. La dérive d'un pavé traîné (`C_d` = 1) : la vitesse relative `w(t) = w₀/(1 + k·w₀·t)`, `k = ½ρ·C_d·A/m` — pour la bouée de 0,5 m
+à 500 kg/m³ (A ≈ 0,1 m² immergé de face, m = 50 kg), `k` ≈ 1 m⁻¹ : la moitié de l'écart en ≈ 1 s.
 
-**Critères, écrits avant (C20).** (1) le bilan : quantité de mouvement corps + eau entraînée conservée à 10⁻¹² près ; `J` à 5 % de
-`Δm_a·v_rel` quand `m_a/m` < 5 % ; (2) **l'indépendance à la phase** : la même chute, décalée de vingt phases de tick, rend le même `J` et le
-même instant d'impact à 10⁻⁹ près — le témoin échantillonné au tick (l'impulsion appliquée au premier tick où la quille est sous l'eau, à
-la vitesse de ce tick) disperse de plusieurs pour cent ; (3) sous le seuil de 2 m/s, aucune impulsion ; (4) les essais du corps inchangés
-(archétype absent par défaut). Si (1)–(4), 6.8 validée.
+**Critères, écrits avant.** (1) sans courant, la requête rend l'enveloppée au bit ; (2) la vitesse d'une crête de houle sous courant :
+`c + U` à 0,5 % ; (3) le profil vertical exact (à 10⁻¹²) ; (4) la dérive d'un pavé traîné en eau calme sous courant : `w(t)` à 1 % de
+l'analytique. 2.6 passe à partiel ; 6.2 garde la turbulence pour seul manque.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'archétype d'impact, la détection exacte, l'impulsion ; essais (1)–(4).
-- [x] **P3** — preuve ; liste 6.8 ; rituel.
+- [ ] **P2** — `CurrentWater` ; essais (1)–(4).
+- [ ] **P3** — preuve ; liste 2.6 et 6.2 ; lot des registres ; rituel.
 
 ### Notes de reprise
-- **P2** — `SlamArchetype`, `SlamEvent`, `slam_entry`, `integrate`, `advance_orientation` (partagée). (1) bilan 1,5·10⁻¹¹ ; 0,980 ; coque
-  `J = m_a·v/(1 + m_a/m)`. (2) **manqué d'abord** : `J` à 1,1·10⁻³ près, instants à 2,3 s près — les pas en l'air symplectiques descendaient
-  plus vite que la chute libre et faisaient manquer le passage ; chute libre exacte en l'air : 2·10⁻¹⁶ ; témoin 5,3 %. (3) un « impact sous
-  le seuil » : un vrai second impact (rebond sans amortissement, rentrée à 2,01 m/s) — l'essai borné à la première entrée. 672 essais.
-- **P3** — preuve IMPACT-ENTREE-S512 ; **6.8 validée** (10 / 120) ; index ; journal.
-
