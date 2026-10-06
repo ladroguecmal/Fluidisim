@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 17:13 +02:00
+JETON            : libre
+Battement        : 2026-10-06 17:18 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S533 — 5.5, la pluie hors contenant : submersion, infiltration et ruissellement ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S532 — la carte refuse ses limites avec un nom ([journal](notes/JOURNAL.md)). Avant : S531 (la dixième revue de méthode)
-Session suivante : **S533 — un lot qui fait avancer une capacité (deux maillons)** : relire le tableau de bord ; candidats — la pluie hors contenant (5.5 : un sol sans flaque explicite), A330 (une référence de corps : Michell), la convergence de δ en pas seul (A328), 6.2 la turbulence, 6.7 la poche d'air, 9.3 un corps quelconque ; limites matérielles calculées (ADR-235 D1), montage dans le domaine de ses outils (ADR-234 D1), ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 2 — S532 : la carte refuse ses limites (une garde), aucun point n'avance
+Session en cours : aucune
+Dernière session : S533 — la pluie hors contenant ([journal](notes/JOURNAL.md)). Avant : S532 (la carte refuse ses limites avec un nom)
+Session suivante : **S534 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'assèchement du sol (5.5 : drainage et évaporation, bilans analytiques), A330 (une référence de corps : Michell), la convergence de δ en pas seul (A328), 6.2 la turbulence, 6.7 la poche d'air, 9.3 un corps quelconque ; un seuil d'instrument au-dessus du quantum de l'objet (ADR-234 D2), limites matérielles calculées (ADR-235 D1), ordres de grandeur calculés (ADR-232). Revue à S536. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S533 : la pluie hors contenant (5.5)
 Registres       : dernier lot S530 (ADR-213 D3) ; le prochain au plus tard en S533
 ```
 

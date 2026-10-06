@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S533 — **en cours**. En autonomie ; deux maillons : une capacité. **5.5 — la pluie hors contenant** : la pluie qui tombe sur le
+Session : S533 — **terminée**. En autonomie ; deux maillons : une capacité. **5.5 — la pluie hors contenant** : la pluie qui tombe sur le
 sol (pas dans un contenant) s'infiltre, puis, quand le sol ne suit plus, remplit la rétention de surface et ruisselle.
 
 **Ce que la session fait.** Le sol à ciel ouvert en trois pièces de V, sans loi nouvelle : un nœud de **rétention de surface** (la lame
@@ -80,8 +80,12 @@ décalé. (3) La masse exacte : pluie = sol + rétention + ruissellement, au mil
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 5.5 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 5.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — submersion lue à 29,1 min (−23 % : le seuil d'1 ml est le quantum, (1) manqué ; 10 ml à 39,13 min, diagnostic après
+  coup) ; F à 2 h 48,928 mm pour 48,880 (9,8·10⁻⁴) ; masse exacte, ruissellement dès la rétention pleine (50 min).
+- **P3** — preuve PLUIE-SOL-S533 ; liste 5.5 ; index ; journal.
+

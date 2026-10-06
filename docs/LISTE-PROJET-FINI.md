@@ -401,8 +401,9 @@ pas recopiée ici (L137).
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D2), sauvegardée ; une heure au millilitre, déversoir
   sous la pluie à 0,11 % de l'analytique ([preuve](validation/PLUIE-V-S378.md)) ; **S530 : l'absorption par le sol** — Green–Ampt,
   une arête de la flaque vers le sol intégrée exactement sur le pas, à 7·10⁻⁵ de la solution implicite ; le sol plein et la flaque à sec
-  l'arrêtent ([preuve](validation/INFILTRATION-S530.md)). Manquent la pluie hors contenant, le calcul de l'exposition depuis les objets
-  posés, l'assèchement du sol, la météo (à la fin).
+  l'arrêtent ([preuve](validation/INFILTRATION-S530.md)) ; **S533 : la pluie hors contenant** — rétention de surface, infiltration,
+  ruissellement : la lame infiltrée à 0,1 % de Mein–Larson et Green–Ampt décalé, la masse exacte ([preuve](validation/PLUIE-SOL-S533.md)).
+  Manquent le calcul de l'exposition depuis les objets posés, l'assèchement du sol, la météo (à la fin).
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.

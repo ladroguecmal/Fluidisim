@@ -583,3 +583,12 @@ refusées par un message, 3,44 M acceptées ; les bancs au bit. Le refus des lia
 groupes sur cette carte). Maillons **2** (une garde, aucun point n'avance) : la suivante choisit un lot qui fait avancer une capacité.
 Suivant : **S533**.
 
+## S533 — 2026-10-06 — la pluie hors contenant
+
+**Entrée.** En autonomie ; deux maillons : 5.5, la pluie hors contenant. **Fait** ([preuve](../docs/validation/PLUIE-SOL-S533.md)) : trois
+pièces de V déjà éprouvées — la rétention de surface reçoit la pluie, l'infiltration de S530 la mène au sol, le débordement de S489 est le
+ruissellement. **Mesuré** : la lame infiltrée à 2 h à 0,098 % de Mein–Larson et Green–Ampt décalé, la masse exacte, le ruissellement dès la
+rétention pleine. **Critère (1) manqué** : la submersion lue à 29,1 min pour 37,67 — le seuil d'1 ml est le quantum de V (ADR-234 D2, que
+j'ai écrite et n'ai pas appliquée à mon propre seuil) ; 10 ml passés à 39,13 min, en diagnostic après coup. Maillons **0** (5.5 avance).
+Suivant : **S534**, un point partiel.
+
