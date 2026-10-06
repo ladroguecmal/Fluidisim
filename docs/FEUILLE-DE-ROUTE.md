@@ -318,8 +318,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **6 points validés sur 120**, 71 partiels,
-43 absents (S497 ; 5.3 en S489, 6.5 en S493, 6.3 en S497) — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378), 8.4 (S380), 4.3 (S386), 4.16 (S393), 4.9 (S396), 9.2 (S401), 9.3 (S405), 4.10 (S408) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **7 points validés sur 120**, 70 partiels,
+43 absents (S503 ; 5.3 en S489, 6.5 en S493, 6.3 en S497, 6.1 en S502) — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378), 8.4 (S380), 4.3 (S386), 4.16 (S393), 4.9 (S396), 9.2 (S401), 9.3 (S405), 4.10 (S408) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -365,6 +365,8 @@ la surface, sur la carte) ; 6.2 avancée (les impacts de W derrière la requête
 avant de remédier) ; **6.3 validée** (le corps en marche émet son sillage).
 **S498–S500** : 6.1 avancée — C11 (les régimes de flottabilité d'ADR-008 §3, le petit objet contraint à la surface), B6 (le modèle
 d'erreur du proxy), la poussée au centre de la part immergée (ADR-227 : une couche suffit, 70 points pour un navire de 60 m).
+**S501–S503** : la quatrième revue (ADR-228 : un corps d'essai loin de ses limites) ; **6.1 validée** (l'amortissement des six degrés de
+liberté, mesuré par δ) ; 6.4 avancée (un solide immergé qui bouge sur la carte).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

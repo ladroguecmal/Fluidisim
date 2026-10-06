@@ -323,3 +323,12 @@ amortissement en roulis, tangage, lacet, cavalement, embardée ; le corps les re
 manqué (15,8 % : sauts aux franchissements de faces, A317), embardée et lacet bruités aux basses pulsations (les murs du domaine).
 **6.1 validée — 7 points sur 120**, sous des constantes à ± 10 à 30 %. Maillons **0**. Suivant : un autre point partiel proche de son
 périmètre.
+
+## S503 — 2026-10-06 — un solide qui bouge sur la carte
+
+**Entrée.** En autonomie ; 6.4 (« Manquent la coque qui bouge sur la carte et C23 »). **Fait** ([preuve](../docs/validation/MOBILE-CARTE-S503.md)) :
+le cœur découpe — le terme de paroi extrait de sa divergence (une seule écriture), les faces qui changent, les volumes solides par
+colonne — et `Linear3::set_motion` applique (deux noyaux, une ligne du second membre). **Mesuré** : une sphère immergée menée à 0,5 m/s, la
+carte à 2,2·10⁻⁶ m de la référence pour 1 cm d'élévation, volumes à 4·10⁻⁹ m³ ; le banc de S358 identique au binaire d'avant. Le recoupage
+CPU coûte 7,7 ms par pas contre 0,71 ms pour la carte : la suite du temps réel. Lot des registres. Maillons **0**. Suivant : **S504, la
+coque qui perce la surface en mouvement sur la carte** (le dépôt sous couvercle partiel, le transfert de S334).

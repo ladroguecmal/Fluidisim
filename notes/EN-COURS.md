@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S503 — **en cours**. En autonomie, **6.4, un solide qui bouge sur la carte** (première part) : `Linear3` (S358, S493) n'accepte
+Session : S503 — **terminée**. En autonomie, **6.4, un solide qui bouge sur la carte** (première part) : `Linear3` (S358, S493) n'accepte
 qu'une géométrie fixe ; la référence (`Volume3::set_solid_rigid`) recoupe à chaque pas, ajoute au second membre le flux de la part des
 faces que la paroi couvre, donne aux faces qui s'ouvrent la vitesse de la paroi et dépose sur la surface l'eau que le solide déplace.
 S503 : un solide **immergé** ; S504 : la coque qui perce la surface (le transfert de S334).
@@ -85,7 +85,7 @@ référence à 10⁻⁶ m³ près ; (4) le coût par pas (recoupage CPU et carte
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le cœur expose le terme de paroi, les faces, les colonnes solides ; `set_motion` et ses noyaux.
 - [x] **P3** — le banc de la sphère menée ; (1)–(4).
-- [ ] **P4** — preuve ; liste 6.4 ; lot des registres (dû) ; rituel.
+- [x] **P4** — preuve ; liste 6.4 ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
 - **P2** — `Volume3::wall_term` (extrait de la divergence, une seule écriture), `wall_divergence`, `changed_faces`, `solid_column_volumes` ;
@@ -94,3 +94,4 @@ référence à 10⁻⁶ m³ près ; (4) le coût par pas (recoupage CPU et carte
 - **P3** — `--lineaire-mobile` : carte à 2,205·10⁻⁶ m de la référence, élévation 1,036 cm (rapport 4 699), volumes à 4,0·10⁻⁹ m³ ;
   recoupage CPU 7,7 ms par pas, pas de la carte 0,71 ms (horloge murale ; l'horodatage GPU d'un pas isolé rendait 343 ms, faux). Suite
   du cœur : 663 essais.
+- **P4** — preuve MOBILE-CARTE-S503 ; liste 6.4 ; index ; lot : feuille de route (7 / 70 / 43, S501–S503) ; journal.

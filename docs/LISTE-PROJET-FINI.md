@@ -433,8 +433,10 @@ pas recopiée ici (L137).
   imposé** dans la référence 3D, masse ajoutée d'une sphère à 1,6 % ([preuve](validation/FACES-COUPEES-3D-S324.md)
   §9) ; la **coque du corps rigide**, qui tourne et perce la surface, pilotée par le jeu (S332–S337,
   [porte D](validation/PORTE-D-S333.md)) ; **S358** : le pas linéaire sur la carte (`Linear3`, ADR-193), à
-  1,3·10⁻⁵ m de la référence, 0,32 ms ([preuve](validation/LINEAIRE-GPU-S358.md)). Manquent la coque **qui bouge**
-  sur la carte et C23 sur le système — exécuté sur un véhicule d'essai.
+  1,3·10⁻⁵ m de la référence, 0,32 ms ([preuve](validation/LINEAIRE-GPU-S358.md)) ; **S503** : un solide **immergé qui bouge**
+  sur la carte — le cœur découpe, la carte applique (`set_motion`) ; une sphère menée à 2,2·10⁻⁶ m de la référence pour 1 cm
+  d'élévation ([preuve](validation/MOBILE-CARTE-S503.md)). Manquent la coque qui **perce** la surface en mouvement sur la carte, le
+  coût du recoupage (7,7 ms par pas) et C23 sur le système — exécuté sur un véhicule d'essai.
 - [x] **6.5 Décor fixe comme frontière imposée** — *validé* (S493) : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**

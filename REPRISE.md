@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 05:03 +02:00
+JETON            : libre
+Battement        : 2026-10-06 05:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S503 — 6.4, un solide qui bouge sur la carte (immergé) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S502 — 6.1 validée : la coque amortie sur ses six degrés de liberté ([journal](notes/JOURNAL.md)). Avant : S501 (la quatrième revue de méthode)
-Session suivante : **S503 — un point partiel proche de son périmètre** : relire le tableau de bord et la liste (6.2 le courant, 6.4, 4.13, 9.5, 5.4…), choisir celui dont le critère est le plus net ; un corps d'essai loin de ses limites (ADR-228), ordre de grandeur contre le terme concurrent (ADR-226). Le lot des registres y est dû. **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
-Maillons        : 0 — S502 : 6.1 validée (7 sur 120)
-Registres       : dernier lot S500 (ADR-213 D3) ; le prochain au plus tard en S503
+Session en cours : aucune
+Dernière session : S503 — un solide qui bouge sur la carte ([journal](notes/JOURNAL.md)). Avant : S502 (6.1 validée : la coque amortie sur ses six degrés de liberté)
+Session suivante : **S504 — la coque qui perce la surface, en mouvement sur la carte** (6.4) : le dépôt dans une colonne en partie couverte et le transfert de S334 (l'eau qu'une paroi qui glisse pousse vers les voisines) portés sur la carte ; la coque de la porte D en pilonnement et roulis imposés, carte contre référence. Chaînes séparées avant tout remède (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
+Maillons        : 0 — S503 : un solide immergé qui bouge sur la carte (6.4 avancée)
+Registres       : dernier lot S503 (ADR-213 D3) ; le prochain au plus tard en S506
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
