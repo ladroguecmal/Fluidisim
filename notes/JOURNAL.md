@@ -887,3 +887,11 @@ tolérance sous le plancher flottant (S568, corrigée dans le code) : rien à ch
 ([preuve](../docs/validation/TRAVERSABILITE-TUILES-S572.md)) : `TileDesc`, `publier` — séquence par tuile, Morton, prévision par cellule,
 événements de franchissement entre deux publications. **Mesuré** : une plage sous la marée publie exactement les 80 franchissements que le
 script du plan avait comptés ; la prévision d'une cellule à 10⁻³ s. Maillons **0** (7.7 avance). Suivant : **S573**, un point partiel.
+
+## S573 — 2026-10-06 — l'invalidation et la praticabilité par agent
+
+**Entrée.** En autonomie ; 7.7, deux manques de S572. **Fait** ([preuve](../docs/validation/TRAVERSABILITE-AGENTS-S573.md)) : `invalider`
+(SPEC-006 §5.4) ; `Agent`, `praticable`, `prochain_changement`. **Mesuré** : les échéances d'un véhicule et d'un bateau à 1 ms de leurs
+formes fermées ; l'invalidation puis le rétablissement des prévisions. **En route** : la borne du bateau a révélé deux expressions f32 du
+même seuil (praticabilité et prévision en désaccord de 4,5·10⁻⁸) — unifiées. Maillons **0** (7.7 avance). Suivant : **S574**, un point
+partiel.

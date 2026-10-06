@@ -558,8 +558,10 @@ pas recopiée ici (L137).
   de danger `HR = d·(v + 0,5)` et ses classes, la classe de profondeur d'un humanoïde) et **le prochain franchissement** d'une profondeur
   prévisible, avec sa cause — une marée M2 à 0,3 ms ([preuve](validation/TRAVERSABILITE-S570.md)) ; **S572 : les tuiles** — séquence,
   Morton, cadence, prévision par cellule, événements de franchissement entre deux publications (80 sur une plage, exactement ;
-  [preuve](validation/TRAVERSABILITE-TUILES-S572.md)). Manquent l'invalidation des prévisions par une commande de V, la glace porteuse, la
-  température, le gué d'un véhicule, le tirant d'un bateau, la marée de B (2.2), la source réelle des échantillons (B, W, V répliqués).
+  [preuve](validation/TRAVERSABILITE-TUILES-S572.md)) ; **S573** : l'invalidation par une commande de V (`Immediat`, `Aucune`) et la
+  praticabilité par agent — humanoïde, véhicule et son gué, bateau et son tirant — avec leur prochain changement
+  ([preuve](validation/TRAVERSABILITE-AGENTS-S573.md)). Manquent la glace porteuse, la température, la marée de B (2.2), la source réelle
+  des échantillons (B, W, V répliqués), le danger dans un courant qui varie.
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
   DyingStar (ADR-219).
 

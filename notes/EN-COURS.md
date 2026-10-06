@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S573 — **en cours**. En autonomie, **7.7** : deux manques de S572.
+Session : S573 — **terminée**. En autonomie, **7.7** : deux manques de S572.
 
 **Ce que la session fait.** (a) **L'invalidation** (SPEC-006 §5.4) : `invalider(tuile, cellules)` — une commande de V à l'amont fait passer
 la tuile en cadence `Immediat` et toutes ses prévisions à `CrossCause::Aucune` (« je ne sais plus » : un résultat, pas un échec) jusqu'à
@@ -84,7 +84,11 @@ toujours `Aucune` ; avec prévision, `Maree` ; (4) S570 et S572 inchangés.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'invalidation, les agents ; (1)–(4).
-- [ ] **P3** — preuve ; liste 7.7 ; rituel.
+- [x] **P2** — l'invalidation, les agents ; (1)–(4).
+- [x] **P3** — preuve ; liste 7.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — véhicule 3 725,9999 s, bateau 6 034,9260 s, humanoïde `None` ; bornes ; invalidation 128 → 256 `Aucune` → 128 rétablies.
+  En route : la praticabilité du bateau et sa prévision ne lisaient pas le même seuil en f32 — corrigé. Suite 747.
+- **P3** — preuve TRAVERSABILITE-AGENTS-S573 ; liste 7.7 ; index ; journal.
+
