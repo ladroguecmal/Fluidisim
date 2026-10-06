@@ -840,6 +840,107 @@ impl Volume3 {
         }
     }
 
+    /// **S330–S332 : le flux de la part des faces de la maille que la paroi mobile couvre**, divisé par `dx` — ce que la divergence de la
+    /// maille reçoit du solide qui bouge (sa vitesse, ou celle de sa paroi au centre de chaque face en rotation) ; `None` sans solide
+    /// mobile. Une seule écriture, pour la divergence du cœur et pour la carte (S503, `wall_divergence`).
+    fn wall_term(&self, g: &cut::Cut3, i: usize, j: usize, k: usize) -> Option<f32> {
+        let dx = self.domain.dx;
+        if let (Some(b), true) = (&g.base, g.solid_angular != [0.; 3]) {
+            let cov = |o: f32, base: f32| base - o;
+            let pw = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
+            let (xc, yc, zc) = ((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx);
+            let (x0, x1) = (i as f32 * dx, (i + 1) as f32 * dx);
+            let (y0, y1) = (j as f32 * dx, (j + 1) as f32 * dx);
+            let (z0, z1) = (k as f32 * dx, (k + 1) as f32 * dx);
+            let fx = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)]) * pw(0, [x1, yc, zc])
+                - cov(g.open_u[self.fu(i, j, k)], b.open_u[self.fu(i, j, k)]) * pw(0, [x0, yc, zc]);
+            let fy = cov(g.open_v[self.fv(i, j + 1, k)], b.open_v[self.fv(i, j + 1, k)]) * pw(1, [xc, y1, zc])
+                - cov(g.open_v[self.fv(i, j, k)], b.open_v[self.fv(i, j, k)]) * pw(1, [xc, y0, zc]);
+            let fz = cov(g.open_w[self.fw(i, j, k + 1)], b.open_w[self.fw(i, j, k + 1)]) * pw(2, [xc, yc, z1])
+                - cov(g.open_w[self.fw(i, j, k)], b.open_w[self.fw(i, j, k)]) * pw(2, [xc, yc, z0]);
+            return Some((fx + fy + fz) / dx);
+        } else if let (Some(b), [su, sv, sw]) = (&g.base, g.solid_velocity) {
+            if su != 0. || sv != 0. || sw != 0. {
+                let cov = |o: f32, base: f32| base - o;
+                let x = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)])
+                    - cov(g.open_u[self.fu(i, j, k)], b.open_u[self.fu(i, j, k)]);
+                let y = cov(g.open_v[self.fv(i, j + 1, k)], b.open_v[self.fv(i, j + 1, k)])
+                    - cov(g.open_v[self.fv(i, j, k)], b.open_v[self.fv(i, j, k)]);
+                let z = cov(g.open_w[self.fw(i, j, k + 1)], b.open_w[self.fw(i, j, k + 1)])
+                    - cov(g.open_w[self.fw(i, j, k)], b.open_w[self.fw(i, j, k)]);
+                return Some((su * x + sv * y + sw * z) / dx);
+            }
+        }
+        None
+    }
+
+    /// **S503 — le terme de paroi de chaque maille** ([`Volume3::wall_term`]), zéro sans solide mobile ni sur une maille solide : ce
+    /// que la carte ajoute à sa divergence pour suivre un solide qui bouge.
+    pub fn wall_divergence(&self, out: &mut [f32]) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        let g = self.cut.as_ref().ok_or(Error::Domain)?;
+        if out.len() != nx * ny * nz {
+            return Err(Error::Shape);
+        }
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    out[c] = if g.frac[c] == 0. { 0. } else { self.wall_term(g, i, j, k).unwrap_or(0.) };
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// **S503 — les faces que le dernier `set_solid_rigid` a fermées ou ouvertes**, dans l'ordre `u, v, w` : `0` pour une face fermée,
+    /// la vitesse normale de la paroi pour une face qui vient de s'ouvrir, `f32::MAX` pour une face à garder. Valide entre
+    /// `set_solid_rigid` et le pas suivant (les ouvertures d'avant vivent dans des tampons que le pas réemploie).
+    pub fn changed_faces(&self, out: &mut [f32]) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let g = self.cut.as_ref().ok_or(Error::Domain)?;
+        let (nu, nv, nw) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz, nx * ny * (nz + 1));
+        if out.len() != nu + nv + nw {
+            return Err(Error::Shape);
+        }
+        let paroi = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    let f = (k * ny + j) * (nx + 1) + i;
+                    out[f] = if g.open_u[f] == 0. { 0. } else if self.saved_u[f] == 0. {
+                        paroi(0, [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx])
+                    } else { f32::MAX };
+                }
+            }
+            for j in 0..=ny {
+                for i in 0..nx {
+                    let f = (k * (ny + 1) + j) * nx + i;
+                    out[nu + f] = if g.open_v[f] == 0. { 0. } else if self.saved_v[f] == 0. {
+                        paroi(1, [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx])
+                    } else { f32::MAX };
+                }
+            }
+        }
+        for k in 0..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let f = (k * ny + j) * nx + i;
+                    out[nu + nv + f] = if g.open_w[f] == 0. { 0. } else if self.saved_w[f] == 0. {
+                        paroi(2, [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx])
+                    } else { f32::MAX };
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// **S503 — le volume solide de chaque colonne** au dernier `set_solid_rigid` (m³) : la différence d'un pas à l'autre, divisée par
+    /// l'aire de la colonne, est l'eau que le solide dépose sur la surface.
+    pub fn solid_column_volumes(&self) -> Option<&[f32]> {
+        self.cut.as_ref().and_then(|g| g.base.as_ref()).map(|b| b.solid_col.as_slice())
+    }
+
     /// **S324 : divergence pondérée par les ouvertures**, parties `x` puis `z` comme la 2D, `y`
     /// ensuite ; une maille solide rend zéro.
     fn divergence_cut(&self, g: &cut::Cut3, u: &[f32], v: &[f32], w: &[f32], out: &mut [f32]) {
@@ -862,31 +963,8 @@ impl Volume3 {
                     out[c] = ((fr - fl + ft - fb) + (fk - ff)) / dx;
                     // S330 : la part des faces que le solide couvre avance à sa vitesse ; S332 : en rotation,
                     // à la vitesse de la paroi au centre de chaque face.
-                    if let (Some(b), true) = (&g.base, g.solid_angular != [0.; 3]) {
-                        let cov = |o: f32, base: f32| base - o;
-                        let pw = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
-                        let (xc, yc, zc) = ((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx);
-                        let (x0, x1) = (i as f32 * dx, (i + 1) as f32 * dx);
-                        let (y0, y1) = (j as f32 * dx, (j + 1) as f32 * dx);
-                        let (z0, z1) = (k as f32 * dx, (k + 1) as f32 * dx);
-                        let fx = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)]) * pw(0, [x1, yc, zc])
-                            - cov(g.open_u[self.fu(i, j, k)], b.open_u[self.fu(i, j, k)]) * pw(0, [x0, yc, zc]);
-                        let fy = cov(g.open_v[self.fv(i, j + 1, k)], b.open_v[self.fv(i, j + 1, k)]) * pw(1, [xc, y1, zc])
-                            - cov(g.open_v[self.fv(i, j, k)], b.open_v[self.fv(i, j, k)]) * pw(1, [xc, y0, zc]);
-                        let fz = cov(g.open_w[self.fw(i, j, k + 1)], b.open_w[self.fw(i, j, k + 1)]) * pw(2, [xc, yc, z1])
-                            - cov(g.open_w[self.fw(i, j, k)], b.open_w[self.fw(i, j, k)]) * pw(2, [xc, yc, z0]);
-                        out[c] += (fx + fy + fz) / dx;
-                    } else if let (Some(b), [su, sv, sw]) = (&g.base, g.solid_velocity) {
-                        if su != 0. || sv != 0. || sw != 0. {
-                            let cov = |o: f32, base: f32| base - o;
-                            let x = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)])
-                                - cov(g.open_u[self.fu(i, j, k)], b.open_u[self.fu(i, j, k)]);
-                            let y = cov(g.open_v[self.fv(i, j + 1, k)], b.open_v[self.fv(i, j + 1, k)])
-                                - cov(g.open_v[self.fv(i, j, k)], b.open_v[self.fv(i, j, k)]);
-                            let z = cov(g.open_w[self.fw(i, j, k + 1)], b.open_w[self.fw(i, j, k + 1)])
-                                - cov(g.open_w[self.fw(i, j, k)], b.open_w[self.fw(i, j, k)]);
-                            out[c] += (su * x + sv * y + sw * z) / dx;
-                        }
+                    if let Some(paroi) = self.wall_term(g, i, j, k) {
+                        out[c] += paroi;
                     }
                 }
             }

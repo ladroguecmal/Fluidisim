@@ -47,6 +47,9 @@ struct Params {
 @group(0) @binding(4) var<storage, read_write> partial: array<f32>;
 @group(0) @binding(5) var<storage, read_write> scalar: array<f32>;
 @group(0) @binding(6) var<uniform> s: Params;
+/// **S503 — le mouvement d'un solide** (`Linear3::set_motion`) : le terme de paroi de chaque maille (`cells`), la vitesse imposée
+/// des faces qui se ferment ou s'ouvrent (`faces` ; `f32::MAX` : garder), l'eau déposée sur chaque colonne (`columns`, m).
+@group(0) @binding(7) var<storage, read> motion: array<f32>;
 
 const X: u32 = 0u;   // pression
 const R: u32 = 1u;   // résidu
@@ -237,7 +240,13 @@ fn rhs(@builtin(global_invocation_id) id: vec3<u32>,
             let fk = open(fv(i, j + 1u, k)) * vel[o + fv(i, j + 1u, k)];
             let fb = open(fw(i, j, k)) * vel[o + fw(i, j, k)];
             let ft = open(fw(i, j, k + 1u)) * vel[o + fw(i, j, k + 1u)];
-            b = s.scale * (((fr - fl + ft - fb) + (fk - ff)) / s.dx);
+            let paroi = motion[c];
+            if (paroi == 0.0) {
+                b = s.scale * (((fr - fl + ft - fb) + (fk - ff)) / s.dx);
+            } else {
+                // S503 : la part des faces que le solide mobile couvre avance à sa vitesse (`Volume3::wall_term`).
+                b = s.scale * ((((fr - fl + ft - fb) + (fk - ff)) / s.dx) + paroi);
+            }
             if (k + 1u == s.nz) {
                 let a = open(fw(i, j, s.nz));
                 if (a >= 1.0) { b += 2.0 * a * lid(j * s.nx + i) * s.inv_dx2; }
@@ -499,4 +508,31 @@ fn advance(@builtin(global_invocation_id) id: vec3<u32>) {
     cols[c] = eta;
     cols[roundoff_at(c)] = roundoff;
     cols[published_at(c)] = difference(eta, s.z0) - roundoff;
+}
+
+// ── S503 : le mouvement d'un solide, appliqué au début du pas qui suit `set_motion` ─────────────────────────────────────────
+
+/// Les faces que le solide vient de fermer (vitesse nulle) ou d'ouvrir (la vitesse normale de sa paroi).
+@compute @workgroup_size(64)
+fn motion_faces(@builtin(global_invocation_id) id: vec3<u32>) {
+    let f = id.x;
+    if (f >= s.faces) { return; }
+    let o = motion[s.cells + f];
+    if (o < 3.0e38) { vel[f] = o; }
+}
+
+/// L'eau que le solide déplace, déposée sur la surface de sa colonne, en somme compensée comme le transport.
+@compute @workgroup_size(64)
+fn motion_deposit(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= columns()) { return; }
+    let depot = motion[s.cells + s.faces + c];
+    if (depot == 0.0) { return; }
+    let eta = cols[c];
+    let roundoff = cols[roundoff_at(c)];
+    let increment = depot - roundoff;
+    let height = eta + increment;
+    cols[c] = height;
+    cols[roundoff_at(c)] = exact_difference(height, eta) - increment;
+    cols[published_at(c)] = difference(height, s.z0) - cols[roundoff_at(c)];
 }

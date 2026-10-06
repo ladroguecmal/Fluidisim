@@ -83,8 +83,14 @@ référence à 10⁻⁶ m³ près ; (4) le coût par pas (recoupage CPU et carte
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le cœur expose le terme de paroi, les faces, les colonnes solides ; `set_motion` et ses noyaux.
-- [ ] **P3** — le banc de la sphère menée ; (1)–(4).
+- [x] **P2** — le cœur expose le terme de paroi, les faces, les colonnes solides ; `set_motion` et ses noyaux.
+- [x] **P3** — le banc de la sphère menée ; (1)–(4).
 - [ ] **P4** — preuve ; liste 6.4 ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
+- **P2** — `Volume3::wall_term` (extrait de la divergence, une seule écriture), `wall_divergence`, `changed_faces`, `solid_column_volumes` ;
+  `Linear3::set_motion`, `motion_faces`, `motion_deposit`, la ligne du second membre (le chemin sans mouvement gardé). S358 : la ligne
+  `cycles=32` identique au binaire d'avant (stash, construction, mesure).
+- **P3** — `--lineaire-mobile` : carte à 2,205·10⁻⁶ m de la référence, élévation 1,036 cm (rapport 4 699), volumes à 4,0·10⁻⁹ m³ ;
+  recoupage CPU 7,7 ms par pas, pas de la carte 0,71 ms (horloge murale ; l'horodatage GPU d'un pas isolé rendait 343 ms, faux). Suite
+  du cœur : 663 essais.

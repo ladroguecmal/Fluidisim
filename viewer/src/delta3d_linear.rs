@@ -14,10 +14,13 @@ use water_core::delta3d::{Domain3, Sponge3};
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `delta3d_linear.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 15] = [
+const KERNELS: [&str; 17] = [
     "predict", "rhs", "finish_bnorm", "init_warm", "finish_rz", "apply_fold", "finish_dq", "update", "finish_beta",
-    "direction", "residual_fold", "finish_residual", "correct", "fluxes", "advance",
+    "direction", "residual_fold", "finish_residual", "correct", "fluxes", "advance", "motion_faces", "motion_deposit",
 ];
+/// S503 : le mouvement d'un solide.
+const MOTION_FACES: usize = 15;
+const MOTION_DEPOSIT: usize = 16;
 const PREDICT: usize = 0;
 const RHS: usize = 1;
 const FINISH_BNORM: usize = 2;
@@ -81,6 +84,10 @@ pub struct Linear3 {
     vel: wgpu::Buffer,
     cols: wgpu::Buffer,
     state: wgpu::Buffer,
+    /// S503 : la géométrie, réécrite par `set_motion` ; le mouvement d'un solide ; un mouvement en attente du prochain pas.
+    geo: wgpu::Buffer,
+    motion: wgpu::Buffer,
+    moving: core::cell::Cell<bool>,
     scalar: wgpu::Buffer,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
@@ -137,6 +144,14 @@ impl Linear3 {
             contents: &f32s(geo),
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         });
+        // S503 : terme de paroi (mailles), faces imposées, dépôt (colonnes) — à zéro (faces : à garder) sans solide mobile.
+        let mut repos = vec![0f32; cells + faces + columns];
+        repos[cells..cells + faces].fill(f32::MAX);
+        let motion = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("mouvement du solide"),
+            contents: &f32s(&repos),
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        });
         let cols = buffer(&device, (col_len * 4) as u64, storage);
         let state = buffer(&device, (7 * cells * 4) as u64, storage);
         let partial = buffer(&device, (3 * groups as usize * 4) as u64, storage);
@@ -150,7 +165,7 @@ impl Linear3 {
         let query_resolve = buffer(&device, 16, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
         let query_read = buffer(&device, 16, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
 
-        let kinds = ['w', 'r', 'w', 'w', 'w', 'w', 'u'];
+        let kinds = ['w', 'r', 'w', 'w', 'w', 'w', 'u', 'r'];
         let entries: Vec<_> = kinds
             .iter()
             .enumerate()
@@ -170,7 +185,7 @@ impl Linear3 {
             })
             .collect();
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor { label: None, entries: &entries });
-        let buffers = [&vel, &geo_buf, &cols, &state, &partial, &scalar, &uniform];
+        let buffers = [&vel, &geo_buf, &cols, &state, &partial, &scalar, &uniform, &motion];
         let entries: Vec<_> = buffers
             .iter()
             .enumerate()
@@ -211,6 +226,9 @@ impl Linear3 {
             vel,
             cols,
             state,
+            geo: geo_buf,
+            motion,
+            moving: core::cell::Cell::new(false),
             scalar,
             read,
             query,
@@ -284,6 +302,25 @@ impl Linear3 {
         Ok(())
     }
 
+    /// **S503 — le mouvement d'un solide**, pour le pas suivant : la géométrie recoupée (`geo`, comme à la construction), le terme de
+    /// paroi de chaque maille (`Volume3::wall_divergence`), les faces imposées (`Volume3::changed_faces` : `f32::MAX` pour garder) et
+    /// l'eau déposée sur chaque colonne (m). Le terme de paroi vaut jusqu'au prochain appel ; faces et dépôt, pour un pas.
+    pub fn set_motion(&self, geo: &[f32], wall: &[f32], faces: &[f32], deposit: &[f32]) -> Result<(), String> {
+        let d = self.domain;
+        let (nf, nc, ncol) = (face_total(d), d.cells(), d.columns());
+        if geo.len() != nf + nc || wall.len() != nc || faces.len() != nf || deposit.len() != ncol {
+            return Err("formes du mouvement".into());
+        }
+        if geo.iter().any(|a| !(0. ..=1.).contains(a)) || wall.iter().chain(deposit).any(|x| !x.is_finite()) {
+            return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
+        }
+        self.queue.write_buffer(&self.geo, 0, &f32s(geo));
+        let tout: Vec<f32> = wall.iter().chain(faces).chain(deposit).copied().collect();
+        self.queue.write_buffer(&self.motion, 0, &f32s(&tout));
+        self.moving.set(true);
+        Ok(())
+    }
+
     /// Dispatchs d'un pas à `cycles` cycles de projection.
     pub fn dispatches(cycles: u32) -> u32 {
         // prédiction ; second membre, ‖b‖ ; départ ; cycles ; vrai résidu ; correction, flux, hauteur.
@@ -308,6 +345,11 @@ impl Linear3 {
             pass.set_pipeline(&self.kernels[index]);
             pass.dispatch_workgroups(groups, 1, 1);
         };
+        // S503 : le mouvement d'un solide, une fois, au début du pas qui suit `set_motion`.
+        if self.moving.replace(false) {
+            run(MOTION_FACES, faces);
+            run(MOTION_DEPOSIT, columns);
+        }
         run(PREDICT, faces);
         run(RHS, cells);
         run(FINISH_BNORM, 1);
@@ -785,6 +827,99 @@ pub fn recevoir_cloison() -> Result<(), String> {
              periode_theorique_s={periode:.4} ecart_periode={:.2e}",
             carte.adapter,
             (mesuree / periode - 1.).abs()
+        );
+        Ok(())
+    })
+}
+
+/// **Banc S503 (liste 6.4) — un solide qui bouge sur la carte** (`--lineaire-mobile`). Une cuve de 1,6 × 1,6 × 0,6 m (32 × 32 × 12 mailles de
+/// 5 cm), murs ; une sphère de 0,15 m de rayon, centrée à 0,3 m sous le repos, menée en x à `VITESSE` m/s (0,5 par défaut) de 0,5 à 1,1 m,
+/// 600 pas de 2 ms. À chaque pas, le cœur recoupe (`set_solid_rigid`) et donne à la carte la géométrie, le terme de paroi, les faces qui
+/// changent et le dépôt (`set_motion`) ; les deux avancent depuis le même état. Relevés tous les 50 pas : l'écart de surface, l'élévation
+/// produite, les volumes ; le coût du recoupage CPU et du pas de la carte.
+pub fn recevoir_mobile() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+    pollster::block_on(async {
+        let d = Domain3 { nx: 32, ny: 32, nz: 12, dx: 0.05 };
+        let (rho, g) = (1000_f32, 9.81_f32);
+        let vitesse: f32 = std::env::var("VITESSE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.5);
+        let cycles: u32 = std::env::var("CYCLES").ok().and_then(|v| v.parse().ok()).unwrap_or(40);
+        let (dt_us, pas, releve) = (2000u64, 600usize, 50usize);
+        let (rayon, z_c, y_c) = (0.15f32, d.z0() - 0.3, 0.8f32);
+        let centre = |n: usize| [0.5 + vitesse * n as f32 * dt_us as f32 * 1e-6, y_c, z_c];
+        let noeuds = |c: [f32; 3], out: &mut Vec<f32>| {
+            out.clear();
+            for k in 0..=d.nz {
+                for j in 0..=d.ny {
+                    for i in 0..=d.nx {
+                        let p = [i as f32 * d.dx, j as f32 * d.dx, k as f32 * d.dx];
+                        out.push(((p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2)).sqrt() - rayon);
+                    }
+                }
+            }
+        };
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        let mut nds = Vec::new();
+        noeuds(centre(0), &mut nds);
+        let mut coeur = Volume3::configure_with_solid(&mut host, d, rho, g, &vec![0.; d.columns()], &nds).map_err(|e| format!("cœur {e:?}"))?;
+        coeur.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+        let geo_de = |c: &Volume3| -> Result<Vec<f32>, String> {
+            let (u, v, w) = c.apertures().ok_or("ouvertures")?;
+            Ok(decoupee(u, v, w, c.fluid_fraction().ok_or("fractions")?))
+        };
+        let carte = Linear3::new(d, rho, g, &geo_de(&coeur)?).await?;
+        carte.set_step(dt_us, Sponge3::default())?;
+        let (nu, nv) = ((d.nx + 1) * d.ny * d.nz, d.nx * (d.ny + 1) * d.nz);
+        let zeros = vec![0f32; face_total(d)];
+        carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[nu + nv..], coeur.surface())?;
+        let aire = d.dx * d.dx;
+        let mut colonnes = coeur.solid_column_volumes().ok_or("colonnes solides")?.to_vec();
+        let (mut paroi, mut faces, mut depot) = (vec![0f32; d.cells()], vec![0f32; face_total(d)], vec![0f32; d.columns()]);
+        let volume = |eta: &[f32]| eta.iter().map(|e| (e - d.z0()) as f64).sum::<f64>() * (d.dx as f64).powi(2);
+        println!("MOBILE_S503 nx={} ny={} nz={} dx={} sphere_r={rayon} vitesse={vitesse} pas={pas} dt_us={dt_us} cycles={cycles} carte={:?}", d.nx, d.ny, d.nz, d.dx, carte.adapter);
+        let (mut pire, mut elevation, mut pire_volume) = (0f32, 0f32, 0f64);
+        let (mut cpu, mut ligne) = (0f64, String::new());
+        for n in 1..=pas {
+            let t0 = std::time::Instant::now();
+            noeuds(centre(n), &mut nds);
+            coeur.set_solid_rigid(&nds, [vitesse, 0., 0.], [0.; 3], centre(n)).map_err(|e| format!("pas {n} : paroi {e:?}"))?;
+            coeur.wall_divergence(&mut paroi).map_err(|e| format!("{e:?}"))?;
+            coeur.changed_faces(&mut faces).map_err(|e| format!("{e:?}"))?;
+            let nouvelles = coeur.solid_column_volumes().ok_or("colonnes solides")?;
+            for c in 0..d.columns() {
+                depot[c] = (nouvelles[c] - colonnes[c]) / aire;
+            }
+            colonnes.copy_from_slice(nouvelles);
+            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot)?;
+            cpu += t0.elapsed().as_secs_f64();
+            coeur.step_surface_linear(dt_us, 4000, &jobs).map_err(|e| format!("cœur, pas {n} : {e:?}"))?;
+            carte.step(cycles);
+            if n % releve == 0 {
+                let (eta, _) = carte.surface()?;
+                let e = eta.iter().zip(coeur.surface()).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+                pire = pire.max(e);
+                elevation = elevation.max(coeur.surface().iter().fold(0f32, |m, x| m.max((x - d.z0()).abs())));
+                pire_volume = pire_volume.max((volume(&eta) - volume(coeur.surface())).abs());
+                ligne.push_str(&format!(" {n}:{e:.2e}"));
+            }
+        }
+        // Le pas de la carte seul, à l'horloge murale, sans mouvement : cent pas soumis, puis attendus.
+        carte.wait()?;
+        let t0 = std::time::Instant::now();
+        for _ in 0..100 {
+            carte.step(cycles);
+        }
+        carte.wait()?;
+        let duree: Option<f64> = Some(t0.elapsed().as_secs_f64() / 100.);
+        println!(
+            "MOBILE_S503 bilan ecart_carte_reference_m={pire:.3e} elevation_m={elevation:.3e} rapport={:.0} ecart_volume_m3={pire_volume:.3e} recoupage_cpu_ms={:.3} pas_carte_ms={} releves{ligne}",
+            elevation / pire.max(1e-12),
+            1e3 * cpu / pas as f64,
+            duree.map_or("—".into(), |s| format!("{:.3}", 1e3 * s))
         );
         Ok(())
     })
