@@ -351,7 +351,7 @@ pub fn step_meteo(
     dt: SimTime,
     scratch: &mut [i64],
 ) -> Result<(), Error> {
-    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None)
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None, None)
 }
 
 /// **S538 — l'état de l'air d'un nœud** (ADR-015 T2) : ouvert (l'air à la pression atmosphérique, T0) ou **scellé** — une poche
@@ -386,7 +386,7 @@ pub fn step_air(
         return Err(Error::Capacity);
     }
     if air.iter().all(|a| *a == Air::Open) {
-        return step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None);
+        return step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None, None);
     }
     let (_, g) = geometry::vertical(g_eff)?;
     for ((n, a), h) in nodes.iter().zip(air.iter()).zip(heads_um.iter_mut()) {
@@ -401,7 +401,7 @@ pub fn step_air(
             }
         };
     }
-    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, Some(heads_um))?;
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, Some(heads_um), None)?;
     // S547 : l'air qui sort par les évents, à la pression du début du pas (celle des charges, isotherme) ; jamais sous la pression
     // atmosphérique.
     let dt_s = dt.0 as f64 * 1e-6;
@@ -435,6 +435,7 @@ fn step_inner(
     dt: SimTime,
     scratch: &mut [i64],
     pression_um: Option<&[f64]>,
+    liquides: Option<(&[i64], &[liquids::Liquid])>,
 ) -> Result<(), Error> {
     // S538 : la charge de pression d'une poche, en µm ; zéro sans air scellé (le pas d'avant au bit : `x + 0.0` est `x`).
     let charge = |i: usize| pression_um.map_or(0.0, |p| p[i]);
@@ -587,25 +588,41 @@ fn step_inner(
             *out = nl as i64;
             continue;
         }
-        // Charge en aval : la surface du receveur ramenée au même repère, ou le seuil si l'arête
-        // rejette hors réseau. Le maximum interdit une charge négative — une ouverture au-dessus
-        // de la surface aval ne débite pas plus qu'à l'air libre.
-        let downstream = match e.to {
-            Some(t) => {
-                let dn = nodes[t as usize];
-                let h_dn = shapes.surface_up(&dn, up)?.offset_um + charge(t as usize);
-                let dn_surface = along(sub(dn.origin_um, src.origin_um), up) + h_dn;
-                dn_surface.max(sill)
+        // S560 (ADR-241 D4) : sous plusieurs liquides, un orifice ou une vanne débite sur la différence de **pression** au seuil, ramenée
+        // en hauteur du liquide qui sort ; la comparaison des surfaces ne vaut plus (un côté chargé d'huile a sa surface plus haute à
+        // l'équilibre).
+        let par_couches = match (liquides, e.flow) {
+            (Some((composition, table)), Flow::Orifice { .. } | Flow::Valve { .. }) => {
+                Some(liquids::orifice_head_m(nodes, e, shapes, g_eff, composition, table)?)
             }
-            None => sill,
+            _ => None,
         };
-        if h_up <= downstream || e.control_pm == 0 {
-            continue;
-        }
+        let head_m = match par_couches {
+            Some(None) => continue,
+            Some(Some(_)) if e.control_pm == 0 => continue,
+            Some(Some(h)) => h,
+            None => {
+                // Charge en aval : la surface du receveur ramenée au même repère, ou le seuil si l'arête
+                // rejette hors réseau. Le maximum interdit une charge négative — une ouverture au-dessus
+                // de la surface aval ne débite pas plus qu'à l'air libre.
+                let downstream = match e.to {
+                    Some(t) => {
+                        let dn = nodes[t as usize];
+                        let h_dn = shapes.surface_up(&dn, up)?.offset_um + charge(t as usize);
+                        let dn_surface = along(sub(dn.origin_um, src.origin_um), up) + h_dn;
+                        dn_surface.max(sill)
+                    }
+                    None => sill,
+                };
+                if h_up <= downstream || e.control_pm == 0 {
+                    continue;
+                }
+                (h_up - downstream) * 1e-6
+            }
+        };
         // La vanne (ADR-199 D2) : la section ou la largeur réduite dans le rapport de la commande. À commande pleine le
         // facteur vaut exactement 1, et le débit est celui d'avant, au bit.
         let ouverture = e.control_pm as f64 / CONTROL_FULL as f64;
-        let head_m = (h_up - downstream) * 1e-6;
         let g = 2.0 * magnitude;
         let q_m3s = match e.flow {
             // Torricelli, ADR-010 §3. Section en mm² → m² : 1e-6.

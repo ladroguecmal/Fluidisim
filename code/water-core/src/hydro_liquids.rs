@@ -7,9 +7,10 @@
 //! L'état reste entier (I-10) : `volume_ml` du nœud est le total ; la composition est une ligne de millilitres de l'appelant, une
 //! entrée par liquide de la table, qui somme à `volume_ml`. Aucune allocation (I-06) : au plus [`MAX_LIQUIDS`] liquides.
 //!
-//! Cette première pièce donne **la pression en un point d'un nœud** (ADR-241 D3) ; le débit par couches (D4) vient ensuite.
+//! S559 : **la pression en un point d'un nœud** (ADR-241 D3). S560 : **le débit par couches** (D4) — [`step_liquids`].
 
-use super::{along, geometry, sub, Error, HydroNode, Shapes};
+use super::{along, geometry, step_inner, sub, Error, Flow, HydroNode, Meteo, Opening, Shapes};
+use crate::SimTime;
 
 /// Le nombre de liquides d'une table, au plus — une borne sans allocation (ADR-241 D2).
 pub const MAX_LIQUIDS: usize = 8;
@@ -21,22 +22,13 @@ pub struct Liquid {
     pub density_kg_m3: f32,
 }
 
-/// Les indices des liquides présents dans `composition`, du fond vers la surface (densité décroissante ; à densité égale, l'indice
-/// croissant), et leur nombre. Refus : longueurs, densités, volumes négatifs, une somme qui n'est pas `volume_ml`.
-fn layers(node: &HydroNode, composition: &[i64], liquids: &[Liquid]) -> Result<([usize; MAX_LIQUIDS], usize), Error> {
-    if liquids.is_empty() || liquids.len() > MAX_LIQUIDS || composition.len() != liquids.len() {
-        return Err(Error::Capacity);
-    }
-    if liquids.iter().any(|l| !(l.density_kg_m3 > 0.0) || !l.density_kg_m3.is_finite()) {
-        return Err(Error::Domain);
-    }
-    if composition.iter().any(|v| *v < 0) || composition.iter().map(|v| *v as i128).sum::<i128>() != node.volume_ml as i128 {
-        return Err(Error::Capacity);
-    }
+/// Les indices des liquides présents dans `row`, du fond vers la surface (densité décroissante ; à densité égale, l'indice croissant),
+/// et leur nombre. Ne valide rien.
+fn order_of(row: &[i64], liquids: &[Liquid]) -> ([usize; MAX_LIQUIDS], usize) {
     let mut order = [0usize; MAX_LIQUIDS];
     let mut n = 0;
-    for (i, v) in composition.iter().enumerate() {
-        if *v == 0 {
+    for (i, v) in row.iter().enumerate() {
+        if *v <= 0 {
             continue;
         }
         // Insertion stable : avant le premier strictement moins dense.
@@ -48,7 +40,30 @@ fn layers(node: &HydroNode, composition: &[i64], liquids: &[Liquid]) -> Result<(
         order[at] = i;
         n += 1;
     }
-    Ok((order, n))
+    (order, n)
+}
+
+/// La table : non vide, au plus [`MAX_LIQUIDS`], des densités finies et positives.
+fn check_table(liquids: &[Liquid]) -> Result<(), Error> {
+    if liquids.is_empty() || liquids.len() > MAX_LIQUIDS {
+        return Err(Error::Capacity);
+    }
+    if liquids.iter().any(|l| !(l.density_kg_m3 > 0.0) || !l.density_kg_m3.is_finite()) {
+        return Err(Error::Domain);
+    }
+    Ok(())
+}
+
+/// [`order_of`], après les refus : longueurs, densités, volumes négatifs, une somme qui n'est pas `volume_ml`.
+fn layers(node: &HydroNode, composition: &[i64], liquids: &[Liquid]) -> Result<([usize; MAX_LIQUIDS], usize), Error> {
+    check_table(liquids)?;
+    if composition.len() != liquids.len() {
+        return Err(Error::Capacity);
+    }
+    if composition.iter().any(|v| *v < 0) || composition.iter().map(|v| *v as i128).sum::<i128>() != node.volume_ml as i128 {
+        return Err(Error::Capacity);
+    }
+    Ok(order_of(composition, liquids))
 }
 
 /// **La pression relative en un point d'un nœud stratifié**, Pa (ADR-241 D3) : la somme, sur les couches au-dessus du point, de
@@ -73,4 +88,126 @@ pub fn pressure_at(node: &HydroNode, composition: &[i64], liquids: &[Liquid], sh
         return Err(Error::NonFinite);
     }
     Ok(pression)
+}
+
+/// Le volume du nœud sous le plan du point (perpendiculaire à `up`), ml — formes volumiques seulement.
+fn volume_below_point(node: &HydroNode, shapes: &Shapes<'_>, up: [f64; 3], point_um: [i64; 3]) -> Result<f64, Error> {
+    let forme = shapes.volumes.get(node.shape as usize).ok_or(Error::Capacity)?;
+    forme.volume_below_ml(geometry::SurfacePlane { up, offset_um: along(sub(point_um, node.origin_um), up) })
+}
+
+/// **Le liquide à un point** : la couche dont le haut (volume cumulé) dépasse le volume sous le point ; au-dessus de toutes, celle du
+/// dessus. `None` dans un nœud vide.
+fn liquid_at(row: &[i64], liquids: &[Liquid], below_ml: f64) -> Option<usize> {
+    let (order, n) = order_of(row, liquids);
+    let mut cumul = 0i64;
+    for &i in &order[..n] {
+        cumul += row[i];
+        if cumul as f64 > below_ml {
+            return Some(i);
+        }
+    }
+    order[..n].last().copied()
+}
+
+/// **S560 — la charge d'un orifice sous plusieurs liquides**, m du liquide qui sort (ADR-241 D4) : `Δp/(ρ·|g|)`, `Δp` la différence des
+/// pressions au seuil des deux côtés (zéro dehors), `ρ` le liquide amont au seuil. `None` si rien ne pousse vers l'aval.
+pub(super) fn orifice_head_m(nodes: &[HydroNode], e: &Opening, shapes: &Shapes<'_>, g_eff: [f32; 3], composition: &[i64],
+    liquids: &[Liquid]) -> Result<Option<f64>, Error> {
+    let (up, magnitude) = geometry::vertical(g_eff)?;
+    let n = liquids.len();
+    let ligne = |i: usize| &composition[i * n..(i + 1) * n];
+    let f = e.from as usize;
+    let amont = pressure_at(&nodes[f], ligne(f), liquids, shapes, g_eff, e.position_um)?;
+    let aval = match e.to {
+        Some(t) => pressure_at(&nodes[t as usize], ligne(t as usize), liquids, shapes, g_eff, e.position_um)?,
+        None => 0.0,
+    };
+    let dp = amont - aval;
+    if !(dp > 0.0) {
+        return Ok(None);
+    }
+    let Some(sortant) = liquid_at(ligne(f), liquids, volume_below_point(&nodes[f], shapes, up, e.position_um)?) else {
+        return Ok(None);
+    };
+    Ok(Some(dp / (liquids[sortant].density_kg_m3 as f64 * magnitude)))
+}
+
+/// Retire `ml` de `row` : la couche `depart`, puis celles du dessus, puis celles du dessous ; ce qui est pris s'ajoute à `pris`.
+fn take(row: &mut [i64], liquids: &[Liquid], depart: usize, mut ml: i64, pris: &mut [i64; MAX_LIQUIDS]) {
+    let (order, n) = order_of(row, liquids);
+    let Some(pos) = order[..n].iter().position(|&i| i == depart) else {
+        return;
+    };
+    for &i in order[pos..n].iter().chain(order[..pos].iter().rev()) {
+        let part = ml.min(row[i]);
+        row[i] -= part;
+        pris[i] += part;
+        ml -= part;
+        if ml == 0 {
+            break;
+        }
+    }
+}
+
+/// **S560 — un pas de V sous plusieurs liquides** (ADR-241 D4). `composition` : `nœuds × liquides` millilitres, chaque ligne sommant au
+/// volume du nœud ; `liquids` : la table ; `pluie` : le liquide qu'apporte la pluie.
+///
+/// Le pas de [`super::step_meteo`], sauf que : un orifice ou une vanne débite sur la différence de **pression** au seuil,
+/// `Q = C_d·A·√(2Δp/ρ)`, `ρ` le liquide amont au seuil ; puis la composition suit les transferts entiers — chaque arête prend dans la
+/// couche à son seuil (une évaporation et un débordement, dans celle du dessus), puis au-dessus, puis au-dessous ; les débordements en
+/// dernier ; la pluie apporte `pluie`. Formes volumiques seulement (`Shape` sinon : une table +Z n'a pas de volume sous un plan) ; sans
+/// air scellé dans cette version. Refus atomique : rien n'est écrit si le pas refuse.
+#[allow(clippy::too_many_arguments)]
+pub fn step_liquids(nodes: &mut [HydroNode], edges: &mut [Opening], shapes: &Shapes<'_>, g_eff: [f32; 3], meteo: Meteo, dt: SimTime,
+    scratch: &mut [i64], composition: &mut [i64], liquids: &[Liquid], pluie: usize) -> Result<(), Error> {
+    if shapes.volumes.is_empty() {
+        return Err(Error::Shape);
+    }
+    check_table(liquids)?;
+    let n = liquids.len();
+    if composition.len() != nodes.len() * n || pluie >= n {
+        return Err(Error::Capacity);
+    }
+    for (i, node) in nodes.iter().enumerate() {
+        layers(node, &composition[i * n..(i + 1) * n], liquids)?;
+    }
+    let (up, _) = geometry::vertical(g_eff)?;
+    // Le volume sous chaque seuil, essayé avant le pas : la mise à jour de la composition, après, ne peut plus refuser.
+    for e in edges.iter() {
+        let node = nodes.get(e.from as usize).ok_or(Error::Capacity)?;
+        volume_below_point(node, shapes, up, e.position_um)?;
+    }
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None, Some((composition, liquids)))?;
+    for debordements in [false, true] {
+        for (e, ml) in edges.iter().zip(scratch.iter()) {
+            if *ml <= 0 || matches!(e.flow, Flow::Spill) != debordements || matches!(e.flow, Flow::Vent { .. }) {
+                continue;
+            }
+            let mut pris = [0i64; MAX_LIQUIDS];
+            let f = e.from as usize;
+            if matches!(e.flow, Flow::Rain { .. }) {
+                pris[pluie] = *ml;
+            } else {
+                let ligne = &mut composition[f * n..(f + 1) * n];
+                let depart = if matches!(e.flow, Flow::Spill | Flow::Evaporation { .. }) {
+                    let (order, k) = order_of(ligne, liquids);
+                    order[..k].last().copied()
+                } else {
+                    let dessous = volume_below_point(&nodes[f], shapes, up, e.position_um)?;
+                    liquid_at(ligne, liquids, dessous)
+                };
+                if let Some(d) = depart {
+                    take(ligne, liquids, d, *ml, &mut pris);
+                }
+            }
+            if let Some(t) = e.to {
+                for (c, p) in composition[t as usize * n..(t as usize + 1) * n].iter_mut().zip(&pris) {
+                    *c += *p;
+                }
+            }
+        }
+    }
+    debug_assert!(nodes.iter().enumerate().all(|(i, node)| composition[i * n..(i + 1) * n].iter().sum::<i64>() == node.volume_ml));
+    Ok(())
 }
