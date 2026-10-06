@@ -166,13 +166,18 @@ def fin(argv) -> int:
     ecrire(EN_COURS, en)
     lot = jeton(r).get("Registres", "")
     m = re.search(r"au plus tard en S(\d+)", lot)
+    rappel = ""
     if m and int(m.group(1)) <= n and "--lot" not in argv:
-        print(f"RAPPEL le lot des registres (REPRISE §6, points 6 à 8) était dû en S{m.group(1)} : le faire, puis --lot")
+        rappel = f"RAPPEL le lot des registres (REPRISE §6, points 6 à 8) était dû en S{m.group(1)} : le faire, puis --lot"
+        print(rappel)
     controle = subprocess.run([sys.executable, str(ROOT / "outils/etat_projet.py"), "--check"], cwd=ROOT, capture_output=True,
                               text=True, encoding="utf-8")
     print("\n".join(controle.stdout.splitlines()[-4:]))
     print(f"RITUEL {session} : jeton libre, registres régénérés, rituel coché ; etat_projet --check = {controle.returncode}. "
           "Reste : le commit de l'étape, et fermer sa copie de travail si elle est isolée (AGENTS).")
+    # S511 (ADR-231 D2) : le rappel aussi en dernière ligne — une lecture de la fin de la sortie ne le manque plus.
+    if rappel:
+        print(rappel)
     return controle.returncode
 
 

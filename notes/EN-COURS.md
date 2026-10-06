@@ -62,31 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S510 — **terminée**. En autonomie, **9.5, le consommateur d'un événement prédit, confirmé ou rétracté** : le journal des impacts
-(ADR-056) tient les causes, prédites puis confirmées ou rejetées, et rend `Change::Retract` — rien ne le consomme : la composition ne lit que
-les confirmés. Et le lot des registres (dû).
+Session : S511 — **en cours**. En autonomie, **la sixième revue de méthode** (ADR-222 D4) : les frictions de S507–S510.
 
-**Ce que la session fait.** `wave_consumer` (cœur, sans allocation) : par cause, l'impact affiché et son poids ; une prédiction s'affiche
-dès son admission ; une confirmation au même effet visible la garde telle quelle ; une confirmation corrigée fond enchaîné de l'une à
-l'autre sur `τ` ; un rejet l'éteint en fondu sur `τ` ; chaque impact garde son âge (aucun retour du temps). Le chemin d'image seul : le jeu
-ne lit que les confirmés (I-04).
-
-**Ordre de grandeur, écrit avant.** Un fondu en `smoothstep` sur `τ` = 0,5 s a une pente maximale `1,5/τ` ; à 60 images/s, le saut d'une
-image dû au fondu vaut au plus `1,5·(1/60)/0,5` = 5 % de l'amplitude de l'impact — contre 100 % pour un retrait sec (le témoin).
-
-**Critères, écrits avant.** (1) confirmation au même effet : l'image identique au bit avant et après, et identique à celle du seul
-confirmé ; (2) rejet : le saut d'une image dû au retrait ≤ 5 % de l'amplitude, nul après `τ` (le témoin sec : ≈ 100 %) ; (3) confirmation
-corrigée (0,5 m plus loin) : saut ≤ 5 %, et après `τ` l'image du seul confirmé, au bit ; (4) l'âge de chaque impact suit l'horloge ; capacité
-bornée, refus sans écriture. Si (1)–(4), 9.5 validée.
+**Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
+table ; un outil corrigé est éprouvé ; `etat_projet --check` à zéro.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `wave_consumer` ; essais (1)–(4).
-- [x] **P3** — preuve ; liste 9.5 ; lot des registres ; rituel.
+- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; l'outil du rituel ; rituel.
 
 ### Notes de reprise
-- **P2** — `wave_consumer` ; critères 1 (au bit, 150 images), 2 (1,56 % ; témoin sec 8,6 % — la prévision « ≈ 100 % » supposait une
-  crête), 3 (2,28 % ; au bit après le fondu), 4. Un essai mal compté (30 images = 499 980 µs < 500 000) corrigé. 669 essais.
-- **P3** — preuve CONSOMMATEUR-S510 ; **9.5 validée** (9 / 120) ; lot : feuille de route (9 / 68 / 43, S507–S510), index ; journal.
-
