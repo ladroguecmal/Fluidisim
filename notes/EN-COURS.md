@@ -62,29 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S527 — **terminée**. En autonomie : **l'angle de C07 à `Fr_h` = 2,14** (S523 : la dernière crête des rayons a pris sur W un
-maximum local du plancher f32, 79,75° pour 27,83°). ADR-234 D2 : la référence d'un instrument porte le bruit de l'objet.
+Session : S528 — **en cours**. En autonomie, **3.1 — les anneaux d'impact en eau peu profonde** (K2-12) : `RadialImpact` refuse le
+régime peu profond (`Error::Regime`, profondeur ≤ π/k_min) ; W porte la profondeur uniforme depuis S522.
 
-**Ce que la session fait.** L'instrument « dernière crête **au-dessus d'un plancher** » : le maximum local le plus extérieur dont la valeur
-dépasse 10⁻³ du maximum du profil — seuil déclaré ici, avant toute mesure, à mi-chemin (en ordre de grandeur) entre le plancher de W et la
-crête. Éprouvé d'abord sur la référence **bruitée** au niveau de W, puis appliqué aux champs de W de S523 (montage retenu), sans les
-refaire.
+**Ce que la session fait.** `RadialImpact::new_in_depth(événement, milieu, domaine)` : le nombre d'onde effectif `κ = k tanh(kh)` de
+S522 dans la pulsation (`ω² = g κ`), le potentiel (`η_t / κ`) et la vitesse horizontale (`k/κ` fois celle de l'eau profonde) ; pas de refus
+de régime ; la borne de pente resserrée (`RHO_DISPERSION`, mesurée en eau profonde) n'y resserre pas (`slope_max_at` = `slope_max`) — la
+borne de couronne, indépendante de la dispersion, reste. `new` inchangé. **La référence** : le champ initial de W (t = 0) sur une grille,
+propagé par FFT avec la dispersion exacte `cos(√(g k tanh kh) t)` (`outils/reference_anneaux.py`), indépendante de la somme de Bessel.
 
-**Ordre de grandeur, calculé.** Profil à 15 m/s (80–100 m) : maximum 1,3·10⁻², crête de Mach ≈ 3·10⁻³ (0,23 du maximum), queue de W
-6–8·10⁻⁸ (6·10⁻⁶ du maximum). Le seuil 10⁻³ est 160 fois au-dessus du plancher, 230 fois sous la crête. Bruit de la référence : gaussien,
-d'écart-type 10⁻⁷ m par point (le plancher de W).
+**Ordre de grandeur, calculé.** λ = 4 m (k₀ = 1,57, nœuds de 0,785 à 3,14 rad/m), 1 m de fond : `tanh(k₀h)` = 0,917, la pulsation 4,2 %
+sous l'eau profonde ; à 10 s, le déphasage au pic vaut **1.66 rad** — l'eau profonde est visiblement fausse. Domaine 40 m, 10 s.
 
-**Critères, écrits avant.** (1) Sur la référence bruitée (trois tirages, trois grilles), l'instrument lit `arcsin(1/Fr_h)` à 1° aux deux
-vitesses. (2) Sur W (S523), à 2° de 44,46° et de 27,83°. Si (1) tient et (2) aussi, C07 peu profond passe aux deux vitesses.
+**Critères, écrits avant.** (1) `new` au bit (suite) ; `new_in_depth` avec `2 k_min h` > 32 rend les échantillons de `new` au bit. (2) W
+par 1 m de fond contre la référence FFT (convergée sur trois grilles) : écart quadratique ≤ 2 % sur le disque de 40 m à 5 et 10 s ; l'eau
+profonde (le même champ initial) à plus de 5 fois cet écart. (3) La pente réelle de W à 0–10 s sous `slope_max_at` et `slope_max_beyond`
+(la sûreté des bornes en eau peu profonde).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'instrument, la référence bruitée, W ; (1), (2).
-- [x] **P3** — preuve ; listes 3.2, 13.2 ; C07 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — le cœur ; (1).
+- [ ] **P3** — la référence, W ; (2), (3).
+- [ ] **P4** — preuve ; liste 3.1 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — référence bruitée : 43,75–44,00° et 27,00° (trois tirages, trois grilles) ; témoin sans plancher : 79,0–79,25° (l'échec de
-  S523 reproduit) ; **W : 44,00° et 27,00°** → (1), (2) tenus.
-- **P3** — preuve C07-PLANCHER-S527 ; listes 3.2, 13.2 ; C07 ; index ; journal.
-
