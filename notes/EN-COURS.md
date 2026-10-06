@@ -62,16 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S516 — **terminée**. En autonomie, **la septième revue de méthode** (ADR-222 D4) : les frictions de S512–S515 ; et le lot des
-registres (dû).
+Session : S517 — **en cours**. En autonomie, **4.13, la coque en marche et sa vague d'étrave** : la liste dit « Manquent la coque en marche
+et sa vague d'étrave, la gerbe (4.16), la résolution près de la coque (± 43–49 % à 25 cm) et la production GPU ». La coque mobile tourne
+sur la carte depuis S503–S509 ; son sillage dans δ n'a jamais été jugé.
 
-**Critères, écrits avant.** Une protection n'entre ou ne change que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne
-duplique la table ; `etat_projet --check` à zéro.
+**Ce que la session fait.** Un banc sur la carte (`--lineaire-sillage`) : la coque de la porte D menée à 3 m/s (départ en rampe d'1 s) dans
+un δ de 48 × 24 × 4 m (192 × 96 × 16 mailles de 25 cm), éponges aux bords ; le cœur ne sert que de découpeur (recoupage en boîte, S508).
+Après 10 s, le sillage : pour chaque distance derrière la coque, la position latérale de la plus forte élévation hors de l'axe ; la droite
+de ces points donne le demi-angle.
+
+**Ordre de grandeur, calculé.** Profondeur 4 m : Froude de profondeur `U/√(gh)` = 0,48 (sous-critique : l'angle de Kelvin des eaux
+profondes, 19,47°) ; onde transverse `λ = 2πU²/g` = 5,76 m (`kh` = 4,4 : eau profonde) ; à 20 m derrière, la ligne des cuspides passe à
+7,1 m de l'axe — dans le domaine (12 m de demi-largeur). 295 000 mailles : la carte seule le permet.
+
+**Critères, écrits avant.** (1) le demi-angle du sillage à 2° de 19,47° ; (2) aucune instabilité (l'élévation bornée, le volume tenu à
+10⁻⁶ m³ hors éponge) ; (3) le coût par pas publié. 4.13 : la coque en marche et sa vague dans δ, sur la carte.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; lot des registres ; rituel.
+- [ ] **P2** — le banc ; (1)–(3).
+- [ ] **P3** — preuve ; liste 4.13 ; rituel.
 
 ### Notes de reprise
-- **P2** — ADR-232 : cinq frictions ; une protection élargie (D1, le corps d'essai n'a que les degrés de liberté de sa référence), une nouvelle (D2, l'ordre de grandeur calculé) ; METHODE (31), L387–L388, BOUSSOLE, index ; lot : feuille de route (S514–S516).
