@@ -62,33 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S563 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S561–S562), puis **5.7 — l'air scellé avec
-plusieurs liquides** : `step_liquids` ignore l'air des compartiments ; un compartiment étanche qui contient du carburant et que la mer
-envahit par le fond doit comprimer son air comme en S538.
+Session : S564 — **en cours**. En autonomie, **5.6 — le seuil adaptatif à l'échelle du contenant** (absent) : « les très petites variations
+peuvent être ignorées par un seuil adaptatif ; une quantité significative dans un bidon peut être négligeable dans une piscine »
+(intentions d'origine §2.2).
 
-**Ce que la session fait.** `step_liquids_air(…, air, pressions_pa)` : la pression de jauge de chaque poche scellée (Boyle isotherme,
-`Air::Sealed`) ajoutée des deux côtés du seuil d'un orifice ou d'une vanne ; un seuil au-dessus de la surface amont ne laisse passer aucun
-liquide ; les évents comme `step_air` (le même calcul, partagé). Les déversoirs et les pompes ne voient pas la pression des poches (comme
-dans `step_air`). Tout ouvert : `step_liquids` au bit.
+**Ce que la session fait.** Le seuil se mesure **en hauteur de surface**, le long de la verticale locale : c'est ce que voient le rendu et
+le joueur, et c'est ce qui rend le seuil propre à chaque contenant sans réglage. `ecart_hauteur_um(nœud, volume_publié)` : la différence des
+plans de la géométrie pour les deux volumes (aucune dérivée, deux inversions exactes) ; `changement_significatif(…, seuil_um)` : au moins le
+seuil. La comparaison se fait contre le **dernier état publié**, pas le pas précédent : une fuite lente s'accumule et finit publiée ; rien
+n'est retiré de la masse (V reste exact, I-10) — le seuil décide de ce qu'on montre et transmet, pas de ce qui existe.
 
-**Références, calculées avant** (une bissection indépendante du code, l'équilibre des pressions au seuil et Boyle résolus ensemble, la mer
-de 100 × 100 m qui baisse de ce qui entre). Un compartiment de 1 × 1 × 2 m contenant 0,5 m³ d'huile (ρ = 850) et 1,5 m³ d'air à la pression
-atmosphérique ; la mer à 1,5 m au-dessus de la brèche du fond (deux orifices de 1 000 mm², `C_d` = 0,62). **Scellé : 0,126197 m d'eau
-entrent** (l'air à +9 307,6 Pa) ; **ouvert (le témoin) : 1,074893 m**. Constantes de temps (ADR-240 D2) : 96 s scellé (la raideur de
-Boyle, ×7,9), 755 s ouvert ; l'essai dure 3 000 s. Le dépassement du pas explicite près de l'équilibre scellé : 6·10⁻⁷ m.
+**Références, calculées avant.** Seuil 500 µm. Bidon 0,2 × 0,1 m : +1 L → **5e+04 µm** (significatif). Piscine 10 × 5 m : +1 L →
+**2e+01 µm** (non) ; +25 L → 500 µm (significatif, à égalité). Carène en V (`V = h²`) à 1 m³ : +0,99 L → **5e+02 µm** (non),
++1,01 L → **5e+02 µm** (oui). Piscine sous `g_eff = (1 ; 0 ; −9,759)` : +25 L → `500·cos θ` = **5e+02 µm** (non). Une fuite de 1 L
+par pas dans la piscine : publiée tous les 25 pas.
 
-**Quantum** (ADR-236 D1) : 1 ml sur 1 m², 1 µm. **Critères, écrits avant.** (1) Scellé : l'eau entrée à 10⁻⁴ m de 0,126197 m ; l'huile
-entière dans le compartiment, au millilitre. (2) Ouvert : à 10⁻⁴ m de 1,074893 m. (3) Tout ouvert : `step_liquids_air` identique au bit
-à `step_liquids` sur le manomètre de S560. (4) `step_air` inchangé (la suite entière).
+**Quantum** (ADR-236 D1) : l'inversion tient le demi-millilitre — 25 µm sur le bidon (rapport 20 au seuil), 0,25 µm sur la carène (marge de
+4,9 µm : rapport 20), 0,01 µm sur la piscine. **Critères, écrits avant.** (1) Chaque écart à 1 µm près de sa référence (au demi-millilitre
+près, plus fin pour la piscine), et le verdict attendu ; (2) la fuite publiée exactement tous les 25 pas, la masse jamais touchée ; (3) les
+refus : un volume publié hors de la capacité, un seuil négatif.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `step_liquids_air` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.7 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — le seuil et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 5.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — scellé 0,126196 m (référence 0,126197), ouvert 1,074893 m (exact), l'huile en place, tout ouvert au bit ; suite 728.
-- **P3** — preuve LIQUIDES-AIR-S563 ; liste 5.7 (reste partiel : un liquide autre que l'eau hors de V manque — pas de réduction de
-  périmètre sans l'utilisateur) ; index ; journal ; le lot.
-
