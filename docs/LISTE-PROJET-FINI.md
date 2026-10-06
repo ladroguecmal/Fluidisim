@@ -432,8 +432,9 @@ pas recopiée ici (L137).
   réservoirs contre une bissection, une maille contre Hardy Cross, à 10⁻⁹ ([preuve](validation/RESEAU-CHARGE-S565.md)) ; **S567 : couplé
   au pas de V** (`pas_reseau`) — deux cuves égalisées à 1 µm d'un Euler indépendant, la masse à l'entier, un robinet à 1 ml
   ([preuve](validation/RESEAU-COUPLE-S567.md)) ; **S568 : pompes et clapets** — le point de fonctionnement et le clapet fermé à 10⁻⁹,
-  une pompe couplée qui s'arrête à sa hauteur de barrage sans retour ([preuve](validation/RESEAU-ORGANES-S568.md)). Manquent la vitesse
-  commandée des pompes, l'air des poches aux raccords, un raccord qui se dénoie, le coup de bélier, le coût d'un grand réseau.
+  une pompe couplée qui s'arrête à sa hauteur de barrage sans retour ([preuve](validation/RESEAU-ORGANES-S568.md)) ; **S569** : la vitesse
+  commandée (similitude) et le raccord qui se dénoie — un exutoire à l'air libre qui ne fait que recevoir
+  ([preuve](validation/RESEAU-EXUTOIRE-S569.md)). Manquent l'air des poches aux raccords, le coup de bélier, le coût d'un grand réseau.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
   d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle
   (0,2901 m sur 2 m, à 1,2·10⁻⁵), avec évent Torricelli à 2,9·10⁻⁴ ([preuve](validation/C17-AIR-S538.md)) ; **S547 : l'évent à débit

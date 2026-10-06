@@ -857,3 +857,11 @@ pompe centrifuge (la loi de V). **Mesuré** : le point de fonctionnement et le c
 remplit une cuve jusqu'à sa hauteur de barrage (0,350000 / 1,350001 m), et rien ne revient. **En route** : une conduite presque sans
 résistance rendait la tolérance de continuité inatteignable (l'ulp de la charge ×10⁶) — l'arrêt au plancher flottant ajouté ; un nombre du
 plan fait à la main, noté pour la revue. Maillons **0** (5.8 avance). Suivant : **S569**, le lot (dû) et un point partiel.
+
+## S569 — 2026-10-06 — le lot ; la vitesse des pompes et le raccord qui se dénoie
+
+**Entrée.** En autonomie ; le lot (feuille de route S567–S568), puis 5.8. **Le script du plan a refusé un montage** : à `n` = 0,8 la pompe
+ne montait plus à 20 m (19,2 m de barrage) — `n` = 0,9 retenu, avant d'écrire. **Fait** ([preuve](../docs/validation/RESEAU-EXUTOIRE-S569.md)) :
+la vitesse des pompes (similitude) ; un raccord hors de l'eau devient un exutoire à l'air libre qui ne fait que recevoir (S567 le
+refusait). **Mesuré** : la pompe au 10⁻⁹ ; l'exutoire à la loi fermée près de l'Euler ; la sortie qui se découvre arrête la vidange à
+0,126 mm sous elle. Maillons **0** (5.8 avance). Suivant : **S570**, un point partiel ; revue à S571.

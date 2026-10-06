@@ -240,4 +240,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S566 | 2026-10-06 | 10 | 77 | 33 | 120 |
 | S567 | 2026-10-06 | 10 | 77 | 33 | 120 |
 | S568 | 2026-10-06 | 10 | 77 | 33 | 120 |
+| S569 | 2026-10-06 | 10 | 77 | 33 | 120 |
 <!-- fin de l'historique -->

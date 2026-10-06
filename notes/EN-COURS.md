@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S569 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S567–S568), puis **5.8** — deux manques : la vitesse
+Session : S569 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S567–S568), puis **5.8** — deux manques : la vitesse
 commandée d'une pompe, et un raccord qui se dénoie (aujourd'hui refusé : `Domain`, et l'hôte ne peut plus avancer).
 
 **Ce que la session fait.** (a) `Organe::Pompe` reçoit sa vitesse `n` (0 à 1, la commande d'ADR-199 D1) : lois de similitude, `H ∝ n²`,
@@ -84,7 +84,11 @@ l'entier ; (3) A final entre 1,0 m − 0.274 mm et 1,0 m, puis immobile ; aucun 
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — la vitesse, l'exutoire ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.8 ; rituel (`--lot`).
+- [x] **P2** — la vitesse, l'exutoire ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.8 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — pompe à 0,9 au 10⁻⁹ ; exutoire à 6·10⁻⁵ m de la loi fermée, final 1,0 / 0,7 m ; dénoyé à 0,126 mm sous la sortie puis
+  immobile ; l'essai de S567 (raccord sec refusé) passe désormais sans débit. Suite 741.
+- **P3** — preuve RESEAU-EXUTOIRE-S569 ; liste 5.8 ; index ; journal ; le lot.
+
