@@ -42,6 +42,10 @@ pub mod geometry;
 #[path = "hydro_liquids.rs"]
 pub mod liquids;
 
+/// S564 — le seuil adaptatif à l'échelle du contenant (liste 5.6).
+#[path = "hydro_seuil.rs"]
+pub mod seuil;
+
 #[path = "hydro_snapshot.rs"]
 pub mod snapshot;
 
@@ -789,6 +793,10 @@ mod tests_air;
 #[cfg(test)]
 #[path = "tests_liquids.rs"]
 mod tests_liquids;
+
+#[cfg(test)]
+#[path = "tests_seuil.rs"]
+mod tests_seuil;
 
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
