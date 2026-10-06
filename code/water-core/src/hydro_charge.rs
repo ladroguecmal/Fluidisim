@@ -35,8 +35,9 @@ pub enum Organe {
     /// Un clapet : le débit de `a` vers `b` seulement ; fermé, la fuite [`FUITE_CLAPET`].
     Clapet,
     /// Une pompe centrifuge et son clapet, refoulant de `a` vers `b` : la loi de V (ADR-199 D3), `H(Q) = H₀·(1 − (Q/Q_max)²)`, soit
-    /// `h_a − h_b + H₀ = (R + H₀/Q_max²)·Q²`, `Q ≥ 0`. `H₀` en m, `Q_max` en m³/s, finis et positifs.
-    Pompe { h0_m: f64, qmax_m3s: f64 },
+    /// `h_a − h_b + H₀ = (R + H₀/Q_max²)·Q²`, `Q ≥ 0`. `H₀` en m, `Q_max` en m³/s, finis et positifs. S569 : sa vitesse `n` (0 à 1, la
+    /// commande d'ADR-199 D1), lois de similitude `H ∝ n²`, `Q ∝ n` : `H(Q) = H₀·n² − H₀·Q²/Q_max²`.
+    Pompe { h0_m: f64, qmax_m3s: f64, vitesse: f64 },
 }
 
 /// Une conduite de `a` vers `b` (le sens positif du débit), de résistance `R` (s²/m⁵, finie et positive), et son organe (S568).
@@ -81,8 +82,19 @@ fn debit_conduite(c: &Conduite, dh: f64) -> (f64, f64) {
     match c.organe {
         Organe::Aucun => debit(dh, c.resistance),
         Organe::Clapet => clapet(dh, c.resistance),
-        Organe::Pompe { h0_m, qmax_m3s } => clapet(dh + h0_m, c.resistance + h0_m / (qmax_m3s * qmax_m3s)),
+        Organe::Pompe { h0_m, qmax_m3s, vitesse } => {
+            clapet(dh + h0_m * vitesse * vitesse, c.resistance + h0_m / (qmax_m3s * qmax_m3s))
+        }
     }
+}
+
+/// S569 : le débit dans le réseau, un raccord **sec** (hors de l'eau, exutoire à l'air libre) ne faisant que recevoir — le débit qui
+/// sortirait de son nœud est coupé comme par un clapet.
+fn debit_reseau(c: &Conduite, dh: f64, sec: &dyn Fn(usize) -> bool) -> (f64, f64) {
+    let (q, d) = debit_conduite(c, dh);
+    let sec_a = matches!(c.a, Sommet::Fixe(r) if sec(r));
+    let sec_b = matches!(c.b, Sommet::Fixe(r) if sec(r));
+    if (sec_a && q > 0.0) || (sec_b && q < 0.0) { (FUITE_CLAPET * dh, FUITE_CLAPET) } else { (q, d) }
 }
 
 fn charge(s: Sommet, fixes: &[f64], h: &[f64]) -> f64 {
@@ -93,12 +105,12 @@ fn charge(s: Sommet, fixes: &[f64], h: &[f64]) -> f64 {
 }
 
 /// Le résidu de continuité `F_j = Σ Q entrants − Σ Q sortants − demande_j`, et sa norme max.
-fn residus(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], h: &[f64], f: &mut [f64]) -> f64 {
+fn residus(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], h: &[f64], f: &mut [f64], sec: &dyn Fn(usize) -> bool) -> f64 {
     for (fj, d) in f.iter_mut().zip(demandes) {
         *fj = -d;
     }
     for c in conduites {
-        let (q, _) = debit_conduite(c, charge(c.a, fixes, h) - charge(c.b, fixes, h));
+        let (q, _) = debit_reseau(c, charge(c.a, fixes, h) - charge(c.b, fixes, h), sec);
         if let Sommet::Jonction(j) = c.b {
             f[j] += q;
         }
@@ -116,6 +128,12 @@ fn residus(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], h: &[f64], f
 #[allow(clippy::too_many_arguments)]
 pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges: &mut [f64], debits: &mut [f64], travail: &mut [f64],
     tolerance_m3s: f64, max_iterations: u32) -> Result<Rapport, Error> {
+    resoudre_avec(fixes, demandes, conduites, charges, debits, travail, tolerance_m3s, max_iterations, &|_| false)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn resoudre_avec(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges: &mut [f64], debits: &mut [f64], travail: &mut [f64],
+    tolerance_m3s: f64, max_iterations: u32, sec: &dyn Fn(usize) -> bool) -> Result<Rapport, Error> {
     let n = demandes.len();
     if charges.len() != n || debits.len() != conduites.len() || travail.len() < tampon(n) {
         return Err(Error::Capacity);
@@ -125,7 +143,8 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         Sommet::Jonction(j) => j < n,
     };
     let organe_valide = |o: Organe| match o {
-        Organe::Pompe { h0_m, qmax_m3s } => h0_m > 0.0 && h0_m.is_finite() && qmax_m3s > 0.0 && qmax_m3s.is_finite(),
+        Organe::Pompe { h0_m, qmax_m3s, vitesse } => h0_m > 0.0 && h0_m.is_finite() && qmax_m3s > 0.0 && qmax_m3s.is_finite()
+            && (0.0..=1.0).contains(&vitesse),
         _ => true,
     };
     if conduites.iter().any(|c| !valide(c.a) || !valide(c.b) || !(c.resistance > 0.0) || !c.resistance.is_finite()
@@ -163,7 +182,7 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
     if atteint.iter().any(|a| *a == 0.0) {
         return Err(Error::Domain);
     }
-    let mut r = residus(fixes, demandes, conduites, charges, f);
+    let mut r = residus(fixes, demandes, conduites, charges, f, sec);
     let mut it = 0;
     while r > tolerance_m3s {
         if it == max_iterations {
@@ -173,7 +192,7 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         // La jacobienne.
         jac.fill(0.0);
         for c in conduites {
-            let (_, d) = debit_conduite(c, charge(c.a, fixes, charges) - charge(c.b, fixes, charges));
+            let (_, d) = debit_reseau(c, charge(c.a, fixes, charges) - charge(c.b, fixes, charges), sec);
             for (s, signe) in [(c.b, 1.0), (c.a, -1.0)] {
                 let Sommet::Jonction(j) = s else { continue };
                 if let Sommet::Jonction(k) = c.a {
@@ -224,7 +243,7 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
             for ((e, h), d) in essai.iter_mut().zip(charges.iter()).zip(dx.iter()) {
                 *e = h + t * d;
             }
-            let r_essai = residus(fixes, demandes, conduites, essai, f);
+            let r_essai = residus(fixes, demandes, conduites, essai, f, sec);
             if r_essai < r || t < 1e-9 {
                 charges.copy_from_slice(essai);
                 r = r_essai;
@@ -237,7 +256,7 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         }
     }
     for (q, c) in debits.iter_mut().zip(conduites) {
-        *q = debit_conduite(c, charge(c.a, fixes, charges) - charge(c.b, fixes, charges)).0;
+        *q = debit_reseau(c, charge(c.a, fixes, charges) - charge(c.b, fixes, charges), sec).0;
     }
     Ok(Rapport { iterations: it, residu_m3s: r })
 }
@@ -259,10 +278,11 @@ const ITERATIONS_PAS: u32 = 50;
 /// raccord, intégré sur `dt`, devient des millilitres entiers avec un reste par raccord (`restes_nl`, comme les arêtes de V). Le réseau
 /// ne stocke rien : ce qu'il soutire aux jonctions sort, et `sortie_ml` le cumule — la masse se compte nœuds + sortie, à l'entier.
 ///
-/// Les résistances sont celles de la gravité locale (`R` en s²/m⁵ pour `|g_eff|`) ; l'air des poches n'entre pas. `fixes` : un tampon,
-/// une charge par raccord ; `travail` : [`tampon`]`(jonctions)`. Refus, sans rien écrire dans les nœuds, les restes ni la sortie : un
-/// raccord hors de l'eau (`Domain` — le réseau aspirerait de l'air), un nœud qui donnerait plus qu'il n'a ou recevrait plus que sa place
-/// (`Capacity`), et ceux de [`resoudre`] ; `charges` et `debits` ne sont alors pas significatifs.
+/// Les résistances sont celles de la gravité locale (`R` en s²/m⁵ pour `|g_eff|`) ; l'air des poches n'entre pas. **S569 : un raccord
+/// hors de l'eau est un exutoire à l'air libre** — sa charge est sa cote, et il ne fait que recevoir (le réseau n'aspire pas d'air) ; S567
+/// le refusait. `fixes` : un tampon, une charge par raccord ; `travail` : [`tampon`]`(jonctions)`. Refus, sans rien écrire dans les nœuds,
+/// les restes ni la sortie : un nœud qui donnerait plus qu'il n'a ou recevrait plus que sa place (`Capacity`), et ceux de [`resoudre`] ;
+/// `charges` et `debits` ne sont alors pas significatifs.
 #[allow(clippy::too_many_arguments)]
 pub fn pas_reseau(nodes: &mut [HydroNode], shapes: &Shapes<'_>, g_eff: [f32; 3], dt: SimTime, raccords: &[Raccord], demandes: &[f64],
     conduites: &[Conduite], charges: &mut [f64], debits: &mut [f64], fixes: &mut [f64], restes_nl: &mut [i64], travail: &mut [f64],
@@ -275,12 +295,15 @@ pub fn pas_reseau(nodes: &mut [HydroNode], shapes: &Shapes<'_>, g_eff: [f32; 3],
         let n = nodes.get(r.noeud as usize).ok_or(Error::Capacity)?;
         shapes.validate_node(n, up)?;
         let surface = along(sub(n.origin_um, [0; 3]), up) + shapes.surface_up(n, up)?.offset_um;
-        if !(along(sub(r.position_um, [0; 3]), up) < surface) {
-            return Err(Error::Domain);
-        }
-        *h = surface * 1e-6;
+        let cote = along(sub(r.position_um, [0; 3]), up);
+        // S569 : hors de l'eau, la charge est la cote du raccord (l'air libre).
+        *h = if cote < surface { surface * 1e-6 } else { cote * 1e-6 };
     }
-    let rapport = resoudre(fixes, demandes, conduites, charges, debits, travail, TOLERANCE_PAS, ITERATIONS_PAS)?;
+    // Un raccord est sec quand sa charge est sa cote — le même calcul, au bit ; immergé, sa charge est la surface, strictement au-dessus.
+    let cote = |r: usize| along(sub(raccords[r].position_um, [0; 3]), up) * 1e-6;
+    let fixes_lus: &[f64] = fixes;
+    let sec = |r: usize| fixes_lus[r] == cote(r);
+    let rapport = resoudre_avec(fixes_lus, demandes, conduites, charges, debits, travail, TOLERANCE_PAS, ITERATIONS_PAS, &sec)?;
     // Le débit sortant de chaque raccord, en millilitres entiers ; rangés dans `fixes`, désormais libre, avant toute écriture.
     let dt_s = dt.0 as f64 * 1e-6;
     let sortant = |r: usize| -> f64 {

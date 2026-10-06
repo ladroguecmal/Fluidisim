@@ -142,8 +142,9 @@ fn a_tap_on_the_network_draws_exactly_its_demand_s567() {
     let conduites = [Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Aucun }];
     let (mut charges, mut debits, mut fixes, mut restes, mut w, mut sortie) = ([0.0], [0.0], [0.0], [0i64], vec![0.0; tampon(1)], 0i64);
     let sec = [Raccord { noeud: 0, position_um: [500_000, 500_000, 1_900_000] }];
-    assert_eq!(pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &sec, &[0.0], &conduites, &mut charges, &mut debits,
-        &mut fixes, &mut restes, &mut w, &mut sortie).err(), Some(Error::Domain), "critère 4 : un raccord à sec");
+    // S569 : un raccord à sec n'est plus refusé (S567 le refusait) : exutoire à l'air libre, il ne débite rien ici.
+    pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &sec, &[0.0], &conduites, &mut charges, &mut debits,
+        &mut fixes, &mut restes, &mut w, &mut sortie).unwrap();
     let ailleurs = [Raccord { noeud: 3, position_um: [0; 3] }];
     assert_eq!(pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &ailleurs, &[0.0], &conduites, &mut charges,
         &mut debits, &mut fixes, &mut restes, &mut w, &mut sortie).err(), Some(Error::Capacity), "critère 4 : un nœud absent");
@@ -156,7 +157,7 @@ fn a_tap_on_the_network_draws_exactly_its_demand_s567() {
 #[test]
 fn a_pump_lifts_water_to_the_operating_point_s568() {
     let conduites = [
-        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0, organe: Organe::Pompe { h0_m: 30.0, qmax_m3s: 0.05 } },
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0, organe: Organe::Pompe { h0_m: 30.0, qmax_m3s: 0.05, vitesse: 1.0 } },
         Conduite { a: Sommet::Jonction(0), b: Sommet::Fixe(1), resistance: 3000.0, organe: Organe::Aucun },
     ];
     let (mut h, mut q, mut w) = ([10.0], [0.0; 2], vec![0.0; tampon(1)]);
@@ -193,7 +194,7 @@ fn a_pump_fills_a_tank_until_shutoff_and_the_valve_holds_s568() {
     ];
     let raccords = [Raccord { noeud: 0, position_um: [500_000, 500_000, 0] }, Raccord { noeud: 1, position_um: [5_500_000, 500_000, 0] }];
     let conduites = [
-        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Pompe { h0_m: 1.0, qmax_m3s: 0.01 } },
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Pompe { h0_m: 1.0, qmax_m3s: 0.01, vitesse: 1.0 } },
         Conduite { a: Sommet::Jonction(0), b: Sommet::Fixe(1), resistance: 1e-6, organe: Organe::Aucun },
     ];
     let (mut charges, mut debits, mut fixes, mut restes, mut w) = ([1.0], [0.0; 2], [0.0; 2], [0i64; 2], vec![0.0; tampon(1)]);
@@ -211,4 +212,72 @@ fn a_pump_fills_a_tank_until_shutoff_and_the_valve_holds_s568() {
     let (bas, haut) = (nodes[0].volume_ml as f64 * 1e-6, nodes[1].volume_ml as f64 * 1e-6);
     println!("S568 pompe couplée : basse {bas:.6} m (0,35), haute {haut:.6} m (1,35) ; sortie {sortie} ml");
     assert!((bas - 0.35).abs() < 2e-4 && (haut - 1.35).abs() < 2e-4, "critère 3 : l'équilibre au refoulement nul");
+}
+
+// --- S569 — la vitesse des pompes ; l'exutoire à l'air libre. Références écrites au plan par son script.
+
+/// (1) La pompe de S568 à `n` = 0,9 (similitude).
+#[test]
+fn a_slowed_pump_follows_the_affinity_laws_s569() {
+    let conduites = [
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 2000.0,
+            organe: Organe::Pompe { h0_m: 30.0, qmax_m3s: 0.05, vitesse: 0.9 } },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Fixe(1), resistance: 3000.0, organe: Organe::Aucun },
+    ];
+    let (mut h, mut q, mut w) = ([10.0], [0.0; 2], vec![0.0; tampon(1)]);
+    let rapport = resoudre(&[0.0, 20.0], &[0.0], &conduites, &mut h, &mut q, &mut w, TOL, 50).unwrap();
+    println!("S569 pompe à 0,9 : h_j = {:.9} m (20,758823529), Q = {:.9} m³/s (0,015904125), {rapport:?}", h[0], q[0]);
+    assert!((h[0] - 20.758823529).abs() < 1e-8 && (q[0] - 0.015904125).abs() < 1e-8, "critère 1");
+}
+
+/// Deux cuves de 1 m² (A à 1,5 m, B à 0,2 m), A–J0–J1–B (`R` total 4·10⁴), les raccords aux cotes données ; `pas` pas de 100 ms.
+fn vidange_s569(cote_a: i64, cote_b: i64, pas: usize) -> Vec<(i64, i64)> {
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mut nodes = [
+        HydroNode { volume_ml: 1_500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 },
+        HydroNode { volume_ml: 200_000, capacity_ml: 2_000_000, origin_um: [5_000_000, 0, 0], shape: 0 },
+    ];
+    let raccords = [Raccord { noeud: 0, position_um: [1_000_000, 500_000, cote_a] }, Raccord { noeud: 1, position_um: [5_000_000, 500_000, cote_b] }];
+    let conduites = [
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4, organe: Organe::Aucun },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Jonction(1), resistance: 2e4, organe: Organe::Aucun },
+        Conduite { a: Sommet::Jonction(1), b: Sommet::Fixe(1), resistance: 1e4, organe: Organe::Aucun },
+    ];
+    let (mut charges, mut debits, mut fixes, mut restes, mut w) = ([1.0; 2], [0.0; 3], [0.0; 2], [0i64; 2], vec![0.0; tampon(2)]);
+    let mut sortie = 0i64;
+    let mut volumes = Vec::new();
+    for _ in 0..pas {
+        pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &raccords, &[0.0, 0.0], &conduites, &mut charges,
+            &mut debits, &mut fixes, &mut restes, &mut w, &mut sortie).unwrap();
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml + sortie, 1_700_000, "la masse, à l'entier");
+        volumes.push((nodes[0].volume_ml, nodes[1].volume_ml));
+    }
+    volumes
+}
+
+/// (2) L'exutoire : l'arrivée de B à 1,0 m, au-dessus de son eau ; A se vide par le fond selon `√(h_A − 1) = √0,5 − t/(2√R)`.
+#[test]
+fn a_free_outlet_above_the_water_drains_to_its_own_level_s569() {
+    let v = vidange_s569(0, 1_000_000, 6_000);
+    for (t, ferme) in [(100usize, 1.208946609f64), (200, 1.042893219)] {
+        let h = v[t * 10 - 1].0 as f64 * 1e-6;
+        println!("S569 exutoire à {t} s : h_A = {h:.6} m (loi fermée {ferme:.6})");
+        assert!((h - ferme).abs() < 1e-3, "critère 2 à {t} s");
+    }
+    let (a, b) = v[5_999];
+    println!("S569 exutoire, final : A {a} ml (1 000 000), B {b} ml (700 000)");
+    assert!((a as f64 * 1e-6 - 1.0).abs() < 2e-4 && (b as f64 * 1e-6 - 0.7).abs() < 2e-4, "critère 2 : l'état final");
+}
+
+/// (3) Un raccord qui se dénoie : la sortie de A en paroi à 1,0 m ; A se vide jusqu'à ce que sa surface passe sous sa sortie, puis plus rien.
+#[test]
+fn an_outlet_that_uncovers_stops_the_flow_s569() {
+    let v = vidange_s569(1_000_000, 0, 6_000);
+    let (a, _) = v[5_999];
+    let arret = v.iter().position(|x| *x == v[5_999]).unwrap();
+    println!("S569 dénoyé : A final {a} ml (entre 999 726 et 1 000 000), immobile depuis le pas {arret}");
+    assert!((999_726..=1_000_000).contains(&a), "critère 3 : l'arrêt à la sortie");
+    assert!(v[arret..].iter().all(|x| *x == v[5_999]), "critère 3 : puis immobile");
 }
