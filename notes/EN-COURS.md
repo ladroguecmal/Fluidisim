@@ -71,6 +71,6 @@ fausse ; deux usages de δ décrits par S375), S545 (C21 corrigé). **ADR-238** 
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-238, rituel, METHODE, L395–L396, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
