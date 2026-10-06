@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 00:07 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 00:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S578 — le lot ; 2.2, la carte cotidale ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S577 — la marée harmonique ([journal](notes/JOURNAL.md)). Avant : S576 (la dix-neuvième revue de méthode)
 Session suivante : **S578 — le lot** (dû en S578) **et un point partiel** (2.2 : la carte cotidale et l'entrée de la marée dans la surface de B ; ou un autre). Revue à S581. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 0 — S577 : 2.2 et 7.7 avancent (la marée)

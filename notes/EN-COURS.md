@@ -62,35 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S577 — **terminée**. En autonomie, **2.2 — la marée** (« manquent la marée, le niveau moyen variable… ») ; elle sert aussi 7.7
-(la prévision des gués, SPEC-006 §5.4 : « la marée, analytique, fiable à l'horizon publié »).
+Session : S578 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S575–S577), puis **2.2 — la carte cotidale** : la marée de
+S577 vaut en un lieu ; amplitude et phase varient dans l'espace (la marée se propage).
 
-**Ce que la session fait.** `maree.rs` : une marée **harmonique**, `η(t) = Z₀ + Σ Aₖ·cos(ωₖ·t − gₖ)`, au plus huit composantes (M2, S2, N2,
-K2, K1, O1, P1, Q1 : leurs périodes sont des faits astronomiques), chaque phase **entière** par `PhaseQ32::from_time` (I-03 : identique sur
-toute plateforme) ; les fréquences converties une fois (`freq_hz_to_q32`). L'amplitude et la phase de chaque composante sont celles du
-lieu (une carte cotidale viendra avec les régions, 11.2) ; le niveau moyen `Z₀` est un paramètre.
+**Ce que la session fait.** `CarteCotidale` : pour chaque composante, l'amplitude complexe `H = A·e^(−ig)` sur une grille régulière
+(origine, pas, dimensions), **interpolée sous forme complexe** (bilinéaire sur `Re H` et `Im H`) — `η = Z₀ + Σ (Re Hₖ·cos ωₖt + Im Hₖ·sin ωₖt)`
+(avec `H = A·e^(−ig)` : `A·cos(ωt − g)`), le cosinus et le sinus par `PhaseQ32` : tout est fait d'opérations IEEE de base et de nos
+polynômes — déterministe, sans `atan2`, sans saut de phase à 2π. Hors de la grille : refus.
 
-**Références, calculées avant** (ce script les écrit). L'arrondi des fréquences en Q32 : au pire **1.0e-05** relatif (M2 :
-1.6e-06) — la phase de M2 dérive de **4.8e-05 tour en 15 jours**, 1.2e-03 tour en un an (0.9 min) :
-déterministe, et sous la précision d'une table de marée. Vives-eaux et mortes-eaux, M2 (1 m) + S2 (0,46 m) : battement de
-**14.765 jours** ; sur 30 jours, η entre **-1.4600 et 1.4600 m** (f64 idéal, pas de 60 s) ; marnages 2,92 et 1,08 m.
-Un gué (fond à −0,5 m) sous M2 + S2, depuis la pleine mer de vives-eaux (`t` = 0, 1,96 m d'eau) : il repasse sous la nage (1,30 m) dans
-**6974.05 s**.
+**Références, calculées avant** (ce script les écrit). Une onde M2 progressive dans un chenal de 20 m : `c = √(g·h)` = **14.0071 m/s**,
+longueur d'onde **626.3 km** ; une carte de 10 km de pas (`A` = 1 m, `g = k·x`). Au milieu d'une maille, l'interpolation de la corde
+creuse l'amplitude de `1 − cos(k·Δx/2)` = **1.258e-03** (la phase y reste exacte, par symétrie) ; aux nœuds, l'onde exacte. Le retard
+de la pleine mer entre `x` = 0 et 50 km : **3569.6 s**.
 
-**Quantum** (ADR-236 D1) : η en f32 (10⁻⁷ m sur 1,5 m) ; la dérive de phase ci-dessus (M2 à 15 jours : 3.0e-04 m sur 1 m
-d'amplitude). **Critères, écrits avant.** (1) M2 seule contre `cos(2πt/T)` idéal à 10⁻³ m sur 15 jours (rapport 3
-à la dérive) ; (2) M2 + S2 : le maximum et le minimum sur 30 jours à 10⁻³ m de 1.4600 / -1.4600 ; (3) le gué à 1 s de 6974.05 s
-par `prochain_franchissement` ; (4) au bit à `t` donné, deux évaluations ; à un an, η fini et borné par `Σ Aₖ` ; (5) refus : plus de huit
-composantes, une période non positive.
+**Quantum** (ADR-236 D1) : η en f32 (10⁻⁷ m) ; la dérive de phase de S577 (3·10⁻⁴ m en 15 jours) — on mesure sur 25 h (2·10⁻⁵ m).
+**Critères, écrits avant.** (1) aux nœuds, η à 10⁻⁴ m de `cos(ωt − kx)` sur 25 h ; (2) au milieu d'une maille, l'amplitude (le maximum
+sur 25 h, pas d'une minute) à 10⁻⁴ de `1 − 1.258e-03` ; (3) le retard de la pleine mer entre 0 et 50 km à 60 s de 3569.6 s (le pas
+d'échantillonnage) ; (4) un point hors de la grille refusé ; au bit à `(x, t)` donnés.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `maree.rs` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; listes 2.2, 7.7 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — la carte cotidale et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 2.2 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — M2 à 2,96·10⁻⁴ m de l'idéal (la dérive prédite) ; M2 + S2 de −1,4600 à 1,4600 m ; le gué à 6 974,03 s ; au bit ; refus.
-  Suite 752.
-- **P3** — preuve MAREE-S577 ; listes 2.2, 7.7 ; index ; journal.
-

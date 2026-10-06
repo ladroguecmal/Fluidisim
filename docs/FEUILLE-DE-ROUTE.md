@@ -414,6 +414,8 @@ l'écrémeur, l'instantané de la composition (`WVLQ`).
 prochain franchissement) ; la dix-huitième revue (ADR-244 : un essai n'affirme que ce que le plan a écrit).
 **S572–S574** : 7.7 avance trois fois — les tuiles, l'invalidation et la praticabilité par agent, la glace porteuse ; **7.6 ouvert**
 (la glace : Stefan, Gold).
+**S575–S577** : **C15 passe** (la glace d'un lac comme couche de V) ; la dix-neuvième revue (ADR-245 : un état quantifié jamais repris
+comme départ, un seuil dans une seule fonction) ; 2.2 avance — la marée harmonique à phases entières.
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
