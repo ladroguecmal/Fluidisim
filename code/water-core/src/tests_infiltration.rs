@@ -168,3 +168,77 @@ fn rain_on_open_ground_ponds_and_runs_off_s533() {
     let _ = ts;
     assert!((f / f_ana - 1.).abs() <= 0.005, "critère 2");
 }
+
+/// **S535, critère 2 — le drainage d'un sol plein** (100 mm de stockage sur 1 m², K = 10,9 mm/h, `c` = 4) vers dehors : `S` contre la
+/// forme fermée `(1 + 3·a·t)^{−1/3}` à 10⁻³ à 1, 10 et 24 h ; la masse exacte.
+#[test]
+fn a_soil_drains_by_brooks_corey_s535() {
+    let table = prism(100_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(100_000, 100_000)];
+    let mut edges = [Opening { from: 0, to: None, flow: Flow::Drainage { area_mm2: 1_000_000, conductivity_nm_s: K_NM_S, exponent_pm: 4000 }, ..Default::default() }];
+    let mut scratch = [0i64; 1];
+    let a = K_NM_S as f64 * 1e-9 / 0.1;
+    let mut parti = 0i64;
+    for n in 1..=864_000u64 {
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+        parti += scratch[0];
+        assert_eq!(nodes[0].volume_ml + parti, 100_000, "masse");
+        if [36_000u64, 360_000, 864_000].contains(&n) {
+            let t = n as f64 * 0.1;
+            let s = nodes[0].volume_ml as f64 / 100_000.;
+            let attendu = (1. + 3. * a * t).powf(-1. / 3.);
+            println!("S535 drainage à {:.0} h : S = {s:.5} (forme fermée {attendu:.5}), écart {:.2e}", t / 3600., s / attendu - 1.);
+            assert!((s / attendu - 1.).abs() <= 1e-3, "critère 2 à {t} s");
+        }
+    }
+}
+
+/// **S535, critère 3 — l'évaporation d'une flaque** (1 cm sur 1 m², 35 nm/s ≈ 3 mm/jour) : 3 024 ml en un jour à 1 ml près ; à sec au
+/// bout de quatre jours, exactement, et plus rien ne part.
+#[test]
+fn a_puddle_evaporates_at_its_rate_s535() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(10_000, 1_000_000)];
+    let mut edges = [Opening { from: 0, to: None, flow: Flow::Evaporation { area_mm2: 1_000_000, rate_nm_s: 35 }, ..Default::default() }];
+    let mut scratch = [0i64; 1];
+    let mut parti = 0i64;
+    for n in 1..=4 * 864_000u64 {
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+        parti += scratch[0];
+        if n == 864_000 {
+            println!("S535 évaporation : {parti} ml en un jour (attendu 3 024)");
+            assert!((parti - 3024).abs() <= 1, "critère 3, le taux");
+        }
+    }
+    assert_eq!(nodes[0].volume_ml, 0, "à sec");
+    assert_eq!(parti, 10_000, "rien de plus que la flaque");
+}
+
+/// **S535, critère 4 — le cycle.** Une heure de pluie à 30 mm/h sur une rétention de 0,5 mm (infiltration, ruissellement, évaporation),
+/// un sol de 100 mm qui draine ; six heures : pluie = rétention + sol + ruissellement + drainage + évaporation, au millilitre à chaque pas.
+#[test]
+fn the_soil_water_cycle_keeps_mass_s535() {
+    let mut table = prism(500).to_vec();
+    table.extend_from_slice(&prism(100_000));
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [HydroNode { volume_ml: 0, capacity_ml: 500, origin_um: [0, 0, 0], shape: 0 }, HydroNode { shape: 1, ..node(0, 100_000) }];
+    let mut edges = [
+        Opening { from: 0, to: Some(0), flow: Flow::Rain { catchment_mm2: 1_000_000 }, ..Default::default() },
+        infiltration(0, 1),
+        Opening { from: 0, to: None, flow: Flow::Spill, ..Default::default() },
+        Opening { from: 1, to: None, flow: Flow::Drainage { area_mm2: 1_000_000, conductivity_nm_s: K_NM_S, exponent_pm: 4000 }, ..Default::default() },
+        Opening { from: 0, to: None, flow: Flow::Evaporation { area_mm2: 1_000_000, rate_nm_s: 35 }, ..Default::default() },
+    ];
+    let mut scratch = [0i64; 5];
+    let (mut pluie, mut sorti) = (0i64, 0i64);
+    for n in 1..=216_000u64 {
+        let meteo = Meteo { pluie_mm_h: if n <= 36_000 { 30.0 } else { 0.0 } };
+        step_meteo(&mut nodes, &mut edges, &shapes, DOWN, meteo, SimTime(STEP_US), &mut scratch).unwrap();
+        pluie += scratch[0];
+        sorti += scratch[2] + scratch[3] + scratch[4];
+        assert_eq!(pluie, nodes[0].volume_ml + nodes[1].volume_ml + sorti, "masse au pas {n}");
+    }
+    println!("S535 cycle : pluie {pluie} ml ; rétention {} ml, sol {} ml, sorti {sorti} ml (ruissellement, drainage, évaporation)", nodes[0].volume_ml, nodes[1].volume_ml);
+}

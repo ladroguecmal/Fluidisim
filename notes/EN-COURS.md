@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S535 — **en cours**. En autonomie, **5.5 — l'assèchement du sol** : depuis S530–S533 la pluie entre dans le sol, mais il ne
+Session : S535 — **terminée**. En autonomie, **5.5 — l'assèchement du sol** : depuis S530–S533 la pluie entre dans le sol, mais il ne
 rend jamais rien.
 
 **Ce que la session fait.** Deux lois d'arête de V. `Flow::Drainage { conductivity_nm_s, exponent_pm }` : le **drainage gravitaire**
@@ -81,8 +81,12 @@ infiltration, drainage, évaporation — garde la masse au millilitre.
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — les lois, les essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.5 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — les lois, les essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `Flow::Drainage`, `Flow::Evaporation` ; essais `s535` : drainage 2–7·10⁻⁶ ; évaporation 3 024 ml exact, à sec exact ;
+  cycle à la masse exacte. Suite 696.
+- **P3** — preuve ASSECHEMENT-S535 ; liste 5.5 ; index ; journal.
+

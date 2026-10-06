@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 17:29 +02:00
+JETON            : libre
+Battement        : 2026-10-06 17:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S535 — 5.5, l'assèchement du sol (drainage, évaporation) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S534 — C1, le champ de courant 2D régional ([journal](notes/JOURNAL.md)). Avant : S533 (la pluie hors contenant)
-Session suivante : **S535 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'advection des vagues de B par un courant C1 variable (la réfraction, une loi de conservation de l'action), l'assèchement du sol (5.5), A330 (Michell), la convergence de δ en pas seul (A328), 6.7 la poche d'air, 9.3 un corps quelconque ; seuils d'instrument au-dessus du quantum (ADR-234 D2), limites matérielles calculées (ADR-235 D1), ordres de grandeur calculés (ADR-232). Revue à S536. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S534 : C1, le champ de courant 2D régional (2.6)
+Session en cours : aucune
+Dernière session : S535 — l'assèchement du sol ([journal](notes/JOURNAL.md)). Avant : S534 (C1, le champ de courant 2D régional)
+Session suivante : **S536 — la onzième revue de méthode** (S531–S535 ; ADR-222 D4) et **le lot des registres** (dû à S536) : frictions — un seuil d'instrument au quantum de V (S533, malgré ADR-234 D2), des limites matérielles refusées avec un nom (S532), le mécanisme physique désigné par le calcul au plan (S534 : la pente cyclostrophique), l'intégration exacte choisie au plan (S530, S535). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S535 : l'assèchement du sol (5.5)
 Registres       : dernier lot S533 (ADR-213 D3) ; le prochain au plus tard en S536
 ```
 

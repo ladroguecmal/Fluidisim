@@ -405,7 +405,9 @@ pas recopiée ici (L137).
   une arête de la flaque vers le sol intégrée exactement sur le pas, à 7·10⁻⁵ de la solution implicite ; le sol plein et la flaque à sec
   l'arrêtent ([preuve](validation/INFILTRATION-S530.md)) ; **S533 : la pluie hors contenant** — rétention de surface, infiltration,
   ruissellement : la lame infiltrée à 0,1 % de Mein–Larson et Green–Ampt décalé, la masse exacte ([preuve](validation/PLUIE-SOL-S533.md)).
-  Manquent le calcul de l'exposition depuis les objets posés, l'assèchement du sol, la météo (à la fin).
+  **S535 : l'assèchement** — le drainage de Brooks–Corey intégré exactement (7·10⁻⁶ de la forme fermée sur 24 h) et l'évaporation ; le cycle
+  de l'eau du sol à la masse exacte ([preuve](validation/ASSECHEMENT-S535.md)). Manquent le calcul de l'exposition depuis les objets
+  posés, l'évaporation du sol limitée par son humidité, la météo (à la fin).
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.

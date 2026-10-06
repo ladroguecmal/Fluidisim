@@ -138,6 +138,14 @@ pub enum Flow {
     /// front `ψ` (`suction_um`), déficit d'humidité `Δθ` (`deficit_pm`, ‰). Intégrée **exactement** sur le pas : `t(F) = (F − M ln(1 +
     /// F/M))/K`, `M = (ψ + h₀)Δθ`, inversée par bissection. Le sol plein, le limiteur d'arrivée l'arrête ; la flaque à sec, rien ne passe.
     Infiltration { area_mm2: i64, conductivity_nm_s: i64, suction_um: i64, deficit_pm: i64 },
+    /// **S535 — le drainage gravitaire d'un sol** (liste 5.5) : du sol `from` vers le dessous (`to` : une nappe, ou dehors),
+    /// `q = K·Sᶜ` par unité d'aire (Brooks–Corey, gradient unitaire), `S` le remplissage du nœud rapporté à sa capacité, `c` =
+    /// `exponent_pm`/1 000 (≥ 1) ; la lame de stockage est la capacité rapportée à l'aire `area_mm2`. Intégré exactement sur le pas :
+    /// `dS/dt = −a·Sᶜ`, `a = K/lame` — `S₁ = (S₀^{1−c} + (c − 1)·a·dt)^{1/(1−c)}`, `S₀·e^{−a·dt}` pour `c` = 1.
+    Drainage { area_mm2: i64, conductivity_nm_s: i64, exponent_pm: i64 },
+    /// **S535 — l'évaporation** : du nœud `from` vers dehors (`to` vaut `None`), au taux potentiel d'auteur `rate_nm_s` sur l'aire
+    /// `area_mm2`, fois la commande (l'exposition ; la météo viendra à la fin, ADR-197 D5) ; bornée par ce que le nœud contient.
+    Evaporation { area_mm2: i64, rate_nm_s: i64 },
 }
 
 /// **La météo du pas** (ADR-204 D4) : une entrée, fournie à l'identique à tous les participants (I-03) ; qui la calcule
@@ -356,6 +364,8 @@ pub fn step_meteo(
             Flow::Valve { .. } | Flow::PumpLine { .. } => law_size(&e.flow),
             // S530 : l'infiltration va vers un sol.
             Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { law_size(&e.flow) },
+            Flow::Drainage { .. } => law_size(&e.flow),
+            Flow::Evaporation { .. } => if e.to.is_some() { -1 } else { law_size(&e.flow) },
             // La pluie tombe sur le nœud que `from` et `to` désignent tous deux.
             Flow::Rain { catchment_mm2 } => {
                 if e.to != Some(e.from) { -1 } else { catchment_mm2 }
@@ -395,6 +405,33 @@ pub fn step_meteo(
             }
             let q_m3s = meteo.pluie_mm_h as f64 * (1e-3 / 3600.0) * (catchment_mm2 as f64 * 1e-6)
                 * (e.control_pm as f64 / CONTROL_FULL as f64);
+            let nl = q_m3s * dt_s * 1e12;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
+        // S535 : le drainage d'un sol, intégré exactement ; l'évaporation au taux d'auteur. Ni l'un ni l'autre ne lit de surface.
+        if let Flow::Drainage { area_mm2, conductivity_nm_s, exponent_pm } = e.flow {
+            let sol = nodes[e.from as usize];
+            if sol.volume_ml <= 0 || sol.capacity_ml <= 0 || e.control_pm == 0 {
+                continue;
+            }
+            let s0 = sol.volume_ml as f64 / sol.capacity_ml as f64;
+            let lame = sol.capacity_ml as f64 * 1e-6 / (area_mm2 as f64 * 1e-6);
+            let a_dt = conductivity_nm_s as f64 * 1e-9 / lame * dt_s * (e.control_pm as f64 / CONTROL_FULL as f64);
+            let c = exponent_pm as f64 / 1000.;
+            let s1 = if exponent_pm == 1000 { s0 * (-a_dt).exp() } else { (s0.powf(1. - c) + (c - 1.) * a_dt).powf(1. / (1. - c)) };
+            let nl = (s0 - s1) * sol.capacity_ml as f64 * 1e6;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
+        if let Flow::Evaporation { area_mm2, rate_nm_s } = e.flow {
+            let q_m3s = rate_nm_s as f64 * 1e-9 * (area_mm2 as f64 * 1e-6) * (e.control_pm as f64 / CONTROL_FULL as f64);
             let nl = q_m3s * dt_s * 1e12;
             if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
                 return Err(Error::NonFinite);
@@ -492,7 +529,8 @@ pub fn step_meteo(
             Flow::Valve { area_mm2, curve_pm } => {
                 e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt() * valve_fraction(&curve_pm, e.control_pm)
             }
-            Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill | Flow::Infiltration { .. } => {
+            Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill | Flow::Infiltration { .. } | Flow::Drainage { .. }
+            | Flow::Evaporation { .. } => {
                 unreachable!("pompes, pluie, débordement et infiltration ont leur propre calcul")
             }
         };
@@ -642,6 +680,11 @@ pub(crate) fn law_size(flow: &Flow) -> i64 {
         Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm } => {
             if area_mm2 <= 0 || conductivity_nm_s < 0 || suction_um < 0 || !(0..=1000).contains(&deficit_pm) { -1 } else { area_mm2 }
         }
+        // S535 : le drainage (c ≥ 1), l'évaporation (vers dehors, vérifié par l'appelant).
+        Flow::Drainage { area_mm2, conductivity_nm_s, exponent_pm } => {
+            if area_mm2 <= 0 || conductivity_nm_s < 0 || exponent_pm < 1000 { -1 } else { area_mm2 }
+        }
+        Flow::Evaporation { area_mm2, rate_nm_s } => if area_mm2 <= 0 || rate_nm_s < 0 { -1 } else { area_mm2 },
         _ => 0,
     }
 }

@@ -600,3 +600,11 @@ l'accélération. Le calcul au plan a désigné le mécanisme : sans la pente, r
 neutre tient une rotation solide à ± 0,025 % (l'oscillation du pas, prévue), revient à 1,7 mm après une période ; le témoin sans pente part
 à 50 m. Maillons **0** (2.6 avance). Suivant : **S535**, un point partiel ; revue à S536.
 
+## S535 — 2026-10-06 — l'assèchement du sol
+
+**Entrée.** En autonomie ; 5.5, le sol ne rendait rien. **Fait** ([preuve](../docs/validation/ASSECHEMENT-S535.md)) : `Flow::Drainage`
+(Brooks–Corey, intégré exactement sur le pas comme Green–Ampt en S530) et `Flow::Evaporation` (un taux d'auteur, en attendant la météo).
+**Mesuré** : le drainage à 7·10⁻⁶ de la forme fermée sur 24 h ; l'évaporation au millilitre près, l'arrêt exact ; le cycle complet — pluie,
+rétention, infiltration, ruissellement, drainage, évaporation — à la masse exacte à chaque pas. Maillons **0** (5.5 avance). Suivant :
+**S536, la onzième revue de méthode** (S531–S535) et le lot (dû à S536).
+
