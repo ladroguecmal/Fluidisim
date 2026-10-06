@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 21:47 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 21:50 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S559 — 5.7, les liquides de V (ADR-241) : la pression d'un nœud stratifié ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S558 — l'énergie du chemin coupé de δ linéaire ([journal](notes/JOURNAL.md)). Avant : S557 (le lot)
 Session suivante : **S559 — un point partiel** (4.18 : l'énergie du pas mobile, ou un autre point ; choisir par la feuille de route). Revue à S561 (noter : l'instrument d'énergie de S555 non éprouvé, L375). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S558 : 4.18 avance (l'énergie du chemin coupé)

@@ -62,33 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S558 — **terminée**. En autonomie, **4.18 — l'énergie du chemin coupé** : S557 a établi l'invariant du pas linéaire sur fond
-plat ; « manquent l'énergie du pas couplé et du chemin coupé ». Le chemin coupé (fond quelconque, mailles en partie solides) est celui de
-toute scène réelle.
+Session : S559 — **en cours**. En autonomie, **5.7 — plusieurs liquides** (absent ; A17) : **ADR-241** (non miscibles, en couches ; l'état
+entier, une composition parallèle ; la pression par couches ; le débit à la session suivante), puis sa première pièce — **la pression en un
+point d'un nœud stratifié** (`hydro_liquids.rs`, sous-module de V).
 
-**La dérivation, depuis le code** (`divergence_cut`, `correct_cut`, `apply_cut`). La divergence pèse chaque face par son ouverture `a_f` ;
-la correction s'applique, sans poids, aux seules faces ouvertes entre deux mailles fluides (le couvercle à sa demi-maille) ; les faces
-ouvertes sur du solide ne sont jamais corrigées et restent au repos. La sommation par parties de S557 tient alors **dans le produit
-scalaire pondéré par les ouvertures** : `⟨v, G p⟩_a = Σ a_f·v_f·(G p)_f·dx³ = Σ p_c·w_c·dA` pour `D_a v = 0`. L'invariant devient
-`Q_a = ½ρ·Σ a_f·ω_f·u_f²·dx³ + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA` (`ω` = ½ au couvercle, entièrement ouvert par contrat), égal à E₀ au
-départ. Le même calcul sans le poids `a_f` (le témoin) n'a aucune raison d'être conservé.
+**Ce que la session fait.** `Liquid { density_kg_m3 }` ; `pressure_at(nœud, composition, liquides, formes, g_eff, point)` : les couches
+rangées par densité (stable), chaque interface le plan de la géométrie pour le volume cumulé, la somme des `ρᵢ·|g|·épaisseurᵢ` au-dessus du
+point. Refus : composition qui ne somme pas au volume, densité non positive, plus de 8 liquides.
 
-**Le montage.** La cuve de S557 (16 × 8 × 6 mailles de 25 cm, z₀ = 1,5 m), un fond en pente de 0,2 à 0,7 m avec une bosse de 0,3 m
-(centrée en 2,5 ; 1,2 m), le haut du fond sous 1,0 m : la couche du couvercle reste entièrement mouillée. La bosse de 2 cm de S557,
-12 000 pas de 10 ms. Le plancher : celui de S557, ≈ 10⁻⁶ de E₀ (calculé alors ; l'énergie de la bosse ne dépend pas du fond).
+**Références, calculées avant** (ADR-239 D1 : des formes fermées indépendantes de la géométrie du code). (1) Cuve droite 4 × 1 × 2 m,
+eau 4 m³ (1 m) sous huile 2 m³ (0,5 m, ρ = 850) : au fond `9,81·(1000·1 + 850·0,5)` = **13 979,25 Pa** ; à 1,2 m, `9,81·850·0,3` =
+2 501,55 Pa. (2) La même sous `g_eff = (1 ; 0 ; −9,759)` : chaque interface passe par la colonne centrale à la hauteur `V/A` (le plan ne
+touche ni le fond ni le couvercle : pente 0,1025, demi-largeur 2 m → 0,205 m de dénivelé, sous les 0,5 m d'huile et au-dessus du fond),
+d'où la pression au coin bas `x = −2 m` par les distances le long de la verticale. (3) La carène en V des essais de géométrie (section
+`|x| ≤ z`, 1 m de long : `V(h) = h²`) : eau 1 m³ (`h` = 1 m) sous huile 0,69 m³ (`h` = 1,3 m) → à la quille `9,81·(1000 + 850·0,3)` =
+**12 311,55 Pa**. (4) Un seul liquide : `ρ·|g|·(surface − z)`, la surface du pas présent.
 
-**Critères, écrits avant.** (1) `|Q_a/E₀ − 1|` < 10⁻⁴ à chaque pas (rapport au plancher : 100). (2) La hausse de `Q_a` d'un pas à
-l'autre, au pire, sous 10⁻⁵ de E₀. (3) Le montage coupe vraiment : des ouvertures strictement entre 0 et 1 existent (comptées). Le témoin
-sans poids, publié sans critère.
+**Quantum** (ADR-236 D1) : l'inversion géométrique tient le demi-millilitre ; sur 4 m² de section, 0,125 µm de hauteur, soit
+≈ 1,2·10⁻³ Pa sur 1,4·10⁴ — 10⁻⁷ relatif. **Critères, écrits avant** : (1)–(4) à 10⁻⁵ relatif (rapport 100) ; (5) les refus ; (6) l'ordre
+des couches ne dépend pas de l'ordre de la table (l'huile déclarée avant l'eau).
 
 ### Plan
 
-- [x] **P1** — jeton ; la dérivation ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 4.18 ; rituel.
+- [x] **P1** — jeton ; ADR-241 ; plan.
+- [ ] **P2** — `hydro_liquids.rs` et ses essais ; (1)–(6).
+- [ ] **P3** — preuve ; liste 5.7 ; A17 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — 280 faces partielles ; `Q_a` à 2,4·10⁻⁶ de E₀, hausse au pire 2,2·10⁻⁶ : (1)–(3) tenus ; le témoin sans poids jusqu'à
-  +1,835 %. Suite 716.
-- **P3** — preuve ENERGIE-COUPEE-S558 ; liste 4.18 ; index ; journal.
-
