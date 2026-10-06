@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 05:20 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 05:21 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S504 — 6.4, la coque qui perce la surface en mouvement sur la carte ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S503 — un solide qui bouge sur la carte ([journal](notes/JOURNAL.md)). Avant : S502 (6.1 validée : la coque amortie sur ses six degrés de liberté)
 Session suivante : **S504 — la coque qui perce la surface, en mouvement sur la carte** (6.4) : le dépôt dans une colonne en partie couverte et le transfert de S334 (l'eau qu'une paroi qui glisse pousse vers les voisines) portés sur la carte ; la coque de la porte D en pilonnement et roulis imposés, carte contre référence. Chaînes séparées avant tout remède (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
 Maillons        : 0 — S503 : un solide immergé qui bouge sur la carte (6.4 avancée)

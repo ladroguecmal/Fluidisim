@@ -62,36 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S503 — **terminée**. En autonomie, **6.4, un solide qui bouge sur la carte** (première part) : `Linear3` (S358, S493) n'accepte
-qu'une géométrie fixe ; la référence (`Volume3::set_solid_rigid`) recoupe à chaque pas, ajoute au second membre le flux de la part des
-faces que la paroi couvre, donne aux faces qui s'ouvrent la vitesse de la paroi et dépose sur la surface l'eau que le solide déplace.
-S503 : un solide **immergé** ; S504 : la coque qui perce la surface (le transfert de S334).
+Session : S504 — **en cours**. En autonomie, **6.4, la coque qui perce la surface en mouvement sur la carte** (seconde part de S503).
+La référence, pour une coque qui perce le couvercle : (a) la pression d'un couvercle en partie couvert retire le dépôt du pas (le flux de
+paroi l'emporte pendant ce pas) ; (b) quand l'ouverture du couvercle d'une colonne se referme, l'eau de surface de la part recouverte
+passe aux voisines de la couche du haut, au prorata des faces partagées et de leurs couvercles (S334).
 
-**Ce que la session fait.** Le cœur reste le découpeur : après `set_solid_rigid`, il expose le terme de paroi par maille, les faces qui
-changent d'ouverture (et leur vitesse) et les volumes solides par colonne. `Linear3::set_motion` reçoit géométrie, terme de paroi,
-faces et dépôt ; deux noyaux (faces, dépôt) et une ligne du second membre les appliquent. Un banc : une sphère immergée menée à vitesse
-imposée, la carte contre la référence depuis le même état.
+**Ce que la session fait.** Le cœur expose les poids du transfert (le rapport de fermeture de chaque colonne et ses quatre parts) ;
+`set_motion` les reçoit ; deux noyaux sur la carte (rassembler ce que chaque colonne reçoit de ses voisines, puis appliquer en somme
+compensée) ; `lid_partial` retire le dépôt du pas ; le dépôt remis à zéro au pas suivant sans mouvement. Un banc : la coque de la porte D
+en pilonnement imposé (5 cm, 3,5 rad/s), puis en roulis (0,05 rad), carte contre référence.
 
-**Ordre de grandeur, écrit avant (ADR-226 D3).** Le terme concurrent est l'élévation que la sphère produit : une sphère de 0,3 m à
-0,5 m/s sous 0,5 m d'eau soulève la surface de l'ordre du millimètre ; la carte suit la référence à 1,3·10⁻⁵ m sur un solide fixe (S358) —
-l'écart attendu reste de cet ordre, loin du millimètre. Coût : un recoupage CPU par pas (≈ 1 à 5 ms à 64 × 64 × 8) — à mesurer.
+**Ordre de grandeur, écrit avant.** Le terme concurrent : l'élévation que la coque rayonne, ≈ 1 cm (S336 : la force de δ ≈ 5 kN pour 5 cm
+de pilonnement) ; S503 tenait 2·10⁻⁶ m pour un solide immergé. Le transfert ajoute un rassemblement en flottant au lieu d'une somme
+exacte : un écart de l'ordre de l'arrondi f32 de la surface (10⁻⁷ m), sans effet visible.
 
-**Critères, écrits avant.** (1) le banc de S358 (solide fixe) inchangé au bit ; (2) sphère menée : la carte à 10⁻⁴ m de la référence sur
-toute la course (le critère de S358), et l'élévation produite ≥ 10× l'écart ; (3) la masse : le volume d'eau de la carte suit celui de la
-référence à 10⁻⁶ m³ près ; (4) le coût par pas (recoupage CPU et carte), publié.
+**Critères, écrits avant.** (1) les bancs de S358 et de S493 (cloison) inchangés ; (2) la coque en pilonnement puis en roulis : la carte à
+10⁻⁴ m de la référence, l'élévation ≥ 10 × l'écart ; (3) les volumes à 10⁻⁶ m³ ; (4) le coût, publié.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le cœur expose le terme de paroi, les faces, les colonnes solides ; `set_motion` et ses noyaux.
-- [x] **P3** — le banc de la sphère menée ; (1)–(4).
-- [x] **P4** — preuve ; liste 6.4 ; lot des registres (dû) ; rituel.
+- [ ] **P2** — les poids du transfert (cœur) ; dépôt et transfert sur la carte ; (1).
+- [ ] **P3** — le banc de la coque ; (2)–(4).
+- [ ] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
-- **P2** — `Volume3::wall_term` (extrait de la divergence, une seule écriture), `wall_divergence`, `changed_faces`, `solid_column_volumes` ;
-  `Linear3::set_motion`, `motion_faces`, `motion_deposit`, la ligne du second membre (le chemin sans mouvement gardé). S358 : la ligne
-  `cycles=32` identique au binaire d'avant (stash, construction, mesure).
-- **P3** — `--lineaire-mobile` : carte à 2,205·10⁻⁶ m de la référence, élévation 1,036 cm (rapport 4 699), volumes à 4,0·10⁻⁹ m³ ;
-  recoupage CPU 7,7 ms par pas, pas de la carte 0,71 ms (horloge murale ; l'horodatage GPU d'un pas isolé rendait 343 ms, faux). Suite
-  du cœur : 663 essais.
-- **P4** — preuve MOBILE-CARTE-S503 ; liste 6.4 ; index ; lot : feuille de route (7 / 70 / 43, S501–S503) ; journal.
