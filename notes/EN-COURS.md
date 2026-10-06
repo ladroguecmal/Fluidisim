@@ -62,16 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S556 — **terminée**. En autonomie, **la quinzième revue de méthode** (ADR-222 D4 ; S551–S555).
+Session : S557 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S552–S556), puis **A332 — l'énergie discrète
+de δ linéaire** (liste 4.18, C09) : S555 a montré que l'énergie naturelle oscille ; laquelle le schéma conserve-t-il ?
 
-**Ce que la session fait.** Relu : S551 (la revue, le lot), S552 (un écart de définition localisé), S553 (une durée trop courte relevée par
-la trace), S554 (la durée vérifiée), S555 (une assertion canonique inapplicable ; la clôture cassée par une apostrophe). **ADR-240** : D1, un
-script en fichier, jamais en ligne ; D2, la constante de temps d'un équilibre au plan ou la trace avant de conclure ; L398, L399 ; METHODE ;
-BOUSSOLE ; index.
+**La dérivation, faite avant la mesure, depuis le code** (`step_surface_linear`). Le pas est un avant-arrière : `u^{n+1} = u^n − (dt/ρ)·G p`
+avec `D u^{n+1} = 0` et la pression imposée au couvercle `p_c = ρg·(η^n − z₀)` (fantôme à deux fois la demi-maille) ; puis
+`η^{n+1} = η^n + dt·w_c^{n+1}` (la somme des flux de colonne d'un champ sans divergence est la vitesse au couvercle, le fond étant clos).
+Pour un champ sans divergence, `⟨v, G p⟩ = Σ p_c·w_c·dA` **si la face du couvercle pèse une demi-maille** dans le produit scalaire (son
+gradient est pris sur `dx/2`). Alors, avec `K(u) = ½ρ·Σ ω_f·u_f²·dx³` (`ω` = ½ au couvercle, 1 ailleurs) :
+`K^{n+2} − K^{n+1} = −½ρg·Σ (η^{n+1} − z₀)·(η^{n+2} − η^n)·dA`, d'où **l'invariant exact**
+`Q = K(u^{n+1}) + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA` — le schéma n'est pas dissipatif (sans éponge), et au départ (`u^0 = 0`)
+`K(u^1) = −½ρg·dt·Σ (η^0 − z₀)·w_c^1·dA` donne **`Q = E₀` exactement**. L'énergie naturelle `K^{n+1} + ½ρg·Σ (η^{n+1} − z₀)²·dA` vaut
+`Q + ½ρg·dt·Σ (η^{n+1} − z₀)·w_c^{n+1}·dA` : elle oscille. La formule s'éprouve par un calcul indépendant (ADR-239 D1) : l'oscillateur
+`p_{n+1} = p_n − h·q_n`, `q_{n+1} = q_n + h·p_{n+1}` conserve `p_{n+1}² + q_n·q_{n+1}` (développé à la main : les deux pas consécutifs
+donnent `p_{n+1}² + q_{n+1}² − h·p_{n+1}·q_{n+1}`) ; l'essai le vérifie aussi en f64 sur l'oscillateur.
+
+**Ordre de grandeur et quantum** (ADR-236 D1). `E₀` = 1,573 J (S555). Le plancher : l'ulp de `η` en f32 au voisinage de z₀ = 1,5 m,
+1,2·10⁻⁷ m, sur une bosse de 2 cm → `ρg·0,02·1,2·10⁻⁷·dA` = 1,5·10⁻⁶ J par colonne, ≈ 10⁻⁶ de E₀ ; la projection itère jusqu'au
+plancher (résidu relatif 10⁻⁶).
+
+**Critères, écrits avant.** (1) `|Q_n/E₀ − 1|` < 10⁻⁴ à chaque pas des 12 000 de S555 (rapport au plancher : 100). (2) La hausse de `Q`
+d'un pas à l'autre, au pire, sous 10⁻⁵ de E₀ (10 fois le plancher) — C09, `dE/dt ≤ 0`, sur l'énergie du schéma au plancher près.
+(3) L'oscillateur f64 : `p_{n+1}² + q_n·q_{n+1}` constant à 10⁻¹² sur 10⁵ pas. L'énergie naturelle, avec et sans le demi-poids du couvercle,
+publiée, sans critère.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-240, METHODE, L398, L399, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; le lot ; la dérivation ; plan.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; A332 ; liste 4.18, 13.2 ; C09 ; rituel (`--lot`).
 
 ### Notes de reprise

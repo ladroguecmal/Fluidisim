@@ -399,6 +399,9 @@ compartiment avec et sans δ, fixe et accéléré) ; un plan sauté et une limit
 **S546–S547** : la treizième revue (ADR-238 : le rituel refuse sans plan committé) ; l'évent à débit limité (5.9, `Q_eau ≤ Q_air`).
 **S548–S551** : 6.6 partiel puis avancé trois fois — la barge envahie (la flottabilité perdue), la carène libre, l'angle de bande ; la
 quatorzième revue (ADR-239 : une formule d'analyse éprouvée avant la mesure).
+**S552–S556** : 6.6 avancé trois fois — la gîte par une brèche latérale, l'envahissement progressif par une cloison percée, la poche
+porteuse d'un compartiment scellé ; C09 exécuté (la masse tient, l'énergie naturelle manque le critère, A332) ; la quinzième revue (ADR-240 :
+un script en fichier, la constante de temps d'un équilibre au plan).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
