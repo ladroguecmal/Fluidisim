@@ -98,4 +98,7 @@ source, et rien n'est conclu de δ). (2) **4.13, le sillage mesuré** : le bord 
 - **Critère nouveau, écrit avant de lancer δ** (ADR-222 : la cible contredite par la mesure est remplacée) : **(2') le bord d'Airy sur δ à
   1° de celui de la théorie de la même coque, 16,40°**, fenêtre 4–6 λ₀, rayons issus du centre ; et par fenêtre d'1 λ₀ de 3 à 6 λ₀, à
   1,5°. (3) inchangé. 4.13 « le sillage mesuré » s'entend alors : le sillage de δ est celui de la théorie linéaire de sa coque.
+- **P3 (en cours)** — le banc exporte sa surface (`SORTIE=`), `reference_sillage.py delta <fichier>` y applique l'instrument figé. Calcul
+  lancé : `calculs/20261006-110837-sillage-delta-s520` (416 × 224, 30 s, 3 m/s ; sortie `calculs/delta_s520.bin`). **À la reprise** : lire
+  `sortie.log` (élévation maximale, coût), puis `python outils/reference_sillage.py delta calculs/delta_s520.bin` → (2') contre 16,40°.
 

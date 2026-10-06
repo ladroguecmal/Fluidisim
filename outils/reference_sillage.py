@@ -12,6 +12,7 @@ de W.
     python outils/reference_sillage.py instrument        — l'instrument de S517 (maximum des rayons) sur la référence, (σ, U), trois grilles
     python outils/reference_sillage.py instrument_fige   — l'instrument figé (le bord d'Airy, 4–6 λ₀) sur la référence, trois grilles
     python outils/reference_sillage.py coque             — S520 : l'instrument figé sur la référence de la coque (4 × 1,6 m), trois grilles
+    python outils/reference_sillage.py delta <fichier>   — S520 : l'instrument figé sur la surface de δ (banc `--lineaire-sillage`, `SORTIE=`)
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import sys
@@ -180,6 +181,31 @@ def coque():
               f" bord_airy_deg={a_k:.2f} kelvin_deg=19.47 ecart_deg={a_k - 19.47:.2f} par_lambda {' '.join(par)}", flush=True)
 
 
+def delta(chemin):
+    """S520 P3 — l'instrument figé sur la surface de δ (fichier du banc `--lineaire-sillage`, `SORTIE=`) : le bord d'Airy sur 4–6 λ₀ et
+    par fenêtre d'1 λ₀, rayons issus du centre de la coque, contre la référence de la coque (critère 2')."""
+    with open(chemin, "rb") as f:
+        tete = f.readline().split()
+        nx, ny = int(tete[0]), int(tete[1])
+        gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+        eta = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+    gx = gx0 + dx * np.arange(nx)
+    gy = gy0 + dx * np.arange(ny)
+    ech = lambda x, y: bilineaire(gx, gy, eta, x, y)
+    u, t = COQUE_U, COQUE_T
+    lam = 2 * np.pi * u * u / G
+    d0, d1 = fenetre(u, t)
+    _, angles, prof = rayons(ech, xs_src, d0, d1)
+    a_max, a_k = bord_airy(angles, prof)
+    par = []
+    for n in range(2, 7):
+        _, a1, p1 = rayons(ech, xs_src, n * lam, (n + 1) * lam)
+        par.append(f"{n}-{n + 1}:{bord_airy(a1, p1)[1]:.2f}")
+    print(f"DELTA_S520 xs={xs_src:.2f} fenetre=[{d0:.2f},{d1:.2f}] maximum_deg={a_max:.2f} bord_airy_deg={a_k:.2f} reference_deg=16.40"
+          f" ecart_reference_deg={a_k - 16.40:.2f} kelvin_deg=19.47 par_lambda {' '.join(par)}"
+          f" profil {' '.join(f'{angles[i]:.0f}:{prof[i]:.2e}' for i in range(0, len(angles), 8))}", flush=True)
+
+
 def instrument():
     t, coupure = 24.0, 6.0
     for sigma in [0.5, 1.0, 2.0]:
@@ -200,5 +226,7 @@ def instrument():
 if __name__ == "__main__":
     if sys.argv[1] == "comparer":
         comparer(sys.argv[2])
+    elif sys.argv[1] == "delta":
+        delta(sys.argv[2])
     else:
         {"instrument": instrument, "instrument_fige": instrument_fige, "coque": coque}[sys.argv[1]]()

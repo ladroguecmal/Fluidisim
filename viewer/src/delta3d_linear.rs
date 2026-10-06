@@ -1430,6 +1430,17 @@ pub fn recevoir_sillage() -> Result<(), String> {
         }
         let (x_max, y_max) = (((ou % d.nx) as f64 + 0.5) * d.dx as f64, ((ou / d.nx) as f64 + 0.5) * d.dx as f64 - yc);
         let fini = eta.iter().all(|e| e.is_finite());
+        // S520 : `SORTIE=<fichier>` écrit la surface finale pour `outils/reference_sillage.py delta` — en-tête `nx ny x0 y0 dx xs`
+        // (centres des mailles, y depuis l'axe de la coque, xs son centre), puis η − z0 en f32 petit-boutiste, x le plus rapide.
+        if let Ok(chemin) = std::env::var("SORTIE") {
+            let dxf = d.dx as f64;
+            let mut octets = format!("{} {} {} {} {} {}
+", d.nx, d.ny, 0.5 * dxf, 0.5 * dxf - yc, dxf, centre(duree)[0]).into_bytes();
+            for e in &eta {
+                octets.extend_from_slice(&(e - d.z0()).to_le_bytes());
+            }
+            std::fs::write(&chemin, octets).map_err(|e| format!("{chemin} : {e}"))?;
+        }
         // Le sillage : à chaque distance derrière le centre de la coque, **le bord du coin** — de chaque côté, le point le plus éloigné de
         // l'axe où |η| dépasse la fraction `SEUIL` (0,2) du maximum à cette distance ; au-delà, l'eau est au repos. (Le maximum latéral,
         // essayé d'abord, prend le champ proche de la coque : 2° au lieu de 19,5°.)
