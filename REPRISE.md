@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 23:26 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 23:28 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S571 — la dix-huitième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S570 — l'échantillon de traversabilité et le prochain franchissement ([journal](notes/JOURNAL.md)). Avant : S569 (le lot)
 Session suivante : **S571 — la dix-huitième revue de méthode** (S566–S570 ; ADR-222 D4) : frictions — un nombre du plan fait à la main (S568, la fuite du clapet) malgré ADR-243 D1 ; un script de plan qui a refusé un montage avant d'écrire (S569, n = 0,8 : ce qui a tenu) ; une assertion hors plan fausse dans un essai (S570) ; une tolérance inatteignable sous le plancher flottant (S568) ; ce qui a tenu (les nombres écrits par le script du plan, S567–S570 ; le refus d'un lot dû par le rituel, S566). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 1 — S570 : 7.7 absent → partiel

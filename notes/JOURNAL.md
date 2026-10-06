@@ -873,3 +873,10 @@ refusait). **Mesuré** : la pompe au 10⁻⁹ ; l'exutoire à la loi fermée pr�
 avec sa cause. **Mesuré** : les classes exactes aux bornes ; une marée M2 annoncée à 0,3 ms de ses franchissements analytiques. **En
 route** : une assertion ajoutée hors du plan, fausse, corrigée — notée pour la revue. Maillons **1** (7.7 : absent → partiel). Suivant :
 **S571, la dix-huitième revue de méthode**.
+
+## S571 — 2026-10-06 — la dix-huitième revue de méthode (ADR-244)
+
+**Entrée.** En autonomie ; revue due. **Friction** : une assertion ajoutée en route dans un essai, hors du plan et fausse (S570) —
+**protection élargie** : un essai n'affirme que ce que le plan a écrit (ADR-244 D1, L403). Un nombre de tête entre parenthèses (S568) et une
+tolérance sous le plancher flottant (S568, corrigée dans le code) : rien à changer. Ont tenu : le script du plan qui refuse un montage
+(S569), le rituel qui refuse un lot dû (S566). Maillons **1**. Suivant : **S572**, le lot (dû) et un point partiel.

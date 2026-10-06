@@ -6647,3 +6647,9 @@ et le commit est parti. Le code de sortie était juste ; la chaîne l'ignorait. 
 **S562 — le nombre écrit avant d'être calculé.** Le plan de l'écrémeur disait « la charge à 1 % vers 190 s » ; le script, lancé après, donnait
 220 s. La règle « calculer avant d'écrire » existait (ADR-237 D1) ; elle a été suivie à l'envers. Le plan de S564 calculait ses nombres et les
 écrivait lui-même, par une chaîne formatée : un nombre de tête n'y avait pas de place (ADR-243 D1).
+
+## L403
+
+**S570 — l'assertion de route.** L'essai de traversabilité portait, en plus des critères du plan, une vérification ajoutée en écrivant :
+« 1,5 m d'eau immobile → dangereux pour la plupart ». HR = 1,5·0,5 = 0,75 : « pour certains ». L'essai a échoué sur un module juste. La valeur
+n'avait été ni écrite au plan ni calculée (ADR-244 D1).
