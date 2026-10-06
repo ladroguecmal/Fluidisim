@@ -62,29 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S548 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S546–S547), puis **6.6 — les grands navires**
-(absent) par leur premier cas : un navire qui s'enfonce parce qu'un compartiment s'envahit — le corps rigide (S331–S539) et un compartiment
-de V (S538–S547) couplés.
+Session : S549 — **en cours**. En autonomie, **6.6 — la carène libre** : l'eau d'un compartiment à demi plein garde sa surface horizontale
+quand la coque gîte ; son centre se déplace vers le bord bas, et la stabilité perd `i/∇` (la hauteur métacentrique, `GM → GM − i/∇`,
+`i` le moment d'inertie de la surface libre) — un navire qui chavire par l'eau qu'il embarque.
 
-**Ce que la session fait.** Un essai de couplage, sans code neuf du cœur : une barge (corps rigide, proxy en couches de 25 cm,
-amortissement de pilonnement) porte un compartiment de V dans son repère ; la mer, vue du navire, est un nœud de V dont la surface suit le
-pilonnement ; une brèche au fond du compartiment ; à chaque pas de V, l'eau du compartiment s'ajoute à la masse du corps (elle est portée
-par la coque), et le corps avance de dix pas. Compartiment central (aucun assiette : le pilonnement seul, ADR-232 D1), ouvert à l'air.
+**Ce que la session fait.** Deux pièces du cœur. (a) `VolumeShape::centroid_below_um(plan)` : le centre de la part mouillée d'une forme de
+V — chaque tétraèdre découpé par le plan (un, deux ou trois sommets mouillés). (b) `RigidBody::loads` : des charges ponctuelles (un point
+du corps, une force du monde) ajoutées aux forces et au moment — vide par défaut. L'essai : la barge de S548 (20 × 8 × 4 m), son
+compartiment central (5 × 8 m) à 1 m d'eau, sans brèche ; son centre de masse décalé latéralement (le proxy déplacé) ; l'eau du compartiment
+pèse en son centre, calculé à chaque pas sous la pesanteur vue du navire (« libre »), ou fixe à son centre au repos (« figée »).
 
-**Ordre de grandeur, calculé.** Barge 20 × 8 × 4 m, 246 t (tirant 1,5 m) ; compartiment central de 5 × 8 × 4 m : **flottabilité perdue**
-`T' = T·A/(A − A_c)` = **2,000 m**, 80 m³ d'eau embarqués (la surface intérieure à la flottaison). Raideur de pilonnement 1,61 MN/m,
-amortissement critique 1,45 MN·s/m (pris : 1 MN·s/m), période 2,8 s ; brèche de 0,1 m² : 0,34 m³/s au départ.
+**Ordre de grandeur, calculé.** 246 t + 41 t d'eau : `∇` = 280 m³, `T` = 1,75 m, `KB` 0,875, `BM` 3,048, `KG` 1,786 → `GM` figé **2,137 m** ;
+`i = l·b³/12` = 213,3 m⁴, `i/∇` = **0,762 m** → `GM` libre 1,375 m, rapport **1,554**. Décalage du centre total de 8,6 cm : gîte figée
+2,30°, libre 3,57° ; à 4°, l'eau monte de 0,28 m au bord (sous les 1 m : la surface reste entre les parois).
 
-**Critères, écrits avant.** (1) Le tirant final à 1 % de 2,000 m. (2) L'eau embarquée à 1 % de `A_c·T'` = 80 m³ ; la surface intérieure à
-1 cm de la flottaison. (3) La masse d'eau de V exacte (mer + compartiment). Quantum : 1 ml sur 40 m² (0,025 µm), rapport 10⁸ (ADR-236 D1).
+**Critères, écrits avant.** (1) Le centre mouillé d'une boîte inclinée : le déplacement latéral `b²·tan θ/(12 h)` à 10⁻⁹ près (rapport à
+l'arrondi f64 > 10⁶). (2) Sans charges, la suite au bit. (3) Le rapport des tangentes de gîte libre / figée à 3 % de `GM_f/(GM_f − i/∇)`,
+`GM_f` mesuré sur la gîte figée (le proxy a son erreur propre, S499 : elle se retire par le rapport).
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — le centre mouillé, les charges, les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — essai `s548` : tirant 1,9995 m (2,000), 79,915 m³ (80), surface intérieure −1,6 mm ; masse de V exacte. Suite 707.
-- **P3** — preuve BARGE-ENVAHIE-S548 ; liste 6.6 (partiel), décompte ; dépendances ; index ; journal.
-

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 20:36 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 20:38 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S549 — 6.6, la carène libre ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S548 — le lot ; une barge s'enfonce par un compartiment envahi ([journal](notes/JOURNAL.md)). Avant : S547 (l'évent à débit limité)
 Session suivante : **S549 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — la carène libre (6.6 : un compartiment décentré, l'eau qui court et fait gîter : l'effet de carène libre réduit GM de ρ·i/∇), la poche d'air porteuse d'un compartiment scellé, Coriolis dans δ, la pesanteur horizontale sur la carte GPU, C14/C15 ; blocages vérifiés (ADR-238 D2), nombres recalculés (ADR-237 D1). Revue à S551. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S548 : la barge envahie (6.6)
