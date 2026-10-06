@@ -2552,6 +2552,12 @@ fn the_boxed_recut_is_the_full_recut_s508() {
             v.step_surface_linear(10_000, 8000, &Jobs).unwrap();
         }
         assert_eq!(bits(entier.surface()), bits(boite.surface()), "surface, pas {n}");
+        // S518 : les vitesses des faces aussi, le recoupage limité jusque dans les faces qui s'ouvrent.
+        assert_eq!(
+            (bits(entier.velocity_u()), bits(entier.velocity_v()), bits(entier.velocity_w())),
+            (bits(boite.velocity_u()), bits(boite.velocity_v()), bits(boite.velocity_w())),
+            "vitesses, pas {n}"
+        );
     }
     println!("S508 : 60 pas, recoupage en boîte et entier identiques au bit");
 }

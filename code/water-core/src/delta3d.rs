@@ -84,10 +84,16 @@ fn wall_velocity(v: [f32; 3], w: [f32; 3], c: [f32; 3], axis: usize, x: [f32; 3]
 
 /// S330 : le volume du solide dans chaque colonne, m³ — ce que la découpe retire au fond seul.
 fn solid_columns(domain: Domain3, base: &[f32], frac: &[f32], out: &mut [f32]) {
+    solid_columns_in(domain, base, frac, out, cut::full_box(domain));
+}
+
+/// S518 : les colonnes d'une boîte seulement (toute leur hauteur) ; les autres, intactes.
+fn solid_columns_in(domain: Domain3, base: &[f32], frac: &[f32], out: &mut [f32], boite: cut::Boite) {
     let Domain3 { nx, ny, nz, dx } = domain;
     let cube = (dx as f64).powi(3);
-    for j in 0..ny {
-        for i in 0..nx {
+    let [i0, i1, j0, j1, ..] = boite;
+    for j in j0..j1 {
+        for i in i0..i1 {
             let mut s = 0f64;
             for k in 0..nz {
                 let c = (k * ny + j) * nx + i;
@@ -374,9 +380,9 @@ impl Volume3 {
         }
         let mut v = Self::configure_with_bottom(host, domain, rho, g_eff, bottom)?;
         // S330 : la découpe du fond seul et le volume du solide par colonne, pour qu'il puisse bouger ; S334 : l'eau
-        // qu'il dépose dans chaque colonne.
+        // qu'il dépose dans chaque colonne ; S518 : les ouvertures d'avant le recoupage.
         let faces = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1);
-        let bytes = (faces + nx * ny * nz + 3 * nx * ny).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
+        let bytes = (2 * faces + nx * ny * nz + 3 * nx * ny).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
         host.alloc.alloc_persistent(bytes).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
@@ -412,9 +418,11 @@ impl Volume3 {
         if solid.len() != (nx + 1) * (ny + 1) * (nz + 1) {
             return Err(Error::Shape);
         }
-        if solid.iter().chain(&velocity).chain(&angular).chain(&center).any(|x| !x.is_finite()) {
+        if velocity.iter().chain(&angular).chain(&center).any(|x| !x.is_finite()) {
             return Err(Error::NotFinite);
         }
+        // S518 : la finitude des nœuds et la boîte du solide en une seule passe.
+        let boite_solide = cut::solid_box_checked(domain, solid)?;
         let g = self.cut.as_mut().ok_or(Error::Domain)?;
         let mut base = g.base.take().ok_or(Error::Domain)?;
         // S508 : le recoupage limité à la boîte du solide — hors d'elle, il ne coupe rien —, unie à celle du pas d'avant, que l'on restaure
@@ -423,7 +431,7 @@ impl Volume3 {
         let (nouvelle, ancienne) = if self.full_recut {
             (Some(toute), Some(toute))
         } else {
-            (cut::solid_box(domain, solid), g.solid_box)
+            (boite_solide, g.solid_box)
         };
         let boite = nouvelle.unwrap_or([0; 6]);
         let restauree = match (nouvelle, ancienne) {
@@ -435,10 +443,14 @@ impl Volume3 {
             g.base = Some(base);
             return Err(e);
         }
-        // Les ouvertures d'avant, dans les tampons de sauvegarde, libres entre deux pas.
-        self.saved_u.copy_from_slice(&g.open_u);
-        self.saved_v.copy_from_slice(&g.open_v);
-        self.saved_w.copy_from_slice(&g.open_w);
+        // S518 : les ouvertures d'avant, dans la base, copiées dans la réunion de la boîte du recoupage précédent et de la nouvelle — hors
+        // d'elle, avant = après depuis le recoupage précédent, et ce recoupage n'y touche pas. Le premier les copie toutes.
+        let avant = g.recut_box.map_or(toute, |b| cut::union_box(b, restauree));
+        cut::box_face_rows(domain, avant, |axe, a, b| match axe {
+            0 => base.before_u[a..b].copy_from_slice(&g.open_u[a..b]),
+            1 => base.before_v[a..b].copy_from_slice(&g.open_v[a..b]),
+            _ => base.before_w[a..b].copy_from_slice(&g.open_w[a..b]),
+        });
         {
             let [i0, i1, j0, j1, k0, k1] = restauree;
             for k in k0..k1 {
@@ -471,39 +483,42 @@ impl Volume3 {
         g.solid_velocity = velocity;
         g.solid_angular = angular;
         g.solid_center = center;
-        // Une face qui s'ouvre naît à la vitesse normale de la paroi en son centre ; une face fermée perd la sienne.
+        // Une face qui s'ouvre naît à la vitesse normale de la paroi en son centre ; une face fermée perd la sienne. S518 : dans la boîte
+        // du recoupage — hors d'elle, aucune face ne s'ouvre ni ne se ferme.
         let paroi = |axis: usize, x: [f32; 3]| wall_velocity(velocity, angular, center, axis, x);
-        for k in 0..nz {
-            for j in 0..ny {
-                for i in 0..=nx {
+        let [bi0, bi1, bj0, bj1, bk0, bk1] = restauree;
+        for k in bk0..bk1 {
+            for j in bj0..bj1 {
+                for i in bi0..if bi1 > bi0 { bi1 + 1 } else { bi0 } {
                     let f = (k * ny + j) * (nx + 1) + i;
-                    if g.open_u[f] == 0. { self.u[f] = 0.; } else if self.saved_u[f] == 0. {
+                    if g.open_u[f] == 0. { self.u[f] = 0.; } else if base.before_u[f] == 0. {
                         self.u[f] = paroi(0, [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx]);
                     }
                 }
             }
-            for j in 0..=ny {
-                for i in 0..nx {
+            for j in bj0..(bj1 + 1).min(ny + 1) {
+                for i in bi0..bi1 {
                     let f = (k * (ny + 1) + j) * nx + i;
-                    if g.open_v[f] == 0. { self.v[f] = 0.; } else if self.saved_v[f] == 0. {
+                    if g.open_v[f] == 0. { self.v[f] = 0.; } else if base.before_v[f] == 0. {
                         self.v[f] = paroi(1, [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx]);
                     }
                 }
             }
         }
-        for k in 0..=nz {
-            for j in 0..ny {
-                for i in 0..nx {
+        for k in bk0..(bk1 + 1).min(nz + 1) {
+            for j in bj0..bj1 {
+                for i in bi0..bi1 {
                     let f = (k * ny + j) * nx + i;
-                    if g.open_w[f] == 0. { self.w[f] = 0.; } else if self.saved_w[f] == 0. {
+                    if g.open_w[f] == 0. { self.w[f] = 0.; } else if base.before_w[f] == 0. {
                         self.w[f] = paroi(2, [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx]);
                     }
                 }
             }
         }
         // L'eau déplacée : le volume solide gagné par une colonne en élève la surface. Le nouveau volume
-        // est écrit dans `rhs`, libre entre deux pas : aucune allocation.
-        solid_columns(domain, &base.frac, &g.frac, &mut self.rhs[..nx * ny]);
+        // est écrit dans `rhs`, libre entre deux pas : aucune allocation. S518 : hors de la boîte, la fraction est celle du fond — zéro.
+        self.rhs[..nx * ny].fill(0.);
+        solid_columns_in(domain, &base.frac, &g.frac, &mut self.rhs[..nx * ny], restauree);
         // Somme compensée f32, comme le transport (S233) : le reste d'arrondi porte ce que `η` perd.
         let area = dx * dx;
         for c in 0..nx * ny {
@@ -524,10 +539,11 @@ impl Volume3 {
             let (top, z0, k) = (nz * nx * ny, domain.z0(), nz - 1);
             let t = &mut self.rhs[nx * ny..2 * nx * ny];
             t.fill(0.);
-            for j in 0..ny {
-                for i in 0..nx {
+            // S518 : dans la boîte — hors d'elle, le couvercle ne change pas.
+            for j in bj0..bj1 {
+                for i in bi0..bi1 {
                     let c = j * nx + i;
-                    let (avant, apres) = (self.saved_w[top + c], g.open_w[top + c]);
+                    let (avant, apres) = (base.before_w[top + c], g.open_w[top + c]);
                     if !(avant > 0. && apres < avant) {
                         continue;
                     }
@@ -1026,12 +1042,14 @@ impl Volume3 {
         if out.len() != nu + nv + nw {
             return Err(Error::Shape);
         }
+        // S518 : les ouvertures d'avant, dans la base ; hors de la boîte du dernier recoupage, égales aux courantes.
+        let (bu, bv, bw) = g.base.as_ref().map_or((&g.open_u[..], &g.open_v[..], &g.open_w[..]), |b| (&b.before_u[..], &b.before_v[..], &b.before_w[..]));
         let paroi = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..=nx {
                     let f = (k * ny + j) * (nx + 1) + i;
-                    out[f] = if g.open_u[f] == 0. { 0. } else if self.saved_u[f] == 0. {
+                    out[f] = if g.open_u[f] == 0. { 0. } else if bu[f] == 0. {
                         paroi(0, [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx])
                     } else { f32::MAX };
                 }
@@ -1039,7 +1057,7 @@ impl Volume3 {
             for j in 0..=ny {
                 for i in 0..nx {
                     let f = (k * (ny + 1) + j) * nx + i;
-                    out[nu + f] = if g.open_v[f] == 0. { 0. } else if self.saved_v[f] == 0. {
+                    out[nu + f] = if g.open_v[f] == 0. { 0. } else if bv[f] == 0. {
                         paroi(1, [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx])
                     } else { f32::MAX };
                 }
@@ -1049,7 +1067,7 @@ impl Volume3 {
             for j in 0..ny {
                 for i in 0..nx {
                     let f = (k * ny + j) * nx + i;
-                    out[nu + nv + f] = if g.open_w[f] == 0. { 0. } else if self.saved_w[f] == 0. {
+                    out[nu + nv + f] = if g.open_w[f] == 0. { 0. } else if bw[f] == 0. {
                         paroi(2, [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx])
                     } else { f32::MAX };
                 }
@@ -1073,10 +1091,13 @@ impl Volume3 {
             return Ok(());
         }
         let (top, k) = (nz * nx * ny, nz - 1);
-        for j in 0..ny {
-            for i in 0..nx {
+        // S518 : dans la boîte du dernier recoupage — hors d'elle, le couvercle n'a pas changé.
+        let bw = g.base.as_ref().map_or(&g.open_w[..], |b| &b.before_w[..]);
+        let [i0, i1, j0, j1, ..] = g.recut_box.unwrap_or(cut::full_box(self.domain));
+        for j in j0..j1 {
+            for i in i0..i1 {
                 let c = j * nx + i;
-                let (avant, apres) = (self.saved_w[top + c], g.open_w[top + c]);
+                let (avant, apres) = (bw[top + c], g.open_w[top + c]);
                 if !(avant > 0. && apres < avant) {
                     continue;
                 }
@@ -1112,12 +1133,14 @@ impl Volume3 {
         let Some([i0, i1, j0, j1, k0, k1]) = g.recut_box else {
             return self.changed_faces(out);
         };
+        // S518 : les ouvertures d'avant, dans la base ; hors de la boîte du dernier recoupage, égales aux courantes.
+        let (bu, bv, bw) = g.base.as_ref().map_or((&g.open_u[..], &g.open_v[..], &g.open_w[..]), |b| (&b.before_u[..], &b.before_v[..], &b.before_w[..]));
         let paroi = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
         for k in k0..k1 {
             for j in j0..j1 {
                 for i in i0..=i1 {
                     let f = (k * ny + j) * (nx + 1) + i;
-                    out[f] = if g.open_u[f] == 0. { 0. } else if self.saved_u[f] == 0. {
+                    out[f] = if g.open_u[f] == 0. { 0. } else if bu[f] == 0. {
                         paroi(0, [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx])
                     } else { f32::MAX };
                 }
@@ -1125,7 +1148,7 @@ impl Volume3 {
             for j in j0..(j1 + 1).min(ny + 1) {
                 for i in i0..i1 {
                     let f = (k * (ny + 1) + j) * nx + i;
-                    out[nu + f] = if g.open_v[f] == 0. { 0. } else if self.saved_v[f] == 0. {
+                    out[nu + f] = if g.open_v[f] == 0. { 0. } else if bv[f] == 0. {
                         paroi(1, [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx])
                     } else { f32::MAX };
                 }
@@ -1135,7 +1158,7 @@ impl Volume3 {
             for j in j0..j1 {
                 for i in i0..i1 {
                     let f = (k * ny + j) * nx + i;
-                    out[nu + nv + f] = if g.open_w[f] == 0. { 0. } else if self.saved_w[f] == 0. {
+                    out[nu + nv + f] = if g.open_w[f] == 0. { 0. } else if bw[f] == 0. {
                         paroi(2, [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx])
                     } else { f32::MAX };
                 }

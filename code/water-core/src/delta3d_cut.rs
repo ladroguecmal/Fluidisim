@@ -93,6 +93,63 @@ pub(crate) fn solid_box(domain: Domain3, solid: &[f32]) -> Option<Boite> {
     Some([i0, i1, j0, j1, k0, k1])
 }
 
+/// **S518 : la boîte d'un solide et sa finitude, en une seule passe** sur les nœuds — `NotFinite` sur un nœud non fini ; sinon la boîte
+/// de [`solid_box`].
+pub(crate) fn solid_box_checked(domain: Domain3, solid: &[f32]) -> Result<Option<Boite>, crate::delta_projection::Error> {
+    let Domain3 { nx, ny, nz, .. } = domain;
+    let (mut lo, mut hi) = ([usize::MAX; 3], [0usize; 3]);
+    let mut fini = true;
+    for c in 0..=nz {
+        for b in 0..=ny {
+            let ligne = &solid[(c * (ny + 1) + b) * (nx + 1)..(c * (ny + 1) + b + 1) * (nx + 1)];
+            for (a, x) in ligne.iter().enumerate() {
+                fini &= x.is_finite();
+                if *x < 0. {
+                    for (q, v) in [a, b, c].into_iter().enumerate() {
+                        lo[q] = lo[q].min(v);
+                        hi[q] = hi[q].max(v);
+                    }
+                }
+            }
+        }
+    }
+    if !fini {
+        return Err(crate::delta_projection::Error::NotFinite);
+    }
+    if lo[0] == usize::MAX {
+        return Ok(None);
+    }
+    let n = [nx, ny, nz];
+    let r = |q: usize| (lo[q].saturating_sub(2), (hi[q] + 2).min(n[q]));
+    let ((i0, i1), (j0, j1), (k0, k1)) = (r(0), r(1), r(2));
+    Ok(Some([i0, i1, j0, j1, k0, k1]))
+}
+
+/// **S518 — les faces d'une boîte**, par rangées contiguës : `f(axe, début, fin)` pour chaque rangée de faces `u` (`i0..=i1`), `v`
+/// (`j0..=j1` borné à `ny`) et `w` (`k0..=k1` borné à `nz`) — les faces que le recoupage dans cette boîte peut toucher.
+pub(crate) fn box_face_rows(domain: Domain3, boite: Boite, mut f: impl FnMut(usize, usize, usize)) {
+    let Domain3 { nx, ny, nz, .. } = domain;
+    let [i0, i1, j0, j1, k0, k1] = boite;
+    for k in k0..k1 {
+        for j in j0..j1 {
+            let u = (k * ny + j) * (nx + 1);
+            if i1 > i0 {
+                f(0, u + i0, u + i1 + 1);
+            }
+        }
+        for j in j0..(j1 + 1).min(ny + 1) {
+            let v = (k * (ny + 1) + j) * nx;
+            f(1, v + i0, v + i1);
+        }
+    }
+    for k in k0..(k1 + 1).min(nz + 1) {
+        for j in j0..j1 {
+            let w = (k * ny + j) * nx;
+            f(2, w + i0, w + i1);
+        }
+    }
+}
+
 /// S330 : la découpe du fond seul, et le volume du solide dans chaque colonne, m³.
 pub(crate) struct Base3 {
     pub frac: Vec<f32>,
@@ -105,6 +162,11 @@ pub(crate) struct Base3 {
     /// remplissage — que le flux de sa paroi retire pendant le pas suivant. La surface d'une colonne en partie
     /// couverte se lit sans elle (A317).
     pub deposit: Vec<f32>,
+    /// **S518 : les ouvertures d'avant le dernier recoupage**, `u, v, w` — persistantes (les tampons de sauvegarde, que le pas réemploie,
+    /// les portaient en entier) ; hors de la boîte du dernier recoupage, égales aux ouvertures courantes.
+    pub before_u: Vec<f32>,
+    pub before_v: Vec<f32>,
+    pub before_w: Vec<f32>,
 }
 
 impl Cut3 {
@@ -118,6 +180,9 @@ impl Cut3 {
             floor: self.floor.clone(),
             solid_col: vec![0.; columns],
             deposit: vec![0.; columns],
+            before_u: self.open_u.clone(),
+            before_v: self.open_v.clone(),
+            before_w: self.open_w.clone(),
         }
     }
 }
