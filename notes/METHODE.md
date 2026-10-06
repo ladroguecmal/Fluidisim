@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Vingt-huit, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md), une par celle de S501, [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
+Vingt-neuf, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md), une par celle de S501, [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md), une par celle de S506, [ADR-230](../docs/adr/ADR-230-cinquieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -27,6 +27,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Deux trajectoires se comparent depuis le même état, positions **et** vitesses : un corps lâché dans une eau qui bouge part à sa vitesse, toutes ses parts composées | L382 | — |
 | **en construisant l'instrument** | Un instrument s'éprouve sur un cas de réponse connue, et se réépreuve quand ce qu'il mesure s'améliore ; deux représentations se comparent à frontière et point de fonctionnement égaux | L360, L368 | — |
 | | Une grandeur de diagnostic (centre, volume, débit) s'éprouve à sa naissance par un essai du cœur sur un cas de réponse connue | L375 | essai `air_pocket_centroid_is_the_bubble_centre_s486` |
+| | Une référence numérique (pas fin, maille fine) s'éprouve convergée sur trois points avant qu'on juge contre elle ; un départ impulsif ou un régime singulier du modèle n'a pas de référence | L385 | — |
 | | Un corps d'essai se choisit loin de ses limites : sa marge (stabilité de forme, `ω·dt`, rampe d'immersion) se calcule avec le proxy qu'il porte avant de mesurer ; une marge de l'ordre de l'erreur du proxy le disqualifie | L384 | — |
 | | Une valeur attendue se calcule dans l'essai (la formule, puis la tolérance), jamais en dur depuis un calcul de tête | L378 | — |
 | | Un garde-fou nomme ce qu'il autorise (une liste explicite), il ne le déduit pas d'une propriété voisine | L379 | — |

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S506 — **en cours**. En autonomie, **la cinquième revue de méthode** (ADR-222 D4) : les frictions de S502–S505.
+Session : S506 — **terminée**. En autonomie, **la cinquième revue de méthode** (ADR-222 D4) : les frictions de S502–S505.
 
 **Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
 table ; `etat_projet --check` à zéro.
@@ -70,6 +70,7 @@ table ; `etat_projet --check` à zéro.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
+- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
 
 ### Notes de reprise
+- **P2** — ADR-230 : six frictions ; une protection (D1, la référence éprouvée convergée), une pratique (D2, l'éveil à chaque reprise) ; METHODE (29), L385, BOUSSOLE, index.

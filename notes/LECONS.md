@@ -6541,3 +6541,9 @@ la même source et petite elle aussi. Comparer au terme concurrent, sur la duré
 faussé un essai quand le proxy est devenu exact ; une part d'une conclusion publiée (la « dérive du second ordre » de S494) était son
 roulis. La marge d'un corps d'essai se calcule avant de mesurer, avec son proxy (ADR-228 D1).
 
+## L385
+
+**S505 — la référence qui n'en était pas une.** Un calcul « au pas fin » jugé comme la vérité, deux fois : un départ impulsif sans limite en
+`dt` (l'élévation doublait quand le pas diminuait), puis une coque au-delà de `√(gh)`, où la réponse linéaire est singulière. Quatre calculs
+avant de vérifier la convergence de la référence elle-même sur trois pas. Une référence s'éprouve convergée avant de juger (ADR-230 D1).
+

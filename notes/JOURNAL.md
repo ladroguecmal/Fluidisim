@@ -350,3 +350,10 @@ rejoué — Courant à 0,4500 de 0,5 à 20 m/s, la borne absolue franchit 1 au s
 impulsif sans limite en `dt`, puis une coque au-delà de `√(gh)` (régime critique, hors du modèle) — localisés avant remède ; en
 sous-critique, l'écart double au passage d'une maille par pas, sur une tendance lente : **A328** (le δ 3D à coque mobile converge lentement
 en `dt` près de la coque). Maillons **0**. Suivant : **S506, la revue de méthode** ; puis A328.
+
+## S506 — 2026-10-06 — la cinquième revue de méthode
+
+**Entrée.** En autonomie, ADR-222 D4. **Fait** : [ADR-230](../docs/adr/ADR-230-cinquieme-revue-de-methode.md) — six frictions de S502–S505 ;
+une protection : une référence numérique s'éprouve convergée sur trois points avant qu'on juge contre elle (S505 : un départ impulsif, puis
+un régime critique, jugés comme des vérités) ; une pratique : l'éveil vérifié à chaque reprise (la machine arrêtée pendant S504). METHODE :
+29 protections ; L385. Maillons **1**. Suivant : **S507, A328** — la convergence en `dt` du δ 3D près d'une coque mobile.

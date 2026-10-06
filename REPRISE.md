@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 08:06 +02:00
+JETON            : libre
+Battement        : 2026-10-06 08:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S506 — la cinquième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S505 — C23 sur le système ; A328 ([journal](notes/JOURNAL.md)). Avant : S504 (la coque qui perce la surface, en mouvement sur la carte)
-Session suivante : **S506 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S502–S505 — dont S505 : une référence non convergée jugée deux fois (départ impulsif, régime critique) avant une vérification de convergence sur trois points ; une machine arrêtée pendant le travail. **Sans attendre de « Continue »** ; `outils/eveil.py` relancé à 7 h 40 pour 14 h.
-Maillons        : 0 — S505 : C23 sur le système (6.4 avancée), A328 ouverte
+Session en cours : aucune
+Dernière session : S506 — la cinquième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S505 (C23 sur le système)
+Session suivante : **S507 — A328** : la convergence en `dt` du δ 3D près d'une coque mobile — localiser avant de remédier (ADR-226 D1) : la coque en translation lente (0,5 m/s, sous-critique), trois pas au moins (ADR-230 D1) ; éteindre un à un les termes de la mise à jour par pas (faces ouvertes à la vitesse de la paroi, dépôt, transfert de S334) contre un témoin. Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (`calcul.py etat`).
+Maillons        : 1 — S506 : la revue de méthode (ADR-230), sans capacité
 Registres       : dernier lot S503 (ADR-213 D3) ; le prochain au plus tard en S506
 ```
 
