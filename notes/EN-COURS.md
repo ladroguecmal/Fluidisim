@@ -83,7 +83,27 @@ courant, la turbulence).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'extraction au bit ; `MixedWater` avec la pression ; essais (1)–(4).
+- [x] **P2** — l'extraction au bit ; `MixedWater` avec la pression ; essais (1)–(4).
 - [ ] **P3** — preuve ; liste 6.2 ; rituel.
 
 ### Notes de reprise
+- **P2 (en cours)** — l'extraction (`compose_local`, `mixed::sample_local`) : 11 560 points au bit contre `Prepared::sample_local` ;
+  S494 inchangé aux chiffres près. `MixedWater.pressure`. **Critère 3 manqué d'abord à 40 %, au premier ordre** (même rapport à 2 et
+  200 Pa). Impasses : la bouée 0,25 × 0,25 × 0,2 roule (GM ≈ 0 avec 4 points par axe) → bouée plate (0,4 × le côté) — l'écart ne
+  change pas ; le corps égale `∫∫−g∇η` au µm : **l'écart est dans le champ** — `du/dt ≠ −g∇η` à 9 m de la source pendant ≈ 0,5 s
+  (résidu ≈ 10⁻⁴ m/s² pour 2 Pa) : la recette d'essai 16 × 24 (`tests_mixed_water`) ne reconstruit la gaussienne qu'à
+  `r ≲ 24/k_max` ≈ 4 m ; au-delà, une pression repliée agit sur l'eau, pas sur le corps. → recette 64 × 128, coupure 3 (le nombre de
+  nœuds du sillage de production S212).
+  **Recette 64 × 128 : 215 %** — l'hypothèse ne suffisait pas. Au point fixe (0, 3), le résidu `du/dt + g∇η` s'accumule au passage de
+  la source : la **vraie** queue de la gaussienne à 3σ (`0,011·p₀`), dont le gradient l'emporte sur la pente du sillage (les deux ∝ p₀ ;
+  rapport ≈ 3/(k·0,01)) — l'ordre de grandeur l'avait dit négligeable sans la comparer à la pente. → bouée en (−6, 6), à 6σ
+  (e⁻¹⁸), route de −15 à 15 m sur 10 s, 12 s de mesure. Coût : ≈ 6,5 min l'essai (4 096 modes, ≈ 150 échantillons par pas).
+  **6σ, coupure 3 : 25 % ; coupure 6 : 19 %** — encore au premier ordre. Diagnostic posé enfin (champ seul, sans pas du corps, au point
+  de la bouée) : résidu `du/dt + g∇η` 4·10⁻⁸ m — **le champ est cohérent** ; `∫u − ∫∫(−g∇η)` croît **linéairement** : `u₀·t`, l'eau a
+  une vitesse au départ (la source naît en marche), la bouée partait au repos — l'erreur de départ de S494, côté pression. → lâchée à
+  la vitesse de l'eau composée. Leçon : trois remèdes essayés avant de séparer les chaînes (corps / champ / départ) — la séparation
+  aurait dû venir d'abord (ADR-224 D1 : l'ordre de grandeur d'un remède — ici, le remède n'était pas diagnostiqué).
+- **P2 fait** — lâchée à la vitesse de l'eau : (3) **0,85 %** à 2 Pa (0,25 m) ; à 200 Pa 12,5 % (second ordre, publié). (2) 0,05 % et
+  0,03 % ; sillage : 9,6 mm de pilonnement pour 8,4 mm de surface. (4) 0. L'essai du sillage `#[ignore]` (≈ 8,5 min). Suite : 654
+  essais, 17 ignorés.
+

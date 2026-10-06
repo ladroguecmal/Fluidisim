@@ -92,28 +92,35 @@ impl WaterQuery for BackgroundWater<'_> {
 /// la composition refuse — hors du domaine d'un impact, au-delà de sa validité, pente au-delà de `max_slope` — rend B seul, et
 /// le refus est **compté** (`refusals`) : l'hôte le lit, rien ne le masque. L'accélération de W est une différence centrée de
 /// 1 ms sur sa vitesse de surface (B garde la sienne, analytique) : la masse ajoutée seule la lit.
+///
+/// **S495 : la pression** — le sillage d'un objet en marche, l'autre part de W —, publiée par son contrôleur à l'instant `time`
+/// (`pressure`), entre dans la même composition (`prepared_water::mixed::sample_local`, ADR-077 : B, impacts puis pressions, une
+/// seule normalisation). Une pression publiée à un autre instant est refusée (comptée). L'accélération ne porte que celle des
+/// impacts : la pression n'est publiée qu'à `time`.
 pub struct MixedWater<'a, 'j, const N: usize = 64> {
     pub bound: &'a crate::prepared_water::BoundBackground<'a>,
     pub impacts: &'a crate::prepared_water::Prepared<'a, 'j, N>,
+    pub pressure: Option<&'a crate::bound_pressure::Prepared<'a>>,
     pub time: crate::types::SimTime,
     pub max_slope: f32,
     pub refusals: core::cell::Cell<u64>,
 }
 
 impl<const N: usize> MixedWater<'_, '_, N> {
-    fn sample(&self, x: f64, y: f64, time: crate::types::SimTime) -> Option<crate::types::WaterSample> {
-        match self.impacts.sample_local(self.bound, [x as f32, y as f32], time, self.max_slope) {
-            Ok(s) => Some(s),
-            Err(_) => {
-                self.refusals.set(self.refusals.get() + 1);
-                self.bound.binding().0.eval_local([x as f32, y as f32, 0.], time)
-            }
-        }
+    fn refus(&self, x: f64, y: f64, time: crate::types::SimTime) -> Option<crate::types::WaterSample> {
+        self.refusals.set(self.refusals.get() + 1);
+        self.bound.binding().0.eval_local([x as f32, y as f32, 0.], time)
     }
-    /// La vitesse de surface de W seule : la composée moins celle de B, au même point et au même instant.
+    fn sample(&self, x: f64, y: f64, time: crate::types::SimTime) -> Option<crate::types::WaterSample> {
+        crate::prepared_water::mixed::sample_local(self.bound, self.impacts, self.pressure, time, [x as f32, y as f32], self.max_slope)
+            .ok()
+            .or_else(|| self.refus(x, y, time))
+    }
+    /// La vitesse de surface des impacts seuls : B et les impacts composés, moins B, au même point et au même instant.
     fn w_velocity(&self, x: f64, y: f64, time: crate::types::SimTime) -> [f64; 3] {
         let b = self.bound.binding().0.eval_local([x as f32, y as f32, 0.], time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64));
-        let m = self.sample(x, y, time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64));
+        let m = self.impacts.sample_local(self.bound, [x as f32, y as f32], time, self.max_slope).ok().or_else(|| self.refus(x, y, time));
+        let m = m.map_or([0.; 3], |s| s.u_total.map(|v| v as f64));
         [m[0] - b[0], m[1] - b[1], m[2] - b[2]]
     }
 }

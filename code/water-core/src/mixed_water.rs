@@ -364,84 +364,129 @@ pub fn sample_world_batch<const N: usize>(
         let local = background
             .local_point(*point)
             .ok_or_else(|| fail(composition::Error::Domain))?;
-        let mut s = background
-            .eval_local(local, time)
-            .ok_or_else(|| fail(composition::Error::InvalidBackground))?;
-        if !finite(&s) || s.normal[2] <= 0.0 || s.steepness < 0.0 {
-            return Err(fail(composition::Error::InvalidBackground));
-        }
-        let mut slope = [-s.normal[0] / s.normal[2], -s.normal[1] / s.normal[2]];
-        // S205, ADR-128 : `envelope` reste la raideur publiée, B compris, même ordre qu'avant ;
-        // `budget` est ce que le refus consomme — les perturbations seules, comme `slope_floor`.
-        let mut envelope = s.steepness * core::f32::consts::PI;
-        // S223, ADR-138 : le budget est celui de `slope_floor`, calculé une fois hors de la
-        // boucle des points — il est point-indépendant par construction, et l'annonce et le
-        // refus doivent lire la même quantité (ADR-128).
-        let budget = joint_budget;
-        let mut perturbation = [0.0f32; 2];
-        let mut fields = impacts.fields.iter().flatten();
-        for event in impacts.journal.confirmed() {
-            let f = fields
-                .next()
-                .ok_or_else(|| fail(composition::Error::FieldsMismatch))?;
-            if event != f.event() {
-                return Err(fail(composition::Error::FieldsMismatch));
-            }
-            let w = f
-                .sample(frame, cell, [local[0], local[1]], time)
-                .map_err(|e| {
-                    fail(match e {
-                        crate::impact_field::Error::NotRepresentable => {
-                            composition::Error::NonFinite
-                        }
-                        _ => composition::Error::Domain,
-                    })
-                })?;
-            s.eta += w.eta;
-            s.deta_dt += w.deta_dt;
-            s.u_total[0] += w.horizontal_velocity[0];
-            s.u_total[1] += w.horizontal_velocity[1];
-            s.u_total[2] += w.deta_dt;
-            slope[0] += w.slope[0];
-            slope[1] += w.slope[1];
-            perturbation[0] += w.slope[0];
-            perturbation[1] += w.slope[1];
-            // S215, ADR-133 : `envelope` reste la raideur publiée (bit publié, inchangé) ;
-            // `budget` suit la dispersion, dans le même ordre de somme que `slope_floor`.
-            envelope += f.slope_max();
-        }
-        if fields.next().is_some() {
-            return Err(fail(composition::Error::FieldsMismatch));
-        }
-        if let Some(p) = pressure {
-            let w = p.sample_local([local[0], local[1]]).map_err(|e| {
-                fail(match e {
-                    crate::modal_pressure::Error::NonFinite => composition::Error::NonFinite,
-                    _ => composition::Error::Domain,
-                })
-            })?;
-            s.eta += w.eta;
-            s.deta_dt += w.vertical_velocity;
-            s.u_total[0] += w.horizontal_velocity[0];
-            s.u_total[1] += w.horizontal_velocity[1];
-            s.u_total[2] += w.vertical_velocity;
-            slope[0] += w.slope[0];
-            slope[1] += w.slope[1];
-            perturbation[0] += w.slope[0];
-            perturbation[1] += w.slope[1];
-            envelope += p.slope_envelope();
-        }
-        check_slope(perturbation, budget, max_slope)?;
-        let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
-        s.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
-        s.steepness = envelope / core::f32::consts::PI;
-        if !finite(&s) || s.normal[2] <= 0.0 {
-            return Err(fail(composition::Error::NonFinite));
-        }
-        scratch[index] = s;
+        scratch[index] = compose_local(background, frame, cell, impacts, pressure, time, local, max_slope, joint_budget, index)?;
     }
     output[..points.len()].copy_from_slice(&scratch[..points.len()]);
     Ok(())
+}
+
+/// **S495 — la composition d'un point**, au point local de l'ancre de B : celle de `sample_world_batch`, extraite telle quelle (les
+/// mêmes opérations dans le même ordre : au bit) ; `joint_budget` est `slope_floor` à l'instant, `index` ne sert qu'à nommer le point
+/// refusé.
+#[allow(clippy::too_many_arguments)]
+fn compose_local<const N: usize>(
+    background: &crate::Background,
+    frame: crate::FrameId,
+    cell: u64,
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Prepared<'_>>,
+    time: SimTime,
+    local: [f32; 3],
+    max_slope: f32,
+    joint_budget: f32,
+    index: usize,
+) -> Result<WaterSample, Error> {
+    let fail = |error| Error::Point { index, error };
+    let mut s = background
+        .eval_local(local, time)
+        .ok_or_else(|| fail(composition::Error::InvalidBackground))?;
+    if !finite(&s) || s.normal[2] <= 0.0 || s.steepness < 0.0 {
+        return Err(fail(composition::Error::InvalidBackground));
+    }
+    let mut slope = [-s.normal[0] / s.normal[2], -s.normal[1] / s.normal[2]];
+    // S205, ADR-128 : `envelope` reste la raideur publiée, B compris, même ordre qu'avant ;
+    // `budget` est ce que le refus consomme — les perturbations seules, comme `slope_floor`.
+    let mut envelope = s.steepness * core::f32::consts::PI;
+    // S223, ADR-138 : le budget est celui de `slope_floor`, calculé une fois hors de la
+    // boucle des points — il est point-indépendant par construction, et l'annonce et le
+    // refus doivent lire la même quantité (ADR-128).
+    let budget = joint_budget;
+    let mut perturbation = [0.0f32; 2];
+    let mut fields = impacts.fields.iter().flatten();
+    for event in impacts.journal.confirmed() {
+        let f = fields
+            .next()
+            .ok_or_else(|| fail(composition::Error::FieldsMismatch))?;
+        if event != f.event() {
+            return Err(fail(composition::Error::FieldsMismatch));
+        }
+        let w = f
+            .sample(frame, cell, [local[0], local[1]], time)
+            .map_err(|e| {
+                fail(match e {
+                    crate::impact_field::Error::NotRepresentable => {
+                        composition::Error::NonFinite
+                    }
+                    _ => composition::Error::Domain,
+                })
+            })?;
+        s.eta += w.eta;
+        s.deta_dt += w.deta_dt;
+        s.u_total[0] += w.horizontal_velocity[0];
+        s.u_total[1] += w.horizontal_velocity[1];
+        s.u_total[2] += w.deta_dt;
+        slope[0] += w.slope[0];
+        slope[1] += w.slope[1];
+        perturbation[0] += w.slope[0];
+        perturbation[1] += w.slope[1];
+        // S215, ADR-133 : `envelope` reste la raideur publiée (bit publié, inchangé) ;
+        // `budget` suit la dispersion, dans le même ordre de somme que `slope_floor`.
+        envelope += f.slope_max();
+    }
+    if fields.next().is_some() {
+        return Err(fail(composition::Error::FieldsMismatch));
+    }
+    if let Some(p) = pressure {
+        let w = p.sample_local([local[0], local[1]]).map_err(|e| {
+            fail(match e {
+                crate::modal_pressure::Error::NonFinite => composition::Error::NonFinite,
+                _ => composition::Error::Domain,
+            })
+        })?;
+        s.eta += w.eta;
+        s.deta_dt += w.vertical_velocity;
+        s.u_total[0] += w.horizontal_velocity[0];
+        s.u_total[1] += w.horizontal_velocity[1];
+        s.u_total[2] += w.vertical_velocity;
+        slope[0] += w.slope[0];
+        slope[1] += w.slope[1];
+        perturbation[0] += w.slope[0];
+        perturbation[1] += w.slope[1];
+        envelope += p.slope_envelope();
+    }
+    check_slope(perturbation, budget, max_slope)?;
+    let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+    s.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
+    s.steepness = envelope / core::f32::consts::PI;
+    if !finite(&s) || s.normal[2] <= 0.0 {
+        return Err(fail(composition::Error::NonFinite));
+    }
+    Ok(s)
+}
+
+/// **S495 — la requête d'un corps** ([`crate::rigid_body::MixedWater`]) : B, les impacts confirmés et la pression publiée, composés au
+/// point `local` du repère de l'ancre de B par la composition de `sample_world_batch` — mêmes contrôles de montage, même budget, même
+/// point —, sans passer par une position du monde.
+pub fn sample_local<const N: usize>(
+    bound: &BoundBackground<'_>,
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Prepared<'_>>,
+    time: SimTime,
+    local: [f32; 2],
+    max_slope: f32,
+) -> Result<WaterSample, Error> {
+    let (background, frame, cell) = bound.binding();
+    match classify(bound, impacts, pressure.map(|p| (p.context().settings(), p.time())), time) {
+        State::Ready => {}
+        State::Context => return Err(Error::Context),
+        State::LossKnown => return Err(Error::LossKnown),
+        State::ImpactsExpired { .. } | State::OutsideWindow { .. } | State::NeedsUpdate { .. } => return Err(Error::Time),
+    }
+    if !max_slope.is_finite() || max_slope <= 0.0 {
+        return Err(Error::MaxSlope);
+    }
+    let joint_budget = slope_floor(impacts, pressure, time);
+    compose_local(background, frame, cell, impacts, pressure, time, [local[0], local[1], 0.0], max_slope, joint_budget, 0)
 }
 
 #[cfg(test)]
