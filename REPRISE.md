@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 15:36 +02:00
+JETON            : libre
+Battement        : 2026-10-06 15:38 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S521 — la huitième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S520 — le sillage de la coque dans δ contre la théorie de sa coque : manqué ; A330 ([journal](notes/JOURNAL.md)). Avant : S519 (le lot des registres)
-Session suivante : **S521 — la huitième revue de méthode** (S517–S520 ; ADR-222 D4) : frictions — trois instruments d'angle non éprouvés (S517) ; un instrument éprouvé sur une source et appliqué à une autre, où il lit un creux d'interférence (S520) ; une limite matérielle (65 535 groupes) trouvée au premier grand domaine ; un remplacement de texte non vérifié (S517). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 1 — S520 : A330 ouverte, la carte au-delà de 65 535 groupes ; aucun point n'avance
-Registres       : dernier lot S519 (ADR-213 D3) ; le prochain au plus tard en S522
+Session en cours : aucune
+Dernière session : S521 — la huitième revue de méthode (ADR-233) ([journal](notes/JOURNAL.md)). Avant : S520 (le sillage de la coque dans δ contre la théorie de sa coque : manqué)
+Session suivante : **S522 — un lot qui fait avancer une capacité (deux maillons)** : relire le tableau de bord ; candidats nets — 2.7/K3 la dispersion en profondeur finie de W (ouvrirait C07 peu profond, critère analytique `arcsin(1/Fr_h)` et la pente −½), A330 par une référence de corps (Michell) éprouvée sur un cas de sa famille, 6.2 la turbulence, 6.7 la poche d'air ; ordres de grandeur calculés (ADR-232), instruments éprouvés sur leur famille (ADR-233). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 2 — S521 : la revue de méthode (ADR-233), sans capacité
+Registres       : dernier lot S521 (ADR-213 D3) ; le prochain au plus tard en S524
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -73,6 +73,6 @@ appliqué à une autre, une limite de dispatch, un script cassé par une apostro
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-233, METHODE, L389, BOUSSOLE, index, feuille de route).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
