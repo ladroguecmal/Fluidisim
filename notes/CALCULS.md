@@ -84,4 +84,6 @@ for nd in (8, 12, 16):
 | `20261006-081538-a328-bosse` | S507 | a328-bosse | `BOSSE=1 code/target/release/examples/c23_coque.exe localise 0` | terminé, 2026-10-06 08:15 |
 | `20261006-081612-a328-bosse2` | S507 | a328-bosse2 | `BOSSE=1 code/target/release/examples/c23_coque.exe localise 0` | terminé, 2026-10-06 08:17 |
 | `20261006-105843-ref-sillage-s519` | S519 | ref-sillage-s519 | `python outils/reference_sillage.py instrument` | terminé, 2026-10-06 10:59 |
-| `20261006-110837-sillage-delta-s520` | S520 | sillage-delta-s520 | `SILLAGE_NX=416 SILLAGE_NY=224 DUREE=30 VITESSE=3 RAMPE=3 SORTIE=calculs/delta_s520.bin D_MIN=23.06 D_MAX=34.59 viewer/target/release/water-viewer.exe --lineaire-sillage` | lancé 2026-10-06 11:08 |
+| `20261006-110837-sillage-delta-s520` | S520 | sillage-delta-s520 | `SILLAGE_NX=416 SILLAGE_NY=224 DUREE=30 VITESSE=3 RAMPE=3 SORTIE=calculs/delta_s520.bin D_MIN=23.06 D_MAX=34.59 viewer/target/release/water-viewer.exe --lineaire-sillage` | échec (code 101), 2026-10-06 11:08 |
+| `20261006-152710-sillage-delta-s520b` | S520 | sillage-delta-s520b | `SILLAGE_NX=416 SILLAGE_NY=224 DUREE=30 VITESSE=3 RAMPE=3 SORTIE=calculs/delta_s520.bin D_MIN=23.06 D_MAX=34.59 viewer/target/release/water-viewer.exe --lineaire-sillage` | échec (code 101), 2026-10-06 15:27 |
+| `20261006-152831-sillage-delta-s520c` | S520 | sillage-delta-s520c | `SILLAGE_NX=416 SILLAGE_NY=224 DUREE=30 VITESSE=3 RAMPE=3 SORTIE=calculs/delta_s520.bin D_MIN=23.06 D_MAX=34.59 viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 15:29 |

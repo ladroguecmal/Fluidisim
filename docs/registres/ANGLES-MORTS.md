@@ -4605,3 +4605,12 @@ cœur 13,1 ms, envoi à la carte 11,5 ms. Les ouvertures d'avant persistent dans
 toutes les boucles du recoupage ne parcourent que la boîte ; la carte ne compare à l'ombre que la réunion des deux dernières boîtes, sur les
 tableaux du cœur non concaténés. **2,20 ms** sur 786 000 mailles (24,9 avant), au bit du recoupage et de l'envoi entiers ; le pas complet
 passe de 27,1 à 9,2 ms. Le dépôt renormalisé reste entier (49 000 colonnes, négligeable).
+
+**A330 — S520, 2026-10-06 (sévérité 2, ouverte). Le sillage de la coque dans δ n'a pas de référence éprouvée.** Contre la théorie linéaire
+d'une pression `ρ g d` sur l'empreinte de la coque ([SILLAGE-COQUE-S520](../validation/SILLAGE-COQUE-S520.md)), δ est 3,5 fois moins ample
+sur la décroissance extérieure du sillage et ses lobes intérieurs diffèrent ; le bord d'Airy, éprouvé sur une source à un lobe (S519), lit
+sur la théorie de la coque un creux d'interférence. On ne sait pas si l'écart vient du modèle (une pression n'est pas un corps qui perce la
+surface : la source d'une coque mince est la pente de sa carène, Michell) ou de δ. **Conséquence** : « le sillage mesuré » de 4.13 reste
+sans preuve. Déclencheur : **avant de déclarer juste le sillage d'une coque dans δ**. Premiers remèdes : une référence de corps (la
+théorie de Michell pour une carène, ou δ à 12,5 cm sur un domaine réduit, convergé sur trois points) ; un instrument éprouvé sur un profil
+à plusieurs lobes.

@@ -148,7 +148,8 @@ fn decode(slot: u32) -> vec4<u32> {
 
 @compute @workgroup_size(64)
 fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
-    let slot = id.x;
+    // S520 : dispatch en deux dimensions au-delà de 65 535 groupes (65 535 · 64 fils par rangée).
+    let slot = id.x + id.y * 4194240u;
     if (slot >= s.faces) { return; }
     let q = decode(slot);
     let x = (f32(q.x) + select(0.5, 0.0, q.w == 0u)) * s.dx;
@@ -394,7 +395,7 @@ fn pressure(c: u32) -> f32 { return state[c]; }
 
 @compute @workgroup_size(64)
 fn correct(@builtin(global_invocation_id) id: vec3<u32>) {
-    let slot = id.x;
+    let slot = id.x + id.y * 4194240u;
     if (slot >= s.faces) { return; }
     let a = open(slot);
     // Une face fermée n'a pas de vitesse — le cœur la garde nulle depuis `close_walls`.
@@ -523,7 +524,7 @@ fn advance(@builtin(global_invocation_id) id: vec3<u32>) {
 /// Les faces que le solide vient de fermer (vitesse nulle) ou d'ouvrir (la vitesse normale de sa paroi).
 @compute @workgroup_size(64)
 fn motion_faces(@builtin(global_invocation_id) id: vec3<u32>) {
-    let f = id.x;
+    let f = id.x + id.y * 4194240u;
     if (f >= s.faces) { return; }
     let o = motion[s.cells + f];
     if (o < 3.0e38) { vel[f] = o; }

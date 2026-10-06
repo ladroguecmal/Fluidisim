@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Le sillage de la coque dans δ contre la théorie de sa coque — S520](validation/SILLAGE-COQUE-S520.md) : critères manqués ; δ 3,5 fois moins ample que la théorie d'une pression ; la carte au-delà de 65 535 groupes ; A330.
 - [C07 en eau profonde : le sillage de W contre la théorie linéaire, et son angle — S519](validation/C07-PROFOND-S519.md) : 0,33 % de la référence exacte en temps ; 19,98° par le bord d'Airy ; C07 profond passe.
 - [Le recoupage d'une coque qui bouge, sous budget dans un grand domaine — S518](validation/RECOUPAGE-GRAND-S518.md) : 24,9 → 2,2 ms sur 786 000 mailles, au bit ; A329 levée.
 - [La coque en marche et son sillage, sur la carte — S517](validation/SILLAGE-S517.md) : vague d'étrave bornée, sillage stable ; l'angle de Kelvin non mesuré à 2° (trois instruments) ; A329 (le recoupage sur un grand domaine).

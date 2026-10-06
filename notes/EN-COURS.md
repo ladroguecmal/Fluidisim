@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S520 — **en cours**. En autonomie, **4.13, le sillage mesuré** : S517 n'a pas pu lire l'angle du sillage de la coque dans δ
+Session : S520 — **terminée**. En autonomie, **4.13, le sillage mesuré** : S517 n'a pas pu lire l'angle du sillage de la coque dans δ
 (trois instruments) ; S519 a montré que l'instrument de S517 ne lit pas Kelvin même sur la théorie, et a éprouvé le **bord d'Airy** (19,98°
 sur la théorie, 19,98° sur W). S517 lisait entre 1,7 et 4,2 λ₀ ; le bord d'Airy demande 4–6 λ₀ — un domaine plus long, abordable depuis
 S518 (le pas de la carte à 9,2 ms sur 786 000 mailles).
@@ -85,8 +85,8 @@ source, et rien n'est conclu de δ). (2) **4.13, le sillage mesuré** : le bord 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la référence de la coque, l'instrument ; (1).
-- [ ] **P3** — la coque dans δ ; (2), (3).
-- [ ] **P4** — preuve ; liste 4.13 ; rituel.
+- [x] **P3** — la coque dans δ ; (2), (3).
+- [x] **P4** — preuve ; liste 4.13 ; rituel.
 
 ### Notes de reprise
 - **P2 fini — (1) manqué.** La référence de la coque (rectangle 4 × 1,6 m, `ρ g d`, coupure de Nyquist de δ), trois grilles : le bord
@@ -101,4 +101,8 @@ source, et rien n'est conclu de δ). (2) **4.13, le sillage mesuré** : le bord 
 - **P3 (en cours)** — le banc exporte sa surface (`SORTIE=`), `reference_sillage.py delta <fichier>` y applique l'instrument figé. Calcul
   lancé : `calculs/20261006-110837-sillage-delta-s520` (416 × 224, 30 s, 3 m/s ; sortie `calculs/delta_s520.bin`). **À la reprise** : lire
   `sortie.log` (élévation maximale, coût), puis `python outils/reference_sillage.py delta calculs/delta_s520.bin` → (2') contre 16,40°.
-
+- **P3 fini** — le premier calcul s'est arrêté (71 504 groupes > 65 535) → prédiction, correction, faces du mouvement, dispersion en deux
+  dimensions (au bit en deçà : e41630abd739b189 ; S503, S504 inchangés). δ : 0,957 m, 23,3 ms par pas ; **bord d'Airy 20,56°** contre
+  16,40° → (2') manqué. Diagnostic : sur la théorie, l'instrument lit un creux d'interférence (15° : 0,236 ; 17° : 0,111 ; 19° : 0,164) ;
+  δ 3,5 fois moins ample sur la décroissance extérieure. **A330** ouverte.
+- **P4** — preuve SILLAGE-COQUE-S520 ; A330 ; liste 4.13 ; index ; journal.

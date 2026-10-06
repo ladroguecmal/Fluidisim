@@ -468,3 +468,13 @@ exacte en temps à la pression gaussienne de `wake_source`, convergée sur trois
 (l'amplitude retombée à Ai(0)/max Ai passé la cuspide) lit 19,98°, figé avant W. **Mesuré** : W à **0,33 %** de la référence sur la zone
 établie, angle **19,98°** → C07 profond passe (3.2, 13.2). L'eau peu profonde attend la dispersion en profondeur finie (2.7). Maillons
 **0** (3.2 et 13.2 avancent : C07 profond exécuté, le chemin — W tel quel —, la preuve). Suivant : **S520**, un point partiel ; revue à S521.
+
+## S520 — 2026-10-06 — le sillage de la coque dans δ contre la théorie de sa coque : manqué ; A330
+
+**Entrée.** En autonomie ; 4.13, « le sillage mesuré », par le bord d'Airy de S519. **Fait** ([preuve](../docs/validation/SILLAGE-COQUE-S520.md)) :
+la théorie de la coque (une pression `ρ g d` sur son empreinte) lit 16,4° à 3 m/s — l'angle d'une coque de 4 m varie avec L/λ₀ — :
+critère (1) manqué, un critère nouveau écrit et committé avant δ. La carte s'arrêtait à 1,49 M mailles (71 504 groupes > 65 535) : les
+noyaux par face en deux dimensions, au bit en deçà. δ (30 s, 23,3 ms par pas, borné) lit 20,56° : **(2') manqué**. Diagnostic : sur la
+théorie, l'instrument lit un creux d'interférence — éprouvé sur un profil à un lobe, il ne l'était pas sur une coque ; et δ est 3,5 fois
+moins ample que ce modèle. **A330** ouverte. Friction pour la revue de S521 : *une stabilité d'instrument ne prouve pas qu'il lit le bon
+trait ; un instrument éprouvé sur une source ne l'est pas sur une autre*. Maillons **1**. Suivant : **S521, la revue de méthode**.

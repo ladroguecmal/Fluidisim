@@ -23,7 +23,7 @@ const SCATTER_WGSL: &str = "
 @group(0) @binding(2) var<storage, read> scatter: array<u32>;
 @compute @workgroup_size(64)
 fn motion_scatter(@builtin(global_invocation_id) id: vec3<u32>) {
-    let n = id.x;
+    let n = id.x + id.y * 4194240u;
     if (n >= scatter[0]) { return; }
     let t = scatter[2u + 2u * n];
     let v = bitcast<f32>(scatter[3u + 2u * n]);
@@ -533,12 +533,20 @@ impl Linear3 {
         if mouvement && self.nombre.get() > 0 {
             pass.set_bind_group(0, &self.dispersion_liaison, &[]);
             pass.set_pipeline(&self.dispersion);
-            pass.dispatch_workgroups(self.nombre.get().div_ceil(GROUP), 1, 1);
+            let g = self.nombre.get().div_ceil(GROUP);
+            pass.dispatch_workgroups(g.min(65_535), g.div_ceil(65_535), 1);
         }
         pass.set_bind_group(0, &self.bind, &[]);
         let mut run = |index: usize, groups: u32| {
             pass.set_pipeline(&self.kernels[index]);
-            pass.dispatch_workgroups(groups, 1, 1);
+            // S520 : les noyaux indexés par face passent en deux dimensions au-delà de 65 535 groupes (la limite de wgpu) ; en deçà,
+            // une rangée, au bit d'avant. Les autres restent sous la limite jusqu'à 4,19 M mailles.
+            if index == PREDICT || index == MOTION_FACES || index == CORRECT {
+                pass.dispatch_workgroups(groups.min(65_535), groups.div_ceil(65_535), 1);
+            } else {
+                assert!(groups <= 65_535, "δ linéaire : {groups} groupes, au-delà de la limite");
+                pass.dispatch_workgroups(groups, 1, 1);
+            }
         };
         // S503 : le mouvement d'un solide, une fois, au début du pas qui suit `set_motion`.
         if mouvement {
