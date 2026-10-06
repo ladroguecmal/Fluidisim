@@ -416,8 +416,10 @@ pas recopiée ici (L137).
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
   d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle
-  (0,2901 m sur 2 m, à 1,2·10⁻⁵), avec évent Torricelli à 2,9·10⁻⁴ ([preuve](validation/C17-AIR-S538.md)). Manquent l'évent à débit
-  limité, la poche adiabatique, la flottabilité de la poche (6.6), les brèches en jeu, la compartimentation d'un navire.
+  (0,2901 m sur 2 m, à 1,2·10⁻⁵), avec évent Torricelli à 2,9·10⁻⁴ ([preuve](validation/C17-AIR-S538.md)) ; **S547 : l'évent à débit
+  limité** (`Q_eau ≤ Q_air`) — le remplissage à 0,7–1,5 % de la loi quasi permanente ([preuve](validation/C17-AIR-S538.md) §5).
+  Manquent la poche adiabatique, la flottabilité de la poche d'un compartiment (6.6), les brèches en jeu, la compartimentation d'un
+  navire.
 - [ ] **5.10 Articulation V↔δ** : V expose sa surface, déclenche δ, garde la masse (C21, ADR-025) —
   *partiel* depuis S375 : le bassin de la piscine est un domaine δ 3D dont **V garde la masse** — niveau de δ à 0,1 µm de
   celui de V sur 330 s, sources et puits aux arêtes de V (le jet, le seuil), repos qui suit V ; V jamais lu en retour

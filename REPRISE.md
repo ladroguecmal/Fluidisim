@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 18:56 +02:00
+JETON            : libre
+Battement        : 2026-10-06 20:30 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S547 — 5.9, l'évent à débit limité ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S546 — la treizième revue de méthode (ADR-238) ([journal](notes/JOURNAL.md)). Avant : S545 (C21 en référentiel accéléré)
-Session suivante : **S547 — un point partiel qui fait avancer une capacité, plan committé d'abord (le rituel le vérifie)** : relire le tableau de bord ; candidats — Coriolis dans δ, la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, l'évent à débit limité (5.9), la poche qui s'échappe (7.5), C14/C15 ; blocages vérifiés avant d'être écrits (ADR-238 D2), nombres recalculés (ADR-237 D1). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 1 — S546 : la revue de méthode (ADR-238), sans capacité
+Session en cours : aucune
+Dernière session : S547 — l'évent à débit limité ([journal](notes/JOURNAL.md)). Avant : S546 (la treizième revue de méthode)
+Session suivante : **S548 — le lot des registres (dû à S548), puis un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — la flottabilité de la poche d'un compartiment (6.6 : une coque compartimentée qui coule par ses brèches), Coriolis dans δ, la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, C14/C15 ; blocages vérifiés avant d'être écrits (ADR-238 D2), nombres recalculés (ADR-237 D1). Revue à S551. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S547 : l'évent à débit limité (5.9)
 Registres       : dernier lot S545 (ADR-213 D3) ; le prochain au plus tard en S548
 ```
 

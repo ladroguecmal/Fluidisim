@@ -686,3 +686,12 @@ dû en S545, fait dans la foulée (feuille de route S542–S545). Suivant : **S5
 P1 » (ADR-238 D1, L395) ; une limite supposée et fausse (S544 : le débordement des entiers des formes de V) — **protection élargie** : un
 blocage supposé se vérifie avant d'être écrit (D2, L396). C16 et C21 ont tenu, corrigés quand il le fallait. Maillons **1**. Suivant :
 **S547**, un point partiel.
+
+## S547 — 2026-10-06 — l'évent à débit limité
+
+**Entrée.** En autonomie ; 5.9, `Q_eau ≤ Q_air` d'ADR-015. Une coupure d'usage après le plan : reprise à chaud, le plan committé suffisait ;
+l'éveil relancé pour 14 h. **Fait** ([preuve](../docs/validation/C17-AIR-S538.md) §5) : `Flow::Vent` — l'air d'une poche sort par un évent
+sous sa surpression, la poche perd ses moles. **Mesuré** : le remplissage à 0,7 % (1 cm²) et 1,5 % (5 cm²) de la loi quasi permanente
+calculée au plan ; 3,59 fois plus lent qu'ouvert pour 1 cm² ; la masse exacte. Maillons **0** (5.9 avance). Suivant : **S548**, le lot (dû)
+et un point partiel.
+

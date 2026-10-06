@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S547 — **en cours**. En autonomie, **5.9 — l'évent à débit limité** (ADR-015 §2 : « l'inondation d'un compartiment fermé est
+Session : S547 — **terminée**. En autonomie, **5.9 — l'évent à débit limité** (ADR-015 §2 : « l'inondation d'un compartiment fermé est
 limitée par la sortie de l'air ; `Q_eau ≤ Q_air` ») : S538 n'a qu'un nœud scellé ou ouvert.
 
 **Ce que la session fait.** `Flow::Vent { area_mm2 }` : l'évent d'un nœud scellé vers l'air libre — aucune eau n'y passe ; dans `step_air`,
@@ -80,8 +80,12 @@ remplit pas (S538). (4) La masse d'eau exacte.
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'évent, les essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.9 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'évent, les essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.9 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `Flow::Vent`, `step_air` (air mutable) ; essais : 5 cm² 570,1 s (561,6 ; 1,5 %), 1 cm² 1 664,1 s (1 652,1 ; 3,59 × l'ouvert) ;
+  S538 inchangé ; masse exacte. Suite 706. (Reprise après une coupure d'usage : rien de perdu, le plan était committé ; éveil relancé.)
+- **P3** — C17-AIR-S538 §5 ; liste 5.9 ; dépendances ; journal.
+

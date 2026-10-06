@@ -146,7 +146,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **5.6** Seuil adaptatif à l'échelle du contenant | H | le seuil adaptatif | — | — | **0** |
 | **5.7** Plusieurs liquides | H | `liquid_id` (A17) | — | — | **0** |
 | **5.8** Réseau fermé sous pression | H | — | 5.4 | — | **1** |
-| **5.9** Compartiments, brèches, inondation de navire, limitée par l'air | H | C17 passé (S538) ; l'évent à débit limité, la flottabilité de la poche, les brèches en jeu | 5.2, 7.5 | 6.6, 13.2 | **3** |
+| **5.9** Compartiments, brèches, inondation de navire, limitée par l'air | H | C17 passé (S538), l'évent à débit limité (S547) ; la flottabilité de la poche, les brèches en jeu | 5.2, 7.5 | 6.6, 13.2 | **3** |
 | **5.10** Articulation V↔δ | H | une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ | — | 1.1, 13.2 | **0** |
 | **5.11** Eaux souterraines | H | — | — | — | **E** — hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **5.12** Capture et restauration de V | H | le stockage durable | 10.1 | 10.6 | **1** |

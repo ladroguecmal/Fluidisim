@@ -16,6 +16,11 @@ fn prism(height_um: i64) -> [i64; SHAPE_ENTRIES] {
 /// C17 : la mer (5·10⁴ m², sa surface à 0), un compartiment de 10 m³ (5 m² × 2 m, son plafond à la flottaison), une brèche d'1 dm² à son
 /// fond (2 m sous la flottaison). Rend la hauteur d'eau dans le compartiment au fil du temps, toutes les 0,1 s, sur `duree` s.
 fn c17(air: Air, duree: u64) -> Vec<f64> {
+    c17_event(air, duree, 0)
+}
+
+/// S547 : la même, avec un évent de `evente_mm2` au plafond du compartiment (0 : aucun).
+fn c17_event(air: Air, duree: u64, evente_mm2: i64) -> Vec<f64> {
     let mut table = prism(20_000_000).to_vec();
     table.extend_from_slice(&prism(2_000_000));
     let shapes = Shapes::new(&table).unwrap();
@@ -23,7 +28,7 @@ fn c17(air: Air, duree: u64) -> Vec<f64> {
         HydroNode { volume_ml: 500_000_000_000, capacity_ml: 1_000_000_000_000, origin_um: [0, 0, -10_000_000], shape: 0 },
         HydroNode { volume_ml: 0, capacity_ml: 10_000_000, origin_um: [0, 0, -2_000_000], shape: 1 },
     ];
-    let mut edges = [Opening {
+    let mut edges = vec![Opening {
         from: 0,
         to: Some(1),
         flow: Flow::Orifice { area_mm2: 10_000 },
@@ -31,12 +36,18 @@ fn c17(air: Air, duree: u64) -> Vec<f64> {
         discharge: SHARP_EDGE_DISCHARGE,
         ..Default::default()
     }];
-    let mut scratch = [0i64; 1];
-    let airs = [Air::Open, air];
+    if evente_mm2 > 0 {
+        edges.push(Opening { from: 1, to: None, flow: Flow::Vent { area_mm2: evente_mm2 }, position_um: [0, 0, 0],
+            discharge: SHARP_EDGE_DISCHARGE, ..Default::default() });
+    }
+    let mut scratch = [0i64; 2];
+    let total = nodes[0].volume_ml + nodes[1].volume_ml;
+    let mut airs = [Air::Open, air];
     let mut heads = [0f64; 2];
     let mut h = Vec::new();
     for _ in 0..duree * 10 {
-        step_air(&mut nodes, &mut edges, &shapes, DOWN, Meteo::SEC, SimTime(STEP_US), &mut scratch, &airs, RHO, &mut heads).unwrap();
+        step_air(&mut nodes, &mut edges, &shapes, DOWN, Meteo::SEC, SimTime(STEP_US), &mut scratch, &mut airs, RHO, &mut heads).unwrap();
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, total, "masse");
         h.push(nodes[1].volume_ml as f64 * 1e-6 / 5.0);
     }
     h
@@ -60,7 +71,7 @@ fn open_air_is_the_previous_step_bit_for_bit_s538() {
     let mut heads = [0f64; 2];
     for _ in 0..5_000 {
         step_meteo(&mut a, &mut ea, &shapes, DOWN, Meteo::SEC, SimTime(STEP_US), &mut sa).unwrap();
-        step_air(&mut b, &mut eb, &shapes, DOWN, Meteo::SEC, SimTime(STEP_US), &mut sb, &[Air::Open; 2], RHO, &mut heads).unwrap();
+        step_air(&mut b, &mut eb, &shapes, DOWN, Meteo::SEC, SimTime(STEP_US), &mut sb, &mut [Air::Open; 2], RHO, &mut heads).unwrap();
         assert_eq!((a[0].volume_ml, a[1].volume_ml, ea[0].residue_nl), (b[0].volume_ml, b[1].volume_ml, eb[0].residue_nl));
     }
 }
@@ -87,3 +98,25 @@ fn a_sealed_compartment_floods_only_until_its_air_holds_s538() {
     assert!((fin / attendu - 1.).abs() <= 0.005, "critère 2");
     assert!(plein_scelle.is_none(), "critère 4 : sans évent, jamais plein");
 }
+
+/// **S547 — l'évent à débit limité** (ADR-015 §2, `Q_eau ≤ Q_air`). Le compartiment de C17 scellé, avec un évent au plafond : de 5 cm², 99 %
+/// du plein à 5 % de la loi quasi permanente (Torricelli ralenti de `k = √((C²A_v²/ρ_a)/(C²A_v²/ρ_a + C²a²/ρ))`, l'air incompressible) ;
+/// de 1 cm², plus de trois fois plus lent qu'ouvert ; la masse exacte à chaque pas (dans `c17_event`).
+#[test]
+fn a_vent_limits_the_flooding_s547() {
+    let pv = P_ATM_PA * 10_000_000.0;
+    let (g, a, c, aire, haut, rho_a) = (9.81f64, 0.01f64, SHARP_EDGE_DISCHARGE as f64, 5.0f64, 2.0f64, 1.2f64);
+    let t99_ouvert = 2. * aire / (c * a * (2. * g).sqrt()) * (haut.sqrt() - (0.01 * haut).sqrt());
+    let k = |av: f64| ((c * c * av * av / rho_a) / (c * c * av * av / rho_a + c * c * a * a / RHO)).sqrt();
+    let t99 = |h: &[f64]| h.iter().position(|x| *x >= 0.99 * haut).map(|n| (n + 1) as f64 * 0.1);
+    let cinq = c17_event(Air::Sealed { pv_pa_ml: pv }, 900, 500);
+    let un = c17_event(Air::Sealed { pv_pa_ml: pv }, 2_500, 100);
+    let (m5, m1) = (t99(&cinq).expect("5 cm² : 99 %"), t99(&un).expect("1 cm² : 99 %"));
+    println!(
+        "S547 évent : 5 cm² → 99 % à {m5:.1} s (quasi permanent {:.1} s, écart {:.2e}) ; 1 cm² → {m1:.1} s (quasi permanent {:.1} s, {:.2} fois l'ouvert {t99_ouvert:.1} s)",
+        t99_ouvert / k(5e-4), m5 / (t99_ouvert / k(5e-4)) - 1., t99_ouvert / k(1e-4), m1 / t99_ouvert
+    );
+    assert!((m5 / (t99_ouvert / k(5e-4)) - 1.).abs() <= 0.05, "critère 2");
+    assert!(m1 >= 3. * t99_ouvert, "critère 3");
+}
+

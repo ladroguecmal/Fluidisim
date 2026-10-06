@@ -56,7 +56,7 @@ fn valid_edge(e: &Opening, nodes: usize) -> bool {
         Flow::Valve { .. } | Flow::PumpLine { .. } => super::law_size(&e.flow),
         Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { super::law_size(&e.flow) },
         Flow::Drainage { .. } => super::law_size(&e.flow),
-        Flow::Evaporation { .. } => if e.to.is_some() { -1 } else { super::law_size(&e.flow) },
+        Flow::Evaporation { .. } | Flow::Vent { .. } => if e.to.is_some() { -1 } else { super::law_size(&e.flow) },
     };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
@@ -150,6 +150,11 @@ impl<'a> Baseline<'a> {
                     h.write_u8(9);
                     h.write_u64(area_mm2 as u64);
                     h.write_u64(rate_nm_s as u64);
+                }
+                // S547 : l'évent.
+                Flow::Vent { area_mm2 } => {
+                    h.write_u8(10);
+                    h.write_u64(area_mm2 as u64);
                 }
             }
             for x in e.position_um { h.write_u64(x as u64); }

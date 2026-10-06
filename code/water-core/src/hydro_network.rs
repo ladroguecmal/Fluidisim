@@ -146,6 +146,10 @@ pub enum Flow {
     /// **S535 — l'évaporation** : du nœud `from` vers dehors (`to` vaut `None`), au taux potentiel d'auteur `rate_nm_s` sur l'aire
     /// `area_mm2`, fois la commande (l'exposition ; la météo viendra à la fin, ADR-197 D5) ; bornée par ce que le nœud contient.
     Evaporation { area_mm2: i64, rate_nm_s: i64 },
+    /// **S547 — l'évent d'un compartiment** (ADR-015 §2, liste 5.9) : du nœud `from` vers l'air libre (`to` vaut `None`) ; aucune eau n'y
+    /// passe. Sous `step_air`, l'air d'une poche scellée en sort à `Q_a = C_d·A·√(2Δp/ρ_a)` (`C_d` : `discharge` ; `ρ_a = 1,2·p/p_atm`,
+    /// isotherme), et le produit `p·V_air` de la poche baisse de `p·Q_a·dt`. Ailleurs (`step`, nœud ouvert), sans effet.
+    Vent { area_mm2: i64 },
 }
 
 /// **La météo du pas** (ADR-204 D4) : une entrée, fournie à l'identique à tous les participants (I-03) ; qui la calcule
@@ -370,7 +374,7 @@ pub fn step_air(
     meteo: Meteo,
     dt: SimTime,
     scratch: &mut [i64],
-    air: &[Air],
+    air: &mut [Air],
     density: f64,
     heads_um: &mut [f64],
 ) -> Result<(), Error> {
@@ -381,7 +385,7 @@ pub fn step_air(
         return step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None);
     }
     let (_, g) = geometry::vertical(g_eff)?;
-    for ((n, a), h) in nodes.iter().zip(air).zip(heads_um.iter_mut()) {
+    for ((n, a), h) in nodes.iter().zip(air.iter()).zip(heads_um.iter_mut()) {
         *h = match *a {
             Air::Open => 0.0,
             Air::Sealed { pv_pa_ml } => {
@@ -393,7 +397,28 @@ pub fn step_air(
             }
         };
     }
-    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, Some(heads_um))
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, Some(heads_um))?;
+    // S547 : l'air qui sort par les évents, à la pression du début du pas (celle des charges, isotherme) ; jamais sous la pression
+    // atmosphérique.
+    let dt_s = dt.0 as f64 * 1e-6;
+    for e in edges.iter() {
+        let Flow::Vent { area_mm2 } = e.flow else { continue };
+        let i = e.from as usize;
+        let Air::Sealed { pv_pa_ml } = air[i] else { continue };
+        let n = nodes[i];
+        let v_air = (n.capacity_ml - n.volume_ml) as f64;
+        let p = heads_um[i] * 1e-6 * density * g + P_ATM_PA;
+        let surpression = p - P_ATM_PA;
+        if !(surpression > 0.0) || e.control_pm == 0 {
+            continue;
+        }
+        let rho_air = 1.2 * p / P_ATM_PA;
+        let q_m3s = e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (2.0 * surpression / rho_air).sqrt()
+            * (e.control_pm as f64 / CONTROL_FULL as f64);
+        let sortie = p * q_m3s * dt_s * 1e6;
+        air[i] = Air::Sealed { pv_pa_ml: (pv_pa_ml - sortie).max(P_ATM_PA * v_air) };
+    }
+    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -431,7 +456,7 @@ fn step_inner(
             // S530 : l'infiltration va vers un sol.
             Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { law_size(&e.flow) },
             Flow::Drainage { .. } => law_size(&e.flow),
-            Flow::Evaporation { .. } => if e.to.is_some() { -1 } else { law_size(&e.flow) },
+            Flow::Evaporation { .. } | Flow::Vent { .. } => if e.to.is_some() { -1 } else { law_size(&e.flow) },
             // La pluie tombe sur le nœud que `from` et `to` désignent tous deux.
             Flow::Rain { catchment_mm2 } => {
                 if e.to != Some(e.from) { -1 } else { catchment_mm2 }
@@ -460,8 +485,8 @@ fn step_inner(
     // --- 2. Débit par arête, dans l'ordre du tableau (I-03).
     for (e, out) in edges.iter().zip(scratch.iter_mut()) {
         *out = 0;
-        // S489 : le débordement ne débite que l'excédent des arrivées (étape 5).
-        if matches!(e.flow, Flow::Spill) {
+        // S489 : le débordement ne débite que l'excédent des arrivées (étape 5). S547 : l'évent ne débite que de l'air (`step_air`).
+        if matches!(e.flow, Flow::Spill | Flow::Vent { .. }) {
             continue;
         }
         // ADR-204 : la pluie, sans lecture de surface — intensité (mm/h → m/s) × ouverture (mm² → m²) × exposition.
@@ -596,7 +621,7 @@ fn step_inner(
                 e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt() * valve_fraction(&curve_pm, e.control_pm)
             }
             Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill | Flow::Infiltration { .. } | Flow::Drainage { .. }
-            | Flow::Evaporation { .. } => {
+            | Flow::Evaporation { .. } | Flow::Vent { .. } => {
                 unreachable!("pompes, pluie, débordement et infiltration ont leur propre calcul")
             }
         };
@@ -755,6 +780,8 @@ pub(crate) fn law_size(flow: &Flow) -> i64 {
             if area_mm2 <= 0 || conductivity_nm_s < 0 || exponent_pm < 1000 { -1 } else { area_mm2 }
         }
         Flow::Evaporation { area_mm2, rate_nm_s } => if area_mm2 <= 0 || rate_nm_s < 0 { -1 } else { area_mm2 },
+        // S547 : l'évent (vers dehors, vérifié par l'appelant).
+        Flow::Vent { area_mm2 } => if area_mm2 <= 0 { -1 } else { area_mm2 },
         _ => 0,
     }
 }
