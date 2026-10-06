@@ -71,6 +71,6 @@ dans une seule fonction ; D3, ADR-240 D1 corrigé (le heredoc protégé permis) 
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-245, METHODE, L404, L405, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
