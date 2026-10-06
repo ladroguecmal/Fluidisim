@@ -163,6 +163,8 @@ impl Linear3 {
             .request_device(&wgpu::DeviceDescriptor {
                 label: Some("pas lineaire delta 3d"),
                 required_features: features,
+                // S529 : les limites de la carte (au-delà de 128 Mo par liaison : 3,4 M mailles à 12,5 cm), comme `apic3d_carte`.
+                required_limits: adapter.limits(),
                 ..Default::default()
             })
             .await
@@ -1322,12 +1324,14 @@ pub fn recevoir_sillage() -> Result<(), String> {
     use water_core::host::HostServices;
     use water_core::rigid_body::oriented_box_distance;
     pollster::block_on(async {
-        let d = Domain3 { nx: lire_n("SILLAGE_NX", 256), ny: lire_n("SILLAGE_NY", 192), nz: 16, dx: 0.25 };
+        // S529 : la maille (`SILLAGE_DX`, `SILLAGE_NZ`) et le pas (`DT_US`) en paramètres — la convergence d'A330.
+        let maille = std::env::var("SILLAGE_DX").ok().and_then(|v| v.parse::<f32>().ok()).unwrap_or(0.25);
+        let d = Domain3 { nx: lire_n("SILLAGE_NX", 256), ny: lire_n("SILLAGE_NY", 192), nz: lire_n("SILLAGE_NZ", 16), dx: maille };
         let (rho, g) = (1025_f32, 9.81_f32);
         let lire = |nom: &str, defaut: f64| std::env::var(nom).ok().and_then(|v| v.parse().ok()).unwrap_or(defaut);
         let (vitesse, duree) = (lire("VITESSE", 3.), lire("DUREE", 15.));
         let cycles = lire("CYCLES", 60.) as u32;
-        let dt_us = 10_000u64;
+        let dt_us = lire("DT_US", 10_000.) as u64;
         let dt = dt_us as f64 * 1e-6;
         let pas = (duree / dt).round() as usize;
         let rampe = lire("RAMPE", 3.);
@@ -1336,7 +1340,7 @@ pub fn recevoir_sillage() -> Result<(), String> {
             if t < rampe { 0.5 * vitesse * (t - rampe / pi * (pi * t / rampe).sin()) } else { 0.5 * vitesse * rampe + vitesse * (t - rampe) }
         };
         let vitesse_a = |t: f64| if t < rampe { 0.5 * vitesse * (1. - (core::f64::consts::PI * t / rampe).cos()) } else { vitesse };
-        let (x0, yc) = (6.1f64, 0.5 * d.ny as f64 * d.dx as f64 - 0.125);
+        let (x0, yc) = (6.1f64, 0.5 * d.ny as f64 * d.dx as f64 - 0.5 * d.dx as f64);
         let z = d.z0() as f64 + 0.5 - 500. / rho as f64;
         let centre = |t: f64| [x0 + parcouru(t), yc, z];
         let n_noeuds = (d.nx + 1) * (d.ny + 1) * (d.nz + 1);

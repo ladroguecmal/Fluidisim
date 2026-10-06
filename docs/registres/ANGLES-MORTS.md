@@ -4627,3 +4627,11 @@ hors du domaine de ses segments.
 Calibré : sous le rayon d'ADR-132 lu sur la distance du chemin aux points, l'écart reste sous 0,4 % ; 7 % à 1,45 R, 23 % à 1,88 R.
 `spectral_pressure::farthest_emission` donne cette distance ; l'hôte l'annonce une fois au-delà du rayon (`WAKE_HORS_RAYON`). La garde est
 conservatrice (deux fausses alertes, à 0,3 % et 2 %), aucune erreur forte n'est plus silencieuse.
+
+*Note du 2026-10-06, S529, sur A330* ([A330-CONVERGENCE-S529](../validation/A330-CONVERGENCE-S529.md)) : **localisée.** L'amplitude du
+sillage de δ est stable en maille (rms à 1 %, maximum du profil des rayons à 8 % entre 25 et 12,5 cm) : le facteur 3,5 revient au modèle de
+référence (une pression sur l'empreinte), pas à δ. Reste ouverte : une référence de corps (Michell). Le champ, lui, ne converge pas point
+par point (un déphasage ; le pas suit la maille, A328 en cause probable, non éprouvée).
+
+*Note du 2026-10-06, S529, sur A317* ([A330-CONVERGENCE-S529](../validation/A330-CONVERGENCE-S529.md)) : le pic d'étrave de la coque en
+boîte **diverge** en maille — 0,30 / 0,72 / 1,47 m à 50 / 25 / 12,5 cm (la stagnation au coin vif, sous couvercle partiel).

@@ -35,7 +35,7 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A319 | 2 | S351 | « Rétrécir ou détruire un domaine perturbatif est visuellement gratuit » n'a jamais été mesuré | — |
 | A323 | 2 | S409 | Au pas long, la cuve fermée gagne de l'énergie | — |
 | A325 | 2 | S485 | Les parois d'APIC ne sont pas des plans de symétrie pour l'écoulement qui les longe | — |
-| A330 | 2 | S520 | Le sillage de la coque dans δ n'a pas de référence éprouvée | — |
+| A330 | 2 | S520 | Le sillage de la coque dans δ n'a pas de référence éprouvée | S529 : localisée |
 | A320 | 3 | S369 | Sous une houle raide, une perturbation de δ croît | S443–S445 : la bascule des défauts (S443) fait du mode relatif la production ; A320 l'y accompagne, plafonnée (ADR-213 D2), sa limite écrite (MER-S369 §9–11) ; rien en … |
 
 ## Closes

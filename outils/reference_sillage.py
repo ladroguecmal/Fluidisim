@@ -18,6 +18,7 @@ de W.
     python outils/reference_sillage.py calibration <W_T16.bin …> — S524 : l'écart de W contre la distance du chemin aux points (A331)
     python outils/reference_sillage.py resonance [W0.3 W0.5 W0.7 W0.9] — S525 : la résonance de C07 sur la référence ou W
     python outils/reference_sillage.py plancher [W10 W15]  — S527 : la dernière crête au-dessus du plancher, référence bruitée ou W
+    python outils/reference_sillage.py convergence <δ50 δ25 δ12,5> — S529 : le sillage de la coque dans δ à trois mailles (A330)
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import os
@@ -305,6 +306,34 @@ def derniere_crete_plancher(angles, prof, plancher=1e-3):
     return float("nan")
 
 
+def convergence(fichiers):
+    """S529 — A330 : le sillage de la coque dans δ à trois mailles (fichiers du banc, de la plus grossière à la plus fine). Les écarts
+    entre mailles sur un réseau commun (tous les 50 cm, de 4 à 22 m derrière le centre de la coque, `|y|` ≤ 12 m), l'ordre observé ; le
+    profil des rayons de 10 à 20 m et son maximum."""
+    champs = []
+    for chemin in fichiers:
+        with open(chemin, "rb") as f:
+            tete = f.readline().split()
+            nx, ny = int(tete[0]), int(tete[1])
+            gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+            eta = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+        champs.append((gx0 + dx * np.arange(nx), gy0 + dx * np.arange(ny), eta, xs_src, dx))
+    xs_src = champs[0][3]
+    X = xs_src - np.arange(4.0, 22.0001, 0.5)
+    Y = np.arange(-12.0, 12.0001, 0.5)
+    XX, YY = np.meshgrid(X, Y)
+    reseau = [bilineaire(gx, gy, e, XX.ravel(), YY.ravel()) for (gx, gy, e, _, _) in champs]
+    d1 = np.sqrt(((reseau[0] - reseau[1]) ** 2).mean())
+    d2 = np.sqrt(((reseau[1] - reseau[2]) ** 2).mean())
+    rms = [np.sqrt((r ** 2).mean()) for r in reseau]
+    print(f"CONV_S529 rms_m {' '.join(f'{v:.4e}' for v in rms)} ecart_grossier_moyen={d1:.4e} ecart_moyen_fin={d2:.4e}"
+          f" ordre_observe={np.log2(d1 / d2):.2f}", flush=True)
+    for (gx, gy, e, xs, dx) in champs:
+        _, angles, prof = rayons(lambda x, y, gx=gx, gy=gy, e=e: bilineaire(gx, gy, e, x, y), xs, 10.0, 20.0, a_max=35.0)
+        print(f"CONV_S529 maille={dx} profil_max={prof.max():.4e} a_deg={angles[np.argmax(prof)]:.2f}"
+              f" profil {' '.join(f'{angles[i]:.0f}:{prof[i]:.2e}' for i in range(0, len(angles), 8))}", flush=True)
+
+
 def plancher(fichiers=None):
     """S527 — l'angle supercritique par la dernière crête au-dessus du plancher. Sans fichier : la référence (5 m, σ 2 m, coupure 3,
     `SUPER_T`) **bruitée** d'un bruit gaussien de 10⁻⁷ m par point, trois tirages, trois grilles (critère 1). Avec les fichiers de W de
@@ -429,6 +458,8 @@ if __name__ == "__main__":
         delta(sys.argv[2])
     elif sys.argv[1] == "profondeur":
         profondeur(sys.argv[2])
+    elif sys.argv[1] == "convergence":
+        convergence(sys.argv[2:])
     elif sys.argv[1] == "plancher":
         plancher(sys.argv[2:] or None)
     elif sys.argv[1] == "calibration":

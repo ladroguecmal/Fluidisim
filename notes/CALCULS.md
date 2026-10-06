@@ -91,3 +91,6 @@ for nd in (8, 12, 16):
 | `20261006-155244-ref-profondeur-s522` | S522 | ref-profondeur-s522 | `PYTHONIOENCODING=utf-8 python outils/reference_sillage.py profondeur calculs/w_profondeur_s522.bin` | terminé, 2026-10-06 15:52 |
 | `20261006-155722-ref-super-s523` | S523 | ref-super-s523 | `PYTHONIOENCODING=utf-8 python outils/reference_sillage.py supercritique` | terminé, 2026-10-06 15:57 |
 | `20261006-155934-ref-super2-s523` | S523 | ref-super2-s523 | `PYTHONIOENCODING=utf-8 python outils/reference_sillage.py supercritique` | terminé, 2026-10-06 15:59 |
+| `20261006-164625-conv25-s529` | S529 | conv25-s529 | `SILLAGE_DX=0.25 SILLAGE_NX=224 SILLAGE_NY=160 SILLAGE_NZ=12 DT_US=10000 DUREE=15 SORTIE=calculs/conv_s529_25.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 16:46 |
+| `20261006-164642-conv12-s529` | S529 | conv12-s529 | `SILLAGE_DX=0.125 SILLAGE_NX=448 SILLAGE_NY=320 SILLAGE_NZ=24 DT_US=5000 DUREE=15 SORTIE=calculs/conv_s529_12.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | échec (code 101), 2026-10-06 16:46 |
+| `20261006-164801-conv12b-s529` | S529 | conv12b-s529 | `SILLAGE_DX=0.125 SILLAGE_NX=448 SILLAGE_NY=320 SILLAGE_NZ=24 DT_US=5000 DUREE=15 SORTIE=calculs/conv_s529_12.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 16:51 |

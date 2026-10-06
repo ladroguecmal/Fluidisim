@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S529 — **en cours**. En autonomie, **A330 localisée avant tout remède** (ADR-226 D1) : le sillage de la coque dans δ est 3,5 fois
+Session : S529 — **terminée**. En autonomie, **A330 localisée avant tout remède** (ADR-226 D1) : le sillage de la coque dans δ est 3,5 fois
 moins ample que la théorie d'une pression `ρ g d` sur son empreinte (S520). Deux causes possibles : δ sous-résolu près de la coque
 (A317 : ± 43–49 % à 25 cm) ou un modèle de référence inadapté (une pression n'est pas un corps qui perce la surface). Une convergence en
 maille les sépare.
@@ -81,8 +81,13 @@ règle déclarée avant** : si le maximum du profil des rayons à 12,5 cm dépas
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — les paramètres du banc, trois calculs ; (1), (2).
-- [ ] **P3** — preuve ; A330 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — les paramètres du banc, trois calculs ; (1), (2).
+- [x] **P3** — preuve ; A330 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — 12,5 cm d'abord refusé (une liaison de 230 Mo > 128 Mo) → la carte demande les limites de l'adaptateur ; S518 au bit.
+  rms 0,0504 / 0,0617 / 0,0612 m ; maximum du profil 0,091 / 0,102 / 0,093 ; écarts 0,064 puis 0,073 (ordre −0,18) → **(1) manqué**,
+  **(2) : le modèle**. Pic d'étrave 0,30 / 0,72 / 1,47 m : divergent.
+- **P3** — preuve A330-CONVERGENCE-S529 ; notes A330, A317 ; liste 4.13 ; index ; journal.
+

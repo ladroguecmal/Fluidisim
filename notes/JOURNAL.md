@@ -549,3 +549,12 @@ profonde) n'y resserre pas. **Mesuré** : au bit de `new` en eau profonde ; cont
 (indépendante de la somme de Bessel), **0,44 %** par 1 m de fond à 5 et 10 s (trois grilles), l'eau profonde 94 % ; la pente réelle sous les
 deux bornes. Un montage refusé en route (le champ initial à 280 m, au-delà de la portée de la somme à 128 modes — la garde de résolution
 a parlé, ADR-234 D1). Maillons **0** (3.1 avance). Suivant : **S529**, un point partiel.
+
+## S529 — 2026-10-06 — A330 localisée : l'amplitude de δ stable en maille
+
+**Entrée.** En autonomie ; A330, localiser avant tout remède. **Fait** ([preuve](../docs/validation/A330-CONVERGENCE-S529.md)) : le banc du
+sillage à trois mailles (50 / 25 / 12,5 cm, 56 × 40 × 3 m) ; la carte demande désormais les limites de l'adaptateur (une liaison de 230 Mo à
+3,4 M mailles). **Mesuré** : l'amplitude stable (rms à 1 %, maximum du profil à −8 %) → par la règle déclarée, l'écart de 3,5 revient au
+modèle de référence ; mais le champ ne converge pas point par point (ordre −0,18 : (1) manqué — un déphasage, le pas suivant la maille,
+A328 probable) ; et le pic d'étrave **diverge** (0,30 / 0,72 / 1,47 m, le coin vif). Maillons **1** (une localisation). Suivant : **S530**, le
+lot (dû) et un point partiel.

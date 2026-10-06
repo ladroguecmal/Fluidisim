@@ -275,7 +275,9 @@ pas recopiée ici (L137).
   [rayonnement](validation/RAYONNEMENT-COQUE-S336.md)) ; la production GPU d'une coque qui bouge depuis S503–S509 (6.4) ; **S517** : la
   coque **en marche** sur la carte, sa vague d'étrave (0,72 m de stagnation, bornée) et un sillage stable, de forme compatible avec Kelvin
   sans mesure à 2° ([preuve](validation/SILLAGE-S517.md)) ; **S520** : sur 1,49 M mailles et 30 s, contre la théorie d'une pression sur son
-  empreinte, δ est 3,5 fois moins ample et l'angle n'est pas tranché (A330, [preuve](validation/SILLAGE-COQUE-S520.md)). Manquent la gerbe (surface non graphe, 4.16), la résolution près de la coque
+  empreinte, δ est 3,5 fois moins ample et l'angle n'est pas tranché (A330, [preuve](validation/SILLAGE-COQUE-S520.md)) ; **S529** :
+  l'amplitude du sillage de δ stable en maille (l'écart revient au modèle de référence), le pic d'étrave divergent au coin vif
+  ([preuve](validation/A330-CONVERGENCE-S529.md)). Manquent la gerbe (surface non graphe, 4.16), la résolution près de la coque
   (± 43–49 % à 25 cm), le sillage mesuré (le recoupage dans un grand domaine : 2,2 ms depuis S518, A329 levée).
 - [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *absent* : C04 exécuté sur un
   véhicule d'essai 1D seulement.
