@@ -62,30 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S555 — **terminée**. En autonomie, **C09 — la conservation de la masse et de l'énergie** (non exécuté ; liste 4.18, 13.2) :
-« domaine clos, sans frottement, perturbation initiale, 120 s ; `|dm/dt| < 10⁻³ s⁻¹` ; `dE/dt ≤ 0` en tout temps ».
+Session : S556 — **terminée**. En autonomie, **la quinzième revue de méthode** (ADR-222 D4 ; S551–S555).
 
-**Ce que la session fait.** Un essai de δ linéaire (le cœur) : une cuve close de 4 × 2 × 1,5 m (16 × 8 × 6 mailles de 25 cm), une bosse
-gaussienne de 2 cm, 120 s au pas de 10 ms ; à chaque pas, la masse (`ρ·Σ(η − z₀)·dA`, rapportée à la masse d'eau totale) et l'énergie
-**naturelle** `E = ½ρ·Σ|u|²·dx³ + ½ρg·Σ(η − z₀)²·dA` (vitesses aux faces, surface aux colonnes, toutes deux en fin de pas).
-
-**Ordre de grandeur, calculé.** Énergie initiale `½ρg·∫η²` de la bosse (2 cm, σ = 0,5 m) : ½·1025·9,81·(0,02²·π·0,25) ≈ 1,58 J ; la
-dissipation mesurée de δ en S310, 0,0935 % par seconde → ≈ 11 % en 120 s. **Mise en garde écrite avant** : dans un schéma décalé, l'énergie
-naturelle mêle des vitesses et une surface à des demi-pas différents ; elle peut osciller d'un pas à l'autre sans qu'aucune instabilité
-n'existe. Si elle le fait, C09 tel qu'écrit est manqué, et l'essai publie l'amplitude des oscillations contre la tendance (l'enveloppe)
-— sans changer le critère.
-
-**Critères, écrits avant.** (1) `|dm/dt|` < 10⁻³ s⁻¹ à chaque pas (attendu : l'arrondi f32, S310). (2) `dE/dt ≤ 0` à chaque pas, sur
-l'énergie naturelle. (3) L'énergie finale sous l'initiale (pas de croissance d'ensemble).
+**Ce que la session fait.** Relu : S551 (la revue, le lot), S552 (un écart de définition localisé), S553 (une durée trop courte relevée par
+la trace), S554 (la durée vérifiée), S555 (une assertion canonique inapplicable ; la clôture cassée par une apostrophe). **ADR-240** : D1, un
+script en fichier, jamais en ligne ; D2, la constante de temps d'un équilibre au plan ou la trace avant de conclure ; L398, L399 ; METHODE ;
+BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; listes 4.18, 13.2 ; C09 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-240, METHODE, L398, L399, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — masse : 2,1·10⁻⁶ s⁻¹ (tenu) ; énergie naturelle : 5 955 hausses, +13 % à l'instant final : (2), (3) **manqués** ; moyennes
-  par fenêtre de 5 s constantes à ± 0,15 % (+8,4 % de E₀) — aucune instabilité. A332 ouverte. Suite 714.
-- **P3** — preuve C09-ENERGIE-S555 ; A332 ; liste 13.2 ; C09 ; index ; journal.
-

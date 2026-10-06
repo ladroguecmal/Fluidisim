@@ -755,3 +755,11 @@ l'énergie naturelle oscille (5 955 hausses sur 12 000) et finit 13 % au-dessus 
 fenêtre de 5 s sont constantes à ± 0,15 % : aucune instabilité. L'énergie discrète du schéma n'est pas connue (**A332**). Les critères n'ont
 pas été changés ; une garde de non-régression, posée après coup, le dit. Maillons **0** (13.2 : C09 exécuté). Suivant : **S556, la quinzième
 revue de méthode**.
+
+## S556 — 2026-10-06 — la quinzième revue de méthode (ADR-240)
+
+**Entrée.** En autonomie ; revue due. **Frictions** : deux clôtures écrites en heredoc, cassées par une apostrophe (S520, S555) — **protection
+élargie** : un script est un fichier écrit par l'outil d'écriture (ADR-240 D1, L399) ; une durée d'essai trop courte vers un équilibre
+(S553) — **élargie** : la constante de temps au plan, ou la trace avant de conclure (D2, L398). Ont tenu : les références indépendantes avant la
+mesure (S552–S554), la mise en garde écrite avant (S555), un écart de définition localisé (S552). Maillons **1**. Suivant : **S557**, le lot
+(dû) et un point partiel.

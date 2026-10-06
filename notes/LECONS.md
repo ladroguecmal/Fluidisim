@@ -6617,3 +6617,15 @@ le déterminant est en i128 sur ± 4 096 m. Une variante de C21 remise d'une ses
 **S549 — la formule d'analyse avant le modèle.** Le rapport attendu de la carène libre reposait sur `tan θ = m_h·Δy/(m·GM)` — faux : le
 proxy décalé déplace toute la poussée. Devant un écart de 10 %, j'ai accusé le proxy et changé le montage ; l'écart est resté. La formule
 relue, tout passait à 0,34 %. S550 a éprouvé sa formule par une intégration avant de mesurer (ADR-239 D1).
+
+## L398
+
+**S553 — l'essai arrêté en plein envahissement.** L'essai de la cloison percée s'arrêtait à 900 s, choisis sans calculer la constante de
+temps de l'écoulement par le trou ; la trace, lue avant de conclure, montrait l'eau encore en mouvement, l'équilibre vers 1 800 s. S554 a
+vérifié sa durée par la trace (ADR-240 D2).
+
+## L399
+
+**S520, S555 — la clôture écrite en ligne.** Deux scripts de clôture passés en heredoc dans une seule commande : une apostrophe française
+(« l'énergie ») ferme la chaîne, l'interpréteur attend la fin, rien ne part — en S555, au moment où le contexte se résumait. Les plans, écrits
+en fichiers, n'ont jamais cassé (ADR-240 D1).
