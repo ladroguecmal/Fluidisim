@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 20:56 +02:00
+JETON            : libre
+Battement        : 2026-10-06 20:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S551 — la quatorzième revue de méthode et le lot ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S550 — l'angle de bande d'une barge instable ([journal](notes/JOURNAL.md)). Avant : S549 (la carène libre)
-Session suivante : **S551 — la quatorzième revue de méthode** (S546–S550 ; ADR-222 D4) et le lot (dû à S551) : frictions — une formule d'analyse fausse au plan et un diagnostic posé avant de la relire (S549 : le proxy accusé, un montage changé pour rien) ; ce qui a tenu (le rituel qui exige le plan, S547–S550 ; la formule vérifiée par intégration avant la mesure, S550 ; la reprise après coupure, S547). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S550 : l'angle de bande (6.6)
-Registres       : dernier lot S548 (ADR-213 D3) ; le prochain au plus tard en S551
+Session en cours : aucune
+Dernière session : S551 — la quatorzième revue de méthode (ADR-239) ; le lot ([journal](notes/JOURNAL.md)). Avant : S550 (l'angle de bande d'une barge instable)
+Session suivante : **S552 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — S548 et S549 ensemble (un compartiment envahi pendant la gîte : un navire qui chavire par sa brèche), la courbe GZ entière au-delà du pont mouillé, la poche porteuse d'un compartiment scellé, Coriolis dans δ, C14/C15 ; formules d'analyse éprouvées avant la mesure (ADR-239 D1), blocages vérifiés (ADR-238 D2). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 1 — S551 : la revue de méthode (ADR-239) et le lot, sans capacité
+Registres       : dernier lot S551 (ADR-213 D3) ; le prochain au plus tard en S554
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

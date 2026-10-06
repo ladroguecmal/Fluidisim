@@ -72,6 +72,6 @@ BOUSSOLE. Le lot : feuille de route S548–S551.
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-239, METHODE, L397, BOUSSOLE, index) ; le lot.
-- [ ] **P2** — rituel (`--lot`).
+- [x] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
