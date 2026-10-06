@@ -437,8 +437,10 @@ pas recopiée ici (L137).
   sur la carte — le cœur découpe, la carte applique (`set_motion`) ; une sphère menée à 2,2·10⁻⁶ m de la référence pour 1 cm
   d'élévation ([preuve](validation/MOBILE-CARTE-S503.md)) ; **S504** : la coque qui **perce** la surface en mouvement — dépôt sous
   couvercle partiel et transfert de S334 sur la carte, pilonnement et roulis à 2·10⁻⁶ m de la référence
-  ([preuve](validation/COQUE-CARTE-S504.md)). Manquent le coût du recoupage (8 ms par pas, CPU) et C23 sur le système — exécuté sur un
-  véhicule d'essai.
+  ([preuve](validation/COQUE-CARTE-S504.md)) ; **S505** : **C23 sur le système** — le pas borné par la vitesse gouvernante, la paroi
+  comprise ([ADR-229](adr/ADR-229-la-paroi-dans-la-vitesse-gouvernante.md)), Courant à 0,4500 de 0,5 à 20 m/s
+  ([preuve](validation/C23-SYSTEME-S505.md)). Manquent A328 (le δ 3D à coque mobile converge lentement en `dt` près de la coque) et le
+  coût du recoupage (8 ms par pas, CPU).
 - [x] **6.5 Décor fixe comme frontière imposée** — *validé* (S493) : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**

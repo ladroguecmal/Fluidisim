@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S505 — **en cours**. En autonomie, **6.4, C23 sur le système** : C23 (CAS-CANONIQUES, ADR-035) — le pas borné par la vitesse
+Session : S505 — **terminée**. En autonomie, **6.4, C23 sur le système** : C23 (CAS-CANONIQUES, ADR-035) — le pas borné par la vitesse
 **gouvernante**, celle du fluide relative à la paroi sur une face coupée, plus la célérité — n'a été éprouvé que sur le véhicule 1D (S28).
 Le δ 3D ne borne pas son pas : l'hôte le choisit, le cœur ne garde que `dt²·g/dx ≤ 1`, et une coque peut franchir plus d'une maille par pas.
 
@@ -84,11 +84,21 @@ fin reste du même ordre à toutes les vitesses.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la mesure (a).
-- [ ] **P3** — la borne et le compteur ; C23 rejoué (b), (c).
-- [ ] **P4** — preuve ; liste 6.4 ; rituel.
+- [x] **P3** — la borne et le compteur ; C23 rejoué (b), (c).
+- [x] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
 - **P2** — `c23_coque 5` (calcul détaché) : élévation de référence 0,77 m (départ impulsif à 5 m/s) ; écart au calcul fin (k = 0,125) :
   k = 0,25 → 4,7 %, 0,5 → 7,4 %, **1 → 100 %**, 2 → 152 %, 3 → 194 %. La rupture est à une maille franchie par pas. Conséquence : la
   vitesse gouvernante d'ADR-035 (fluide relatif à la paroi) ne suffit pas sur une grille coupée — le fluide suit la coque ; il faut aussi la
   vitesse de la paroi sur la grille (son déplacement par pas). Une précision d'ADR-035 : ADR-229.
+- **P3 (en cours)** — `governing_speed`, `celerity`, `courant_bound`, `courant` ; essai C23 tenu (0,4500 partout ; seuil 5,41 → 0,9996,
+  5,42 → 1,0006). **Mais** la mesure de P2 jugeait contre une référence non convergée : (i) départ impulsif — l'élévation doublait quand le
+  pas diminuait ; (ii) avec une rampe de 0,5 s, toujours ≈ 45 % à 5 m/s — localisé : à 0,5 m/s ça converge (8,9 / 27 / 63 mm, ordre
+  ≈ 1,5), à 5 m/s l'écart reste à l'étrave : **5 m/s dans 2 m d'eau dépasse √(gh) = 4,43 m/s** (Froude de profondeur 1,13) — la rampe
+  traverse le régime critique, où la réponse linéaire est singulière. Corps d'essai hors des limites du modèle (ADR-228 D1, encore).
+  → mesure refaite à 2 m/s (Fr 0,45), k = 0,0625 à 1.
+- **P3** — sous-critique 2 m/s : 33 / 44 / 57 / **125 %** (k = 0,125 / 0,25 / 0,5 / 1) ; gouvernant 0,5 / 1 / 2 / 3 m/s : 33 / 75 / 33 /
+  45 %. **A328 ouverte** (convergence lente en `dt` près d'une coque mobile). ADR-229.
+- **P4** — preuve C23-SYSTEME-S505 ; liste 6.4 ; index ; journal.
+

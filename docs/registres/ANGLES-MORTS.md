@@ -4574,3 +4574,14 @@ Reproduction : `cargo test -p water-core --release --offline s490 -- --ignored`.
 
 *Note du 2026-10-06, S492, sur A327* ([A327-S492](../validation/A327-S492.md)) : **levée, et réattribuée** — la cloison n'était pas en cause. La projection avait convergé (plancher d'arrondi atteint) et était refusée sur la divergence **relative à la plus grande vitesse**, qui passe près de zéro au point mort d'une oscillation (1,1·10⁻⁴ m/s). Remède : ADR-225 (un plancher de vitesse de 1 mm/s à la seule décision finale, au plancher d'arrondi) ; la 2D, le couplage et la colonne graduée restent exposés au même point mort.
 
+
+**A328 — S505, 2026-10-06 (sévérité 2, ouverte). Le δ 3D linéaire à coque mobile converge lentement en `dt` près de la coque.** La coque
+de la porte D en translation (départ en rampe de 0,5 s, 2 m d'eau), comparée au même calcul au pas moitié, quart, huitième : à 0,5 m/s,
+hors des colonnes de la coque, l'écart vaut 7, 22, 51 % de l'élévation (ordre ≈ 1,5) ; à 2 m/s, au maximum sur la surface, 33, 44, 57 % —
+il décroît d'un facteur 1,3 seulement par pas divisé par deux, et l'écart maximal se tient au bord de la coque (derrière la poupe, devant
+l'étrave) ([C23-SYSTEME-S505](../validation/C23-SYSTEME-S505.md)). La carte suit la référence au même pas (S503–S504) : c'est la référence
+elle-même qui dépend du pas. **Conséquence** : le champ proche d'une coque en marche dans δ dépend du pas de l'hôte ; la porte D (une coque
+qui suit la houle, ≈ 0,5 m/s, 10 ms) en porte une part. Premiers suspects : la mise à jour par pas de la géométrie (faces qui s'ouvrent à la
+vitesse de la paroi, dépôt et transfert de S334 appliqués d'un coup à chaque pas). À 5 m/s (au-delà de `√(gh)` = 4,43 m/s), la réponse
+linéaire n'a pas de limite — hors du modèle, pas un défaut. Déclencheur : **avant toute mesure du champ proche d'une coque en marche** (4.13,
+6.4). Reproduction : `cargo run -p water-core --release --offline --example c23_coque -- localise 0.5` (≈ 1 min).

@@ -340,3 +340,13 @@ partiel et le transfert de S334 portés sur la carte (poids calculés par le cœ
 concurrente). **Mesuré** : la coque de la porte D en pilonnement et en roulis, la carte à 1,7·10⁻⁶ et 2,4·10⁻⁷ m de la référence pour des
 élévations de 4,5 cm et 8,8 mm ; le témoin sans transfert dérive à 5,6·10⁻⁵ m ; S358, S493, S503 inchangés. 6.4 avance : restent C23 et le
 coût du recoupage (8 ms par pas sur le CPU). Maillons **0**. Suivant : **S505, C23 sur le système**.
+
+## S505 — 2026-10-06 — C23 sur le système ; A328
+
+**Entrée.** En autonomie ; la machine s'était arrêtée vers 5 h 30 (éveil interrompu, rituel de S504 inachevé) : éveil relancé à 7 h 40,
+rituel de S504 terminé. **Fait** ([preuve](../docs/validation/C23-SYSTEME-S505.md), [ADR-229](../docs/adr/ADR-229-la-paroi-dans-la-vitesse-gouvernante.md)) :
+la vitesse gouvernante du δ 3D (le fluide relatif à la paroi, et la paroi elle-même), la borne et le compteur d'une même fonction ; C23
+rejoué — Courant à 0,4500 de 0,5 à 20 m/s, la borne absolue franchit 1 au seuil analytique. **La mesure a coûté trois essais** : un départ
+impulsif sans limite en `dt`, puis une coque au-delà de `√(gh)` (régime critique, hors du modèle) — localisés avant remède ; en
+sous-critique, l'écart double au passage d'une maille par pas, sur une tendance lente : **A328** (le δ 3D à coque mobile converge lentement
+en `dt` près de la coque). Maillons **0**. Suivant : **S506, la revue de méthode** ; puis A328.

@@ -2436,3 +2436,49 @@ fn a_grid_aligned_wall_through_the_surface_a327_s490() {
     a_fixed_wall_through_the_surface_splits_the_tank_s490();
 }
 
+
+
+/// **S505 — C23 sur le système** (CAS-CANONIQUES C23, ADR-035, ADR-229). Eau au repos, 2 m ; la coque de la porte D, qui perce la surface,
+/// mise en mouvement à `u_p` de 0,5 à 20 m/s. (1) Sous la borne **gouvernante** (`courant_bound`), le Courant réalisé (`courant`, la même
+/// vitesse) vaut `ν` = 0,45 au millième, et la paroi franchit moins de `ν` maille par pas ; (2) sous la borne **absolue** (`c` et la vitesse
+/// absolue du fluide, nulle au repos), il vaut `ν·(u_p + c)/c` et dépasse 1 exactement au-delà de `u_p = c·(1/ν − 1)` ; (3) borne et compteur
+/// dérivent de `governing_speed`, une seule fonction.
+#[test]
+fn the_courant_number_sees_the_moving_wall_c23_s505() {
+    use crate::rigid_body::oriented_box_distance;
+    let d = Domain3 { nx: 32, ny: 16, nz: 8, dx: 0.25 };
+    let z_r = 0.5 - 500. / 1025.;
+    let c = [4.1f64, 1.875, d.z0() as f64 + z_r];
+    let mut noeuds = Vec::with_capacity((d.nx + 1) * (d.ny + 1) * (d.nz + 1));
+    for k in 0..=d.nz {
+        for j in 0..=d.ny {
+            for i in 0..=d.nx {
+                let p = [i as f64 * 0.25, j as f64 * 0.25, k as f64 * 0.25];
+                noeuds.push(oriented_box_distance(c, [1., 0., 0., 0.], [2., 0.8, 0.5], p) as f32);
+            }
+        }
+    }
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, d, 1025., 9.81,
+        &vec![0.; d.columns()], &noeuds).unwrap();
+    v.set_surface(&vec![d.z0(); d.columns()]).unwrap();
+    let nu = 0.45f64;
+    let cel = v.celerity() as f64;
+    let seuil = cel * (1. / nu - 1.);
+    println!("S505 : c = {cel:.4} m/s, seuil analytique u_p = {seuil:.4} m/s");
+    for u_p in [0.5f32, 1., 2., 5., 5.41, 5.42, 10., 20.] {
+        v.set_solid_rigid(&noeuds, [u_p, 0., 0.], [0.; 3], c.map(|x| x as f32)).unwrap();
+        let dt_g = v.courant_bound(nu, u_p);
+        let realise_g = v.courant(dt_g, u_p);
+        let franchi = u_p as f64 * dt_g / 0.25;
+        // La borne absolue : la célérité et la vitesse absolue du fluide — la paroi n'y entre pas.
+        // Le fluide est au repos : sa vitesse absolue, la seule que la borne absolue voie, est nulle.
+        let dt_a = nu * 0.25 / cel;
+        let realise_a = v.courant(dt_a, u_p);
+        println!("S505 u_p = {u_p:5.2} : gouvernante dt {dt_g:.5} s, Courant {realise_g:.4}, mailles franchies {franchi:.3} ; absolue dt {dt_a:.5} s, Courant {realise_a:.4}");
+        assert!((realise_g - nu).abs() <= 1e-3, "critère 1 : {realise_g}");
+        assert!(franchi < nu, "critère 1 : {franchi}");
+        assert!((realise_a - nu * (u_p as f64 + cel) / cel).abs() <= 1e-6, "critère 2 : {realise_a}");
+        assert_eq!(realise_a > 1., (u_p as f64) > seuil, "critère 2, seuil : u_p {u_p}");
+    }
+}

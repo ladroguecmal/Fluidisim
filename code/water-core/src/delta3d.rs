@@ -874,6 +874,71 @@ impl Volume3 {
         None
     }
 
+    /// **S505 — la vitesse gouvernante** (ADR-035 §2, précisée par ADR-229), m/s : sur les faces qui portent une inconnue, la vitesse du
+    /// fluide **relative à la paroi** sur une face que le solide mobile couvre en partie, la vitesse absolue ailleurs ; et **la vitesse
+    /// de la paroi elle-même** sur la grille, `wall` (m/s, celle que l'hôte imposera au pas) — une paroi qui franchit une maille par pas
+    /// casse le calcul (S505 : 100 % d'écart au calcul fin), quand le fluide qui la suit n'a plus de vitesse relative. **Une seule
+    /// définition** pour la borne ([`Volume3::courant_bound`]) et le compteur ([`Volume3::courant`]) : ADR-035 §3.
+    pub fn governing_speed(&self, wall: f32) -> f32 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let mut vmax = wall.abs();
+        let g = self.cut.as_ref();
+        let base = g.and_then(|g| g.base.as_ref());
+        let paroi = |axis: usize, x: [f32; 3]| {
+            g.map_or(0., |g| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x))
+        };
+        let mut face = |vitesse: f32, ouverte: f32, base_ouverte: f32, axis: usize, x: [f32; 3]| {
+            if ouverte == 0. {
+                return;
+            }
+            let v = if base_ouverte > ouverte { (vitesse - paroi(axis, x)).abs() } else { vitesse.abs() };
+            vmax = vmax.max(v);
+        };
+        let ouverture = |a: Option<&Vec<f32>>, f: usize| a.map_or(1., |a| a[f]);
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    let f = (k * ny + j) * (nx + 1) + i;
+                    face(self.u[f], ouverture(g.map(|g| &g.open_u), f), ouverture(base.map(|b| &b.open_u), f), 0,
+                        [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx]);
+                }
+            }
+            for j in 0..=ny {
+                for i in 0..nx {
+                    let f = (k * (ny + 1) + j) * nx + i;
+                    face(self.v[f], ouverture(g.map(|g| &g.open_v), f), ouverture(base.map(|b| &b.open_v), f), 1,
+                        [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx]);
+                }
+            }
+        }
+        for k in 0..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let f = (k * ny + j) * nx + i;
+                    face(self.w[f], ouverture(g.map(|g| &g.open_w), f), ouverture(base.map(|b| &b.open_w), f), 2,
+                        [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx]);
+                }
+            }
+        }
+        vmax
+    }
+
+    /// **S505 — la célérité des ondes longues**, `√(g·z₀)` : la profondeur du domaine au repos, la plus grande que le fond permette —
+    /// une majoration (ADR-035 §3 : la borne se majore en amont).
+    pub fn celerity(&self) -> f32 {
+        (self.g_eff * self.domain.z0().max(0.)).sqrt()
+    }
+
+    /// **S505 — la borne du pas, en amont** (ADR-035 §3) : `ν·dx/(u_gouvernante + c)`, secondes, pour une paroi qui ira à `wall` m/s.
+    pub fn courant_bound(&self, nu: f64, wall: f32) -> f64 {
+        nu * self.domain.dx as f64 / (self.governing_speed(wall) as f64 + self.celerity() as f64)
+    }
+
+    /// **S505 — le compteur** : le nombre de Courant d'un pas `dt` (s), de la même vitesse gouvernante que la borne.
+    pub fn courant(&self, dt: f64, wall: f32) -> f64 {
+        dt * (self.governing_speed(wall) as f64 + self.celerity() as f64) / self.domain.dx as f64
+    }
+
     /// **S503 — le terme de paroi de chaque maille** ([`Volume3::wall_term`]), zéro sans solide mobile ni sur une maille solide : ce
     /// que la carte ajoute à sa divergence pour suivre un solide qui bouge.
     pub fn wall_divergence(&self, out: &mut [f32]) -> Result<(), Error> {
