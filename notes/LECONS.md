@@ -6535,3 +6535,9 @@ séparé les chaînes : le champ cohérent, le corps exact, l'écart dans le dé
 secondes) ; la queue d'une gaussienne à 3σ dite négligeable contre la source (1 %), alors qu'elle concurrence la pente du sillage, née de
 la même source et petite elle aussi. Comparer au terme concurrent, sur la durée (ADR-226 D3).
 
+## L384
+
+**S494–S500 — la bouée qui roulait.** Une bouée d'essai haute et étroite (GM vrai de 2 mm pour 25 cm de côté) a chaviré, roulé, puis
+faussé un essai quand le proxy est devenu exact ; une part d'une conclusion publiée (la « dérive du second ordre » de S494) était son
+roulis. La marge d'un corps d'essai se calcule avant de mesurer, avec son proxy (ADR-228 D1).
+

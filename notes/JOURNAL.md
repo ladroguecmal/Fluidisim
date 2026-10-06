@@ -305,3 +305,11 @@ de sa part immergée. **Mesuré** : la hauteur des poussées égale au centre de
 haute de S494 (GM vrai +2 mm) devient instable avec un proxy de 4 × 4 — l'ancienne poussée la stabilisait à tort ; bouées d'essai plates
 (ADR-227 D3). Avec elles, l'écart horizontal de S494 à 1 kJ tombe de 102 à 35 % : une part de sa « dérive » était le roulis. 660 essais.
 Lot des registres. Maillons **0**. Suivant : **S501, la revue de méthode** (ADR-222).
+
+## S501 — 2026-10-06 — la quatrième revue de méthode
+
+**Entrée.** En autonomie, ADR-222 D4. **Fait** : [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md) — six frictions de S497–S500 ;
+une protection : un corps d'essai se choisit loin de ses limites (la bouée haute qui a chaviré, roulé, puis faussé un essai et une part
+d'une conclusion de S494) ; une pratique outillée : le battement lu par le script qui écrit le jeton (trois battements écrits d'avance, de
+tête, jusqu'à onze minutes). Quatre frictions sans suite : les protections ont joué. METHODE : 28 protections ; L384. Maillons **1**.
+Suivant : **S502** — 6.1, l'amortissement des autres degrés de liberté (le dernier manque de 6.1).

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S501 — **en cours**. En autonomie, **la quatrième revue de méthode** (ADR-222 D4) : les frictions de S497–S500.
+Session : S501 — **terminée**. En autonomie, **la quatrième revue de méthode** (ADR-222 D4) : les frictions de S497–S500.
 
 **Ce que la session fait.** Relire journaux et notes de S497–S500 ; pour chaque friction, son coût et sa suite ; un ADR ; METHODE et LECONS
 pour les protections nouvelles seulement ; la boussole.
@@ -73,6 +73,7 @@ table ; `etat_projet --check` à zéro.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
+- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
 
 ### Notes de reprise
+- **P2** — ADR-228 : six frictions ; une protection (D1, le corps d'essai loin de ses limites), une pratique outillée (D2, le battement lu par le script) ; METHODE (28), L384, BOUSSOLE, index.

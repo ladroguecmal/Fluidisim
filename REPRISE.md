@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 04:31 +02:00
+JETON            : libre
+Battement        : 2026-10-06 04:33 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S501 — la quatrième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S500 — la poussée du proxy au centre de la part immergée ([journal](notes/JOURNAL.md)). Avant : S499 (B6 : combien de points pour le proxy de flottabilité)
-Session suivante : **S501 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S497–S500 — dont une poussée fausse qui stabilisait à tort une bouée d'essai (S494–S500 : une conclusion publiée sur un instrument qui compensait) et un estimateur bruité de |G| refait sans toucher au seuil. **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
-Maillons        : 0 — S500 : la poussée au centre de la part immergée (6.1 avancée)
+Session en cours : aucune
+Dernière session : S501 — la quatrième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S500 (la poussée du proxy au centre de la part immergée)
+Session suivante : **S502 — 6.1, l'amortissement des autres degrés de liberté** : le dernier manque de 6.1 — le rayonnement en roulis et tangage (S336 ne l'a mesuré qu'en pilonnement) ; δ mesure hors ligne l'amortissement d'une coque libre qui roule (comme S336), le corps le reçoit comme constante d'archétype. Un corps d'essai loin de ses limites (ADR-228), ordre de grandeur contre le terme concurrent (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
+Maillons        : 1 — S501 : la revue de méthode (ADR-228), sans capacité
 Registres       : dernier lot S500 (ADR-213 D3) ; le prochain au plus tard en S503
 ```
 
