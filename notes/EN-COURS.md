@@ -71,6 +71,6 @@ indépendantes). **ADR-243** : D1, les nombres d'un plan écrits par le script q
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-243, METHODE, L402, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise

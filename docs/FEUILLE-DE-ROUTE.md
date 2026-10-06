@@ -407,6 +407,8 @@ celle du chemin coupé ; **5.7 ouvert** (ADR-241 : les liquides de V, non miscib
 débit par couches (le manomètre en U, la vidange stratifiée).
 **S561–S562** : la seizième revue (ADR-242 : une grandeur intégrale aux poids du schéma ; le rituel refuse un lot dû) ; 5.7 avance —
 l'écrémeur, l'instantané de la composition (`WVLQ`).
+**S563–S566** : 5.7 avance (l'air scellé avec plusieurs liquides) ; **5.6 ouvert** (le seuil adaptatif, en hauteur de surface) ;
+**5.8 ouvert** (la solution d'un réseau en charge) ; la dix-septième revue (ADR-243 : les nombres d'un plan écrits par leur script).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
