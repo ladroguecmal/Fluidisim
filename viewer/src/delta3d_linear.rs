@@ -94,6 +94,8 @@ pub struct Linear3 {
     moving: core::cell::Cell<bool>,
     /// S504 : un dépôt et des poids de transfert restent dans le tampon après leur pas : à effacer au pas suivant sans mouvement.
     deposited: core::cell::Cell<bool>,
+    /// S508 : le tampon de conversion de `set_motion`, gardé d'un pas à l'autre.
+    octets: core::cell::RefCell<Vec<u8>>,
     scalar: wgpu::Buffer,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
@@ -237,6 +239,7 @@ impl Linear3 {
             motion,
             moving: core::cell::Cell::new(false),
             deposited: core::cell::Cell::new(false),
+            octets: core::cell::RefCell::new(Vec::new()),
             scalar,
             read,
             query,
@@ -323,9 +326,19 @@ impl Linear3 {
         if geo.iter().any(|a| !(0. ..=1.).contains(a)) || wall.iter().chain(deposit).chain(transfer).any(|x| !x.is_finite()) {
             return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
         }
-        self.queue.write_buffer(&self.geo, 0, &f32s(geo));
-        let tout: Vec<f32> = wall.iter().chain(faces).chain(deposit).chain(transfer).copied().collect();
-        self.queue.write_buffer(&self.motion, 0, &f32s(&tout));
+        // S508 : une conversion par tranche, dans un tampon gardé — ni concaténation, ni allocation au pas.
+        let mut octets = self.octets.borrow_mut();
+        let mut ecrit = |tampon: &wgpu::Buffer, tranches: &[&[f32]]| {
+            octets.clear();
+            octets.resize(tranches.iter().map(|t| t.len()).sum::<usize>() * 4, 0);
+            for (o, v) in octets.chunks_exact_mut(4).zip(tranches.iter().flat_map(|t| t.iter())) {
+                o.copy_from_slice(&v.to_le_bytes());
+            }
+            self.queue.write_buffer(tampon, 0, &octets);
+        };
+        ecrit(&self.geo, &[geo]);
+        ecrit(&self.motion, &[wall, faces, deposit, transfer]);
+        let _ = (nc, nf, ncol);
         self.moving.set(true);
         Ok(())
     }
@@ -978,17 +991,25 @@ pub fn recevoir_coque() -> Result<(), String> {
                 ([centre_xy[0], centre_xy[1], d.z0() as f64 + z_r + m], [1., 0., 0., 0.])
             }
         };
-        let noeuds = |c: [f64; 3], q: [f64; 4], out: &mut Vec<f32>| {
-            out.clear();
-            for k in 0..=d.nz {
-                for j in 0..=d.ny {
-                    for i in 0..=d.nx {
+        // S508 : les nœuds de toute la grille au départ ; ensuite seulement dans la boîte de la coque (sa demi-diagonale, deux mailles de
+        // marge, à l'ancienne et à la nouvelle position) — dehors, la distance reste positive, et le cœur ne la lit pas (sa boîte).
+        let noeuds_dans = |c: [f64; 3], q: [f64; 4], boite: [usize; 6], out: &mut Vec<f32>| {
+            out.resize((d.nx + 1) * (d.ny + 1) * (d.nz + 1), 1.);
+            for k in boite[4]..=boite[5] {
+                for j in boite[2]..=boite[3] {
+                    for i in boite[0]..=boite[1] {
                         let p = [i as f64 * d.dx as f64, j as f64 * d.dx as f64, k as f64 * d.dx as f64];
-                        out.push(oriented_box_distance(c, q, [2., 0.8, 0.5], p) as f32);
+                        out[(k * (d.ny + 1) + j) * (d.nx + 1) + i] = oriented_box_distance(c, q, [2., 0.8, 0.5], p) as f32;
                     }
                 }
             }
         };
+        let boite_de = |c: [f64; 3]| {
+            let r = (2f64 * 2. + 0.8 * 0.8 + 0.5 * 0.5).sqrt() + 2. * d.dx as f64;
+            let n = |x: f64, m: usize| ((x / d.dx as f64).floor().max(0.) as usize).min(m);
+            [n(c[0] - r, d.nx), n(c[0] + r + d.dx as f64, d.nx), n(c[1] - r, d.ny), n(c[1] + r + d.dx as f64, d.ny), n(c[2] - r, d.nz), n(c[2] + r + d.dx as f64, d.nz)]
+        };
+        let noeuds = |c: [f64; 3], q: [f64; 4], out: &mut Vec<f32>| noeuds_dans(c, q, [0, d.nx, 0, d.ny, 0, d.nz], out);
         let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
         let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
@@ -1018,12 +1039,23 @@ pub fn recevoir_coque() -> Result<(), String> {
         );
         let (mut pire, mut elevation, mut pire_volume, mut transferts) = (0f32, 0f32, 0f64, 0usize);
         let (mut cpu, mut ligne) = (0f64, String::new());
+        // S508 : la part de chaque étage du recoupage — nœuds, `set_solid_rigid`, terme de paroi, faces, transfert, colonnes, géométrie,
+        // envoi.
+        let mut etages = [0f64; 8];
+        let mut chrono = std::time::Instant::now();
+        let mut marque = |k: usize, etages: &mut [f64; 8]| {
+            etages[k] += chrono.elapsed().as_secs_f64();
+            chrono = std::time::Instant::now();
+        };
         let mut precedent = pose(0.);
         for n in 1..=pas {
             let t = n as f64 * dt_us as f64 * 1e-6;
             let t0 = std::time::Instant::now();
+            marque(7, &mut [0f64; 8]);
             let (c, q) = pose(t);
-            noeuds(c, q, &mut nds);
+            let (b0, b1) = (boite_de(precedent.0), boite_de(c));
+            noeuds_dans(c, q, [b0[0].min(b1[0]), b0[1].max(b1[1]), b0[2].min(b1[2]), b0[3].max(b1[3]), b0[4].min(b1[4]), b0[5].max(b1[5])], &mut nds);
+            marque(0, &mut etages);
             let vitesse = [0., 0., ((c[2] - precedent.0[2]) / (dt_us as f64 * 1e-6)) as f32];
             let mut angulaire = [0f32; 3];
             if roulis {
@@ -1031,9 +1063,13 @@ pub fn recevoir_coque() -> Result<(), String> {
             }
             precedent = (c, q);
             coeur.set_solid_rigid(&nds, vitesse, angulaire, c.map(|x| x as f32)).map_err(|e| format!("pas {n} : paroi {e:?}"))?;
+            marque(1, &mut etages);
             coeur.wall_divergence(&mut paroi).map_err(|e| format!("{e:?}"))?;
+            marque(2, &mut etages);
             coeur.changed_faces(&mut faces).map_err(|e| format!("{e:?}"))?;
+            marque(3, &mut etages);
             coeur.lid_transfer_weights(&mut transfert).map_err(|e| format!("{e:?}"))?;
+            marque(4, &mut etages);
             transferts += transfert.chunks(5).filter(|w| w[0] != 0.).count();
             // Le témoin (`SANS_TRANSFERT`) : la carte privée du transfert de S334.
             if std::env::var("SANS_TRANSFERT").is_ok() {
@@ -1044,7 +1080,11 @@ pub fn recevoir_coque() -> Result<(), String> {
                 depot[k] = (nouvelles[k] - colonnes[k]) / aire;
             }
             colonnes.copy_from_slice(nouvelles);
-            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot, &transfert)?;
+            marque(5, &mut etages);
+            let geo = geo_de(&coeur)?;
+            marque(6, &mut etages);
+            carte.set_motion(&geo, &paroi, &faces, &depot, &transfert)?;
+            marque(7, &mut etages);
             cpu += t0.elapsed().as_secs_f64();
             coeur.step_surface_linear(dt_us, 8000, &jobs).map_err(|e| format!("cœur, pas {n} : {e:?}"))?;
             carte.step(cycles);
@@ -1068,6 +1108,11 @@ pub fn recevoir_coque() -> Result<(), String> {
             elevation / pire.max(1e-12),
             1e3 * cpu / pas as f64,
             1e3 * t0.elapsed().as_secs_f64() / 100.
+        );
+        let ms = etages.map(|x| 1e3 * x / pas as f64);
+        println!(
+            "COQUE_S504 etages_ms noeuds={:.3} set_solid_rigid={:.3} paroi={:.3} faces={:.3} transfert={:.3} colonnes={:.3} geometrie={:.3} envoi={:.3}",
+            ms[0], ms[1], ms[2], ms[3], ms[4], ms[5], ms[6], ms[7]
         );
         Ok(())
     })

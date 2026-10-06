@@ -47,6 +47,48 @@ pub(crate) struct Cut3 {
     /// **S332 : le solide peut percer le couvercle** — une coque qui flotte. Mode linéaire seulement :
     /// les faces du couvercle qu'elle couvre deviennent paroi ; le pas mobile garde son plancher.
     pub piercing: bool,
+    /// **S508 : la boîte du solide** au dernier recoupage — les mailles que ses nœuds négatifs touchent, deux mailles de marge
+    /// (`i0, i1, j0, j1, k0, k1`, fins exclues) ; `None` sans solide.
+    pub solid_box: Option<Boite>,
+}
+
+/// **S508 — une boîte de mailles** `[i0, i1, j0, j1, k0, k1]`, fins exclues.
+pub(crate) type Boite = [usize; 6];
+
+/// S508 : toute la grille.
+pub(crate) fn full_box(domain: Domain3) -> Boite {
+    [0, domain.nx, 0, domain.ny, 0, domain.nz]
+}
+
+/// S508 : la réunion de deux boîtes.
+pub(crate) fn union_box(a: Boite, b: Boite) -> Boite {
+    [a[0].min(b[0]), a[1].max(b[1]), a[2].min(b[2]), a[3].max(b[3]), a[4].min(b[4]), a[5].max(b[5])]
+}
+
+/// **S508 : la boîte d'un solide** — les mailles qui touchent un nœud de distance négative, deux mailles de marge ; `None` si aucun nœud
+/// n'est négatif. Une face ou une maille hors de cette boîte n'a aucun nœud négatif : le solide ne la coupe pas.
+pub(crate) fn solid_box(domain: Domain3, solid: &[f32]) -> Option<Boite> {
+    let Domain3 { nx, ny, nz, .. } = domain;
+    let (mut lo, mut hi) = ([usize::MAX; 3], [0usize; 3]);
+    for c in 0..=nz {
+        for b in 0..=ny {
+            for a in 0..=nx {
+                if solid[(c * (ny + 1) + b) * (nx + 1) + a] < 0. {
+                    for (q, v) in [a, b, c].into_iter().enumerate() {
+                        lo[q] = lo[q].min(v);
+                        hi[q] = hi[q].max(v);
+                    }
+                }
+            }
+        }
+    }
+    if lo[0] == usize::MAX {
+        return None;
+    }
+    let n = [nx, ny, nz];
+    let r = |q: usize| (lo[q].saturating_sub(2), (hi[q] + 2).min(n[q]));
+    let ((i0, i1), (j0, j1), (k0, k1)) = (r(0), r(1), r(2));
+    Some([i0, i1, j0, j1, k0, k1])
 }
 
 /// S330 : la découpe du fond seul, et le volume du solide dans chaque colonne, m³.
@@ -249,7 +291,19 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
         .flat_map(|j| (0..nx).map(move |i| (i, j)))
         .map(|(i, j)| footprint(i, j).into_iter().fold(f32::NEG_INFINITY, f32::max))
         .collect();
-    Cut3 { frac, open_u, open_v, open_w, floor, base: None, solid_velocity: [0.; 3], solid_angular: [0.; 3], solid_center: [0.; 3], piercing: false }
+    Cut3 {
+        frac,
+        open_u,
+        open_v,
+        open_w,
+        floor,
+        base: None,
+        solid_velocity: [0.; 3],
+        solid_angular: [0.; 3],
+        solid_center: [0.; 3],
+        piercing: false,
+        solid_box: None,
+    }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════════════════
@@ -398,11 +452,12 @@ fn cell_nodes(domain: Domain3, solid: &[f32], i: usize, j: usize, k: usize) -> [
 
 /// Une maille fluide dont aucune face n'est ouverte rendrait l'opérateur singulier : elle est déclarée
 /// solide, comme en 2D.
-fn seal_isolated(g: &mut Cut3, domain: Domain3) {
-    let Domain3 { nx, ny, nz, .. } = domain;
-    for k in 0..nz {
-        for j in 0..ny {
-            for i in 0..nx {
+fn seal_isolated(g: &mut Cut3, domain: Domain3, boite: Boite) {
+    let Domain3 { nx, ny, .. } = domain;
+    let [i0, i1, j0, j1, k0, k1] = boite;
+    for k in k0..k1 {
+        for j in j0..j1 {
+            for i in i0..i1 {
                 let c = (k * ny + j) * nx + i;
                 if g.frac[c] == 0. {
                     continue;
@@ -427,14 +482,25 @@ fn seal_isolated(g: &mut Cut3, domain: Domain3) {
 /// au sommet de la plus haute maille que le solide touche : le pas mobile garde la surface deux mailles
 /// au-dessus.
 pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<(), crate::delta_projection::Error> {
+    add_solid_in(g, domain, solid, full_box(domain), full_box(domain), true)
+}
+
+/// **S508 : `add_solid` limité à la boîte `boite`** (celle du solide : hors d'elle, il ne coupe rien) ; l'étanchéité des mailles isolées
+/// revue dans `scellee` (la boîte du solide unie à celle du pas d'avant, que le recoupage a restaurée). `verifier` : faux quand
+/// l'appelant a déjà vérifié le solide contre la même découpe (le recoupage le fait sur celle du fond, que la boîte restaure).
+pub(crate) fn add_solid_in(g: &mut Cut3, domain: Domain3, solid: &[f32], boite: Boite, scellee: Boite, verifier: bool)
+    -> Result<(), crate::delta_projection::Error> {
     use crate::delta_projection::Error;
     // S330 : vérifier d'abord, écrire ensuite — un refus laisse la découpe intacte.
-    check_solid(&g.frac, &g.open_u, &g.open_v, &g.open_w, domain, solid, g.piercing)?;
+    if verifier {
+        check_solid_in(&g.frac, &g.open_u, &g.open_v, &g.open_w, domain, solid, g.piercing, boite)?;
+    }
     let Domain3 { nx, ny, nz, dx } = domain;
+    let [i0, i1, j0, j1, k0, k1] = boite;
     let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
-    for k in 0..nz {
-        for j in 0..ny {
-            for i in 0..nx {
+    for k in k0..k1 {
+        for j in j0..j1 {
+            for i in i0..i1 {
                 let s = cell_negative(cell_nodes(domain, solid, i, j, k));
                 if s > 0. {
                     let c = (k * ny + j) * nx + i;
@@ -454,42 +520,45 @@ pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<
         }
         Ok(())
     };
-    for k in 0..nz {
-        for j in 0..ny {
-            for i in 1..nx {
+    for k in k0..k1 {
+        for j in j0..j1 {
+            for i in i0.max(1)..nx.min(i1 + 1) {
                 face(&mut g.open_u[(k * ny + j) * (nx + 1) + i],
                     [node(i, j, k), node(i, j + 1, k), node(i, j + 1, k + 1), node(i, j, k + 1)])?;
             }
         }
-        for j in 1..ny {
-            for i in 0..nx {
+        for j in j0.max(1)..ny.min(j1 + 1) {
+            for i in i0..i1 {
                 face(&mut g.open_v[(k * (ny + 1) + j) * nx + i],
                     [node(i, j, k), node(i + 1, j, k), node(i + 1, j, k + 1), node(i, j, k + 1)])?;
             }
         }
     }
-    for k in 1..=nz {
-        for j in 0..ny {
-            for i in 0..nx {
+    for k in k0.max(1)..(nz + 1).min(k1 + 1) {
+        for j in j0..j1 {
+            for i in i0..i1 {
                 face(&mut g.open_w[(k * ny + j) * nx + i],
                     [node(i, j, k), node(i + 1, j, k), node(i + 1, j + 1, k), node(i, j + 1, k)])?;
             }
         }
     }
-    seal_isolated(g, domain);
+    seal_isolated(g, domain, scellee);
     Ok(())
 }
 
 /// **S330 : les refus de `add_solid`, sans rien écrire** — une maille ou une face que fond et solide
-/// coupent tous deux, un solide dans la couche du couvercle.
-pub(crate) fn check_solid(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: &[f32], domain: Domain3, solid: &[f32],
-    piercing: bool) -> Result<(), crate::delta_projection::Error> {
+/// coupent tous deux, un solide dans la couche du couvercle ; **S508** : limités à la boîte du solide — hors d'elle, aucun nœud
+/// négatif, aucun refus possible.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn check_solid_in(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: &[f32], domain: Domain3, solid: &[f32],
+    piercing: bool, boite: Boite) -> Result<(), crate::delta_projection::Error> {
     use crate::delta_projection::Error;
     let Domain3 { nx, ny, nz, .. } = domain;
+    let [i0, i1, j0, j1, k0, k1] = boite;
     let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
-    for k in 0..nz {
-        for j in 0..ny {
-            for i in 0..nx {
+    for k in k0..k1 {
+        for j in j0..j1 {
+            for i in i0..i1 {
                 if cell_negative(cell_nodes(domain, solid, i, j, k)) > 0. && (frac[(k * ny + j) * nx + i] < 1. || (k + 1 == nz && !piercing)) {
                     return Err(Error::Domain);
                 }
@@ -497,25 +566,25 @@ pub(crate) fn check_solid(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: 
         }
     }
     let partage = |open: f32, c: [f64; 4]| open < 1. && face_negative(c) > 0.;
-    for k in 0..nz {
-        for j in 0..ny {
-            for i in 1..nx {
+    for k in k0..k1 {
+        for j in j0..j1 {
+            for i in i0.max(1)..nx.min(i1 + 1) {
                 if partage(open_u[(k * ny + j) * (nx + 1) + i], [node(i, j, k), node(i, j + 1, k), node(i, j + 1, k + 1), node(i, j, k + 1)]) {
                     return Err(Error::Domain);
                 }
             }
         }
-        for j in 1..ny {
-            for i in 0..nx {
+        for j in j0.max(1)..ny.min(j1 + 1) {
+            for i in i0..i1 {
                 if partage(open_v[(k * (ny + 1) + j) * nx + i], [node(i, j, k), node(i + 1, j, k), node(i + 1, j, k + 1), node(i, j, k + 1)]) {
                     return Err(Error::Domain);
                 }
             }
         }
     }
-    for k in 1..=nz {
-        for j in 0..ny {
-            for i in 0..nx {
+    for k in k0.max(1)..(nz + 1).min(k1 + 1) {
+        for j in j0..j1 {
+            for i in i0..i1 {
                 if partage(open_w[(k * ny + j) * nx + i], [node(i, j, k), node(i + 1, j, k), node(i + 1, j + 1, k), node(i, j + 1, k)]) {
                     return Err(Error::Domain);
                 }

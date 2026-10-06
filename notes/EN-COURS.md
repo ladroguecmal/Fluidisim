@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S508 — **en cours**. En autonomie, **6.4, le coût du recoupage** : une coque qui bouge sur la carte coûte 8 ms de CPU par pas
+Session : S508 — **terminée**. En autonomie, **6.4, le coût du recoupage** : une coque qui bouge sur la carte coûte 8 ms de CPU par pas
 (S503–S504) — le `set_solid_rigid` entier du cœur, trois extractions et l'envoi de toute la géométrie — contre 0,7 à 0,9 ms pour la carte.
 
 **Ce que la session fait.** Mesurer d'abord la part de chaque étage ; puis limiter le recoupage du cœur et les extractions à la boîte que
@@ -80,8 +80,14 @@ validée (ses manques nommés : la coque qui bouge sur la carte, C23, le coût).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la part de chaque étage.
-- [ ] **P3** — le recoupage et les extractions limités à la boîte ; l'envoi partiel ; (2)–(3).
-- [ ] **P4** — preuve ; liste 6.4 ; rituel.
+- [x] **P2** — la part de chaque étage.
+- [x] **P3** — le recoupage et les extractions limités à la boîte ; l'envoi partiel ; (2)–(3).
+- [x] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
+- **P2** — nœuds 0,69, `set_solid_rigid` 6,18, paroi 0,22, faces 0,08, envoi 0,66 ms (roulis).
+- **P3** — boîte du solide (`solid_box`, `check_solid_in`, `add_solid_in`, `prec_cut_in`), vérification unique, terme de paroi en boîte ;
+  banc : nœuds en boîte ; envoi en deux écritures. Au bit (essai s508, 60 pas). Total 1,4 à 1,55 ms : **(3) manqué** (1 ms). Le dépôt
+  gardé entier (il renormalise la somme compensée partout : le limiter changerait des bits). 665 essais.
+- **P4** — preuve RECOUPAGE-S508 ; liste 6.4 ; index ; journal.
+

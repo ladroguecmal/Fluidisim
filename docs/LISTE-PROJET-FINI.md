@@ -440,7 +440,9 @@ pas recopiée ici (L137).
   ([preuve](validation/COQUE-CARTE-S504.md)) ; **S505** : **C23 sur le système** — le pas borné par la vitesse gouvernante, la paroi
   comprise ([ADR-229](adr/ADR-229-la-paroi-dans-la-vitesse-gouvernante.md)), Courant à 0,4500 de 0,5 à 20 m/s
   ([preuve](validation/C23-SYSTEME-S505.md)) ; **S507** : A328 réattribuée — l'ordre 1 en temps, constante ×5 près d'une coque qui bouge
-  (10 % du champ proche à ≈ 6 ms) ([preuve](validation/A328-S507.md)). Manque le coût du recoupage (8 ms par pas, CPU).
+  (10 % du champ proche à ≈ 6 ms) ([preuve](validation/A328-S507.md)) ; **S508** : le recoupage dans la boîte du solide, au bit de
+  l'entier — 8 ms → 1,4 à 1,55 ms par pas ([preuve](validation/RECOUPAGE-S508.md)). Manque un recoupage sous 1 ms (l'envoi, 0,4 à
+  0,65 ms, reste le plus gros).
 - [x] **6.5 Décor fixe comme frontière imposée** — *validé* (S493) : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**

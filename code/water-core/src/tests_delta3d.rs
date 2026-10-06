@@ -2482,3 +2482,71 @@ fn the_courant_number_sees_the_moving_wall_c23_s505() {
         assert_eq!(realise_a > 1., (u_p as f64) > seuil, "critère 2, seuil : u_p {u_p}");
     }
 }
+
+
+/// **S508 — le recoupage limité à la boîte du solide rend les tableaux du recoupage entier, au bit.** Deux volumes, l'un recoupé sur toute
+/// la grille (`set_full_recut`), l'autre dans la boîte du solide ; la coque de la porte D qui pilonne, roule et avance à 2 m/s, 60 pas de
+/// 10 ms : après chaque recoupage, ouvertures, fractions, terme de paroi, faces, colonnes et poids du transfert ; après chaque pas, surface
+/// et vitesses — identiques.
+#[test]
+fn the_boxed_recut_is_the_full_recut_s508() {
+    use crate::rigid_body::oriented_box_distance;
+    let d = Domain3 { nx: 40, ny: 16, nz: 8, dx: 0.25 };
+    let z_r = 0.5 - 500. / 1025.;
+    let pose = |t: f64| {
+        let roulis = 0.05 * (2.5 * t).sin();
+        ([3.1 + 2. * t, 1.875 + 0.1 * (1.3 * t).sin(), d.z0() as f64 + z_r + 0.05 * (3.5 * t).sin()], [(0.5 * roulis).cos(), (0.5 * roulis).sin(), 0., 0.])
+    };
+    let noeuds = |t: f64| -> Vec<f32> {
+        let (c, q) = pose(t);
+        let mut out = Vec::with_capacity((d.nx + 1) * (d.ny + 1) * (d.nz + 1));
+        for k in 0..=d.nz {
+            for j in 0..=d.ny {
+                for i in 0..=d.nx {
+                    out.push(oriented_box_distance(c, q, [2., 0.8, 0.5], [i as f64 * 0.25, j as f64 * 0.25, k as f64 * 0.25]) as f32);
+                }
+            }
+        }
+        out
+    };
+    let cree = || {
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, d, 1025., 9.81,
+            &vec![0.; d.columns()], &noeuds(0.)).unwrap();
+        v.set_surface(&vec![d.z0(); d.columns()]).unwrap();
+        v
+    };
+    let (mut entier, mut boite) = (cree(), cree());
+    entier.set_full_recut(true);
+    let bits = |x: &[f32]| x.iter().map(|v| v.to_bits()).collect::<Vec<u32>>();
+    let mut tampons = [vec![0f32; d.cells()], vec![0f32; d.cells()]];
+    let nf = (d.nx + 1) * d.ny * d.nz + d.nx * (d.ny + 1) * d.nz + d.nx * d.ny * (d.nz + 1);
+    let mut faces = [vec![0f32; nf], vec![0f32; nf]];
+    let mut poids = [vec![0f32; 5 * d.columns()], vec![0f32; 5 * d.columns()]];
+    for n in 1..=60 {
+        let t = n as f64 * 0.01;
+        let (c, _) = pose(t);
+        let (cp, _) = pose(t - 0.01);
+        let vitesse = [((c[0] - cp[0]) / 0.01) as f32, ((c[1] - cp[1]) / 0.01) as f32, ((c[2] - cp[2]) / 0.01) as f32];
+        let angulaire = [(0.05 * 2.5 * (2.5 * t).cos()) as f32, 0., 0.];
+        let nds = noeuds(t);
+        for (k, v) in [&mut entier, &mut boite].into_iter().enumerate() {
+            v.set_solid_rigid(&nds, vitesse, angulaire, c.map(|x| x as f32)).unwrap();
+            v.wall_divergence(&mut tampons[k]).unwrap();
+            v.changed_faces(&mut faces[k]).unwrap();
+            v.lid_transfer_weights(&mut poids[k]).unwrap();
+        }
+        let (ae, ab) = (entier.apertures().unwrap(), boite.apertures().unwrap());
+        assert_eq!((bits(ae.0), bits(ae.1), bits(ae.2)), (bits(ab.0), bits(ab.1), bits(ab.2)), "ouvertures, pas {n}");
+        assert_eq!(bits(entier.fluid_fraction().unwrap()), bits(boite.fluid_fraction().unwrap()), "fractions, pas {n}");
+        assert_eq!(bits(&tampons[0]), bits(&tampons[1]), "terme de paroi, pas {n}");
+        assert_eq!(bits(&faces[0]), bits(&faces[1]), "faces, pas {n}");
+        assert_eq!(bits(&poids[0]), bits(&poids[1]), "transfert, pas {n}");
+        assert_eq!(bits(entier.solid_column_volumes().unwrap()), bits(boite.solid_column_volumes().unwrap()), "colonnes, pas {n}");
+        for v in [&mut entier, &mut boite] {
+            v.step_surface_linear(10_000, 8000, &Jobs).unwrap();
+        }
+        assert_eq!(bits(entier.surface()), bits(boite.surface()), "surface, pas {n}");
+    }
+    println!("S508 : 60 pas, recoupage en boîte et entier identiques au bit");
+}

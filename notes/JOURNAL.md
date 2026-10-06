@@ -365,3 +365,12 @@ vraiment plus fine ; la pose au milieu du pas ; un témoin à coque fixe. **Mesu
 en temps (témoin : 5 % à 12,5 ms), la coque mobile multiplie la constante par cinq. S505 jugeait contre une référence deux fois plus fine
 seulement. **A328 levée, réattribuée.** Lot des registres (dû en S506). Maillons **1** (un défaut levé, sans capacité nouvelle). Suivant : un
 point de la liste qui fasse avancer une capacité.
+
+## S508 — 2026-10-06 — le coût du recoupage d'une coque qui bouge
+
+**Entrée.** En autonomie (maillons 1) ; le dernier manque de 6.4. **Fait** ([preuve](../docs/validation/RECOUPAGE-S508.md)) : la part de
+chaque étage mesurée (le `set_solid_rigid` du cœur : 6,2 ms sur 7,9) ; le recoupage limité à la boîte du solide — identique au bit au
+recoupage entier sur 60 pas —, la vérification faite une fois, Jacobi et terme de paroi en boîte, l'envoi en deux écritures. **Mesuré** :
+8 → 1,4 à 1,55 ms par pas ; S358, S503, S504 inchangés. **Critère de 1 ms manqué** ; restent l'envoi (0,4 à 0,65 ms) et le cœur (0,5 ms).
+6.4 reste partielle sur ce seul point. Maillons **2** (une optimisation qui ne franchit pas son critère n'est pas une capacité). Suivant :
+**S509, un lot qui fasse avancer une capacité** (maillons 2 : comparer la priorité aux reliquats).

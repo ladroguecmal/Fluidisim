@@ -152,6 +152,8 @@ pub struct Volume3 {
     res: Vec<f32>,
     dir: Vec<f32>,
     tmp: Vec<f32>,
+    /// S508 : le recoupage d'un solide qui bouge sur toute la grille (essais) ; sinon dans la boîte du solide.
+    full_recut: bool,
     saved_u: Vec<f32>,
     saved_v: Vec<f32>,
     saved_w: Vec<f32>,
@@ -305,6 +307,7 @@ impl Volume3 {
             cut: None,
             precondition_cut: true,
             partial_lid: true,
+            full_recut: false,
             lid_floor: 1.,
             linear_sponge: None,
             sponge_removed: 0.,
@@ -381,6 +384,8 @@ impl Volume3 {
         g.piercing = piercing;
         let mut base = g.base(nx * ny);
         cut::add_solid(g, domain, solid)?;
+        // S508 : la boîte du solide, d'où le recoupage suivant partira.
+        g.solid_box = cut::solid_box(domain, solid);
         solid_columns(domain, &base.frac, &g.frac, &mut base.solid_col);
         g.base = Some(base);
         v.prec_cut();
@@ -412,7 +417,21 @@ impl Volume3 {
         }
         let g = self.cut.as_mut().ok_or(Error::Domain)?;
         let mut base = g.base.take().ok_or(Error::Domain)?;
-        if let Err(e) = cut::check_solid(&base.frac, &base.open_u, &base.open_v, &base.open_w, domain, solid, g.piercing) {
+        // S508 : le recoupage limité à la boîte du solide — hors d'elle, il ne coupe rien —, unie à celle du pas d'avant, que l'on restaure
+        // depuis la découpe du fond. `full_recut` (essais) garde la grille entière : les deux rendent les mêmes tableaux, au bit.
+        let toute = cut::full_box(domain);
+        let (nouvelle, ancienne) = if self.full_recut {
+            (Some(toute), Some(toute))
+        } else {
+            (cut::solid_box(domain, solid), g.solid_box)
+        };
+        let boite = nouvelle.unwrap_or([0; 6]);
+        let restauree = match (nouvelle, ancienne) {
+            (Some(a), Some(b)) => cut::union_box(a, b),
+            (Some(a), None) | (None, Some(a)) => a,
+            (None, None) => [0; 6],
+        };
+        if let Err(e) = cut::check_solid_in(&base.frac, &base.open_u, &base.open_v, &base.open_w, domain, solid, g.piercing, boite) {
             g.base = Some(base);
             return Err(e);
         }
@@ -420,12 +439,34 @@ impl Volume3 {
         self.saved_u.copy_from_slice(&g.open_u);
         self.saved_v.copy_from_slice(&g.open_v);
         self.saved_w.copy_from_slice(&g.open_w);
-        g.frac.copy_from_slice(&base.frac);
-        g.open_u.copy_from_slice(&base.open_u);
-        g.open_v.copy_from_slice(&base.open_v);
-        g.open_w.copy_from_slice(&base.open_w);
-        g.floor.copy_from_slice(&base.floor);
-        cut::add_solid(g, domain, solid).expect("vérifié");
+        {
+            let [i0, i1, j0, j1, k0, k1] = restauree;
+            for k in k0..k1 {
+                for j in j0..j1 {
+                    let c = (k * ny + j) * nx;
+                    g.frac[c + i0..c + i1].copy_from_slice(&base.frac[c + i0..c + i1]);
+                    let u = (k * ny + j) * (nx + 1);
+                    if i1 > i0 {
+                        g.open_u[u + i0..=u + i1].copy_from_slice(&base.open_u[u + i0..=u + i1]);
+                    }
+                }
+                for j in j0..(j1 + 1).min(ny + 1) {
+                    let v = (k * (ny + 1) + j) * nx;
+                    g.open_v[v + i0..v + i1].copy_from_slice(&base.open_v[v + i0..v + i1]);
+                }
+            }
+            for k in k0..(k1 + 1).min(nz + 1) {
+                for j in j0..j1 {
+                    let w = (k * ny + j) * nx;
+                    g.open_w[w + i0..w + i1].copy_from_slice(&base.open_w[w + i0..w + i1]);
+                }
+            }
+            for j in j0..j1 {
+                g.floor[j * nx + i0..j * nx + i1].copy_from_slice(&base.floor[j * nx + i0..j * nx + i1]);
+            }
+        }
+        cut::add_solid_in(g, domain, solid, boite, restauree, false).expect("vérifié");
+        g.solid_box = nouvelle;
         g.solid_velocity = velocity;
         g.solid_angular = angular;
         g.solid_center = center;
@@ -525,7 +566,8 @@ impl Volume3 {
             }
         }
         g.base = Some(base);
-        self.prec_cut();
+        let [i0, i1, j0, j1, k0, k1] = restauree;
+        self.prec_cut_in([i0.saturating_sub(1), (i1 + 1).min(nx), j0.saturating_sub(1), (j1 + 1).min(ny), k0.saturating_sub(1), (k1 + 1).min(nz)]);
         Ok(())
     }
 
@@ -554,6 +596,11 @@ impl Volume3 {
             return Err(Error::Shape);
         }
         Ok(cut::solid_wall_load(self.domain, solid, &|_, c| self.p[c] as f64, centre))
+    }
+
+    /// **S508 : le recoupage sur toute la grille** — pour les essais ; limité à la boîte du solide par défaut, aux mêmes tableaux.
+    pub fn set_full_recut(&mut self, on: bool) {
+        self.full_recut = on;
     }
 
     /// S326 : active ou coupe le Jacobi du chemin coupé — pour la mesure ; actif par défaut.
@@ -589,12 +636,19 @@ impl Volume3 {
     /// deux fois celle du couvercle, comme la ligne de `apply_cut` ; zéro sur une maille solide. La
     /// géométrie est fixe : calculée une fois, à la configuration.
     pub(super) fn prec_cut(&mut self) {
+        self.prec_cut_in(cut::full_box(self.domain));
+    }
+
+    /// S508 : la diagonale de Jacobi dans une boîte — celle que le recoupage a touchée, une maille de plus : la diagonale d'une maille ne
+    /// dépend que de ses faces et de ses voisines.
+    pub(super) fn prec_cut_in(&mut self, boite: cut::Boite) {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let inv = 1. / (dx * dx);
         let g = self.cut.as_ref().expect("fond coupé");
-        for k in 0..nz {
-            for j in 0..ny {
-                for i in 0..nx {
+        let [i0, i1, j0, j1, k0, k1] = boite;
+        for k in k0..k1 {
+            for j in j0..j1 {
+                for i in i0..i1 {
                     let c = self.c(i, j, k);
                     if g.frac[c] == 0. {
                         self.prec[c] = 0.;
@@ -947,9 +1001,12 @@ impl Volume3 {
         if out.len() != nx * ny * nz {
             return Err(Error::Shape);
         }
-        for k in 0..nz {
-            for j in 0..ny {
-                for i in 0..nx {
+        // S508 : hors de la boîte du solide, aucune face couverte — le terme est nul.
+        out.fill(0.);
+        let [i0, i1, j0, j1, k0, k1] = g.solid_box.unwrap_or([0; 6]);
+        for k in k0..k1 {
+            for j in j0..j1 {
+                for i in i0..i1 {
                     let c = self.c(i, j, k);
                     out[c] = if g.frac[c] == 0. { 0. } else { self.wall_term(g, i, j, k).unwrap_or(0.) };
                 }
