@@ -553,8 +553,10 @@ pas recopiée ici (L137).
   en dessous il coule ([preuve](validation/POCHE-AIR-S539.md)). Manquent la poche adiabatique, la poche qui s'échappe quand le corps
   bascule, la bulle libre (7.4), le vide et l'eau dans le vide.
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *partiel* depuis S574 : **la glace** — la croissance de Stefan, la portance de Gold (la table de SPEC-002
-  reproduite ligne à ligne), la flottaison, la formation en plaque ([preuve](validation/GLACE-S574.md)). Manquent la vapeur, la glace
-  dans les couches (un plan d'eau qui gèle, sa fonte), le gel borné aux plans d'eau gelables (ADR-027 §3), le rendu. Décidé : l'évaporation et le gel des contenants passent par V
+  reproduite ligne à ligne), la flottaison, la formation en plaque ([preuve](validation/GLACE-S574.md)) ; **S575 : C15 passe** — la
+  glace d'un lac comme couche de V, gelée par quanta exacts, la masse à l'entier sur un cycle gel/dégel ([preuve](validation/C15-GLACE-S575.md)).
+  Manquent la vapeur, un dégel physique (le bilan d'énergie), la glace dans B et δ, le gel borné aux plans d'eau gelables (ADR-027 §3),
+  le rendu. Décidé : l'évaporation et le gel des contenants passent par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *partiel* depuis S570 : **l'échantillon** (le produit
   de danger `HR = d·(v + 0,5)` et ses classes, la classe de profondeur d'un humanoïde) et **le prochain franchissement** d'une profondeur
@@ -789,7 +791,8 @@ pas recopiée ici (L137).
   ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). **C13 depuis S540** ([preuve](validation/C13-BULLES-S540.md)) ; **C16 depuis S542–S543** (l'inclinaison, la période, la rotation ;
   [preuve](validation/C16-ACCELERE-S542.md)) ; **C21 depuis S544–S545** (fixe et accéléré ;
   [preuve](validation/C21-MASSE-S544.md)) ; **C09 depuis S555–S557** (la masse ; l'énergie du schéma, conservée ;
-  [preuve](validation/ENERGIE-DISCRETE-S557.md)). Non exécutés : C05, C11, C14, C15. **C18 partiel**
+  [preuve](validation/ENERGIE-DISCRETE-S557.md)) ; **C15 depuis S575** (la glace d'un lac ; [preuve](validation/C15-GLACE-S575.md)).
+  Non exécutés : C05, C11, C14. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

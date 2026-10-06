@@ -762,6 +762,10 @@ conservée sur un cycle gel/dégel complet.
 Le dernier point est le plus important : un lac qui gèle puis dégèle ne doit ni gagner ni perdre
 d'eau. Le défaut n'apparaît qu'après des dizaines d'heures de jeu.
 
+> *Note du 2026-10-06, S575, sur C15* ([C15-GLACE-S575](C15-GLACE-S575.md)) : **exécuté, passé** sur V — 0,610210 m après 300 K·jour
+> (+0,66 % de `0,035·√FDD`), la masse exacte à chaque pas et l'eau rendue au millilitre après le dégel ; sous `Hs` = 0,2 m, aucune glace
+> — le mécanisme existe, l'assertion de la note S29 n'est plus vide.
+
 > **Note corrective S29 — « aucune plaque ne se forme tant que `Hs > 0,15 m` » passe avant que le
 > modèle de glace existe.** C'est la **vacuité** : l'assertion est satisfaite par l'absence du
 > mécanisme, et elle est verte depuis l'écriture du cas.

@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 23:51 +02:00
+JETON            : libre
+Battement        : 2026-10-06 23:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S575 — le lot ; C15, la glace d'un lac dans V ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S574 — la glace : croissance et portance ([journal](notes/JOURNAL.md)). Avant : S573 (l'invalidation et la praticabilité par agent)
-Session suivante : **S575 — le lot** (dû en S575) **et un point partiel** (par la feuille de route). Revue à S576. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 1 — S574 : 7.6 absent → partiel ; 7.7 avance
-Registres       : dernier lot S572 (ADR-213 D3) ; le prochain au plus tard en S575
+Session en cours : aucune
+Dernière session : S575 — le lot ; C15, la glace d'un lac dans V ([journal](notes/JOURNAL.md)). Avant : S574 (la glace : croissance et portance)
+Session suivante : **S576 — la dix-neuvième revue de méthode** (S571–S575 ; ADR-222 D4) : frictions — un état arrondi pris comme départ du pas suivant (S575 : 2,4 mm de troncature accumulée, critère manqué puis tenu) ; deux expressions f32 d'un même seuil (S573) ; des scripts encore écrits par heredoc (S566, S574) ; ce qui a tenu (la vérification de route passée par les notes, S574 ; le script du plan qui vérifie une table avant d'écrire, S574). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S575 : C15 exécuté (13.2), 7.6 avance
+Registres       : dernier lot S575 (ADR-213 D3) ; le prochain au plus tard en S578
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

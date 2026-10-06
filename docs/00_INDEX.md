@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [C15 : la glace d'un lac dans V — S575](validation/C15-GLACE-S575.md) : une couche de V gelée par quanta exacts ; la masse à l'entier sur un cycle gel/dégel.
 - [La glace : croissance et portance — S574](validation/GLACE-S574.md) : Stefan, Gold (la table de SPEC-002 reproduite), l'échéance d'une charge.
 - [L'invalidation et la praticabilité par agent — S573](validation/TRAVERSABILITE-AGENTS-S573.md) : `Immediat`/`Aucune` après une commande de V ; gué, tirant, leurs échéances.
 - [Les tuiles de traversabilité — S572](validation/TRAVERSABILITE-TUILES-S572.md) : séquence, Morton, prévision par cellule ; 80 franchissements sur une plage, exactement.

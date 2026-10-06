@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S575 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S572–S574 ; la ligne 7.6 de la liste reformulée), puis
+Session : S575 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S572–S574 ; la ligne 7.6 de la liste reformulée), puis
 **C15 — la croissance de la glace** (non exécuté ; listes 7.6, 13.2) : « lac abrité, `FDD` imposé, 30 jours ; épaisseur à ± 10 % de
 `0,035·√FDD` ; aucune plaque tant que `Hs > 0,15 m` ; masse conservée sur un cycle gel/dégel complet ». ADR-203 D6 : le gel des contenants
 passe par V.
@@ -85,7 +85,13 @@ pas (la place comprise : refus si la capacité manque).
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `geler`, `fondre` et C15 ; (1)–(4).
-- [ ] **P3** — preuve ; listes 7.6, 13.2 ; C15 ; rituel (`--lot`).
+- [x] **P2** — `geler`, `fondre` et C15 ; (1)–(4).
+- [x] **P3** — preuve ; listes 7.6, 13.2 ; C15 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — 61 021 quanta, 0,610210 m, la masse exacte, l'eau rendue, rien sous la houle. **La première mesure a manqué « à un quantum
+  de Stefan » de 2,4 mm** : le pilote repartait de l'épaisseur quantifiée (la troncature accumulée) ; l'état exact, le gel cumulé — critère
+  inchangé. Pour la revue de S576 : un état arrondi pris comme départ du pas suivant. Suite 750. (`geler`/`fondre` du plan : une seule
+  fonction, `ajuster_glace`.)
+- **P3** — preuve C15-GLACE-S575 ; listes 7.6, 13.2 ; C15 ; index ; journal ; le lot.
+

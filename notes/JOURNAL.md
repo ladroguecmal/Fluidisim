@@ -903,3 +903,11 @@ avec des masses de référence, reproduit la table de SPEC-002. **Fait** ([preuv
 Gold, flottaison, plaque) ; l'échantillon porte la glace et sa charge. **Mesuré** : chaque référence au 10⁻⁶ ; « une voiture passera dans
 2,647 jours de ce gel » à 0,1 s. Une vérification ajoutée en route est passée d'abord par les notes (ADR-244 D1). Maillons **1** (7.6 :
 absent → partiel). Suivant : **S575**, le lot (dû) et un point partiel ; revue à S576.
+
+## S575 — 2026-10-06 — le lot ; C15, la glace d'un lac dans V
+
+**Entrée.** En autonomie ; le lot (feuille de route S572–S574), puis C15. **Fait** ([preuve](../docs/validation/C15-GLACE-S575.md)) : la
+glace comme couche des liquides de V, gelée par quanta exacts (917 ml d'eau → 1 000 ml de glace). **Mesuré** : 0,610210 m après 300 K·jour,
+la masse à l'entier à chaque pas, l'eau rendue au millilitre, aucune plaque sous la houle — **C15 passe**. **En route** : la première mesure
+manquait un critère de 2,4 mm — un état arrondi pris comme départ du pas suivant ; l'état exact (le gel cumulé) le tient. Maillons **0**
+(7.6, 13.2 avancent). Suivant : **S576, la dix-neuvième revue de méthode**.
