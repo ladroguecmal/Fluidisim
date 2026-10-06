@@ -46,6 +46,10 @@ pub mod liquids;
 #[path = "hydro_seuil.rs"]
 pub mod seuil;
 
+/// S565 — le réseau fermé sous pression (liste 5.8).
+#[path = "hydro_charge.rs"]
+pub mod charge;
+
 #[path = "hydro_snapshot.rs"]
 pub mod snapshot;
 
@@ -797,6 +801,10 @@ mod tests_liquids;
 #[cfg(test)]
 #[path = "tests_seuil.rs"]
 mod tests_seuil;
+
+#[cfg(test)]
+#[path = "tests_charge.rs"]
+mod tests_charge;
 
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
