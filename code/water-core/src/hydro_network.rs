@@ -343,6 +343,72 @@ pub fn step_meteo(
     dt: SimTime,
     scratch: &mut [i64],
 ) -> Result<(), Error> {
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None)
+}
+
+/// **S538 — l'état de l'air d'un nœud** (ADR-015 T2) : ouvert (l'air à la pression atmosphérique, T0) ou **scellé** — une poche
+/// isotherme dont le produit `p·V_air` (Pa·ml) est constant ; sa pression `p·V/(capacité − volume)`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Air {
+    Open,
+    Sealed { pv_pa_ml: f64 },
+}
+
+/// S538 : la pression atmosphérique de référence, Pa.
+pub const P_ATM_PA: f64 = 101_325.0;
+
+/// **S538 — un pas de V avec l'air des compartiments** (liste 5.9, C17, ADR-015 T2) : `step_meteo`, la pression de jauge de chaque poche
+/// scellée ajoutée aux charges des arêtes, `(p − p_atm)/(ρ·g)` — l'eau qui entre comprime l'air, qui la retient. `air` : un état par
+/// nœud ; `heads_um` : un tampon de l'appelant, un par nœud (I-06). Tous ouverts : `step_meteo` au bit. Une poche dont l'air disparaîtrait
+/// (volume ≥ capacité) est refusée (`Domain`). Les pompes ne voient pas la pression des poches.
+#[allow(clippy::too_many_arguments)]
+pub fn step_air(
+    nodes: &mut [HydroNode],
+    edges: &mut [Opening],
+    shapes: &Shapes<'_>,
+    g_eff: [f32; 3],
+    meteo: Meteo,
+    dt: SimTime,
+    scratch: &mut [i64],
+    air: &[Air],
+    density: f64,
+    heads_um: &mut [f64],
+) -> Result<(), Error> {
+    if air.len() != nodes.len() || heads_um.len() != nodes.len() || !(density > 0.0) || !density.is_finite() {
+        return Err(Error::Capacity);
+    }
+    if air.iter().all(|a| *a == Air::Open) {
+        return step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, None);
+    }
+    let (_, g) = geometry::vertical(g_eff)?;
+    for ((n, a), h) in nodes.iter().zip(air).zip(heads_um.iter_mut()) {
+        *h = match *a {
+            Air::Open => 0.0,
+            Air::Sealed { pv_pa_ml } => {
+                let v_air = (n.capacity_ml - n.volume_ml) as f64;
+                if !(v_air > 0.0) || !(pv_pa_ml > 0.0) || !pv_pa_ml.is_finite() {
+                    return Err(Error::Domain);
+                }
+                (pv_pa_ml / v_air - P_ATM_PA) / (density * g) * 1e6
+            }
+        };
+    }
+    step_inner(nodes, edges, shapes, g_eff, meteo, dt, scratch, Some(heads_um))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn step_inner(
+    nodes: &mut [HydroNode],
+    edges: &mut [Opening],
+    shapes: &Shapes<'_>,
+    g_eff: [f32; 3],
+    meteo: Meteo,
+    dt: SimTime,
+    scratch: &mut [i64],
+    pression_um: Option<&[f64]>,
+) -> Result<(), Error> {
+    // S538 : la charge de pression d'une poche, en µm ; zéro sans air scellé (le pas d'avant au bit : `x + 0.0` est `x`).
+    let charge = |i: usize| pression_um.map_or(0.0, |p| p[i]);
     if !(meteo.pluie_mm_h >= 0.0) || !meteo.pluie_mm_h.is_finite() {
         return Err(Error::Domain);
     }
@@ -440,7 +506,7 @@ pub fn step_meteo(
             continue;
         }
         let src = nodes[e.from as usize];
-        let h_up = shapes.surface_up(&src, up)?.offset_um;
+        let h_up = shapes.surface_up(&src, up)?.offset_um + charge(e.from as usize);
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
         // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
         let sill = along(sub(e.position_um, src.origin_um), up);
@@ -498,7 +564,7 @@ pub fn step_meteo(
         let downstream = match e.to {
             Some(t) => {
                 let dn = nodes[t as usize];
-                let h_dn = shapes.surface_up(&dn, up)?.offset_um;
+                let h_dn = shapes.surface_up(&dn, up)?.offset_um + charge(t as usize);
                 let dn_surface = along(sub(dn.origin_um, src.origin_um), up) + h_dn;
                 dn_surface.max(sill)
             }
@@ -665,6 +731,10 @@ mod tests_controles;
 #[cfg(test)]
 #[path = "tests_infiltration.rs"]
 mod tests_infiltration;
+
+#[cfg(test)]
+#[path = "tests_air.rs"]
+mod tests_air;
 
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).

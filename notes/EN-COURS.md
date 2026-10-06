@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S538 — **en cours**. En autonomie, **5.9 — compartiments et inondation limitée par l'air** (C17, ADR-015 T2) : dans V, l'air
+Session : S538 — **terminée**. En autonomie, **5.9 — compartiments et inondation limitée par l'air** (C17, ADR-015 T2) : dans V, l'air
 est implicite (T0) ; un compartiment étanche se remplit comme s'il avait un évent — « tous les temps d'avarie du jeu sont trop courts ».
 
 **Ce que la session fait.** `hydro_network::step_air` : le pas de V avec, par nœud, un **état d'air** — ouvert (l'air à la pression
@@ -81,8 +81,12 @@ C17 : le rapport des temps de remplissage supérieur à 5 (sans évent, il ne se
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — `step_air`, les essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.9 ; C17 ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `step_air`, les essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.9 ; C17 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `step_air`, `Air`, `P_ATM_PA` ; essais `s538` : au bit tous ouverts ; avec évent 463,6 s (463,5) ; sans évent 0,2901 m
+  (Boyle 0,2901) ; jamais plein. Le plan disait 467 s (ajusté de tête : la loi donne 463,5). Suite 699.
+- **P3** — preuve C17-AIR-S538 ; liste 5.9 (partiel), 13.2 ; C17 ; dépendances ; index ; journal.
+

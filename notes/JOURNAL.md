@@ -622,3 +622,10 @@ plus bas de l'enveloppe convexe, l'orientation intégrée. **Mesuré** : une bo�
 bisection indépendante ; la sphère englobante la faisait toucher 38,8 ms trop tôt. Le quantum écrit à côté du seuil, au plan (ADR-236 D1).
 Maillons **0** (9.3 avance). Suivant : **S538**, un point partiel.
 
+## S538 — 2026-10-06 — C17 : l'inondation limitée par l'air
+
+**Entrée.** En autonomie ; 5.9 (absent) et C17. **Fait** ([preuve](../docs/validation/C17-AIR-S538.md)) : `step_air` — une poche isotherme
+scellée par nœud de V, sa pression de jauge dans les charges des arêtes ; tous ouverts, le pas d'avant au bit. **Mesuré** : sans évent, la
+brèche n'embarque que 0,2901 m sur 2 m (Boyle à 1,2·10⁻⁵), jamais plein ; avec évent, Torricelli à 2,9·10⁻⁴ — **C17 passe**. Une valeur du
+plan ajustée de tête (467 s pour 463,5 : ADR-232 D2 rappelée). Maillons **0** (5.9 devient partiel, 13.2 avance). Suivant : **S539**.
+

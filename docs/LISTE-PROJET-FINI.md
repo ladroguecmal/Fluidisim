@@ -411,7 +411,10 @@ pas recopiée ici (L137).
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
-- [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *absent*.
+- [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
+  d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle
+  (0,2901 m sur 2 m, à 1,2·10⁻⁵), avec évent Torricelli à 2,9·10⁻⁴ ([preuve](validation/C17-AIR-S538.md)). Manquent l'évent à débit
+  limité, la poche adiabatique, la flottabilité de la poche (6.6), les brèches en jeu, la compartimentation d'un navire.
 - [ ] **5.10 Articulation V↔δ** : V expose sa surface, déclenche δ, garde la masse (C21, ADR-025) —
   *partiel* depuis S375 : le bassin de la piscine est un domaine δ 3D dont **V garde la masse** — niveau de δ à 0,1 µm de
   celui de V sur 330 s, sources et puits aux arêtes de V (le jet, le seuil), repos qui suit V ; V jamais lu en retour
@@ -735,7 +738,7 @@ pas recopiée ici (L137).
   ([preuve](validation/CORPS-RIGIDE-S331.md)). Sur véhicules d'essai : C01, C03, C04, C06 (partiel),
   C08, C22, C23 ; **C07 en eau profonde depuis S519** (W, [preuve](validation/C07-PROFOND-S519.md)), **peu profond au-delà du critique
   aux deux vitesses depuis S523–S527** ([preuve](validation/C07-PLANCHER-S527.md)), **sa résonance depuis S525**
-  ([preuve](validation/C07-RESONANCE-S525.md)). Non exécutés : C05, C09, C11, C13 à C17, C20, C21. **C18 partiel**
+  ([preuve](validation/C07-RESONANCE-S525.md)) ; **C17 depuis S538** ([preuve](validation/C17-AIR-S538.md)). C20 depuis S512 ([preuve](validation/IMPACT-ENTREE-S512.md)). Non exécutés : C05, C09, C11, C13 à C16, C21. **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par

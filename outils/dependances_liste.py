@@ -81,7 +81,7 @@ D = {
  "5.6": ("H", "le seuil adaptatif", [], None),
  "5.7": ("H", "`liquid_id` (A17)", [], None),
  "5.8": ("H", "—", ["5.4"], None),
- "5.9": ("H", "—", ["5.2", "5.3", "7.5"], None),
+ "5.9": ("H", "C17 passé (S538) ; l'évent à débit limité, la flottabilité de la poche, les brèches en jeu", ["5.2", "5.3", "7.5"], None),
  "5.10": ("H", "une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ", ["6.5"], None),
  "5.11": ("H", "—", [], "hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui"),
  "5.12": ("H", "le stockage durable", ["10.1"], None),

@@ -799,6 +799,10 @@ variantes, avec et sans arête d'évent.
 Valide l'angle mort A29. Si les deux variantes donnent le même temps, l'air n'est pas modélisé et
 tous les temps d'avarie du jeu sont trop courts.
 
+> *Note du 2026-10-06, S538, sur C17* ([C17-AIR-S538](C17-AIR-S538.md)) : **exécuté et passé** dans V (`step_air`, une poche isotherme) :
+> sans évent, 0,2901 m d'eau sur 2 m — l'équilibre de Boyle à 1,2·10⁻⁵ — et jamais plein ; avec évent, Torricelli à 2,9·10⁻⁴. Le rapport
+> des temps est infini.
+
 ## C18 — Invariants du système
 
 Batterie binaire, mode `check`, sans GPU, à chaque commit :

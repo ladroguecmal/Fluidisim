@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 17:48 +02:00
+JETON            : libre
+Battement        : 2026-10-06 17:56 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S538 — 5.9 et C17, l'inondation limitée par l'air ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S537 — le contact d'un corps quelconque ([journal](notes/JOURNAL.md)). Avant : S536 (la onzième revue de méthode)
-Session suivante : **S538 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'entrée orientée consommée par δ (9.3 : le coin et l'orientation au contact, la région de δ alignée), l'évaporation du sol limitée par son humidité (5.5), A330 (Michell), 6.7 la poche d'air, la réfraction des vagues par un courant C1 ; le quantum écrit à côté de chaque seuil (ADR-236 D1), limites matérielles calculées (ADR-235 D1), ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S537 : le contact d'un corps quelconque (9.3)
+Session en cours : aucune
+Dernière session : S538 — C17 : l'inondation limitée par l'air ([journal](notes/JOURNAL.md)). Avant : S537 (le contact d'un corps quelconque)
+Session suivante : **S539 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — l'évent à débit limité (5.9 : l'air qui sort par une ouverture finie, Q_eau ≤ Q_air), la flottabilité d'une poche d'air (6.6, la coque retournée : la poche se comprime avec la profondeur, ADR-015 §3), C16 (le ballottement en repère accéléré) ou C13 (la remontée de bulle) parmi les cas canoniques non exécutés ; le quantum écrit à côté de chaque seuil (ADR-236 D1), ordres de grandeur calculés — vraiment (ADR-232 D2). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 0 — S538 : C17 passe, 5.9 partiel
 Registres       : dernier lot S536 (ADR-213 D3) ; le prochain au plus tard en S539
 ```
 
