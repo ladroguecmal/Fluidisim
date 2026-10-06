@@ -62,32 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S529 — **terminée**. En autonomie, **A330 localisée avant tout remède** (ADR-226 D1) : le sillage de la coque dans δ est 3,5 fois
-moins ample que la théorie d'une pression `ρ g d` sur son empreinte (S520). Deux causes possibles : δ sous-résolu près de la coque
-(A317 : ± 43–49 % à 25 cm) ou un modèle de référence inadapté (une pression n'est pas un corps qui perce la surface). Une convergence en
-maille les sépare.
+Session : S530 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S528–S529), puis **5.5 — l'absorption par le
+sol** : la pluie tombe dans V (S378), mais rien n'entre dans le sol.
 
-**Ce que la session fait.** Le banc du sillage (`--lineaire-sillage`) reçoit `SILLAGE_DX`, `SILLAGE_NZ`, `DT_US` ; trois mailles — 50, 25,
-12,5 cm — sur 56 × 40 × 3 m (53 760 / 430 080 / 3 440 640 mailles : sous la limite de 4,19 M des noyaux de mailles), 15 s à 3 m/s, le pas
-de temps proportionnel à la maille (20 / 10 / 5 ms). La surface exportée ; `reference_sillage.py convergence` : les écarts entre mailles
-sur un réseau commun (tous les 50 cm, de 4 à 22 m derrière la coque, `|y|` ≤ 12 m), et le profil des rayons de 10 à 20 m.
+**Ce que la session fait.** Une loi d'arête de V, `Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm }` : **Green–
+Ampt**, `f = K·(1 + (ψ + h₀)·Δθ/F)`, de la flaque (`from`, la surface du sol à la cote de l'arête ; `h₀` la lame au-dessus) vers le sol
+(`to`, un nœud dont le remplissage rapporté à l'aire est la lame infiltrée cumulée `F` — aucun état nouveau). Sur un pas, l'équation
+s'intègre **exactement** : `t(F) = (F − M ln(1 + F/M))/K`, `M = (ψ + h₀)Δθ`, inversée par bissection en f64 (déterministe). Le sol plein, le
+limiteur d'arrivée arrête l'infiltration ; la flaque à sec, rien ne passe. La validation, l'empreinte et l'instantané connaissent la loi.
 
-**Ordre de grandeur, calculé.** λ₀ = 5,76 m (11,5 / 23 / 46 mailles par longueur d'onde) ; `kh` = 3,3 par 3 m de fond (profond) ; la coque
-au bout de 15 s à 46,6 m, l'éponge à 53 m ; les rayons à 35° et 24 m passent à 13,8 m de l'axe (l'éponge à 17 m).
+**Ordre de grandeur, calculé.** Limon sableux : K = 1,09 cm/h, ψ = 11 cm, Δθ = 0,3, h₀ = 1 cm : `F` = **3,74 / 12,68 / 35,71 mm** à 60 s /
+10 min / 1 h. **Un Euler explicite** (`F` au début du pas, plancher 1 µm, pas de 0,1 s) donne +212 % / +37 % / +7,6 % — d'où l'intégration
+exacte. Le quantum de V (1 ml sur 1 m², 1 µm) : 3·10⁻⁵ de `F` à 1 h.
 
-**Critères, écrits avant.** (1) **La convergence** : `‖η₂₅ − η₁₂,₅‖ < ‖η₅₀ − η₂₅‖`, d'ordre observé `log₂` du rapport ≥ 0,5. (2) **L'attribution,
-règle déclarée avant** : si le maximum du profil des rayons à 12,5 cm dépasse celui à 25 cm de plus de 30 %, A330 revient à la résolution de
-δ (A317) ; à moins de 10 %, δ est convergé et l'écart à la théorie revient au modèle de référence ; entre les deux, non tranché.
+**Critères, écrits avant.** (1) Les lois d'avant au bit (suite). (2) Flaque à charge quasi constante (1 000 m², 1 cm), 1 m² de sol :
+`F(t)` à 10⁻³ de la solution implicite à 60 s, 10 min, 1 h ; la masse exacte. (3) Le sol plein arrête l'infiltration (au millilitre) ;
+une flaque à sec n'infiltre rien. (4) Une pluie de 5 mm/h sur 1 m² de sol de K = 10,9 mm/h pendant 1 h : tout entre (5 L au millilitre
+près), la flaque reste sous 2 ml.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — les paramètres du banc, trois calculs ; (1), (2).
-- [x] **P3** — preuve ; A330 ; rituel.
+- [x] **P1** — jeton ; le lot (feuille de route S528–S529) ; plan.
+- [ ] **P2** — la loi, les essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.5 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — 12,5 cm d'abord refusé (une liaison de 230 Mo > 128 Mo) → la carte demande les limites de l'adaptateur ; S518 au bit.
-  rms 0,0504 / 0,0617 / 0,0612 m ; maximum du profil 0,091 / 0,102 / 0,093 ; écarts 0,064 puis 0,073 (ordre −0,18) → **(1) manqué**,
-  **(2) : le modèle**. Pic d'étrave 0,30 / 0,72 / 1,47 m : divergent.
-- **P3** — preuve A330-CONVERGENCE-S529 ; notes A330, A317 ; liste 4.13 ; index ; journal.
-

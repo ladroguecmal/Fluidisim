@@ -383,6 +383,8 @@ référence éprouvée (A330 ; la carte au-delà de 65 535 groupes) ; la huitiè
 (44,00° pour 44,46°) ; A331 (le domaine honnête de W non vérifié).
 **S524–S527** : A331 levée (le domaine honnête de W lu sur la distance du chemin aux points, la garde de l'hôte) ; la résonance de C07 (W à
 0,03 % de la théorie, l'assertion corrigée) ; l'angle à `Fr_h` = 2,14 — **C07 passe entier** ; la neuvième revue (ADR-234).
+**S528–S529** : les anneaux d'impact de W en eau peu profonde (3.1 ; 0,44 % d'une propagation FFT exacte) ; A330 localisée (l'amplitude du
+sillage de δ stable en maille, l'écart revient au modèle de référence ; le pic d'étrave divergent au coin vif).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
