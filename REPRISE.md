@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 18:51 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 18:54 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S546 — la treizième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S545 — C21 en référentiel accéléré ; une raison fausse corrigée ([journal](notes/JOURNAL.md)). Avant : S544 (C21 en référentiel fixe)
 Session suivante : **S546 — la treizième revue de méthode** (S541–S545 ; ADR-222 D4) : frictions — un plan non committé avant le travail (S544), une affirmation de limite écrite sans calcul et fausse (S544 : le débordement des entiers des formes de V), deux usages de δ refusés en route que S375 avait décrits (S544), une limite de V découverte en route (les tables +Z sous g_eff incliné) ; ce qui a tenu (C16 et sa formule recalculée, S542–S543 ; C21 corrigé le lendemain). Puis le lot (dû à S545… voir RAPPEL) et un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S545 : C21 passe (fixe et accéléré)

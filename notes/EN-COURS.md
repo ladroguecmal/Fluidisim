@@ -62,28 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S545 — **terminée**. En autonomie, **C21 en référentiel accéléré**. S544 a écrit que les formes volumiques de V « frôlent le
-débordement des entiers en µm³ » à l'échelle d'une mer : **faux, et écrit sans calcul** — `Tetrahedron` borne ses coordonnées à ± 4 096 m
-(I-08) et calcule le déterminant en i128 ; le seul obstacle était que les formes n'étaient pas construites. À corriger d'abord.
+Session : S546 — **terminée**. En autonomie, **la treizième revue de méthode** (ADR-222 D4 ; S541–S545).
 
-**Ce que la session fait.** (a) La correction de S544 (sa preuve, son essai, la note de C21). (b) Le scénario de C21 avec des formes
-volumiques (tétraèdres) : la mer, une boîte de 100 × 100 × 20 m ; le compartiment, 2,5 × 2 × 2 m (5 m²) ; la brèche d'1 dm² à son fond ;
-sous `g_eff` = (1, 0, −9,759) m/s² (incliné de 5,85°) puis vertical ; sans puis avec le domaine δ de S544.
-
-**Ordre de grandeur, calculé.** Capacité de la mer : 2·10⁵ m³ = 2·10¹¹ ml (volume·6 en µm³ : 1,2·10²⁴, dans i128) ; le compartiment en
-reçoit ≈ 0,76 m³ en 20 s (S544) — la mer baisse de 0,04 mm. L'angle de `g_eff` : atan(1/9,759) = 5,85°.
-
-**Critères, écrits avant.** (1) Sous `g_eff` incliné, `volume_ml` du compartiment identique à l'entier, sans puis avec δ, aux 200 pas ; le
-compartiment reçoit plus de 100 L. (2) Vertical, avec les formes volumiques : de même. (3) La suite au bit.
+**Ce que la session fait.** Relu : S541 (la revue), S542–S543 (C16, la formule recalculée), S544 (le plan sauté ; une limite supposée et
+fausse ; deux usages de δ décrits par S375), S545 (C21 corrigé). **ADR-238** : D1, le rituel refuse une session sans commit « Snnn P1 »
+(`outils/rituel.py`, `--sans-plan`) ; D2, un blocage supposé se vérifie avant d'être écrit ; L395, L396 ; METHODE ; BOUSSOLE.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la correction de S544 ; l'essai ; (1)–(3).
-- [x] **P3** — preuve (C21-MASSE-S544 §5) ; C21 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-238, rituel, METHODE, L395–L396, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — l'essai de S544 étendu (tables fixe ; volumiques fixe et accéléré) : identiques à l'entier, 761 747 / 761 741 / 761 481 ml.
-  La raison fausse de S544 corrigée dans la preuve, l'essai et la note de C21. Suite verte.
-- **P3** — C21-MASSE-S544 §5 ; C21 ; liste 13.2 ; journal.
-

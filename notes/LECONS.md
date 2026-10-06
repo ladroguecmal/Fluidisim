@@ -6599,3 +6599,15 @@ submersion lue à 29 min pour 38. Une protection qui ne s'écrit pas dans le pla
 
 **S538 — le nombre ajusté à vue.** Le temps de remplissage de Torricelli calculé avec `C_d` = 0,61, puis « corrigé » de tête pour 0,62 :
 467 s au plan, 463,5 s par la loi. Un nombre calculé ne se retouche pas quand un paramètre change : il se recalcule (ADR-237 D1).
+
+## L395
+
+**S544 — le plan sauté.** Dans une suite de sessions courtes, une session a commencé par le code : pas de commit « S544 P1 », un critère
+non redéclaré (celui de l'énoncé de C21 tenait lieu). La règle la plus ancienne ne tenait qu'à la mémoire ; le rituel la vérifie
+désormais (ADR-238 D1).
+
+## L396
+
+**S544 — la limite supposée.** « Les formes volumiques de V frôlent le débordement des entiers » : écrit sans ouvrir `hydro_geometry.rs`, où
+le déterminant est en i128 sur ± 4 096 m. Une variante de C21 remise d'une session pour rien. Un blocage supposé se vérifie avant d'être
+écrit, comme un blocage hérité (ADR-238 D2).

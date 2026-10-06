@@ -679,3 +679,10 @@ l'échelle d'une mer — **faux** (± 4 096 m, i128) ; corrigé. **Fait** ([preu
 avec des formes volumiques, `g_eff` incliné de 5,85° — **identique à l'entier sur 200 pas, sans puis avec δ**. **C21 passe dans ses deux
 référentiels.** Maillons **0** (13.2). Friction pour S546 : *une affirmation de limite écrite sans calcul* (S544). Le lot des registres,
 dû en S545, fait dans la foulée (feuille de route S542–S545). Suivant : **S546, la treizième revue de méthode**.
+
+## S546 — 2026-10-06 — la treizième revue de méthode (ADR-238)
+
+**Entrée.** En autonomie ; revue due (S541–S545). **Frictions** : le plan sauté (S544) — **un outil** : le rituel refuse sans commit « Snnn
+P1 » (ADR-238 D1, L395) ; une limite supposée et fausse (S544 : le débordement des entiers des formes de V) — **protection élargie** : un
+blocage supposé se vérifie avant d'être écrit (D2, L396). C16 et C21 ont tenu, corrigés quand il le fallait. Maillons **1**. Suivant :
+**S547**, un point partiel.

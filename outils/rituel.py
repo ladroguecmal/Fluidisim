@@ -14,6 +14,8 @@ de la liste) reste écrit par la session, et l'outil vérifie qu'il l'a été. I
         Registres) ; coche le rituel ; lance `etat_projet.py --check`. Échoue, sans rien écrire, si une vérification manque.
         **S483 (ADR-222 D3)** : lance d'abord le banc de non-régression (`outils/non_regression.py`, ≈ 2 min) ; un échec arrête le
         rituel. `--sans-banc "<raison>"` le saute — la raison est imprimée, et va au journal.
+        **S546 (ADR-238 D1)** : refuse si aucun commit « Snnn P1 » n'est dans l'historique — le plan se committe avant le travail ;
+        `--sans-plan "<raison>"` le dit (la raison va au journal).
 """
 import re
 import subprocess
@@ -112,6 +114,15 @@ def fin(argv) -> int:
         ouvertes = [p for c, p in plan[:-1] if c != "x"]
         if ouvertes:
             manques.append(f"EN-COURS : étapes non cochées avant le rituel : {', '.join(ouvertes)}")
+    # S546 (ADR-238 D1) : le plan committé avant le travail — un commit « Snnn P1 » dans l'historique récent.
+    historique = subprocess.run(["git", "log", "--format=%s", "-300"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
+                                errors="replace").stdout
+    if not any(l.startswith(f"{session} P1") for l in historique.splitlines()):
+        if "--sans-plan" in argv:
+            print(f"PLAN non committé : {option('--sans-plan')} (à dire au journal)")
+        else:
+            manques.append(f"git : aucun commit « {session} P1 » — le plan se committe avant le travail (ADR-238 D1) ; "
+                           "--sans-plan \"<raison>\" le dit")
     journal = lire(JOURNAL)
     entree = re.search(rf"^## {session} — [^\n]*\n(.*?)(?=^## S\d+|\Z)", journal, flags=re.M | re.S)
     if not entree:
