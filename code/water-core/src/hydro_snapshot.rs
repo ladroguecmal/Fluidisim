@@ -53,6 +53,7 @@ fn valid_edge(e: &Opening, nodes: usize) -> bool {
         Flow::Pump { max_flow_mlps, shutoff_head_um, .. } => if shutoff_head_um <= 0 { -1 } else { max_flow_mlps },
         Flow::Rain { catchment_mm2 } => if e.to != Some(e.from) { -1 } else { catchment_mm2 },
         Flow::Spill => if e.to.is_none() { 0 } else { -1 },
+        Flow::Valve { .. } | Flow::PumpLine { .. } => super::law_size(&e.flow),
     };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
@@ -113,6 +114,20 @@ impl<'a> Baseline<'a> {
                 }
                 Flow::Rain { catchment_mm2 } => { h.write_u8(3); h.write_u64(catchment_mm2 as u64); }
                 Flow::Spill => h.write_u8(4),
+                // S515 : la vanne et sa courbe ; la pompe sur sa conduite.
+                Flow::Valve { area_mm2, curve_pm } => {
+                    h.write_u8(5);
+                    h.write_u64(area_mm2 as u64);
+                    for c in curve_pm { h.write_u32(c as u32); }
+                }
+                Flow::PumpLine { max_flow_mlps, shutoff_head_um, outlet_um, loss_um_per_l2s2, efficiency_pm } => {
+                    h.write_u8(6);
+                    h.write_u64(max_flow_mlps as u64);
+                    h.write_u64(shutoff_head_um as u64);
+                    for x in outlet_um { h.write_u64(x as u64); }
+                    h.write_u64(loss_um_per_l2s2 as u64);
+                    h.write_u64(efficiency_pm as u64);
+                }
             }
             for x in e.position_um { h.write_u64(x as u64); }
             h.write_u32(e.discharge.to_bits());

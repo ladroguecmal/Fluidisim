@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S515 — **en cours**. En autonomie, **5.4, la vanne selon son ouverture, les pertes et l'énergie de la pompe** : ADR-199 laissait
+Session : S515 — **terminée**. En autonomie, **5.4, la vanne selon son ouverture, les pertes et l'énergie de la pompe** : ADR-199 laissait
 « le `C_d` selon l'ouverture, à calibrer sur la courbe du constructeur », « ni puissance ni énergie consommée, ni pertes de charge » ; son
 §3 dit la voie : une courbe tabulée à la place de la section, une seconde loi plutôt qu'une modification.
 
@@ -85,7 +85,12 @@ partielle par 5.8 (le réseau fermé, v2 d'ADR-010).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `Valve`, `PumpLine`, `pump_operating_point` ; essais (1)–(4).
-- [ ] **P3** — preuve ; note datée à ADR-199 ; liste 5.4 ; rituel.
+- [x] **P2** — `Valve`, `PumpLine`, `pump_operating_point` ; essais (1)–(4).
+- [x] **P3** — preuve ; note datée à ADR-199 ; liste 5.4 ; rituel.
 
 ### Notes de reprise
+- **P2** — `Flow::Valve`, `Flow::PumpLine`, `law_size` (partagée pas/instantané), `valve_fraction`, `pump_delivery` (partagée), `pump_line_point`,
+  `pump_operating_point`. (1) au quantum ; borne 0,0157/0,0163 ; (2) au nanolitre, 7,3030 l/s exacte ; (3) 0,002 % et −0,005 %. Ordres de
+  grandeur du plan légèrement faux (1,6 % et 6,83 l/s), l'essai les calcule. 681 essais ; l'afficheur construit.
+- **P3** — preuve VANNE-POMPE-S515 ; note datée ADR-199 ; liste 5.4 ; index ; journal.
+

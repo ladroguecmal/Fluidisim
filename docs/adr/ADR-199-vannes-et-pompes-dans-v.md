@@ -54,3 +54,12 @@ rien.
 Un réseau de canalisations fermées dans un niveau (D4) ; une vanne dont la loi n'est pas proportionnelle à l'ouverture
 (courbe à pourcentage égal : remplacer la section par une table) ; une pompe volumétrique (débit indépendant de la
 hauteur : une seconde loi, pas une modification de celle-ci).
+
+## Note datée S515 — 2026-10-06 : la courbe de la vanne, les pertes et l'énergie de la pompe
+
+Le §3 appliqué, sans rien changer des lois de D2 et D3 : deux lois nouvelles, `Flow::Valve` (la section multipliée par la courbe
+d'ouverture du constructeur, onze points interpolés) et `Flow::PumpLine` (la perte de charge `K·Q²` de la conduite et le rendement) ;
+`pump_operating_point` donne la puissance hydraulique et à l'arbre, que l'hôte cumule en énergie. De D4 ne restent que le réseau fermé
+sous pression, le temps de manœuvre (l'hôte), la cavitation et le matériau poreux. La preuve :
+[VANNE-POMPE-S515](../validation/VANNE-POMPE-S515.md).
+

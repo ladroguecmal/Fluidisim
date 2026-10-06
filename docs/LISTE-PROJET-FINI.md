@@ -377,8 +377,9 @@ pas recopiée ici (L137).
   (WVST v2) ; la vanne, section ou largeur commandée — C12 à demi-ouverture à −0,10 % de l'analytique ; la **pompe** en
   réseau ouvert, courbe parabolique, clapet, à sec, similitude — à 0,025 % de l'intégrale analytique, barrage au
   millilitre ; masse exacte, au bit à commande pleine ([preuve](validation/VANNES-POMPES-S372.md),
-  [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md)). Manquent le `C_d` selon l'ouverture, pertes et énergie de la
-  pompe, le réseau fermé (5.8). **S374** : un premier consommateur, la piscine rejouée dans Godot
+  [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md)). **S515** : la vanne et sa courbe d'ouverture (`Flow::Valve`, la courbe du
+  constructeur), la pompe sur sa conduite (`Flow::PumpLine`, pertes `K·Q²`, rendement) et son énergie — à 0,005 % du gain d'énergie
+  potentielle ([preuve](validation/VANNE-POMPE-S515.md)). Manque le réseau fermé (5.8). **S374** : un premier consommateur, la piscine rejouée dans Godot
   ([preuve](validation/PISCINE-V-S374.md)).
 - [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *partiel* depuis S378 : la **pluie**, arête de V
   du ciel vers un contenant — surface d'ouverture × exposition × intensité (ADR-204) ; l'exposition **dynamique et

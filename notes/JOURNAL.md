@@ -423,3 +423,12 @@ Maillons **0**. Suivant : un point partiel proche de son périmètre.
 contraint, sa commande ajoutée à la vitesse de l'eau. **Mesuré** : les règles de part et d'autre de chaque seuil ; le nageur cesse de faire
 route au seuil dérivé (`H*` = 1,140 m pour une houle de 5 s, la relaxation comprise) : +0,014 m/s à 0,98 `H*`, −0,014 à 1,02. **6.7
 partielle.** Maillons **0**. Suivant : un point partiel proche de son périmètre.
+
+## S515 — 2026-10-06 — la vanne selon son ouverture, les pertes et l'énergie de la pompe
+
+**Entrée.** En autonomie ; 5.4 (« Manquent le `C_d` selon l'ouverture, pertes et énergie de la pompe »). **Fait**
+([preuve](../docs/validation/VANNE-POMPE-S515.md)) : deux lois nouvelles de V, les anciennes intactes — `Valve` (la courbe d'ouverture du
+constructeur, onze points) et `PumpLine` (pertes `K·Q²`, rendement) — et `pump_operating_point` (puissance hydraulique et à l'arbre).
+**Mesuré** : la courbe linéaire au quantum de l'orifice commandé ; le point de fonctionnement exact ; l'énergie dépensée égale au gain
+d'énergie potentielle (plus les pertes) à 0,005 %. 5.4 ne manque plus que du réseau fermé (5.8, v2). Maillons **0**. Suivant : **S516, la
+revue de méthode**.

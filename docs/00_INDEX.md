@@ -159,6 +159,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [L'impulsion d'entrée dans l'eau — S512](validation/IMPACT-ENTREE-S512.md) : C20, l'impulsion de masse ajoutée à l'instant exact du passage, indépendante de la phase du tick ; **liste 6.8 validée**.
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
+- [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [A327 réattribuée et levée — S492](validation/A327-S492.md) : la projection refusée au point mort d'une seiche (la divergence relative à une vitesse quasi nulle) ; [ADR-225](adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md).
 - [Un décor fixe qui perce la surface — S490](validation/DECOR-S490.md) : 6.5 — la cloison tient en milieu de maille ; alignée sur la grille, la projection échoue (A327).
 - [Le débordement vers l'extérieur — S489](validation/DEBORDEMENT-S489.md) : V, `Flow::Spill` — un contenant plein déverse exactement ce qu'il reçoit ; **liste 5.3 validée**.

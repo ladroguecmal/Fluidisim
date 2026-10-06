@@ -110,6 +110,16 @@ pub enum Flow {
     /// est sous la prise (à sec). Vitesse `n = commande/1 000`, lois de similitude. Débit maximal en millilitres par
     /// seconde, hauteur de barrage `H0` en micromètres ; données de l'auteur de l'arête.
     Pump { max_flow_mlps: i64, shutoff_head_um: i64, outlet_um: [i64; 3] },
+    /// **S515 — une vanne et sa courbe** (ADR-199 §3 : « remplacer la section par une table ») : Torricelli, la section multipliée par
+    /// la courbe d'ouverture du constructeur — la fraction de débit, en pour mille, aux ouvertures 0, 100, …, 1 000 ‰ de la commande,
+    /// interpolée linéairement (linéaire, à pourcentage égal, à ouverture rapide…). La courbe ne décroît pas et reste sous 1 000.
+    Valve { area_mm2: i64, curve_pm: [u16; 11] },
+    /// **S515 — une pompe sur sa conduite** : la loi de `Pump`, plus la perte de charge de la conduite `K·Q²` (`loss_um_per_l2s2`, en
+    /// micromètres par (litre/seconde)²) et le rendement (`efficiency_pm`, pour mille, 1 à 1 000). Point de fonctionnement
+    /// `H₀·n² − H₀·(Q/Qmax)² = Δh + K·Q²`, soit `Q = √((n²·H₀ − Δh)/(H₀/Qmax² + K))` ; zéro si le radical ne l'est pas, à sec, ou à
+    /// commande nulle. La puissance (`pump_operating_point`) : hydraulique `ρ·g·Q·(Δh + K·Q²)`, à l'arbre celle-ci divisée par le
+    /// rendement.
+    PumpLine { max_flow_mlps: i64, shutoff_head_um: i64, outlet_um: [i64; 3], loss_um_per_l2s2: i64, efficiency_pm: i64 },
     /// **Pluie** (ADR-204) : du ciel vers le nœud que `from` et `to` désignent tous deux. Débit `intensité × surface
     /// d'ouverture × exposition` — l'intensité vient du pas (`Meteo`), la surface d'ouverture est une donnée d'auteur (mm²,
     /// horizontale : la pluie qui tombe dans l'ouverture d'un contenant finit dans son eau), l'exposition est la commande
@@ -337,6 +347,7 @@ pub fn step_meteo(
             Flow::Pump { max_flow_mlps, shutoff_head_um, .. } => {
                 if shutoff_head_um <= 0 { -1 } else { max_flow_mlps }
             }
+            Flow::Valve { .. } | Flow::PumpLine { .. } => law_size(&e.flow),
             // La pluie tombe sur le nœud que `from` et `to` désignent tous deux.
             Flow::Rain { catchment_mm2 } => {
                 if e.to != Some(e.from) { -1 } else { catchment_mm2 }
@@ -388,20 +399,24 @@ pub fn step_meteo(
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
         // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
         let sill = along(sub(e.position_um, src.origin_um), up);
+        if let Flow::PumpLine { .. } = e.flow {
+            // S515 : la pompe sur sa conduite — le point de fonctionnement, partagé avec `pump_operating_point`.
+            let Some(point) = pump_line_point(nodes, e, shapes, up, 1000.)? else {
+                continue;
+            };
+            let nl = point.flow_m3s * dt_s * 1e12;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
         if let Flow::Pump { max_flow_mlps, shutoff_head_um, outlet_um } = e.flow {
             // ADR-199 D3. À sec si la surface amont n'atteint pas la prise ; arrêtée à commande nulle.
             if h_up <= sill || e.control_pm == 0 {
                 continue;
             }
-            let outlet = along(sub(outlet_um, src.origin_um), up);
-            let delivery = match e.to {
-                Some(t) => {
-                    let dn = nodes[t as usize];
-                    let h_dn = shapes.surface_up(&dn, up)?.offset_um;
-                    (along(sub(dn.origin_um, src.origin_um), up) + h_dn).max(outlet)
-                }
-                None => outlet,
-            };
+            let delivery = pump_delivery(nodes, e, shapes, up, outlet_um)?;
             let n = e.control_pm as f64 / CONTROL_FULL as f64;
             let radical = n * n - (delivery - h_up) / shutoff_head_um as f64;
             if !(radical > 0.0) {
@@ -448,8 +463,12 @@ pub fn step_meteo(
                     * head_m.powf(1.5)
                     * ouverture
             }
-            Flow::Pump { .. } | Flow::Rain { .. } | Flow::Spill => {
-                unreachable!("pompe, pluie et débordement ont leur propre calcul")
+            // S515 : la vanne et sa courbe — la section multipliée par la fraction de débit tabulée à cette ouverture.
+            Flow::Valve { area_mm2, curve_pm } => {
+                e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt() * valve_fraction(&curve_pm, e.control_pm)
+            }
+            Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill => {
+                unreachable!("pompes, pluie et débordement ont leur propre calcul")
             }
         };
         if !q_m3s.is_finite() {
@@ -579,3 +598,83 @@ mod tests;
 #[cfg(test)]
 #[path = "tests_hydro_controles.rs"]
 mod tests_controles;
+
+
+/// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
+pub(crate) fn law_size(flow: &Flow) -> i64 {
+    match *flow {
+        Flow::Valve { area_mm2, curve_pm } => {
+            if curve_pm.iter().all(|c| *c <= 1000) && curve_pm.windows(2).all(|w| w[0] <= w[1]) { area_mm2 } else { -1 }
+        }
+        Flow::PumpLine { max_flow_mlps, shutoff_head_um, loss_um_per_l2s2, efficiency_pm, .. } => {
+            if shutoff_head_um <= 0 || loss_um_per_l2s2 < 0 || !(1..=1000).contains(&efficiency_pm) { -1 } else { max_flow_mlps }
+        }
+        _ => 0,
+    }
+}
+
+/// S515 : la fraction de débit d'une vanne à la commande `c` (‰), interpolée linéairement sur sa courbe de onze points.
+fn valve_fraction(curve: &[u16; 11], c: i64) -> f64 {
+    let x = c as f64 / 100.;
+    let i = (x.floor() as usize).min(9);
+    let f = x - i as f64;
+    (curve[i] as f64 + (curve[i + 1] as f64 - curve[i] as f64) * f) / 1000.
+}
+
+/// La cote de refoulement d'une pompe au-dessus du point de référence amont (µm) : la sortie, ou la surface du receveur si elle la
+/// noie (ADR-199 D3) — partagée par `Pump` et `PumpLine`.
+fn pump_delivery(nodes: &[HydroNode], e: &Opening, shapes: &Shapes<'_>, up: [f64; 3], outlet_um: [i64; 3]) -> Result<f64, Error> {
+    let src = nodes[e.from as usize];
+    let outlet = along(sub(outlet_um, src.origin_um), up);
+    Ok(match e.to {
+        Some(t) => {
+            let dn = nodes[t as usize];
+            let h_dn = shapes.surface_up(&dn, up)?.offset_um;
+            (along(sub(dn.origin_um, src.origin_um), up) + h_dn).max(outlet)
+        }
+        None => outlet,
+    })
+}
+
+/// **S515 — le point de fonctionnement d'une pompe sur sa conduite** : débit (m³/s), hauteur de la pompe (m : la hauteur statique plus
+/// la perte de charge), puissance hydraulique et à l'arbre (W) pour un liquide de masse volumique `rho`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PumpPoint {
+    pub flow_m3s: f64,
+    pub head_m: f64,
+    pub hydraulic_w: f64,
+    pub shaft_w: f64,
+}
+
+fn pump_line_point(nodes: &[HydroNode], e: &Opening, shapes: &Shapes<'_>, up: [f64; 3], rho: f64) -> Result<Option<PumpPoint>, Error> {
+    let Flow::PumpLine { max_flow_mlps, shutoff_head_um, outlet_um, loss_um_per_l2s2, efficiency_pm } = e.flow else {
+        return Ok(None);
+    };
+    let src = nodes[e.from as usize];
+    let h_up = shapes.surface_up(&src, up)?.offset_um;
+    let sill = along(sub(e.position_um, src.origin_um), up);
+    if h_up <= sill || e.control_pm == 0 {
+        return Ok(None);
+    }
+    let dh_m = (pump_delivery(nodes, e, shapes, up, outlet_um)? - h_up) * 1e-6;
+    let n = e.control_pm as f64 / CONTROL_FULL as f64;
+    let (h0_m, qmax_lps, k) = (shutoff_head_um as f64 * 1e-6, max_flow_mlps as f64 * 1e-3, loss_um_per_l2s2 as f64 * 1e-6);
+    let numerateur = n * n * h0_m - dh_m;
+    if !(numerateur > 0.0) || !(qmax_lps > 0.0) {
+        return Ok(None);
+    }
+    let q_lps = (numerateur / (h0_m / (qmax_lps * qmax_lps) + k)).sqrt();
+    let head_m = dh_m + k * q_lps * q_lps;
+    let flow_m3s = q_lps * 1e-3;
+    let hydraulic_w = rho * crate::body::G * flow_m3s * head_m;
+    Ok(Some(PumpPoint { flow_m3s, head_m, hydraulic_w, shaft_w: hydraulic_w / (efficiency_pm as f64 / 1000.) }))
+}
+
+/// **S515 — le point de fonctionnement de l'arête `index`** si c'est une pompe sur sa conduite qui débite dans l'état présent du réseau ;
+/// l'hôte cumule l'énergie (`shaft_w · dt`). Même calcul que le pas.
+pub fn pump_operating_point(nodes: &[HydroNode], edges: &[Opening], shapes: &Shapes<'_>, g_eff: [f32; 3], index: usize, rho: f64)
+    -> Result<Option<PumpPoint>, Error> {
+    let (up, _) = geometry::vertical(g_eff)?;
+    let e = edges.get(index).ok_or(Error::Capacity)?;
+    pump_line_point(nodes, e, shapes, up, rho)
+}

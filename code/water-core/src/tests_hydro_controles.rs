@@ -673,3 +673,137 @@ fn the_snapshot_fingerprints_the_spill_s489() {
     vers_noeud[0].to = Some(0);
     assert!(Baseline::new(7, 1, &nodes, &vers_noeud, &shapes).is_err());
 }
+
+// ══ S515 — la vanne et sa courbe ; la pompe sur sa conduite, son énergie ═════════════════════════════════════════════════
+
+fn vanne(from: u16, to: Option<u16>, area_mm2: i64, curve_pm: [u16; 11], position_um: [i64; 3]) -> Opening {
+    Opening {
+        from, to, flow: Flow::Valve { area_mm2, curve_pm }, position_um,
+        discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, ..Default::default()
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn pompe_conduite(from: u16, to: Option<u16>, max_flow_mlps: i64, shutoff_head_um: i64, intake_um: [i64; 3], outlet_um: [i64; 3],
+    loss_um_per_l2s2: i64, efficiency_pm: i64) -> Opening {
+    Opening {
+        from, to, flow: Flow::PumpLine { max_flow_mlps, shutoff_head_um, outlet_um, loss_um_per_l2s2, efficiency_pm },
+        position_um: intake_um, discharge: 0.0, residue_nl: 0, ..Default::default()
+    }
+}
+
+const LINEAIRE: [u16; 11] = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+
+/// **S515, critère 1 — la vanne et sa courbe.** La courbe linéaire rend la fraction `c/1 000` à 10⁻¹², et les débits de l'orifice commandé
+/// au nanolitre (le quantum de V) près, sur 200 pas à cinq commandes. Une courbe à pourcentage égal de rapport 50 (`f = 50^(x−1)`,
+/// tabulée tous les 10 %) : exacte aux points de la table, et dans la borne d'interpolation entre eux (calculée ici, plus l'arrondi de la
+/// table au pour mille).
+#[test]
+fn a_valve_follows_its_opening_curve_s515() {
+    for c in [0i64, 137, 500, 862, 1000] {
+        assert!((valve_fraction(&LINEAIRE, c) - c as f64 / 1000.).abs() <= 1e-12, "fraction linéaire à {c}");
+    }
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    for c in [137i64, 500, 862] {
+        let (mut na, mut nb) = ([node(1_000_000, 1_000_000, 0)], [node(1_000_000, 1_000_000, 0)]);
+        let mut ea = [Opening { control_pm: c, ..orifice(0, None, 1_000, [0, 0, 0]) }];
+        let mut eb = [Opening { control_pm: c, ..vanne(0, None, 1_000, LINEAIRE, [0, 0, 0]) }];
+        let (mut sa, mut sb) = ([0i64; 1], [0i64; 1]);
+        for k in 0..200 {
+            step(&mut na, &mut ea, &shapes, DOWN, SimTime(STEP_US), &mut sa).unwrap();
+            step(&mut nb, &mut eb, &shapes, DOWN, SimTime(STEP_US), &mut sb).unwrap();
+            assert!((sa[0] - sb[0]).abs() <= 1, "commande {c}, pas {k} : {} contre {}", sa[0], sb[0]);
+        }
+        assert!((na[0].volume_ml - nb[0].volume_ml).abs() <= 1, "commande {c} : volumes");
+    }
+    let f = |x: f64| 50f64.powf(x - 1.);
+    let courbe: [u16; 11] = core::array::from_fn(|i| (1000. * f(i as f64 / 10.)).round() as u16);
+    let mut borne = 0f64;
+    for i in 0..10 {
+        for k in 0..=100 {
+            let x = i as f64 / 10. + k as f64 / 1000.;
+            let lin = f(i as f64 / 10.) + (f((i + 1) as f64 / 10.) - f(i as f64 / 10.)) * (k as f64 / 100.);
+            borne = borne.max((lin - f(x)).abs());
+        }
+    }
+    let borne = borne + 0.0005;
+    let mut pire = 0f64;
+    for c in 0..=1000i64 {
+        let v = valve_fraction(&courbe, c);
+        if c % 100 == 0 {
+            assert!((v - courbe[(c / 100) as usize] as f64 / 1000.).abs() <= 1e-12, "aux points de la table : {c}");
+        }
+        pire = pire.max((v - f(c as f64 / 1000.)).abs());
+    }
+    println!("S515 vanne : pourcentage égal, à mi-ouverture {:.4} (linéaire 0,5) ; écart à la loi {pire:.4} (borne {borne:.4})", valve_fraction(&courbe, 500));
+    assert!(pire <= borne, "critère 1 : {pire} contre {borne}");
+}
+
+/// **S515, critère 2 — la pompe sur sa conduite.** À perte nulle, elle rend la pompe de S372 au nanolitre près (la vidange jusqu'à la
+/// prise, 10 000 pas) ; à `K` = 0,05 m/(l/s)², son point de fonctionnement est la forme fermée à 10⁻⁹.
+#[test]
+fn a_pump_line_with_losses_follows_its_operating_point_s515() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut na = [node(1_000_000, 1_000_000, 0), node(0, 1_000_000, 2_000_000)];
+    let mut nb = na;
+    let mut ea = [pump(0, Some(1), 5_000, 10_000_000, [0, 0, 100_000], [0, 0, 3_000_000])];
+    let mut eb = [pompe_conduite(0, Some(1), 5_000, 10_000_000, [0, 0, 100_000], [0, 0, 3_000_000], 0, 1000)];
+    let (mut sa, mut sb) = ([0i64; 1], [0i64; 1]);
+    let mut pire = 0i64;
+    for _ in 0..10_000 {
+        step(&mut na, &mut ea, &shapes, DOWN, SimTime(STEP_US), &mut sa).unwrap();
+        step(&mut nb, &mut eb, &shapes, DOWN, SimTime(STEP_US), &mut sb).unwrap();
+        pire = pire.max((sa[0] - sb[0]).abs());
+    }
+    assert!(pire <= 1, "critère 2, perte nulle : {pire} nl");
+    // Avec pertes : 10 l/s, 10 m de barrage, K = 0,05 m/(l/s)², refoulement libre à 3 m d'une cuve pleine à 1 m.
+    let nodes = [node(1_000_000, 1_000_000, 0), node(0, 1_000_000, 2_000_000)];
+    let edges = [pompe_conduite(0, Some(1), 10_000, 10_000_000, [0, 0, 0], [0, 0, 3_000_000], 50_000, 700)];
+    let p = pump_operating_point(&nodes, &edges, &shapes, DOWN, 0, 1000.).unwrap().unwrap();
+    let dh: f64 = 3. - 1.;
+    let q = ((10. - dh) / (10. / 100. + 0.05)).sqrt() * 1e-3;
+    println!("S515 pompe : à Δh = {dh} m, Q = {:.4} l/s (forme fermée {:.4}), H = {:.4} m, P_h = {:.1} W, arbre {:.1} W", 1e3 * p.flow_m3s, 1e3 * q, p.head_m, p.hydraulic_w, p.shaft_w);
+    assert!((p.flow_m3s / q - 1.).abs() <= 1e-9, "critère 2 : {} contre {q}", p.flow_m3s);
+    assert!((p.head_m - (dh + 0.05 * (q * 1e3).powi(2))).abs() <= 1e-9);
+    assert!((p.shaft_w - p.hydraulic_w / 0.7).abs() <= 1e-9 * p.shaft_w);
+}
+
+/// L'énergie potentielle de l'eau d'un nœud prismatique d'1 m² dont le fond est à `z0` (m) : `ρg·(V·z0 + V²/(2A))`.
+fn potentielle(n: &HydroNode) -> f64 {
+    let v = n.volume_ml as f64 * 1e-6;
+    1000. * 9.81 * (v * n.origin_um[2] as f64 * 1e-6 + v * v / 2.)
+}
+
+/// **S515, critère 3 — l'énergie.** Une pompe noyée (refoulement au fond de B, 2 m plus haut) remplit B depuis A : sans perte, `∫ P_h dt`
+/// égale l'énergie potentielle gagnée par l'eau à 0,1 % ; avec `K` = 0,5 m/(l/s)², elle égale ce gain plus `∫ ρgKQ³ dt`. La masse exacte.
+#[test]
+fn a_pump_spends_the_energy_it_lifts_s515() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    for k_um in [0i64, 500_000] {
+        let mut nodes = [node(1_000_000, 1_000_000, 0), node(0, 1_000_000, 2_000_000)];
+        let mut edges = [pompe_conduite(0, Some(1), 5_000, 5_000_000, [0, 0, 0], [0, 0, 2_000_000], k_um, 650)];
+        let e0 = potentielle(&nodes[0]) + potentielle(&nodes[1]);
+        let mut scratch = [0i64; 1];
+        let (mut travail, mut pertes, mut arbre) = (0f64, 0f64, 0f64);
+        for _ in 0..3_000 {
+            let Some(p) = pump_operating_point(&nodes, &edges, &shapes, DOWN, 0, 1000.).unwrap() else { break };
+            let dt = STEP_US as f64 * 1e-6;
+            travail += p.hydraulic_w * dt;
+            arbre += p.shaft_w * dt;
+            pertes += 1000. * 9.81 * (k_um as f64 * 1e-6) * (p.flow_m3s * 1e3).powi(2) * p.flow_m3s * dt;
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+        }
+        let gain = potentielle(&nodes[0]) + potentielle(&nodes[1]) - e0;
+        let ecart = (travail - gain - pertes) / travail;
+        println!(
+            "S515 énergie, K = {} m/(l/s)² : travail hydraulique {travail:.1} J, gain potentiel {gain:.1} J, pertes {pertes:.1} J, écart {:.3} % ; à l'arbre {arbre:.1} J ; B {} ml",
+            k_um as f64 * 1e-6, 100. * ecart, nodes[1].volume_ml
+        );
+        assert!(ecart.abs() <= 0.001, "critère 3 : {ecart}");
+        assert!((arbre - travail / 0.65).abs() <= 1e-9 * arbre);
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, 1_000_000, "masse");
+    }
+}
