@@ -6570,3 +6570,15 @@ un débit de pompe (6,32 l/s pour 6,83) : écrits dans le plan sans calcul. Une 
 premier ne lisait même pas Kelvin sur la théorie (S519). Puis le bord d'Airy, éprouvé sur une source gaussienne à un lobe, lit sur la
 théorie d'une coque un creux d'interférence, stable d'une fenêtre à l'autre (S520). Un instrument s'éprouve sur un cas de sa famille, et
 l'on regarde ce qu'il lit (ADR-233 D1).
+
+## L390
+
+**S523 — le montage hors du domaine de son outil.** Un sillage de W de 400 à 600 m de trajet, mesuré à 80–100 m de la source avec une
+recette dont le rayon honnête est 179 m : 23 et 62 % d'erreur, sans refus. Le rayon d'ADR-132 se lit sur la distance du chemin émetteur aux
+points (S524). Comme les corps d'essai à leur limite (L384, L387) : tout le montage se place dans le domaine de ses outils (ADR-234 D1).
+
+## L391
+
+**S523 — l'instrument sans bruit.** La dernière crête des rayons, éprouvée sur la théorie (float64, sans bruit), prend sur W un maximum
+local du plancher f32 (8·10⁻⁸ m pour un profil de 10⁻² m) : 79,75° au lieu de 27°. La famille de l'objet mesuré comprend son bruit
+(ADR-234 D2).

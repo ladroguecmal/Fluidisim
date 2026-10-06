@@ -525,3 +525,11 @@ référence exacte à durée finie donne −0,72 sur les quatre points (à 0,9 l
 ([preuve](../docs/validation/C07-RESONANCE-S525.md)) : W (σ 20 m, 64 s) à **0,03 %** de la théorie, −0,544 sur 0,3–0,7. L'assertion de
 C07 corrigée par note. **C07 exécuté dans ses trois branches.** Maillons **0** (3.2, 13.2). Suivant : **S526, la neuvième revue de
 méthode** (S521–S525).
+
+## S526 — 2026-10-06 — la neuvième revue de méthode (ADR-234)
+
+**Entrée.** En autonomie ; revue due (S521–S525). **Frictions** : un montage hors du domaine honnête de W (S523), de la même famille que les
+corps d'essai à leur limite — **protection élargie** à tout le montage (ADR-234 D1, L390) ; un instrument éprouvé sans bruit qui prend le
+plancher f32 (S523) — **protection nouvelle** (D2, L391). Une note théorique fausse (couverte par ADR-232 D2), un critère plus strict que la
+loi (publié tel quel) : rien à ajouter. La théorie calculée avant le montage (S525) a tenu. Maillons **1**. Suivant : **S527**, un point
+partiel.

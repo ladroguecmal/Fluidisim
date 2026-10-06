@@ -62,35 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S525 — **terminée**. En autonomie, **la résonance de C07** (CAS-CANONIQUES, note S30) : « la pente de `log A` contre
-`log|1 − Fr_h²|` vaut −½ ± 0,15 sur `Fr_h` ∈ {0,3 ; 0,5 ; 0,7 ; 0,9} ». Dernière branche de C07.
+Session : S526 — **terminée**. En autonomie, **la neuvième revue de méthode** (ADR-222 D4 ; S521–S525).
 
-**Ce que dit la théorie, calculé avant.** En ondes longues (source large devant le fond), l'équation permanente
-`(1 − Fr²) η_xx + η_yy = −∇²p/ρg` donne sous une source isotrope **exactement** `η(0) = −(p₀/ρg)/√(1 − Fr²)` (la moyenne angulaire de
-`1/((1 − Fr²)cos²θ + sin²θ)` vaut `1/√(1 − Fr²)` : le facteur de Prandtl–Glauert) — d'où la pente −½. **Mais la référence exacte (finie,
-dispersive, en temps fini ; `reference_sillage.py`) ne le donne pas sur les quatre points** : la dépression maximale près de la source,
-rapportée à la statique, vaut 1,052 / 1,167 / 1,441 / **3,21** (σ 20 m, 5 m de fond, 64 s) contre 1,048 / 1,155 / 1,400 / **2,29** ; pente
-**−0,72** (−0,60 à 32 s ; σ 10 m : −0,80 / −0,85). À `Fr_h` = 0,9 le régime n'est pas permanent (le temps d'établissement croît comme
-`σ/((1 − Fr)c)`) et la dispersion y compte ; sur 0,3–0,7, la théorie suit Prandtl–Glauert à 3 % près. (La note de S523, « une source
-fine », était fausse : la loi demande une source **large**.)
-
-**Ce que la session fait.** `c07_profondeur` reçoit σ et une grille devant la source ; W (σ 20 m, recette 512 × 512 à coupure 0,4 : rayon
-honnête 2 681 m) aux quatre `Fr_h`, 64 s ; l'instrument (le maximum de |η| à moins de 3σ de la source) sur W et sur la référence aux mêmes
-points.
-
-**Critères, écrits avant.** (1) **La théorie** : sur la référence, la pente sur {0,3 ; 0,5 ; 0,7} à −½ ± 0,05 ; sur les quatre points, sa
-valeur publiée (−0,72) — l'assertion de C07 telle qu'écrite n'est pas celle de la théorie à durée finie. (2) **W** : les quatre amplitudes à
-2 % de la référence, la pente sur quatre points à 0,05 de la sienne, sur trois points à −½ ± 0,15 (l'assertion, restreinte au régime
-permanent). (3) La note de C07 corrige l'assertion (ADR-222 : une cible contredite par la mesure est remplacée).
+**Ce que la session fait.** Relu : S521 (la revue), S522 (W en profondeur : l'essai de taille du nœud), S523 (un montage hors du domaine
+honnête de W ; un instrument qui prend le bruit f32 ; une note théorique fausse), S524 (une transition plus douce que le critère), S525 (la
+théorie calculée d'abord, l'assertion de C07 corrigée). **ADR-234** : D1 (tout le montage dans le domaine de ses outils, élargit ADR-228
+D1 et ADR-232 D1), D2 (la référence d'un instrument bruitée comme l'objet) ; L390, L391 ; METHODE (trente-deux) ; BOUSSOLE.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — W et la référence ; (1), (2).
-- [x] **P3** — preuve ; C07 ; listes 3.2, 13.2 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-234, METHODE, L390–L391, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — W aux quatre `Fr_h` (4 s chacun) : 1,0529 / 1,1672 / 1,4418 / 3,2071 contre 1,0531 / 1,1674 / 1,4422 / 3,2077 (0,03 %) ;
-  pentes −0,721 et −0,544 des deux côtés → (1), (2) tenus.
-- **P3** — preuve C07-RESONANCE-S525 ; note C07 ; listes 3.2, 13.2 ; index ; journal.
-
