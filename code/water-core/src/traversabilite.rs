@@ -129,6 +129,118 @@ pub fn prochain_franchissement(profondeur: &dyn Fn(f64) -> f64, t0: f64, horizon
     }
 }
 
+// --- S572 — les tuiles (SPEC-006 §5.2).
+
+/// La classe de cadence d'une tuile : ce qui la gouverne (SPEC-006 §5.2, ADR-018 §6).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cadence {
+    Maree,
+    Debit,
+    NoeudV,
+    Immediat,
+}
+
+/// La description d'une tuile : 16 × 16 cellules `HydroGrid`, ou `(16·2^subdivision)²` sous-cellules (SPEC-006 §5.3).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TileDesc {
+    pub frame: u32,
+    pub tile_morton: u64,
+    pub cadence: Cadence,
+    pub subdivision: u8,
+    /// Propre à la tuile : un consommateur voit qu'elle a sauté des publications (SPEC-006 §5.2).
+    pub sequence: u32,
+}
+
+/// La subdivision maximale d'une tuile.
+pub const SUBDIVISION_MAX: u8 = 4;
+
+impl TileDesc {
+    /// Le nombre d'échantillons de la tuile.
+    pub fn echantillons(&self) -> usize {
+        let cote = 16usize << self.subdivision;
+        cote * cote
+    }
+}
+
+/// **Le code de Morton** d'une tuile : `x` aux bits pairs, `y` aux bits impairs.
+pub fn morton(x: u32, y: u32) -> u64 {
+    (0..32).fold(0u64, |m, b| m | (((x >> b) & 1) as u64) << (2 * b) | (((y >> b) & 1) as u64) << (2 * b + 1))
+}
+
+/// Une cellule publiée : l'échantillon et sa prévision.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Cellule {
+    pub echantillon: Echantillon,
+    /// Secondes avant le prochain franchissement ; non significatif si `cause` vaut `Aucune`.
+    pub t_next_cross: f32,
+    pub cause: CrossCause,
+}
+
+/// Un franchissement constaté entre deux publications : la cellule (indice dans la tuile) et ses classes d'avant et d'après.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CrossingEvent {
+    pub cellule: u32,
+    pub avant: (Profondeur, Danger),
+    pub apres: (Profondeur, Danger),
+}
+
+/// La prévision d'une tuile : la profondeur prévisible de chaque cellule `(i, j, t)`, l'instant, l'horizon, le pas, la cause.
+pub struct Prevision<'a> {
+    pub profondeur: &'a dyn Fn(usize, usize, f64) -> f64,
+    pub t: f64,
+    pub horizon_s: f64,
+    pub pas_s: f64,
+    pub cause: CrossCause,
+}
+
+/// **S572 — publier une tuile.** `echantillonner(i, j)` rend la profondeur et le courant de surface de la cellule `(i, j)` ; `cellules`
+/// contient la publication précédente (si `premiere` est faux) et reçoit la nouvelle ; les franchissements de classe entre les deux vont
+/// dans `evenements`, dont le nombre est rendu ; la séquence de la tuile avance. Refus, sans rien écrire : tampons trop courts,
+/// subdivision au-delà de [`SUBDIVISION_MAX`], et ceux de [`echantillon`] et [`prochain_franchissement`].
+pub fn publier(tuile: &mut TileDesc, premiere: bool, echantillonner: &dyn Fn(usize, usize) -> (f32, f32), prevision: Option<&Prevision<'_>>,
+    cellules: &mut [Cellule], evenements: &mut [CrossingEvent]) -> Result<usize, Refus> {
+    if tuile.subdivision > SUBDIVISION_MAX {
+        return Err(Refus);
+    }
+    let n = tuile.echantillons();
+    if cellules.len() < n || evenements.len() < n {
+        return Err(Refus);
+    }
+    let cote = 16usize << tuile.subdivision;
+    // Tout se calcule avant d'écrire : un refus ne laisse rien.
+    for j in 0..cote {
+        for i in 0..cote {
+            let (d, v) = echantillonner(i, j);
+            echantillon(d, v)?;
+        }
+    }
+    let mut k = 0;
+    for j in 0..cote {
+        for i in 0..cote {
+            let c = j * cote + i;
+            let (d, v) = echantillonner(i, j);
+            let e = echantillon(d, v)?;
+            let (t_next_cross, cause) = match prevision {
+                Some(p) => match prochain_franchissement(&|t| (p.profondeur)(i, j, t), p.t, p.horizon_s, p.pas_s, p.cause)? {
+                    Some(f) => (f.delai_s as f32, f.cause),
+                    None => (0.0, CrossCause::Aucune),
+                },
+                None => (0.0, CrossCause::Aucune),
+            };
+            if !premiere {
+                let avant = (cellules[c].echantillon.profondeur, cellules[c].echantillon.danger);
+                if avant != (e.profondeur, e.danger) {
+                    evenements[k] = CrossingEvent { cellule: c as u32, avant, apres: (e.profondeur, e.danger) };
+                    k += 1;
+                }
+            }
+            cellules[c] = Cellule { echantillon: e, t_next_cross, cause };
+        }
+    }
+    tuile.sequence = tuile.sequence.wrapping_add(1);
+    Ok(k)
+}
+
 #[cfg(test)]
 #[path = "tests_traversabilite.rs"]
 mod tests;

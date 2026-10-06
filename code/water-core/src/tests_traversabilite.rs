@@ -43,3 +43,55 @@ fn a_tide_announces_its_next_crossing_s570() {
     assert_eq!(prochain_franchissement(&maree, 0.0, 0.0, 60.0, CrossCause::Maree), Err(Refus), "critère 3");
     assert_eq!(prochain_franchissement(&maree, 0.0, 3600.0, -1.0, CrossCause::Maree), Err(Refus), "critère 3");
 }
+
+// --- S572 — les tuiles. Références écrites au plan par son script.
+
+fn plage_s572(i: usize, t: f64) -> f64 {
+    let periode = 12.42 * 3600.0;
+    let fond = -2.0 + 4.0 * ((i as f64 + 0.5) * 64.0) / 1024.0;
+    (0.4 * (2.0 * std::f64::consts::PI * t / periode).sin() - fond).max(0.0)
+}
+
+/// (1) Une plage sous la marée : 80 franchissements entre deux publications ; (2) la prévision de la colonne 6 ; (3) Morton, séquences.
+#[test]
+fn a_tile_on_a_beach_publishes_its_crossings_s572() {
+    let periode = 12.42 * 3600.0;
+    let t1 = periode / 12.0;
+    let mut tuile = TileDesc { frame: 0, tile_morton: morton(3, 5), cadence: Cadence::Maree, subdivision: 0, sequence: 0 };
+    let vide = Cellule { echantillon: echantillon(0.0, 0.0).unwrap(), t_next_cross: 0.0, cause: CrossCause::Aucune };
+    let mut cellules = vec![vide; 256];
+    let mut evenements = vec![CrossingEvent { cellule: 0, avant: (Profondeur::Negligeable, Danger::Faible),
+        apres: (Profondeur::Negligeable, Danger::Faible) }; 256];
+    let n0 = publier(&mut tuile, true, &|i, _| (plage_s572(i, 0.0) as f32, 0.0), None, &mut cellules, &mut evenements).unwrap();
+    let prevision = Prevision { profondeur: &|i, _, t| plage_s572(i, t), t: t1, horizon_s: periode, pas_s: 60.0, cause: CrossCause::Maree };
+    let n1 = publier(&mut tuile, false, &|i, _| (plage_s572(i, t1) as f32, 0.0), Some(&prevision), &mut cellules, &mut evenements).unwrap();
+    let mut colonnes: Vec<usize> = evenements[..n1].iter().map(|e| e.cellule as usize % 16).collect();
+    colonnes.sort();
+    colonnes.dedup();
+    println!("S572 : {n0} puis {n1} événements, colonnes {colonnes:?} ; Morton {} ; séquence {} ; colonne 6 : {:?}", tuile.tile_morton,
+        tuile.sequence, cellules[6]);
+    assert_eq!((n0, n1), (0, 80), "critère 1 : le nombre");
+    assert_eq!(colonnes, vec![2, 3, 4, 6, 7], "critère 1 : les colonnes");
+    assert!(evenements[..n1].iter().all(|e| e.avant != e.apres), "critère 1 : avant et après diffèrent");
+    let c6 = cellules[6];
+    assert!((c6.t_next_cross as f64 - 16368.32335745605).abs() < 1e-2 && c6.cause == CrossCause::Maree, "critère 2");
+    assert_eq!((tuile.tile_morton, tuile.sequence), (39, 2), "critère 3");
+}
+
+/// (3) Une subdivision 1 donne 32 × 32 échantillons ; (4) les refus.
+#[test]
+fn a_subdivided_tile_has_more_samples_and_short_buffers_are_refused_s572() {
+    let mut tuile = TileDesc { frame: 0, tile_morton: 0, cadence: Cadence::Debit, subdivision: 1, sequence: 7 };
+    assert_eq!(tuile.echantillons(), 1024, "critère 3");
+    let vide = Cellule { echantillon: echantillon(0.0, 0.0).unwrap(), t_next_cross: 0.0, cause: CrossCause::Aucune };
+    let ev = CrossingEvent { cellule: 0, avant: (Profondeur::Negligeable, Danger::Faible), apres: (Profondeur::Negligeable, Danger::Faible) };
+    let (mut cellules, mut evenements) = (vec![vide; 1024], vec![ev; 1024]);
+    assert_eq!(publier(&mut tuile, true, &|_, _| (0.3, 1.0), None, &mut cellules, &mut evenements), Ok(0));
+    assert_eq!(tuile.sequence, 8);
+    let mut court = vec![vide; 1023];
+    assert_eq!(publier(&mut tuile, true, &|_, _| (0.3, 1.0), None, &mut court, &mut evenements), Err(Refus), "critère 4 : tampon");
+    let mut trop = TileDesc { subdivision: 5, ..tuile };
+    assert_eq!(publier(&mut trop, true, &|_, _| (0.3, 1.0), None, &mut cellules, &mut evenements), Err(Refus), "critère 4 : subdivision");
+    assert_eq!(publier(&mut tuile, true, &|_, _| (-1.0, 1.0), None, &mut cellules, &mut evenements), Err(Refus), "critère 4 : profondeur");
+    assert_eq!(tuile.sequence, 8, "critère 4 : rien d'écrit");
+}
