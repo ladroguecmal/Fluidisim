@@ -62,30 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S533 — **terminée**. En autonomie ; deux maillons : une capacité. **5.5 — la pluie hors contenant** : la pluie qui tombe sur le
-sol (pas dans un contenant) s'infiltre, puis, quand le sol ne suit plus, remplit la rétention de surface et ruisselle.
+Session : S534 — **en cours**. En autonomie, **2.6 C1 — le champ de courant 2D régional** (ADR-011 §1 : une grille précalculée hors ligne,
+en lecture seule, « une lecture de texture » ; embouchures, détroits, littoral, courants d'auteur). C0 et C2 existent depuis S513.
 
-**Ce que la session fait.** Le sol à ciel ouvert en trois pièces de V, sans loi nouvelle : un nœud de **rétention de surface** (la lame
-que les creux du sol retiennent, 0,5 mm) qui reçoit la pluie (`Rain`) ; l'**infiltration** de Green–Ampt (S530) vers le **sol** ; le
-**débordement** de la rétention vers l'extérieur (`Spill`, S489) — le **ruissellement**, que l'hôte dépose où le terrain le mène (δ, la
-mer). Aucune flaque n'est posée par l'auteur : avant la submersion, toute la pluie entre.
+**Ce que la session fait.** `current_field::CurrentField` — une grille de vitesses de surface (f32), origine et pas, échantillonnée
+bilinéairement (bornée à la grille), son gradient par maille et l'accélération advective `(u·∇)u`. `RegionalCurrentWater` enveloppe une
+requête (B, B + W, ou `CurrentWater`) : la vitesse augmentée du champ (au profil C2 de décroissance donnée), **la pente que le champ
+implique** — `g∇η = −(u·∇)u`, l'équilibre d'un courant permanent : c'est elle qui fournit au corps la force centripète, par la poussée du
+proxy — et l'accélération `(u·∇)u` (la masse ajoutée). La hauteur n'est pas relevée (5 cm sur 10 m dans l'essai : sans effet sur un corps
+noyé). C1 n'advecte pas les vagues (la réfraction par le courant n'est pas portée) ; sans champ, rien ne change.
 
-**Ordre de grandeur, calculé.** Limon sableux (K = 10,9 mm/h, ψ = 11 cm, Δθ = 0,3 : M = 33 mm), pluie de 30 mm/h : **submersion de
-Mein–Larson** `F_p = M K/(i − K)` = **18,84 mm** à `t_p = F_p/i` = **37,67 min** ; ensuite Green–Ampt décalé (`t_s` = 1 299 s) — `F` =
-**48,88 mm** à 2 h, sur 60 mm de pluie : 11,12 mm de rétention et de ruissellement. La rétention (0,5 mm) déplace `M` de 0,45 % (la lame
-`h₀` que la loi compte et que Mein–Larson néglige).
+**Ordre de grandeur, calculé.** Rotation solide Ω = 0,1 rad/s à 10 m : 1 m/s, accélération centripète 0,1 m/s², pente 0,0102, période
+62,8 s ; le pas symplectique (`Ω·dt` = 10⁻³) fait osciller le rayon de ± 0,025 % sur deux tours, sans dérive.
 
-**Critères, écrits avant.** (1) Le début de la submersion (la rétention passe 1 ml) à 1 % de `t_p`. (2) `F` à 2 h à 0,5 % de Green–Ampt
-décalé. (3) La masse exacte : pluie = sol + rétention + ruissellement, au millilitre ; le ruissellement nul avant la rétention pleine.
+**Critères, écrits avant.** (1) Un champ uniforme rend la requête de C0 (vitesse) à 10⁻¹² ; un champ linéaire est échantillonné et dérivé
+exactement (10⁻¹²). (2) **Un corps neutre** (une sphère d'un point, masse ajoutée ½ρV, noyé à 2 m) lâché à la vitesse de l'eau dans une
+rotation solide (une grille de 41 × 41 au pas de 1 m) : son rayon à 0,5 % près sur deux tours ; sa position après une période à 1 % du
+rayon de son départ. (3) Le témoin : sans la pente du champ, le même corps s'écarte de plus de 10 % en deux tours (la force qui le tient
+est bien celle-là).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 5.5 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — le champ, la requête, les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — submersion lue à 29,1 min (−23 % : le seuil d'1 ml est le quantum, (1) manqué ; 10 ml à 39,13 min, diagnostic après
-  coup) ; F à 2 h 48,928 mm pour 48,880 (9,8·10⁻⁴) ; masse exacte, ruissellement dès la rétention pleine (50 min).
-- **P3** — preuve PLUIE-SOL-S533 ; liste 5.5 ; index ; journal.
-
