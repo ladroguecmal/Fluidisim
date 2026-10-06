@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 20:30 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 20:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S548 — le lot ; 6.6, une barge qui s'enfonce par un compartiment envahi ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S547 — l'évent à débit limité ([journal](notes/JOURNAL.md)). Avant : S546 (la treizième revue de méthode)
 Session suivante : **S548 — le lot des registres (dû à S548), puis un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — la flottabilité de la poche d'un compartiment (6.6 : une coque compartimentée qui coule par ses brèches), Coriolis dans δ, la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, C14/C15 ; blocages vérifiés avant d'être écrits (ADR-238 D2), nombres recalculés (ADR-237 D1). Revue à S551. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S547 : l'évent à débit limité (5.9)

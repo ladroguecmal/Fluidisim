@@ -62,30 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S547 — **terminée**. En autonomie, **5.9 — l'évent à débit limité** (ADR-015 §2 : « l'inondation d'un compartiment fermé est
-limitée par la sortie de l'air ; `Q_eau ≤ Q_air` ») : S538 n'a qu'un nœud scellé ou ouvert.
+Session : S548 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S546–S547), puis **6.6 — les grands navires**
+(absent) par leur premier cas : un navire qui s'enfonce parce qu'un compartiment s'envahit — le corps rigide (S331–S539) et un compartiment
+de V (S538–S547) couplés.
 
-**Ce que la session fait.** `Flow::Vent { area_mm2 }` : l'évent d'un nœud scellé vers l'air libre — aucune eau n'y passe ; dans `step_air`,
-l'air de la poche en sort à `Q_a = C_d·A·√(2Δp/ρ_a)`, `ρ_a = 1,2·p/p_atm` (isotherme), et le produit `p·V_air` de la poche baisse de
-`p·Q_a·dt` (les moles qui sortent). `air` devient mutable. Sans évent, S538 au bit.
+**Ce que la session fait.** Un essai de couplage, sans code neuf du cœur : une barge (corps rigide, proxy en couches de 25 cm,
+amortissement de pilonnement) porte un compartiment de V dans son repère ; la mer, vue du navire, est un nœud de V dont la surface suit le
+pilonnement ; une brèche au fond du compartiment ; à chaque pas de V, l'eau du compartiment s'ajoute à la masse du corps (elle est portée
+par la coque), et le corps avance de dix pas. Compartiment central (aucun assiette : le pilonnement seul, ADR-232 D1), ouvert à l'air.
 
-**Ordre de grandeur, calculé (incompressible, quasi permanent).** Le débit d'eau par la brèche égale le débit d'air par l'évent :
-`k = √((C²A_v²/ρ_a)/(C²A_v²/ρ_a + C²a²/ρ))`, le remplissage de Torricelli ralenti de `k`. C17 (brèche 1 dm², 99 % en 463,5 s ouvert) :
-évent de **5 cm²** → `k` = 0,8253, **99 % en 561,6 s**, surpression initiale 6,4 kPa (6,3 % de p_atm) ; 1 cm² → `k` = 0,2805, 1 652 s,
-18,5 kPa (18 %). La compressibilité de l'air, négligée par cette loi, compte de l'ordre de la surpression rapportée à p_atm.
+**Ordre de grandeur, calculé.** Barge 20 × 8 × 4 m, 246 t (tirant 1,5 m) ; compartiment central de 5 × 8 × 4 m : **flottabilité perdue**
+`T' = T·A/(A − A_c)` = **2,000 m**, 80 m³ d'eau embarqués (la surface intérieure à la flottaison). Raideur de pilonnement 1,61 MN/m,
+amortissement critique 1,45 MN·s/m (pris : 1 MN·s/m), période 2,8 s ; brèche de 0,1 m² : 0,34 m³/s au départ.
 
-**Critères, écrits avant.** (1) Sans évent, `step_air` au bit de S538 (ses essais). (2) Évent de 5 cm² : 99 % à 5 % de 561,6 s (la
-compressibilité, ≈ 6 %, en marge). (3) Évent de 1 cm² : plus de trois fois plus lent qu'ouvert (`1/k` = 3,6) ; un compartiment scellé ne se
-remplit pas (S538). (4) La masse d'eau exacte.
+**Critères, écrits avant.** (1) Le tirant final à 1 % de 2,000 m. (2) L'eau embarquée à 1 % de `A_c·T'` = 80 m³ ; la surface intérieure à
+1 cm de la flottaison. (3) La masse d'eau de V exacte (mer + compartiment). Quantum : 1 ml sur 40 m² (0,025 µm), rapport 10⁸ (ADR-236 D1).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'évent, les essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.9 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — `Flow::Vent`, `step_air` (air mutable) ; essais : 5 cm² 570,1 s (561,6 ; 1,5 %), 1 cm² 1 664,1 s (1 652,1 ; 3,59 × l'ouvert) ;
-  S538 inchangé ; masse exacte. Suite 706. (Reprise après une coupure d'usage : rien de perdu, le plan était committé ; éveil relancé.)
-- **P3** — C17-AIR-S538 §5 ; liste 5.9 ; dépendances ; journal.
-

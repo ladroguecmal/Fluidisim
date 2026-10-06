@@ -396,6 +396,7 @@ partiel) ; la coque retournée et sa poche comprimée, le point de non-retour (7
 changement de paramètre).
 **S542–S545** : **C16 passe** (la pesanteur effective inclinée et la rotation dans δ ; 4.17 partiel) ; **C21 passe** (la masse d'un
 compartiment avec et sans δ, fixe et accéléré) ; un plan sauté et une limite affirmée sans calcul, relevés.
+**S546–S547** : la treizième revue (ADR-238 : le rituel refuse sans plan committé) ; l'évent à débit limité (5.9, `Q_eau ≤ Q_air`).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
