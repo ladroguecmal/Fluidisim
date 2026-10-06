@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 04:05 +02:00
+JETON            : libre
+Battement        : 2026-10-06 04:10 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S499 — 6.1, B6 : le nombre de points du proxy par archétype ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S498 — le petit objet léger : les régimes de flottabilité (C11) ([journal](notes/JOURNAL.md)). Avant : S497 (6.3 validée : un corps en marche produit son sillage)
-Session suivante : **S499 — B6, le nombre de points du proxy par archétype** (ADR-008 §7.1 : 20 à 60 points) : pour chaque archétype, le plus petit proxy dont le tirant, la période de pilonnement et la réponse à la houle tiennent leur référence ; ordre de grandeur contre le terme concurrent, chaînes séparées avant tout remède (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà.
-Maillons        : 0 — S498 : C11, les régimes de flottabilité (6.1 avancée)
+Session en cours : aucune
+Dernière session : S499 — B6 : combien de points pour le proxy de flottabilité ([journal](notes/JOURNAL.md)). Avant : S498 (le petit objet léger : les régimes de flottabilité)
+Session suivante : **S500 — pousser au centre de la part immergée** : la couche partielle du proxy pousse en son milieu (S499 : tout le surcoût des couches) ; appliquer chaque poussée au centre de la part immergée de son point — `z_F` exact à une couche ; B6 refait (attendu : navire 7 × 10 × 1, barque et caisse 7 × 7 × 1) ; les essais du corps (S331–S336, S494–S499) tenus ; une décision technique (ADR). Ordre de grandeur contre le terme concurrent, chaînes séparées (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
+Maillons        : 0 — S499 : B6 mesuré (6.1 avancée)
 Registres       : dernier lot S497 (ADR-213 D3) ; le prochain au plus tard en S500
 ```
 
