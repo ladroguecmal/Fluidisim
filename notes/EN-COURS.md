@@ -62,30 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S537 — **terminée**. En autonomie, **9.3 — un corps quelconque** : le prédicteur balistique (S405) détecte le contact par la
-sphère englobante ; une planche qui tourne touche l'eau par un coin, bien après sa sphère.
+Session : S538 — **en cours**. En autonomie, **5.9 — compartiments et inondation limitée par l'air** (C17, ADR-015 T2) : dans V, l'air
+est implicite (T0) ; un compartiment étanche se remplit comme s'il avait un évent — « tous les temps d'avarie du jeu sont trop courts ».
 
-**Ce que la session fait.** `ballistic::predict_hull(objet, sommets, …)` : le contact quand le **sommet le plus bas** de l'enveloppe
-convexe (ses sommets dans le repère du corps, tournés par l'orientation intégrée) atteint la surface à sa propre position horizontale ;
-l'instant par la même bisection sur un pas de RK4 que `predict` ; la région utile, la plus grande distance d'un sommet au centre. `predict`
-inchangé.
+**Ce que la session fait.** `hydro_network::step_air` : le pas de V avec, par nœud, un **état d'air** — ouvert (l'air à la pression
+atmosphérique, T0 : le pas d'avant au bit) ou **scellé** (une poche isotherme, `p·V_air` constant, ADR-015 §3 « lente »). La pression de
+jauge d'une poche entre dans les charges des arêtes (`(p − p_atm)/ρg`) — l'eau qui entre comprime l'air, qui la retient. Les têtes de
+pression dans un tampon de l'appelant (I-06). Ni évent à débit limité (un nœud est scellé ou ouvert), ni effet sur les pompes.
 
-**Ordre de grandeur, calculé.** Lâchée de 10 m : une boîte alignée (demi-hauteur 0,1 m) touche à **1,420686 s** ; une planche de 4 × 0,2 ×
-0,2 m tournant à 3 rad/s autour de son axe long… — autour de `x` (demi-longueur 2 m selon `y`) — touche par un coin à **1,315550 s** ; sa
-sphère englobante (2,0025 m) la ferait toucher à **1,276902 s**, 38,6 ms trop tôt. Le seuil d'instant (10⁻⁹ s) contre la bisection
-(10⁻¹² s) : un rapport de 1 000 (ADR-236 D1).
+**Ordre de grandeur, calculé.** C17 : un compartiment de 10 m³ (5 m² × 2 m, son plafond à la flottaison), une brèche de 1 dm² à 2 m sous
+la flottaison, `C_d` = 0,62, ρ = 1 025 kg/m³ : **sans évent**, l'équilibre `p_atm·2/u = p_atm + ρg·u` donne `u` = 1,710 m d'air, **0,290 m
+d'eau** (14,5 %), l'air à 118,5 kPa ; **avec évent**, Torricelli `t = (2A/(C_d·a·√(2g)))·(√H − √(H − h))` : 99 % en 467 s, plein en
+518 s.
 
-**Critères, écrits avant.** (1) La boîte alignée en chute libre : l'instant à 10⁻⁹ s de `√(2(z₀ − h)/g)`. (2) La planche tournante :
-l'instant à 10⁻⁹ s de la racine de `z₀ − ½gt² − (h_y|sin ωt| + h_z|cos ωt|)` (bisection indépendante, f64) ; la sphère englobante publiée
-(38,6 ms d'avance). (3) `predict` au bit (suite).
+**Critères, écrits avant.** (1) Sans air scellé, `step_air` rend `step_meteo` au bit. (2) Sans évent, la hauteur finale à 0,5 % de 0,290 m
+(le quantum : 1 ml sur 5 m², 0,2 µm — rapport 10⁴, ADR-236 D1). (3) Avec évent, 99 % à 1 % de la loi de Torricelli. (4) L'assertion de
+C17 : le rapport des temps de remplissage supérieur à 5 (sans évent, il ne se remplit jamais).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la fonction, les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 9.3 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — `step_air`, les essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.9 ; C17 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `predict_hull` ; boîte 3·10⁻¹³ s, planche 1,3·10⁻¹⁰ s, la sphère 38,8 ms trop tôt. Suite 697.
-- **P3** — preuve CORPS-QUELCONQUE-S537 ; liste 9.3 ; index ; journal.
-
