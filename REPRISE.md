@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 08:05 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 08:06 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S506 — la cinquième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S505 — C23 sur le système ; A328 ([journal](notes/JOURNAL.md)). Avant : S504 (la coque qui perce la surface, en mouvement sur la carte)
 Session suivante : **S506 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S502–S505 — dont S505 : une référence non convergée jugée deux fois (départ impulsif, régime critique) avant une vérification de convergence sur trois points ; une machine arrêtée pendant le travail. **Sans attendre de « Continue »** ; `outils/eveil.py` relancé à 7 h 40 pour 14 h.
 Maillons        : 0 — S505 : C23 sur le système (6.4 avancée), A328 ouverte
