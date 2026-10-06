@@ -2786,3 +2786,78 @@ fn a_closed_tank_keeps_its_mass_and_loses_energy_s555() {
     assert!(hi / lo - 1. < 0.01, "garde : l'énergie moyenne croît ({lo} → {hi})");
     let _ = (hausses, e_prec);
 }
+
+
+/// **S557 — A332, l'énergie que le pas linéaire conserve.** Le pas est un avant-arrière (la vitesse depuis `η^n`, puis `η^{n+1}` depuis la
+/// vitesse) : avec la face du couvercle comptée pour une demi-maille, `Q = K(u^{n+1}) + ½ρg·Σ (η^n − z₀)·(η^{n+1} − z₀)·dA` est un
+/// invariant exact, égal à E₀ dès le départ. Critères : `|Q/E₀ − 1|` < 10⁻⁴ à chaque pas ; une hausse d'un pas à l'autre sous 10⁻⁵ de E₀ ;
+/// l'oscillateur f64 de même structure conserve `p_{n+1}² + q_n·q_{n+1}` à 10⁻¹².
+#[test]
+fn the_linear_step_conserves_its_mixed_energy_s557() {
+    // (3) L'oscillateur, la formule éprouvée à part (ADR-239 D1).
+    let (h, mut p, mut q) = (0.1f64, 0.0f64, 1.0f64);
+    let mut invariant = None;
+    let mut pire_osc = 0f64;
+    for _ in 0..100_000 {
+        let q_avant = q;
+        p -= h * q;
+        q += h * p;
+        let i = p * p + q_avant * q;
+        let i0 = *invariant.get_or_insert(i);
+        pire_osc = pire_osc.max((i / i0 - 1.).abs());
+    }
+    println!("S557 oscillateur : p_(n+1)² + q_n·q_(n+1) constant à {pire_osc:.1e} sur 10⁵ pas");
+    assert!(pire_osc < 1e-12, "critère 3");
+
+    // (1), (2) La cuve close de S555.
+    let (n, m, k, dx, g, rho) = (16usize, 8usize, 6usize, 0.25f32, 9.81f64, 1025.0f64);
+    let (mut v, _) = volume(n, m, k, dx, g as f32);
+    let z0 = v.domain().z0() as f64;
+    let mut eta = vec![0f32; n * m];
+    for j in 0..m {
+        for i in 0..n {
+            let (x, y) = ((i as f64 + 0.5) * 0.25 - 2.0, (j as f64 + 0.5) * 0.25 - 1.0);
+            eta[j * n + i] = (z0 + 0.02 * (-(x * x + y * y) / (2. * 0.25)).exp()) as f32;
+        }
+    }
+    v.set_surface(&eta).unwrap();
+    let (da, dv) = (0.0625f64, 0.015625f64);
+    let couvercle = k * n * m;
+    // L'énergie cinétique, la face du couvercle comptée pour une demi-maille (ou pleine, `demi = false`).
+    let cinetique = |v: &Volume3, demi: bool| -> f64 {
+        let w: f64 = v.velocity_w().iter().enumerate()
+            .map(|(f, x)| (*x as f64).powi(2) * if demi && f >= couvercle { 0.5 } else { 1. }).sum();
+        (v.velocity_u().iter().chain(v.velocity_v()).map(|x| (*x as f64).powi(2)).sum::<f64>() + w) * 0.5 * rho * dv
+    };
+    let hauteurs = |v: &Volume3| -> Vec<f64> { v.surface().iter().map(|e| *e as f64 - z0).collect() };
+    let e0 = hauteurs(&v).iter().map(|x| x * x).sum::<f64>() * 0.5 * rho * g * da;
+    let mut avant = hauteurs(&v);
+    let (mut pire_q, mut pire_hausse, mut q_prec) = (0f64, 0f64, None::<f64>);
+    let (mut nat_lo, mut nat_hi, mut plein_lo, mut plein_hi) = (f64::MAX, 0f64, f64::MAX, 0f64);
+    for _ in 0..12_000 {
+        v.step_surface_linear(10_000, 2000, &Jobs).unwrap();
+        let apres = hauteurs(&v);
+        let mixte: f64 = avant.iter().zip(&apres).map(|(a, b)| a * b).sum::<f64>() * 0.5 * rho * g * da;
+        let pot: f64 = apres.iter().map(|x| x * x).sum::<f64>() * 0.5 * rho * g * da;
+        let (kd, kp) = (cinetique(&v, true), cinetique(&v, false));
+        let q = kd + mixte;
+        pire_q = pire_q.max((q / e0 - 1.).abs());
+        if let Some(qp) = q_prec {
+            pire_hausse = pire_hausse.max((q - qp) / e0);
+        }
+        q_prec = Some(q);
+        (nat_lo, nat_hi) = (nat_lo.min(kd + pot), nat_hi.max(kd + pot));
+        (plein_lo, plein_hi) = (plein_lo.min(kp + pot), plein_hi.max(kp + pot));
+        avant = apres;
+    }
+    println!(
+        "S557 A332 : E₀ = {e0:.5} J ; Q au pire à {pire_q:.2e} de E₀, Q final {:.6} J ; la plus forte hausse d'un pas à l'autre {pire_hausse:.2e} de E₀",
+        q_prec.unwrap()
+    );
+    println!(
+        "S557 A332 : énergie naturelle, demi-poids du couvercle, de {:+.2} % à {:+.2} % de E₀ ; poids plein (S555), de {:+.2} % à {:+.2} %",
+        100. * (nat_lo / e0 - 1.), 100. * (nat_hi / e0 - 1.), 100. * (plein_lo / e0 - 1.), 100. * (plein_hi / e0 - 1.)
+    );
+    assert!(pire_q < 1e-4, "critère 1 : Q à {pire_q:.2e} de E₀");
+    assert!(pire_hausse < 1e-5, "critère 2 : une hausse de {pire_hausse:.2e} de E₀");
+}
