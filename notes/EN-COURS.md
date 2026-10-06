@@ -62,29 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S499 — **terminée**. En autonomie, **6.1, B6 — le nombre de points du proxy par archétype** (ADR-008 §5.1 : « 20 à 60 »). La
-porte D a pris 16 × 8 × 4 points sans mesure de ce qu'il fallait ; S494–S495 ont vu une bouée de 4 × 4 × 4 points rouler et chavirer.
+Session : S500 — **en cours**. En autonomie, **6.1 — pousser au centre de la part immergée** : S499 a montré que tout le surcoût des
+couches du proxy vient de la couche partielle, qui pousse en son milieu (`z_F` faux de `(1 − f)·f·e²/(2d)`).
 
-**Ce que la session fait.** Un banc dans le cœur : pour chaque archétype en pavé (navire, barque, caisse ; la balle est contrainte), et des
-grilles `nx × ny × nz`, la raideur de pilonnement, la hauteur métacentrique en roulis et en tangage — mesurées par le moment de rappel
-d'une inclinaison de 10⁻⁴ rad en eau calme — contre l'analytique `GM = KB + BM − KG`, et la houle vue par la flottaison contre le continu.
+**Ce que la session fait.** Dans `RigidBody::forces`, la poussée d'un point partiellement immergé s'applique au centre de sa part immergée
+— son milieu abaissé de `(1 − f)·e/2` le long de l'axe du corps ; les forces (et donc la translation) ne changent pas, le moment seul.
+ADR-227. B6 refait avec ce modèle.
 
-**Ordre de grandeur, écrit avant (ADR-226 D3).** L'inertie de flottaison d'une grille de `n` centres : `(L²/12)·(1 − 1/n²)` — l'erreur
-sur `BM` est `1/n²`, sur `GM` `(BM/GM)/n²` : le terme concurrent est `GM`, petit devant `BM` pour un navire (roulis : `BM` = 4,27 m,
-`GM` = 1,25 m → `n` ≥ 9 pour 5 %). La couche partielle pousse en son milieu et non au centre de sa part immergée : `KB` faux de
-`(1 − f)·f·e²/(2d)` au plus `e²/(8d)`. La houle : `sin(kL/2)/(kL/2)` contre la moyenne de `cos(k·x)` sur `n` centres.
+**Ordre de grandeur, écrit avant.** Sur la coque de la porte D (16 × 8 × 4 points, `e` = 0,25 m, tirant 0,49 m) : l'erreur de `KB` qui
+disparaît, au plus `e²/(8d)` ≈ 1,6 cm, contre `GM` de tangage ≈ 2,7 m — 0,6 % : les essais du corps (S331–S499) doivent tenir à leurs
+tolérances ; le pilonnement droit ne change pas au bit (moment nul par symétrie).
 
-**Critères, écrits avant.** (1) la raideur de pilonnement `ρgA` à 10⁻⁹ quelle que soit la grille ; (2) l'erreur mesurée sur `BM` suit
-`1/n²` à 10⁻³ près (la formule calculée dans l'essai), celle sur `KB` la borne de la couche partielle ; (3) par archétype, le plus petit
-proxy dont `GM` (roulis et tangage) tient 5 % et la houle 1 % de son onde de projet — publié, comparé aux 20 à 60 points d'ADR-008.
+**Critères, écrits avant.** (1) à l'équilibre droit, `z_F = KB − KG` à 10⁻⁹ pour toute grille ; (2) B6 refait : la prédiction
+`BM·(1 − 1/n²) + z_F` à 10⁻³ ; les plus petits proxys sans compensation = avec, attendus 7 × 10 × 1 (navire), 7 × 7 × 1 (barque, caisse) ;
+(3) toute la suite du cœur tient ; les valeurs publiées des essais du corps qui changent, relevées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le banc ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.1 ; rituel.
+- [ ] **P2** — la poussée au centre de la part immergée ; B6 refait ; la suite.
+- [ ] **P3** — ADR-227 ; preuve ; liste 6.1 ; rituel.
 
 ### Notes de reprise
-- **P2** — banc `b6_how_many_proxy_points_per_archetype_s499` : prédiction à 3·10⁻⁸ ; plus petits proxys 224 / 49 / 49, sans compensation
-  560 / 196 / 147 ; une couche ne tient que par compensation (L278) → ajouté la recherche « sans compensation ». 659 essais.
-- **P3** — preuve B6-PROXY-S499 ; liste 6.1 ; index ; journal.

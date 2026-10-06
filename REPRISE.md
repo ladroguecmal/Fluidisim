@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-06 04:10 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S500 — 6.1, la poussée au centre de la part immergée ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S499 — B6 : combien de points pour le proxy de flottabilité ([journal](notes/JOURNAL.md)). Avant : S498 (le petit objet léger : les régimes de flottabilité)
 Session suivante : **S500 — pousser au centre de la part immergée** : la couche partielle du proxy pousse en son milieu (S499 : tout le surcoût des couches) ; appliquer chaque poussée au centre de la part immergée de son point — `z_F` exact à une couche ; B6 refait (attendu : navire 7 × 10 × 1, barque et caisse 7 × 7 × 1) ; les essais du corps (S331–S336, S494–S499) tenus ; une décision technique (ADR). Ordre de grandeur contre le terme concurrent, chaînes séparées (ADR-226). **Sans attendre de « Continue »** ; `outils/eveil.py` jusqu'à 15 h 25 — le relancer au-delà.
 Maillons        : 0 — S499 : B6 mesuré (6.1 avancée)
