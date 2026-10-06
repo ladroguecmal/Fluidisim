@@ -62,15 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S571 — **terminée**. En autonomie, **la dix-huitième revue de méthode** (ADR-222 D4 ; S566–S570).
+Session : S572 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S569–S571), puis **7.7 — les tuiles** (SPEC-006 §5.2) :
+l'unité de publication de la traversabilité.
 
-**Ce que la session fait.** Relu : S566 (la revue ; le lot refusé par le rituel), S567 (le réseau couplé), S568 (les organes ; un nombre de
-tête ; la tolérance sous le plancher), S569 (la vitesse, l'exutoire ; le script qui refuse un montage), S570 (la traversabilité ; une
-assertion de route fausse). **ADR-244** : D1, un essai n'affirme que ce que le plan a écrit ; L403 ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** `TileDesc` (référentiel, code de Morton, classe de cadence `Maree | Debit | NoeudV | Immediat`, subdivision,
+séquence propre à la tuile) ; `publier(…)` : les `(16·2^s)²` échantillons d'une tuile depuis un échantillonneur (profondeur, courant) de
+l'appelant, la prévision par cellule (`t_next_cross` et sa cause, S570) quand une profondeur prévisible est fournie, la séquence
+incrémentée, et **les événements de franchissement** — une cellule dont la classe de profondeur ou de danger a changé depuis la publication
+précédente — dans un tampon de l'appelant (I-06).
+
+**Références, calculées avant** (ce script les écrit). Une tuile de 16 × 16 cellules de 64 m sur une plage (fond de −2 à +2 m en `x`),
+une marée de 0,4 m (M2), courant nul ; publiée à `t₀` = 0 puis `t₁ = T/12` (0 puis 0,2 m) : les colonnes [2, 3, 4, 6, 7] changent de classe →
+**80 événements**. La prévision de la colonne 6 à `t₁` (fond -0.3750 m, 0.5750 m d'eau) : la marée ne monte pas jusqu'à
+1,00 m ; elle repasse 0,50 m en descendant dans **16368.323 s**. Le code de Morton de la tuile (3, 5) : **39**. Séquences 1 puis 2.
+
+**Quantum** (ADR-236 D1) : la bissection à 1 ms ; les classes, des entiers. **Critères, écrits avant.** (1) 80 événements
+exactement, aux colonnes attendues, avec les classes d'avant et d'après ; (2) la prévision de la colonne 6 à 10 ms, seuil 0,50 m, en
+descendant, cause `Maree` ; (3) Morton 39 ; séquences 1 puis 2 ; une subdivision 1 donne 32 × 32 échantillons ; (4) refus : tampons
+trop courts, subdivision au-delà de 4.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-244, METHODE, L403, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — les tuiles et leurs essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 7.7 ; rituel (`--lot`).
 
 ### Notes de reprise

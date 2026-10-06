@@ -410,6 +410,8 @@ l'écrémeur, l'instantané de la composition (`WVLQ`).
 **S563–S566** : 5.7 avance (l'air scellé avec plusieurs liquides) ; **5.6 ouvert** (le seuil adaptatif, en hauteur de surface) ;
 **5.8 ouvert** (la solution d'un réseau en charge) ; la dix-septième revue (ADR-243 : les nombres d'un plan écrits par leur script).
 **S567–S568** : 5.8 avance deux fois — le réseau en charge couplé au pas de V (la masse à l'entier), ses pompes et ses clapets.
+**S569–S571** : 5.8 avance (la vitesse des pompes, l'exutoire à l'air libre) ; **7.7 ouvert** (l'échantillon de traversabilité, le
+prochain franchissement) ; la dix-huitième revue (ADR-244 : un essai n'affirme que ce que le plan a écrit).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
