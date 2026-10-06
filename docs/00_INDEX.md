@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [L'écrémeur et l'instantané de la composition — S562](validation/LIQUIDES-ECREMEUR-S562.md) : l'huile seule par le déversoir, à 0,1 ml ; `WVLQ`, la continuation au bit.
 - [Le débit par couches — S560](validation/LIQUIDES-DEBIT-S560.md) : `step_liquids` ; le manomètre en U à l'entier, la vidange stratifiée à 0,02 %.
 - [La pression d'un nœud stratifié — S559](validation/LIQUIDES-COUCHES-S559.md) : les liquides de V en couches (ADR-241), à 4·10⁻⁸ de trois formes fermées.
 - [L'énergie du chemin coupé de δ linéaire — S558](validation/ENERGIE-COUPEE-S558.md) : l'invariant pondéré par les ouvertures, conservé à 2,4·10⁻⁶.

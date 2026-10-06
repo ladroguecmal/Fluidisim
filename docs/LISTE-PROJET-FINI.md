@@ -420,8 +420,9 @@ pas recopiée ici (L137).
   `g_eff`, l'état entier (une composition parallèle) ; **la pression d'un nœud stratifié** contre trois formes fermées (cuve droite,
   inclinée, carène en V) à 4·10⁻⁸ ([preuve](validation/LIQUIDES-COUCHES-S559.md)) ; **S560 : le débit par couches** (`step_liquids`) —
   le manomètre en U à l'entier (1,17 m), la vidange stratifiée à 0,02 %, un liquide identique au pas présent
-  ([preuve](validation/LIQUIDES-DEBIT-S560.md)). Manquent le déversoir par couches éprouvé, l'air scellé avec plusieurs liquides,
-  l'instantané de la composition.
+  ([preuve](validation/LIQUIDES-DEBIT-S560.md)) ; **S562** : l'écrémeur (un déversoir sort l'huile, l'eau intacte, à 0,1 ml) et
+  l'instantané de la composition (bloc `WVLQ`, la continuation au bit ; [preuve](validation/LIQUIDES-ECREMEUR-S562.md)). Manquent l'air
+  scellé avec plusieurs liquides, la sortie d'un liquide autre que l'eau vers δ ou la mer.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
   d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle

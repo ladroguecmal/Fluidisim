@@ -804,3 +804,11 @@ Suivant : **S561, la seizième revue de méthode**.
 (ADR-242 D1, L400) ; un commit parti après une anomalie du rituel (S559, la chaîne en `;`) — **élargie, et un outil** : le commit se garde
 par le code du rituel, qui sort désormais en erreur aussi quand le lot est dû (D2, L401). Ont tenu : les dérivations depuis le code, la
 constante de temps au plan, les scripts en fichiers. Maillons **1**. Suivant : **S562**, un point partiel.
+
+## S562 — 2026-10-06 — l'écrémeur et l'instantané de la composition
+
+**Entrée.** En autonomie ; 5.7, deux manques de S560. **Fait** ([preuve](../docs/validation/LIQUIDES-ECREMEUR-S562.md)) : l'écrémeur —
+un déversoir à crête au-dessus de l'interface — et le bloc d'instantané `WVLQ`. **Mesuré** : l'huile restante à 0,1 ml de la loi du
+déversoir, l'eau intacte à chaque pas ; la continuation au bit après restauration, les refus. **En route** : une valeur du plan écrite de tête
+(190 s pour 220 s calculées), et un heredoc contre la lettre d'ADR-240 D1 — notés pour la revue de S566. Maillons **0** (5.7 avance).
+Suivant : **S563**, le lot (dû) et un point partiel.

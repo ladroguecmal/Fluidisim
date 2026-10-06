@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S562 — **en cours**. En autonomie, **5.7** : deux manques de S560 — le déversoir par couches, non éprouvé, et l'instantané de la
+Session : S562 — **terminée**. En autonomie, **5.7** : deux manques de S560 — le déversoir par couches, non éprouvé, et l'instantané de la
 composition (I-17 : un état qu'on ne sauve pas n'est pas un état).
 
 **Ce que la session fait.** (a) **L'écrémeur** : une cuve de 1 m², 1,0 m³ d'eau sous 0,4 m³ d'huile (surface à 1,4 m), un déversoir de
@@ -84,7 +84,12 @@ d'écrit sur refus.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le bloc `WVLQ` et les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 5.7 ; rituel.
+- [x] **P2** — le bloc `WVLQ` et les essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 5.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — écrémeur : 200 306 ml pour 200 306,1, l'eau intacte ; `WVLQ` : la continuation au bit, les refus. Suite 726. Le plan
+  avait écrit « vers 190 s » de tête : calculé, 220 s (600 s suffisent). **Pour la revue S566** : le code de `WVLQ` ajouté par un heredoc
+  (entre apostrophes droites, donc sans danger), contre la lettre d'ADR-240 D1.
+- **P3** — preuve LIQUIDES-ECREMEUR-S562 ; liste 5.7 ; index ; journal.
+
