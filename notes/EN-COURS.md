@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S517 — **en cours**. En autonomie, **4.13, la coque en marche et sa vague d'étrave** : la liste dit « Manquent la coque en marche
+Session : S517 — **terminée**. En autonomie, **4.13, la coque en marche et sa vague d'étrave** : la liste dit « Manquent la coque en marche
 et sa vague d'étrave, la gerbe (4.16), la résolution près de la coque (± 43–49 % à 25 cm) et la production GPU ». La coque mobile tourne
 sur la carte depuis S503–S509 ; son sillage dans δ n'a jamais été jugé.
 
@@ -81,8 +81,8 @@ profondes, 19,47°) ; onde transverse `λ = 2πU²/g` = 5,76 m (`kh` = 4,4 : eau
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le banc ; (1)–(3).
-- [ ] **P3** — preuve ; liste 4.13 ; rituel.
+- [x] **P2** — le banc ; (1)–(3).
+- [x] **P3** — preuve ; liste 4.13 ; rituel.
 
 ### Notes de reprise
 - **P2 (en cours)** — premier instrument (maximum latéral) : 2° — il prend le champ proche. Second (le bord du coin à un seuil) : domaine
@@ -91,4 +91,8 @@ profondes, 19,47°) ; onde transverse `λ = 2πU²/g` = 5,76 m (`kh` = 4,4 : eau
   avant de le lancer** : la moyenne de |η| le long des rayons issus de l'étrave, de 10 à 24 m, pour chaque angle de 5 à 35° (pas de 0,5°) ;
   l'angle du maximum contre 19,47° à 2°. L'élévation maximale, 0,72 m, est sur l'étrave (la stagnation, `U²/2g` = 0,46 m, amplifiée par le
   couvercle partiel). Recoupage CPU 25 ms par pas sur 786 000 mailles (les boucles entières du cœur et de la géométrie dominent).
+- **P2 fini** — instrument 3 (déclaré avant) : maximum à 6,5° (transverses), local à 17°, amplitude ÷2 entre 21 et 25° → **(1) manqué**,
+  pas de quatrième instrument. (2) tenu. (3) 25,5 ms : **A329** ouverte (les boucles entières du recoupage sur un grand domaine ; 6.4 à
+  0,82 ms ne vaut que pour un petit domaine — la liste le dit).
+- **P3** — preuve SILLAGE-S517 ; listes 4.13 et 6.4 (limite) ; A329 ; index ; journal.
 

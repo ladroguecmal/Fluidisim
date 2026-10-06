@@ -1384,6 +1384,34 @@ pub fn recevoir_sillage() -> Result<(), String> {
                 }
             }
         }
+        // Le troisième instrument (S517, déclaré avant son essai) : la moyenne de |η| le long des rayons issus de l'étrave, de 10 à 24 m,
+        // des deux côtés, pour chaque angle de 5 à 35° ; le sillage de Kelvin a son maximum sur la ligne des cuspides.
+        let etrave = xh + 2.;
+        let (mut theta_max, mut moyenne_max, mut profil) = (0f64, 0f64, String::new());
+        for k in 0..=60 {
+            let theta = (5. + 0.5 * k as f64).to_radians();
+            let (mut somme, mut n_pts) = (0f64, 0usize);
+            for r in (0..=56).map(|q| 10. + 0.25 * q as f64) {
+                for cote in [1f64, -1.] {
+                    let (x, y) = (etrave - r * theta.cos(), yc + cote * r * theta.sin());
+                    let (i, j) = ((x / d.dx as f64).floor(), (y / d.dx as f64).floor());
+                    if i < 0. || j < 0. || i as usize >= d.nx || j as usize >= d.ny {
+                        continue;
+                    }
+                    somme += (eta[j as usize * d.nx + i as usize] - d.z0()).abs() as f64;
+                    n_pts += 1;
+                }
+            }
+            let m = somme / n_pts.max(1) as f64;
+            if m > moyenne_max {
+                moyenne_max = m;
+                theta_max = theta.to_degrees();
+            }
+            if k % 4 == 0 {
+                profil.push_str(&format!(" {:.0}:{:.4}", theta.to_degrees(), m));
+            }
+        }
+        println!("SILLAGE_S517 rayons angle_du_maximum_deg={theta_max:.2} kelvin_deg=19.47 ecart_deg={:.2} profil{profil}", theta_max - 19.47);
         let nn = points.len() as f64;
         let (sx, sy) = (points.iter().map(|p| p.0).sum::<f64>(), points.iter().map(|p| p.1).sum::<f64>());
         let (sxx, sxy) = (points.iter().map(|p| p.0 * p.0).sum::<f64>(), points.iter().map(|p| p.0 * p.1).sum::<f64>());

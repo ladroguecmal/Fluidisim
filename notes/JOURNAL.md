@@ -439,3 +439,12 @@ revue de méthode**.
 une protection élargie : un corps d'essai n'a que les degrés de liberté que la référence décrit (la bouée qui tangue sous sa traînée, la
 coque qui rebondit, malgré ADR-228) ; une nouvelle : un ordre de grandeur calculé avant d'être écrit (trois chiffres de plan faux, de tête).
 METHODE : 31 protections ; L387–L388. Lot des registres. Maillons **1**. Suivant : **S517**, un point partiel proche de son périmètre.
+
+## S517 — 2026-10-06 — la coque en marche et son sillage ; A329
+
+**Entrée.** En autonomie ; 4.13 (« la coque en marche et sa vague d'étrave »). **Fait** ([preuve](../docs/validation/SILLAGE-S517.md)) : un banc
+de 786 000 mailles sur la carte, la coque de la porte D à 3 m/s, le cœur en découpeur. **Mesuré** : une vague d'étrave bornée (0,72 m sur
+l'étrave, la stagnation amplifiée par le couvercle partiel) et un sillage stable, de forme compatible avec Kelvin (cuspide locale à 17°,
+bord vers 23°). **Critère de l'angle manqué** : trois instruments, le troisième déclaré avant son essai (6,5°) ; aucun seuil retenu après
+coup. Et **A329** : le recoupage coûte 25 ms sur ce grand domaine — 6.4 n'est sous 1 ms que dans un petit domaine (la liste le dit).
+Maillons **0** (4.13 avance). Suivant : **S518, A329** — le recoupage limité à sa boîte jusque dans l'extraction et l'ombre.

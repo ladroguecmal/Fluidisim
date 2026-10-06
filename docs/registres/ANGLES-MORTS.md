@@ -4590,3 +4590,12 @@ linéaire n'a pas de limite — hors du modèle, pas un défaut. Déclencheur : 
 Contre une référence vraiment plus fine (1,56 ms), toutes les normes convergent à l'ordre 1 à 1,6 ; le δ linéaire est d'ordre 1 en temps (le
 témoin, coque fixe : 5 % à 12,5 ms), et la coque mobile multiplie la constante par cinq (25 %). S505 jugeait contre une référence deux fois
 plus fine seulement. Pour 10 % sur le champ proche, un pas de ≈ 6 ms.
+
+**A329 — S517, 2026-10-06 (sévérité 2, ouverte). Le recoupage d'une coque qui bouge garde des boucles entières : 25 ms par pas sur un
+grand domaine.** 6.4 a été validée (S509) sur la coque de la porte D dans un domaine de 12 288 mailles : 0,82 ms de CPU par pas. Sur
+786 000 mailles (le banc du sillage, 64 × 48 × 4 m à 25 cm), le même recoupage coûte **25 ms** ([SILLAGE-S517](../validation/SILLAGE-S517.md)) :
+ce qui reste entier dans `set_solid_rigid` (les copies des ouvertures, les boucles de vitesses de faces, les colonnes solides, le dépôt), la
+géométrie reconstruite (`decoupee`) et la comparaison à l'ombre sur toute la grille croissent avec elle, la boîte de la coque non.
+**Conséquence** : une coque dans un domaine δ de jeu (des centaines de milliers de mailles) ne tient pas le budget. Déclencheur : **avant une
+coque dans un domaine δ de plus de 50 000 mailles**. Premiers remèdes : l'extraction et l'ombre limitées à la boîte du recoupage (comme les
+faces en place, S509), le dépôt renormalisé seulement là où il change si le bit le permet.
