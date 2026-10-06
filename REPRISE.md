@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 02:34 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 02:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S495 — 6.2, le sillage de pression derrière la requête du corps ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S494 — les impacts de W poussent les corps (6.2) ([journal](notes/JOURNAL.md)). Avant : S493 (6.5 validée : le décor qui perce la surface, sur la carte)
 Session suivante : **S495 — 6.2, le sillage de pression derrière la requête du corps** : l'autre part de W (`bound_pressure`) dans `MixedWater` ; un corps dans le sillage d'un autre ; ordre de grandeur (le second ordre compté) et critères avant (ADR-224). **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà. S496 : la revue de méthode (ADR-222).
 Maillons        : 0 — S494 : les impacts de W poussent les corps (6.2 avancée)

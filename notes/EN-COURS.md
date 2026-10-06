@@ -62,37 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S494 — **terminée**. En autonomie, **6.2, les forces de W sur un corps** : le corps rigide (S331–S336) n'interroge que B
-(`BackgroundWater`) ; « Manquent W, le courant, la turbulence ». Les impacts de W (`RadialImpact`, composés à B par
-`composition::compose`, ADR-077) n'entrent pas dans sa requête.
+Session : S495 — **en cours**. En autonomie, **6.2, le sillage de pression derrière la requête du corps** : `MixedWater` (S494) compose
+B et les impacts ; l'autre part de W, la pression d'un objet en marche (`bound_pressure`, ADR-103), n'y entre pas. Un corps ne sent pas
+le sillage d'un autre.
 
-**Ce que la session fait.** Une requête `MixedWater` (B + impacts confirmés, par la composition autoritaire, refus comptés et repliés
-sur B) derrière `WaterQuery` ; l'accélération de W par différence centrée de 1 ms. Un essai : une bouée de 0,5 × 0,5 × 0,4 m à
-500 kg/m³ à 5 m d'un impact d'1 kJ (λ = 4 m), sur une houle de B.
+**Ce que la session fait.** La composition de `mixed_water::sample_world_batch` (B, impacts, pression ; ADR-077) extraite par point, au
+bit, et exposée au point local (`mixed::sample_local`) ; `MixedWater` la prend quand une pression est publiée à l'instant demandé. Un
+essai : une source de pression gaussienne (σ = 1 m) en marche à 3 m/s, une bouée posée à 3 m de sa route.
 
-**Ordre de grandeur, écrit avant.** Un impact d'1 kJ sur ≈ 4 m de rayon : `a ≈ √(2E/(ρgπR²))` ≈ 6 cm au centre, ≈ 1 à 3 cm à 5 m ;
-pente `k·a` ≈ 0,03 à 0,1. La bouée : tirant 0,195 m, `ωₙ = √(g/tirant)` ≈ 7,1 rad/s contre `ω` ≈ 3,9 pour λ = 4 m — elle suit
-la surface amplifiée de ≈ 1,4 ; son empreinte voit la pente à `sin(kL/2)/(kL/2)` ≈ 0,975.
+**Ordre de grandeur, écrit avant.** Creux sous la source ≈ `p₀/(ρg)` : 2 cm pour 200 Pa ; sillage de Kelvin à 3 m de la route ≈ 0,5 à
+1 cm, onde transverse `λ = 2πU²/g` ≈ 5,8 m, divergentes ≈ 2 m. Le second ordre cumulé `k·a·ω·t` (la leçon de S494) : ≈ 0,5 à 200 Pa
+sur 3 s — le critère horizontal se tient donc au régime linéaire, 2 Pa (≈ 0,005). L'empreinte d'une bouée de 0,25 m sur 2 m : ≈ 0,7 %.
 
-**Critères, écrits avant.** (1) sans impact, la requête mixte rend la trajectoire de `BackgroundWater` à 10⁻⁶ m sur 20 s (la seule
-renormalisation de la normale) ; (2) le pilonnement suit l'oscillateur de référence `m·z'' = ρgA(η̄ − z)` forcé par la surface moyenne
-sous l'empreinte (RK4 à 0,1 ms) à 3 % de max|η̄| (prévu < 1 %), et l'impact fait bouger la bouée d'au moins 30 % de son amplitude ;
-(3) le déplacement horizontal suit l'excursion de la particule de surface `∫u dt` à 5 % de son maximum (prévu ≈ 2,5 %, l'empreinte) ;
-(4) aucun refus de la composition. 6.2 reste partielle (le sillage de pression, le courant, la turbulence).
+**Critères, écrits avant.** (1) l'extraction au bit : les essais de la composition mixte inchangés (`tests_mixed_water`), et sans pression,
+`MixedWater` rend S494 à 10⁻⁶ m ; (2) à 200 Pa, le pilonnement suit l'oscillateur forcé par la surface sous l'empreinte à 3 % de max|η̄|,
+et le sillage fait bouger la bouée d'au moins 30 % de max|η̄_P| ; (3) à 2 Pa, le déplacement horizontal suit `∫u dt` à 5 % de son maximum
+(bouée de 0,25 m) ; (4) aucun refus. Avec S494, W entier (impacts et pression) derrière la requête du corps ; 6.2 reste partielle (le
+courant, la turbulence).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Prepared::sample_local`, `MixedWater` ; essais (1)–(4).
-- [x] **P3** — preuve ; liste 6.2 ; lot des registres (dû) ; rituel.
+- [ ] **P2** — l'extraction au bit ; `MixedWater` avec la pression ; essais (1)–(4).
+- [ ] **P3** — preuve ; liste 6.2 ; rituel.
 
 ### Notes de reprise
-- **P2** — (1) 2,0·10⁻¹⁰ m sur 20 s. (2) pilonnement à 0,81 % de max|η̄| (1 kJ sur 2 cm), l'impact seul : 6,9 cm de pilonnement pour
-  3,8 cm de surface. (3) **manqué d'abord** : à 1 kJ l'écart horizontal vaut l'excursion (7,65 cm) — une **dérive du second ordre**
-  vers l'extérieur ; ×97,5 de 10 J à 1 kJ (second ordre). Au linéaire (0,1 J), le reste est l'empreinte : 4,90 % à 0,5 m, 1,26 % à
-  0,25 m (÷ 3,90, en L²). Critère (3) réécrit après le manqué, dit dans l'essai. (4) zéro refus. Impasses : 64 modes refusés
-  (`Resolution`, 32 m sur 12 s) → 256 ; une bouée étroite et haute (0,25 × 0,25 × 0,4) chavire → proportions gardées ; départ au
-  repos dans la houle → 0,21 m de retard (vitesse de l'eau au départ, comme S333). Observation : sous B seule, l'écart du pilonnement à
-  l'oscillateur temporel vaut 3·10⁻⁵ à 1,4·10⁻⁴ m (2,5 mm à 2 cm de houle), non proportionnel — sous 1 % de la houle, cause non
-  cherchée. Suite : 653 essais.
-- **P3** — preuve FORCES-W-S494 ; liste 6.2 ; lot : feuille de route (5 / 72 / 43, S492–S494), index ; journal.
