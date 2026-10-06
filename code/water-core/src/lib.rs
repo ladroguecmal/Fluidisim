@@ -51,6 +51,8 @@ pub mod rigid_body;
 pub mod current_field;
 /// S540 — C13, la remontée des petites bulles (SPEC-002 §2).
 pub mod bulle;
+/// S570 — danger et traversabilité (liste 7.7 ; ADR-018, SPEC-006 §5).
+pub mod traversabilite;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
