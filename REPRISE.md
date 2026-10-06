@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 08:08 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 08:10 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S507 — A328, la convergence en dt près d'une coque mobile ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S506 — la cinquième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S505 (C23 sur le système)
 Session suivante : **S507 — A328** : la convergence en `dt` du δ 3D près d'une coque mobile — localiser avant de remédier (ADR-226 D1) : la coque en translation lente (0,5 m/s, sous-critique), trois pas au moins (ADR-230 D1) ; éteindre un à un les termes de la mise à jour par pas (faces ouvertes à la vitesse de la paroi, dépôt, transfert de S334) contre un témoin. Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (`calcul.py etat`).
 Maillons        : 1 — S506 : la revue de méthode (ADR-230), sans capacité

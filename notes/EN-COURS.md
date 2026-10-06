@@ -62,15 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S506 — **terminée**. En autonomie, **la cinquième revue de méthode** (ADR-222 D4) : les frictions de S502–S505.
+Session : S507 — **en cours**. En autonomie, **A328** — le δ 3D à coque mobile converge lentement en `dt` près de la coque (S505). Et le lot
+des registres, dû en S506.
 
-**Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
-table ; `etat_projet --check` à zéro.
+**Ce que la session fait.** Localiser avant de remédier (ADR-226 D1) : la coque en translation sous-critique (0,5 et 2 m/s, départ en
+rampe), quatre pas (ADR-230 D1) ; trois normes de l'écart au plus fin : le maximum sur la surface, le maximum hors de la coque (à une
+maille près de son empreinte), l'écart quadratique ; puis, si le défaut reste dans le champ, éteindre un à un les termes de la mise à jour
+par pas contre un témoin.
+
+**Ordre de grandeur, écrit avant.** Le bord de la coque est une discontinuité qui se déplace d'une fraction de maille par pas : au bord,
+l'écart **maximal** est de l'ordre de la hauteur portée par la colonne coupée, et ne décroît en `dt` que si la maille décroît aussi — un
+ordre ≈ 0 attendu au bord ; hors de la coque, l'ordre du schéma (1, le pas de la géométrie appliqué d'un coup) ; en norme quadratique, le
+bord pèse en `√(colonnes du bord / colonnes)` ≈ 0,1.
+
+**Critères, écrits avant.** (1) les trois normes publiées sur quatre pas aux deux vitesses ; (2) si l'ordre hors de la coque et l'ordre
+quadratique sont ≥ 0,8 aux deux vitesses : A328 se réduit au bord de la coque (une propriété d'une paroi qui se déplace sur une grille
+fixe, de résolution : A317) — levée, réécrite ; sinon, la suite : éteindre les termes ; (3) le lot des registres.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
+- [ ] **P2** — les trois normes, quatre pas, deux vitesses (calcul détaché).
+- [ ] **P3** — verdict sur A328 ; preuve ; lot des registres ; rituel.
 
 ### Notes de reprise
-- **P2** — ADR-230 : six frictions ; une protection (D1, la référence éprouvée convergée), une pratique (D2, l'éveil à chaque reprise) ; METHODE (29), L385, BOUSSOLE, index.
