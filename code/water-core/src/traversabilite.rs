@@ -57,6 +57,10 @@ pub struct Echantillon {
     pub hazard: f32,
     pub profondeur: Profondeur,
     pub danger: Danger,
+    /// S574 : l'épaisseur de glace porteuse, m (0 sans glace).
+    pub ice_h: f32,
+    /// S574 : sa charge admissible, kg — dérivée une fois, ici (Gold, `glace.rs` ; SPEC-006 §5.1).
+    pub ice_capacity_kg: f32,
 }
 
 /// Une entrée refusée : profondeur ou courant négatifs ou non finis, pas ou horizon non positifs.
@@ -76,7 +80,20 @@ pub fn echantillon(depth: f32, flow_speed: f32) -> Result<Echantillon, Refus> {
     let profondeur = [Profondeur::Negligeable, Profondeur::Ralentie, Profondeur::Entravee, Profondeur::Precaire, Profondeur::Nage]
         [classe(depth, SEUILS_PROFONDEUR)];
     let danger = [Danger::Faible, Danger::PourCertains, Danger::PourLaPlupart, Danger::PourTous][classe(hazard, SEUILS_DANGER)];
-    Ok(Echantillon { depth, flow_speed, hazard, profondeur, danger })
+    Ok(Echantillon { depth, flow_speed, hazard, profondeur, danger, ice_h: 0.0, ice_capacity_kg: 0.0 })
+}
+
+/// **S574 — l'échantillon d'une cellule couverte de glace** : celui de [`echantillon`], plus l'épaisseur de glace porteuse (m) et sa
+/// charge admissible (Gold).
+pub fn echantillon_glace(depth: f32, flow_speed: f32, ice_h: f32) -> Result<Echantillon, Refus> {
+    let e = echantillon(depth, flow_speed)?;
+    let capacite = crate::glace::charge_admissible_kg(ice_h as f64).map_err(|_| Refus)?;
+    Ok(Echantillon { ice_h, ice_capacity_kg: capacite as f32, ..e })
+}
+
+/// **S574 — un agent de `masse_kg` peut-il marcher sur la glace de cet échantillon ?**
+pub fn porte_par_la_glace(masse_kg: f32, e: &Echantillon) -> bool {
+    e.ice_h > 0.0 && masse_kg <= e.ice_capacity_kg
 }
 
 /// Un franchissement prédit : dans `delai_s` secondes, la profondeur passe le seuil `seuil_m`, en montant (`trend` = +1) ou en

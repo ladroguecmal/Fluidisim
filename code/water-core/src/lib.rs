@@ -53,6 +53,8 @@ pub mod current_field;
 pub mod bulle;
 /// S570 — danger et traversabilité (liste 7.7 ; ADR-018, SPEC-006 §5).
 pub mod traversabilite;
+/// S574 — la glace : Stefan, Gold (listes 7.6, 7.7 ; SPEC-002 §4).
+pub mod glace;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
