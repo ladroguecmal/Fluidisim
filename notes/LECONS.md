@@ -6641,3 +6641,9 @@ ouvertures (ADR-242 D1).
 
 **S559 — le commit après l'anomalie.** `rituel … > fichier; tail …; git commit` : le rituel a rendu « --check = 1 » (le décompte de la liste)
 et le commit est parti. Le code de sortie était juste ; la chaîne l'ignorait. S560 a gardé son commit par le code (ADR-242 D2).
+
+## L402
+
+**S562 — le nombre écrit avant d'être calculé.** Le plan de l'écrémeur disait « la charge à 1 % vers 190 s » ; le script, lancé après, donnait
+220 s. La règle « calculer avant d'écrire » existait (ADR-237 D1) ; elle a été suivie à l'envers. Le plan de S564 calculait ses nombres et les
+écrivait lui-même, par une chaîne formatée : un nombre de tête n'y avait pas de place (ADR-243 D1).

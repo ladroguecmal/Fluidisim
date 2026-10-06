@@ -835,3 +835,10 @@ revue à S566.
 indépendantes** : une bissection (trois réservoirs), Hardy Cross (une maille). **Fait** ([preuve](../docs/validation/RESEAU-CHARGE-S565.md)) :
 `hydro_charge.rs`, Newton sur les charges des jonctions, Gauss dans un tampon de l'appelant. **Mesuré** : les deux cas à 10⁻⁹, en 4 et 8
 itérations. Maillons **1** (5.8 : absent → partiel). Suivant : **S566, la dix-septième revue de méthode**.
+
+## S566 — 2026-10-06 — la dix-septième revue de méthode (ADR-243)
+
+**Entrée.** En autonomie ; revue due. **Friction** : une valeur du plan écrite avant d'être calculée (S562) — **protection élargie** : les
+nombres d'un plan sont écrits par le script qui les calcule (ADR-243 D1, L402). Un heredoc protégé (S562) n'a rien cassé : la règle reste.
+Ont tenu : le commit gardé par le code du rituel, les références par des méthodes indépendantes, le périmètre non réduit. Maillons **1**.
+Suivant : **S567**, un point partiel.

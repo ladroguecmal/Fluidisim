@@ -62,34 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S565 — **terminée**. En autonomie, **5.8 — le réseau fermé sous pression** (absent ; « reporté en v2 » par ADR-010 §4 — la v1
-est atteinte et la liste entière est l'objectif, ADR-190). Première pièce : **la solution d'un réseau de conduites en charge** — les
-charges aux jonctions et les débits, les réservoirs (les nœuds de V à surface libre) imposant leurs charges.
+Session : S566 — **terminée**. En autonomie, **la dix-septième revue de méthode** (ADR-222 D4 ; S561–S565).
 
-**Ce que la session fait.** `hydro_charge.rs` : des conduites `h_a − h_b = R·Q·|Q|` (une résistance quadratique, Darcy–Weisbach en régime
-turbulent rugueux) entre des sommets fixes (charges données) et des jonctions (inconnues, une demande chacune) ; Newton sur les charges des
-jonctions, la matrice jacobienne (un laplacien pondéré) résolue par élimination de Gauss à pivot partiel dans un tampon de l'appelant
-(I-06), un pas amorti si le résidu croît ; sous 1 µm de perte, une conduite est linéarisée (la dérivée de la racine y est infinie). Une
-jonction sans chemin vers une charge fixe est refusée. Le couplage au pas de V (les réservoirs qui se vident par le réseau) viendra
-ensuite.
-
-**Références, calculées avant, par des méthodes indépendantes** (ADR-239 D1). (1) *Trois réservoirs* (100, 80, 50 m ; `R` = 2 000, 3 000,
-1 500 s²/m⁵) reliés à une jonction — par bissection sur la continuité : **`h_j` = 77,455794994 m**, débits 0,106170158 ; 0,029121613 ;
-−0,135291771 m³/s. (2) *Une maille* — un réservoir à 60 m relié à J0, la maille J0–J1–J2–J3, demandes 0,06 ; 0,08 ; 0,04 m³/s — **par
-Hardy Cross** (une autre méthode : corrections de débit dans la maille) : charges J0 43,800000000, J1 34,964659639, J2 33,231017516, J3
-34,924075772 m ; débits J0→J1 0,093996491217, J0→J3 0,086003508783 m³/s.
-
-**Quantum** (ADR-236 D1) : les références publiées à 10⁻⁹ m. **Critères, écrits avant.** (1), (2) les charges à 10⁻⁸ m (rapport 10), les
-débits à 10⁻⁹ m³/s ; la continuité à chaque jonction sous 10⁻¹² m³/s ; moins de 30 itérations. (3) Refus : une jonction isolée des
-charges fixes (`Domain`), une résistance non positive (`Domain`), un tampon trop court (`Capacity`).
+**Ce que la session fait.** Relu : S561 (la revue), S562 (l'écrémeur ; une valeur de tête ; un heredoc), S563 (l'air avec plusieurs
+liquides ; le périmètre gardé), S564 (le seuil ; les nombres écrits par le script du plan), S565 (le réseau en charge ; deux méthodes
+indépendantes). **ADR-243** : D1, les nombres d'un plan écrits par le script qui les calcule ; L402 ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `hydro_charge.rs` et ses essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 5.8 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-243, METHODE, L402, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — trois réservoirs en 4 itérations, la maille en 8, à 10⁻⁹ des références ; continuité 5·10⁻¹⁷ ; refus. Suite 733.
-- **P3** — preuve RESEAU-CHARGE-S565 ; liste 5.8 (absent → partiel) et décompte ; index ; journal.
-
