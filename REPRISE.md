@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 03:33 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 03:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S496 — la troisième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S495 — le sillage d'un objet en marche pousse un corps (6.2) ([journal](notes/JOURNAL.md)). Avant : S494 (les impacts de W poussent les corps)
 Session suivante : **S496 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S492–S495 — dont S495, trois remèdes essayés avant de séparer les chaînes (corps, champ, départ), et l'ordre de grandeur qui oubliait le second ordre cumulé (S494) et la queue de la source (S495). **Sans attendre de « Continue »** ; `outils/eveil.py` tient la machine éveillée jusqu'à 15 h 25 — le relancer au-delà.
 Maillons        : 0 — S495 : le sillage pousse les corps (W entier derrière la requête du corps)

@@ -62,48 +62,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S495 — **terminée**. En autonomie, **6.2, le sillage de pression derrière la requête du corps** : `MixedWater` (S494) compose
-B et les impacts ; l'autre part de W, la pression d'un objet en marche (`bound_pressure`, ADR-103), n'y entre pas. Un corps ne sent pas
-le sillage d'un autre.
+Session : S496 — **en cours**. En autonomie, **la troisième revue de méthode** (ADR-222 D4, toutes les cinq sessions) : les frictions de
+S492–S495.
 
-**Ce que la session fait.** La composition de `mixed_water::sample_world_batch` (B, impacts, pression ; ADR-077) extraite par point, au
-bit, et exposée au point local (`mixed::sample_local`) ; `MixedWater` la prend quand une pression est publiée à l'instant demandé. Un
-essai : une source de pression gaussienne (σ = 1 m) en marche à 3 m/s, une bouée posée à 3 m de sa route.
+**Ce que la session fait.** Relire les journaux et notes de S492–S495 ; pour chaque friction, son coût et sa suite (protection nouvelle,
+rien à ajouter, fait) ; un ADR ; METHODE et LECONS pour les protections nouvelles seulement ; la boussole.
 
-**Ordre de grandeur, écrit avant.** Creux sous la source ≈ `p₀/(ρg)` : 2 cm pour 200 Pa ; sillage de Kelvin à 3 m de la route ≈ 0,5 à
-1 cm, onde transverse `λ = 2πU²/g` ≈ 5,8 m, divergentes ≈ 2 m. Le second ordre cumulé `k·a·ω·t` (la leçon de S494) : ≈ 0,5 à 200 Pa
-sur 3 s — le critère horizontal se tient donc au régime linéaire, 2 Pa (≈ 0,005). L'empreinte d'une bouée de 0,25 m sur 2 m : ≈ 0,7 %.
-
-**Critères, écrits avant.** (1) l'extraction au bit : les essais de la composition mixte inchangés (`tests_mixed_water`), et sans pression,
-`MixedWater` rend S494 à 10⁻⁶ m ; (2) à 200 Pa, le pilonnement suit l'oscillateur forcé par la surface sous l'empreinte à 3 % de max|η̄|,
-et le sillage fait bouger la bouée d'au moins 30 % de max|η̄_P| ; (3) à 2 Pa, le déplacement horizontal suit `∫u dt` à 5 % de son maximum
-(bouée de 0,25 m) ; (4) aucun refus. Avec S494, W entier (impacts et pression) derrière la requête du corps ; 6.2 reste partielle (le
-courant, la turbulence).
+**Critères, écrits avant.** Une protection n'entre que pour une erreur **répétée** ou d'un coût d'au moins un essai long ; chacune a sa
+leçon ; aucune protection existante n'est dupliquée (relire la table avant d'écrire) ; `etat_projet --check` à zéro.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'extraction au bit ; `MixedWater` avec la pression ; essais (1)–(4).
-- [x] **P3** — preuve ; liste 6.2 ; rituel.
+- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
 
 ### Notes de reprise
-- **P2 (en cours)** — l'extraction (`compose_local`, `mixed::sample_local`) : 11 560 points au bit contre `Prepared::sample_local` ;
-  S494 inchangé aux chiffres près. `MixedWater.pressure`. **Critère 3 manqué d'abord à 40 %, au premier ordre** (même rapport à 2 et
-  200 Pa). Impasses : la bouée 0,25 × 0,25 × 0,2 roule (GM ≈ 0 avec 4 points par axe) → bouée plate (0,4 × le côté) — l'écart ne
-  change pas ; le corps égale `∫∫−g∇η` au µm : **l'écart est dans le champ** — `du/dt ≠ −g∇η` à 9 m de la source pendant ≈ 0,5 s
-  (résidu ≈ 10⁻⁴ m/s² pour 2 Pa) : la recette d'essai 16 × 24 (`tests_mixed_water`) ne reconstruit la gaussienne qu'à
-  `r ≲ 24/k_max` ≈ 4 m ; au-delà, une pression repliée agit sur l'eau, pas sur le corps. → recette 64 × 128, coupure 3 (le nombre de
-  nœuds du sillage de production S212).
-  **Recette 64 × 128 : 215 %** — l'hypothèse ne suffisait pas. Au point fixe (0, 3), le résidu `du/dt + g∇η` s'accumule au passage de
-  la source : la **vraie** queue de la gaussienne à 3σ (`0,011·p₀`), dont le gradient l'emporte sur la pente du sillage (les deux ∝ p₀ ;
-  rapport ≈ 3/(k·0,01)) — l'ordre de grandeur l'avait dit négligeable sans la comparer à la pente. → bouée en (−6, 6), à 6σ
-  (e⁻¹⁸), route de −15 à 15 m sur 10 s, 12 s de mesure. Coût : ≈ 6,5 min l'essai (4 096 modes, ≈ 150 échantillons par pas).
-  **6σ, coupure 3 : 25 % ; coupure 6 : 19 %** — encore au premier ordre. Diagnostic posé enfin (champ seul, sans pas du corps, au point
-  de la bouée) : résidu `du/dt + g∇η` 4·10⁻⁸ m — **le champ est cohérent** ; `∫u − ∫∫(−g∇η)` croît **linéairement** : `u₀·t`, l'eau a
-  une vitesse au départ (la source naît en marche), la bouée partait au repos — l'erreur de départ de S494, côté pression. → lâchée à
-  la vitesse de l'eau composée. Leçon : trois remèdes essayés avant de séparer les chaînes (corps / champ / départ) — la séparation
-  aurait dû venir d'abord (ADR-224 D1 : l'ordre de grandeur d'un remède — ici, le remède n'était pas diagnostiqué).
-- **P2 fait** — lâchée à la vitesse de l'eau : (3) **0,85 %** à 2 Pa (0,25 m) ; à 200 Pa 12,5 % (second ordre, publié). (2) 0,05 % et
-  0,03 % ; sillage : 9,6 mm de pilonnement pour 8,4 mm de surface. (4) 0. L'essai du sillage `#[ignore]` (≈ 8,5 min). Suite : 654
-  essais, 17 ignorés.
-- **P3** — preuve SILLAGE-CORPS-S495 ; liste 6.2 ; index ; journal.
