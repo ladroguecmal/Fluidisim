@@ -62,19 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S496 — **terminée**. En autonomie, **la troisième revue de méthode** (ADR-222 D4, toutes les cinq sessions) : les frictions de
-S492–S495.
+Session : S497 — **en cours**. En autonomie, **6.3, un corps en marche produit son sillage** : l'émetteur de sillage (ADR-104) enchaîne
+des tronçons déclarés par l'hôte ; ADR-103 : « une trajectoire déclarée, pas un flux de poses moteur ». Rien ne choisit les tronçons
+depuis un corps qui bouge.
 
-**Ce que la session fait.** Relire les journaux et notes de S492–S495 ; pour chaque friction, son coût et sa suite (protection nouvelle,
-rien à ajouter, fait) ; un ADR ; METHODE et LECONS pour les protections nouvelles seulement ; la boussole.
+**Ce que la session fait.** `RigidBody::wake_leg` : le tronçon suivant de l'émetteur, visé du curseur vers la position **prédite** du
+corps à la fin du tronçon (`x + v·Δ`), sous sa charge `m·g` ; le chemin de la source reste continu (l'émetteur l'exige) et se recale à
+chaque tronçon. Un essai : la coque de la porte D (4 × 1,6 × 1 m, 3 200 kg, 31,4 kN) menée par le jeu sur un cercle de 20 m à 3 m/s,
+tronçons de Δ = 1, 0,5, 0,25 s, contre la même trajectoire déclarée exacte (tronçons de 0,2 s sur le cercle).
 
-**Critères, écrits avant.** Une protection n'entre que pour une erreur **répétée** ou d'un coût d'au moins un essai long ; chacune a sa
-leçon ; aucune protection existante n'est dupliquée (relire la table avant d'écrire) ; `etat_projet --check` à zéro.
+**Ordre de grandeur, écrit avant (ADR-226 D3).** L'erreur de visée en fin de tronçon : `δ = ½·(U²/R)·Δ²` = 5,6 cm à 0,5 s ; elle se
+recale à chaque tronçon (pas d'accumulation). Le terme concurrent, l'onde : `k·δ` avec `λ = 2πU²/g` ≈ 5,8 m → ≈ 6 % au plus, ≈ 2 % en
+moyenne sur le tronçon ; en `Δ²`.
+
+**Critères, écrits avant.** (1) le curseur suit le corps : à chaque fin de tronçon, l'écart au corps ≤ `½·(U²/R)·Δ²` × 1,2 (la formule
+dans l'essai) ; (2) la charge publiée : `P₀ = m·g/(2πσ²)` à l'arrondi ; (3) le sillage émis contre le déclaré, aux points d'une grille
+autour du cercle, à trois instants : ≤ 10 % de max|η| à Δ = 0,5 s (prévu 2 à 6 %), et un ordre ≥ 1,7 sur Δ = 1 / 0,5 / 0,25 s ; (4)
+aucune admission refusée. 6.3 : le corps en marche couplé à la source.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; rituel.
+- [ ] **P2** — `wake_leg` ; l'essai (1)–(4).
+- [ ] **P3** — preuve ; lot des registres (dû) ; rituel.
 
 ### Notes de reprise
-- **P2** — ADR-226 : huit frictions, trois protections (D1 localiser avant de remédier, D2 même état de départ vitesses comprises, D3 l'ordre de grandeur contre le terme concurrent et sur la durée) ; METHODE (27), L381–L383, BOUSSOLE, index.
