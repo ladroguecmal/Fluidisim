@@ -65,6 +65,44 @@ pub fn prend_en_plaque(hs: f64) -> Result<bool, Refus> {
     Ok(fini_positif(hs)? < HS_PLAQUE)
 }
 
+// --- S575 — la glace d'un plan d'eau de V (C15 ; ADR-203 D6 : le gel des contenants passe par V).
+
+/// Un quantum de gel : 917 ml d'eau deviennent 1 000 ml de glace — `917·1000 = 1000·917`, la masse à l'entier.
+pub const QUANTUM_EAU_ML: i64 = 917;
+/// Le volume de glace d'un quantum, ml.
+pub const QUANTUM_GLACE_ML: i64 = 1000;
+
+/// **S575 — amener la glace d'un nœud de V vers l'épaisseur visée.** La glace est une couche des liquides de V (ADR-241), de densité
+/// 917, au-dessus de l'eau : `ligne` est la composition du nœud, `eau` et `glace` les indices de leurs liquides, `aire_m2` l'aire de la
+/// surface libre. Le volume de glace visé est `aire·h_visee` ; on gèle (ou fond) par quanta entiers vers lui — chaque quantum change
+/// `volume_ml` de ±83 ml. Rend le nombre de quanta (positif : gel, négatif : fonte). Refus, sans rien écrire : indices, épaisseur ou aire
+/// invalides, une ligne qui ne somme pas au volume, la capacité du nœud dépassée.
+pub fn ajuster_glace(node: &mut crate::hydro_network::HydroNode, ligne: &mut [i64], eau: usize, glace: usize, aire_m2: f64, h_visee: f64)
+    -> Result<i64, Refus> {
+    if eau >= ligne.len() || glace >= ligne.len() || eau == glace || !(aire_m2 > 0.0) || !aire_m2.is_finite() {
+        return Err(Refus);
+    }
+    fini_positif(h_visee)?;
+    if ligne.iter().any(|v| *v < 0) || ligne.iter().sum::<i64>() != node.volume_ml {
+        return Err(Refus);
+    }
+    let visee_ml = aire_m2 * h_visee * 1e6;
+    let ecart = visee_ml - ligne[glace] as f64;
+    let q = if ecart >= 0.0 {
+        ((ecart / QUANTUM_GLACE_ML as f64).floor() as i64).min(ligne[eau] / QUANTUM_EAU_ML)
+    } else {
+        -(((-ecart) / QUANTUM_GLACE_ML as f64).ceil() as i64).min(ligne[glace] / QUANTUM_GLACE_ML)
+    };
+    let croit = q * (QUANTUM_GLACE_ML - QUANTUM_EAU_ML);
+    if node.volume_ml + croit > node.capacity_ml {
+        return Err(Refus);
+    }
+    ligne[eau] -= q * QUANTUM_EAU_ML;
+    ligne[glace] += q * QUANTUM_GLACE_ML;
+    node.volume_ml += croit;
+    Ok(q)
+}
+
 #[cfg(test)]
 #[path = "tests_glace.rs"]
 mod tests;
