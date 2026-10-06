@@ -62,41 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S523 — **terminée**. En autonomie, **C07 peu profond, la branche supercritique** : par 5 m de fond, le sillage au-delà du
-critique est contenu dans un coin de demi-angle `arcsin(1/Fr_h)` (CAS-CANONIQUES C07, SPEC-001 §5) ; W en profondeur uniforme (S522) le
-rend mesurable.
+Session : S524 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S522–S523), puis **A331** — W ne dit pas
+quand un point échantillonné sort du domaine honnête de son chemin (S523 : 23–62 % d'erreur silencieuse). Le rayon d'ADR-132
+(`2π·angulaire/(3·coupure)`) a été écrit pour la distance à la source ; S523 suggère qu'il vaut pour **la distance du chemin émetteur aux
+points**. Le calibrer, puis le vérifier.
 
-**Ce que la session fait.** `c07_profondeur` généralisé (vitesse, durée, grille en arguments ; ses défauts rendent S522) ; à `U` = 10 et
-15 m/s (`Fr_h` = 1,43 et 2,14), 24 s, σ 2 m, recette 512 × 256 à coupure 3, la zone de mesure près de l'origine (rayon honnête 179 m).
-**L'instrument éprouvé d'abord sur la référence de la même famille** (ADR-233 : profondeur finie, supercritique, même source) — la
-moyenne de |η| le long des rayons issus de la source, de 20 à 60 m derrière, l'angle de son maximum (le front où s'empilent les ondes
-longues) ; on regarde le profil ; s'il ne lit pas `arcsin(1/Fr_h)` sur la référence, il est changé avant W. Puis W, mêmes points.
+**Ce que la session fait.** (a) **La calibration** : le montage de S523 (5 m de fond, 10 m/s, σ 2 m, recette 512 × 256 à coupure 3 :
+rayon 179 m), la zone de 80 à 100 m derrière la source, `|y|` ≤ 100 m ; la durée varie, et avec elle `D`, la plus grande distance d'un point
+du chemin à un point de la zone. W contre la référence (écart quadratique). (b) **La garde** : `spectral_pressure::farthest_emission(chemin,
+min, max)` — la plus grande distance d'une extrémité de segment à un coin de la boîte d'échantillonnage ; l'hôte la compare au rayon
+honnête et l'annonce (comme il annonce déjà la durée, ADR-132).
 
-**Ordre de grandeur, calculé.** `√(gh)` = 7,00 m/s ; demi-angles **44,46°** (10 m/s) et **27,83°** (15 m/s) ; à 60 m derrière, le front
-passe à 58,9 et 31,7 m de l'axe ; parcours 240 et 360 m ; le transitoire du départ s'étend à 168 m de son point de départ, loin derrière
-la zone. **La résonance** (la pente −½ en deçà du critique) n'est pas de cette session : avec σ = 2 m, le facteur de la source à l'onde
-transverse varie de 5·10⁻⁵ (2,1 m/s) à 0,94 (6,3 m/s) et masquerait la pente — il faut σ ≤ 0,25 m (0,86 à 1), une autre recette.
+**Ordre de grandeur, calculé.** `D` = 128 / 189 / 260 / 335 m à 16 / 24 / 32 / 40 s, soit `D/R` = 0,72 / 1,05 / 1,45 / 1,87. Les montages
+de S523 : le premier `D/R` = 2,96 (62 %), le retenu 0,94 et 0,53 (< 0,4 %).
 
-**Critères, écrits avant.** (1) Sur la référence (convergée sur trois grilles), l'instrument lit `arcsin(1/Fr_h)` à 1° aux deux vitesses.
-(2) **C07 peu profond, supercritique** : sur W, à 2° de 44,46° et de 27,83°. (3) W contre la référence, écart quadratique ≤ 10 % sur la
-zone de mesure.
+**Critères, écrits avant.** (1) **La loi** : écart ≤ 5 % pour `D/R` ≤ 1 ; > 10 % pour `D/R` ≥ 1,4. (2) **La garde** : elle signale chaque
+montage mesuré à plus de 10 % et aucun à moins de 5 % (les quatre de la calibration, les trois de S523, ceux de S519 et S522). (3) La suite
+du cœur, le banc de non-régression inchangés.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'exemple généralisé, la référence, l'instrument éprouvé ; (1).
-- [x] **P3** — W ; (2), (3).
-- [x] **P4** — preuve ; listes 3.2, 13.2 ; CAS-CANONIQUES ; rituel.
+- [x] **P1** — jeton ; le lot (feuille de route S522–S523) ; plan.
+- [ ] **P2** — la calibration ; (1).
+- [ ] **P3** — la garde ; (2), (3).
+- [ ] **P4** — preuve ; A331 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — l'instrument déclaré (le maximum des rayons, 20–60 m, 24 s) lit sur la référence **14,5° et 11,25°** : le sillage
-  intérieur d'ondes courtes ; changé avant W, comme prévu. Le profil (regardé, ADR-233) : un sillage intérieur, puis une **crête d'ondes
-  longues juste en dedans du coin de Mach**, qui l'approche avec la distance (U = 10 : 41,5 / 43,25 / 43,75 / 44,0 / 44,5° de 20 à 120 m ;
-  U = 15 : 24,25 / 26,0 / 26,75 / 27,0 / 27,25°). **Figé** : la dernière crête (le maximum local le plus extérieur), fenêtre 80–100 m,
-  40 s (le transitoire hors de la zone). Sur la référence, trois grilles : **43,75–44,00° (attendu 44,46) et 27,00° (27,83)** → (1) tenu.
-- **P3 fini** — montage 1 (512 × 256, coupure 3, 40 s) : 23 % / 62 % → localisé : hors du domaine d'ADR-132 (trajets 400–600 m, rayon 179 m).
-  Montage 2 (512 × 512, coupure 1,5) : 0,03 % à 10 m/s, mais l'instrument lit 77° sur la référence même (Gibbs) — famille non éprouvée.
-  **Montage retenu** (512 × 512, coupure 3, 40 s / 16 s) : 0,38 % / < 0,01 % ; **44,00°** à 10 m/s (tenu) ; 79,75° à 15 m/s (une crête du
-  bruit f32 à 8·10⁻⁸ m : manqué, pas d'instrument changé après coup). A331 ouverte.
-- **P4** — preuve C07-PEU-PROFOND-S523 ; listes 3.2, 13.2 ; CAS-CANONIQUES ; A331 ; index ; journal.
-
