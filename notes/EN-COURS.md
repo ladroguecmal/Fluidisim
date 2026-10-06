@@ -62,30 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S539 — **terminée**. En autonomie, **7.5 — l'air comprimé** (absent) par le cas d'ADR-015 §2–3 : « une coque retournée flotte
-grâce à l'air qu'elle emprisonne » ; la poche se comprime avec la profondeur, « un bateau chaviré flotte, puis passe un point de non-retour
-et coule d'un coup ».
+Session : S540 — **en cours**. En autonomie, **C13 — la remontée d'une bulle** (non exécuté) : des bulles de 0,1, 1 et 5 mm lâchées à 3 m
+de profondeur ; vitesse terminale à ± 15 % de SPEC-002 §2 (5,5 mm/s ; 0,12–0,25 m/s ; ≈ 0,25 m/s) ; trajectoire selon `−g_eff`, pas selon
+`+Z`. Les grosses bulles d'APIC existent (S479–S485) ; les petites, qui portent les microbulles (7.3, absent) et l'aération, non.
 
-**Ce que la session fait.** `RigidBody::air_pocket : Option<AirPocket { body, volume_surface, thickness }>` — une poche d'air portée par
-le corps (son centre dans le repère du corps, son volume à la pression atmosphérique, son épaisseur verticale) : noyée à la profondeur `d`
-de son centre, elle déplace `V₀·p_atm/(p_atm + ρ g d)` (isotherme, ADR-015 §3 « lente »), une poussée `ρ g V` appliquée en son centre
-(fraction d'immersion comme un point du proxy, la pente de la surface comme S333). `None` : rien ne change.
+**Ce que la session fait.** `bulle.rs` : une bulle ponctuelle — poussée `(ρ − ρ_air)·V·(−g_eff)`, masse ajoutée ½ρV, traînée de Tomiyama
+pour bulles contaminées (`C_D = max(24/Re·(1 + 0,15 Re^0,687), (8/3)·Eo/(Eo + 4))` : Schiller–Naumann, puis le régime où la bulle se
+déforme), la vitesse relative à l'eau ; `vitesse_terminale(d, g, milieu)` par point fixe. Eau douce de SPEC-002 : ρ = 1 000, μ = 10⁻³ Pa·s,
+σ = 0,072 N/m.
 
-**Ordre de grandeur, calculé.** La table d'ADR-015 (eau de mer) : 100 / 50,19 / 33,50 / 25,14 % du volume à 0 / 10 / 20 / 30 m. Un corps de
-2 000 kg et 0,5 m³ de matière (4 000 kg/m³) portant 2 m³ d'air à la surface : il faut 1,451 m³ d'air pour le porter → **point de
-non-retour `d*` = 3,811 m**.
+**Ordre de grandeur, calculé (la loi d'abord, au plan).** 0,1 mm : **4,99 mm/s** (Stokes 5,45 : −8 %, `Re` 0,5) ; 1 mm : **0,112 m/s**
+(table 0,12–0,25 : −6 % sous le bas, `Re` 112) ; 5 mm : **0,231 m/s** (table 0,25 : −8 %, `Eo` 3,4). Remontée de 3 m : 602 / 27 / 13 s.
 
-**Critères, écrits avant.** (1) La poussée de la poche à 0, 10, 20, 30 m à 10⁻¹² de Boyle (le quantum : l'arrondi f64, rapport > 10⁶,
-ADR-236 D1). (2) Lâché au repos à `d*` − 0,3 m, le corps remonte (centre au-dessus de −1 m à 60 s) ; à `d*` + 0,3 m, il coule (sous −20 m
-à 60 s). (3) Sans poche, la suite du cœur au bit.
+**Critères, écrits avant.** (1) La vitesse atteinte par l'intégration (lâchée au repos, à 3 m) à 10⁻⁶ de `vitesse_terminale` (le quantum :
+l'arrondi f64, rapport > 10⁶). (2) **C13** : à ± 15 % de la table (la fourchette du 1 mm élargie de 15 % de part et d'autre). (3) Sous un
+`g_eff` incliné de 20°, la trajectoire selon `−g_eff` à 10⁻⁹ rad.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la poche, les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 7.5 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — la bulle, les essais ; (1)–(3).
+- [ ] **P3** — preuve ; listes 7.3, 13.2 ; C13 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `AirPocket` ; essai `s539` : Boyle à 10⁻¹² ; à 3,51 m il remonte (−0,22 m), à 4,11 m il coule (−272 m). Suite 700.
-- **P3** — preuve POCHE-AIR-S539 ; liste 7.5 (partiel), décompte ; dépendances ; index ; journal.
-
