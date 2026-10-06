@@ -62,16 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S561 — **terminée**. En autonomie, **la seizième revue de méthode** (ADR-222 D4 ; S556–S560).
+Session : S562 — **en cours**. En autonomie, **5.7** : deux manques de S560 — le déversoir par couches, non éprouvé, et l'instantané de la
+composition (I-17 : un état qu'on ne sauve pas n'est pas un état).
 
-**Ce que la session fait.** Relu : S556 (la revue), S557 (l'invariant du pas linéaire ; l'instrument de S555 aux mauvais poids), S558 (le
-chemin coupé ; le témoin sans poids à 1,8 %), S559 (les liquides ; un commit parti après une anomalie du rituel), S560 (le débit par
-couches ; le lot rappelé). **ADR-242** : D1, une grandeur intégrale aux poids du schéma, éprouvée sur un invariant connu ; D2, le commit
-gardé par le code du rituel, qui sort en erreur (3) sur un lot dû ; L400, L401 ; METHODE ; BOUSSOLE ; index ; `outils/rituel.py`.
+**Ce que la session fait.** (a) **L'écrémeur** : une cuve de 1 m², 1,0 m³ d'eau sous 0,4 m³ d'huile (surface à 1,4 m), un déversoir de
+0,1 m (`C_d` = 0,62) dont la crête est à 1,2 m — au-dessus de l'interface : seule l'huile passe. (b) **Le bloc `WVLQ`** : la composition
+entière, nœuds × liquides en `i64`, l'empreinte de la table (FNV-1a des densités), une somme de contrôle ; la restauration refuse une
+longueur, une version, une table, une intégrité, une ligne qui ne somme pas au volume du nœud restauré — atomique. À côté de WVST
+(ADR-140), pas dedans : un réseau sans liquides n'a pas de bloc, et WVST V2 reste lisible.
+
+**Références, calculées avant.** Écrémeur : `dH/dt = −(2/3)·C_d·b·√(2g)·H^{3/2}/A` → `H(t) = 1/(1/√0,2 + 0,0915·t)²` ; à 600 s,
+`H` = 3,06·10⁻⁴ m → il reste **200 306 ml** d'huile, l'eau intacte (1 000 000 ml). Constante (ADR-240 D2) : la charge tombe à 1 % de
+0,2 m vers 190 s ; l'essai dure 600 s. Instantané : la continuation au bit — un pas de 1 000 à 6 000 du manomètre de S560, d'une traite
+contre restauré au pas 1 000.
+
+**Quantum** (ADR-236 D1) : 1 ml. **Critères, écrits avant.** (1) Écrémeur : l'eau intacte au millilitre à chaque pas ; l'huile restante
+à 100 ml de 200 306 ml (rapport 100). (2) Instantané : la suite restaurée identique au bit (composition, nœuds) ; (3) les refus : un octet
+changé (`Integrity`), une autre table (`Configuration`), des nœuds aux volumes différents (`Record`), une longueur (`Length`) ; rien
+d'écrit sur refus.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-242, METHODE, L400, L401, BOUSSOLE, index, le rituel).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — le bloc `WVLQ` et les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 5.7 ; rituel.
 
 ### Notes de reprise
