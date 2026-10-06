@@ -62,17 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S544 — **terminée**. En autonomie, **C21 — la masse d'un compartiment avec et sans δ** (ADR-025 §4) : non exécuté, dit vrai « par
-construction » en S375. **Le plan n'a pas été committé avant le travail (P1 manqué)** : le critère est celui de l'énoncé de C21 (identique
-à l'entier près, à tout instant), écrit en S15 ; écrit ici après coup, pour la trace.
+Session : S545 — **en cours**. En autonomie, **C21 en référentiel accéléré**. S544 a écrit que les formes volumiques de V « frôlent le
+débordement des entiers en µm³ » à l'échelle d'une mer : **faux, et écrit sans calcul** — `Tetrahedron` borne ses coordonnées à ± 4 096 m
+(I-08) et calcule le déterminant en i128 ; le seul obstacle était que les formes n'étaient pas construites. À corriger d'abord.
+
+**Ce que la session fait.** (a) La correction de S544 (sa preuve, son essai, la note de C21). (b) Le scénario de C21 avec des formes
+volumiques (tétraèdres) : la mer, une boîte de 100 × 100 × 20 m ; le compartiment, 2,5 × 2 × 2 m (5 m²) ; la brèche d'1 dm² à son fond ;
+sous `g_eff` = (1, 0, −9,759) m/s² (incliné de 5,85°) puis vertical ; sans puis avec le domaine δ de S544.
+
+**Ordre de grandeur, calculé.** Capacité de la mer : 2·10⁵ m³ = 2·10¹¹ ml (volume·6 en µm³ : 1,2·10²⁴, dans i128) ; le compartiment en
+reçoit ≈ 0,76 m³ en 20 s (S544) — la mer baisse de 0,04 mm. L'angle de `g_eff` : atan(1/9,759) = 5,85°.
+
+**Critères, écrits avant.** (1) Sous `g_eff` incliné, `volume_ml` du compartiment identique à l'entier, sans puis avec δ, aux 200 pas ; le
+compartiment reçoit plus de 100 L. (2) Vertical, avec les formes volumiques : de même. (3) La suite au bit.
 
 ### Plan
 
-- [x] **P1** — (manqué avant le travail ; écrit après) jeton, plan.
-- [x] **P2** — l'essai C21 (fixe ; l'accéléré non joué : les tables +Z de V refusent un g_eff incliné).
-- [x] **P3** — preuve ; listes 13.2 ; C21 ; rituel.
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — la correction de S544 ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve (C21-MASSE-S544 §5) ; C21 ; rituel.
 
 ### Notes de reprise
-- **P2** — δ refusé deux fois en route (une colonne à 3,9 L par pas ; la montée uniforme sur le repos d'origine — `shift_rest`, S375) ;
-  puis 200 pas identiques à l'entier, 761 747 ml entrés. Sous `g_eff` incliné : `Orientation` (tables +Z). Suite 705.
-

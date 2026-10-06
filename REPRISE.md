@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 18:45 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 18:46 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S545 — C21 en référentiel accéléré (formes volumiques de V) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S544 — C21 en référentiel fixe ; un plan manqué ([journal](notes/JOURNAL.md)). Avant : S543 (la rotation de C16)
 Session suivante : **S545 — un point partiel qui fait avancer une capacité, plan committé d'abord** : relire le tableau de bord ; candidats — les formes volumiques de V à grande échelle (la variante accélérée de C21 ; les débordements d'entiers en µm³), Coriolis dans δ, la pesanteur horizontale sur la carte GPU, les bulles dans un écoulement, l'évent à débit limité (5.9) ; nombres recalculés (ADR-237 D1), quantum écrit à côté des seuils (ADR-236 D1). Revue à S546. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S544 : C21 en référentiel fixe (13.2)
