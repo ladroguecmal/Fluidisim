@@ -6611,3 +6611,9 @@ désormais (ADR-238 D1).
 **S544 — la limite supposée.** « Les formes volumiques de V frôlent le débordement des entiers » : écrit sans ouvrir `hydro_geometry.rs`, où
 le déterminant est en i128 sur ± 4 096 m. Une variante de C21 remise d'une session pour rien. Un blocage supposé se vérifie avant d'être
 écrit, comme un blocage hérité (ADR-238 D2).
+
+## L397
+
+**S549 — la formule d'analyse avant le modèle.** Le rapport attendu de la carène libre reposait sur `tan θ = m_h·Δy/(m·GM)` — faux : le
+proxy décalé déplace toute la poussée. Devant un écart de 10 %, j'ai accusé le proxy et changé le montage ; l'écart est resté. La formule
+relue, tout passait à 0,34 %. S550 a éprouvé sa formule par une intégration avant de mesurer (ADR-239 D1).

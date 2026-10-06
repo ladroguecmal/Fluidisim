@@ -62,29 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S550 — **terminée**. En autonomie, **6.6 — la stabilité aux grands angles** par l'angle de bande (*loll*) : une barge dont la
-hauteur métacentrique devient négative sous une charge haute ne reste pas droite ; elle gîte jusqu'à `tan θ = √(−2·GM/BM)` (flancs droits,
-pont sec, bouchain noyé) — la frontière du chavirement.
+Session : S551 — **terminée**. En autonomie, **la quatorzième revue de méthode** (ADR-222 D4 ; S546–S550) et **le lot des registres** (dû).
 
-**Ce que la session fait.** Un essai, sans code neuf : la barge de S548 (20 × 8 × 4 m, 246 t), une charge de 100 t à 8 m au-dessus de la
-quille (une charge ponctuelle, S549), lâchée à 1° de gîte, amortie ; la gîte d'équilibre contre l'angle de bande. Le proxy en 4 × 32 × 16
-points : l'erreur du proxy sur la hauteur métacentrique, `BM/n²` (S499), vaut 2,5 mm à `n` = 32 (3,9 cm à 8).
-
-**Ordre de grandeur, calculé.** 346 t : `T` = 2,110 m, `KB` 1,055, `BM` 2,528, `KG` 3,734 → **`GM` = −0,151 m** ; **angle de bande 19,08°** ;
-le pont se mouille à 25,29°, le bouchain émerge à 27,81° (la formule tient jusque-là). La sensibilité : `tan θ ∝ √(−GM)` — 2,5 mm sur
-0,151 m, 0,8 % sur la tangente.
-
-**Critères, écrits avant.** (1) La gîte d'équilibre à 3 % de 19,08° (en tangente), des deux côtés selon le sens du lâcher. (2) Sans la
-charge, la barge revient droite (à 0,1°). La formule d'analyse vérifiée avant la mesure : `GZ = sin θ·(GM + BM·tan²θ/2)`, nul à `θ ≠ 0`
-pour `tan²θ = −2·GM/BM` (un calcul, pas un souvenir : ADR-232 D2).
+**Ce que la session fait.** Relu : S546 (la revue), S547 (l'évent ; la reprise après coupure), S548 (la barge envahie), S549 (une formule
+d'analyse fausse, un diagnostic posé avant de la relire), S550 (la formule éprouvée par intégration avant la mesure). **ADR-239** : D1, une
+formule d'analyse nouvelle s'éprouve par un calcul indépendant avant la mesure et se relit la première devant un écart ; L397 ; METHODE ;
+BOUSSOLE. Le lot : feuille de route S548–S551.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'essai ; (1), (2).
-- [x] **P3** — preuve ; liste 6.6 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-239, METHODE, L397, BOUSSOLE, index) ; le lot.
+- [ ] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — essai `s550` : ± 19,310° pour ± 19,084° (1,3 % en tangente) ; droite sans charge. Suite 710.
-- **P3** — preuve ANGLE-BANDE-S550 ; liste 6.6 ; index ; journal.
-

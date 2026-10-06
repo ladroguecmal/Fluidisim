@@ -718,3 +718,10 @@ intégration de la carène inclinée redonne `GZ = sin θ·(GM + BM·tan²θ/2)`
 la barge de S548 chargée de 100 t à 8 m (`GM` = −0,151 m). **Mesuré** : elle gîte à ± 19,31° pour 19,08° (1,3 % en tangente, l'erreur du
 proxy prévue à 0,8 %), droite sans la charge. Maillons **0** (6.6 avance). Suivant : **S551, la quatorzième revue de méthode**.
 
+## S551 — 2026-10-06 — la quatorzième revue de méthode (ADR-239) ; le lot
+
+**Entrée.** En autonomie ; revue et lot dus. **Friction** : une formule d'analyse fausse au plan et un diagnostic posé avant de la relire
+(S549) — **protection élargie** : une formule d'analyse nouvelle s'éprouve par un calcul indépendant avant la mesure, et se relit la première
+devant un écart (ADR-239 D1, L397) ; S550 l'a déjà fait. Le rituel qui exige le plan et la reprise à chaud ont tenu. Le lot : feuille de
+route S548–S551. Maillons **1**. Suivant : **S552**, un point partiel.
+
