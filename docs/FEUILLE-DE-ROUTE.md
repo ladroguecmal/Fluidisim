@@ -405,6 +405,8 @@ un script en fichier, la constante de temps d'un équilibre au plan).
 **S557–S560** : 4.18 avance deux fois — l'énergie que le pas linéaire de δ conserve (l'invariant mixte, A332 levée, C09 passé), puis
 celle du chemin coupé ; **5.7 ouvert** (ADR-241 : les liquides de V, non miscibles, en couches) — la pression d'un nœud stratifié, le
 débit par couches (le manomètre en U, la vidange stratifiée).
+**S561–S562** : la seizième revue (ADR-242 : une grandeur intégrale aux poids du schéma ; le rituel refuse un lot dû) ; 5.7 avance —
+l'écrémeur, l'instantané de la composition (`WVLQ`).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

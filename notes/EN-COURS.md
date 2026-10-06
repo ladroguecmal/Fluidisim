@@ -62,34 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S562 — **terminée**. En autonomie, **5.7** : deux manques de S560 — le déversoir par couches, non éprouvé, et l'instantané de la
-composition (I-17 : un état qu'on ne sauve pas n'est pas un état).
+Session : S563 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S561–S562), puis **5.7 — l'air scellé avec
+plusieurs liquides** : `step_liquids` ignore l'air des compartiments ; un compartiment étanche qui contient du carburant et que la mer
+envahit par le fond doit comprimer son air comme en S538.
 
-**Ce que la session fait.** (a) **L'écrémeur** : une cuve de 1 m², 1,0 m³ d'eau sous 0,4 m³ d'huile (surface à 1,4 m), un déversoir de
-0,1 m (`C_d` = 0,62) dont la crête est à 1,2 m — au-dessus de l'interface : seule l'huile passe. (b) **Le bloc `WVLQ`** : la composition
-entière, nœuds × liquides en `i64`, l'empreinte de la table (FNV-1a des densités), une somme de contrôle ; la restauration refuse une
-longueur, une version, une table, une intégrité, une ligne qui ne somme pas au volume du nœud restauré — atomique. À côté de WVST
-(ADR-140), pas dedans : un réseau sans liquides n'a pas de bloc, et WVST V2 reste lisible.
+**Ce que la session fait.** `step_liquids_air(…, air, pressions_pa)` : la pression de jauge de chaque poche scellée (Boyle isotherme,
+`Air::Sealed`) ajoutée des deux côtés du seuil d'un orifice ou d'une vanne ; un seuil au-dessus de la surface amont ne laisse passer aucun
+liquide ; les évents comme `step_air` (le même calcul, partagé). Les déversoirs et les pompes ne voient pas la pression des poches (comme
+dans `step_air`). Tout ouvert : `step_liquids` au bit.
 
-**Références, calculées avant.** Écrémeur : `dH/dt = −(2/3)·C_d·b·√(2g)·H^{3/2}/A` → `H(t) = 1/(1/√0,2 + 0,0915·t)²` ; à 600 s,
-`H` = 3,06·10⁻⁴ m → il reste **200 306 ml** d'huile, l'eau intacte (1 000 000 ml). Constante (ADR-240 D2) : la charge tombe à 1 % de
-0,2 m vers 190 s ; l'essai dure 600 s. Instantané : la continuation au bit — un pas de 1 000 à 6 000 du manomètre de S560, d'une traite
-contre restauré au pas 1 000.
+**Références, calculées avant** (une bissection indépendante du code, l'équilibre des pressions au seuil et Boyle résolus ensemble, la mer
+de 100 × 100 m qui baisse de ce qui entre). Un compartiment de 1 × 1 × 2 m contenant 0,5 m³ d'huile (ρ = 850) et 1,5 m³ d'air à la pression
+atmosphérique ; la mer à 1,5 m au-dessus de la brèche du fond (deux orifices de 1 000 mm², `C_d` = 0,62). **Scellé : 0,126197 m d'eau
+entrent** (l'air à +9 307,6 Pa) ; **ouvert (le témoin) : 1,074893 m**. Constantes de temps (ADR-240 D2) : 96 s scellé (la raideur de
+Boyle, ×7,9), 755 s ouvert ; l'essai dure 3 000 s. Le dépassement du pas explicite près de l'équilibre scellé : 6·10⁻⁷ m.
 
-**Quantum** (ADR-236 D1) : 1 ml. **Critères, écrits avant.** (1) Écrémeur : l'eau intacte au millilitre à chaque pas ; l'huile restante
-à 100 ml de 200 306 ml (rapport 100). (2) Instantané : la suite restaurée identique au bit (composition, nœuds) ; (3) les refus : un octet
-changé (`Integrity`), une autre table (`Configuration`), des nœuds aux volumes différents (`Record`), une longueur (`Length`) ; rien
-d'écrit sur refus.
+**Quantum** (ADR-236 D1) : 1 ml sur 1 m², 1 µm. **Critères, écrits avant.** (1) Scellé : l'eau entrée à 10⁻⁴ m de 0,126197 m ; l'huile
+entière dans le compartiment, au millilitre. (2) Ouvert : à 10⁻⁴ m de 1,074893 m. (3) Tout ouvert : `step_liquids_air` identique au bit
+à `step_liquids` sur le manomètre de S560. (4) `step_air` inchangé (la suite entière).
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — le bloc `WVLQ` et les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 5.7 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `step_liquids_air` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 5.7 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — écrémeur : 200 306 ml pour 200 306,1, l'eau intacte ; `WVLQ` : la continuation au bit, les refus. Suite 726. Le plan
-  avait écrit « vers 190 s » de tête : calculé, 220 s (600 s suffisent). **Pour la revue S566** : le code de `WVLQ` ajouté par un heredoc
-  (entre apostrophes droites, donc sans danger), contre la lettre d'ADR-240 D1.
-- **P3** — preuve LIQUIDES-ECREMEUR-S562 ; liste 5.7 ; index ; journal.
-

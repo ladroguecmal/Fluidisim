@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 22:27 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 22:29 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S563 — le lot ; 5.7, l'air scellé avec plusieurs liquides ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S562 — l'écrémeur et l'instantané de la composition ([journal](notes/JOURNAL.md)). Avant : S561 (la seizième revue de méthode)
 Session suivante : **S563 — le lot** (dû en S563) **et un point partiel** (5.7 : l'air scellé avec plusieurs liquides ; ou un autre, par la feuille de route). Revue à S566. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
 Maillons        : 0 — S562 : 5.7 avance (l'écrémeur, l'instantané)
