@@ -83,8 +83,12 @@ fin reste du même ordre à toutes les vitesses.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la mesure (a).
+- [x] **P2** — la mesure (a).
 - [ ] **P3** — la borne et le compteur ; C23 rejoué (b), (c).
 - [ ] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
+- **P2** — `c23_coque 5` (calcul détaché) : élévation de référence 0,77 m (départ impulsif à 5 m/s) ; écart au calcul fin (k = 0,125) :
+  k = 0,25 → 4,7 %, 0,5 → 7,4 %, **1 → 100 %**, 2 → 152 %, 3 → 194 %. La rupture est à une maille franchie par pas. Conséquence : la
+  vitesse gouvernante d'ADR-035 (fluide relatif à la paroi) ne suffit pas sur une grille coupée — le fluide suit la coque ; il faut aussi la
+  vitesse de la paroi sur la grille (son déplacement par pas). Une précision d'ADR-035 : ADR-229.

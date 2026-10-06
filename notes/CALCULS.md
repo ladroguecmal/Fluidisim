@@ -67,3 +67,4 @@ for nd in (8, 12, 16):
 | `20261006-044723-cavalement-s502` | S502 | cavalement-s502 | `code/target/release/examples/rayonnement_coque.exe --mode cavalement --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
 | `20261006-044724-embardee-s502` | S502 | embardee-s502 | `code/target/release/examples/rayonnement_coque.exe --mode embardee --omega 2.0,3.0,4.0` | terminé, 2026-10-06 04:52 |
 | `20261006-074013-eveil` | S504 | eveil | `python outils/eveil.py 14` | en cours |
+| `20261006-074606-c23-mesure` | S505 | c23-mesure | `code/target/release/examples/c23_coque.exe 5` | lancé 2026-10-06 07:46 |
