@@ -81,9 +81,13 @@ profonde (le même champ initial) à plus de 5 fois cet écart. (3) La pente ré
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — le cœur ; (1).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le cœur ; (1).
 - [ ] **P3** — la référence, W ; (2), (3).
 - [ ] **P4** — preuve ; liste 3.1 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — `RadialImpact::new_in_depth` (`κ`, potentiel, vitesse horizontale ; pas de resserrement) ; essais `s528` : au bit de `new`
+  à 30 m (N 128 : 64 modes refusés par la résolution à 40 m et 10 s), le régime peu profond accepté ; la pente réelle au plus 0,990 de
+  `slope_max_at` par 1 m de fond (le critère 3, en avance). Suite verte.
+

@@ -96,6 +96,9 @@ pub const RHO_DISPERSION: [f32; 96] = [
 #[cfg(test)]
 #[path = "tests_radial_energy.rs"]
 mod energy_tests;
+#[cfg(test)]
+#[path = "tests_anneaux_profondeur.rs"]
+mod anneaux_profondeur;
 /// Développement asymptotique d'Abramowitz & Stegun 9.2.1, employé au-delà de la table.
 /// `P0 = 1 − 9/(128x²)` mais `P1 = 1 + 15/(128x²)` : les signes diffèrent entre J0 et J1.
 /// Phase par PhaseQ32 depuis la distance, jamais par un argument reconstruit — sans libm.
@@ -163,6 +166,9 @@ struct Node {
     omega: f32,
     freq: u64,
     coefficient: f32,
+    /// S528 : le nombre d'onde effectif `k tanh(kh)` (`k` en eau profonde) et le rapport `k/κ` de la vitesse horizontale (1).
+    kappa: f32,
+    ratio: f32,
 }
 /// ADR-085 : N64 reste le défaut ; dimensionner explicitement N128/N256 au rayon et à
 /// l'horizon requis. L'admission numérique ne reçoit pas la précision physique du domaine.
@@ -174,9 +180,23 @@ pub struct RadialImpact<const N: usize = 64> {
     nodes: [Node; N],
     gravity: f32,
     density: f32,
+    /// S528 : construit par `new_in_depth` — la borne resserrée (mesurée en eau profonde) n'y resserre pas.
+    finite_depth: bool,
 }
 impl<const N: usize> RadialImpact<N> {
     pub fn new(event: WaveEvent, medium: Medium, domain: Domain) -> Result<Self, Error> {
+        Self::build(event, medium, domain, false)
+    }
+
+    /// **S528 — l'anneau en profondeur finie** (`medium.depth`, uniforme) : le nombre d'onde effectif `κ = k tanh(kh)` (S522) dans la
+    /// pulsation `ω² = g κ`, le potentiel `η_t/κ` et la vitesse horizontale (`k/κ` fois celle de l'eau profonde) ; le régime peu profond
+    /// n'est plus refusé. `slope_max_at` ne resserre pas (la table `RHO_DISPERSION` est mesurée en eau profonde) ; `slope_max_beyond`,
+    /// indépendante de la dispersion, reste. Une profondeur où `2 k_min h` > 32 rend les échantillons de `new` au bit.
+    pub fn new_in_depth(event: WaveEvent, medium: Medium, domain: Domain) -> Result<Self, Error> {
+        Self::build(event, medium, domain, true)
+    }
+
+    fn build(event: WaveEvent, medium: Medium, domain: Domain, finite_depth: bool) -> Result<Self, Error> {
         // ADR-082 : une borne, un nom, et le nom désigne ce qu'il faut revoir.
         // ADR-105 : N512 explicite pour la campagne R80/60s ; garde de phase inchangé.
         if !(64..=256).contains(&N) && N != 512 {
@@ -215,8 +235,8 @@ impl<const N: usize> RadialImpact<N> {
         if hi * domain.radius > BESSEL_MAX {
             return Err(Error::Reach);
         }
-        // Eau profonde : le milieu n'est pas en cause, le régime l'est.
-        if medium.depth <= core::f32::consts::PI / lo {
+        // Eau profonde : le milieu n'est pas en cause, le régime l'est. S528 : sauf en profondeur finie, qui le porte.
+        if !finite_depth && medium.depth <= core::f32::consts::PI / lo {
             return Err(Error::Regime);
         }
         // Contrôle de résolution, pas borne d'erreur : variation de phase par intervalle.
@@ -249,7 +269,8 @@ impl<const N: usize> RadialImpact<N> {
             let x = (i as f32 + 0.5) / N as f32;
             let k = lo + width * x;
             let a = scale * x * x * (1.0 - x) * (1.0 - x);
-            let omega = (medium.gravity * k).sqrt();
+            let kappa = crate::modal_pressure::effective_wavenumber(k, finite_depth.then_some(medium.depth));
+            let omega = (medium.gravity * kappa).sqrt();
             let frequency = omega / core::f32::consts::TAU * 4294967296.0;
             if !frequency.is_finite() || frequency < 1.0 || frequency >= u64::MAX as f32 {
                 return Err(Error::Wavelength);
@@ -259,6 +280,8 @@ impl<const N: usize> RadialImpact<N> {
                 omega,
                 freq: frequency as u64,
                 coefficient: a * k * dk,
+                kappa,
+                ratio: k / kappa,
             };
             slope += node.coefficient * k; // |J1| <= 1, borne conservative.
         }
@@ -281,6 +304,7 @@ impl<const N: usize> RadialImpact<N> {
             nodes,
             gravity: medium.gravity,
             density: medium.density,
+            finite_depth,
         })
     }
     pub fn event(&self) -> &WaveEvent {
@@ -325,7 +349,7 @@ impl<const N: usize> RadialImpact<N> {
     pub fn slope_max_at(&self, time: SimTime) -> f32 {
         let annonce = self.slope_max();
         let v = self.event.data();
-        if time.0 < v.birth.0 {
+        if time.0 < v.birth.0 || self.finite_depth {
             return annonce;
         }
         let seconds = (time.0 - v.birth.0) as f32 * 1e-6;
@@ -425,9 +449,9 @@ impl<const N: usize> RadialImpact<N> {
             let st = phase.sin();
             out.eta += node.coefficient * j0 * ct;
             out.deta_dt -= node.coefficient * node.omega * j0 * st;
-            out.potential -= node.coefficient * node.omega / node.k * j0 * st;
+            out.potential -= node.coefficient * node.omega / node.kappa * j0 * st;
             radial_slope -= node.coefficient * node.k * j1 * ct;
-            radial_velocity += node.coefficient * node.omega * j1 * st;
+            radial_velocity += node.coefficient * node.omega * j1 * st * node.ratio;
         }
         if r > 0.0 {
             out.slope = [radial_slope * d[0] / r, radial_slope * d[1] / r];
