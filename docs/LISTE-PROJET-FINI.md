@@ -418,8 +418,10 @@ pas recopiée ici (L137).
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *partiel* depuis S559 : **ADR-241** — non miscibles, en couches perpendiculaires à
   `g_eff`, l'état entier (une composition parallèle) ; **la pression d'un nœud stratifié** contre trois formes fermées (cuve droite,
-  inclinée, carène en V) à 4·10⁻⁸ ([preuve](validation/LIQUIDES-COUCHES-S559.md)). Manquent le débit par couches (le manomètre en U, la
-  vidange stratifiée), le transport de la composition par le pas, l'instantané.
+  inclinée, carène en V) à 4·10⁻⁸ ([preuve](validation/LIQUIDES-COUCHES-S559.md)) ; **S560 : le débit par couches** (`step_liquids`) —
+  le manomètre en U à l'entier (1,17 m), la vidange stratifiée à 0,02 %, un liquide identique au pas présent
+  ([preuve](validation/LIQUIDES-DEBIT-S560.md)). Manquent le déversoir par couches éprouvé, l'air scellé avec plusieurs liquides,
+  l'instantané de la composition.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
   d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle

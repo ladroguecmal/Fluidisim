@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S560 — **en cours**. En autonomie, **5.7 — le débit par couches** (ADR-241 D4), après la pression d'un nœud stratifié (S559).
+Session : S560 — **terminée**. En autonomie, **5.7 — le débit par couches** (ADR-241 D4), après la pression d'un nœud stratifié (S559).
 
 **Ce que la session fait.** `step_liquids(…, composition, liquides, pluie)` : (a) un orifice ou une vanne débite sur la différence de
 **pression** au seuil, `Q = C_d·A·√(2Δp/ρ)`, `ρ` le liquide de la couche amont au seuil (la condition `h_amont > h_aval` des surfaces ne
@@ -89,7 +89,11 @@ seule. (4) Refus : une table +Z, une composition qui ne somme pas.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `step_liquids` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.7 ; rituel.
+- [x] **P2** — `step_liquids` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — manomètre 1,170000 m (exact), vidange 225,7 s pour 225,65 (+0,021 %), un liquide à 0 ml, refus tenus. Suite 724.
+- **P3** — preuve LIQUIDES-DEBIT-S560 ; liste 5.7 ; index ; journal. **Pour la revue S561** : en S559, le rituel a rendu une anomalie
+  (le décompte de la liste) et le commit est parti quand même — la chaîne était en `;` après le rituel (corrigé au commit suivant).
+

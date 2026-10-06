@@ -402,6 +402,9 @@ quatorzième revue (ADR-239 : une formule d'analyse éprouvée avant la mesure).
 **S552–S556** : 6.6 avancé trois fois — la gîte par une brèche latérale, l'envahissement progressif par une cloison percée, la poche
 porteuse d'un compartiment scellé ; C09 exécuté (la masse tient, l'énergie naturelle manque le critère, A332) ; la quinzième revue (ADR-240 :
 un script en fichier, la constante de temps d'un équilibre au plan).
+**S557–S560** : 4.18 avance deux fois — l'énergie que le pas linéaire de δ conserve (l'invariant mixte, A332 levée, C09 passé), puis
+celle du chemin coupé ; **5.7 ouvert** (ADR-241 : les liquides de V, non miscibles, en couches) — la pression d'un nœud stratifié, le
+débit par couches (le manomètre en U, la vidange stratifiée).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

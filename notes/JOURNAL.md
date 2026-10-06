@@ -787,3 +787,12 @@ perpendiculaires à `g_eff` ; l'état entier, une composition parallèle ; la qu
 ([preuve](../docs/validation/LIQUIDES-COUCHES-S559.md)) : `hydro_liquids.rs`, la pression en un point d'un nœud stratifié, chaque interface
 le plan de la géométrie pour le volume cumulé. **Mesuré** contre trois formes fermées écrites au plan (cuve droite, inclinée, carène en V) :
 4·10⁻⁸ au plus. Maillons **1** (5.7 : absent → partiel). Suivant : **S560**, le débit par couches.
+
+## S560 — 2026-10-06 — le débit par couches (ADR-241 D4)
+
+**Entrée.** En autonomie ; 5.7, la suite de S559 ; les références et la constante de temps calculées au plan (ADR-240 D2). **Fait**
+([preuve](../docs/validation/LIQUIDES-DEBIT-S560.md)) : `step_liquids` — un orifice débite sur la différence de pression au seuil, la
+composition suit les transferts couche par couche. **Mesuré** : le manomètre en U à l'entier (1,17 m ; la surface chargée d'huile 6 cm plus
+haut), la vidange stratifiée à 0,02 % (l'eau d'abord, l'huile intacte), un seul liquide identique au pas présent. **En route** (S559) : le
+rituel avait rendu une anomalie de décompte et le commit était parti, la chaîne en `;` — noté pour la revue. Maillons **0** (5.7 avance).
+Suivant : **S561, la seizième revue de méthode**.
