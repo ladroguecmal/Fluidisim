@@ -1500,3 +1500,54 @@ fn a_dragged_body_drifts_with_the_current_s513() {
     println!("S513 : k = {k:.4} m⁻¹ ; dérive à 3 s {:.5} m/s (attendue {:.5}) ; écart au pire {:.3} %", c.velocity[0], 1. - 1. / (1. + 3. * k), 100. * pire);
     assert!(pire <= 0.01, "critère 4 : {pire}");
 }
+
+/// Un nageur : 0,5 × 0,3 × 0,3 m à 1 000 kg/m³ (45 kg, l'aire de flottaison d'un torse), à 30 Hz.
+fn nageur() -> RigidBody {
+    RigidBody::cuboid([0.5, 0.3, 0.3], 1000., [0.; 3], [4, 4, 4])
+}
+
+/// **S514, critère 2 — un corps commandé est contraint.** Le nageur à 30 Hz : `ω·dt` ≈ 0,19, un régime normal pour un corps passif ;
+/// commandé, contraint.
+#[test]
+fn a_controlled_body_is_constrained_s514() {
+    let n = nageur();
+    let passif = n.floating(1. / 30., MER);
+    let commande = n.floating_controlled(1. / 30., MER);
+    println!("S514 : nageur ω·dt = {:.3}, passif {:?}, commandé {:?}", passif.omega / 30., passif.regime, commande.regime);
+    assert_eq!(passif.regime, Regime::Normal);
+    assert_eq!(commande.regime, Regime::Constrained);
+    assert_eq!(commande.omega, passif.omega);
+}
+
+/// **S514, critère 3 — le nageur qui ne fait plus route** (ADR-023 §3.4). Commandé à 0,7 m/s vers +x, une houle de 5 s vers +x : sa vitesse
+/// sur le fond change de signe quand la vitesse orbitale de surface, `πH/T`, vue à travers sa relaxation (le gain `G` du filtre discret au
+/// taux `ω`, calculé ici), dépasse 0,7 m/s — `H* = 0,7·T/(π·G)` ; à 0,98 `H*` jamais, à 1,02 `H*` oui.
+#[test]
+fn a_swimmer_stops_making_way_in_a_swell_s514() {
+    let (t_houle, dt, nage) = (5f64, 1. / 30., 0.7);
+    let n = nageur();
+    let f = n.floating_controlled(dt, MER);
+    let r = (-f.omega * dt).exp();
+    let om = core::f64::consts::TAU / t_houle;
+    // Le gain du filtre `v ← u + (v − u)·r` à la pulsation de la houle.
+    let gain = (1. - r) / ((1. - r * (om * dt).cos()).powi(2) + (r * (om * dt).sin()).powi(2)).sqrt();
+    let h_etoile = nage * t_houle / (core::f64::consts::PI * gain);
+    let recule = |h: f64| {
+        let b = houle(h / 2., t_houle);
+        let mut c = nageur();
+        c.position[2] = f.offset;
+        let mut pire = f64::INFINITY;
+        for k in 0..900u64 {
+            let suivante = BackgroundWater { background: &b, time: SimTime((k + 1) * 1_000_000 / 30) };
+            c.step_controlled(&f, dt, &suivante, [nage, 0.]);
+            if k > 300 {
+                pire = pire.min(c.velocity[0]);
+            }
+        }
+        pire
+    };
+    let (dessous, dessus) = (recule(0.98 * h_etoile), recule(1.02 * h_etoile));
+    println!("S514 : H* = {h_etoile:.4} m (sans relaxation 0,7·T/π = {:.4} ; gain {gain:.4}) ; vitesse sur le fond au pire : {dessous:.4} m/s à 0,98 H*, {dessus:.4} m/s à 1,02 H*", nage * t_houle / core::f64::consts::PI);
+    assert!(dessous > 0., "critère 3, sous H* : {dessous}");
+    assert!(dessus < 0., "critère 3, au-dessus : {dessus}");
+}

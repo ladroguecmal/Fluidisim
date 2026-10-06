@@ -662,21 +662,42 @@ impl RigidBody {
                     self.step(dt / n as f64, water, milieu);
                 }
             }
-            Regime::Constrained => {
-                let [x, y, z] = self.position;
-                let u = next.velocity([x, y, next.surface(x, y)]);
-                let r = (-f.omega * dt).exp();
-                for k in 0..2 {
-                    self.velocity[k] = u[k] + (self.velocity[k] - u[k]) * r;
-                    self.position[k] += dt * self.velocity[k];
-                }
-                let [x, y, _] = self.position;
-                self.position[2] = next.surface(x, y) + f.offset;
-                self.velocity[2] = (self.position[2] - z) / dt;
-                self.orientation = surface_tilt(next.slope(x, y));
-                self.angular_velocity = [0.; 3];
-            }
+            Regime::Constrained => self.constrained_step(f, dt, next, None),
         }
+    }
+
+    /// Le pas contraint (S498) : la vitesse horizontale relaxée au taux `ω` vers celle de l'eau — **S514** : plus la commande d'un corps
+    /// commandé (`command`, m/s, horizontale), ajoutée dans le repère de la surface (ADR-023 §3.2) —, la position avancée puis projetée sur
+    /// la surface de `next`, l'axe sur la normale.
+    fn constrained_step(&mut self, f: &Floating, dt: f64, next: &dyn WaterQuery, command: Option<[f64; 2]>) {
+        let [x, y, z] = self.position;
+        let mut u = next.velocity([x, y, next.surface(x, y)]);
+        if let Some(c) = command {
+            u[0] += c[0];
+            u[1] += c[1];
+        }
+        let r = (-f.omega * dt).exp();
+        for k in 0..2 {
+            self.velocity[k] = u[k] + (self.velocity[k] - u[k]) * r;
+            self.position[k] += dt * self.velocity[k];
+        }
+        let [x, y, _] = self.position;
+        self.position[2] = next.surface(x, y) + f.offset;
+        self.velocity[2] = (self.position[2] - z) / dt;
+        self.orientation = surface_tilt(next.slope(x, y));
+        self.angular_velocity = [0.; 3];
+    }
+
+    /// **S514 — la création d'un corps commandé** (ADR-023 §3.2) : un corps commandé par un joueur ou une IA, en surface, est contraint quel
+    /// que soit son `ω·dt` — une flottabilité dynamique se battrait contre ses commandes.
+    pub fn floating_controlled(&self, dt: f64, milieu: Milieu) -> Floating {
+        Floating { regime: Regime::Constrained, ..self.floating(dt, milieu) }
+    }
+
+    /// **S514 — le pas d'un corps commandé** : le pas contraint, la commande horizontale `command` (m/s) ajoutée à la vitesse de l'eau
+    /// vers laquelle le corps relaxe ; projeté sur la surface de `next`, l'eau à la fin du pas.
+    pub fn step_controlled(&mut self, f: &Floating, dt: f64, next: &dyn WaterQuery, command: [f64; 2]) {
+        self.constrained_step(f, dt, next, Some(command));
     }
 }
 

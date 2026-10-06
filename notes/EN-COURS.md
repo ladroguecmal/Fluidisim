@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S514 — **en cours**. En autonomie, **6.7, l'acteur poussé, renversé ou déplacé par l'eau** — absent. ADR-018 (seuils de
+Session : S514 — **terminée**. En autonomie, **6.7, l'acteur poussé, renversé ou déplacé par l'eau** — absent. ADR-018 (seuils de
 profondeur humanoïdes 0,15 / 0,50 / 1,00 / 1,30 m ; produit d'emportement `HR = d·(v + 0,5)` et ses classes) et ADR-023 §3 (le nageur :
 un corps commandé en surface bascule en mode contraint quel que soit son `ω·dt`, la commande ajoutée dans le repère de la surface) en
 fixent les règles ; rien ne les construit.
@@ -83,7 +83,12 @@ nageur).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `actor` ; le mode contraint commandé ; essais (1)–(3).
-- [ ] **P3** — preuve ; liste 6.7 ; rituel.
+- [x] **P2** — `actor` ; le mode contraint commandé ; essais (1)–(3).
+- [x] **P3** — preuve ; liste 6.7 ; rituel.
 
 ### Notes de reprise
+- **P2** — `actor` ; `floating_controlled`, `step_controlled`, `constrained_step` partagé. (1) tenu ; (2) passif Normal, commandé Constrained ;
+  (3) H* = 1,1399 m, +0,0136 / −0,0143 m/s. Un hôte d'essai mal recopié (la signature de `JobSystem`) → les essais du nageur dans ceux du corps.
+  678 essais.
+- **P3** — preuve ACTEUR-S514 ; liste 6.7 (partiel) ; index ; journal.
+

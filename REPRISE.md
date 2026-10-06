@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 09:51 +02:00
+JETON            : libre
+Battement        : 2026-10-06 09:59 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S514 — 6.7, l'acteur poussé, renversé ou déplacé par l'eau ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S513 — le courant derrière la requête de l'eau ([journal](notes/JOURNAL.md)). Avant : S512 (6.8 validée : l'impulsion d'entrée dans l'eau)
-Session suivante : **S514 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 la turbulence, 6.7 l'acteur poussé par l'eau, 4.13, 5.4…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites et des couplages non jugés (ADR-228), enchaînements arrêtés au premier échec (ADR-231). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
-Maillons        : 0 — S513 : 2.6 partielle (le courant C0 et C2), 6.2 avancée
+Session en cours : aucune
+Dernière session : S514 — l'acteur poussé, renversé ou déplacé par l'eau ([journal](notes/JOURNAL.md)). Avant : S513 (le courant derrière la requête de l'eau)
+Session suivante : **S515 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 la turbulence, 6.7 la poche d'air, 4.13, 5.4, 9.3…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites et des couplages non jugés (ADR-228), enchaînements arrêtés au premier échec (ADR-231). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
+Maillons        : 0 — S514 : 6.7 partielle (l'acteur, le nageur commandé)
 Registres       : dernier lot S513 (ADR-213 D3) ; le prochain au plus tard en S516
 ```
 

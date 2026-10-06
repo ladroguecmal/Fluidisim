@@ -415,3 +415,11 @@ enveloppe B ou B + W — les vagues advectées par le courant, la vitesse augmen
 rencontre exacte (`λ/(c + U)`) ; le profil exact ; un corps traîné qui dérive à 0,37 % de l'analytique — après une bouée flottante qui
 tanguait sous sa traînée (17 %), un corps d'essai mal choisi. **2.6 partielle, 6.2 n'attend plus que la turbulence.** Lot des registres.
 Maillons **0**. Suivant : un point partiel proche de son périmètre.
+
+## S514 — 2026-10-06 — l'acteur poussé, renversé ou déplacé par l'eau
+
+**Entrée.** En autonomie ; 6.7 absente, ses règles écrites (ADR-018, ADR-023 §3). **Fait** ([preuve](../docs/validation/ACTEUR-S514.md)) :
+`actor` (la progression selon la profondeur, le produit d'emportement et ses classes, l'adulte emporté) ; le corps commandé, toujours
+contraint, sa commande ajoutée à la vitesse de l'eau. **Mesuré** : les règles de part et d'autre de chaque seuil ; le nageur cesse de faire
+route au seuil dérivé (`H*` = 1,140 m pour une houle de 5 s, la relaxation comprise) : +0,014 m/s à 0,98 `H*`, −0,014 à 1,02. **6.7
+partielle.** Maillons **0**. Suivant : un point partiel proche de son périmètre.
