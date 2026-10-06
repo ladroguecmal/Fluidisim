@@ -865,3 +865,11 @@ ne montait plus à 20 m (19,2 m de barrage) — `n` = 0,9 retenu, avant d'écrir
 la vitesse des pompes (similitude) ; un raccord hors de l'eau devient un exutoire à l'air libre qui ne fait que recevoir (S567 le
 refusait). **Mesuré** : la pompe au 10⁻⁹ ; l'exutoire à la loi fermée près de l'Euler ; la sortie qui se découvre arrête la vidange à
 0,126 mm sous elle. Maillons **0** (5.8 avance). Suivant : **S570**, un point partiel ; revue à S571.
+
+## S570 — 2026-10-06 — l'échantillon de traversabilité et le prochain franchissement
+
+**Entrée.** En autonomie ; 7.7 (absent ; ADR-018, SPEC-006 §5). **Fait** ([preuve](../docs/validation/TRAVERSABILITE-S570.md)) :
+`traversabilite.rs` — le produit de danger et ses classes, la classe de profondeur, le prochain franchissement d'une profondeur prévisible
+avec sa cause. **Mesuré** : les classes exactes aux bornes ; une marée M2 annoncée à 0,3 ms de ses franchissements analytiques. **En
+route** : une assertion ajoutée hors du plan, fausse, corrigée — notée pour la revue. Maillons **1** (7.7 : absent → partiel). Suivant :
+**S571, la dix-huitième revue de méthode**.

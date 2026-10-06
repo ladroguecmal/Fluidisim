@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S570 — **en cours**. En autonomie, **7.7 — danger et traversabilité** (absent ; ADR-018, SPEC-006 §5). Première pièce :
+Session : S570 — **terminée**. En autonomie, **7.7 — danger et traversabilité** (absent ; ADR-018, SPEC-006 §5). Première pièce :
 **l'échantillon** et **le prochain franchissement de seuil**.
 
 **Ce que la session fait.** `traversabilite.rs` : `echantillon(profondeur, courant, glace…)` — le produit de danger **`HR = d·(v + 0,5)`**
@@ -87,7 +87,11 @@ positifs.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `traversabilite.rs` et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 7.7 ; rituel.
+- [x] **P2** — `traversabilite.rs` et ses essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 7.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — les `HR` et classes exacts ; trois franchissements de marée à 0,3 ms au plus ; refus. Une assertion hors plan, fausse
+  (la borne de 1,5 m), corrigée — à noter pour la revue de S571. Suite 743.
+- **P3** — preuve TRAVERSABILITE-S570 ; liste 7.7 (absent → partiel) et décompte ; index ; journal.
+

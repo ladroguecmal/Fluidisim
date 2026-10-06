@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [L'échantillon de traversabilité et le prochain franchissement — S570](validation/TRAVERSABILITE-S570.md) : `HR = d·(v+0,5)` et ses classes ; une marée M2 annoncée à 0,3 ms.
 - [La vitesse des pompes et le raccord qui se dénoie — S569](validation/RESEAU-EXUTOIRE-S569.md) : similitude au 10⁻⁹ ; l'exutoire à l'air libre, la sortie qui se découvre.
 - [Les pompes et les clapets du réseau en charge — S568](validation/RESEAU-ORGANES-S568.md) : le point de fonctionnement à 10⁻⁹, la pompe couplée arrêtée à sa hauteur de barrage.
 - [Le réseau en charge couplé au pas de V — S567](validation/RESEAU-COUPLE-S567.md) : deux cuves égalisées à 1 µm d'un Euler indépendant, la masse à l'entier.
