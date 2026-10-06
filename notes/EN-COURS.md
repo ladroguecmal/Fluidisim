@@ -62,15 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S576 — **terminée**. En autonomie, **la dix-neuvième revue de méthode** (ADR-222 D4 ; S571–S575).
+Session : S577 — **en cours**. En autonomie, **2.2 — la marée** (« manquent la marée, le niveau moyen variable… ») ; elle sert aussi 7.7
+(la prévision des gués, SPEC-006 §5.4 : « la marée, analytique, fiable à l'horizon publié »).
 
-**Ce que la session fait.** Relu : S571 (la revue), S572 (les tuiles), S573 (deux expressions d'un seuil), S574 (la glace ; la vérification
-par les notes ; un heredoc), S575 (C15 ; l'état arrondi). **ADR-245** : D1, un état quantifié jamais repris comme départ ; D2, un seuil
-dans une seule fonction ; D3, ADR-240 D1 corrigé (le heredoc protégé permis) ; L404, L405 ; METHODE (trente-quatre) ; BOUSSOLE ; index.
+**Ce que la session fait.** `maree.rs` : une marée **harmonique**, `η(t) = Z₀ + Σ Aₖ·cos(ωₖ·t − gₖ)`, au plus huit composantes (M2, S2, N2,
+K2, K1, O1, P1, Q1 : leurs périodes sont des faits astronomiques), chaque phase **entière** par `PhaseQ32::from_time` (I-03 : identique sur
+toute plateforme) ; les fréquences converties une fois (`freq_hz_to_q32`). L'amplitude et la phase de chaque composante sont celles du
+lieu (une carte cotidale viendra avec les régions, 11.2) ; le niveau moyen `Z₀` est un paramètre.
+
+**Références, calculées avant** (ce script les écrit). L'arrondi des fréquences en Q32 : au pire **1.0e-05** relatif (M2 :
+1.6e-06) — la phase de M2 dérive de **4.8e-05 tour en 15 jours**, 1.2e-03 tour en un an (0.9 min) :
+déterministe, et sous la précision d'une table de marée. Vives-eaux et mortes-eaux, M2 (1 m) + S2 (0,46 m) : battement de
+**14.765 jours** ; sur 30 jours, η entre **-1.4600 et 1.4600 m** (f64 idéal, pas de 60 s) ; marnages 2,92 et 1,08 m.
+Un gué (fond à −0,5 m) sous M2 + S2, depuis la pleine mer de vives-eaux (`t` = 0, 1,96 m d'eau) : il repasse sous la nage (1,30 m) dans
+**6974.05 s**.
+
+**Quantum** (ADR-236 D1) : η en f32 (10⁻⁷ m sur 1,5 m) ; la dérive de phase ci-dessus (M2 à 15 jours : 3.0e-04 m sur 1 m
+d'amplitude). **Critères, écrits avant.** (1) M2 seule contre `cos(2πt/T)` idéal à 10⁻³ m sur 15 jours (rapport 3
+à la dérive) ; (2) M2 + S2 : le maximum et le minimum sur 30 jours à 10⁻³ m de 1.4600 / -1.4600 ; (3) le gué à 1 s de 6974.05 s
+par `prochain_franchissement` ; (4) au bit à `t` donné, deux évaluations ; à un an, η fini et borné par `Σ Aₖ` ; (5) refus : plus de huit
+composantes, une période non positive.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-245, METHODE, L404, L405, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `maree.rs` et ses essais ; (1)–(5).
+- [ ] **P3** — preuve ; listes 2.2, 7.7 ; rituel.
 
 ### Notes de reprise
