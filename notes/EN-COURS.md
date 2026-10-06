@@ -84,9 +84,15 @@ C07 (`arcsin(1/Fr_h)`) reste hors de portée — W est en eau profonde (aucune `
 
 ### Plan
 
-- [ ] **P1** — jeton ; le lot des registres (feuille de route S517–S518) ; plan.
-- [ ] **P2** — la référence et l'instrument éprouvé ; (1).
+- [x] **P1** — jeton ; le lot des registres (feuille de route S517–S518) ; plan.
+- [x] **P2** — la référence et l'instrument éprouvé ; (1).
 - [ ] **P3** — W mesuré ; (2), (3).
 - [ ] **P4** — preuve ; liste 3.2 ; CAS-CANONIQUES (C07) ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — `outils/reference_sillage.py` : la référence convergée sur trois grilles (256 × 128 et 512 × 256 à 25 cm, 512 × 256 à
+  12,5 cm : mêmes angles au 0,25° près). **L'instrument de S517 (le maximum des rayons) ne lit pas Kelvin** : 16,5–17,75° pour σ = 0,5 m,
+  5–10° à σ = 1 m, 40° à σ = 2 m (les ondes y sont éteintes) — comme prévu par le critère (1), l'instrument est changé avant W. **Le bord
+  d'Airy** : passé le maximum du profil (au-delà de 12°), l'angle où il retombe à Ai(0)/max Ai = 0,663 (la ligne de Kelvin est le zéro de
+  l'argument d'Airy) ; par fenêtres d'1 λ₀, il lit 20,3 / 19,9 / 19,9° à 4–7 λ₀ (σ = 0,5, U = 2,5). **Figé** : fenêtre 4–6 λ₀, σ = 0,5 m,
+  U = 2,5 m/s (Fr_σ = 1,13, λ₀ = 4 m, établi jusqu'à 30 m). Sur la référence : **19,98 / 19,98 / 19,96°** → (1) tenu (0,5° de 19,47).
