@@ -507,3 +507,12 @@ honnête d'ADR-132 (179 m), sans que W le dise (**A331**) ; un second à coupure
 Montage retenu : W à 0,38 % et < 0,01 % de la théorie ; **44,00° à `Fr_h` = 1,43 (tenu)**, 79,75° à 2,14 (une crête du bruit f32 :
 manqué). Maillons **0** (3.2 et 13.2 avancent). Frictions pour S526 : *le domaine honnête se juge sur la distance du chemin aux points* ;
 *un instrument à maximum local sans seuil prend le bruit*. Suivant : **S524**, le lot des registres (dû) et un point partiel.
+
+## S524 — 2026-10-06 — le lot ; A331 levée : le domaine honnête de W se lit sur la distance du chemin aux points
+
+**Entrée.** En autonomie ; le lot (feuille de route S522–S523), puis A331. **Fait** ([preuve](../docs/validation/SILLAGE-DOMAINE-S524.md)) :
+la calibration — W contre la théorie à quatre durées, l'écart en fonction de `D/R`, `D` la distance du chemin émetteur aux points : < 10⁻⁴
+à 0,72, 0,32 % à 1,06, 7,1 % à 1,45, 23 % à 1,88. Le critère « > 10 % dès 1,4 » est manqué (la transition est plus douce) ; la garde
+(`farthest_emission`, annoncée par l'hôte) ne laisse plus d'erreur forte silencieuse mais alerte à tort deux fois (0,3 %, 2 %). **A331
+levée** pour sa conséquence. Maillons **1** (une garde, aucun point n'avance). Suivant : **S525**, une capacité — la résonance de C07
+(source fine), A330, 6.2, 6.7.

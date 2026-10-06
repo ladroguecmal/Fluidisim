@@ -94,3 +94,18 @@ fn a_field_in_deep_enough_water_is_the_deep_field_bit_for_bit_s522() {
     assert!(spectral_pressure::prepare_in_depth(spectre.nodes(), &chemin, 9.81, 1025.0, Some(0.0), SimTime(4_000_000), SimTime(8_000_000),
         [-16.0; 2], [16.0; 2], &mut d).is_err());
 }
+
+/// **S524 — A331 : la distance du chemin émetteur aux points.** Le montage de la calibration à 40 s (départ en (−310, 0), arrivée en
+/// (90, 0), zone `x` ∈ [−10, 10], `|y|` ≤ 100) : 335,3 m, la valeur de la calibration ; un chemin vide rend `NaN`.
+#[test]
+fn the_farthest_emission_is_the_path_to_box_distance_s524() {
+    let chemin: Vec<Segment> = (0..5)
+        .map(|n| Segment { birth: SimTime(8_000_000 * n), duration_us: 8_000_000, origin: [-310.0 + 80.0 * n as f32, 0.0], velocity: [10.0, 0.0], pressure_pa: 1.0 })
+        .collect();
+    let d = spectral_pressure::farthest_emission(&chemin, [-10.0, -100.0], [10.0, 100.0]);
+    let attendu = (320f32 * 320. + 100. * 100.).sqrt();
+    println!("S524 distance du chemin à la zone : {d:.2} m (attendu {attendu:.2})");
+    assert!((d - attendu).abs() <= 1e-3, "{d} contre {attendu}");
+    assert!(spectral_pressure::farthest_emission(&[], [0.0; 2], [1.0; 2]).is_nan());
+}
+

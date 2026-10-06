@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S524 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S522–S523), puis **A331** — W ne dit pas
+Session : S524 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S522–S523), puis **A331** — W ne dit pas
 quand un point échantillonné sort du domaine honnête de son chemin (S523 : 23–62 % d'erreur silencieuse). Le rayon d'ADR-132
 (`2π·angulaire/(3·coupure)`) a été écrit pour la distance à la source ; S523 suggère qu'il vaut pour **la distance du chemin émetteur aux
 points**. Le calibrer, puis le vérifier.
@@ -83,8 +83,13 @@ du cœur, le banc de non-régression inchangés.
 ### Plan
 
 - [x] **P1** — jeton ; le lot (feuille de route S522–S523) ; plan.
-- [ ] **P2** — la calibration ; (1).
-- [ ] **P3** — la garde ; (2), (3).
-- [ ] **P4** — preuve ; A331 ; rituel (`--lot`).
+- [x] **P2** — la calibration ; (1).
+- [x] **P3** — la garde ; (2), (3).
+- [x] **P4** — preuve ; A331 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — `D/R` 0,72 / 1,06 / 1,45 / 1,88 → < 10⁻⁴ / 0,32 % / **7,1 %** / 23 % : (1) à moitié (au-delà, plus doux que prévu).
+- **P3 fini** — `farthest_emission` (essai : 335,26 m), l'annonce `WAKE_HORS_RAYON` de l'hôte ; (2) à moitié (fausses alertes à 1,06 et
+  S522 à 1,25) ; suite 685.
+- **P4** — preuve SILLAGE-DOMAINE-S524 ; A331 levée ; index ; journal.
+

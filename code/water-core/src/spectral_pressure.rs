@@ -96,6 +96,28 @@ impl From<Error> for PrepareError {
         Self::Calculation(e)
     }
 }
+/// **S524 — A331 : la plus grande distance d'un point émetteur à un point échantillonné** (m) : de chaque extrémité de segment du chemin à
+/// chaque coin de la boîte `[min, max]`. Le domaine honnête d'un sillage (ADR-132, `2π·angulaire/(3·coupure)`) vaut pour cette
+/// distance, pas pour la distance à la source : calibré en S524, l'écart à la théorie est sous 0,4 % jusqu'à 1,06 rayon, 7 % à 1,45, 23 %
+/// à 1,88. L'hôte la compare au rayon de sa recette ; `NaN` sur un chemin vide.
+pub fn farthest_emission(path: &[Segment], min: [f32; 2], max: [f32; 2]) -> f32 {
+    let coins = [[min[0], min[1]], [min[0], max[1]], [max[0], min[1]], [max[0], max[1]]];
+    let mut loin = f32::NAN;
+    for s in path {
+        let fin = [
+            s.origin[0] + s.velocity[0] * (s.duration_us as f32 * 1e-6),
+            s.origin[1] + s.velocity[1] * (s.duration_us as f32 * 1e-6),
+        ];
+        for p in [s.origin, fin] {
+            for c in coins {
+                let d = ((p[0] - c[0]) * (p[0] - c[0]) + (p[1] - c[1]) * (p[1] - c[1])).sqrt();
+                loin = if loin.is_nan() { d } else { loin.max(d) };
+            }
+        }
+    }
+    loin
+}
+
 /// Pool candidat modifiable au refus ; aucune vue partielle publiée. Horizon commun <=16 s.
 pub fn prepare<'a>(
     nodes: &[Node],

@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 16:09 +02:00
+JETON            : libre
+Battement        : 2026-10-06 16:19 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S524 — le lot ; A331, le domaine honnête de W calibré et vérifié ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S523 — C07 peu profond passe à Fr_h = 1,43 ; A331 ([journal](notes/JOURNAL.md)). Avant : S522 (la pression de W en profondeur uniforme)
-Session suivante : **S524 — le lot des registres (dû à S524), puis un point partiel** : relire le tableau de bord ; candidats — A331 (le domaine honnête de W vérifié sur la distance du chemin aux points : découpe ou marque), la résonance de C07 (source fine σ ≤ 0,25 m), A330 (référence de corps pour la coque), 6.2 la turbulence, 6.7 la poche d'air ; instruments éprouvés sur leur famille et contre le bruit (ADR-233), ordres de grandeur calculés (ADR-232). Revue à S526. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
-Maillons        : 0 — S523 : C07 peu profond passe à Fr_h = 1,43 (3.2, 13.2)
-Registres       : dernier lot S521 (ADR-213 D3) ; le prochain au plus tard en S524
+Session en cours : aucune
+Dernière session : S524 — le lot ; A331 levée : le domaine honnête de W se lit sur la distance du chemin aux points ([journal](notes/JOURNAL.md)). Avant : S523 (C07 peu profond passe à Fr_h = 1,43)
+Session suivante : **S525 — un point partiel qui fait avancer une capacité** : relire le tableau de bord ; candidats — la résonance de C07 en deçà du critique (une source fine σ ≤ 0,25 m, recette adaptée ; pente −½ ± 0,15 sur Fr_h ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}, l'instrument éprouvé sur la théorie d'abord), A330 (une référence de corps pour la coque), 6.2 la turbulence, 6.7 la poche d'air ; instruments éprouvés sur leur famille et contre le bruit (ADR-233), le domaine honnête de W sur la distance du chemin (S524). Revue à S526. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
+Maillons        : 1 — S524 : A331 levée (une garde), aucun point n'avance
+Registres       : dernier lot S524 (ADR-213 D3) ; le prochain au plus tard en S527
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

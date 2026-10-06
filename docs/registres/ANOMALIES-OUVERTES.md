@@ -5,7 +5,7 @@
 suites datées ; l'état est lu par mots sur la dernière suite qui tranche (voir l'outil). Les entrées plus anciennes, au tableau
 général du registre, ne sont pas lues ici.
 
-**46 entrées lues — 26 ouvertes, 20 closes.** Sévérité : 1 = refonte d'architecture si découvert
+**46 entrées lues — 25 ouvertes, 21 closes.** Sévérité : 1 = refonte d'architecture si découvert
 tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 
 ## Ouvertes
@@ -36,7 +36,6 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A323 | 2 | S409 | Au pas long, la cuve fermée gagne de l'énergie | — |
 | A325 | 2 | S485 | Les parois d'APIC ne sont pas des plans de symétrie pour l'écoulement qui les longe | — |
 | A330 | 2 | S520 | Le sillage de la coque dans δ n'a pas de référence éprouvée | — |
-| A331 | 2 | S523 | W ne dit pas quand un point échantillonné sort du domaine honnête de son chemin | — |
 | A320 | 3 | S369 | Sous une houle raide, une perturbation de δ croît | S443–S445 : la bascule des défauts (S443) fait du mode relatif la production ; A320 l'y accompagne, plafonnée (ADR-213 D2), sa limite écrite (MER-S369 §9–11) ; rien en … |
 
 ## Closes
@@ -63,3 +62,4 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A327 | 2 | S490 | S492 | Un mur de décor aligné sur la grille fait échouer la projection linéaire de δ |
 | A328 | 2 | S505 | S507 | Le δ 3D linéaire à coque mobile converge lentement en `dt` près de la coque |
 | A329 | 2 | S517 | S518 | Le recoupage d'une coque qui bouge garde des boucles entières : 25 ms par pas sur un grand domaine |
+| A331 | 2 | S523 | S524 | W ne dit pas quand un point échantillonné sort du domaine honnête de son chemin |

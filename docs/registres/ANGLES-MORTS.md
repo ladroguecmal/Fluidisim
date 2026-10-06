@@ -4622,3 +4622,8 @@ le rayon honnête est plafonné par la recette (512 directions). **Conséquence*
 domaine en silence. Déclencheur : **avant un sillage de W de plus de quelques centaines de mètres de trajet dans une scène**. Premiers
 remèdes : l'hôte découpe le chemin en sillages successifs dont chacun tient son domaine (ADR-132 le calcule), ou W marque un échantillon
 hors du domaine de ses segments.
+
+*Note du 2026-10-06, S524, sur A331* ([SILLAGE-DOMAINE-S524](../validation/SILLAGE-DOMAINE-S524.md)) : **levée** pour sa conséquence.
+Calibré : sous le rayon d'ADR-132 lu sur la distance du chemin aux points, l'écart reste sous 0,4 % ; 7 % à 1,45 R, 23 % à 1,88 R.
+`spectral_pressure::farthest_emission` donne cette distance ; l'hôte l'annonce une fois au-delà du rayon (`WAKE_HORS_RAYON`). La garde est
+conservatrice (deux fausses alertes, à 0,3 % et 2 %), aucune erreur forte n'est plus silencieuse.

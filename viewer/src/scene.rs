@@ -12,7 +12,7 @@ use water_core::{
     pressure_source::Metadata,
     pressure_timeline::Timeline,
     radial_impact::{Domain, RadialImpact, RadialTable},
-    spectral_pressure::{Node, Slot},
+    spectral_pressure::{self, Node, Slot},
     wake_source::{Leg, Wake},
     wave_event::{Impact, Origin, WaveEvent},
     wave_journal::{self, Cause},
@@ -720,6 +720,8 @@ pub struct FrameData<'a> {
     pub honest_radius: f32,
     pub honest_duration: f32,
     announced: bool,
+    /// S524 — A331 : l'annonce du rayon honnête dépassé, faite.
+    announced_radius: bool,
     /// S234 : LOD spatial de couche. Vrai : le sillage est reconstruit depuis sa grille locale ;
     /// faux : somme directe par sommet (chemin S212–S225, conservé comme témoin).
     pub lod: bool,
@@ -845,6 +847,7 @@ impl<'a> FrameData<'a> {
             honest_radius: wake_honest_radius(recipe),
             honest_duration: wake_honest_duration(recipe, 9.81),
             announced: false,
+            announced_radius: false,
             lod: true,
             spectral: true,
             cwm: false,
@@ -957,6 +960,22 @@ impl<'a> FrameData<'a> {
         self.wake_active = wake_time.is_some();
         // ADR-132 : une annonce, une seule, au premier instant hors domaine. Le sillage reste
         // affiché — le chemin est cosmétique (ADR-129 §3) et rien ne le refuse (A214).
+        // S524 — A331 : le rayon honnête vaut pour la distance du chemin émetteur aux points de la boîte d'image ; une annonce, une seule.
+        if self.wake_active && !self.announced_radius {
+            let loin = self
+                .wake_input
+                .journal
+                .published()
+                .map(|s| spectral_pressure::farthest_emission(s.segments(), WAKE_MIN, WAKE_MAX))
+                .fold(0f32, f32::max);
+            if loin > self.honest_radius {
+                self.announced_radius = true;
+                println!(
+                    "WAKE_HORS_RAYON distance_chemin_image={loin:.1} m > rayon_honnete={:.1} m — échantillons hors domaine de la recette",
+                    self.honest_radius
+                );
+            }
+        }
         if self.wake_active && age > self.honest_duration as f64 && !self.announced {
             self.announced = true;
             println!(

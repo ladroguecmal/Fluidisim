@@ -15,6 +15,7 @@ de W.
     python outils/reference_sillage.py delta <fichier>   — S520 : l'instrument figé sur la surface de δ (banc `--lineaire-sillage`, `SORTIE=`)
     python outils/reference_sillage.py profondeur <fichier> — S522 : W par 5 m de fond (`c07_profondeur`) contre la référence finie et profonde
     python outils/reference_sillage.py supercritique [W10 W15] — S523 : l'angle au-delà du critique, sur la référence (trois grilles) ou W
+    python outils/reference_sillage.py calibration <W_T16.bin …> — S524 : l'écart de W contre la distance du chemin aux points (A331)
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import os
@@ -292,6 +293,31 @@ def supercritique(fichiers=None):
         print(f"C07_S523 U={u} ecart_quadratique_relatif={ecart:.4f} points_zone={zone.sum()} max_ref_zone={np.abs(ref[zone]).max():.4f}", flush=True)
 
 
+def calibration(fichiers):
+    """S524 — A331 : W (5 m de fond, 10 m/s, σ 2 m, recette 512 × 256 à coupure 3, rayon honnête 179 m) contre la référence, la zone de 80
+    à 100 m derrière la source ; la durée lue dans le nom du fichier (`…_T<durée>.bin`). `D`, la plus grande distance d'un point du chemin
+    (le départ) à un point de la zone, et l'écart quadratique relatif."""
+    u, r_honnete = 10.0, 2 * np.pi * 256 / (3 * 3.0)
+    for chemin in fichiers:
+        t = float(chemin.rsplit("_T", 1)[1].split(".")[0])
+        with open(chemin, "rb") as f:
+            tete = f.readline().split()
+            nx, ny = int(tete[0]), int(tete[1])
+            gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+            w = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+        x0 = xs_src - u * t
+        gx = gx0 + dx * np.arange(nx)
+        gy = gy0 + dx * np.arange(ny)
+        GX, GY = np.meshgrid(gx, gy)
+        xs, ys, eta = champ(2.0, u, t, 2048.0, 768.0, 0.5, x0, 3.0, profondeur=SUPER_H)
+        ref = bilineaire(xs, ys, eta, GX.ravel(), GY.ravel()).reshape(ny, nx)
+        d = xs_src - GX
+        zone = (d >= SUPER_D[0]) & (d <= SUPER_D[1])
+        dist = np.hypot(GX[zone] - x0, GY[zone]).max()
+        ecart = np.sqrt(((w - ref)[zone] ** 2).sum() / (ref[zone] ** 2).sum())
+        print(f"CALIB_S524 T={t:.0f} D_m={dist:.1f} D_sur_R={dist / r_honnete:.2f} ecart_quadratique_relatif={ecart:.4f}", flush=True)
+
+
 def instrument():
     t, coupure = 24.0, 6.0
     for sigma in [0.5, 1.0, 2.0]:
@@ -316,6 +342,8 @@ if __name__ == "__main__":
         delta(sys.argv[2])
     elif sys.argv[1] == "profondeur":
         profondeur(sys.argv[2])
+    elif sys.argv[1] == "calibration":
+        calibration(sys.argv[2:])
     elif sys.argv[1] == "supercritique":
         supercritique(sys.argv[2:] or None)
     else:
