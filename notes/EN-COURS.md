@@ -72,6 +72,6 @@ gardé par le code du rituel, qui sort en erreur (3) sur un lot dû ; L400, L401
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-242, METHODE, L400, L401, BOUSSOLE, index, le rituel).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
