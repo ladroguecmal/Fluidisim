@@ -62,32 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S507 — **terminée**. En autonomie, **A328** — le δ 3D à coque mobile converge lentement en `dt` près de la coque (S505). Et le lot
-des registres, dû en S506.
+Session : S508 — **en cours**. En autonomie, **6.4, le coût du recoupage** : une coque qui bouge sur la carte coûte 8 ms de CPU par pas
+(S503–S504) — le `set_solid_rigid` entier du cœur, trois extractions et l'envoi de toute la géométrie — contre 0,7 à 0,9 ms pour la carte.
 
-**Ce que la session fait.** Localiser avant de remédier (ADR-226 D1) : la coque en translation sous-critique (0,5 et 2 m/s, départ en
-rampe), quatre pas (ADR-230 D1) ; trois normes de l'écart au plus fin : le maximum sur la surface, le maximum hors de la coque (à une
-maille près de son empreinte), l'écart quadratique ; puis, si le défaut reste dans le champ, éteindre un à un les termes de la mise à jour
-par pas contre un témoin.
+**Ce que la session fait.** Mesurer d'abord la part de chaque étage ; puis limiter le recoupage du cœur et les extractions à la boîte que
+le solide occupe (avant et après le pas, une maille de marge), et n'envoyer à la carte que ce qui change.
 
-**Ordre de grandeur, écrit avant.** Le bord de la coque est une discontinuité qui se déplace d'une fraction de maille par pas : au bord,
-l'écart **maximal** est de l'ordre de la hauteur portée par la colonne coupée, et ne décroît en `dt` que si la maille décroît aussi — un
-ordre ≈ 0 attendu au bord ; hors de la coque, l'ordre du schéma (1, le pas de la géométrie appliqué d'un coup) ; en norme quadratique, le
-bord pèse en `√(colonnes du bord / colonnes)` ≈ 0,1.
+**Ordre de grandeur, écrit avant.** La coque de la porte D occupe ≈ 18 × 8 × 6 mailles de 25 cm (avec la marge) sur 48 × 32 × 8 — ≈ 7 % de
+la grille ; un recoupage limité à sa boîte devrait coûter de l'ordre de 7 % de l'entier, ≈ 0,5 ms ; l'envoi de la géométrie entière
+(≈ 1 Mo) pèse ≈ 0,1 à 0,3 ms.
 
-**Critères, écrits avant.** (1) les trois normes publiées sur quatre pas aux deux vitesses ; (2) si l'ordre hors de la coque et l'ordre
-quadratique sont ≥ 0,8 aux deux vitesses : A328 se réduit au bord de la coque (une propriété d'une paroi qui se déplace sur une grille
-fixe, de résolution : A317) — levée, réécrite ; sinon, la suite : éteindre les termes ; (3) le lot des registres.
+**Critères, écrits avant.** (1) la part de chaque étage publiée ; (2) le recoupage limité rend des tableaux **identiques au bit** à
+l'entier (géométrie, terme de paroi, faces, colonnes, poids du transfert) sur la coque en pilonnement et en roulis ; les bancs de S503 et
+S504 aux mêmes chiffres ; la suite du cœur ; (3) le coût CPU par pas ≤ 1 ms sur la coque de la porte D. Si (2) et (3) tiennent, 6.4 est
+validée (ses manques nommés : la coque qui bouge sur la carte, C23, le coût).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les trois normes, quatre pas, deux vitesses (calcul détaché).
-- [x] **P3** — verdict sur A328 ; preuve ; lot des registres ; rituel.
+- [ ] **P2** — la part de chaque étage.
+- [ ] **P3** — le recoupage et les extractions limités à la boîte ; l'envoi partiel ; (2)–(3).
+- [ ] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
-- **P2** — ordres 1,1 à 1,6 aux deux vitesses, trois normes ; `MILIEU` sans effet d'ordre ; témoin `BOSSE` 0,4 / 2 / 5 / 11 % (ordre 1,2 à
-  2,1). Impasses : une variable préfixée dans le shell ne passe pas au calcul détaché (`calcul.py lancer nom VAR=val -- …`) ; une édition
-  ancrée sur un texte qui n'était pas celui du fichier (rien d'écrit : les ancres d'abord).
-- **P3** — A328 levée, réattribuée ; preuve A328-S507 ; liste 6.4 ; index ; lot : feuille de route (S504–S506) ; journal.
-

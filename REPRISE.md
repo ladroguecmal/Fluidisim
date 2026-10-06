@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-06 08:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S508 — 6.4, le coût du recoupage ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S507 — A328 réattribuée : l'ordre 1 en temps près d'une coque mobile ([journal](notes/JOURNAL.md)). Avant : S506 (la cinquième revue de méthode)
 Session suivante : **S508 — un point de la liste qui fasse avancer une capacité** (maillons 1) : relire le tableau de bord (6.2 le courant, 6.4 le coût du recoupage, 4.13, 9.5, 5.4…), choisir le critère le plus net ; ordre de grandeur contre le terme concurrent, référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
 Maillons        : 1 — S507 : A328 levée, réattribuée (sans capacité)
