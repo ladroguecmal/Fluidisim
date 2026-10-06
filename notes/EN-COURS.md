@@ -62,30 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S509 — **terminée**. En autonomie (maillons 2), **6.4, l'envoi sous 1 ms** : S508 a ramené le recoupage de 8 à 1,4–1,55 ms par
-pas ; l'envoi à la carte (0,4 à 0,65 ms : 450 Ko par pas, géométrie et tableaux de mouvement entiers) en est le plus gros reste.
+Session : S510 — **en cours**. En autonomie, **9.5, le consommateur d'un événement prédit, confirmé ou rétracté** : le journal des impacts
+(ADR-056) tient les causes, prédites puis confirmées ou rejetées, et rend `Change::Retract` — rien ne le consomme : la composition ne lit que
+les confirmés. Et le lot des registres (dû).
 
-**Ce que la session fait.** `Linear3` garde une ombre de ce qu'elle a reçu ; `set_motion` n'envoie que les valeurs qui changent, en paires
-(indice, valeur) ; un noyau de dispersion les écrit dans la géométrie et le tampon de mouvement au début du pas.
+**Ce que la session fait.** `wave_consumer` (cœur, sans allocation) : par cause, l'impact affiché et son poids ; une prédiction s'affiche
+dès son admission ; une confirmation au même effet visible la garde telle quelle ; une confirmation corrigée fond enchaîné de l'une à
+l'autre sur `τ` ; un rejet l'éteint en fondu sur `τ` ; chaque impact garde son âge (aucun retour du temps). Le chemin d'image seul : le jeu
+ne lit que les confirmés (I-04).
 
-**Ordre de grandeur, écrit avant.** Ce qui change d'un pas à l'autre : les faces et mailles coupées par la surface de la coque — de l'ordre
-de la surface de la coque en mailles (≈ 2·(16·6 + 16·4 + 6·4) ≈ 370 mailles de 25 cm, autant de faces par famille), quelques milliers de
-valeurs, ≈ 10 à 30 Ko au lieu de 450 ; la comparaison à l'ombre, ≈ 110 000 flottants, ≈ 0,05 ms.
+**Ordre de grandeur, écrit avant.** Un fondu en `smoothstep` sur `τ` = 0,5 s a une pente maximale `1,5/τ` ; à 60 images/s, le saut d'une
+image dû au fondu vaut au plus `1,5·(1/60)/0,5` = 5 % de l'amplitude de l'impact — contre 100 % pour un retrait sec (le témoin).
 
-**Critères, écrits avant.** (1) la carte rend les mêmes bits qu'avec l'envoi entier : les bancs de S503 et S504 aux mêmes chiffres, S358
-identique ; (2) le coût CPU par pas ≤ 1 ms sur la coque de la porte D (le critère de S508) ; si (1) et (2), **6.4 validée**.
+**Critères, écrits avant.** (1) confirmation au même effet : l'image identique au bit avant et après, et identique à celle du seul
+confirmé ; (2) rejet : le saut d'une image dû au retrait ≤ 5 % de l'amplitude, nul après `τ` (le témoin sec : ≈ 100 %) ; (3) confirmation
+corrigée (0,5 m plus loin) : saut ≤ 5 %, et après `τ` l'image du seul confirmé, au bit ; (4) l'âge de chaque impact suit l'horloge ; capacité
+bornée, refus sans écriture. Si (1)–(4), 9.5 validée.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ombre, les paires, le noyau de dispersion ; (1)–(2).
-- [x] **P3** — preuve ; liste 6.4 ; rituel.
+- [ ] **P2** — `wave_consumer` ; essais (1)–(4).
+- [ ] **P3** — preuve ; liste 9.5 ; lot des registres ; rituel.
 
 ### Notes de reprise
-- **P2** — ombre + paires + dispersion (module à part) : mêmes bits partout, 882 valeurs par pas, mais envoi 0,33 ms ; profil interne :
-  comparaison 0,185 (dont la validation de 110 000 valeurs) + écriture 0,134 (coût fixe de l'appel). Puis : validation sur les valeurs
-  changées (ombre mise à jour après la boucle), test bon marché d'abord dans `check_solid_in`, `changed_faces_in_place`, nœuds dans la
-  boîte orientée : **0,81–0,82 ms**. Deux scripts correctifs échoués (guillemets imbriqués, ancre absente) — rattrapés à la main, rien de
-  faux committé. 665 essais.
-- **P3** — preuve ENVOI-S509 ; **6.4 validée** (8 / 120) ; index ; journal.
-

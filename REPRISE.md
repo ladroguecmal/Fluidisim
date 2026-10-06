@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 09:06 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 09:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S510 — 9.5, le consommateur d'un événement prédit ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S509 — 6.4 validée : la coque qui bouge sous 1 ms ([journal](notes/JOURNAL.md)). Avant : S508 (le coût du recoupage d'une coque qui bouge)
 Session suivante : **S510 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 le courant, 9.5 le consommateur, 5.4 `C_d` et pompe, 4.13…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228), ordre de grandeur contre le terme concurrent (ADR-226). Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
 Maillons        : 0 — S509 : 6.4 validée (8 sur 120)
