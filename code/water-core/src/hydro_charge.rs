@@ -8,9 +8,10 @@
 //! Newton sur les charges des jonctions : la jacobienne (un laplacien pondéré par `dQ/dΔh`) est résolue par élimination de Gauss à pivot
 //! partiel dans un tampon de l'appelant (I-06) ; un pas qui n'abaisse pas le résidu est amorti de moitié. Sous [`LINEAIRE_M`] de perte,
 //! une conduite est linéarisée (raccord continu) : la dérivée de la racine y serait infinie. Calcul `f64` séquentiel, reproductible (I-03).
-//! Le couplage au pas de V — des réservoirs qui se vident par le réseau — viendra ensuite.
+//! S567 : **le couplage au pas de V** — [`pas_reseau`] : les charges fixes sont les surfaces des nœuds, les débits les vident.
 
-use super::Error;
+use super::{along, geometry, sub, Error, HydroNode, Shapes};
+use crate::SimTime;
 
 /// Sous cette perte de charge (m), une conduite est linéarisée : `Q = Δh/√(R·LINEAIRE_M)`, continu avec la loi quadratique.
 pub const LINEAIRE_M: f64 = 1e-6;
@@ -198,4 +199,74 @@ pub fn resoudre(fixes: &[f64], demandes: &[f64], conduites: &[Conduite], charges
         *q = debit(charge(c.a, fixes, charges) - charge(c.b, fixes, charges), c.resistance).0;
     }
     Ok(Rapport { iterations: it, residu_m3s: r })
+}
+
+/// **S567 — un raccord** : le nœud de V `noeud` relié au réseau au point `position_um` (repère du référentiel) ; il est le sommet
+/// `Sommet::Fixe(indice du raccord)`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Raccord {
+    pub noeud: u16,
+    pub position_um: [i64; 3],
+}
+
+/// La tolérance de continuité du couplage, m³/s, et son nombre d'itérations.
+const TOLERANCE_PAS: f64 = 1e-13;
+const ITERATIONS_PAS: u32 = 50;
+
+/// **S567 — un pas du réseau en charge couplé à V.** Chaque raccord donne une charge fixe — la cote de la surface de son nœud le long de
+/// la verticale locale (m) ; le réseau est résolu ([`resoudre`], départ sur `charges`, l'état du pas précédent) ; le débit net de chaque
+/// raccord, intégré sur `dt`, devient des millilitres entiers avec un reste par raccord (`restes_nl`, comme les arêtes de V). Le réseau
+/// ne stocke rien : ce qu'il soutire aux jonctions sort, et `sortie_ml` le cumule — la masse se compte nœuds + sortie, à l'entier.
+///
+/// Les résistances sont celles de la gravité locale (`R` en s²/m⁵ pour `|g_eff|`) ; l'air des poches n'entre pas. `fixes` : un tampon,
+/// une charge par raccord ; `travail` : [`tampon`]`(jonctions)`. Refus, sans rien écrire dans les nœuds, les restes ni la sortie : un
+/// raccord hors de l'eau (`Domain` — le réseau aspirerait de l'air), un nœud qui donnerait plus qu'il n'a ou recevrait plus que sa place
+/// (`Capacity`), et ceux de [`resoudre`] ; `charges` et `debits` ne sont alors pas significatifs.
+#[allow(clippy::too_many_arguments)]
+pub fn pas_reseau(nodes: &mut [HydroNode], shapes: &Shapes<'_>, g_eff: [f32; 3], dt: SimTime, raccords: &[Raccord], demandes: &[f64],
+    conduites: &[Conduite], charges: &mut [f64], debits: &mut [f64], fixes: &mut [f64], restes_nl: &mut [i64], travail: &mut [f64],
+    sortie_ml: &mut i64) -> Result<Rapport, Error> {
+    if fixes.len() != raccords.len() || restes_nl.len() != raccords.len() || dt.0 == 0 {
+        return Err(Error::Capacity);
+    }
+    let (up, _) = geometry::vertical(g_eff)?;
+    for (r, h) in raccords.iter().zip(fixes.iter_mut()) {
+        let n = nodes.get(r.noeud as usize).ok_or(Error::Capacity)?;
+        shapes.validate_node(n, up)?;
+        let surface = along(sub(n.origin_um, [0; 3]), up) + shapes.surface_up(n, up)?.offset_um;
+        if !(along(sub(r.position_um, [0; 3]), up) < surface) {
+            return Err(Error::Domain);
+        }
+        *h = surface * 1e-6;
+    }
+    let rapport = resoudre(fixes, demandes, conduites, charges, debits, travail, TOLERANCE_PAS, ITERATIONS_PAS)?;
+    // Le débit sortant de chaque raccord, en millilitres entiers ; rangés dans `fixes`, désormais libre, avant toute écriture.
+    let dt_s = dt.0 as f64 * 1e-6;
+    let sortant = |r: usize| -> f64 {
+        conduites.iter().zip(debits.iter()).map(|(c, q)| {
+            (if c.a == Sommet::Fixe(r) { *q } else { 0.0 }) - (if c.b == Sommet::Fixe(r) { *q } else { 0.0 })
+        }).sum()
+    };
+    for (r, f) in fixes.iter_mut().enumerate() {
+        let nl = sortant(r) * dt_s * 1e12 + restes_nl[r] as f64;
+        if !nl.is_finite() || nl.abs() >= 9e18 {
+            return Err(Error::NonFinite);
+        }
+        *f = (nl / 1e6).floor();
+    }
+    for (i, n) in nodes.iter().enumerate() {
+        let sort: f64 = raccords.iter().zip(fixes.iter()).filter(|(r, _)| r.noeud as usize == i).map(|(_, ml)| *ml).sum();
+        let apres = n.volume_ml as f64 - sort;
+        if apres < 0.0 || apres > n.capacity_ml as f64 {
+            return Err(Error::Capacity);
+        }
+    }
+    for r in 0..raccords.len() {
+        let ml = fixes[r] as i64;
+        let nl = sortant(r) * dt_s * 1e12 + restes_nl[r] as f64;
+        restes_nl[r] = (nl - ml as f64 * 1e6) as i64;
+        nodes[raccords[r].noeud as usize].volume_ml -= ml;
+        *sortie_ml += ml;
+    }
+    Ok(rapport)
 }

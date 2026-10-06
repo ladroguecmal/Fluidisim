@@ -62,3 +62,90 @@ fn an_isolated_junction_or_a_bad_pipe_is_refused_s565() {
     let mut court = vec![0.0; tampon(1) - 1];
     assert_eq!(resoudre(&[10.0], &[0.0], &[ok], &mut h1, &mut q1, &mut court, TOL, 30).err(), Some(Error::Capacity), "un tampon court");
 }
+
+// --- S567 — le réseau en charge couplé au pas de V. Références écrites au plan par son script.
+
+use crate::hydro_network::charge::{pas_reseau, Raccord};
+use crate::hydro_network::geometry::{Tetrahedron, VolumeShape};
+use crate::SimTime;
+
+fn box_cells(lo: [i64; 3], hi: [i64; 3]) -> [Tetrahedron; 6] {
+    let v: [[i64; 3]; 8] = std::array::from_fn(|bits|
+        std::array::from_fn(|axis| if bits & (1 << axis) == 0 { lo[axis] } else { hi[axis] }));
+    [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]].map(|p| {
+        Tetrahedron::new([v[0], v[1 << p[0]], v[(1 << p[0]) | (1 << p[1])], v[7]]).unwrap()
+    })
+}
+
+/// Deux cuves de 1 m² (l'eau à 1,5 et 0,5 m) reliées au fond par A–J0–J1–B ; `pas` pas de 100 ms, la demande `robinet` à J0. Rend les
+/// volumes après chaque pas et la sortie cumulée.
+fn deux_cuves(pas: usize, robinet: f64) -> (Vec<(i64, i64)>, i64) {
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mut nodes = [
+        HydroNode { volume_ml: 1_500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 },
+        HydroNode { volume_ml: 500_000, capacity_ml: 2_000_000, origin_um: [5_000_000, 0, 0], shape: 0 },
+    ];
+    let raccords = [Raccord { noeud: 0, position_um: [500_000, 500_000, 0] }, Raccord { noeud: 1, position_um: [5_500_000, 500_000, 0] }];
+    let conduites = [
+        Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4 },
+        Conduite { a: Sommet::Jonction(0), b: Sommet::Jonction(1), resistance: 2e4 },
+        Conduite { a: Sommet::Jonction(1), b: Sommet::Fixe(1), resistance: 1e4 },
+    ];
+    let (mut charges, mut debits, mut fixes, mut restes, mut w) = ([1.0; 2], [0.0; 3], [0.0; 2], [0i64; 2], vec![0.0; tampon(2)]);
+    let mut sortie = 0i64;
+    let mut volumes = Vec::new();
+    for _ in 0..pas {
+        pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &raccords, &[robinet, 0.0], &conduites, &mut charges,
+            &mut debits, &mut fixes, &mut restes, &mut w, &mut sortie).unwrap();
+        volumes.push((nodes[0].volume_ml, nodes[1].volume_ml));
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml + sortie, 2_000_000, "critère 2 : la masse, à l'entier");
+    }
+    (volumes, sortie)
+}
+
+/// (1) Deux cuves s'égalisent par le réseau selon `√Δh = √Δh₀ − (1/A + 1/B)·t/(2√R)` ; (2) la masse à l'entier, la sortie bornée.
+#[test]
+fn two_tanks_level_through_a_pressurised_network_s567() {
+    let (volumes, sortie) = deux_cuves(3_000, 0.0);
+    // Un Euler f64 indépendant, au même pas.
+    let (mut dh, mut euler) = (1.0f64, Vec::new());
+    for _ in 0..3_000 {
+        dh -= 0.1 * 2.0 * (dh.max(0.0) / 4e4).sqrt();
+        euler.push(dh);
+    }
+    for (t, ferme) in [(50usize, 0.5625f64), (100, 0.25), (150, 0.0625)] {
+        let (a, b) = volumes[t * 10 - 1];
+        let mesure = (a - b) as f64 * 1e-6;
+        println!("S567 à {t} s : Δh = {mesure:.6} m (loi fermée {ferme}, Euler {:.6})", euler[t * 10 - 1]);
+        assert!((mesure - ferme).abs() < 1e-3, "critère 1 : la loi fermée à {t} s");
+        assert!((mesure - euler[t * 10 - 1]).abs() < 1e-5, "critère 1 : l'Euler indépendant à {t} s");
+    }
+    let (a, b) = volumes[2_999];
+    println!("S567 à 300 s : {a} et {b} ml ; sortie {sortie} ml");
+    assert!(sortie.abs() <= 2, "critère 2 : la sortie sans demande");
+}
+
+/// (3) Le robinet : 1 L/s soutiré à J0 pendant 100 s ; (4) les refus.
+#[test]
+fn a_tap_on_the_network_draws_exactly_its_demand_s567() {
+    let (_, sortie) = deux_cuves(1_000, 0.001);
+    println!("S567 robinet : {sortie} ml sortis (100 000)");
+    assert!((sortie - 100_000).abs() <= 2, "critère 3");
+    // Un raccord hors de l'eau.
+    let cells = box_cells([0, 0, 0], [1_000_000, 1_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mut nodes = [HydroNode { volume_ml: 500_000, capacity_ml: 2_000_000, origin_um: [0; 3], shape: 0 }];
+    let avant = nodes;
+    let conduites = [Conduite { a: Sommet::Fixe(0), b: Sommet::Jonction(0), resistance: 1e4 }];
+    let (mut charges, mut debits, mut fixes, mut restes, mut w, mut sortie) = ([0.0], [0.0], [0.0], [0i64], vec![0.0; tampon(1)], 0i64);
+    let sec = [Raccord { noeud: 0, position_um: [500_000, 500_000, 1_900_000] }];
+    assert_eq!(pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &sec, &[0.0], &conduites, &mut charges, &mut debits,
+        &mut fixes, &mut restes, &mut w, &mut sortie).err(), Some(Error::Domain), "critère 4 : un raccord à sec");
+    let ailleurs = [Raccord { noeud: 3, position_um: [0; 3] }];
+    assert_eq!(pas_reseau(&mut nodes, &shapes, [0.0, 0.0, -9.81], SimTime(100_000), &ailleurs, &[0.0], &conduites, &mut charges,
+        &mut debits, &mut fixes, &mut restes, &mut w, &mut sortie).err(), Some(Error::Capacity), "critère 4 : un nœud absent");
+    assert_eq!((nodes, restes, sortie), (avant, [0], 0), "critère 4 : rien d'écrit");
+}
