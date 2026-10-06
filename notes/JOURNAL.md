@@ -772,3 +772,10 @@ exactement ; la formule éprouvée sur l'oscillateur (ADR-239 D1). **Fait** ([pr
 **Mesuré** : `Q` conservé à 2,1·10⁻⁵ de E₀ sur 120 s, hausse au pire 4,5·10⁻⁶ ; C09 passe sur l'énergie du schéma. **En route** : le +8,4 %
 de S555 venait de l'instrument — le couvercle compté pour une maille pleine ; au bon poids, l'énergie naturelle oscille de ± 1,4 % autour de
 E₀. Une note l'écrit dans la preuve de S555. Maillons **0** (4.18, 13.2 avancent). Suivant : **S558**, un point partiel.
+
+## S558 — 2026-10-06 — l'énergie du chemin coupé de δ linéaire
+
+**Entrée.** En autonomie ; 4.18, la suite de S557. **La dérivation d'abord** : sur fond coupé, l'invariant vit dans le produit scalaire
+pondéré par les ouvertures. **Fait** ([preuve](../docs/validation/ENERGIE-COUPEE-S558.md)) : la cuve de S557 sur un fond en pente et bosse,
+280 faces partielles. **Mesuré** : `Q_a` conservé à 2,4·10⁻⁶ de E₀ ; le témoin sans poids dérive jusqu'à +1,8 %. Maillons **0** (4.18
+avance). Suivant : **S559**, un point partiel.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S558 — **en cours**. En autonomie, **4.18 — l'énergie du chemin coupé** : S557 a établi l'invariant du pas linéaire sur fond
+Session : S558 — **terminée**. En autonomie, **4.18 — l'énergie du chemin coupé** : S557 a établi l'invariant du pas linéaire sur fond
 plat ; « manquent l'énergie du pas couplé et du chemin coupé ». Le chemin coupé (fond quelconque, mailles en partie solides) est celui de
 toute scène réelle.
 
@@ -84,7 +84,11 @@ sans poids, publié sans critère.
 ### Plan
 
 - [x] **P1** — jeton ; la dérivation ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 4.18 ; rituel.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 4.18 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — 280 faces partielles ; `Q_a` à 2,4·10⁻⁶ de E₀, hausse au pire 2,2·10⁻⁶ : (1)–(3) tenus ; le témoin sans poids jusqu'à
+  +1,835 %. Suite 716.
+- **P3** — preuve ENERGIE-COUPEE-S558 ; liste 4.18 ; index ; journal.
+

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:43 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:47 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S558 — 4.18, l'énergie du chemin coupé de δ linéaire ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S557 — le lot ; l'énergie que le pas linéaire conserve ; A332 levée ([journal](notes/JOURNAL.md)). Avant : S556 (la quinzième revue de méthode)
-Session suivante : **S558 — un point partiel** (6.6, 4.18 : l'énergie du chemin coupé ou du pas couplé, ou un autre ; choisir par la feuille de route). À noter pour la revue de S561 : l'instrument d'énergie de S555 n'avait pas été éprouvé sur un cas connu (L375) — le couvercle compté plein, relevé en S557. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S557 : 4.18 et 13.2 avancent (A332 levée, C09 passé sur δ linéaire)
+Session en cours : aucune
+Dernière session : S558 — l'énergie du chemin coupé de δ linéaire ([journal](notes/JOURNAL.md)). Avant : S557 (le lot)
+Session suivante : **S559 — un point partiel** (4.18 : l'énergie du pas mobile, ou un autre point ; choisir par la feuille de route). Revue à S561 (noter : l'instrument d'énergie de S555 non éprouvé, L375). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 0 — S558 : 4.18 avance (l'énergie du chemin coupé)
 Registres       : dernier lot S557 (ADR-213 D3) ; le prochain au plus tard en S560
 ```
 

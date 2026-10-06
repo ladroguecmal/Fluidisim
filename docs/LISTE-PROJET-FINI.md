@@ -338,7 +338,9 @@ pas recopiée ici (L137).
   le bilan δ + régions se ferme au résidu ([ordre D](validation/RESTITUTION-S317.md)) — la
   représentation, pas le monde. **S555, S557** : C09 sur δ linéaire — la masse à 2·10⁻⁶ s⁻¹ ; l'énergie du
   schéma, l'invariant mixte `K(u^{n+1}) + ½ρg·Σ η^n·η^{n+1}·dA` dérivé du code, **conservée à 2·10⁻⁵ sur 120 s** : le pas linéaire ne
-  dissipe pas ([preuve](validation/ENERGIE-DISCRETE-S557.md)). Manquent l'énergie du pas couplé et du chemin coupé.
+  dissipe pas ([preuve](validation/ENERGIE-DISCRETE-S557.md)). **S558** : le chemin coupé aussi — l'invariant pondéré par les
+  ouvertures, conservé à 2,4·10⁻⁶ sur un fond en pente et bosse ([preuve](validation/ENERGIE-COUPEE-S558.md)). Manquent l'énergie du
+  pas mobile et du pas couplé.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
   (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
   280 à 49 ms, environ 24 fois le budget d'eau. **S276 : δ en direct à 40 images/s** — bande de
