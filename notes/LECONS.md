@@ -6547,3 +6547,9 @@ roulis. La marge d'un corps d'essai se calcule avant de mesurer, avec son proxy 
 `dt` (l'élévation doublait quand le pas diminuait), puis une coque au-delà de `√(gh)`, où la réponse linéaire est singulière. Quatre calculs
 avant de vérifier la convergence de la référence elle-même sur trois pas. Une référence s'éprouve convergée avant de juger (ADR-230 D1).
 
+## L386
+
+**S509 — le correctif qui échoue, et le script qui part quand même.** Deux fois dans la session : un script correctif tombé sur des
+guillemets imbriqués, puis sur une ancre absente ; la commande suivante, sur une ligne nouvelle, a lancé le script d'origine — une
+version fautive appliquée, rattrapée à la main. `&&` entre étapes dépendantes ; corriger le fichier visé, pas le correctif (ADR-231 D1).
+

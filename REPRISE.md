@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 09:20 +02:00
+JETON            : libre
+Battement        : 2026-10-06 09:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S511 — la sixième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S510 — 9.5 validée : le consommateur des impacts prédits ([journal](notes/JOURNAL.md)). Avant : S509 (6.4 validée : la coque qui bouge sous 1 ms)
-Session suivante : **S511 — la revue de méthode** (ADR-222, toutes les cinq sessions) : les frictions de S507–S510 — dont deux scripts correctifs ratés en S509 (guillemets imbriqués, ancre absente), une prévision de témoin fausse (S510), une variable d'environnement non transmise au calcul détaché (S507). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
-Maillons        : 0 — S510 : 9.5 validée (9 sur 120)
+Session en cours : aucune
+Dernière session : S511 — la sixième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S510 (9.5 validée : le consommateur des impacts prédits)
+Session suivante : **S512 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 le courant, 5.4 `C_d` et pompe, 4.13 la coque en marche dans δ, 9.3, 9.2…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228), enchaînements arrêtés au premier échec (ADR-231). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
+Maillons        : 1 — S511 : la revue de méthode (ADR-231), sans capacité
 Registres       : dernier lot S510 (ADR-213 D3) ; le prochain au plus tard en S513
 ```
 

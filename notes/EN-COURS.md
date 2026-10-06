@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S511 — **en cours**. En autonomie, **la sixième revue de méthode** (ADR-222 D4) : les frictions de S507–S510.
+Session : S511 — **terminée**. En autonomie, **la sixième revue de méthode** (ADR-222 D4) : les frictions de S507–S510.
 
 **Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
 table ; un outil corrigé est éprouvé ; `etat_projet --check` à zéro.
@@ -70,6 +70,7 @@ table ; un outil corrigé est éprouvé ; `etat_projet --check` à zéro.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; l'outil du rituel ; rituel.
+- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; l'outil du rituel ; rituel.
 
 ### Notes de reprise
+- **P2** — ADR-231 : six frictions ; une protection (D1, l'enchaînement qui s'arrête au premier échec), un outil (D2, le rappel du lot en dernière ligne — `py_compile` passé ; éprouvé en vrai au prochain lot dû, S513) ; METHODE (30), L386, BOUSSOLE (la variable du calcul détaché), index.

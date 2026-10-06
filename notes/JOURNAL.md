@@ -390,3 +390,10 @@ poids : une prédiction s'affiche dès son admission, une confirmation au même 
 enchaîné, un rejet s'éteint en fondu ; chaque impact garde sa naissance. **Mesuré** : confirmation au bit du seul confirmé sur 150 images ;
 sauts d'image de 1,56 % (rejet) et 2,28 % (correction), sous la borne de 5 %. **9.5 validée — 9 points sur 120.** Lot des registres.
 Maillons **0**. Suivant : **S511, la revue de méthode** (ADR-222).
+
+## S511 — 2026-10-06 — la sixième revue de méthode
+
+**Entrée.** En autonomie, ADR-222 D4. **Fait** : [ADR-231](../docs/adr/ADR-231-sixieme-revue-de-methode.md) — six frictions de S507–S510 ;
+une protection : un enchaînement de commandes s'arrête au premier échec (S509 : deux correctifs échoués suivis du script fautif) ; un outil :
+le rappel du lot dû répété en dernière ligne du rituel ; la boussole dit comment passer une variable au calcul détaché. METHODE : 30
+protections ; L386. Maillons **1**. Suivant : **S512**, un point partiel proche de son périmètre.

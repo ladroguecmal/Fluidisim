@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Vingt-neuf, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md), une par celle de S501, [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md), une par celle de S506, [ADR-230](../docs/adr/ADR-230-cinquieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
+Trente, tirées des erreurs qui se sont **répétées** (trois ajoutées par la revue de S486, [ADR-223](../docs/adr/ADR-223-premiere-revue-de-methode.md), trois par celle de S491, [ADR-224](../docs/adr/ADR-224-deuxieme-revue-de-methode.md), trois par celle de S496, [ADR-226](../docs/adr/ADR-226-troisieme-revue-de-methode.md), une par celle de S501, [ADR-228](../docs/adr/ADR-228-quatrieme-revue-de-methode.md), une par celle de S506, [ADR-230](../docs/adr/ADR-230-cinquieme-revue-de-methode.md), une par celle de S511, [ADR-231](../docs/adr/ADR-231-sixieme-revue-de-methode.md)) ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -41,6 +41,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Une note à un ADR s'**ajoute** ; écrire le fichier entier avec la seule note l'efface (ADR-005, de S35 à S401) | L373 | un ADR commence par son titre |
 | | Une liste qu'il faut penser à tenir se confie à un outil : décomptes, plafonds, fichiers produits | L349 | décompte, plafonds, fichiers produits |
 | | Une édition par script vérifie toutes ses ancres avant d'écrire, et s'ancre sur une ligne courte | L380 | — |
+| | Un enchaînement de commandes s'arrête au premier échec (`&&`, jamais une ligne nouvelle) ; un correctif de script qui échoue ne laisse pas partir le script corrigé — corriger le fichier visé à la main | L386 | — |
 | **en choisissant la suite** | Un blocage hérité se vérifie dans le code avant d'être contourné ou tranché ; un ordre nomme la dépendance qu'il protège | L176, L243, L343 | — |
 | | Avant de déclarer un remède physique, son ordre de grandeur à l'échelle de la scène : un remède qui n'y pèse pas n'est pas déclaré | L377 | — |
 | | Un ordre de grandeur se compare au terme concurrent, sur la durée de la mesure : un effet qui s'accumule se compte à la fin ; « négligeable » se dit contre ce qu'il concurrence, pas contre ce qui le produit | L383 | — |
