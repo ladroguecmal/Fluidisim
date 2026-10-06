@@ -156,7 +156,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
 | **6.2** Forces de l'eau sur les objets | H | W derrière la requête | 2.6, 4.15 | 6.7 | **1** |
-| **6.6** Grands navires | H | — | 3.2, 4.13, 5.9 | 11.3 | **4** |
+| **6.6** Grands navires | H | la barge envahie faite (S548) ; la carène libre, la poche porteuse, plusieurs compartiments | 3.2, 4.13, 5.9 | 11.3 | **4** |
 | **6.7** Acteur poussé, renversé ou déplacé par l'eau | B | — | 6.2 | — | **2** |
 
 ### 7. Phénomènes secondaires

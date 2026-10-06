@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S548 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S546–S547), puis **6.6 — les grands navires**
+Session : S548 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S546–S547), puis **6.6 — les grands navires**
 (absent) par leur premier cas : un navire qui s'enfonce parce qu'un compartiment s'envahit — le corps rigide (S331–S539) et un compartiment
 de V (S538–S547) couplés.
 
@@ -81,7 +81,10 @@ amortissement critique 1,45 MN·s/m (pris : 1 MN·s/m), période 2,8 s ; brèche
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 6.6 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — essai `s548` : tirant 1,9995 m (2,000), 79,915 m³ (80), surface intérieure −1,6 mm ; masse de V exacte. Suite 707.
+- **P3** — preuve BARGE-ENVAHIE-S548 ; liste 6.6 (partiel), décompte ; dépendances ; index ; journal.
+

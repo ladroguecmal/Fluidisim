@@ -1587,3 +1587,46 @@ fn a_capsized_hull_floats_on_its_air_until_the_point_of_no_return_s539() {
     assert!(haut > -1., "critère 2 : remonte");
     assert!(bas < -20., "critère 2 : coule");
 }
+
+/// **S548 — 6.6 : une barge s'enfonce par un compartiment envahi.** Barge de 20 × 8 × 4 m, 246 t (tirant 1,5 m ; proxy en couches de 25 cm,
+/// amortissement de pilonnement 1 MN·s/m) ; un compartiment central de 5 × 8 × 4 m de V dans son repère, ouvert à l'air, une brèche de
+/// 0,1 m² à son fond ; la mer, vue du navire, un nœud de V dont la surface suit le pilonnement. À chaque pas de V (0,1 s), l'eau du
+/// compartiment s'ajoute à la masse portée, puis dix pas du corps. Critères : le tirant final à 1 % de la flottabilité perdue
+/// `T' = T·A/(A − A_c)` = 2 m ; l'eau embarquée à 1 % de 80 m³, la surface intérieure à 1 cm de la flottaison ; la masse de V exacte.
+#[test]
+fn a_barge_sinks_by_its_flooded_compartment_s548() {
+    use crate::hydro_network::{step, Flow, HydroNode, Opening, Shapes, SHAPE_ENTRIES, SHARP_EDGE_DISCHARGE, STEP_US};
+    let prism = |h: i64| -> [i64; SHAPE_ENTRIES] { core::array::from_fn(|i| h * i as i64 / (SHAPE_ENTRIES - 1) as i64) };
+    let mut table = prism(20_000_000).to_vec();
+    table.extend_from_slice(&prism(4_000_000));
+    let shapes = Shapes::new(&table).unwrap();
+    let calme = CalmWater { level: 0. };
+    let m0 = 246_000.;
+    let mut barge = RigidBody::cuboid([20., 8., 4.], m0 / 640., [0., 0., 0.5], [4, 2, 16]);
+    barge.radiation_damping = [0., 0., 1.0e6];
+    let mut nodes = [
+        HydroNode { volume_ml: 500_000_000_000, capacity_ml: 1_000_000_000_000, origin_um: [0, 0, 0], shape: 0 },
+        HydroNode { volume_ml: 0, capacity_ml: 160_000_000, origin_um: [0, 0, -2_000_000], shape: 1 },
+    ];
+    let mut edges = [Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 100_000 }, position_um: [0, 0, -2_000_000],
+        discharge: SHARP_EDGE_DISCHARGE, ..Default::default() }];
+    let mut scratch = [0i64; 1];
+    let total = nodes[0].volume_ml + nodes[1].volume_ml;
+    for _ in 0..15_000 {
+        // La mer dans le repère du navire : sa surface (son origine + 10 m) à la flottaison du monde, `−z` du centre.
+        nodes[0].origin_um = [0, 0, ((-barge.position[2] - 10.) * 1e6).round() as i64];
+        step(&mut nodes, &mut edges, &shapes, [0., 0., -9.81], SimTime(STEP_US), &mut scratch).unwrap();
+        assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, total, "masse de V");
+        barge.mass = m0 + nodes[1].volume_ml as f64 * 1e-6 * MER.rho;
+        for _ in 0..10 {
+            barge.step(0.01, &calme, MER);
+        }
+    }
+    let tirant = 2. - barge.position[2];
+    let eau = nodes[1].volume_ml as f64 * 1e-6;
+    let interieur = barge.position[2] - 2. + eau / 40.;
+    println!("S548 barge : tirant {tirant:.4} m (flottabilité perdue 2,000 m) ; {eau:.3} m³ embarqués (80) ; surface intérieure à {interieur:+.4} m de la flottaison");
+    assert!((tirant / 2. - 1.).abs() <= 0.01, "critère 1");
+    assert!((eau / 80. - 1.).abs() <= 0.01, "critère 2, eau");
+    assert!(interieur.abs() <= 0.01, "critère 2, surface intérieure");
+}

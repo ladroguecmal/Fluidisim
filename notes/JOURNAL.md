@@ -695,3 +695,10 @@ sous sa surpression, la poche perd ses moles. **Mesuré** : le remplissage à 0,
 calculée au plan ; 3,59 fois plus lent qu'ouvert pour 1 cm² ; la masse exacte. Maillons **0** (5.9 avance). Suivant : **S548**, le lot (dû)
 et un point partiel.
 
+## S548 — 2026-10-06 — le lot ; une barge s'enfonce par un compartiment envahi
+
+**Entrée.** En autonomie ; le lot (feuille de route S546–S547), puis 6.6 (absent). **Calculé au plan** : la flottabilité perdue, `T' = 2 m`,
+80 m³. **Fait** ([preuve](../docs/validation/BARGE-ENVAHIE-S548.md)) : le corps rigide et un compartiment de V couplés, sans code neuf — la
+mer replacée dans le repère du navire, l'eau du compartiment ajoutée à la masse portée. **Mesuré** : le tirant à 0,025 %, l'eau à 0,1 %, la
+surface intérieure à 1,6 mm de la flottaison, la masse de V exacte. Maillons **0** (6.6 devient partiel). Suivant : **S549**.
+

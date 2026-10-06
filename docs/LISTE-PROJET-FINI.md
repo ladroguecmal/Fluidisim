@@ -486,7 +486,10 @@ pas recopiée ici (L137).
   ([DECOR-S490](validation/DECOR-S490.md)) ; **aligné sur la grille** depuis S492 (A327 levée : la tolérance au point mort,
   [A327-S492](validation/A327-S492.md)) ; **sur la carte** depuis S493 — le couvercle partiel porté, la carte à 6·10⁻⁸ m de la
   référence, aucune fuite, au bit sur le couvercle plein ([DECOR-CARTE-S493](validation/DECOR-CARTE-S493.md)).
-- [ ] **6.6 Grands navires** — *absent*.
+- [ ] **6.6 Grands navires** — *partiel* depuis S548 : une barge s'enfonce par un compartiment envahi — le corps rigide et un
+  compartiment de V couplés, le tirant final à 0,025 % de la flottabilité perdue, l'eau embarquée à 0,1 %
+  ([preuve](validation/BARGE-ENVAHIE-S548.md)). Manquent l'assiette et la gîte d'un compartiment décentré (la carène libre), la poche
+  d'air qui porte la coque, la stabilité jusqu'au chavirement, plusieurs compartiments, un navire réel, les brèches en jeu.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *partiel* depuis S514 : les règles d'ADR-018 (la
   progression selon la profondeur, le produit d'emportement : 0,5 m à 2 m/s emporte un adulte) et le nageur d'ADR-023 §3 (corps commandé,
   contraint, sa commande dans le repère de la surface) — il cesse de faire route au seuil dérivé `πH/T = 0,7 m/s`, au point près
@@ -777,7 +780,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 6 | 4 |
-| 6. Solides | 8 | 5 | 2 | 1 |
+| 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 3 | 5 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
@@ -785,7 +788,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **73** | **38** |
+| **total** | **121** | **10** | **74** | **37** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

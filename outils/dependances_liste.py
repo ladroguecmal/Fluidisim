@@ -90,7 +90,7 @@ D = {
  "6.3": ("H", "le corps en marche couplé à la source de sillage", [], None),
  "6.4": ("B", "la coque dans la production GPU de δ ; C23 sur le système", [], None),
  "6.5": ("B", "le décor dans la production GPU ; un décor qui perce la surface", [], None),
- "6.6": ("H", "—", ["6.1", "6.4", "4.13", "3.2", "5.9"], None),
+ "6.6": ("H", "la barge envahie faite (S548) ; la carène libre, la poche porteuse, plusieurs compartiments", ["6.1", "6.4", "4.13", "3.2", "5.9"], None),
  "6.7": ("B", "—", ["6.2"], None),
  "6.8": ("H", "—", ["4.12", "6.1"], None),
  "7.1": ("A", "sources de W, δ, vent ; demi-vies et transfert (B9)", [], None),
