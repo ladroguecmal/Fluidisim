@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 08:44 +02:00
+JETON            : libre
+Battement        : 2026-10-06 09:06 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S509 — 6.4, l'envoi sous 1 ms ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S508 — le coût du recoupage d'une coque qui bouge ([journal](notes/JOURNAL.md)). Avant : S507 (A328 réattribuée : l'ordre 1 en temps près d'une coque mobile)
-Session suivante : **S509 — un lot qui fasse avancer une capacité** (maillons 2, REPRISE §6) : relire le tableau de bord et choisir un point dont l'état change — 6.2 (le courant), 9.5 (le consommateur d'un événement prédit, confirmé ou rétracté), 5.4 (`C_d` selon l'ouverture, pertes et énergie de la pompe), 4.13 ; comparer à finir 6.4 (l'envoi sous 1 ms). Référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
-Maillons        : 2 — S508 : le coût du recoupage, 8 → 1,5 ms (critère 1 ms manqué), sans capacité
+Session en cours : aucune
+Dernière session : S509 — 6.4 validée : la coque qui bouge sous 1 ms ([journal](notes/JOURNAL.md)). Avant : S508 (le coût du recoupage d'une coque qui bouge)
+Session suivante : **S510 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 le courant, 9.5 le consommateur, 5.4 `C_d` et pompe, 4.13…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228), ordre de grandeur contre le terme concurrent (ADR-226). Le lot des registres y est dû. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
+Maillons        : 0 — S509 : 6.4 validée (8 sur 120)
 Registres       : dernier lot S507 (ADR-213 D3) ; le prochain au plus tard en S510
 ```
 

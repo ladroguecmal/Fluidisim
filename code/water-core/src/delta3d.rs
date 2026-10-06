@@ -467,6 +467,7 @@ impl Volume3 {
         }
         cut::add_solid_in(g, domain, solid, boite, restauree, false).expect("vérifié");
         g.solid_box = nouvelle;
+        g.recut_box = Some(restauree);
         g.solid_velocity = velocity;
         g.solid_angular = angular;
         g.solid_center = center;
@@ -1093,6 +1094,50 @@ impl Volume3 {
                 out[5 * c] = 1. - apres / avant;
                 for q in 0..4 {
                     out[5 * c + 1 + q] = poids[q] / total;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// **S509 — `changed_faces` en place** : n'écrit que les faces de la boîte du dernier recoupage ; hors d'elle, rien n'a changé depuis
+    /// le recoupage précédent, et `out` doit porter ce qu'un appel précédent (ou `changed_faces`) y a écrit.
+    pub fn changed_faces_in_place(&self, out: &mut [f32]) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let g = self.cut.as_ref().ok_or(Error::Domain)?;
+        let (nu, nv, nw) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz, nx * ny * (nz + 1));
+        if out.len() != nu + nv + nw {
+            return Err(Error::Shape);
+        }
+        let Some([i0, i1, j0, j1, k0, k1]) = g.recut_box else {
+            return self.changed_faces(out);
+        };
+        let paroi = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
+        for k in k0..k1 {
+            for j in j0..j1 {
+                for i in i0..=i1 {
+                    let f = (k * ny + j) * (nx + 1) + i;
+                    out[f] = if g.open_u[f] == 0. { 0. } else if self.saved_u[f] == 0. {
+                        paroi(0, [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx])
+                    } else { f32::MAX };
+                }
+            }
+            for j in j0..(j1 + 1).min(ny + 1) {
+                for i in i0..i1 {
+                    let f = (k * (ny + 1) + j) * nx + i;
+                    out[nu + f] = if g.open_v[f] == 0. { 0. } else if self.saved_v[f] == 0. {
+                        paroi(1, [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx])
+                    } else { f32::MAX };
+                }
+            }
+        }
+        for k in k0..(k1 + 1).min(nz + 1) {
+            for j in j0..j1 {
+                for i in i0..i1 {
+                    let f = (k * ny + j) * nx + i;
+                    out[nu + nv + f] = if g.open_w[f] == 0. { 0. } else if self.saved_w[f] == 0. {
+                        paroi(2, [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx])
+                    } else { f32::MAX };
                 }
             }
         }

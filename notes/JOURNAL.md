@@ -374,3 +374,11 @@ recoupage entier sur 60 pas —, la vérification faite une fois, Jacobi et term
 8 → 1,4 à 1,55 ms par pas ; S358, S503, S504 inchangés. **Critère de 1 ms manqué** ; restent l'envoi (0,4 à 0,65 ms) et le cœur (0,5 ms).
 6.4 reste partielle sur ce seul point. Maillons **2** (une optimisation qui ne franchit pas son critère n'est pas une capacité). Suivant :
 **S509, un lot qui fasse avancer une capacité** (maillons 2 : comparer la priorité aux reliquats).
+
+## S509 — 2026-10-06 — 6.4 validée : la coque qui bouge sous 1 ms
+
+**Entrée.** En autonomie (maillons 2) ; finir 6.4. **Fait** ([preuve](../docs/validation/ENVOI-S509.md)) : la carte ne reçoit que ce qui
+change (une ombre, des paires, un noyau de dispersion à part) ; la vérification du solide teste d'abord le cas bon marché ; les faces en
+place dans la boîte du recoupage ; les nœuds du banc dans la boîte orientée de la coque. **Mesuré** : 7,9 (S504) → 1,5 (S508) → **0,82 ms**
+par pas ; tous les bancs aux mêmes chiffres, l'essai au bit tenu. **6.4 validée — 8 points sur 120.** Maillons **0**. Suivant : un point
+partiel proche de son périmètre (6.2, le courant ; 9.5 ; 5.4 ; 4.13).

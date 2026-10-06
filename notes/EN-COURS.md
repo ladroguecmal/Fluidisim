@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S509 — **en cours**. En autonomie (maillons 2), **6.4, l'envoi sous 1 ms** : S508 a ramené le recoupage de 8 à 1,4–1,55 ms par
+Session : S509 — **terminée**. En autonomie (maillons 2), **6.4, l'envoi sous 1 ms** : S508 a ramené le recoupage de 8 à 1,4–1,55 ms par
 pas ; l'envoi à la carte (0,4 à 0,65 ms : 450 Ko par pas, géométrie et tableaux de mouvement entiers) en est le plus gros reste.
 
 **Ce que la session fait.** `Linear3` garde une ombre de ce qu'elle a reçu ; `set_motion` n'envoie que les valeurs qui changent, en paires
@@ -78,7 +78,14 @@ identique ; (2) le coût CPU par pas ≤ 1 ms sur la coque de la porte D (le cri
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ombre, les paires, le noyau de dispersion ; (1)–(2).
-- [ ] **P3** — preuve ; liste 6.4 ; rituel.
+- [x] **P2** — l'ombre, les paires, le noyau de dispersion ; (1)–(2).
+- [x] **P3** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
+- **P2** — ombre + paires + dispersion (module à part) : mêmes bits partout, 882 valeurs par pas, mais envoi 0,33 ms ; profil interne :
+  comparaison 0,185 (dont la validation de 110 000 valeurs) + écriture 0,134 (coût fixe de l'appel). Puis : validation sur les valeurs
+  changées (ombre mise à jour après la boucle), test bon marché d'abord dans `check_solid_in`, `changed_faces_in_place`, nœuds dans la
+  boîte orientée : **0,81–0,82 ms**. Deux scripts correctifs échoués (guillemets imbriqués, ancre absente) — rattrapés à la main, rien de
+  faux committé. 665 essais.
+- **P3** — preuve ENVOI-S509 ; **6.4 validée** (8 / 120) ; index ; journal.
+

@@ -14,6 +14,24 @@ use water_core::delta3d::{Domain3, Sponge3};
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `delta3d_linear.wgsl`, dans l'ordre de ce tableau.
+/// **S509 — la dispersion** : les valeurs que `set_motion` a vues changer, en paires (indice, bits) après un en-tête (`nombre`, `coupure`) ;
+/// un indice sous la coupure vise la géométrie, au-delà le tampon de mouvement. Module à part : la géométrie y est en écriture, et les
+/// noyaux du pas la gardent en lecture seule — leur code ne change pas (L345).
+const SCATTER_WGSL: &str = "
+@group(0) @binding(0) var<storage, read_write> geo: array<f32>;
+@group(0) @binding(1) var<storage, read_write> motion: array<f32>;
+@group(0) @binding(2) var<storage, read> scatter: array<u32>;
+@compute @workgroup_size(64)
+fn motion_scatter(@builtin(global_invocation_id) id: vec3<u32>) {
+    let n = id.x;
+    if (n >= scatter[0]) { return; }
+    let t = scatter[2u + 2u * n];
+    let v = bitcast<f32>(scatter[3u + 2u * n]);
+    let coupure = scatter[1];
+    if (t < coupure) { geo[t] = v; } else { motion[t - coupure] = v; }
+}
+";
+
 const KERNELS: [&str; 19] = [
     "predict", "rhs", "finish_bnorm", "init_warm", "finish_rz", "apply_fold", "finish_dq", "update", "finish_beta",
     "direction", "residual_fold", "finish_residual", "correct", "fluxes", "advance", "motion_faces", "motion_deposit",
@@ -88,14 +106,20 @@ pub struct Linear3 {
     vel: wgpu::Buffer,
     cols: wgpu::Buffer,
     state: wgpu::Buffer,
-    /// S503 : la géométrie, réécrite par `set_motion` ; le mouvement d'un solide ; un mouvement en attente du prochain pas.
-    geo: wgpu::Buffer,
+    /// S503 : le mouvement d'un solide ; un mouvement en attente du prochain pas. (S509 : la géométrie ne se réécrit plus que par la
+    /// dispersion, qui la tient par sa liaison.)
     motion: wgpu::Buffer,
     moving: core::cell::Cell<bool>,
     /// S504 : un dépôt et des poids de transfert restent dans le tampon après leur pas : à effacer au pas suivant sans mouvement.
     deposited: core::cell::Cell<bool>,
     /// S508 : le tampon de conversion de `set_motion`, gardé d'un pas à l'autre.
     octets: core::cell::RefCell<Vec<u8>>,
+    /// **S509** : l'ombre de ce que la carte a reçu (`[géométrie | mouvement]`), les paires à disperser, leur nombre ; la dispersion.
+    ombre: core::cell::RefCell<Vec<f32>>,
+    paires: wgpu::Buffer,
+    nombre: core::cell::Cell<u32>,
+    dispersion: wgpu::ComputePipeline,
+    dispersion_liaison: wgpu::BindGroup,
     scalar: wgpu::Buffer,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
@@ -160,6 +184,48 @@ impl Linear3 {
             label: Some("mouvement du solide"),
             contents: &f32s(&repos),
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        });
+        // S509 : l'ombre, et la place de toutes les paires possibles (une par valeur), en-tête compris.
+        let ombre: Vec<f32> = geo.iter().chain(&repos).copied().collect();
+        let paires = buffer(&device, ((2 + 2 * ombre.len()) * 4) as u64, wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST);
+        let disp_entrees: Vec<_> = (0..3u32)
+            .map(|binding| wgpu::BindGroupLayoutEntry {
+                binding,
+                visibility: wgpu::ShaderStages::COMPUTE,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Storage { read_only: binding == 2 },
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            })
+            .collect();
+        let disp_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor { label: None, entries: &disp_entrees });
+        let dispersion_liaison = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: None,
+            layout: &disp_layout,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 0, resource: geo_buf.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 1, resource: motion.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 2, resource: paires.as_entire_binding() },
+            ],
+        });
+        let disp_module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("dispersion"),
+            source: wgpu::ShaderSource::Wgsl(SCATTER_WGSL.into()),
+        });
+        let disp_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            bind_group_layouts: &[Some(&disp_layout)],
+            immediate_size: 0,
+        });
+        let dispersion = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some("motion_scatter"),
+            layout: Some(&disp_pipeline_layout),
+            module: &disp_module,
+            entry_point: Some("motion_scatter"),
+            compilation_options: Default::default(),
+            cache: None,
         });
         let cols = buffer(&device, (col_len * 4) as u64, storage);
         let state = buffer(&device, (7 * cells * 4) as u64, storage);
@@ -235,11 +301,15 @@ impl Linear3 {
             vel,
             cols,
             state,
-            geo: geo_buf,
             motion,
             moving: core::cell::Cell::new(false),
             deposited: core::cell::Cell::new(false),
             octets: core::cell::RefCell::new(Vec::new()),
+            ombre: core::cell::RefCell::new(ombre),
+            paires,
+            nombre: core::cell::Cell::new(0),
+            dispersion,
+            dispersion_liaison,
             scalar,
             read,
             query,
@@ -323,24 +393,52 @@ impl Linear3 {
         if geo.len() != nf + nc || wall.len() != nc || faces.len() != nf || deposit.len() != ncol || transfer.len() != 5 * ncol {
             return Err("formes du mouvement".into());
         }
-        if geo.iter().any(|a| !(0. ..=1.).contains(a)) || wall.iter().chain(deposit).chain(transfer).any(|x| !x.is_finite()) {
-            return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
-        }
-        // S508 : une conversion par tranche, dans un tampon gardé — ni concaténation, ni allocation au pas.
+        // S509 : la validation porte sur les valeurs qui changent (les autres sont celles de l'ombre, déjà reçues) — dans la boucle.
+        // S509 : seules les valeurs qui changent, comparées bit à bit à l'ombre de ce que la carte a reçu, en paires (indice, bits).
+        let mut ombre = self.ombre.borrow_mut();
         let mut octets = self.octets.borrow_mut();
-        let mut ecrit = |tampon: &wgpu::Buffer, tranches: &[&[f32]]| {
-            octets.clear();
-            octets.resize(tranches.iter().map(|t| t.len()).sum::<usize>() * 4, 0);
-            for (o, v) in octets.chunks_exact_mut(4).zip(tranches.iter().flat_map(|t| t.iter())) {
-                o.copy_from_slice(&v.to_le_bytes());
+        octets.clear();
+        octets.extend_from_slice(&[0u8; 8]);
+        let mut n = 0u32;
+        let mut indice = 0usize;
+        for (rang, tranche) in [geo, wall, faces, deposit, transfer].into_iter().enumerate() {
+            for v in tranche {
+                if ombre[indice].to_bits() != v.to_bits() {
+                    let valide = match rang {
+                        0 => (0. ..=1.).contains(v),
+                        2 => true,
+                        _ => v.is_finite(),
+                    };
+                    if !valide {
+                        // Rien d'envoyé, l'ombre intacte : elle n'est mise à jour qu'après la boucle.
+                        return Err("mouvement : géométrie hors de [0, 1] ou valeur non finie".into());
+                    }
+                    octets.extend_from_slice(&(indice as u32).to_le_bytes());
+                    octets.extend_from_slice(&v.to_bits().to_le_bytes());
+                    n += 1;
+                }
+                indice += 1;
             }
-            self.queue.write_buffer(tampon, 0, &octets);
-        };
-        ecrit(&self.geo, &[geo]);
-        ecrit(&self.motion, &[wall, faces, deposit, transfer]);
-        let _ = (nc, nf, ncol);
+        }
+        // L'ombre suit, depuis les paires, une fois toutes les valeurs validées.
+        for paire in octets[8..].chunks_exact(8) {
+            let i = u32::from_le_bytes([paire[0], paire[1], paire[2], paire[3]]) as usize;
+            ombre[i] = f32::from_bits(u32::from_le_bytes([paire[4], paire[5], paire[6], paire[7]]));
+        }
+        octets[..4].copy_from_slice(&n.to_le_bytes());
+        octets[4..8].copy_from_slice(&((nf + nc) as u32).to_le_bytes());
+        if n > 0 {
+            self.queue.write_buffer(&self.paires, 0, &octets);
+        }
+        let _ = ncol;
+        self.nombre.set(n);
         self.moving.set(true);
         Ok(())
+    }
+
+    /// S509 : le nombre de valeurs que le dernier `set_motion` a envoyées.
+    pub fn dispersees(&self) -> u32 {
+        self.nombre.get()
     }
 
     /// Dispatchs d'un pas à `cycles` cycles de projection.
@@ -368,8 +466,17 @@ impl Linear3 {
         } else if self.deposited.replace(false) {
             let debut = (d.cells() + face_total(d)) * 4;
             self.queue.write_buffer(&self.motion, debut as u64, &vec![0u8; 6 * d.columns() * 4]);
+            // S509 : l'ombre suit.
+            let depuis = face_total(d) + d.cells() + d.cells() + face_total(d);
+            self.ombre.borrow_mut()[depuis..depuis + 6 * d.columns()].fill(0.);
         }
         let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamps });
+        // S509 : les valeurs reçues d'abord, par leur propre liaison (la géométrie en écriture), puis la liaison du pas.
+        if mouvement && self.nombre.get() > 0 {
+            pass.set_bind_group(0, &self.dispersion_liaison, &[]);
+            pass.set_pipeline(&self.dispersion);
+            pass.dispatch_workgroups(self.nombre.get().div_ceil(GROUP), 1, 1);
+        }
         pass.set_bind_group(0, &self.bind, &[]);
         let mut run = |index: usize, groups: u32| {
             pass.set_pipeline(&self.kernels[index]);
@@ -1004,10 +1111,23 @@ pub fn recevoir_coque() -> Result<(), String> {
                 }
             }
         };
-        let boite_de = |c: [f64; 3]| {
-            let r = (2f64 * 2. + 0.8 * 0.8 + 0.5 * 0.5).sqrt() + 2. * d.dx as f64;
-            let n = |x: f64, m: usize| ((x / d.dx as f64).floor().max(0.) as usize).min(m);
-            [n(c[0] - r, d.nx), n(c[0] + r + d.dx as f64, d.nx), n(c[1] - r, d.ny), n(c[1] + r + d.dx as f64, d.ny), n(c[2] - r, d.nz), n(c[2] + r + d.dx as f64, d.nz)]
+        // S509 : la boîte englobante de la coque orientée (ses huit coins), deux mailles de marge.
+        let boite_de = |c: [f64; 3], q: [f64; 4]| {
+            let mut e = [0f64; 3];
+            for sx in [-1., 1.] {
+                for sy in [-1., 1.] {
+                    for sz in [-1., 1.] {
+                        let r = water_core::rigid_body::rotate(q, [2. * sx, 0.8 * sy, 0.5 * sz]);
+                        for k in 0..3 {
+                            e[k] = e[k].max(r[k].abs());
+                        }
+                    }
+                }
+            }
+            let m = 2. * d.dx as f64;
+            let n = |x: f64, lim: usize| ((x / d.dx as f64).floor().max(0.) as usize).min(lim);
+            [n(c[0] - e[0] - m, d.nx), n(c[0] + e[0] + m + d.dx as f64, d.nx), n(c[1] - e[1] - m, d.ny), n(c[1] + e[1] + m + d.dx as f64, d.ny),
+                n(c[2] - e[2] - m, d.nz), n(c[2] + e[2] + m + d.dx as f64, d.nz)]
         };
         let noeuds = |c: [f64; 3], q: [f64; 4], out: &mut Vec<f32>| noeuds_dans(c, q, [0, d.nx, 0, d.ny, 0, d.nz], out);
         let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
@@ -1032,6 +1152,10 @@ pub fn recevoir_coque() -> Result<(), String> {
         let mut colonnes = coeur.solid_column_volumes().ok_or("colonnes solides")?.to_vec();
         let (mut paroi, mut faces, mut depot) = (vec![0f32; d.cells()], vec![0f32; face_total(d)], vec![0f32; d.columns()]);
         let mut transfert = vec![0f32; 5 * d.columns()];
+        // S509 : les faces en place partent de la géométrie : 0 pour une face fermée, « garder » pour une ouverte.
+        for (f, a) in faces.iter_mut().zip(geo_de(&coeur)?.iter()) {
+            *f = if *a == 0. { 0. } else { f32::MAX };
+        }
         let volume = |eta: &[f32]| eta.iter().map(|e| (e - d.z0()) as f64).sum::<f64>() * (d.dx as f64).powi(2);
         println!(
             "COQUE_S504 mode={} nx={} ny={} nz={} dx={} amplitude={amplitude} omega={omega} pas={pas} dt_us={dt_us} cycles={cycles} carte={:?}",
@@ -1048,12 +1172,13 @@ pub fn recevoir_coque() -> Result<(), String> {
             chrono = std::time::Instant::now();
         };
         let mut precedent = pose(0.);
+        let mut envoyees = 0u64;
         for n in 1..=pas {
             let t = n as f64 * dt_us as f64 * 1e-6;
             let t0 = std::time::Instant::now();
             marque(7, &mut [0f64; 8]);
             let (c, q) = pose(t);
-            let (b0, b1) = (boite_de(precedent.0), boite_de(c));
+            let (b0, b1) = (boite_de(precedent.0, precedent.1), boite_de(c, q));
             noeuds_dans(c, q, [b0[0].min(b1[0]), b0[1].max(b1[1]), b0[2].min(b1[2]), b0[3].max(b1[3]), b0[4].min(b1[4]), b0[5].max(b1[5])], &mut nds);
             marque(0, &mut etages);
             let vitesse = [0., 0., ((c[2] - precedent.0[2]) / (dt_us as f64 * 1e-6)) as f32];
@@ -1066,7 +1191,7 @@ pub fn recevoir_coque() -> Result<(), String> {
             marque(1, &mut etages);
             coeur.wall_divergence(&mut paroi).map_err(|e| format!("{e:?}"))?;
             marque(2, &mut etages);
-            coeur.changed_faces(&mut faces).map_err(|e| format!("{e:?}"))?;
+            coeur.changed_faces_in_place(&mut faces).map_err(|e| format!("{e:?}"))?;
             marque(3, &mut etages);
             coeur.lid_transfer_weights(&mut transfert).map_err(|e| format!("{e:?}"))?;
             marque(4, &mut etages);
@@ -1085,6 +1210,7 @@ pub fn recevoir_coque() -> Result<(), String> {
             marque(6, &mut etages);
             carte.set_motion(&geo, &paroi, &faces, &depot, &transfert)?;
             marque(7, &mut etages);
+            envoyees += carte.dispersees() as u64;
             cpu += t0.elapsed().as_secs_f64();
             coeur.step_surface_linear(dt_us, 8000, &jobs).map_err(|e| format!("cœur, pas {n} : {e:?}"))?;
             carte.step(cycles);
@@ -1111,8 +1237,8 @@ pub fn recevoir_coque() -> Result<(), String> {
         );
         let ms = etages.map(|x| 1e3 * x / pas as f64);
         println!(
-            "COQUE_S504 etages_ms noeuds={:.3} set_solid_rigid={:.3} paroi={:.3} faces={:.3} transfert={:.3} colonnes={:.3} geometrie={:.3} envoi={:.3}",
-            ms[0], ms[1], ms[2], ms[3], ms[4], ms[5], ms[6], ms[7]
+            "COQUE_S504 etages_ms noeuds={:.3} set_solid_rigid={:.3} paroi={:.3} faces={:.3} transfert={:.3} colonnes={:.3} geometrie={:.3} envoi={:.3} valeurs_par_pas={}",
+            ms[0], ms[1], ms[2], ms[3], ms[4], ms[5], ms[6], ms[7], envoyees / pas as u64
         );
         Ok(())
     })

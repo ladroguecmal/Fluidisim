@@ -50,6 +50,8 @@ pub(crate) struct Cut3 {
     /// **S508 : la boîte du solide** au dernier recoupage — les mailles que ses nœuds négatifs touchent, deux mailles de marge
     /// (`i0, i1, j0, j1, k0, k1`, fins exclues) ; `None` sans solide.
     pub solid_box: Option<Boite>,
+    /// **S509 : la boîte du dernier recoupage** — celle du solide unie à celle du pas d'avant : hors d'elle, rien n'a changé.
+    pub recut_box: Option<Boite>,
 }
 
 /// **S508 — une boîte de mailles** `[i0, i1, j0, j1, k0, k1]`, fins exclues.
@@ -303,6 +305,7 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
         solid_center: [0.; 3],
         piercing: false,
         solid_box: None,
+        recut_box: None,
     }
 }
 
@@ -559,7 +562,9 @@ pub(crate) fn check_solid_in(frac: &[f32], open_u: &[f32], open_v: &[f32], open_
     for k in k0..k1 {
         for j in j0..j1 {
             for i in i0..i1 {
-                if cell_negative(cell_nodes(domain, solid, i, j, k)) > 0. && (frac[(k * ny + j) * nx + i] < 1. || (k + 1 == nz && !piercing)) {
+                // S509 : le test bon marché d'abord — la maille coupée par le fond, ou dans la couche du couvercle — ; la part solide
+                // ensuite, pour ces seules mailles. Même refus, dans le même ordre.
+                if (frac[(k * ny + j) * nx + i] < 1. || (k + 1 == nz && !piercing)) && cell_negative(cell_nodes(domain, solid, i, j, k)) > 0. {
                     return Err(Error::Domain);
                 }
             }

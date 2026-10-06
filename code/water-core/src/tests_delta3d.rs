@@ -2523,6 +2523,9 @@ fn the_boxed_recut_is_the_full_recut_s508() {
     let nf = (d.nx + 1) * d.ny * d.nz + d.nx * (d.ny + 1) * d.nz + d.nx * d.ny * (d.nz + 1);
     let mut faces = [vec![0f32; nf], vec![0f32; nf]];
     let mut poids = [vec![0f32; 5 * d.columns()], vec![0f32; 5 * d.columns()]];
+    // S509 : `changed_faces_in_place`, parti de la géométrie, rend chaque pas le tableau entier.
+    let (ou, ov, ow) = boite.apertures().unwrap();
+    let mut en_place: Vec<f32> = ou.iter().chain(ov).chain(ow).map(|a| if *a == 0. { 0. } else { f32::MAX }).collect();
     for n in 1..=60 {
         let t = n as f64 * 0.01;
         let (c, _) = pose(t);
@@ -2541,6 +2544,8 @@ fn the_boxed_recut_is_the_full_recut_s508() {
         assert_eq!(bits(entier.fluid_fraction().unwrap()), bits(boite.fluid_fraction().unwrap()), "fractions, pas {n}");
         assert_eq!(bits(&tampons[0]), bits(&tampons[1]), "terme de paroi, pas {n}");
         assert_eq!(bits(&faces[0]), bits(&faces[1]), "faces, pas {n}");
+        boite.changed_faces_in_place(&mut en_place).unwrap();
+        assert_eq!(bits(&en_place), bits(&faces[1]), "faces en place, pas {n}");
         assert_eq!(bits(&poids[0]), bits(&poids[1]), "transfert, pas {n}");
         assert_eq!(bits(entier.solid_column_volumes().unwrap()), bits(boite.solid_column_volumes().unwrap()), "colonnes, pas {n}");
         for v in [&mut entier, &mut boite] {

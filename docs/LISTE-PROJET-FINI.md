@@ -429,7 +429,7 @@ pas recopiée ici (L137).
   position prédite, charge `m·g`) — une coque menée sur un cercle à 3 m/s, son sillage à 1,20 % de la trajectoire déclarée, en `Δ²`
   ([preuve](validation/SILLAGE-EMIS-S497.md)) ; S495 le fait sentir aux autres corps. Le corps réel remue δ depuis S332 ; le champ
   proche d'une coque qui avance est 6.4, la résistance de vague rendue au corps 6.2.
-- [ ] **6.4 Parois et corps mobiles dans δ** (C23) — *partiel* depuis S330 : un **solide en mouvement
+- [x] **6.4 Parois et corps mobiles dans δ** (C23) — *validé* (S509) : un **solide en mouvement
   imposé** dans la référence 3D, masse ajoutée d'une sphère à 1,6 % ([preuve](validation/FACES-COUPEES-3D-S324.md)
   §9) ; la **coque du corps rigide**, qui tourne et perce la surface, pilotée par le jeu (S332–S337,
   [porte D](validation/PORTE-D-S333.md)) ; **S358** : le pas linéaire sur la carte (`Linear3`, ADR-193), à
@@ -441,8 +441,8 @@ pas recopiée ici (L137).
   comprise ([ADR-229](adr/ADR-229-la-paroi-dans-la-vitesse-gouvernante.md)), Courant à 0,4500 de 0,5 à 20 m/s
   ([preuve](validation/C23-SYSTEME-S505.md)) ; **S507** : A328 réattribuée — l'ordre 1 en temps, constante ×5 près d'une coque qui bouge
   (10 % du champ proche à ≈ 6 ms) ([preuve](validation/A328-S507.md)) ; **S508** : le recoupage dans la boîte du solide, au bit de
-  l'entier — 8 ms → 1,4 à 1,55 ms par pas ([preuve](validation/RECOUPAGE-S508.md)). Manque un recoupage sous 1 ms (l'envoi, 0,4 à
-  0,65 ms, reste le plus gros).
+  l'entier — 8 ms → 1,4 à 1,55 ms par pas ([preuve](validation/RECOUPAGE-S508.md)). **S509** : 0,82 ms par pas — la carte ne reçoit que ce qui change
+  ([preuve](validation/ENVOI-S509.md)). Limite : l'ordre 1 en temps près d'une coque qui bouge (A328).
 - [x] **6.5 Décor fixe comme frontière imposée** — *validé* (S493) : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**
@@ -725,7 +725,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 2 | 5 | 5 |
-| 6. Solides | 8 | 3 | 2 | 3 |
+| 6. Solides | 8 | 4 | 1 | 3 |
 | 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 0 | 9 | 4 |
@@ -733,7 +733,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **7** | **70** | **44** |
+| **total** | **121** | **8** | **69** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
