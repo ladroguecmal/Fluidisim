@@ -72,6 +72,6 @@ BOUSSOLE ; index.
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-240, METHODE, L398, L399, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise

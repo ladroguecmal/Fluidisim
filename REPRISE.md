@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 21:32 +02:00
+JETON            : libre
+Battement        : 2026-10-06 21:34 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S556 — la quinzième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S555 — C09 : la masse tient, l'énergie naturelle manque le critère ; A332 ([journal](notes/JOURNAL.md)). Avant : S554 (le lot)
-Session suivante : **S556 — la quinzième revue de méthode** (S551–S555 ; ADR-222 D4) : frictions — une durée d'essai trop courte relevée par une trace (S553), un écart de définition dans une comparaison (S552 : le tirant le long de l'axe contre la verticale), une assertion canonique inapplicable telle qu'écrite (S555 : l'énergie naturelle d'un schéma décalé), deux scripts de clôture cassés par une apostrophe dans un heredoc (S520, S555) ; ce qui a tenu (les références indépendantes avant la mesure, S552–S554 ; la mise en garde écrite avant, S555). Puis un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 0 — S555 : C09 exécuté (13.2), A332
+Session en cours : aucune
+Dernière session : S556 — la quinzième revue de méthode (ADR-240) ([journal](notes/JOURNAL.md)). Avant : S555 (C09 : la masse tient, l'énergie naturelle manque le critère)
+Session suivante : **S557 — le lot** (dû ; feuille de route S552–S556) **et un point partiel** (6.6 ou 4.18 : A332, l'énergie discrète de δ, si elle se dérive en une session). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 1 — S556 : la quinzième revue (ADR-240)
 Registres       : dernier lot S554 (ADR-213 D3) ; le prochain au plus tard en S557
 ```
 
