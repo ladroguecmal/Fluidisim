@@ -2659,6 +2659,10 @@ fn run() -> Result<(), String> {
         return surface_carte::banc();
     }
     // S481 — K2-2 : les poches d'air enfermé sur la carte, contre la référence.
+    // S493 — 6.5 : le décor qui perce la surface, sur la carte (δ linéaire).
+    if args.iter().any(|a| a == "--lineaire-cloison") {
+        return delta3d_linear::recevoir_cloison();
+    }
     if args.iter().any(|a| a == "--apic3d-poches") {
         return apic3d_poches::banc_poches();
     }

@@ -50,9 +50,9 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 46 | 1.7, 1.8, 2.6, 2.7, 3.8, 3.9, 4.2, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.1, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
-| **1** | 32 | 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 3.7, 4.1, 4.4, 4.6, 4.13, 4.17, 4.20, 5.8, 5.10, 5.12, 6.2, 7.2, 7.4, 7.6, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
-| **2** | 13 | 1.1, 1.6, 2.5, 3.3, 3.4, 3.5, 4.9, 4.12, 6.7, 7.5, 9.5, 10.6, 12.2 |
+| **0** | 46 | 1.7, 1.8, 2.6, 2.7, 3.8, 3.9, 4.2, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 6.1, 6.3, 6.4, 7.1, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
+| **1** | 32 | 1.1, 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 3.7, 4.1, 4.4, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 7.6, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
+| **2** | 12 | 1.6, 2.5, 3.3, 3.4, 3.5, 4.9, 4.12, 6.7, 7.5, 9.5, 10.6, 12.2 |
 | **3** | 6 | 3.1, 4.3, 4.14, 5.9, 6.8, 7.3 |
 | **4** | 5 | 4.10, 6.6, 8.4, 13.2, 13.3 |
 | **5** | 2 | 11.3, 13.4 |
@@ -74,7 +74,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **1.1** Eau = somme de quatre couches B, W, δ, V, dans le code | C | — | 3.9, 4.8, 5.10 | — | **2** |
+| **1.1** Eau = somme de quatre couches B, W, δ, V, dans le code | C | — | 3.9, 4.8, 5.10 | — | **1** |
 | **1.3** Interfaces de SPEC-004 | H | l'interface des solides de SPEC-004 §7, sur la paroi de δ existante | 2.7, 6.4 | — | **1** |
 | **1.4** Point d'entrée unique, orchestrateur des régimes | H | `WaterSystem`, qui porte l'ordonnanceur, l'oubli et l'estimateur de coût | 1.6, 9.9 | 9.12 | **E**, par 9.9 |
 | **1.5** Grille 3D de référence stable | B | la grille de référence et ses zones actives (ADR-006) | 10.1 | 1.6, 4.9 | **1** |
@@ -127,7 +127,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **4.11** Régime substitutif | B | — | 1.6, 4.20, 12.3 | — | **E**, par 12.3 |
 | **4.12** Cavité et gerbe d'impact | B | le raccord particules ↔ colonnes (A316) | 4.16, 7.4 | 3.1, 6.8, 7.3, 13.3 | **2** |
 | **4.13** Proche-coque et gerbe d'étrave | B | la coque en marche dans la production de δ | 4.16, 6.4 | 6.6 | **1** |
-| **4.14** Plage | B | — | 2.7, 3.5, 4.16, 6.5 | — | **3** |
+| **4.14** Plage | B | — | 2.7, 3.5, 4.16 | — | **3** |
 | **4.15** Rochers et obstacles immergés | B | le couplage à B/W sur fond coupé ; un modèle de turbulence | — | 6.2 | **0** |
 | **4.16** Surface non graphe | B | le raccord (A316), puis APIC en 3D | — | 3.3, 4.1, 4.12, 4.13, 4.14, 4.20, 7.2, 7.4 | **0** |
 | **4.17** Référentiel accéléré et invariance galiléenne | B | — | 1.8 | 13.2 | **1** |
@@ -147,7 +147,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **5.7** Plusieurs liquides | H | `liquid_id` (A17) | — | — | **0** |
 | **5.8** Réseau fermé sous pression | H | — | 5.4 | — | **1** |
 | **5.9** Compartiments, brèches, inondation de navire, limitée par l'air | H | — | 5.2, 7.5 | 6.6, 13.2 | **3** |
-| **5.10** Articulation V↔δ | H | une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ | 6.5 | 1.1, 13.2 | **1** |
+| **5.10** Articulation V↔δ | H | une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ | — | 1.1, 13.2 | **0** |
 | **5.11** Eaux souterraines | H | — | — | — | **E** — hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **5.12** Capture et restauration de V | H | le stockage durable | 10.1 | 10.6 | **1** |
 
@@ -159,7 +159,6 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **6.2** Forces de l'eau sur les objets | H | W derrière la requête | 2.6, 4.15 | 6.7 | **1** |
 | **6.3** Un objet en mouvement produit son sillage | H | le corps en marche couplé à la source de sillage | — | — | **0** |
 | **6.4** Parois et corps mobiles dans δ | B | la coque dans la production GPU de δ ; C23 sur le système | — | 1.3, 4.13, 6.6 | **0** |
-| **6.5** Décor fixe comme frontière imposée | B | le décor dans la production GPU ; un décor qui perce la surface | — | 4.14, 5.10 | **0** |
 | **6.6** Grands navires | H | — | 3.2, 4.13, 5.9, 6.1, 6.4 | 11.3 | **4** |
 | **6.7** Acteur poussé, renversé ou déplacé par l'eau | B | — | 6.2 | — | **2** |
 | **6.8** Impulsion d'entrée dans l'eau | H | — | 4.12, 6.1 | 13.2 | **3** |

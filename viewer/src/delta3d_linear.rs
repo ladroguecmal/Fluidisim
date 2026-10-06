@@ -106,10 +106,9 @@ impl Linear3 {
         if geo.len() != faces + cells || geo.iter().any(|a| !(0. ..=1.).contains(a)) {
             return Err(format!("géométrie : {} valeurs pour {}, ou hors de [0, 1]", geo.len(), faces + cells));
         }
-        let lid = faces - columns;
-        if geo[lid..faces].iter().any(|a| *a != 1.) {
-            return Err("couvercle non entièrement ouvert : la coque qui le perce n'est pas portée".into());
-        }
+        // S493 : le couvercle peut être en partie couvert ou fermé — un décor fixe qui le perce ; la coque qui bouge (son dépôt,
+        // le transfert de S334) n'est pas portée.
+        let _ = columns;
         let instance = crate::instance();
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -254,7 +253,8 @@ impl Linear3 {
             sponge.width_x,
             sponge.width_y,
             sponge.rate_per_s,
-            0.,
+            // S493 : le plancher du couvercle partiel, celui du cœur (`step_surface_linear`).
+            ((dt * dt * self.g_eff as f64 / dx as f64) as f32).min(1.).max(water_core::delta3d::PARTIAL_LID_MIN_APERTURE),
         ] {
             words.extend_from_slice(&v.to_le_bytes());
         }
@@ -681,6 +681,111 @@ pub fn rejouer_avance() -> Result<(), String> {
                 n + 1
             );
         }
+        Ok(())
+    })
+}
+
+/// La distance signée d'une cloison `|x − xc| ≤ e`, toute la largeur et toute la hauteur (elle perce le couvercle), aux nœuds.
+fn noeuds_cloison(d: Domain3, xc: f64, e: f64) -> Vec<f32> {
+    let dx = d.dx as f64;
+    let (z0, z1) = (-1.0, d.nz as f64 * dx + 1.0);
+    let mut out = Vec::with_capacity((d.nx + 1) * (d.ny + 1) * (d.nz + 1));
+    for k in 0..=d.nz {
+        for _j in 0..=d.ny {
+            for i in 0..=d.nx {
+                let (x, z) = (i as f64 * dx, k as f64 * dx);
+                let q = [(x - xc).abs() - e, (z - 0.5 * (z0 + z1)).abs() - 0.5 * (z1 - z0)];
+                let dehors = (q[0].max(0.).powi(2) + q[1].max(0.).powi(2)).sqrt();
+                out.push((dehors + q[0].max(q[1]).min(0.)) as f32);
+            }
+        }
+    }
+    out
+}
+
+/// **Banc S493 (liste 6.5) — le décor qui perce la surface, sur la carte** (`--lineaire-cloison`). La cuve de S490 (2,4 m × 0,2 m,
+/// 0,8 m d'eau, 48 × 4 × 16 mailles), une cloison fixe posée sur le fond qui perce le couvercle — `CLOISON_E` sa demi-épaisseur
+/// (0,05 : alignée sur la grille ; 0,075 : en milieu de maille) — et une seiche dans la moitié gauche. La référence (`Volume3`) et la
+/// carte (`Linear3`, la découpe du cœur telle quelle) depuis le même état ; l'écart de surface relevé tous les 50 pas ; la fuite à
+/// droite et la période sur la carte, contre `ω² = g·k·tanh(k·h)`.
+pub fn recevoir_cloison() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+    pollster::block_on(async {
+        let d = Domain3 { nx: 48, ny: 4, nz: 16, dx: 0.05 };
+        let (rho, g) = (1000_f32, 9.81_f32);
+        let e: f64 = std::env::var("CLOISON_E").ok().and_then(|v| v.parse().ok()).unwrap_or(0.05);
+        let cycles: u32 = std::env::var("CYCLES").ok().and_then(|v| v.parse().ok()).unwrap_or(60);
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        let (h, xc) = (d.nz as f64 * d.dx as f64, 1.2f64);
+        let mut coeur = Volume3::configure_with_floating_solid(&mut host, d, rho, g, &vec![0.; d.columns()], &noeuds_cloison(d, xc, e))
+            .map_err(|e| format!("cœur {e:?}"))?;
+        let (u, v, w) = coeur.apertures().ok_or("ouvertures")?;
+        let geo = decoupee(u, v, w, coeur.fluid_fraction().expect("fractions"));
+        let lid0 = face_total(d) - d.columns();
+        let couvercle_partiel = geo[lid0..face_total(d)].iter().filter(|a| **a > 0. && **a < 1.).count();
+        let couvercle_ferme = geo[lid0..face_total(d)].iter().filter(|a| **a == 0.).count();
+        let lg = xc - e;
+        let k = core::f64::consts::PI / lg;
+        let eta0: Vec<f32> = (0..d.columns())
+            .map(|c| {
+                let x = ((c % d.nx) as f64 + 0.5) * d.dx as f64;
+                if x < lg { (h + 0.01 * (k * x).cos()) as f32 } else { h as f32 }
+            })
+            .collect();
+        coeur.set_surface(&eta0).map_err(|e| format!("{e:?}"))?;
+        let periode = 2. * core::f64::consts::PI / (9.81 * k * (k * h).tanh()).sqrt();
+        let (dt_us, releve) = (2000u64, 50usize);
+        let pas = ((3.2 * periode / 0.002) as usize / releve) * releve;
+        println!(
+            "CLOISON_S493 e={e} couvercle_partiel={couvercle_partiel} couvercle_ferme={couvercle_ferme} pas={pas} periode_theorique_s={periode:.4}"
+        );
+        let mut releves = Vec::new();
+        for n in 1..=pas {
+            coeur.step_surface_linear(dt_us, 100_000, &jobs).map_err(|e| format!("cœur, pas {n} : {e:?}"))?;
+            if n % releve == 0 {
+                releves.push(coeur.surface().to_vec());
+            }
+        }
+        let carte = Linear3::new(d, rho, g, &geo).await?;
+        carte.set_step(dt_us, Sponge3::default())?;
+        let (nu, nv) = ((d.nx + 1) * d.ny * d.nz, d.nx * (d.ny + 1) * d.nz);
+        let zeros = vec![0f32; face_total(d)];
+        carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[nu + nv..], &eta0)?;
+        let (mut pire, mut droite, mut serie) = (0f32, 0f64, Vec::new());
+        for (r, attendu) in releves.iter().enumerate() {
+            for q in 0..releve {
+                carte.step(cycles);
+                if q % 5 == 4 {
+                    let (eta, _) = carte.surface()?;
+                    serie.push((((r * releve + q + 1) as f64) * 0.002, eta[0] as f64 - h));
+                }
+            }
+            let (eta, _) = carte.surface()?;
+            pire = pire.max(eta.iter().zip(attendu).fold(0f32, |m, (a, b)| m.max((a - b).abs())));
+            for c in 0..d.columns() {
+                let x = ((c % d.nx) as f64 + 0.5) * d.dx as f64;
+                if x > xc + e {
+                    droite = droite.max((eta[c] as f64 - h).abs());
+                }
+            }
+        }
+        let mut passages = Vec::new();
+        for w in serie.windows(2) {
+            if w[0].1 > 0. && w[1].1 <= 0. {
+                passages.push(w[0].0 + (w[1].0 - w[0].0) * w[0].1 / (w[0].1 - w[1].1));
+            }
+        }
+        let mesuree = if passages.len() >= 2 { (passages[passages.len() - 1] - passages[0]) / (passages.len() - 1) as f64 } else { f64::NAN };
+        println!(
+            "CLOISON_S493 bilan e={e} carte={:?} cycles={cycles} ecart_carte_reference_m={pire:.3e} droite_carte_m={droite:.3e} periode_carte_s={mesuree:.4} \
+             periode_theorique_s={periode:.4} ecart_periode={:.2e}",
+            carte.adapter,
+            (mesuree / periode - 1.).abs()
+        );
         Ok(())
     })
 }

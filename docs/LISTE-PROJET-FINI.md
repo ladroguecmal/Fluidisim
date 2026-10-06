@@ -424,13 +424,14 @@ pas recopiée ici (L137).
   [porte D](validation/PORTE-D-S333.md)) ; **S358** : le pas linéaire sur la carte (`Linear3`, ADR-193), à
   1,3·10⁻⁵ m de la référence, 0,32 ms ([preuve](validation/LINEAIRE-GPU-S358.md)). Manquent la coque **qui bouge**
   sur la carte et C23 sur le système — exécuté sur un véhicule d'essai.
-- [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés en 2D (S232) **et
+- [x] **6.5 Décor fixe comme frontière imposée** — *validé* (S493) : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
   référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**
   depuis S358, découpe du cœur chargée telle quelle ([preuve](validation/LINEAIRE-GPU-S358.md) §2) ; **un décor qui perce la
   surface, posé sur le fond** (S490) : repos au bit, aucune fuite, la seiche de la demi-cuve à 0,3 %
   ([DECOR-S490](validation/DECOR-S490.md)) ; **aligné sur la grille** depuis S492 (A327 levée : la tolérance au point mort,
-  [A327-S492](validation/A327-S492.md)). Manque **le décor qui perce la surface sur la carte** (la production).
+  [A327-S492](validation/A327-S492.md)) ; **sur la carte** depuis S493 — le couvercle partiel porté, la carte à 6·10⁻⁸ m de la
+  référence, aucune fuite, au bit sur le couvercle plein ([DECOR-CARTE-S493](validation/DECOR-CARTE-S493.md)).
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.
 - [ ] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *absent*.
@@ -705,7 +706,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 2 | 5 | 5 |
-| 6. Solides | 8 | 0 | 5 | 3 |
+| 6. Solides | 8 | 1 | 4 | 3 |
 | 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 0 | 9 | 4 |
@@ -713,7 +714,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **4** | **73** | **44** |
+| **total** | **121** | **5** | **72** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

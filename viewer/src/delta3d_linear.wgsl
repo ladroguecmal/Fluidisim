@@ -32,7 +32,8 @@ struct Params {
     sponge_x: f32,
     sponge_y: f32,
     sponge_rate: f32,
-    _p2: f32,
+    // S493 : le plancher d'ouverture du couvercle en partie couvert (`lid_floor` du cœur : `dt²·g/dx` borné à [0,1 ; 1]).
+    lid_floor: f32,
 };
 
 // Vitesses aux faces : [u | v | w] courantes, puis [u | v | w] prédites, rangées comme le cœur.
@@ -104,10 +105,18 @@ fn perturbation(col: u32) -> f32 {
     return difference(cols[col], s.z0) - cols[roundoff_at(col)];
 }
 
-/// Pression dynamique imposée au couvercle de la colonne : `ρg·((η − z₀) − reste)`. Le couvercle partiel d'une coque
-/// qui le perce (S334) n'est pas porté ici : ce module n'admet qu'un couvercle entièrement ouvert.
+/// Pression dynamique imposée au couvercle de la colonne : `ρg·((η − z₀) − reste)`. **S493 — le couvercle partiel d'un
+/// décor fixe qui le perce** (S334, `Volume3::lid`) : l'excès d'eau d'une colonne en partie couverte se tient dans sa part
+/// libre `a`, où la pression vaut `1/max(a, plancher)` fois celle de la hauteur de remplissage. Un décor fixe ne dépose rien
+/// (le dépôt d'une coque qui bouge n'est pas porté). Couvercle plein ou fermé : la valeur d'avant, au bit.
 fn lid(col: u32) -> f32 {
     return s.rho_g * perturbation(col);
+}
+
+/// S493 — la pression d'un couvercle **en partie couvert** (`0 < a < 1`), appelée seulement là : un couvercle plein garde
+/// l'expression d'avant aux deux endroits où elle sert, au bit (le compilateur réordonnait sinon le chemin plein, L345).
+fn lid_partial(col: u32, a: f32) -> f32 {
+    return s.rho_g * perturbation(col) / max(a, s.lid_floor);
 }
 
 /// Emplacement de face → (i, j, k, axe).
@@ -231,7 +240,8 @@ fn rhs(@builtin(global_invocation_id) id: vec3<u32>,
             b = s.scale * (((fr - fl + ft - fb) + (fk - ff)) / s.dx);
             if (k + 1u == s.nz) {
                 let a = open(fw(i, j, s.nz));
-                if (a > 0.0) { b += 2.0 * a * lid(j * s.nx + i) * s.inv_dx2; }
+                if (a >= 1.0) { b += 2.0 * a * lid(j * s.nx + i) * s.inv_dx2; }
+                else if (a > 0.0) { b += 2.0 * a * lid_partial(j * s.nx + i, a) * s.inv_dx2; }
             }
             let diag = stencil(X, c).y;
             if (diag > 0.0) { m = 1.0 / diag; }
@@ -397,7 +407,12 @@ fn correct(@builtin(global_invocation_id) id: vec3<u32>) {
             if (k < s.nz) {
                 if (frac(below + plane) > 0.0) { value -= s.k1 * (pressure(below + plane) - pressure(below)) / s.dx; }
             } else {
-                value -= s.k1 * (lid(j * s.nx + i) - pressure(below)) / (0.5 * s.dx);
+                let a_lid = open(slot);
+                if (a_lid >= 1.0 || a_lid == 0.0) {
+                    value -= s.k1 * (lid(j * s.nx + i) - pressure(below)) / (0.5 * s.dx);
+                } else {
+                    value -= s.k1 * (lid_partial(j * s.nx + i, a_lid) - pressure(below)) / (0.5 * s.dx);
+                }
             }
         }
     }

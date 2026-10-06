@@ -229,3 +229,11 @@ d'arrondi, un plancher de vitesse de 1 mm/s à la seule décision finale (un pre
 bit : retiré). **Mesuré** : le mur aligné, 0,16 % et aucune fuite ; 651 essais du cœur. A327 levée ; 6.5 avance (manque la carte).
 Maillons **0** (un défaut levé, une capacité : le décor aligné). Suivant : **S493, 6.5 sur la carte**.
 
+## S493 — 2026-10-06 — 6.5 validée : le décor qui perce la surface, sur la carte
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/DECOR-CARTE-S493.md)) : le couvercle partiel d'un décor fixe porté dans
+`Linear3` (la pression `ρg·η/max(a, plancher)` de S334) ; un banc `--lineaire-cloison`. **Mesuré** : la carte à 5,96·10⁻⁸ m de la référence,
+la moitié droite nulle, la période à 0,16 % (alignée) et 0,27 % (milieu de maille) ; le banc de S358 **au bit** — après une première
+écriture qui changeait les bits du couvercle plein (le compilateur réordonnait le chemin plein : la branche placée aux endroits d'usage).
+**6.5 validée — 5 points sur 120.** Maillons **0**. Suivant : un autre point partiel proche de son périmètre.
+

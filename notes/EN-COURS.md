@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S493 — **en cours**. En autonomie, **6.5 sur la carte** : le δ linéaire de la carte (`Linear3`, S358) refuse un couvercle
+Session : S493 — **terminée**. En autonomie, **6.5 sur la carte** : le δ linéaire de la carte (`Linear3`, S358) refuse un couvercle
 qui n'est pas entièrement ouvert ; un décor fixe qui perce la surface y manque.
 
 **Ce que la session fait.** Le couvercle partiel d'un décor fixe porté sur la carte (la pression `ρg·η/max(a, plancher)` de S334, sans
@@ -76,7 +76,11 @@ la période à 3 %. 6.5 validée si (1)–(3).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le couvercle partiel sur la carte ; le banc ; (1)–(3).
-- [ ] **P3** — preuve ; 6.5 ; rituel.
+- [x] **P2** — le couvercle partiel sur la carte ; le banc ; (1)–(3).
+- [x] **P3** — preuve ; 6.5 ; rituel.
 
 ### Notes de reprise
+- **P2** — `lid_partial` aux deux usages (second membre, correction), `lid_floor` dans le mot libre des paramètres, le refus du
+  couvercle partiel levé. Première écriture (branche dans `lid`) : le banc S358 changé (résidu 8,874 → 8,941·10⁻⁵, les deux versions
+  déterministes) ; seconde : au bit. Cloisons : 5,96·10⁻⁸ m, droite 0, périodes 0,16 / 0,27 %.
+- **P3** — preuve DECOR-CARTE-S493 ; **6.5 validée** (décompte 5 / 72 / 44) ; index ; journal.

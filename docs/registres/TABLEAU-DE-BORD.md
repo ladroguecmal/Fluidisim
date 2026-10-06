@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 4** (3.3 %) — partiels : 73 — absents : 43.
+**Périmètre : 120 points** (5.11 hors). **Validés : 5** (4.2 %) — partiels : 72 — absents : 43.
 
 ## Par campagne
 
@@ -14,7 +14,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 |---|---:|---:|---:|---|
 | **K1** Rendu final et banc visuel | 0 | 9 | 0 | ◐8.1 ◐8.2 ◐8.3 ◐8.5 ◐8.6 ◐8.8 ◐8.9 ◐8.7 ◐8.10 |
 | **K2** La surface non graphe | 0 | 5 | 5 | ◐4.16 ◐4.1 ◐4.12 ·4.20 ◐7.4 ·7.5 ·7.2 ·7.3 ·3.3 ◐3.1 |
-| **K3** Le fond et la côte | 0 | 6 | 5 | ◐2.7 ◐2.9 ·3.6 ◐3.2 ·3.5 ·4.14 ◐4.15 ◐6.5 ·2.6 ·3.9 ◐4.6 |
+| **K3** Le fond et la côte | 1 | 5 | 5 | ◐2.7 ◐2.9 ·3.6 ◐3.2 ·3.5 ·4.14 ◐4.15 ✅6.5 ·2.6 ·3.9 ◐4.6 |
 | **K4** Les eaux intérieures | 0 | 0 | 4 | ·2.3 ·2.4 ·2.5 ·12.2 |
 | **K5** δ, le système | 0 | 10 | 4 | ◐4.2 ◐4.3 ·4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ·4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
 | **K6** Les solides | 0 | 6 | 3 | ◐6.1 ◐6.2 ◐6.3 ◐6.4 ·6.7 ·6.8 ·6.6 ◐4.13 ◐1.3 |
@@ -91,7 +91,6 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 6.2 | partiel | Forces de l'eau sur les objets |
 | 6.3 | partiel | Un objet en mouvement produit son sillage |
 | 6.4 | partiel | Parois et corps mobiles dans δ |
-| 6.5 | partiel | Décor fixe comme frontière imposée |
 | 6.6 | absent | Grands navires |
 | 6.7 | absent | Acteur poussé, renversé ou déplacé par l'eau |
 | 6.8 | absent | Impulsion d'entrée dans l'eau |
@@ -170,4 +169,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S490 | 2026-10-06 | 4 | 73 | 43 | 120 |
 | S491 | 2026-10-06 | 4 | 73 | 43 | 120 |
 | S492 | 2026-10-06 | 4 | 73 | 43 | 120 |
+| S493 | 2026-10-06 | 5 | 72 | 43 | 120 |
 <!-- fin de l'historique -->
