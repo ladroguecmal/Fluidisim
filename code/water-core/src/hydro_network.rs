@@ -132,6 +132,12 @@ pub enum Flow {
     /// déposer (le sol, δ, la mer). La première arête de débordement d'un nœud, dans l'ordre du tableau, le porte (I-03). Sans
     /// arête de débordement, le transfert est refusé comme avant (S227), au bit.
     Spill,
+    /// **S530 — l'infiltration dans le sol, Green–Ampt** (liste 5.5) : de la flaque `from` (la surface du sol à la cote de l'arête, `h₀`
+    /// la lame au-dessus) vers le sol `to` (obligatoire), dont le remplissage rapporté à l'aire `area_mm2` est la lame infiltrée cumulée
+    /// `F`. Capacité d'infiltration `f = K·(1 + (ψ + h₀)·Δθ/F)` — conductivité à saturation `K` (`conductivity_nm_s`, nm/s), succion au
+    /// front `ψ` (`suction_um`), déficit d'humidité `Δθ` (`deficit_pm`, ‰). Intégrée **exactement** sur le pas : `t(F) = (F − M ln(1 +
+    /// F/M))/K`, `M = (ψ + h₀)Δθ`, inversée par bissection. Le sol plein, le limiteur d'arrivée l'arrête ; la flaque à sec, rien ne passe.
+    Infiltration { area_mm2: i64, conductivity_nm_s: i64, suction_um: i64, deficit_pm: i64 },
 }
 
 /// **La météo du pas** (ADR-204 D4) : une entrée, fournie à l'identique à tous les participants (I-03) ; qui la calcule
@@ -348,6 +354,8 @@ pub fn step_meteo(
                 if shutoff_head_um <= 0 { -1 } else { max_flow_mlps }
             }
             Flow::Valve { .. } | Flow::PumpLine { .. } => law_size(&e.flow),
+            // S530 : l'infiltration va vers un sol.
+            Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { law_size(&e.flow) },
             // La pluie tombe sur le nœud que `from` et `to` désignent tous deux.
             Flow::Rain { catchment_mm2 } => {
                 if e.to != Some(e.from) { -1 } else { catchment_mm2 }
@@ -399,6 +407,23 @@ pub fn step_meteo(
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
         // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
         let sill = along(sub(e.position_um, src.origin_um), up);
+        if let Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm } = e.flow {
+            // S530 : à sec (la surface de la flaque sous celle du sol) ou fermée, rien ne passe.
+            if h_up <= sill || e.control_pm == 0 {
+                continue;
+            }
+            let aire = area_mm2 as f64 * 1e-6;
+            let sol = nodes[e.to.expect("vérifié") as usize];
+            let f0 = sol.volume_ml as f64 * 1e-6 / aire;
+            let m = (suction_um as f64 * 1e-6 + (h_up - sill) * 1e-6) * (deficit_pm as f64 / 1000.);
+            let f1 = green_ampt_step(f0, m, conductivity_nm_s as f64 * 1e-9 * dt_s);
+            let nl = (f1 - f0) * aire * 1e12;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
         if let Flow::PumpLine { .. } = e.flow {
             // S515 : la pompe sur sa conduite — le point de fonctionnement, partagé avec `pump_operating_point`.
             let Some(point) = pump_line_point(nodes, e, shapes, up, 1000.)? else {
@@ -467,8 +492,8 @@ pub fn step_meteo(
             Flow::Valve { area_mm2, curve_pm } => {
                 e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt() * valve_fraction(&curve_pm, e.control_pm)
             }
-            Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill => {
-                unreachable!("pompes, pluie et débordement ont leur propre calcul")
+            Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill | Flow::Infiltration { .. } => {
+                unreachable!("pompes, pluie, débordement et infiltration ont leur propre calcul")
             }
         };
         if !q_m3s.is_finite() {
@@ -599,6 +624,10 @@ mod tests;
 #[path = "tests_hydro_controles.rs"]
 mod tests_controles;
 
+#[cfg(test)]
+#[path = "tests_infiltration.rs"]
+mod tests_infiltration;
+
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
 pub(crate) fn law_size(flow: &Flow) -> i64 {
@@ -609,8 +638,36 @@ pub(crate) fn law_size(flow: &Flow) -> i64 {
         Flow::PumpLine { max_flow_mlps, shutoff_head_um, loss_um_per_l2s2, efficiency_pm, .. } => {
             if shutoff_head_um <= 0 || loss_um_per_l2s2 < 0 || !(1..=1000).contains(&efficiency_pm) { -1 } else { max_flow_mlps }
         }
+        // S530 : une aire positive, des paramètres de sol positifs, un déficit en ‰. (Le sol receveur, `to`, est vérifié par l'appelant.)
+        Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm } => {
+            if area_mm2 <= 0 || conductivity_nm_s < 0 || suction_um < 0 || !(0..=1000).contains(&deficit_pm) { -1 } else { area_mm2 }
+        }
         _ => 0,
     }
+}
+
+/// **S530 — un pas de Green–Ampt, exact** : la lame `F₁` telle que `t(F₁) − t(F₀) = K·dt`, `t(F) = (F − M ln(1 + F/M))/K` —
+/// `F₁ − F₀ − M ln((M + F₁)/(M + F₀)) = K·dt` —, par bissection en f64 (60 itérations, déterministe). `M` = 0 : `F₁ = F₀ + K·dt`.
+pub(crate) fn green_ampt_step(f0: f64, m: f64, k_dt: f64) -> f64 {
+    if !(k_dt > 0.0) {
+        return f0;
+    }
+    if !(m > 0.0) {
+        return f0 + k_dt;
+    }
+    let g = |f: f64| f - f0 - m * ((m + f) / (m + f0)).ln() - k_dt;
+    let (mut lo, mut hi) = (f0, f0 + k_dt + 2.0 * (2.0 * (m + f0) * k_dt).sqrt() + k_dt);
+    for _ in 0..64 {
+        if g(hi) >= 0.0 {
+            break;
+        }
+        hi = f0 + 2.0 * (hi - f0);
+    }
+    for _ in 0..60 {
+        let mid = 0.5 * (lo + hi);
+        if g(mid) < 0.0 { lo = mid } else { hi = mid }
+    }
+    0.5 * (lo + hi)
 }
 
 /// S515 : la fraction de débit d'une vanne à la commande `c` (‰), interpolée linéairement sur sa courbe de onze points.

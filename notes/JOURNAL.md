@@ -558,3 +558,11 @@ sillage à trois mailles (50 / 25 / 12,5 cm, 56 × 40 × 3 m) ; la carte demande
 modèle de référence ; mais le champ ne converge pas point par point (ordre −0,18 : (1) manqué — un déphasage, le pas suivant la maille,
 A328 probable) ; et le pic d'étrave **diverge** (0,30 / 0,72 / 1,47 m, le coin vif). Maillons **1** (une localisation). Suivant : **S530**, le
 lot (dû) et un point partiel.
+
+## S530 — 2026-10-06 — le lot ; l'absorption par le sol (Green–Ampt dans V)
+
+**Entrée.** En autonomie ; le lot (feuille de route S528–S529), puis 5.5. **Fait** ([preuve](../docs/validation/INFILTRATION-S530.md)) :
+`Flow::Infiltration`, de la flaque vers un sol qui est un nœud de V (sa lame cumulée, l'état de Green–Ampt, sans état nouveau). **L'ordre de
+grandeur calculé au plan a changé la construction** : un Euler explicite faisait +212 % à 60 s ; l'équation est intégrée exactement sur le
+pas. **Mesuré** : 7·10⁻⁵ de la solution implicite au pire sur 1 h, masse exacte, sol plein et flaque à sec, la pluie toute absorbée.
+Maillons **0** (5.5 avance). Suivant : **S531, la dixième revue de méthode** (S526–S530).

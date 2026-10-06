@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [L'absorption par le sol : Green–Ampt dans V — S530](validation/INFILTRATION-S530.md) : une arête de V intégrée exactement sur le pas, à 7·10⁻⁵ de la solution implicite.
 - [A330 localisée : le sillage de la coque dans δ à trois mailles — S529](validation/A330-CONVERGENCE-S529.md) : l'amplitude stable en maille (l'écart revient au modèle) ; le champ déphasé ; le pic d'étrave divergent.
 - [Les anneaux d'impact de W en eau peu profonde — S528](validation/ANNEAUX-PROFONDEUR-S528.md) : 0,44 % d'une propagation FFT exacte par 1 m de fond ; les bornes de pente sûres.
 - [C07 peu profond aux deux vitesses : la dernière crête au-dessus du plancher — S527](validation/C07-PLANCHER-S527.md) : 44,00° et 27,00° ; C07 passe entier.

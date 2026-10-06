@@ -54,6 +54,7 @@ fn valid_edge(e: &Opening, nodes: usize) -> bool {
         Flow::Rain { catchment_mm2 } => if e.to != Some(e.from) { -1 } else { catchment_mm2 },
         Flow::Spill => if e.to.is_none() { 0 } else { -1 },
         Flow::Valve { .. } | Flow::PumpLine { .. } => super::law_size(&e.flow),
+        Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { super::law_size(&e.flow) },
     };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
@@ -127,6 +128,14 @@ impl<'a> Baseline<'a> {
                     for x in outlet_um { h.write_u64(x as u64); }
                     h.write_u64(loss_um_per_l2s2 as u64);
                     h.write_u64(efficiency_pm as u64);
+                }
+                // S530 : l'infiltration de Green–Ampt.
+                Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm } => {
+                    h.write_u8(7);
+                    h.write_u64(area_mm2 as u64);
+                    h.write_u64(conductivity_nm_s as u64);
+                    h.write_u64(suction_um as u64);
+                    h.write_u64(deficit_pm as u64);
                 }
             }
             for x in e.position_um { h.write_u64(x as u64); }

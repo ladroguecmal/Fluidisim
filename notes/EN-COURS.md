@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S530 — **en cours**. En autonomie : **le lot des registres** (dû ; feuille de route S528–S529), puis **5.5 — l'absorption par le
+Session : S530 — **terminée**. En autonomie : **le lot des registres** (dû ; feuille de route S528–S529), puis **5.5 — l'absorption par le
 sol** : la pluie tombe dans V (S378), mais rien n'entre dans le sol.
 
 **Ce que la session fait.** Une loi d'arête de V, `Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm }` : **Green–
@@ -83,7 +83,11 @@ près), la flaque reste sous 2 ml.
 ### Plan
 
 - [x] **P1** — jeton ; le lot (feuille de route S528–S529) ; plan.
-- [ ] **P2** — la loi, les essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 5.5 ; rituel (`--lot`).
+- [x] **P2** — la loi, les essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 5.5 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — `Flow::Infiltration`, `green_ampt_step` ; essais `s530` : 3·10⁻⁵ / 1·10⁻⁵ / 7·10⁻⁵ ; sol plein exact ; flaque à sec ; pluie
+  4 999 ml, flaque ≤ 1 ml. Suite 690.
+- **P3** — preuve INFILTRATION-S530 ; liste 5.5 ; index ; journal.
+
