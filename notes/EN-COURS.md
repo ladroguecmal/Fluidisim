@@ -62,33 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S572 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S569–S571), puis **7.7 — les tuiles** (SPEC-006 §5.2) :
-l'unité de publication de la traversabilité.
+Session : S573 — **en cours**. En autonomie, **7.7** : deux manques de S572.
 
-**Ce que la session fait.** `TileDesc` (référentiel, code de Morton, classe de cadence `Maree | Debit | NoeudV | Immediat`, subdivision,
-séquence propre à la tuile) ; `publier(…)` : les `(16·2^s)²` échantillons d'une tuile depuis un échantillonneur (profondeur, courant) de
-l'appelant, la prévision par cellule (`t_next_cross` et sa cause, S570) quand une profondeur prévisible est fournie, la séquence
-incrémentée, et **les événements de franchissement** — une cellule dont la classe de profondeur ou de danger a changé depuis la publication
-précédente — dans un tampon de l'appelant (I-06).
+**Ce que la session fait.** (a) **L'invalidation** (SPEC-006 §5.4) : `invalider(tuile, cellules)` — une commande de V à l'amont fait passer
+la tuile en cadence `Immediat` et toutes ses prévisions à `CrossCause::Aucune` (« je ne sais plus » : un résultat, pas un échec) jusqu'à
+la publication suivante qui reçoit une prévision établie. (b) **La praticabilité par agent** (ADR-018 §2) : `Agent::Humanoide` (moins de
+1,30 m et `HR` sous 1,25), `Agent::Vehicule { gue }` (la profondeur sous le gué de son châssis), `Agent::Bateau { tirant, marge }`
+(`profondeur − tirant − marge > 0`) ; `prochain_changement(agent, profondeur(t), …)` — le prochain franchissement du seuil de cet agent,
+par le balayage et la bissection de S570, généralisés à une liste de seuils.
 
-**Références, calculées avant** (ce script les écrit). Une tuile de 16 × 16 cellules de 64 m sur une plage (fond de −2 à +2 m en `x`),
-une marée de 0,4 m (M2), courant nul ; publiée à `t₀` = 0 puis `t₁ = T/12` (0 puis 0,2 m) : les colonnes [2, 3, 4, 6, 7] changent de classe →
-**80 événements**. La prévision de la colonne 6 à `t₁` (fond -0.3750 m, 0.5750 m d'eau) : la marée ne monte pas jusqu'à
-1,00 m ; elle repasse 0,50 m en descendant dans **16368.323 s**. Le code de Morton de la tuile (3, 5) : **39**. Séquences 1 puis 2.
+**Références, calculées avant** (ce script les écrit). La marée de S570 (`0,8 + 0,4·sin`, 12,42 h). Un véhicule au gué de 0,6 m, depuis
+la mi-marée descendante : praticable dans **3726.000 s** (`T/12`), en descendant. Un bateau de 0,9 m de tirant avec 0,2 m de marge
+de houle, depuis la mi-marée montante : navigable dans **6034.925 s** (`asin(0,75)·T/2π`), en montant. Un humanoïde : la marée
+culmine à 1.2 m, sous la nage — aucun changement.
 
-**Quantum** (ADR-236 D1) : la bissection à 1 ms ; les classes, des entiers. **Critères, écrits avant.** (1) 80 événements
-exactement, aux colonnes attendues, avec les classes d'avant et d'après ; (2) la prévision de la colonne 6 à 10 ms, seuil 0,50 m, en
-descendant, cause `Maree` ; (3) Morton 39 ; séquences 1 puis 2 ; une subdivision 1 donne 32 × 32 échantillons ; (4) refus : tampons
-trop courts, subdivision au-delà de 4.
+**Quantum** (ADR-236 D1) : la bissection à 1 ms. **Critères, écrits avant.** (1) les deux délais à 10 ms, le sens ; l'humanoïde `None` ;
+(2) `praticable` aux bornes : véhicule à 0,6 m praticable (borne incluse), à 0,601 m non ; bateau à 1,1 m non, à 1,101 m oui ; humanoïde à
+0,5 m et 2 m/s (`HR` = 1,25) non ; (3) l'invalidation : après elle, cadence `Immediat`, 256 causes `Aucune` ; republiée sans prévision,
+toujours `Aucune` ; avec prévision, `Maree` ; (4) S570 et S572 inchangés.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — les tuiles et leurs essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 7.7 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — l'invalidation, les agents ; (1)–(4).
+- [ ] **P3** — preuve ; liste 7.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — 80 événements aux colonnes 2, 3, 4, 6, 7 ; la colonne 6 annoncée à 16 368,323 s ; Morton 39 ; séquences ; 1 024
-  échantillons en subdivision 1 ; refus. Suite 745.
-- **P3** — preuve TRAVERSABILITE-TUILES-S572 ; liste 7.7 ; index ; journal ; le lot.
-
