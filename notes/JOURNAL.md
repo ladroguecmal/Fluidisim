@@ -828,3 +828,10 @@ jamais la masse. **Fait** ([preuve](../docs/validation/SEUIL-ADAPTATIF-S564.md))
 50 000 µm, une piscine de 20 µm, une carène en V de 495 à 505 µm selon 0,99 ou 1,01 L, une piscine inclinée de `500·cos θ` — chaque fois au
 dix-millième ; une fuite lente publiée tous les 25 pas. Maillons **1** (5.6 : absent → partiel). Suivant : **S565**, un point partiel ;
 revue à S566.
+
+## S565 — 2026-10-06 — la solution d'un réseau en charge
+
+**Entrée.** En autonomie ; 5.8 (absent, « reporté en v2 » — la v1 est atteinte). **Les références d'abord, par deux méthodes
+indépendantes** : une bissection (trois réservoirs), Hardy Cross (une maille). **Fait** ([preuve](../docs/validation/RESEAU-CHARGE-S565.md)) :
+`hydro_charge.rs`, Newton sur les charges des jonctions, Gauss dans un tampon de l'appelant. **Mesuré** : les deux cas à 10⁻⁹, en 4 et 8
+itérations. Maillons **1** (5.8 : absent → partiel). Suivant : **S566, la dix-septième revue de méthode**.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S565 — **en cours**. En autonomie, **5.8 — le réseau fermé sous pression** (absent ; « reporté en v2 » par ADR-010 §4 — la v1
+Session : S565 — **terminée**. En autonomie, **5.8 — le réseau fermé sous pression** (absent ; « reporté en v2 » par ADR-010 §4 — la v1
 est atteinte et la liste entière est l'objectif, ADR-190). Première pièce : **la solution d'un réseau de conduites en charge** — les
 charges aux jonctions et les débits, les réservoirs (les nœuds de V à surface libre) imposant leurs charges.
 
@@ -86,7 +86,10 @@ charges fixes (`Domain`), une résistance non positive (`Domain`), un tampon tro
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `hydro_charge.rs` et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 5.8 ; rituel.
+- [x] **P2** — `hydro_charge.rs` et ses essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 5.8 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — trois réservoirs en 4 itérations, la maille en 8, à 10⁻⁹ des références ; continuité 5·10⁻¹⁷ ; refus. Suite 733.
+- **P3** — preuve RESEAU-CHARGE-S565 ; liste 5.8 (absent → partiel) et décompte ; index ; journal.
+

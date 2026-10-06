@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-06 22:44 +02:00
+JETON            : libre
+Battement        : 2026-10-06 22:50 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S565 — 5.8, la solution d'un réseau en charge ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S564 — le seuil adaptatif à l'échelle du contenant ([journal](notes/JOURNAL.md)). Avant : S563 (le lot)
-Session suivante : **S565 — un point partiel** (par la feuille de route et le tableau de bord). Revue à S566. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
-Maillons        : 1 — S564 : 5.6 absent → partiel
+Session en cours : aucune
+Dernière session : S565 — la solution d'un réseau en charge ([journal](notes/JOURNAL.md)). Avant : S564 (le seuil adaptatif à l'échelle du contenant)
+Session suivante : **S566 — la dix-septième revue de méthode** (S561–S565 ; ADR-222 D4) : frictions — une valeur du plan écrite de tête (S562 : 190 s pour 220 s), un heredoc contre la lettre d'ADR-240 D1 (S562) ; ce qui a tenu (les références par des méthodes indépendantes : bissection, Hardy Cross, S563–S565 ; le commit gardé par le code du rituel, S561–S565 ; le périmètre de 5.7 non réduit sans l'utilisateur, S563). Puis un point partiel (5.8 : le couplage au pas de V ; ou un autre). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h).
+Maillons        : 1 — S565 : 5.8 absent → partiel
 Registres       : dernier lot S563 (ADR-213 D3) ; le prochain au plus tard en S566
 ```
 

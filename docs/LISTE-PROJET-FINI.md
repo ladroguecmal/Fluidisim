@@ -427,7 +427,11 @@ pas recopiée ici (L137).
   l'instantané de la composition (bloc `WVLQ`, la continuation au bit ; [preuve](validation/LIQUIDES-ECREMEUR-S562.md)) ; **S563** :
   l'air scellé avec plusieurs liquides (`step_liquids_air` — 0,126196 m pour 0,126197 ; [preuve](validation/LIQUIDES-AIR-S563.md)).
   Manque, hors de V : un liquide autre que l'eau qui sort vers la mer, δ ou le sol (sa nappe, son rendu ; ADR-241 D5).
-- [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
+- [ ] **5.8 Réseau fermé sous pression** — *partiel* depuis S565 (reporté en v2 par ADR-010 ; la v1 est atteinte, ADR-190) : **la
+  solution d'un réseau de conduites en charge** (`hydro_charge.rs`, Newton sur les charges des jonctions) — le problème des trois
+  réservoirs contre une bissection, une maille contre Hardy Cross, à 10⁻⁹ ([preuve](validation/RESEAU-CHARGE-S565.md)). Manquent le
+  couplage au pas de V (les réservoirs qui se vident par le réseau), les pompes et clapets du réseau, le coup de bélier, le coût d'un grand
+  réseau.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *partiel* depuis S538 : la poche
   d'air isotherme scellée d'un compartiment de V (`step_air`) — **C17 passe** : sans évent, la brèche n'embarque que l'équilibre de Boyle
   (0,2901 m sur 2 m, à 1,2·10⁻⁵), avec évent Torricelli à 2,9·10⁻⁴ ([preuve](validation/C17-AIR-S538.md)) ; **S547 : l'évent à débit
@@ -799,7 +803,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
-| 5. Volumes finis (V) | 12 | 2 | 8 | 2 |
+| 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 3 | 5 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
@@ -808,7 +812,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **76** | **35** |
+| **total** | **121** | **10** | **77** | **34** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
