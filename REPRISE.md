@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 09:23 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 09:27 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S512 — 6.8, l'impulsion d'entrée dans l'eau ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S511 — la sixième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S510 (9.5 validée : le consommateur des impacts prédits)
 Session suivante : **S512 — un point partiel proche de son périmètre** : relire le tableau de bord (6.2 le courant, 5.4 `C_d` et pompe, 4.13 la coque en marche dans δ, 9.3, 9.2…), choisir le critère le plus net ; référence éprouvée convergée (ADR-230), corps d'essai loin des limites (ADR-228), enchaînements arrêtés au premier échec (ADR-231). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord.
 Maillons        : 1 — S511 : la revue de méthode (ADR-231), sans capacité

@@ -62,15 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S511 — **terminée**. En autonomie, **la sixième revue de méthode** (ADR-222 D4) : les frictions de S507–S510.
+Session : S512 — **en cours**. En autonomie, **6.8, l'impulsion d'entrée dans l'eau** (*slamming*, C20, ADR-023 §2) — absente : une
+entrée dans l'eau dure moins d'un tick (17 à 73 ms) ; la flottabilité échantillonnée la rate ou la double selon la phase du tick.
 
-**Critères, écrits avant.** Une protection n'entre que pour une erreur répétée ou coûteuse ; chacune a sa leçon ; aucune ne duplique la
-table ; un outil corrigé est éprouvé ; `etat_projet --check` à zéro.
+**Ce que la session fait.** Le corps rigide reçoit un archétype d'impact (relèvement `β`, demi-largeur `b`, longueur `L`, seuil de
+2 m/s) ; à chaque pas, l'instant **exact** où sa quille passe sous la surface (chute libre résolue dans le pas), et, au-delà du seuil,
+l'impulsion de masse ajoutée appliquée à cet instant : `m_a = ½πρb²L`, la quantité de mouvement du corps et de l'eau entraînée conservée —
+`v' = m·v/(m + m_a)`, `J = m_a·v'` (→ `m_a·v` d'ADR-023 quand `m_a ≪ m`) ; un événement publié (instant, `J`, `v_rel`, `t_impact`).
+
+**Ordre de grandeur, écrit avant.** La coque de la porte D lâchée à plat (`b` = 0,8 m, `L` = 4 m) : `m_a` = ½·π·1025·0,64·4 ≈ 4 100 kg —
+plus que sa masse (3 200 kg) : l'impulsion d'ADR-023 (`m_a·v`) y surestimerait `J` de `1 + m_a/m` ≈ 2,3 ; le bilan (von Kármán) le borne.
+Pour un corps lourd (`m_a/m` < 5 %), les deux à 5 % près. `t_impact = 2b·tanβ/(πv)` : 10 à 70 ms.
+
+**Critères, écrits avant (C20).** (1) le bilan : quantité de mouvement corps + eau entraînée conservée à 10⁻¹² près ; `J` à 5 % de
+`Δm_a·v_rel` quand `m_a/m` < 5 % ; (2) **l'indépendance à la phase** : la même chute, décalée de vingt phases de tick, rend le même `J` et le
+même instant d'impact à 10⁻⁹ près — le témoin échantillonné au tick (l'impulsion appliquée au premier tick où la quille est sous l'eau, à
+la vitesse de ce tick) disperse de plusieurs pour cent ; (3) sous le seuil de 2 m/s, aucune impulsion ; (4) les essais du corps inchangés
+(archétype absent par défaut). Si (1)–(4), 6.8 validée.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ADR de la revue ; METHODE, LECONS, BOUSSOLE ; l'outil du rituel ; rituel.
+- [ ] **P2** — l'archétype d'impact, la détection exacte, l'impulsion ; essais (1)–(4).
+- [ ] **P3** — preuve ; liste 6.8 ; rituel.
 
 ### Notes de reprise
-- **P2** — ADR-231 : six frictions ; une protection (D1, l'enchaînement qui s'arrête au premier échec), un outil (D2, le rappel du lot en dernière ligne — `py_compile` passé ; éprouvé en vrai au prochain lot dû, S513) ; METHODE (30), L386, BOUSSOLE (la variable du calcul détaché), index.
