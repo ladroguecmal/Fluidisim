@@ -5,7 +5,9 @@
 //! rayon honnête de la recette (512 × 256 à coupure 3 : 179 m). Le champ η à 40 s par `prepare_in_depth` (5 m), sur une grille d'1 m
 //! de `xs − 128` à `xs`, `|y|` ≤ 155 m, écrit dans `<sortie>` (en-tête `nx ny x0 y0 dx xs`, puis f32 petit-boutiste).
 //!
-//! `cargo run -p water-core --release --example c07_profondeur -- <sortie>`
+//! S523 : `[U T xs arrière demi_y dx]` en arguments (défauts : ceux de S522 — 6,3 40 63 128 155 1) ; `T` multiple de 8 s.
+//!
+//! `cargo run -p water-core --release --example c07_profondeur -- <sortie> [U T xs arrière demi_y dx]`
 use water_core::{
     bound_pressure::Settings,
     gaussian_spectrum::{bake, Recipe},
@@ -17,9 +19,12 @@ use water_core::{
 };
 
 fn main() {
-    let sortie = std::env::args().nth(1).expect("sortie");
-    let (sigma, u, t_s, profondeur, force, dx) = (2.0f32, 6.3f32, 40.0f32, 5.0f32, 19_620.0f32, 1.0f32);
-    let xs = 63.0f32;
+    let args: Vec<String> = std::env::args().collect();
+    let sortie = args.get(1).expect("sortie").clone();
+    let arg = |i: usize, defaut: f32| args.get(i).map(|v| v.parse::<f32>().expect("nombre")).unwrap_or(defaut);
+    let (u, t_s, xs, arriere, demi_y, dx) = (arg(2, 6.3), arg(3, 40.0), arg(4, 63.0), arg(5, 128.0), arg(6, 155.0), arg(7, 1.0));
+    let (sigma, profondeur, force) = (2.0f32, 5.0f32, 19_620.0f32);
+    let fin_us = (t_s * 1e6).round() as u64;
     let x0 = xs - u * t_s;
     let recette = Recipe { sigma, cutoff: 3.0, radial: 512, angular: 256 };
     let settings = Settings {
@@ -30,10 +35,10 @@ fn main() {
         min: [-256.0, -192.0],
         max: [256.0, 192.0],
         start: SimTime(0),
-        end: SimTime(40_000_000),
+        end: SimTime(fin_us),
     };
     let metadata = Metadata { epoch: 1, id: 522, cause: Cause { entity: 522, command: 1, emission: 0 }, settings, recipe: recette };
-    let legs = [Leg { duration_us: 8_000_000, velocity: [u, 0.0], downward_force_n: force }; 5];
+    let legs = vec![Leg { duration_us: 8_000_000, velocity: [u, 0.0], downward_force_n: force }; (fin_us / 8_000_000) as usize];
     let wake = Wake::build(metadata, SimTime(0), [x0, 0.0], &legs).expect("sillage");
     let mut noeuds = vec![Node::default(); recette.radial * recette.angular];
     let spectre = bake(recette, &mut noeuds).expect("recette");
@@ -45,15 +50,15 @@ fn main() {
         9.81,
         1025.0,
         Some(profondeur),
-        SimTime(40_000_000),
-        SimTime(40_000_000),
+        SimTime(fin_us),
+        SimTime(fin_us),
         [-256.0, -192.0],
         [256.0, 192.0],
         &mut slots,
     )
     .expect("préparation");
-    let (gx0, gy0) = (xs - 128.0, -155.0f32);
-    let (nx, ny) = (129usize, 311usize);
+    let (gx0, gy0) = (xs - arriere, -demi_y);
+    let (nx, ny) = ((arriere / dx).round() as usize + 1, (2.0 * demi_y / dx).round() as usize + 1);
     let debut = std::time::Instant::now();
     let mut eta = vec![0f32; nx * ny];
     let fils = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4);

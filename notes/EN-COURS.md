@@ -83,9 +83,15 @@ zone de mesure.
 
 ### Plan
 
-- [ ] **P1** — jeton, plan seul.
-- [ ] **P2** — l'exemple généralisé, la référence, l'instrument éprouvé ; (1).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'exemple généralisé, la référence, l'instrument éprouvé ; (1).
 - [ ] **P3** — W ; (2), (3).
 - [ ] **P4** — preuve ; listes 3.2, 13.2 ; CAS-CANONIQUES ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — l'instrument déclaré (le maximum des rayons, 20–60 m, 24 s) lit sur la référence **14,5° et 11,25°** : le sillage
+  intérieur d'ondes courtes ; changé avant W, comme prévu. Le profil (regardé, ADR-233) : un sillage intérieur, puis une **crête d'ondes
+  longues juste en dedans du coin de Mach**, qui l'approche avec la distance (U = 10 : 41,5 / 43,25 / 43,75 / 44,0 / 44,5° de 20 à 120 m ;
+  U = 15 : 24,25 / 26,0 / 26,75 / 27,0 / 27,25°). **Figé** : la dernière crête (le maximum local le plus extérieur), fenêtre 80–100 m,
+  40 s (le transitoire hors de la zone). Sur la référence, trois grilles : **43,75–44,00° (attendu 44,46) et 27,00° (27,83)** → (1) tenu.
+

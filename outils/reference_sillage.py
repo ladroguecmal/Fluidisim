@@ -14,6 +14,7 @@ de W.
     python outils/reference_sillage.py coque             — S520 : l'instrument figé sur la référence de la coque (4 × 1,6 m), trois grilles
     python outils/reference_sillage.py delta <fichier>   — S520 : l'instrument figé sur la surface de δ (banc `--lineaire-sillage`, `SORTIE=`)
     python outils/reference_sillage.py profondeur <fichier> — S522 : W par 5 m de fond (`c07_profondeur`) contre la référence finie et profonde
+    python outils/reference_sillage.py supercritique [W10 W15] — S523 : l'angle au-delà du critique, sur la référence (trois grilles) ou W
     python outils/reference_sillage.py comparer <fichier W>  — W contre la référence aux mêmes points (fichier de `c07_sillage`)
 """
 import sys
@@ -68,10 +69,10 @@ def bilineaire(xs, ys, eta, x, y):
     return (eta[j, i] * (1 - a) * (1 - b) + eta[j, i + 1] * a * (1 - b) + eta[j + 1, i] * (1 - a) * b + eta[j + 1, i + 1] * a * b)
 
 
-def rayons(echant, xs_src, d_min, d_max, pas=0.25):
+def rayons(echant, xs_src, d_min, d_max, pas=0.25, a_max=40.0):
     """L'instrument de S517 : la moyenne de |η| le long des rayons issus de la source, de d_min à d_max, vers l'arrière, des deux côtés ;
     l'angle du maximum (5 à 40°, pas de 0,25°) et le profil."""
-    angles = np.arange(5.0, 40.0001, 0.25)
+    angles = np.arange(5.0, a_max + 0.0001, 0.25)
     r = np.arange(d_min, d_max + 1e-9, pas)
     prof = []
     for a in angles:
@@ -239,6 +240,54 @@ def profondeur(chemin):
             print(f"C07_S522 reference={nom} grille={lx:.0f}x{ly:.0f}@{ddx} ecart_quadratique_relatif={ecart:.4f} max_ref_zone={np.abs(ref[zone]).max():.4f}", flush=True)
 
 
+SUPER_U, SUPER_T, SUPER_XS, SUPER_H, SUPER_D = (10.0, 15.0), 40.0, 90.0, 5.0, (80.0, 100.0)
+
+
+def derniere_crete(angles, prof):
+    """L'instrument figé de S523 : l'angle du maximum local le plus extérieur du profil (la crête des ondes longues, juste en dedans du
+    coin de Mach ; au-delà, le profil décroît)."""
+    for i in range(len(prof) - 2, 0, -1):
+        if prof[i] > prof[i - 1] and prof[i] >= prof[i + 1]:
+            return angles[i]
+    return float("nan")
+
+
+def supercritique(fichiers=None):
+    """S523 — C07 peu profond au-delà du critique. Le maximum des rayons (20–60 m, 24 s) lisait le sillage intérieur (14,5° et 11,25°) :
+    changé avant W. L'instrument figé : la dernière crête de la moyenne de |η| le long des rayons, 80–100 m derrière, 40 s (le transitoire
+    du départ hors de la zone). Sur la référence par 5 m de fond, trois grilles (critère 1) ; avec les fichiers de W (`c07_profondeur`),
+    sur W et la référence aux mêmes points, et l'écart quadratique (critères 2, 3)."""
+    for n, u in enumerate(SUPER_U):
+        attendu = np.degrees(np.arcsin(np.sqrt(G * SUPER_H) / u))
+        x0 = SUPER_XS - u * SUPER_T
+        if fichiers is None:
+            for (lx, ly, dx) in [(2048.0, 768.0, 1.0), (2048.0, 768.0, 0.5), (2560.0, 1024.0, 0.5)]:
+                xs, ys, eta = champ(2.0, u, SUPER_T, lx, ly, dx, x0, 3.0, profondeur=SUPER_H)
+                _, angles, prof = rayons(lambda x, y: bilineaire(xs, ys, eta, x, y), SUPER_XS, *SUPER_D, a_max=80.0)
+                a = derniere_crete(angles, prof)
+                print(f"REF_S523 U={u} Fr_h={u / np.sqrt(G * SUPER_H):.3f} grille={lx:.0f}x{ly:.0f}@{dx} derniere_crete_deg={a:.2f} attendu_deg={attendu:.2f}"
+                      f" ecart_deg={a - attendu:.2f} profil {' '.join(f'{angles[i]:.0f}:{prof[i]:.2e}' for i in range(0, len(angles), 12))}", flush=True)
+            continue
+        with open(fichiers[n], "rb") as f:
+            tete = f.readline().split()
+            nx, ny = int(tete[0]), int(tete[1])
+            gx0, gy0, dx, xs_src = (float(v) for v in tete[2:6])
+            w = np.frombuffer(f.read(), dtype="<f4").reshape(ny, nx).astype(float)
+        gx = gx0 + dx * np.arange(nx)
+        gy = gy0 + dx * np.arange(ny)
+        GX, GY = np.meshgrid(gx, gy)
+        xs, ys, eta = champ(2.0, u, SUPER_T, 2048.0, 768.0, 0.5, x0, 3.0, profondeur=SUPER_H)
+        ref = bilineaire(xs, ys, eta, GX.ravel(), GY.ravel()).reshape(ny, nx)
+        d = xs_src - GX
+        zone = (d >= SUPER_D[0]) & (d <= SUPER_D[1])
+        ecart = np.sqrt(((w - ref)[zone] ** 2).sum() / (ref[zone] ** 2).sum())
+        for nom, c in [("W", w), ("reference", ref)]:
+            _, angles, prof = rayons(lambda x, y, c=c: bilineaire(gx, gy, c, x, y), xs_src, *SUPER_D, a_max=80.0)
+            a = derniere_crete(angles, prof)
+            print(f"C07_S523 U={u} {nom} derniere_crete_deg={a:.2f} attendu_deg={attendu:.2f} ecart_deg={a - attendu:.2f}", flush=True)
+        print(f"C07_S523 U={u} ecart_quadratique_relatif={ecart:.4f} points_zone={zone.sum()} max_ref_zone={np.abs(ref[zone]).max():.4f}", flush=True)
+
+
 def instrument():
     t, coupure = 24.0, 6.0
     for sigma in [0.5, 1.0, 2.0]:
@@ -263,5 +312,7 @@ if __name__ == "__main__":
         delta(sys.argv[2])
     elif sys.argv[1] == "profondeur":
         profondeur(sys.argv[2])
+    elif sys.argv[1] == "supercritique":
+        supercritique(sys.argv[2:] or None)
     else:
         {"instrument": instrument, "instrument_fige": instrument_fige, "coque": coque}[sys.argv[1]]()

@@ -89,3 +89,5 @@ for nd in (8, 12, 16):
 | `20261006-152831-sillage-delta-s520c` | S520 | sillage-delta-s520c | `SILLAGE_NX=416 SILLAGE_NY=224 DUREE=30 VITESSE=3 RAMPE=3 SORTIE=calculs/delta_s520.bin D_MIN=23.06 D_MAX=34.59 viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 15:29 |
 | `20261006-155157-w-profondeur-s522` | S522 | w-profondeur-s522 | `code/target/release/examples/c07_profondeur.exe calculs/w_profondeur_s522.bin` | terminé, 2026-10-06 15:52 |
 | `20261006-155244-ref-profondeur-s522` | S522 | ref-profondeur-s522 | `PYTHONIOENCODING=utf-8 python outils/reference_sillage.py profondeur calculs/w_profondeur_s522.bin` | terminé, 2026-10-06 15:52 |
+| `20261006-155722-ref-super-s523` | S523 | ref-super-s523 | `PYTHONIOENCODING=utf-8 python outils/reference_sillage.py supercritique` | lancé 2026-10-06 15:57 |
+| `20261006-155934-ref-super2-s523` | S523 | ref-super2-s523 | `PYTHONIOENCODING=utf-8 python outils/reference_sillage.py supercritique` | lancé 2026-10-06 15:59 |
