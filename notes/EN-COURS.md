@@ -62,33 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S569 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S567–S568), puis **5.8** — deux manques : la vitesse
-commandée d'une pompe, et un raccord qui se dénoie (aujourd'hui refusé : `Domain`, et l'hôte ne peut plus avancer).
+Session : S570 — **en cours**. En autonomie, **7.7 — danger et traversabilité** (absent ; ADR-018, SPEC-006 §5). Première pièce :
+**l'échantillon** et **le prochain franchissement de seuil**.
 
-**Ce que la session fait.** (a) `Organe::Pompe` reçoit sa vitesse `n` (0 à 1, la commande d'ADR-199 D1) : lois de similitude, `H ∝ n²`,
-`Q ∝ n`, soit `H(Q) = H₀·n² − H₀·Q²/Q_max²`. (b) **Un raccord hors de l'eau est un exutoire à l'air libre** : sa charge est la cote du
-raccord (la pression atmosphérique), et il ne fait que **recevoir** — un débit qui sortirait du nœud (le réseau aspirerait de l'air) est
-coupé comme par un clapet. Plus de refus.
+**Ce que la session fait.** `traversabilite.rs` : `echantillon(profondeur, courant, glace…)` — le produit de danger **`HR = d·(v + 0,5)`**
+(ADR-018 §3), sa classe (faible < 0,75 ≤ dangereux pour certains < 1,25 ≤ pour la plupart < 2,5 ≤ pour tous ; bornes basses incluses :
+« 50 cm à 2 m/s, HR = 1,25, emporte déjà un adulte »), la classe de profondeur d'un humanoïde (§2 : 0,15 ; 0,50 ; 1,00 ; 1,30 m) ;
+`prochain_franchissement(profondeur(t), t₀, horizon)` — le temps avant que la profondeur franchisse l'un des seuils, par un balayage au
+pas donné puis une bissection, et le sens (`trend`) ; la cause supposée (`CrossCause` : Aucune, Marée, Débit, Commande — SPEC-006 §5.4)
+portée telle quelle. Le courant est celui de surface, jamais l'orbitale (§5.5) : l'appelant le fournit. Les tuiles et la publication
+(§5.2) viendront ensuite ; la marée de B n'existe pas encore (2.2) — l'essai prend une marée analytique.
 
-**Références, calculées avant** (ce script les écrit). (1) La pompe de S568 à `n` = 0,9 (à 0,8 elle ne monterait plus à 20 m : 19,2 m de barrage) — bissection : **`h_j` = 20.758823529 m, `Q` =
-0.015904125 m³/s**. (2) Exutoire : A (1 m², 1,5 m) se vide par le fond vers B dont l'arrivée est à 1,0 m, au-dessus de son eau (0,2 m) ;
-`√(h_A − 1) = √0,5 − t/(2√R)`, `R` = 4·10⁴ : **`h_A` = 1.208947 m à 100 s, 1.042893 m à 200 s**, A s'arrête à 1,0 m vers
-**283 s**, B à 0,7 m ; l'essai dure 600 s. (3) Un raccord qui se dénoie : la sortie de A en paroi à 1,0 m, B rempli par le fond
-(0,2 m) ; A se vide jusqu'à ce que sa surface passe sous sa sortie, puis plus rien ; le dernier pas dépasse d'au plus `√(0,3/R)·dt` =
-**0.274 mm**.
+**Références, calculées avant** (ce script les écrit). HR : 0,5 m à 2 m/s → **1.25** (dangereux pour la plupart) ; 0,3 m à
+0,5 m/s → **0.30** (faible) ; 1,0 m à 1,0 m/s → **1.50** (pour la plupart) ; 1,2 m à 2,0 m/s → **3.00**
+(pour tous). Une marée M2, `d(t) = 0,8 + 0,4·sin(2πt/T)`, `T` = 12,42 h : depuis la mi-marée montante, 1,0 m franchi dans **3726.000 s**
+(`T/12`) ; depuis la pleine mer, 1,0 m redescendu dans **7452.000 s** (`T/6`) ; depuis la mi-marée descendante, 0,5 m dans **6034.925 s**
+(`asin(0,75)·T/2π`).
 
-**Quantum** (ADR-236 D1) : 10⁻⁹ pour (1) ; 1 µm en V ; l'Euler du pas pour (2) — l'écart attendu comme en S567 (~2·10⁻⁴ m). **Critères,
-écrits avant.** (1) à 10⁻⁸ ; (2) `h_A` à 10⁻³ m de la loi fermée à 100 et 200 s, l'état final à 2·10⁻⁴ m de 1,0 et 0,7 m, la masse à
-l'entier ; (3) A final entre 1,0 m − 0.274 mm et 1,0 m, puis immobile ; aucun refus ; (4) S565–S568 inchangés.
+**Quantum** (ADR-236 D1) : la bissection à 1 ms ; `HR` en f32 (`half` dans SPEC-006 : 10⁻³ relatif). **Critères, écrits avant.** (1)
+chaque `HR` à 10⁻⁶ et sa classe ; les classes de profondeur aux bornes ; (2) chaque franchissement à 10 ms (rapport 10), le bon seuil et le
+bon sens ; aucun franchissement dans l'horizon → `None` ; (3) refus : profondeur ou courant négatifs ou non finis, pas ou horizon non
+positifs.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — la vitesse, l'exutoire ; (1)–(4).
-- [x] **P3** — preuve ; liste 5.8 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `traversabilite.rs` et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 7.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — pompe à 0,9 au 10⁻⁹ ; exutoire à 6·10⁻⁵ m de la loi fermée, final 1,0 / 0,7 m ; dénoyé à 0,126 mm sous la sortie puis
-  immobile ; l'essai de S567 (raccord sec refusé) passe désormais sans débit. Suite 741.
-- **P3** — preuve RESEAU-EXUTOIRE-S569 ; liste 5.8 ; index ; journal ; le lot.
-
