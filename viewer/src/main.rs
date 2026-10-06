@@ -2661,6 +2661,10 @@ fn run() -> Result<(), String> {
     // S481 — K2-2 : les poches d'air enfermé sur la carte, contre la référence.
     // S493 — 6.5 : le décor qui perce la surface, sur la carte (δ linéaire).
     // S503 — 6.4 : un solide qui bouge sur la carte.
+    // S504 — 6.4 : la coque qui perce la surface, en mouvement sur la carte.
+    if args.iter().any(|a| a == "--lineaire-coque") {
+        return delta3d_linear::recevoir_coque();
+    }
     if args.iter().any(|a| a == "--lineaire-mobile") {
         return delta3d_linear::recevoir_mobile();
     }

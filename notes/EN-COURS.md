@@ -83,8 +83,11 @@ exacte : un écart de l'ordre de l'arrondi f32 de la surface (10⁻⁷ m), sans 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les poids du transfert (cœur) ; dépôt et transfert sur la carte ; (1).
-- [ ] **P3** — le banc de la coque ; (2)–(4).
+- [x] **P3** — le banc de la coque ; (2)–(4).
 - [ ] **P4** — preuve ; liste 6.4 ; rituel.
 
 ### Notes de reprise
 - **P2** — `Volume3::lid_transfer_weights` ; `lid_partial` − dépôt ; `motion_gather`, `motion_apply` ; dépôt effacé au pas suivant sans mouvement. (1) : S358 identique (diff vide), cloisons 5,96·10⁻⁸ m inchangées, sphère de S503 inchangée. Un heredoc mal lu par le shell (rien d'appliqué) → script dans le brouillon.
+- **P3** — `--lineaire-coque` : pilonnement 1,669·10⁻⁶ m pour 4,537 cm (rapport 27 184), volume 5,9·10⁻⁷ m³, aucun transfert (une
+  boîte en pilonnement ne referme pas de couvercle) ; roulis 2,384·10⁻⁷ m pour 8,8 mm (36 913), 5 814 transferts, volume 2,0·10⁻⁷ m³ ;
+  **témoin** sans transfert : 5,555·10⁻⁵ m et croissant ; recoupage CPU 7,9–8,2 ms, carte 0,7–0,9 ms. 663 essais.

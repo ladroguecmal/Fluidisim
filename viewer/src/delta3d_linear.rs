@@ -945,3 +945,130 @@ pub fn recevoir_mobile() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// **Banc S504 (liste 6.4) — la coque qui perce la surface, en mouvement sur la carte** (`--lineaire-coque`, `MODE=pilonnement|roulis`).
+/// La coque de la porte D (4 × 1,6 × 1 m à 500 kg/m³, à son tirant) dans un δ de 12 × 8 × 2 m (48 × 32 × 8 mailles de 25 cm), murs ;
+/// pilonnement imposé de 5 cm à 3,5 rad/s, ou roulis de 0,05 rad à 2,5 rad/s, démarrés sur une période (S336) ; 300 pas de 10 ms. À
+/// chaque pas, le cœur recoupe et donne à la carte la géométrie, le terme de paroi, les faces, le dépôt et le transfert ; relevés tous
+/// les 25 pas.
+pub fn recevoir_coque() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+    use water_core::rigid_body::oriented_box_distance;
+    pollster::block_on(async {
+        let d = Domain3 { nx: 48, ny: 32, nz: 8, dx: 0.25 };
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let roulis = std::env::var("MODE").map_or(false, |m| m == "roulis");
+        let cycles: u32 = std::env::var("CYCLES").ok().and_then(|v| v.parse().ok()).unwrap_or(40);
+        let (dt_us, pas, releve) = (10_000u64, 300usize, 25usize);
+        let (amplitude, omega) = if roulis { (0.05f64, 2.5f64) } else { (0.05, 3.5) };
+        let periode = core::f64::consts::TAU / omega;
+        let mouvement = |t: f64| {
+            let rampe = if t < periode { 0.5 * (1. - (core::f64::consts::PI * t / periode).cos()) } else { 1. };
+            amplitude * rampe * (omega * t).sin()
+        };
+        let z_r = 0.5 - 500. / rho as f64;
+        let centre_xy = [6.1f64, 3.875];
+        let pose = |t: f64| -> ([f64; 3], [f64; 4]) {
+            let m = mouvement(t);
+            if roulis {
+                ([centre_xy[0], centre_xy[1], d.z0() as f64 + z_r], [(0.5 * m).cos(), (0.5 * m).sin(), 0., 0.])
+            } else {
+                ([centre_xy[0], centre_xy[1], d.z0() as f64 + z_r + m], [1., 0., 0., 0.])
+            }
+        };
+        let noeuds = |c: [f64; 3], q: [f64; 4], out: &mut Vec<f32>| {
+            out.clear();
+            for k in 0..=d.nz {
+                for j in 0..=d.ny {
+                    for i in 0..=d.nx {
+                        let p = [i as f64 * d.dx as f64, j as f64 * d.dx as f64, k as f64 * d.dx as f64];
+                        out.push(oriented_box_distance(c, q, [2., 0.8, 0.5], p) as f32);
+                    }
+                }
+            }
+        };
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        let mut nds = Vec::new();
+        let (c0, q0) = pose(0.);
+        noeuds(c0, q0, &mut nds);
+        let mut coeur =
+            Volume3::configure_with_floating_solid(&mut host, d, rho, g, &vec![0.; d.columns()], &nds).map_err(|e| format!("cœur {e:?}"))?;
+        coeur.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+        let geo_de = |c: &Volume3| -> Result<Vec<f32>, String> {
+            let (u, v, w) = c.apertures().ok_or("ouvertures")?;
+            Ok(decoupee(u, v, w, c.fluid_fraction().ok_or("fractions")?))
+        };
+        let carte = Linear3::new(d, rho, g, &geo_de(&coeur)?).await?;
+        carte.set_step(dt_us, Sponge3::default())?;
+        let (nu, nv) = ((d.nx + 1) * d.ny * d.nz, d.nx * (d.ny + 1) * d.nz);
+        let zeros = vec![0f32; face_total(d)];
+        carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[nu + nv..], coeur.surface())?;
+        let aire = d.dx * d.dx;
+        let mut colonnes = coeur.solid_column_volumes().ok_or("colonnes solides")?.to_vec();
+        let (mut paroi, mut faces, mut depot) = (vec![0f32; d.cells()], vec![0f32; face_total(d)], vec![0f32; d.columns()]);
+        let mut transfert = vec![0f32; 5 * d.columns()];
+        let volume = |eta: &[f32]| eta.iter().map(|e| (e - d.z0()) as f64).sum::<f64>() * (d.dx as f64).powi(2);
+        println!(
+            "COQUE_S504 mode={} nx={} ny={} nz={} dx={} amplitude={amplitude} omega={omega} pas={pas} dt_us={dt_us} cycles={cycles} carte={:?}",
+            if roulis { "roulis" } else { "pilonnement" }, d.nx, d.ny, d.nz, d.dx, carte.adapter
+        );
+        let (mut pire, mut elevation, mut pire_volume, mut transferts) = (0f32, 0f32, 0f64, 0usize);
+        let (mut cpu, mut ligne) = (0f64, String::new());
+        let mut precedent = pose(0.);
+        for n in 1..=pas {
+            let t = n as f64 * dt_us as f64 * 1e-6;
+            let t0 = std::time::Instant::now();
+            let (c, q) = pose(t);
+            noeuds(c, q, &mut nds);
+            let vitesse = [0., 0., ((c[2] - precedent.0[2]) / (dt_us as f64 * 1e-6)) as f32];
+            let mut angulaire = [0f32; 3];
+            if roulis {
+                angulaire[0] = ((mouvement(t) - mouvement(t - dt_us as f64 * 1e-6)) / (dt_us as f64 * 1e-6)) as f32;
+            }
+            precedent = (c, q);
+            coeur.set_solid_rigid(&nds, vitesse, angulaire, c.map(|x| x as f32)).map_err(|e| format!("pas {n} : paroi {e:?}"))?;
+            coeur.wall_divergence(&mut paroi).map_err(|e| format!("{e:?}"))?;
+            coeur.changed_faces(&mut faces).map_err(|e| format!("{e:?}"))?;
+            coeur.lid_transfer_weights(&mut transfert).map_err(|e| format!("{e:?}"))?;
+            transferts += transfert.chunks(5).filter(|w| w[0] != 0.).count();
+            // Le témoin (`SANS_TRANSFERT`) : la carte privée du transfert de S334.
+            if std::env::var("SANS_TRANSFERT").is_ok() {
+                transfert.fill(0.);
+            }
+            let nouvelles = coeur.solid_column_volumes().ok_or("colonnes solides")?;
+            for k in 0..d.columns() {
+                depot[k] = (nouvelles[k] - colonnes[k]) / aire;
+            }
+            colonnes.copy_from_slice(nouvelles);
+            carte.set_motion(&geo_de(&coeur)?, &paroi, &faces, &depot, &transfert)?;
+            cpu += t0.elapsed().as_secs_f64();
+            coeur.step_surface_linear(dt_us, 8000, &jobs).map_err(|e| format!("cœur, pas {n} : {e:?}"))?;
+            carte.step(cycles);
+            if n % releve == 0 {
+                let (eta, _) = carte.surface()?;
+                let e = eta.iter().zip(coeur.surface()).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+                pire = pire.max(e);
+                elevation = elevation.max(coeur.surface().iter().fold(0f32, |m, x| m.max((x - d.z0()).abs())));
+                pire_volume = pire_volume.max((volume(&eta) - volume(coeur.surface())).abs());
+                ligne.push_str(&format!(" {n}:{e:.2e}"));
+            }
+        }
+        carte.wait()?;
+        let t0 = std::time::Instant::now();
+        for _ in 0..100 {
+            carte.step(cycles);
+        }
+        carte.wait()?;
+        println!(
+            "COQUE_S504 bilan ecart_carte_reference_m={pire:.3e} elevation_m={elevation:.3e} rapport={:.0} ecart_volume_m3={pire_volume:.3e} colonnes_transferees={transferts} recoupage_cpu_ms={:.3} pas_carte_ms={:.3} releves{ligne}",
+            elevation / pire.max(1e-12),
+            1e3 * cpu / pas as f64,
+            1e3 * t0.elapsed().as_secs_f64() / 100.
+        );
+        Ok(())
+    })
+}
