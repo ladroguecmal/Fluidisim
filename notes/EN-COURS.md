@@ -62,32 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S579 — **terminée**. En autonomie, **2.2 — la marée dans la surface de B** : S577–S578 calculent le niveau ; il doit entrer
-dans l'échantillon que B publie (`WaterSample`), que la composition B + W (ADR-062) et ses consommateurs lisent.
+Session : S580 — **en cours**. En autonomie, **2.2 — le courant de marée** (S579 : « manque le courant de marée ») ; il sert aussi 7.7
+(SPEC-006 §5.5 : `flow_speed` est le courant de B, sans l'orbitale).
 
-**Ce que la session fait.** `Maree::vitesse(t)` et `CarteCotidale::niveau_et_vitesse(x, y, t)` : `∂η/∂t = −Σ Aₖ·ωₖ·sin(ωₖt − gₖ)` (la
-pulsation de la fréquence **arrondie**, celle des phases). `maree::avec_maree(échantillon, niveau, vitesse)` : `η += τ`, `∂η/∂t += τ̇`, et la
-vitesse verticale de surface `w += τ̇` (la condition cinématique) ; le reste de l'échantillon inchangé. Une marée nulle laisse
-l'échantillon de B tel quel. **Ne fait pas** : le courant horizontal de marée (il demande la profondeur : `u = η·√(g/h)` pour une onde
-progressive), la pente de la marée (k·A ≈ 10⁻⁵, sous le visible), l'adoption par défaut.
+**Ce que la session fait.** La quantité de mouvement linéaire, sans frottement ni Coriolis : `∂u/∂t = −g·∇η`. Pour chaque composante
+`η = Re(H·e^(iωt))`, `u = Re(i·g·∇H·e^(iωt)/ω)` = `−(g/ω)·(∇Re H·sin ωt + ∇Im H·cos ωt)` — **sans la profondeur** : la carte cotidale porte
+déjà la propagation. `CarteCotidale::courant(x, y, t)` (le gradient de l'interpolation bilinéaire) ; `maree::avec_courant(échantillon, u)` :
+le courant horizontal ajouté à `u_total`. Ne fait pas : le frottement sur le fond, Coriolis (`f` ≈ 10⁻⁴ s⁻¹, comparable à ω de M2 : à
+reprendre avant les grandes baies), le courant dans les zones peu profondes (non linéaire).
 
-**Références, calculées avant** (ce script les écrit). M2, 1 m : la fréquence arrondie `96054` (Q32), `ω` = **1.405191332e-04 rad/s**,
-`|∂η/∂t|` ≤ **1.405191e-04 m/s**.
+**Références, calculées avant** (ce script les écrit). L'onde progressive de S578 (chenal de 20 m, `c` = 14.0071 m/s, `A` = 1 m) : `u =
+(g·k/ω)·η` = **0.700356 m/s** d'amplitude (`g/c` = 0.700357). La pente de la corde au milieu d'une maille de 10 km :
+`sinc(k·Δx/2)` = **0.999580720**, soit **0.700062 m/s**, la phase exacte — le courant y est maximal en même temps que η.
 
-**Quantum** (ADR-236 D1) : la vitesse en f32, ulp ≈ 1.5e-11 m/s ; la somme B + marée, un ulp de `|η|` (≈ 2.4e-07 m). **Critères,
-écrits avant.** (1) `vitesse(t)` contre `−A·ω·sin(ωt)` (la même `ω`, en f64) à 10⁻⁹ m/s sur 25 h (rapport ≈ 70 à l'ulp) ; la carte de S578
-au nœud contre la même forme ; (2) sur B réel (un fond de S259 ou le plus simple disponible), `η_total − η_B` à 2 ulp de `|η|` de la marée
-et `w_total − w_B` à 2 ulp ; (3) une marée nulle : l'échantillon identique (champ à champ) ; (4) la composition B + W (`compose`) accepte
-l'échantillon avec marée et rend `η` = celui d'avant + τ, à 2 ulp.
+**Quantum** (ADR-236 D1) : f32 (10⁻⁷ relatif) ; la dérive de phase de S577 (2·10⁻⁵ sur 25 h). **Critères, écrits avant.** (1) au milieu
+d'une maille, le maximum de `u` sur 25 h (pas d'une minute) à 10⁻⁴ m/s de 0.700062 m/s, et `v` nul à 10⁻⁶ m/s ; (2) au même point, le
+pic du courant et celui du niveau au même instant à 60 s près ; (3) `avec_courant` ne change que `u_total[0..2]` (les autres champs au bit) ;
+(4) un point hors de la grille refusé.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la vitesse, `avec_maree` ; (1)–(4).
-- [x] **P3** — preuve ; liste 2.2 ; rituel.
+- [ ] **P2** — le courant et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 2.2 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — vitesse à 1,8·10⁻¹¹ m/s, la carte à 2,5·10⁻¹¹ ; B + marée à 1 ulp, `w` 0,5 ulp ; composée exacte ; marée nulle au bit.
-  `WaterSample` n'est pas comparable : le critère (3) compare champ à champ, par leurs bits. Suite 755.
-- **P3** — preuve MAREE-DANS-B-S579 ; liste 2.2 ; index ; journal.
-

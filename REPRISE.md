@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 01:52 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 01:53 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S580 — 2.2, le courant de marée ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S579 — la marée dans la surface de B ([journal](notes/JOURNAL.md)). Avant : S578 (le lot)
 Session suivante : **S580 — un point partiel** (par la feuille de route et le tableau de bord). Revue à S581. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 0 — S579 : 2.2 avance (la marée dans B)
