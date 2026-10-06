@@ -62,41 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S522 — **terminée**. En autonomie ; deux maillons : un lot qui fait avancer une capacité. **W en profondeur finie** : la pression
-de W (sillages, impacts de pression) suppose l'eau profonde (`ω² = g k`, aucune `tanh`) ; C07 peu profond, les anneaux en eau peu profonde
-(K2-12) et 2.7 l'attendent.
+Session : S523 — **en cours**. En autonomie, **C07 peu profond, la branche supercritique** : par 5 m de fond, le sillage au-delà du
+critique est contenu dans un coin de demi-angle `arcsin(1/Fr_h)` (CAS-CANONIQUES C07, SPEC-001 §5) ; W en profondeur uniforme (S522) le
+rend mesurable.
 
-**Ce que la session fait.** (a) **Le cœur** : `ModalPressure::new_in_depth(k, g, ρ, profondeur, …)` — une profondeur uniforme `h`
-(`Option`, `None` : le chemin profond, inchangé au bit) ; le nombre d'onde effectif `κ = |k|·tanh(|k|h)` remplace `|k|` dans la
-pulsation (`ω² = g κ`), le forçage (`−κ p/ρ` : `η_t = κ φ` en surface) et, dans les échantillons, la conversion de la vitesse verticale
-en potentiel et en vitesse horizontale, et l'énergie (`|w|²/κ`). `tanh` sans libm, par l'exponentielle déterministe du cœur (`decay`) ;
-`tanh` = 1 exactement au-delà de `2|k|h` = 32. `spectral_pressure::prepare_in_depth` ; `prepare` y passe sans profondeur. (b) **La
-référence** (`outils/reference_sillage.py`) en profondeur finie : `ω = √(g k tanh kh)`, forçage `k tanh kh`. (c) **W contre elle**.
+**Ce que la session fait.** `c07_profondeur` généralisé (vitesse, durée, grille en arguments ; ses défauts rendent S522) ; à `U` = 10 et
+15 m/s (`Fr_h` = 1,43 et 2,14), 24 s, σ 2 m, recette 512 × 256 à coupure 3, la zone de mesure près de l'origine (rayon honnête 179 m).
+**L'instrument éprouvé d'abord sur la référence de la même famille** (ADR-233 : profondeur finie, supercritique, même source) — la
+moyenne de |η| le long des rayons issus de la source, de 20 à 60 m derrière, l'angle de son maximum (le front où s'empilent les ondes
+longues) ; on regarde le profil ; s'il ne lit pas `arcsin(1/Fr_h)` sur la référence, il est changé avant W. Puis W, mêmes points.
 
-**Ordre de grandeur, calculé.** Par 5 m de fond, `√(gh)` = 7,00 m/s ; à `Fr_h` = 0,9 (U = 6,3 m/s), l'onde transverse fait **36,6 m**
-contre 25,4 m en eau profonde (`kh` = 0,86) — l'écart que la mesure doit voir ; à `Fr_h` = 0,5, 7,9 m des deux côtés. Zone établie à
-`T` = 40 s : `U·T/2` = 126 m (3,4 λ). Recette 512 × 256 à coupure 3 (σ = 2 m) : rayon honnête 179 m ; en eau peu profonde, `c_g` ≤ 7 m/s,
-la récurrence `2π/dk` = 1 072 m n'est pas atteinte.
+**Ordre de grandeur, calculé.** `√(gh)` = 7,00 m/s ; demi-angles **44,46°** (10 m/s) et **27,83°** (15 m/s) ; à 60 m derrière, le front
+passe à 58,9 et 31,7 m de l'axe ; parcours 240 et 360 m ; le transitoire du départ s'étend à 168 m de son point de départ, loin derrière
+la zone. **La résonance** (la pente −½ en deçà du critique) n'est pas de cette session : avec σ = 2 m, le facteur de la source à l'onde
+transverse varie de 5·10⁻⁵ (2,1 m/s) à 0,94 (6,3 m/s) et masquerait la pente — il faut σ ≤ 0,25 m (0,86 à 1), une autre recette.
 
-**Critères, écrits avant.** (1) **Au bit** : sans profondeur, la suite du cœur et les bancs inchangés ; une profondeur où `2|k|h` > 32
-pour tous les nœuds rend le chemin profond au bit. (2) **Un mode** : la pulsation libre après le forçage, mesurée sur le signal du mode,
-à 10⁻⁴ relatif de `√(g k tanh kh)` pour `kh` ∈ {0,1 ; 0,5 ; 1 ; 3} ; la hauteur statique sous une pression tenue, `−p/ρg`, inchangée par
-la profondeur. (3) **Le sillage** à `Fr_h` = 0,9 (h = 5 m, U = 6,3 m/s, σ = 2 m, 40 s) : W contre la référence en profondeur finie,
-écart quadratique ≤ 10 % sur la zone établie (de 1 λ à `U·T/2` − 1 λ, coin de 60°) ; la référence profonde, elle, à plus de deux fois cet
-écart (la profondeur se voit). La référence convergée sur trois grilles (ADR-230).
+**Critères, écrits avant.** (1) Sur la référence (convergée sur trois grilles), l'instrument lit `arcsin(1/Fr_h)` à 1° aux deux vitesses.
+(2) **C07 peu profond, supercritique** : sur W, à 2° de 44,46° et de 27,83°. (3) W contre la référence, écart quadratique ≤ 10 % sur la
+zone de mesure.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le cœur en profondeur finie ; (1), (2).
-- [x] **P3** — la référence et le sillage ; (3).
-- [x] **P4** — preuve ; listes 2.7, 3.2 ; rituel (lot dû à S522 : fait en S521, `--lot` non requis).
+- [ ] **P1** — jeton, plan seul.
+- [ ] **P2** — l'exemple généralisé, la référence, l'instrument éprouvé ; (1).
+- [ ] **P3** — W ; (2), (3).
+- [ ] **P4** — preuve ; listes 3.2, 13.2 ; CAS-CANONIQUES ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — `effective_wavenumber`, `ModalPressure::new_in_depth`, `prepare_in_depth` ; `add_segments` reçoit la profondeur (le nœud
-  reste à 64 octets : l'essai de taille l'a rappelé). Essais `s522` : pulsation libre à **2·10⁻⁷** de `√(g k tanh kh)` (kh 0,1 à 3), creux
-  `−2p/ρg` à 10⁻⁷, le chemin profond au bit (modes et champ), 5 m de fond diffère. Suite du cœur : **684**, verte.
-- **P3 fini** — `c07_profondeur` (W, 40 119 points, 22 s) ; référence par 5 m de fond (`reference_sillage.py profondeur`) : λ transverse
-  36,48 m ; écart quadratique **2,0 %** sur les trois grilles ; la référence profonde **121 %** → (3) tenu.
-- **P4** — preuve W-PROFONDEUR-S522 ; listes 2.7, 3.2 ; dépendances ; index ; journal.
-

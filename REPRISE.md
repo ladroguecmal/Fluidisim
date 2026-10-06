@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-06 15:55 +02:00
+JETON            : occupé
+Battement        : 2026-10-06 15:56 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S523 — C07 peu profond, l'angle au-delà du critique ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S522 — la pression de W en profondeur uniforme ([journal](notes/JOURNAL.md)). Avant : S521 (la huitième revue de méthode)
 Session suivante : **S523 — C07 peu profond** : par 5 m de fond, l'angle `arcsin(1/Fr_h)` au-delà du critique (`Fr_h` = 1,43 et 2,14 : 44,4° et 27,8°, ±2°) et la pente −½ ± 0,15 de la résonance en deçà (`Fr_h` ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}) — chaque instrument éprouvé d'abord sur la référence de la même famille (ADR-233), la référence convergée sur trois grilles, les ordres de grandeur calculés (ADR-232). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (il court jusqu'à ≈ 21 h 40).
 Maillons        : 0 — S522 : W en profondeur uniforme (2.7 avance ; C07 peu profond mesurable)
