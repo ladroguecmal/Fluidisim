@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S651 — **en cours**. En autonomie vers la v2. **La trente-quatrième revue de méthode** (ADR-222 D4 : S646–S650).
+Session : S651 — **terminée**. En autonomie vers la v2. **La trente-quatrième revue de méthode** (ADR-222 D4 : S646–S650).
 
 **Critères, écrits avant.** (1) ADR-265 relit chaque session S646–S650 ; (2) une protection nouvelle seulement pour une friction qui a
 coûté ; (3) la prochaine revue nommée.
@@ -70,7 +70,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-265.
+- [x] **P2** — ADR-265.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-265 : D1, un long calcul sur une copie du binaire (éprouvé) ; D2, le travail d'attente appartient à la session suivante, déclaré. Prochaine revue S656.

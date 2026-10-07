@@ -1479,3 +1479,11 @@ sur la plage ; APIC 3D ne couvre que la pente, une zone de colonnes au large re�
 particules (l'air balistique) sur la pente. **Mesuré** à 5 cm : le retournement à 0,004 s et 0,15 m du tout-3D, l'air enfermé après lui ;
 la masse exacte au débit compté (−3,7·10⁻¹⁷), le débit compté à 0,2 % de Saint-Venant ; 64 % du temps du tout-3D. Le lot (S648–S650).
 Maillons **1** (4.14 avance). Suivant : **S651, la revue de méthode** (ADR-265), puis l'étape 5 (le rouleau qui agit sur un corps).
+
+## S651 — 2026-10-07 — la trente-quatrième revue de méthode (ADR-265)
+
+**Entrée.** La revue (S646–S650). **Fait** : [ADR-265](../docs/adr/ADR-265-trente-quatrieme-revue-de-methode.md) — D1, un long calcul
+tourne sur une copie du binaire d'essai (le verrou de Windows bloquait la compilation six fois en sept sessions ; éprouvé) ; D2, le
+travail fait pendant une attente appartient à la session suivante, déclaré et rejoué. ADR-263 D2 a servi deux fois (S647, S648).
+Maillons **2**. Suivant : **S652, l'étape 5 du rouleau** (la force du rouleau sur un corps).
+
