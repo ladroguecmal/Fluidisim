@@ -6741,3 +6741,11 @@ convergeait) l'a rendu au numérique. Deux variations avant d'attribuer (ADR-256
 **S622, S624, S629 — le montage hors de ses bornes.** Une onde solitaire plus large que le bassin ; une durée plus courte que le trajet de
 l'onde ; la plage de S625, haute d'un mètre, réemployée pour des remontées de plusieurs mètres — l'eau butait au mur. Trois fois vu aux
 valeurs, avant la mesure du code ; une exploration perdue. Les bornes d'un montage s'assertent (ADR-257 D1).
+
+## L419
+
+**S639–S640 — la variation qui ne pouvait pas trancher.** En S639, le repos manqué au rivage baissait peu à maille moitié : j'en avais conclu
+« la géométrie en escalier » et désigné les faces coupées. Mais l'escalier et le film d'eau du rivage s'affinent ensemble ; la variation de
+maille ne séparait pas les deux causes. Une session entière de faces coupées l'a montré : exactes sous l'eau (8·10⁻⁶ m/s), elles
+s'emballent au rivage (0,26 m/s). Le témoin qui isole — la même pente **entièrement immergée** — tient en dix secondes de calcul. Avant de
+nommer un remède, une variation qui supprime l'une des causes candidates, pas seulement une qui les change toutes (ADR-256 D2).

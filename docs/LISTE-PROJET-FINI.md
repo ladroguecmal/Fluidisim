@@ -345,8 +345,11 @@ pas recopiée ici (L137).
   ([preuve](validation/BARRAGES-S627.md)) ; **S628** : le frottement de Manning et le bord droit — l'écoulement uniforme sur pente
   converge vers la hauteur normale (celle de S604) ([preuve](validation/FROTTEMENT-S628.md)) ; **S639 — le rouleau 3D, étape 1** : un fond
   en pente dans APIC 3D (en escalier, reflété, contremarches comprises) ; masse exacte, mais au repos 1,5 cm/s au rivage d'une maille
-  (critère de 1 cm/s manqué : un escalier n'est pas une pente — les faces coupées sont le remède) ([preuve](validation/FOND-APIC3D-S639.md)).
-  Manquent les faces coupées, la vague sur la pente et son déferlement en 3D, le relais 2D → 3D, le branchement à δ.
+  (critère de 1 cm/s manqué) ([preuve](validation/FOND-APIC3D-S639.md)) ; **S640 — étape 1 bis** : les faces coupées dans APIC 3D (un fond
+  lisse, la projection pondérée par les fractions ouvertes) — exactes au repos sur une pente immergée (8·10⁻⁶ m/s), mais avec un rivage
+  0,26 m/s (critère manqué, sans convergence en maille) : la cause est le film d'eau plus mince que le noyau, où la surface reconstruite
+  se trompe — non l'escalier, comme S639 l'avait cru ([preuve](validation/FACES-COUPEES-APIC3D-S640.md)). Manquent une surface fiable en
+  eau mince au rivage, la vague sur la pente et son déferlement en 3D, le relais 2D → 3D, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

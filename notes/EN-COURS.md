@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S640 — **en cours**. En autonomie, la campagne du rouleau 3D (accepté par l'utilisateur le 2026-10-07). **Étape 1 bis — les faces
+Session : S640 — **terminée**. En autonomie, la campagne du rouleau 3D (accepté par l'utilisateur le 2026-10-07). **Étape 1 bis — les faces
 coupées dans APIC 3D** : en S639, le fond en escalier manquait le repos (1,51 cm/s au rivage d'une maille ; à 2,5 cm, 1,18 : la géométrie).
 
 **Ce que la session fait.** `Apic3::set_seabed_lisse(fond)` : le fond **lisse** — linéaire entre les centres des colonnes — et, pour chaque
@@ -85,7 +85,15 @@ inchangés ; (4) refus : longueur fausse, valeur non finie ou hors du domaine ; 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les faces coupées et leurs essais ; (1)–(4).
-- [ ] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
+- [x] **P2** — les faces coupées et leurs essais ; (1)–(4).
+- [x] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1), (3), (4) tenus ; **(2) manqué** : 0,26 m/s au rivage (0,28 à maille moitié). Localisé : la pente immergée tient à
+  8·10⁻⁶ m/s (la propriété annoncée, assertée) — la projection est exacte ; le film plus mince que le noyau fausse la surface. Six
+  reconstructions essayées (0,22 à 4,4 m/s) ; l'escalier de S639 reste meilleur au rivage. L'attribution de S639 corrigée (L419).
+  49 essais d'APIC 3D ; suite : 825 listés.
+- **P3** — preuve FACES-COUPEES-APIC3D-S640 ; ligne 4.14 ; index ; leçon L419 ; journal.
+- **En parallèle** (demande de l'utilisateur, 2026-10-07) : relecture des documents fondateurs — intentions oubliées, changées, caduques. Fait : [AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md) — 15 intentions
+  absentes de la liste, 9 changements non décidés (dont le seuil 0,35·Hs rétabli en S609 contre ADR-111/112, I-08 et I-14 non tenus),
+  10 caduques. Les ajouts et corrections techniques à S641 ; les arbitrages soumis à l'utilisateur.

@@ -1379,3 +1379,13 @@ réflexion sous le fond et aux contremarches. **Mesuré** : masse exacte, aucune
 pente au repos manque son critère** : 1,51 cm/s au rivage d'une maille (≤ 1 cm/s exigé), localisé et réduit de 4,7 par les contremarches,
 peu sensible à la maille (1,18 à 2,5 cm) : l'escalier. **En route** : un montage à égalités exactes (f32/f64), amendé avant la mesure.
 Maillons **1** (4.14, 4.16 avancent). Suivant : **S640, l'étape 1 bis — les faces coupées** (un fond lisse, pour tenir le repos).
+
+## S640 — 2026-10-07 — le rouleau 3D, étape 1 bis : les faces coupées dans APIC 3D
+
+**Entrée.** La suite de S639 (le repos manqué au rivage, attribué à l'escalier). **Fait**
+([preuve](../docs/validation/FACES-COUPEES-APIC3D-S640.md)) : `Apic3::set_seabed_smooth` — le fond lisse, les fractions ouvertes des faces,
+la projection pondérée (Batty et al. 2007), au bit sans fond lisse. **Mesuré** : la pente immergée au repos à 8·10⁻⁶ m/s (la projection
+est exacte) ; le témoin plat à 3·10⁻⁶ ; **avec un rivage, 0,26 m/s — critère manqué**, sans convergence en maille : le film plus mince que
+le noyau fausse la surface reconstruite. L'escalier de S639 reste meilleur au rivage (1,5 cm/s) ; son attribution est corrigée (L419).
+**En parallèle** : l'utilisateur demande la relecture des documents fondateurs (intentions oubliées, changées, caduques) — confiée à un
+agent : [l'audit](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md) (15 absentes, 9 changements implicites, 10 caduques). Maillons **1** (4.14 avance). Suivant : **S641, revue de méthode et lot**, puis le choix de l'étape 2.
