@@ -89,6 +89,8 @@ pub mod activite;
 pub mod substitutif;
 /// S610 — le précalcul avant l'impact : translater, rebâtir, réallouer, libérer ; l'établissement (liste 9.6 ; ADR-013 §3–4).
 pub mod precalcul;
+/// S612 — le changement de solveur par W : transduction, destruction, création à δ = 0 (liste 4.20 ; ADR-007 §3).
+pub mod changement_solveur;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;

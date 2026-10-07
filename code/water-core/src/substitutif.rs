@@ -88,6 +88,22 @@ impl Domaine1D {
         &self.eta
     }
 
+    /// **S612** — les vitesses aux faces (au demi-pas).
+    pub fn u(&self) -> &[f64] {
+        &self.u
+    }
+
+    /// **S612** — la maille, la profondeur au repos, la gravité.
+    pub fn maille(&self) -> f64 {
+        self.dx
+    }
+    pub fn profondeur(&self) -> f64 {
+        self.h
+    }
+    pub fn gravite(&self) -> f64 {
+        self.g
+    }
+
     /// Le pas de temps (s).
     pub fn temps_pas(&self) -> f64 {
         self.dt
