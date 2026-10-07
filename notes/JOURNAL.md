@@ -1029,3 +1029,11 @@ Suivant : **S591, la vingt-deuxième revue de méthode**.
 de canal (validation, instantané, empreinte). **Mesuré** : un canal de dix biefs trouve sa hauteur normale au dixième de millimètre, le
 débit partout à 5,00000 m³/s, le bilan au millilitre, l'instantané au bit. Le script du plan a vérifié ses rapports seuil/quantum (ADR-249
 D1). Maillons **1** (2.5 : absent → partiel). Suivant : **S593**, le lot (dû) et un point absent (2.4, les rivières, sur cette loi).
+
+## S593 — 2026-10-07 — le lot ; la ligne d'eau d'une rivière et son remous
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S590–S592), puis 2.4 (absent). **Trois références au plan** : le découpage
+exact, l'onde diffusive continue, la ligne complète ; et le pas de temps choisi par l'amplitude d'oscillation calculée. **Fait**
+([preuve](../docs/validation/RIVIERE-REMOUS-S593.md)) : une rivière de vingt biefs derrière un seuil. **Mesuré** : la ligne d'eau à 0,014 mm du
+découpage exact, la vitesse de chaque bief, le bilan ; l'inertie absente de V publiée (4 cm). Maillons **1** (2.4 : absent → partiel).
+Suivant : **S594**, un point absent.

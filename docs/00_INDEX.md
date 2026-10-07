@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [La ligne d'eau d'une rivière et son remous — S593](validation/RIVIERE-REMOUS-S593.md) : le remous derrière un seuil à 0,014 mm ; la vitesse de chaque bief.
 - [Un canal dans V : la loi de Manning — S592](validation/CANAL-MANNING-S592.md) : dix biefs à leur hauteur normale ; le débit, le bilan, l'instantané.
 - [Le niveau moyen d'un lac par son bilan d'eau — S590](validation/LAC-BILAN-S590.md) : pluie, évaporation, déversoir ; l'équilibre à 58 µm, le bilan au millilitre.
 - [La vitesse de B au-dessus du plan moyen — S589](validation/AU-DESSUS-S589.md) : `U` constant, `W` fermé par la continuité (A286) ; incompressible.

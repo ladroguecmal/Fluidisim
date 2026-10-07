@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S593 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S590–S592), puis **2.4 — les rivières** (absent ;
+Session : S593 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S590–S592), puis **2.4 — les rivières** (absent ;
 « débit macroscopique qui contraint les perturbations locales »). Première pièce : **l'état macroscopique d'une rivière** dans V — sa
 ligne d'eau, avec le **remous** qu'un seuil aval lui impose, et la vitesse moyenne de chaque bief (ce que δ et W devront respecter).
 
@@ -85,7 +85,10 @@ l'écart publié.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 2.4 ; rituel (`--lot`).
+- [x] **P2** — l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 2.4 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — 0,014 mm du découpage exact ; les vitesses ; le bilan. L'essai dure 65 s (216 000 pas) — le plus long du cœur. Suite 767.
+- **P3** — preuve RIVIERE-REMOUS-S593 ; liste 2.4 (absent → partiel) et décompte ; index ; journal ; le lot.
+

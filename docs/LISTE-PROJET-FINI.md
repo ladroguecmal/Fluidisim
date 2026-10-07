@@ -118,7 +118,11 @@ pas recopiée ici (L137).
   la pluie sur le bassin versant, l'évaporation, le déversoir : l'équilibre à 58 µm, le bilan exact au millilitre
   ([preuve](validation/LAC-BILAN-S590.md)). Manquent la surface du lac dans B (ses vagues de vent), les courants faibles, les apports par
   une rivière, les seiches.
-- [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
+- [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *partiel* depuis S593 : **l'état macroscopique
+  d'une rivière dans V** (la loi de Manning) — la ligne d'eau et son remous derrière un seuil à 0,014 mm du découpage exact, la vitesse
+  moyenne de chaque bief ; V est une onde diffusive (sans inertie : 4 cm d'écart à la ligne complète, publié)
+  ([preuve](validation/RIVIERE-REMOUS-S593.md)). Manquent la contrainte transmise à δ et W (le courant), un lit quelconque, le régime
+  torrentiel, le rendu.
 - [ ] **2.5 Canaux** — *partiel* depuis S592 : **la loi de Manning dans V** (`Flow::Manning`) — un canal de dix biefs trouve sa hauteur
   normale (0,70611 m pour 0,706106), le débit à 5,00000 m³/s, le bilan au millilitre, l'instantané au bit
   ([preuve](validation/CANAL-MANNING-S592.md)). Manquent les ouvrages (écluses), le remous, le régime torrentiel et le ressaut, le rendu.
@@ -843,7 +847,7 @@ pas recopiée ici (L137).
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
-| 2. Grandes masses (B) | 9 | 0 | 7 | 2 |
+| 2. Grandes masses (B) | 9 | 0 | 8 | 1 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
@@ -855,7 +859,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **86** | **25** |
+| **total** | **121** | **10** | **87** | **24** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
