@@ -62,31 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S632 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S629–S631), puis **3.5 — la
-hauteur réfractée par une côte courbe** (un manque de S630 : `transformer` suppose des isobathes parallèles).
+Session : S633 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **3.5** — achever les rayons de S632 : les sommets de SPEC-006
+§6 (position, flux dissipé, direction de crête) le long d'un faisceau ordonné — la polyligne chaînée d'une côte quelconque.
 
-**Ce que la session fait.** `portee::tracer_houle` (le rayon de houle dispersif de S603, rendu public) ; `deferlement::sur_rayons(a, b, b₀, …)`
-— le long du rayon `a`, `H = H₀·K_s·K_r` (la levée de `bathymetrie`, la réfraction `√(b₀/b)` contre le rayon voisin `b` au même indice,
-`refraction::coefficient`), le déferlement au premier passage de `H − 0,78·h` par zéro, interpolé. Ne fait pas : les caustiques (`b → 0`),
-la diffraction, le chaînage de ces points en polyligne (S630 le ferait), le flux dissipé.
+**Ce que la session fait.** `deferlement::sommets_sur_rayons(rayons, b₀, …)` : pour chaque rayon du faisceau (son voisin : le suivant, ou le
+précédent pour le dernier), le point de déferlement de S632, le flux `ρ·g·H²/8·c_g` en kW/m (`H` = 0,78·h au point), la direction de crête (θ
+du rayon, interpolé) ; les sommets dans l'ordre du faisceau. Ne fait pas : les caustiques, un faisceau qui se replie, la publication.
 
-**Références, calculées avant** (`s632_ref.py`, numpy). Côte droite `h = 0,02·x`, houle de 8 s et 1,5 m, rayons partis de 6 km (120 m, en eau
-profonde) à θ₀ = 0,3 rad, espacés de 10 m : l'analytique (Snell, levée, `K_r = √(cos θ₀/cos θ)`) **x_b = 112.599453093 m** ; le long des rayons, pas de
-2, 1, ½ s : **112.618473302, 112.604772538, 112.600476235 m** — écarts 1.90e-02, 5.32e-03, 1.02e-03 m. **Bornes du montage**
-(ADR-257 D1, assertées) : le départ en eau profonde (120 m ≥ λ), la coupure (0,5 m) sous la profondeur de déferlement. Une île conique
-(rivage à 100 m, pente 0,02), des rayons en incidence normale partis de 5,2 km par paires miroir (y = ±200, ±210 m) : un cas où le gradient
-du fond tourne.
+**Références, calculées avant** (`s633_ref.py`, numpy ; le montage de S632, ses bornes assertées alors). Côte droite, l'analytique : flux
+**16.973287676 kW/m**, direction (-0.994088221713 ; 0.108575353794). Le long des rayons, pas de ½ s : x = 112.600476235 m, flux
+**16.973662175 kW/m** (à 2.2e-05 de l'analytique), direction (-0.994088284396 ; 0.108574779879) (à 5.7e-07).
 
-**Quantum** : f64. **Critères, écrits avant.** (1) côte droite : les trois positions égales aux références à 10⁻⁹ m ; (2) l'écart à l'analytique
-décroissant avec le pas, sous 2 mm à ½ s ; (3) l'île : les deux rayons de chaque paire déferlent, en points miroir (`y ↔ −y`) à 10⁻⁹ m ; (4)
-refus : `b₀` non positif, un rayon vide.
+**Quantum** : f64. **Critères, écrits avant.** (1) un faisceau de cinq rayons (y = 0, 10, 20, 30, 40 m) : cinq sommets, dans l'ordre ; le premier
+égal à la référence à 10⁻⁹ (position, flux, direction) ; (2) le flux à 10⁻⁴ relatif de l'analytique, la direction à 10⁻⁵ ; les cinq positions
+`x` à 10⁻⁹ m l'une de l'autre (la côte droite) ; (3) refus : moins de deux rayons.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `tracer_houle`, `sur_rayons` et leurs essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.5 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `sommets_sur_rayons` et son essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai. Suite : 817 essais listés.
-- **P3** — preuve RAYONS-DEFERLEMENT-S632 ; ligne 3.5 ; index ; journal ; le lot.
