@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S584 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S582–S583), puis **3.4 — le tsunami sur un rayon courbe** :
+Session : S584 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S582–S583), puis **3.4 — le tsunami sur un rayon courbe** :
 S582 le propage sur un rayon droit, S583 trace des rayons qui se courbent ; les brancher.
 
 **Ce que la session fait.** `tsunami::sur_rayon(a0, h0, point, voisin, b0, profondeur)` : l'instant d'arrivée est l'instant du point du
@@ -78,7 +78,11 @@ relatif ; (3) le flux `A²·√h·b` constant à 10⁻⁴ relatif en cinq points
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `sur_rayon` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
+- [x] **P2** — `sur_rayon` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — arrivée 1 604,6229 s ; amplitude 0,897333 pour 0,897340 ; flux constant (vrai par construction — noté dans la preuve) ;
+  refus. Suite 761.
+- **P3** — preuve TSUNAMI-RAYON-COURBE-S584 ; liste 3.4 ; index ; journal ; le lot.
+

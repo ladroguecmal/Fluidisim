@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 02:15 +02:00
+JETON            : libre
+Battement        : 2026-10-07 02:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S584 — le lot ; 3.4, le tsunami sur un rayon courbe ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S583 — la réfraction par tracé de rayons ([journal](notes/JOURNAL.md)). Avant : S582 (la propagation macroscopique d'un tsunami)
-Session suivante : **S584 — le lot** (dû en S584) **et un point partiel** (3.4 : le tsunami sur un rayon courbe, branché au traceur de S583 ; ou un autre). Revue à S586. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S583 : 3.6 absent → partiel
-Registres       : dernier lot S581 (ADR-213 D3) ; le prochain au plus tard en S584
+Session en cours : aucune
+Dernière session : S584 — le lot ; le tsunami sur un rayon courbe ([journal](notes/JOURNAL.md)). Avant : S583 (la réfraction par tracé de rayons)
+Session suivante : **S585 — un point partiel** (par la feuille de route et le tableau de bord). Revue à S586 (noter : un critère vrai par construction, S584 ; deux trajectoires de familles différentes, S583). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 0 — S584 : 3.4 avance (le rayon courbe)
+Registres       : dernier lot S584 (ADR-213 D3) ; le prochain au plus tard en S587
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

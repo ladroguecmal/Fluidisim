@@ -159,8 +159,9 @@ pas recopiée ici (L137).
 - [ ] **3.3 Explosions de surface et sous-marines** — *absent*.
 - [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *partiel* depuis S582 : **la propagation le long d'un
   rayon** — le temps de parcours exact par segment, la levée de Green, une impulsion polynomiale au bit ; l'heure d'arrivée et la hauteur
-  à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)). Manquent l'étalement d'une source ponctuelle, les rayons qui se courbent
-  (3.6), la dispersion des sources courtes, le déferlement et le raffinement à la côte, l'événement de W qui le porte.
+  à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)) ; **S584 : sur un rayon courbe** (le traceur de 3.6 : Green et la
+  réfraction ensemble, l'amplitude à 8·10⁻⁶ ; [preuve](validation/TSUNAMI-RAYON-COURBE-S584.md)). Manquent l'étalement d'une source
+  ponctuelle, les caustiques, la dispersion des sources courtes, le déferlement et le raffinement à la côte, l'événement de W qui le porte.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
   (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).

@@ -968,3 +968,10 @@ d'onde longue (RK4 déterministe), le coefficient de réfraction. **Mesuré** : 
 **En route** : `K_r` manqué à la première mesure — un tracé indépendant a montré le module juste et le montage faux (le rayon voisin d'une
 autre famille de Snell) ; corrigé, critère inchangé. Maillons **1** (3.6 : absent → partiel). Suivant : **S584**, le lot (dû) et un point
 partiel.
+
+## S584 — 2026-10-07 — le lot ; le tsunami sur un rayon courbe
+
+**Entrée.** En autonomie ; le lot (feuille de route S582–S583), puis 3.4. **Fait**
+([preuve](../docs/validation/TSUNAMI-RAYON-COURBE-S584.md)) : `sur_rayon`, Green et la réfraction ensemble. **Mesuré** : l'arrivée à 0,2 ms,
+l'amplitude à 8·10⁻⁶ de la forme fermée ; un critère vrai par construction, dit tel quel. Maillons **0** (3.4 avance). Suivant : **S585**,
+un point partiel ; revue à S586.
