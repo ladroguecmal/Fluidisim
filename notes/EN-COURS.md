@@ -62,26 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S671 — **terminée**. En autonomie vers la v2. **La trente-huitième revue de méthode** (ADR-222 D4 : S666–S670) ; le lot
-S669–S671.
+Session : S672 — **en cours**. En autonomie vers la v2 ; 2.7 et 12.3 (« manquent le courant de dérive littorale »). `Cote2D` déferle
+(S670), mais la mer qui déferle pousse aussi l'eau : elle relève le niveau moyen au rivage et entraîne un courant le long de la côte.
+
+**Ce que la session fait.** Le module `houle_moyenne.rs` (catégorie O) traite une côte uniforme le long de ses bords, rangée par rangée.
+
+- **La contrainte de radiation** (Longuet-Higgins et Stewart 1964) : `S_ss = Σ E·(n·k_s²/k² + n − ½)` et `S_sn = Σ E·n·k_s·k_n/k²`.
+- **Le niveau moyen** : `dη̄/ds = −(dS_ss/ds)/(g·(h + η̄))`, implicite en `η̄`. `S_ss` peut dépendre de `η̄` (le déferlement saturé).
+- **Le courant de dérive** : `c_f·⟨|u|·u_n⟩ = −dS_sn/ds`. La moyenne est prise sur le temps des vitesses au fond de toutes les ondes,
+  sans linéariser le frottement ; `V` est trouvé par bissection.
+
+La côte 2D les recevra en S673.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-253 D1, ADR-268.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+- **témoin** : sans objet (un module nouveau).
+- **instrument** : trois solutions analytiques. Ce qui départagerait : un `S_ss` faux (le `n − ½` oublié, un `cos²` de trop) s'écarte du
+  creux de (1) de dizaines de % ; une intégration fausse s'écarte de la pente de (2) ; une dérive au mauvais signe ou un frottement mal
+  moyenné s'écarte de (3).
+  - (1) le creux hors du déferlement (Longuet-Higgins et Stewart 1962) : `η̄ = −H²k/(8·sinh 2kh)`, une houle de 1 m et 10 s de face
+    sur la plage 1:50, de 80 m à 5 m ;
+  - (2) la remontée saturée (Bowen, Inman et Simmons 1968), `H = γ·(h + η̄)` : `dη̄/ds = K·|dh/ds|`, `K = 1/(1 + 8/(3γ²))`, `γ` = 0,78,
+    une houle de 30 s (l'eau peu profonde des formules), de 3 m à 0,3 m ;
+  - (3) le courant de Longuet-Higgins (1970), sans mélange, le frottement linéarisé faible :
+    `V = (5π/16)·(γ/c_f)·tan β·√(gh)·sin θ`, `c_f` = 0,01, 30 s, 1° à 2 m, de 1,5 m à 0,5 m.
+- **calcul** (scratchpad `s672_calc.py`, le même équilibre intégré en Python ; ce script asserte les bornes au double du plancher au
+  moins) : (1) 0,10 % → borne **0,5 %** ; (2) 0,73 % (`n` < 1 au large de la bande) → **2 %** ; (3) 1,0 % à 1° → **3 %**. À 5°, l'écart
+  est de 10,9 % : `V/u_m` vaut 0,26 et le frottement n'est plus linéaire. C'est l'effet que la moyenne exacte porte et que la formule
+  ignore : il est rapporté, pas jugé.
+- **ADR** : ADR-196, ADR-262 (le réalisme), ADR-268.
+- **pièges** : le signe de la dérive (`s` croît vers la côte : `−dS_sn/ds` > 0 dans la bande, le courant va dans le sens de `k_n`) ;
+  `E = g·a²/2` par `ρ` ; `n` au `k` de la profondeur totale ; l'échantillonnage du temps (une suite équirépartie, pas une période
+  commensurable).
 
-**Critères, écrits avant.** (1) ADR-269 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Critères, écrits avant.** (1) Le creux à **0,5 %** de Longuet-Higgins et Stewart, à chaque rangée. (2) La pente de la remontée saturée
+à **2 %** de `K`, à chaque rangée. (3) La dérive à **3 %** de Longuet-Higgins 1970, de 1,5 m à 0,5 m, à 1° ; l'écart à 5° rapporté.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-269.
-- [x] **P3** — lot ; rituel.
+- [ ] **P2** — `houle_moyenne.rs` ; les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.7, 12.3 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-269 : cinq sessions relues ; aucune règle nouvelle ; la voie écartée (le pas adapté, ×1,4) écrite ; la prochaine revue S676.
