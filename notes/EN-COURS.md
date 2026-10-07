@@ -62,37 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S582 — **terminée**. En autonomie, **3.4 — les tsunamis** (absent ; « propagation macroscopique, puis raffinement à la côte »).
-ADR-001 §3.1 : un tsunami est un objet de W — dérivé d'un événement horodaté, déterministe —, pas un très grand domaine δ.
+Session : S583 — **en cours**. En autonomie, **3.6 — la réfraction bathymétrique des ondes** (absent) ; elle sert 3.4 (les rayons d'un
+tsunami se courbent). La référence de B (S362) ne traite que des isobathes droites et parallèles ; ici, un fond quelconque.
 
-**Ce que la session fait.** `tsunami.rs` : un **profil de profondeur le long d'un rayon** (des sommets `(s, h)`, linéaire entre eux) ; le
-**temps de parcours** `τ(s) = ∫ ds/√(g·h)`, exact par segment (`2L/(√g·(√h_a + √h_b))`) ; la **levée de Green** `A(s) = A₀·(h₀/h)^(1/4)`
-(le flux d'énergie `A²·√h` conservé, sans étalement latéral) ; **le niveau** `η(s, t) = A(s)·f((t − t₀ − τ(s))/T)`, `f(u) = (1 − u²)²` pour
-`|u| < 1` — un polynôme : aucune transcendante, le niveau est le même sur toute plateforme (I-03 ; la racine carrée est exacte en IEEE).
-Ne fait pas : la dispersion (une onde longue `kh ≪ 1` n'en a guère au large), l'étalement d'une source ponctuelle, le déferlement et le
-raffinement à la côte (la suite de 3.4), l'entrée dans B/W (un événement).
+**Ce que la session fait.** `refraction.rs` : le **tracé d'un rayon** d'onde longue (`c = √(g·h)`) sur un fond `h(x, y)` fourni avec son
+gradient par l'appelant — `ẋ = c·cos θ`, `ẏ = c·sin θ`, `θ̇ = sin θ·∂c/∂x − cos θ·∂c/∂y` —, Runge-Kutta d'ordre 4 à pas de temps fixe
+(f64, déterministe) ; le **coefficient de réfraction** `K_r = √(b₀/b)` par deux rayons voisins (l'écart mesuré perpendiculairement au
+rayon). Ne fait pas : les caustiques (`b → 0`), la diffraction, la réfraction des ondes courtes (la dispersion : `c` dépend alors de
+`k·h`), l'entrée dans W.
 
-**Références, calculées avant** (ce script les écrit). 1 000 km sur 4 000 m : **5048.188 s** ; puis une pente de 4 000 à 10 m sur
-100 km : **961.560 s** (forme fermée ; Simpson indépendant, 10⁶ intervalles : 961.560 s, écart 0.0e+00) — à la
-côte en **6009.747 s** ; Green à 10 m : **×4.472136**.
+**Références, calculées avant** (ce script les écrit). Un fond `h = 4 000 − 0,0195·x` (m), un rayon lancé à 30° de la normale aux
+isobathes : Snell, `sin θ/c` constant — à `x` = 190 km (`h` = 295 m), **θ = 7.804001°** ; l'instant d'arrivée, `∫ dx/(c·cos θ)`
+par Simpson (10⁶ intervalles) : **1604.6227 s** ; l'ordonnée atteinte `∫ tan θ dx` : **72949.931 m** ; `K_r = √(cos θ₀/cos θ)` =
+**0.934944**.
 
-**Quantum** (ADR-236 D1) : f64 (10⁻¹² relatif) pour `τ` ; `η` en f32. **Critères, écrits avant.** (1) `τ` à 10⁻⁶ s des trois valeurs ;
-(2) Green à 10⁻⁹ relatif, et `A²·√h` constant à 10⁻¹² relatif en cinq points du profil ; (3) le pic de `η` en un point de la pente arrive à
-`t₀ + τ(s)` à 1 s près (échantillonné à la seconde), d'amplitude `A(s)` à 10⁻⁶ relatif ; avant `t₀ + τ − T`, `η` = 0 exactement ; (4) au
-bit, deux évaluations ; refus : moins de deux sommets, `s` non croissant, une profondeur non positive, un point hors du profil.
+**Quantum** (ADR-236 D1) : f64 ; l'erreur du RK4 au pas d'une seconde (`c` ≈ 200 m/s, la courbure lente) — estimée sous 10⁻⁹ relatif ;
+l'instant d'arrivée mesuré par interpolation linéaire entre deux pas. **Critères, écrits avant.** (1) `sin θ/c` constant le long du rayon à
+10⁻⁹ relatif ; (2) l'instant où le rayon passe `x` = 190 km à 0,01 s de 1604.6227 s, l'ordonnée à 0,1 m de 72949.931 m ; (3) `K_r` à 10⁻⁴ de
+0.934944 (deux rayons écartés de 100 m) ; (4) un fond uniforme : le rayon droit, `θ` constant au bit ; refus : profondeur non positive,
+pas non positif, tampon trop court.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `tsunami.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.4 ; rituel.
+- [ ] **P2** — `refraction.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.6 ; rituel.
 
 ### Notes de reprise
-- **Avant la mesure, une faute du plan relevée** (ADR-236 D1) : l'amplitude du pic **échantillonné à la seconde** porte un quantum de
-  `2·(0,5/600)²` = 1.4e-06 relatif (l'instant du pic tombe jusqu'à 0,5 s d'une seconde entière, `T` = 600 s), au-dessus du seuil de 10⁻⁶ :
-  ce seuil, ainsi appliqué, est disqualifié. L'amplitude se mesure donc **à l'instant exact `t₀ + τ(s)`** (le quantum devient l'arrondi
-  f32, 6·10⁻⁸), seuil inchangé ; l'instant du pic reste mesuré à la seconde (à 1 s près).
-- **P2 fini** — τ au µs (5 048,187773 ; 6 009,747349) ; Green et le flux ; le pic à 5 444 s pour 5 443,751, 0,5942325 m à l'instant exact ;
-  nul avant ; refus. Suite 758.
-- **P3** — preuve TSUNAMI-S582 ; liste 3.4 (absent → partiel) et décompte ; index ; journal.
-
