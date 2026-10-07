@@ -62,31 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S657 — **terminée**. En autonomie vers la v2 ; 6.7. En S655, le corps libre (la masse ajoutée implicite) dépassait à 5 ms la
-vitesse de la sonde — une sonde restée à sa position de départ.
+Session : S658 — **en cours**. Sur la demande de l'utilisateur (2026-10-07) : *« J'aimerais des sessions visuelles grâce à toutes les
+nouvelles avancées »*. **La séance visuelle du rouleau** : le montage complet de S650–S657 — Saint-Venant 2D au large, APIC 3D sur la
+plage, le déferlement plongeant, la poche d'air, la sphère libre emportée — enregistré, rendu en animations, envoyé pour un verdict (R40).
+
+**Le rendu** : un rendu d'atelier (numpy et PIL, sans téléchargement), pour juger la physique — la forme du rouleau, le jet, la poche, la
+remontée, le corps emporté —, non le rendu final de Godot. Deux animations : la plage entière vue de côté, la zone du rouleau de près ;
+les particules colorées par leur vitesse, le fond en escalier, la surface de Saint-Venant au large, la sphère.
 
 **Contrôles du plan** (ADR-266)
 
-- **témoin** : deux causes candidates de l'excès de S655 — (a) le comparant mal placé, (b) un reste du couplage. Le comparant local
-  supprime (a) : si l'excès disparaît contre l'eau autour du corps, c'était (a).
-- **instrument** : la vitesse de l'eau autour du corps — le plus grand module de la vitesse, aux centres des mailles d'eau voisines d'une
-  maille du corps — éprouvée d'abord sur un cas connu : une sphère **imposée** à 0,5 m/s dans une eau au repos ; le lecteur doit lire entre
-  0,3 et 0,7 m/s (l'eau poussée par le corps va à sa vitesse sur ses faces, moins à leur centre).
-- **calcul** : aucun nombre nouveau ; la masse (2,094 kg), le montage et les pas sont ceux de S653–S655.
-- **ADR** : ADR-263 D2 (l'instrument d'abord), ADR-259 D1 (le témoin), ADR-266 ; le schéma de S655 appliqué tel quel.
-- **pièges** : un corps hors de l'eau n'a pas d'eau autour de lui (le rapport n'est lu que si au moins quatre mailles d'eau le touchent) ;
-  le jet balistique, plus rapide que l'eau sous lui ; la masse ajoutée.
+- **témoin** : sans objet — la séance montre, elle n'attribue rien.
+- **instrument** : l'enregistrement relu avant de rendre — le nombre de particules d'une image égale celui que le calcul compte, la position
+  de la sphère celle du relevé de S657 au même instant (à 1 mm).
+- **calcul** : les échelles du rendu (m par pixel) calculées par le script, la durée des images assertée (4 s, une image toutes les 0,04 s).
+- **ADR** : ADR-216 (le banc visuel ; l'utilisateur juge), ADR-262 (indiscernable du réel : ce rendu ne juge pas le réalisme visuel final).
+- **pièges** : la projection de côté superpose toute la largeur (le corps masque l'eau derrière lui) ; une vitesse saturée cache le jet
+  (l'échelle des couleurs bornée et dite) ; la taille des fichiers (sous 15 Mo chacun).
 
-**Critères, écrits avant.** (1) Le lecteur : 0,3 à 0,7 m/s sur le cas imposé. (2) Sous le rouleau, aux deux pas (10 et 5 ms) : à
-l'instant où le corps est le plus rapide, sa vitesse au plus **1,2 fois** celle de l'eau autour de lui ; rapportés, le rapport au plus sur
-toute la course, et les vitesses aux deux pas. (3) La masse au bit.
+**Critères, écrits avant.** (1) L'enregistrement relu (les deux contrôles de l'instrument). (2) Deux animations envoyées à l'utilisateur, avec
+ce qu'elles montrent et à quel instant. (3) Le verdict reçu ou attendu, inscrit (R40).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le lecteur et son épreuve ; les deux pas en parallèle ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
+- [ ] **P2** — l'enregistrement ; le rendu ; l'envoi.
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) le lecteur 0,466 m/s pour 0,5 ; (2) rapport au pic 0,90 (10 ms), 0,91 (5 ms), au plus 0,98 ; (3) au bit. A334 levée. L'utilisateur
-  demande des séances visuelles des avancées — S658.
