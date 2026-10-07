@@ -114,7 +114,10 @@ pas recopiée ici (L137).
   2·10⁻⁶ m/s ; [preuve](validation/COURANT-MAREE-S580.md)). Manquent le frottement et Coriolis dans le courant, le choix de la marée d'une
   région par l'hôte (l'adoption par défaut), les corrections nodales, le niveau moyen variable par la météo, des houles issues d'une
   météo.
-- [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
+- [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *partiel* depuis S590 : **le niveau moyen par le bilan d'eau** dans V —
+  la pluie sur le bassin versant, l'évaporation, le déversoir : l'équilibre à 58 µm, le bilan exact au millilitre
+  ([preuve](validation/LAC-BILAN-S590.md)). Manquent la surface du lac dans B (ses vagues de vent), les courants faibles, les apports par
+  une rivière, les seiches.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.
 - [ ] **2.6 Courants macroscopiques à niveau de détail propre**, du vecteur au champ 3D — *partiel* depuis S513 (conçu par ADR-011) : les
@@ -838,7 +841,7 @@ pas recopiée ici (L137).
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
-| 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
+| 2. Grandes masses (B) | 9 | 0 | 6 | 3 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
@@ -850,7 +853,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **84** | **27** |
+| **total** | **121** | **10** | **85** | **26** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

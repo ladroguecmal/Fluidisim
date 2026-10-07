@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S590 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S587–S589), puis **2.3 — les lacs** (absent ;
+Session : S590 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S587–S589), puis **2.3 — les lacs** (absent ;
 « niveau moyen, apports, courants faibles »). Première pièce : **le niveau moyen d'un lac par son bilan d'eau**, dans V — un lac est un
 contenant (ADR-010) : ses apports (la pluie sur son bassin versant, ADR-204), son évaporation, son exutoire (un déversoir).
 
@@ -82,7 +82,11 @@ déversé moins l'évaporé (les transferts de chaque pas) ; (3) le niveau à 49
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.3 ; rituel (`--lot`).
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 2.3 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — 0,419246 m pour 0,419304 ; 0,418305 m à 49,8 h ; le bilan exact. L'évaporation entière (58 nm/s, le plan 57,87) : référence
+  recalculée dans l'essai. Suite 765.
+- **P3** — preuve LAC-BILAN-S590 ; liste 2.3 (absent → partiel) et décompte ; index ; journal ; le lot.
+

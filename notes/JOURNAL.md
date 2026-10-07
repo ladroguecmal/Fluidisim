@@ -1009,3 +1009,10 @@ Maillons **1** (3.5 : absent → partiel). Suivant : **S589**, un point absent.
 `Background::vitesse_au_dessus` — `U` constant, `W` fermé par la continuité. **Mesuré** : incompressible (10⁻⁶ s⁻¹ contre 10⁻² pour
 Taylor), le mode d'Airy à 6·10⁻⁸ m/s, continu au bit. **Avant la mesure**, un critère sous son bruit relevé (la procédure corrigée, le seuil
 gardé). La section 3 n'a plus d'absent. Maillons **1** (3.9 : absent → partiel). Suivant : **S590**, le lot (dû) et un point absent.
+
+## S590 — 2026-10-07 — le lot ; le niveau moyen d'un lac
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S587–S589), puis 2.3 (absent). **Fait**
+([preuve](../docs/validation/LAC-BILAN-S590.md)) : un lac dans V — la pluie de son bassin versant, l'évaporation, son déversoir. **Mesuré** :
+le niveau d'équilibre à 58 µm, le temps de montée calculé tenu, le bilan exact au millilitre. Maillons **1** (2.3 : absent → partiel).
+Suivant : **S591, la vingt-deuxième revue de méthode**.

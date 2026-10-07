@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 02:52 +02:00
+JETON            : libre
+Battement        : 2026-10-07 02:57 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S590 — le lot ; 2.3, le niveau moyen d'un lac par son bilan ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S589 — la vitesse de B au-dessus du plan moyen (A286) ([journal](notes/JOURNAL.md)). Avant : S588 (la polyligne de déferlement)
-Session suivante : **S590 — le lot** (dû en S590) **et un point absent** (ADR-247 ; restent 27 absents, plus aucun en section 3). Revue à S591. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S589 : 3.9 absent → partiel
-Registres       : dernier lot S587 (ADR-213 D3) ; le prochain au plus tard en S590
+Session en cours : aucune
+Dernière session : S590 — le lot ; le niveau moyen d'un lac ([journal](notes/JOURNAL.md)). Avant : S589 (la vitesse de B au-dessus du plan moyen)
+Session suivante : **S591 — la vingt-deuxième revue de méthode** (S586–S590 ; ADR-222 D4) : à noter — un seuil sous son bruit relevé avant la mesure, deux fois (S582, S589 : le script imprimait le rapport, je ne l'ai pas lu) ; un paramètre entier dans la loi alors que le plan le donnait décimal (S590) ; ce qui a tenu (les formules indépendantes du plan, S587–S590). Puis un point absent (ADR-247 ; restent 26). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S590 : 2.3 absent → partiel
+Registres       : dernier lot S590 (ADR-213 D3) ; le prochain au plus tard en S593
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
