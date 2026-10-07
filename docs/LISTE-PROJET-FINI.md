@@ -836,8 +836,10 @@ pas recopiée ici (L137).
 - [ ] **11.3 Très grands événements** (tsunami, crash, très grand navire) : macroscopique au large,
   3D locale à l'interaction — *partiel* depuis S614 : le tsunami du large à la plage — la levée de Green du rayon (S582) donne la hauteur au
   bord d'un domaine local de Saint-Venant 2D (S613), dont la remontée converge vers Synolakis (0,705 → 0,850 m pour 0,861)
-  ([preuve](validation/GRAND-EVENEMENT-S614.md)) ; **S620** : à l'ordre deux, 0,806 → 0,875 m ([preuve](validation/ORDRE-DEUX-S620.md)).
-  Manquent le niveau du large imposé au bord, le déferlement, le local 3D, le crash et le très grand navire.
+  ([preuve](validation/GRAND-EVENEMENT-S614.md)) ; **S620** : à l'ordre deux, 0,806 → 0,875 m ([preuve](validation/ORDRE-DEUX-S620.md)) ;
+  **S622** : le niveau du large imposé au bord — une frontière caractéristique, fidèle (l'écart à un domaine étendu converge, 0,6 % à
+  ¼ m) et absorbante (10⁻⁹ m après sortie) ([preuve](validation/BORD-FORCE-S622.md)). Manquent le déferlement, le local 3D, le crash et
+  le très grand navire.
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
   sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.

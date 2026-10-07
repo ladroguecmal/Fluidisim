@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 08:31 +02:00
+JETON            : libre
+Battement        : 2026-10-07 08:42 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S622 — 11.3, le niveau du large imposé au bord : une frontière caractéristique ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S621 — la vingt-huitième revue de méthode (ADR-255) ([journal](notes/JOURNAL.md)). Avant : S620 (le lot)
-Session suivante : **S622 — la physique des partiels** (ADR-247). Revue à S626 ; le lot à S623. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S621 : la revue
+Session en cours : aucune
+Dernière session : S622 — le niveau du large imposé au bord ([journal](notes/JOURNAL.md)). Avant : S621 (la vingt-huitième revue de méthode)
+Session suivante : **S623 — le lot (dû), puis la physique des partiels** (ADR-247). Revue à S626. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S622 : 11.3 avance (le bord forcé)
 Registres       : dernier lot S620 (ADR-213 D3) ; le prochain au plus tard en S623
 ```
 

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S622 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **11.3** — un manque nommé en S614 : *le niveau du large
+Session : S622 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **11.3** — un manque nommé en S614 : *le niveau du large
 imposé au bord* du domaine local (en S614, l'onde était posée en condition initiale).
 
 **Ce que la session fait.** `SaintVenant2D::pas_avec_bord(dt, t, extérieur)` : la face gauche devient une **frontière caractéristique** —
@@ -86,7 +86,11 @@ repos garde le bassin au repos (vitesse sous 10⁻¹⁴ m/s, 500 pas : assemblag
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `pas_avec_bord` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 11.3 ; rituel.
+- [x] **P2** — `pas_avec_bord` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 11.3 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (2)–(5) tenus ; **(1) manqué au-delà de la maille 1** : la crête à ½ (6·10⁻¹¹ m), l'écart et le reste à ¼ (10⁻⁸, 10⁻⁹ m)
+  s'écartent de numpy — les pentes minmod des zones presque plates changent de branche au bruit d'arrondi (A98). Pour la revue de S626 :
+  la tolérance d'accord avec une référence doit tenir compte de la sensibilité du limiteur. Suite : 809 essais listés.
+- **P3** — preuve BORD-FORCE-S622 ; ligne 11.3 ; index ; journal.

@@ -1248,3 +1248,12 @@ la remontée 0,806 → 0,875 m pour 0,861. **En route** (au plan) : l'`ε` de S6
 convergence de l'ordre deux en S620) — **élargie** : il porte son échelle, confrontée au cas (ADR-255 D1, L415). Ont tenu : le garde-fou
 mesuré sur la référence, la propriété documentée éprouvée, le défaut I-06 relevé puis levé. Maillons **1**. Suivant : **S622**, la physique
 des partiels.
+
+## S622 — 2026-10-07 — le niveau du large imposé au bord
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 11.3, le niveau du large au bord du domaine local. **Fait** ([preuve](../docs/validation/BORD-FORCE-S622.md)) :
+`SaintVenant2D::pas_avec_bord` — une frontière caractéristique génératrice et absorbante. **Mesuré** : contre un domaine étendu, l'écart à la
+jauge converge avec la maille (2,9 → 1,3 → 0,6 %) ; il reste 10⁻⁹ m après la sortie de l'onde. **Manqué** : l'accord au bit avec numpy
+au-delà de la maille 1 (le limiteur minmod amplifie un ulp, A98). **En route** (au plan) : deux montages qui n'éprouvaient pas le bord
+(une onde solitaire plus large que le bassin ; une amplitude où la propagation non linéaire s'ajoutait). Maillons **1** (11.3 avance).
+Suivant : **S623**, le lot et la physique des partiels.
