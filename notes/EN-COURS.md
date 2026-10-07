@@ -72,6 +72,6 @@ un seuil refusé par le script, un bord mal centré trouvé), S610 (9.6 : une r�
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; la revue (ADR-253, METHODE, L412, BOUSSOLE, index).
-- [ ] **P2** — rituel (`--lot`).
+- [x] **P2** — rituel (`--lot`).
 
 ### Notes de reprise

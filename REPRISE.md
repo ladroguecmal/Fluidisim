@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 06:42 +02:00
+JETON            : libre
+Battement        : 2026-10-07 06:44 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S611 — le lot ; la vingt-sixième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S610 — le précalcul avant l'impact ([journal](notes/JOURNAL.md)). Avant : S609 (le régime substitutif : la bascule, le champ total alimenté par B)
-Session suivante : **S611 — la vingt-sixième revue de méthode et le lot** (ADR-222 D4 ; S606–S610), puis un point absent (ADR-247 ; restent 9). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S610 : 9.6 absent → partiel
-Registres       : dernier lot S608 (ADR-213 D3) ; le prochain au plus tard en S611
+Session en cours : aucune
+Dernière session : S611 — le lot ; la vingt-sixième revue de méthode (ADR-253) ([journal](notes/JOURNAL.md)). Avant : S610 (le précalcul avant l'impact)
+Session suivante : **S612 — un point absent** (ADR-247 ; restent 9). Revue à S616 ; le lot à S614. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S611 : la revue, le lot
+Registres       : dernier lot S611 (ADR-213 D3) ; le prochain au plus tard en S614
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
