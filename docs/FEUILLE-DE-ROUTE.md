@@ -481,6 +481,8 @@ sa mémoire divisée par seize (les tables à 8 m, la marche à 2 m : 10 Mo/km²
 d'énergie) ; `Cote2D` déferle jusqu'au rivage (chaque composante à 0,4 %) ; la trente-huitième revue (ADR-269, aucune règle) (2.7).
 **S672–S674** : l'effet moyen de la houle — la contrainte de radiation, le niveau au rivage et le courant de dérive (à 1 % de trois
 solutions analytiques), portés par `Cote2D` (13 cm au rivage), le niveau rétroagissant sur le déferlement (point fixe) (2.7, 12.3).
+**S675–S677** : la séance visuelle de la côte qui déferle (R42 posé) ; la trente-neuvième revue (ADR-270, aucune règle) ; la zone de
+déferlement d'une mer tirée de la côte 2D — la ligne, la largeur, le flux dissipé (3.5).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
