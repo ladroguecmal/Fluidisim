@@ -62,14 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S591 — **terminée**. En autonomie, **la vingt-deuxième revue de méthode** (ADR-222 D4 ; S586–S590).
+Session : S592 — **en cours**. En autonomie (ADR-247), **2.5 — les canaux** (absent) ; la base de 2.4 (les rivières).
 
-**Ce que la session fait.** Relu : S586 (la revue), S587 (la bulle), S588 (le déferlement), S589 (au-dessus du plan ; un rapport au bruit
-imprimé et non lu), S590 (le lac ; un paramètre entier). **ADR-249** : D1, D2 ; L408 ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** Une loi d'arête de V : **`Flow::Manning { width_mm, length_mm, roughness_e6, outlet_slope_e6 }`** — un bief de
+canal rectangulaire entre deux nœuds : `Q = (1/n)·A·R^(2/3)·√S_f`, `A = b·ȳ`, `R = A/(b + 2ȳ)`, la profondeur moyenne `ȳ` des deux côtés au
+seuil, la pente de frottement `S_f = Δh/L` entre les deux surfaces ; vers dehors (`to = None`), la sortie en régime uniforme : `S_f` = la
+pente du lit donnée, `ȳ` la profondeur amont. Paramètres entiers (I-10 ; ADR-249 D2) : `n·10⁶`, la pente `·10⁶`. Ajoutée à la validation,
+à l'instantané (son empreinte) et au pas ; les liquides de V l'héritent (la couche au seuil).
+
+**Le montage.** Dix biefs de 100 × 5 m, le lit descendant de `S·L` = 0,1 m de bief en bief (`S` = 10⁻³), chaque arête au milieu de la
+marche (la profondeur moyenne y vaut celle des biefs en régime uniforme) ; 5 m³/s apportés au premier (la pluie sur 1,8 km² à 10 mm/h) ;
+la sortie en régime uniforme ; `n` = 0,015 ; trois heures au pas d'une seconde.
+
+**Références, calculées avant** (ce script les écrit et vérifie ses rapports seuil/quantum, ADR-249 D1). La **hauteur normale** (bissection
+sur Manning) : **`y_n` = 0.706106 m** ; la vitesse 1.4162 m/s, le Froude 0.538 (fluvial) ; la constante de temps d'un bief ≈ 13.6 s
+(le pas d'une seconde est stable) ; le remplissage ≈ 706 s ; l'essai dure 10800 s.
+
+**Quantum** (ADR-236 D1) : 1 ml sur 500 m² (2e-09 m) ; le débit, 1 ml par seconde (2·10⁻⁷ relatif). **Critères, écrits avant.**
+(1) la profondeur de chacun des dix biefs à 1 mm de `y_n` ; (2) le débit de chaque arête, en moyenne sur la dernière minute, à 10⁻³ de
+5 m³/s ; (3) le bilan exact au millilitre ; (4) l'instantané de V accepte la loi et la restaure au bit (l'empreinte la porte) ; la suite
+entière inchangée.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-249, METHODE, L408, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — la loi, l'instantané, l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 2.5 ; rituel.
 
 ### Notes de reprise
