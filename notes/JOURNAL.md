@@ -1194,3 +1194,10 @@ Maillons **1** (4.14 : absent → partiel ; la section 4 n'a plus d'absent). Sui
 0,705 → 0,793 → 0,850 m quand la maille passe de 1 à ¼ m, pour 0,861 selon Synolakis. **En route** : la référence divergeait — les murs de
 S613 n'exerçaient aucune pression (sans effet à bords secs, faux à bord mouillé) ; corrigé, S613 inchangé, note datée à sa preuve.
 Maillons **1** (11.3 : absent → partiel). Suivant : **S615**, un point absent.
+
+## S615 — 2026-10-07 — les grandes formes cohérentes entre clients, les détails locaux libres
+
+**Entrée.** En autonomie (ADR-247) ; 10.5 (absent). **Fait** ([preuve](../docs/validation/COHERENCE-CLIENTS-S615.md)) : `coherence_clients.rs` —
+la coupure passe-bas, la transduction de la seule part longue de δ. **Mesuré** contre numpy : deux clients (maille 0,5 m sans détail ;
+0,25 m avec des rides semées localement) ; leurs W à 0,46 % de la crête l'un de l'autre, leurs restes à 0,43 mm ; sans coupure, l'écart des W
+quadruple. Maillons **1** (10.5 : absent → partiel ; la section 10 n'a plus d'absent). Suivant : **S616**, la revue de méthode.

@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 105 — absents : 5.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 106 — absents : 4.
 
 ## Par campagne
 
@@ -20,7 +20,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
 | **K7** Les volumes finis | 1 | 8 | 0 | ◐5.2 ✅5.3 ◐5.4 ◐5.6 ◐5.7 ◐5.8 ◐5.9 ◐5.10 ◐5.12 |
 | **K8** Activation, prédiction, budget | 1 | 15 | 1 | ◐9.1 ◐9.2 ◐9.3 ◐9.4 ✅9.5 ◐9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ◐9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
-| **K9** Réseau et persistance | 0 | 10 | 1 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ·10.5 ◐10.6 ◐10.8 ◐10.9 ◐1.5 ◐3.7 ◐3.8 |
+| **K9** Réseau et persistance | 0 | 11 | 0 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ◐10.5 ◐10.6 ◐10.8 ◐10.9 ◐1.5 ◐3.7 ◐3.8 |
 | **K10** Grande échelle | 0 | 6 | 0 | ◐11.1 ◐11.2 ◐11.3 ◐3.4 ◐2.1 ◐2.2 |
 | **K11** Outillage | 0 | 4 | 0 | ◐12.1 ◐12.3 ◐12.4 ◐12.5 |
 | **K12** La fin de l'eau | 0 | 6 | 1 | ◐2.8 ◐7.1 ◐7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
@@ -125,7 +125,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 10.3 | partiel | Déterminisme bit à bit entre plateformes pour B, W répliqué et V |
 | 10.4 | partiel | δ sans autorité de jeu, aucun chemin d'énergie du client vers le monde, grandeurs
   dérivées autoritaires |
-| 10.5 | absent | Grandes formes cohérentes entre clients, détails locaux libres |
+| 10.5 | partiel | Grandes formes cohérentes entre clients, détails locaux libres |
 | 10.6 | partiel | Sauvegarde, reconnexion, arrivée en cours de partie |
 | 10.8 | partiel | Chemin poussé de SPEC-006 |
 | 10.9 | partiel | Requêtes de jeu |
@@ -286,4 +286,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S612 | 2026-10-07 | 10 | 103 | 7 | 120 |
 | S613 | 2026-10-07 | 10 | 104 | 6 | 120 |
 | S614 | 2026-10-07 | 10 | 105 | 5 | 120 |
+| S615 | 2026-10-07 | 10 | 106 | 4 | 120 |
 <!-- fin de l'historique -->

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S615 — **en cours**. En autonomie (ADR-247) : **10.5 — les grandes formes cohérentes entre clients, les détails locaux libres**
+Session : S615 — **terminée**. En autonomie (ADR-247) : **10.5 — les grandes formes cohérentes entre clients, les détails locaux libres**
 (absent). δ n'est jamais le même d'un client à l'autre (SPEC-003 : jamais D1 ; une autre maille, d'autres détails semés localement). La
 grande forme passe à W, répliqué, au-delà d'une coupure `λ_cut` (B2, ADR-001) ; le reste demeure local et libre.
 
@@ -85,7 +85,9 @@ restes égal à la référence à 10⁻⁹ m, au-dessus de 0,25 mm ; (3) la fuit
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `coherence_clients.rs` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 10.5 ; rituel.
+- [x] **P2** — `coherence_clients.rs` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 10.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus du premier essai. Suite : 804 essais listés.
+- **P3** — preuve COHERENCE-CLIENTS-S615 ; liste 10.5 (absent → partiel) et décompte ; index ; journal.

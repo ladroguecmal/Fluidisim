@@ -804,7 +804,10 @@ pas recopiée ici (L137).
   **éprouvé pour un corps** : trajectoire de jeu identique au bit avec ou sans δ (S332 ; S333, 800 pas
   sur la houle — [preuve](validation/CORPS-RIGIDE-S331.md) §4, [porte D](validation/PORTE-D-S333.md)) ;
   le volume qui quitte δ n'entre jamais dans B ou V répliqués (ADR-185, S317). Non éprouvé sur réseau.
-- [ ] **10.5 Grandes formes cohérentes entre clients, détails locaux libres** — *absent*.
+- [ ] **10.5 Grandes formes cohérentes entre clients, détails locaux libres** — *partiel* depuis S615 : la coupure passe-bas avant W —
+  deux clients aux δ différents (maille, rides semées localement) voient la même grande forme à 0,46 % près ; leurs détails diffèrent de
+  0,43 mm ; sans coupure, l'écart des W quadruple ([preuve](validation/COHERENCE-CLIENTS-S615.md)). Manquent le 2D/3D, `λ_cut` par la
+  physique, l'autorité de l'émission, deux clients réels.
 - [ ] **10.6 Sauvegarde, reconnexion, arrivée en cours de partie** (ADR-022, C19) — *partiel* :
   branche V de C19 en local, journaux W restaurés. C19 complet manque.
 - [x] **10.7 Aucun état de δ sérialisé** (I-17) — *validé* : aucun codec δ n'existe, et le démarrage
@@ -905,11 +908,11 @@ pas recopiée ici (L137).
 | 7. Secondaires | 8 | 0 | 7 | 1 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 11 | 1 |
-| 10. Multijoueur | 9 | 1 | 7 | 1 |
+| 10. Multijoueur | 9 | 1 | 8 | 0 |
 | 11. Grande échelle | 5 | 0 | 4 | 1 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **105** | **6** |
+| **total** | **121** | **10** | **106** | **5** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
