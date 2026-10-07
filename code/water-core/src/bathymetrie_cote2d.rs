@@ -67,6 +67,17 @@ impl Cote2D {
     #[allow(clippy::too_many_arguments)]
     pub fn cuire(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64, pas: f64,
         profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
+        Self::cuire_decime(host, fond, normale, origine, longueur, largeur, pas, 1, profondeur)
+    }
+
+    /// **S668 — la marche et les tables découplées** : la marche au pas `pas`, les tables gardées un nœud sur `m` dans chaque direction
+    /// (leur pas, `m·pas`) — la mémoire divisée par `m²`. `m` = 1 : [`Cote2D::cuire`].
+    #[allow(clippy::too_many_arguments)]
+    pub fn cuire_decime(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64, pas: f64,
+        m: usize, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
+        if m == 0 {
+            return Err(Cote2DError::Geometrie);
+        }
         let norme = (normale[0] * normale[0] + normale[1] * normale[1]).sqrt();
         if !(pas > 0.0 && longueur > pas && largeur >= 0.0 && norme > 0.0) || !origine.is_finite() || !longueur.is_finite()
             || !largeur.is_finite() || !norme.is_finite() {
@@ -74,27 +85,30 @@ impl Cote2D {
         }
         let nv = [normale[0] / norme, normale[1] / norme];
         let tv = [-nv[1], nv[0]];
-        let ns = (longueur / pas).round() as usize + 1;
-        let nn = (largeur / pas).round() as usize + 1;
-        if nn < 2 {
+        // Les tables : `ns × nn` nœuds au pas `m·pas` ; la marche : `ns_m = (ns − 1)·m + 1` rangées, `nn_m = nn·m` nœuds périodiques.
+        let pas_t = m as f64 * pas;
+        let ns = (longueur / pas_t).round() as usize + 1;
+        let nn = (largeur / pas_t).round() as usize + 1;
+        if nn < 2 || ns < 2 {
             return Err(Cote2DError::Geometrie);
         }
-        let n0 = -0.5 * (nn - 1) as f64 * pas;
+        let (ns_m, nn_m) = ((ns - 1) * m + 1, nn * m);
+        let n0 = -0.5 * (nn - 1) as f64 * pas_t;
         let composantes = fond.components();
-        let m = composantes.len();
-        host.alloc.alloc_persistent(m * ns * nn * 20).map_err(Cote2DError::Alloc)?;
+        let nc = composantes.len();
+        host.alloc.alloc_persistent(nc * ns * nn * 20).map_err(Cote2DError::Alloc)?;
         let g = fond.gravity() as f64;
         let mut cote = Cote2D {
             normale: [nv[0] as f32, nv[1] as f32],
             origine: origine as f32,
-            pas: pas as f32,
+            pas: pas_t as f32,
             n0: n0 as f32,
             ns,
             nn,
-            phase: Vec::with_capacity(m * ns * nn),
-            facteur: Vec::with_capacity(m * ns * nn),
-            kv: Vec::with_capacity(m * ns * nn),
-            coth: Vec::with_capacity(m * ns * nn),
+            phase: Vec::with_capacity(nc * ns * nn),
+            facteur: Vec::with_capacity(nc * ns * nn),
+            kv: Vec::with_capacity(nc * ns * nn),
+            coth: Vec::with_capacity(nc * ns * nn),
         };
         for c in composantes {
             let (k0, omega) = onde(c);
@@ -113,13 +127,13 @@ impl Cote2D {
             // Toute la marche, marge comprise, doit être mouillée : la marche refuse une profondeur non positive.
             let h = |s: f64, n: f64| profondeur(s, n);
             let depart = |n: f64| transformer(omega, theta0, 1.0, profondeur(0.0, n), g).map_or(1.0, |e| e.amplitude);
-            let champ = propager_periodique(&h, core::f64::consts::TAU / omega, g, 0.0, (ns - 1) as f64 * pas, pas, n0, pas, nn,
+            let champ = propager_periodique(&h, core::f64::consts::TAU / omega, g, 0.0, (ns_m - 1) as f64 * pas, pas, n0, pas, nn_m,
                 &|n| (depart(n) * (kn * n).cos(), depart(n) * (kn * n).sin()), kn).map_err(|_| Cote2DError::Profondeur)?;
             // ψ(s), comme la marche : la moyenne de k sur la rangée, aux demi-pas.
             let kb = |s: f64| (0..champ.ny).map(|j| nombre_d_onde(omega, h(s, champ.y0 + j as f64 * champ.dy), g)).sum::<f64>() / champ.ny as f64;
-            let mut psi = vec![0.0f64; ns];
-            let mut kbs = vec![kb(0.0); ns];
-            for i in 1..ns {
+            let mut psi = vec![0.0f64; ns_m];
+            let mut kbs = vec![kb(0.0); ns_m];
+            for i in 1..ns_m {
                 kbs[i] = kb(i as f64 * pas);
                 psi[i] = psi[i - 1] + 0.5 * (kbs[i - 1] + kbs[i]) * pas;
             }
@@ -138,10 +152,10 @@ impl Cote2D {
                 }
                 d
             };
-            for i in 0..ns {
+            for it in 0..ns {
                 for j in 0..nn {
-                    let jm = j + j_decal;
-                    let (s, n) = (i as f64 * pas, n0 + j as f64 * pas);
+                    let (i, jm) = (it * m, j * m + j_decal);
+                    let (s, n) = (i as f64 * pas, n0 + jm as f64 * pas);
                     let (re, im) = champ.valeur(i, jm);
                     let correction = psi[i] + im.atan2(re) - k0 * (s * cos0 + n * sin0);
                     let tours = correction / core::f64::consts::TAU;
@@ -150,7 +164,7 @@ impl Cote2D {
                     cote.facteur.push((re * re + im * im).sqrt() as f32);
                     // Le vecteur d'onde local : ∂s(ψ + arg A), ∂n(arg A), par différences centrées (décentrées aux bords).
                     let im_ = |a: usize, b: usize| arg(a, b);
-                    let ds = if i == 0 { enroule(im_(1, jm) - im_(0, jm)) / pas } else if i + 1 == ns {
+                    let ds = if i == 0 { enroule(im_(1, jm) - im_(0, jm)) / pas } else if i + 1 == ns_m {
                         enroule(im_(i, jm) - im_(i - 1, jm)) / pas
                     } else {
                         enroule(im_(i + 1, jm) - im_(i - 1, jm)) / (2.0 * pas)
@@ -162,7 +176,7 @@ impl Cote2D {
                     };
                     let (ks, knl) = (kbs[i] + ds, dn);
                     // La correction entre deux nœuds voisins doit avancer de moins d'un demi-tour : l'interpolation entière en dépend.
-                    if ((ks - k0 * cos0) * pas).abs() >= core::f64::consts::PI || ((knl - k0 * sin0) * pas).abs() >= core::f64::consts::PI {
+                    if ((ks - k0 * cos0) * pas_t).abs() >= core::f64::consts::PI || ((knl - k0 * sin0) * pas_t).abs() >= core::f64::consts::PI {
                         return Err(Cote2DError::PasTropGrand);
                     }
                     cote.kv.push([(ks * nv[0] + knl * tv[0]) as f32, (ks * nv[1] + knl * tv[1]) as f32]);

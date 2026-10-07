@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S668 — **en cours**. En autonomie vers la v2 ; 2.7. `Cote2D` coûte 160 Mo/km² pour 32 composantes au pas de 2 m (S667).
+Session : S668 — **terminée**. En autonomie vers la v2 ; 2.7. `Cote2D` coûte 160 Mo/km² pour 32 composantes au pas de 2 m (S667).
 
 **Ce que la session fait.** **La marche et les tables découplées** : la marche à 2 m (sa justesse), les tables gardées un nœud sur `m` dans
 chaque direction (`Cote2D::cuire_decime`) — la mémoire divisée par `m²`. `cuire` est `cuire_decime` avec `m` = 1 (au bit).
@@ -85,7 +85,8 @@ mémoire ; **le plus grand `m` sous 3 mm**, et la mémoire d'un km² à 32 compo
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `cuire_decime` ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P2** — `cuire_decime` ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) `m` = 1 au bit ; (2) `|Δη|` 0,21 / 0,70 / 4,3 mm à `m` = 2 / 4 / 8 ; le plus grand `m` sous 3 mm : 4 (tables à 8 m), 10 Mo/km² pour 32 composantes ; (3) croissant.

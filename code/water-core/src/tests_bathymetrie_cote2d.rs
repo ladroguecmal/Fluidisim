@@ -149,3 +149,48 @@ fn the_2d_coast_composes_a_sea_of_eight_components_s667() {
     assert_eq!(dessous, n_points, "critère 1 : la composition");
 }
 
+/// **S668** — les tables décimées : (1) `m` = 1 au bit de `cuire` ; (2) pour `m` = 2, 4, 8, `|Δη|` contre la côte pleine et la mémoire ;
+/// (3) l'écart croît avec `m`.
+#[test]
+fn decimated_tables_trade_memory_for_a_known_error_s668() {
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15f32, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let comps: Vec<Component> = (0..8).map(|i| {
+        let mut c = composante(t[i], a[i], th[i].to_radians());
+        c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+        c
+    }).collect();
+    let b = fond(&comps);
+    let (mut alloc, services) = (Hote, Hote);
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    // La longueur et la largeur, multiples de 16 m (le pas des tables à m = 8).
+    let (l, w) = (3888.0, 192.0);
+    let plein = Cote2D::cuire(&mut host, &b, [0.0, 1.0], 0.0, l, w, 2.0, &|s, _| plage(s)).unwrap();
+    let un = Cote2D::cuire_decime(&mut host, &b, [0.0, 1.0], 0.0, l, w, 2.0, 1, &|s, _| plage(s)).unwrap();
+    let points: Vec<[f32; 3]> = (0..60).map(|i| [-90.0 + (i as f32 * 37.0) % 180.0, 50.0 + i as f32 * 62.5, 0.0]).collect();
+    let instants = [0u64, 5_300_000, 47_100_000];
+    // (1) m = 1 au bit.
+    for p in &points {
+        for &tt in &instants {
+            assert_eq!(plein.eval_local(&b, *p, SimTime(tt)).unwrap().eta.to_bits(), un.eval_local(&b, *p, SimTime(tt)).unwrap().eta.to_bits(), "critère 1");
+        }
+    }
+    let mut ecarts = Vec::new();
+    for m in [2usize, 4, 8] {
+        let d = Cote2D::cuire_decime(&mut host, &b, [0.0, 1.0], 0.0, l, w, 2.0, m, &|s, _| plage(s)).unwrap();
+        let mut pire = 0f32;
+        for p in &points {
+            for &tt in &instants {
+                let (e0, e1) = (plein.eval_local(&b, *p, SimTime(tt)).unwrap().eta, d.eval_local(&b, *p, SimTime(tt)).unwrap().eta);
+                pire = pire.max((e1 - e0).abs());
+            }
+        }
+        let km2 = 1e6 / (2.0 * m as f64).powi(2) * 20.0 * 32.0 / 1e6;
+        println!("S668 m = {m} (pas des tables {} m) : |Δη| au plus {:.2} mm ; {:.2} Mo pour 8 composantes ; 1 km², 32 composantes : {km2:.1} Mo",
+            2 * m, 1000.0 * pire, d.octets() as f64 / 1e6);
+        ecarts.push(pire);
+    }
+    assert!(ecarts[0] < ecarts[1] && ecarts[1] < ecarts[2], "critère 3 : l'écart croît avec m");
+}
+

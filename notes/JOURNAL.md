@@ -1621,3 +1621,11 @@ puis reprise en S665). Maillons **2**. Suivant : **S667, Cote2D à plusieurs com
 sur la côte 2D, jugée contre la côte 1D sous une borne calculée en chaque point (ADR-268 D1). **Mesuré** : 180/180 sous la borne, `η` à
 0,5 cm (`Hs` 2,2 m) ; la cuisson 1,5 s ; **la mémoire, 160 Mo/km² pour 32 composantes** au pas de 2 m — trop pour une planète. Maillons
 **1** (2.7 avance). Suivant : **S668, la mémoire réduite** (le pas adapté, les transformations partagées — ADR-196 §3).
+
+## S668 — 2026-10-07 — La mémoire de Cote2D réduite : la marche fine, les tables décimées
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/COTE-2D-MEMOIRE-S668.md)) : `Cote2D::cuire_decime`. La
+marche reste à 2 m, les tables gardent un nœud sur `m`. **Mesuré** : `m` = 1 au bit ; à `m` = 4 (tables à 8 m), `η` à 0,70 mm de la côte
+pleine et **10 Mo/km²** pour 32 composantes (seize fois moins) ; à 16 m, 4,3 mm. La borne du plan, une somme au pire, restait au-dessus.
+**Lot** S666–S668. Maillons **1** (2.7 avance). Suivant : **S669**, le pas adapté au gradient de `k` (grossier au large) ou Cote2D dans
+Godot ; la revue en S671.
