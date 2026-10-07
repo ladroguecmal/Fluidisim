@@ -91,6 +91,8 @@ pub mod substitutif;
 pub mod precalcul;
 /// S612 — le changement de solveur par W : transduction, destruction, création à δ = 0 (liste 4.20 ; ADR-007 §3).
 pub mod changement_solveur;
+/// S613 — Saint-Venant 2D, le mouillage et le séchage (liste 4.14 ; C04 en 2D, Thacker).
+pub mod saint_venant_2d;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
