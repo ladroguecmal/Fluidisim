@@ -70,6 +70,6 @@ Session : S601 — **terminée**. En autonomie, **la vingt-quatrième revue de m
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-251, METHODE, L410, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
