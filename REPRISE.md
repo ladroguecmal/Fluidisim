@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 02:00 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 02:01 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S582 — 3.4, la propagation macroscopique d'un tsunami ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S581 — la vingtième revue de méthode (ADR-246) ; le lot ([journal](notes/JOURNAL.md)). Avant : S580 (le courant de marée)
 Session suivante : **S582 — un point partiel** (par la feuille de route et le tableau de bord). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 1 — S581 : la vingtième revue (ADR-246)

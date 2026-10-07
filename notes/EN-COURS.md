@@ -62,15 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S581 — **terminée**. En autonomie, **la vingtième revue de méthode** (ADR-222 D4 ; S576–S580) et **le lot** (dû).
+Session : S582 — **en cours**. En autonomie, **3.4 — les tsunamis** (absent ; « propagation macroscopique, puis raffinement à la côte »).
+ADR-001 §3.1 : un tsunami est un objet de W — dérivé d'un événement horodaté, déterministe —, pas un très grand domaine δ.
 
-**Ce que la session fait.** Relu : S576 (la revue), S577 (la marée), S578 (la carte ; un signe faux au plan), S579 (la marée dans B ; une
-coupure reprise ; un critère sous le quantum écarté), S580 (le courant). **ADR-246** : aucune protection nouvelle ; BOUSSOLE ; index. Le
-lot : feuille de route S578–S581.
+**Ce que la session fait.** `tsunami.rs` : un **profil de profondeur le long d'un rayon** (des sommets `(s, h)`, linéaire entre eux) ; le
+**temps de parcours** `τ(s) = ∫ ds/√(g·h)`, exact par segment (`2L/(√g·(√h_a + √h_b))`) ; la **levée de Green** `A(s) = A₀·(h₀/h)^(1/4)`
+(le flux d'énergie `A²·√h` conservé, sans étalement latéral) ; **le niveau** `η(s, t) = A(s)·f((t − t₀ − τ(s))/T)`, `f(u) = (1 − u²)²` pour
+`|u| < 1` — un polynôme : aucune transcendante, le niveau est le même sur toute plateforme (I-03 ; la racine carrée est exacte en IEEE).
+Ne fait pas : la dispersion (une onde longue `kh ≪ 1` n'en a guère au large), l'étalement d'une source ponctuelle, le déferlement et le
+raffinement à la côte (la suite de 3.4), l'entrée dans B/W (un événement).
+
+**Références, calculées avant** (ce script les écrit). 1 000 km sur 4 000 m : **5048.188 s** ; puis une pente de 4 000 à 10 m sur
+100 km : **961.560 s** (forme fermée ; Simpson indépendant, 10⁶ intervalles : 961.560 s, écart 0.0e+00) — à la
+côte en **6009.747 s** ; Green à 10 m : **×4.472136**.
+
+**Quantum** (ADR-236 D1) : f64 (10⁻¹² relatif) pour `τ` ; `η` en f32. **Critères, écrits avant.** (1) `τ` à 10⁻⁶ s des trois valeurs ;
+(2) Green à 10⁻⁹ relatif, et `A²·√h` constant à 10⁻¹² relatif en cinq points du profil ; (3) le pic de `η` en un point de la pente arrive à
+`t₀ + τ(s)` à 1 s près (échantillonné à la seconde), d'amplitude `A(s)` à 10⁻⁶ relatif ; avant `t₀ + τ − T`, `η` = 0 exactement ; (4) au
+bit, deux évaluations ; refus : moins de deux sommets, `s` non croissant, une profondeur non positive, un point hors du profil.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-246, BOUSSOLE, index) ; le lot.
-- [x] **P2** — rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `tsunami.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.4 ; rituel.
 
 ### Notes de reprise
