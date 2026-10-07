@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 15:21 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S648 — le rouleau : le jet qui retombe et la poche d'air ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S647 — le rouleau 3D, étape 3 : l'onde qui plonge sur la pente ([journal](notes/JOURNAL.md))
 Session suivante : **S648 — le rouleau : sa forme et sa vie** — le jet qui retombe et la poche d'air enfermée sous lui (détectée, comptée : volume, durée), sur l'onde de S647 ; le lecteur éprouvé d'abord (ADR-263 D2).
 Maillons        : 1

@@ -62,36 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S647 — **terminée**. En autonomie vers la v2 ; la campagne du rouleau 3D. **Étape 3 — une onde qui déferle sur la pente**, dans
-APIC 3D, fond en escalier, l'air balistique actif (S645).
+Session : S648 — **en cours**. En autonomie vers la v2 ; le rouleau 3D. **La forme et la vie du rouleau** : après le retournement de S647,
+le jet retombe devant la crête et **enferme de l'air** — la signature d'un déferlement plongeant.
 
-**Le jugement : la classification de Grilli, Svendsen et Subramanya (1997)**, vérifiée en ligne : le paramètre de pente
-`S₀ = 1,521·s/√(H₀/h₀)` ; glissant si `S₀ < 0,025`, plongeant si `0,025 < S₀ < 0,30`, frontal si `0,30 < S₀ < 0,37`, pas de déferlement
-au-delà. Leurs formules empiriques de la profondeur et de l'indice au déferlement n'ont pas pu être relues : elles ne jugent rien ici,
-`H_b/h_b` est seulement rapporté.
+**Le lecteur (ADR-263 D2), éprouvé d'abord.** L'air enfermé : les mailles d'air que l'air libre (la rangée du haut) n'atteint pas, en
+remplissage par voisins (six), dans tout le domaine — leur nombre, et l'abscisse de leur centre. Éprouvé sur une couche d'eau à 0,6 m
+(rien) et la même avec une cavité posée — x ∈ [0,9 ; 1,1] m, z ∈ [0,25 ; 0,40] m, toute la largeur : **48 mailles** posées ;
+le lecteur doit la trouver, au plus 48 mailles (la reconstruction épaissit l'eau), centrée à 0,1 m près de 1,0 m.
 
-**Le lecteur (ADR-263 D2), éprouvé d'abord.** Le retournement : dans une colonne de la rangée médiane, en montant depuis le fond, de l'eau,
-puis de l'air, puis de l'eau (`labels`) — la surface n'est plus un graphe ; l'écart d'air en mailles. Éprouvé sur deux cas posés à la main,
-reconstruits sans mouvement : une couche d'eau plate (aucun retournement) ; la même avec une lèvre d'eau posée au-dessus d'un vide d'air
-(retournement trouvé, à l'abscisse et avec l'écart posés).
-
-**Références, calculées avant** (ce script). Montage : `d` = 0.5 m, `H` = 0.15 m (`H/d` = 0.3), pente 1:12 : **`S₀` = 0.231 —
-plongeant**. L'onde à 2.30 m du pied (pied à 5.696 m), le rivage au repos à 11.70 m, domaine 12.8 × 1.0 m. Le cas de S644 :
-`S₀` = 1.13 > 0,37, pas de déferlement (vérifié en S644 à l'œil, ici par le lecteur). **Bornes assertées** (ADR-257 D1) : la queue
-de l'onde, le rivage dans le domaine, la crête sous le couvercle, aucune égalité centre/fond.
-
-**Critères, écrits avant.** (1) le lecteur : aucun retournement sur la couche plate, le retournement posé trouvé ; (2) les particules
-gardées, aucune sous le fond ; (3) **à 2,5 cm, l'onde déferle en plongeant** — un retournement d'au moins une maille d'air sous de l'eau,
-avant le rivage au repos ; (4) l'onde de S644 (`S₀` > 0,37) **ne déferle pas** (aucun retournement) ; (5) rapportés : le point de
-déferlement, `h_b`, `H_b/h_b`, la maille de 5 cm.
+**Critères, écrits avant.** (1) le lecteur ; (2) sur l'onde de S647, **à 2,5 cm, de l'air enfermé apparaît dans les 0,5 s qui suivent le
+premier retournement, en avant de lui** (le jet a retombé) ; (3) rapportés : son volume le plus grand, sa durée de vie (de l'apparition à la
+disparition), à 5 et 2,5 cm ; (4) la masse ; (5) l'onde de S644 n'enferme pas d'air (elle ne déferle pas). Ne juge pas : la quantité d'air
+contre une mesure publiée (aucune n'a pu être relue).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le lecteur et son épreuve ; le déferlement ; (1)–(5).
-- [x] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
+- [ ] **P2** — le lecteur et son épreuve ; le rouleau ; (1)–(5).
+- [ ] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus : le lecteur (plat : rien ; lèvre : `i` = 27, écart 1) ; masse exacte ; 1:12 plonge (2,5 cm : 2,64 s, 9,99 m,
-  écart 2, avant le rivage à 11,70 m) ; 1:3 ne déferle pas. (5) : `H_b/h_b` 1,33 (5 cm), 1,46 (2,5 cm). Les essais d'onde `#[ignore]`
-  (4 et 23 min) ; le lecteur dans la suite.
