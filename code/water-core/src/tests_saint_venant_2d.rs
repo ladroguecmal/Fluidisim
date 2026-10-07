@@ -262,3 +262,46 @@ fn the_offshore_level_enters_through_a_characteristic_boundary_s622() {
     println!("S622 : bassin au repos, bord forcé au repos, vitesse max {:e} m/s", repos.vitesse_max());
     assert!(repos.vitesse_max() < 1e-14, "critère 4");
 }
+
+/// **S625** — une houle longue périodique entre par le bord et monte une pente : la remontée d'un cycle établi.
+fn houle_sur_plage(k: usize) -> (f64, f64) {
+    let (d, cot, a, periode) = (10.0f64, 19.85f64, 0.05f64, 60.0f64);
+    let w = 2.0 * core::f64::consts::PI / periode;
+    let (dx, dt, ny) = (1.0 / k as f64, 0.04 / k as f64, 3usize);
+    let nx = (520.0 / dx).round() as usize;
+    let z1: Vec<f64> = (0..nx).map(|i| (-d + ((i as f64 + 0.5) * dx - 300.0).max(0.0) / cot).min(1.0)).collect();
+    let z: Vec<f64> = z1.iter().flat_map(|&v| [v; 3]).collect();
+    let h: Vec<f64> = z.iter().map(|v| (-v).max(0.0)).collect();
+    let mut dom = SaintVenant2D::nouveau(nx, ny, dx, G, z, h, vec![0.0; nx * ny], vec![0.0; nx * ny]).unwrap();
+    dom.regler_ordre_deux(1e-16).unwrap();
+    let ext = move |t: f64| {
+        let e = a * (w * t).sin();
+        (d + e, (G / d).sqrt() * e)
+    };
+    let npas = (8.0 * periode / dt).round() as usize;
+    let debut = (6.0 * periode / dt).round() as usize;
+    let (mut remontee, mut hmin) = (f64::NEG_INFINITY, 0.0f64);
+    for n in 0..npas {
+        dom.pas_avec_bord(dt, n as f64 * dt, &ext).unwrap();
+        hmin = dom.h.iter().fold(hmin, |m, &x| m.min(x));
+        if n >= debut {
+            let j = (0..nx).filter(|&i| dom.h[i * ny + 1] > 1e-3).max().unwrap();
+            remontee = remontee.max(z1[j] + dom.h[j * ny + 1]);
+        }
+    }
+    (remontee, hmin)
+}
+
+/// **S625** — (1) les remontées contre numpy ; (2) contre Keller & Keller ; (3) `h ≥ 0`.
+#[test]
+fn a_periodic_long_wave_runs_up_as_keller_and_keller_predict_s625() {
+    let r_kk = 0.24919030127856767;
+    for (k, rref) in [(1usize, 0.2502375547409519), (2, 0.24906091666274022), (4, 0.24931064547426435)] {
+        let (rem, hmin) = houle_sur_plage(k);
+        println!("S625 : maille 1/{k} — remontée {rem} m (Keller & Keller {r_kk}, {:+.3} %), écart à numpy {:e} m, h min {hmin}",
+            100.0 * (rem / r_kk - 1.0), (rem - rref).abs());
+        assert!((rem - rref).abs() < 1e-6, "critère 1 : 1/{k}");
+        assert!((rem / r_kk - 1.0).abs() < if k == 1 { 0.01 } else { 1e-3 }, "critère 2 : 1/{k}");
+        assert!(hmin >= 0.0, "critère 3 : 1/{k}");
+    }
+}
