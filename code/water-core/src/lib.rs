@@ -85,6 +85,8 @@ pub mod geoide;
 pub mod hydro_grid;
 /// S608 — les niveaux d'activité des cellules ; cellules et domaines non alignés (liste 1.6 ; ADR-006).
 pub mod activite;
+/// S609 — le régime substitutif : la bascule, un domaine propriétaire du champ total (liste 4.11 ; ADR-001 §3.3).
+pub mod substitutif;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
