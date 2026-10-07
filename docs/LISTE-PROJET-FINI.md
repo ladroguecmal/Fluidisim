@@ -402,7 +402,8 @@ pas recopiée ici (L137).
   les poches de K2 sous le rouleau, le relais dans les deux sens et la bande qui vit avec la vague, le relais 2D → 3D, le branchement à δ.
   **S678** : le film du rivage au repos — deux causes trouvées (la surface du film, les faces à peine ouvertes) ; leur remède tient le
   repos à quelques mm/s sur quatre plages sur six, pas sur toutes (éteint par défaut) ; la suite, le film confié à Saint-Venant 2D
-  ([preuve](validation/FILM-RIVAGE-S678.md)).
+  ([preuve](validation/FILM-RIVAGE-S678.md)). **S679** : décidé ([ADR-271](adr/ADR-271-le-film-du-rivage-a-saint-venant.md)) et conçu
+  ([RELAIS-RIVAGE-S679](registres/RELAIS-RIVAGE-S679.md)) : le relais au rivage dans les deux sens, en cinq étapes.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

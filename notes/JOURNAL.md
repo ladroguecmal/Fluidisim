@@ -1712,3 +1712,11 @@ de la ligne d'eau, où des faces à peine ouvertes donnent des vitesses fausses.
 cause active ; rejugé ici (ADR-268 D2), et extrapolé plutôt que fermé, il tient le repos à quelques mm/s avec le film, mais sur quatre
 plages sur six seulement. Les deux remèdes sont éteints par défaut. La suite : confier le film du rivage à Saint-Venant 2D (le relais
 dans les deux sens). Maillons **1** (4.14 : deux causes nommées). Suivant : **S679**.
+
+## S679 — 2026-10-07 — La conception du relais au rivage (ADR-271)
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14. **Fait** : [ADR-271](../docs/adr/ADR-271-le-film-du-rivage-a-saint-venant.md) — le film du
+rivage appartient à Saint-Venant 2D, APIC 3D garde la bande où la surface se retourne ; un seul flux d'interface (HLL) par pas ;
+[la conception](../docs/registres/RELAIS-RIVAGE-S679.md) en cinq étapes, chacune avec son essai et ce qu'il rendrait. Obstacle nommé :
+la zone des colonnes refuse le fond lisse. Maillons **0** (conception). Suivant : **S680**, l'étape 1, le raccord au repos sur les six
+plages de S678.

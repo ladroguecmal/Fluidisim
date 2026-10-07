@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S679 — **en cours**. En autonomie vers la v2 ; K3, 4.14. S678 a montré que le film du rivage ne se règle pas dans APIC 3D
+Session : S679 — **terminée**. En autonomie vers la v2 ; K3, 4.14. S678 a montré que le film du rivage ne se règle pas dans APIC 3D
 (quatre plages sur six). **Une session de conception** : le film confié à Saint-Venant 2D, le relais dans les deux sens.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
@@ -84,7 +84,8 @@ décide que le film du rivage appartient à Saint-Venant 2D.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la conception ; ADR-271.
-- [ ] **P3** — rituel.
+- [x] **P2** — la conception ; ADR-271.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — RELAIS-RIVAGE-S679 (les rôles, l'interface, la masse, cinq étapes et leurs essais) ; ADR-271.
