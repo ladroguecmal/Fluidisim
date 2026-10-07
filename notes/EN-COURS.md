@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S648 — **en cours**. En autonomie vers la v2 ; le rouleau 3D. **La forme et la vie du rouleau** : après le retournement de S647,
+Session : S648 — **terminée**. En autonomie vers la v2 ; le rouleau 3D. **La forme et la vie du rouleau** : après le retournement de S647,
 le jet retombe devant la crête et **enferme de l'air** — la signature d'un déferlement plongeant.
 
 **Le lecteur (ADR-263 D2), éprouvé d'abord.** L'air enfermé : les mailles d'air que l'air libre (la rangée du haut) n'atteint pas, en
@@ -78,7 +78,10 @@ contre une mesure publiée (aucune n'a pu être relue).
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le lecteur et son épreuve ; le rouleau ; (1)–(5).
+- [x] **P2** — le lecteur et son épreuve ; le rouleau ; (1)–(5).
 - [ ] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus : le lecteur (48 mailles posées, 48 lues) ; à 2,5 cm l'air enfermé 0,18 s après le retournement, 0,39 m en
+  avant, 210 mailles (3,3 L), vie 1,18 s ; 5 cm : +0,30 s, 18 mailles, 1,12 s ; 1:3 rien ; masse exacte. En attendant le calcul :
+  l'étude du découpage de la planète mesurée (HEALPix contre cube-sphère), son ADR en brouillon pour S649.

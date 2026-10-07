@@ -2002,20 +2002,11 @@ fn the_overturn_reader_finds_a_posed_lip_and_nothing_on_flat_water_s647() {
 /// lui ; la crête la plus haute à ±5 mailles, au-dessus du niveau ; particules posées, gardées, sous le fond).
 #[allow(clippy::type_complexity)]
 fn deferlement_s647(dx: f32, cas: [f64; 9]) -> (Option<(f64, f64, usize)>, f64, f64, usize, usize, usize) {
-    use crate::grand_evenement::OndeSolitaire;
-    let [d, h, cot, x1, x_pied, niveau, l, lz, duree] = cas;
-    let (niveau, fond0) = (niveau as f32, (niveau - d) as f32);
-    let (nx, ny, nz) = ((l / dx as f64).round() as usize, 4usize, (lz / dx as f64).round() as usize);
-    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
-    let lzf = nz as f32 * dx;
-    let fond: Vec<f32> = (0..nx * ny).map(|c| (fond0 + (((c % nx) as f32 + 0.5) * dx - x_pied as f32).max(0.) / cot as f32).min(lzf)).collect();
-    a.set_seabed(Some(&fond)).unwrap();
-    a.set_ballistic_air(true);
-    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
-    let onde = OndeSolitaire { h, d, x1, g: 9.81 };
-    let m2 = marche.clone();
-    let n = a.seed(&|p| p[2] > m2[((p[0] / dx) as usize).min(nx - 1)] && p[2] < niveau + onde.eta(p[0] as f64) as f32).unwrap();
-    a.set_particle_velocities(&|p| ([if (p[0] as f64) < x_pied { onde.u(p[0] as f64) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])).unwrap();
+    let (mut a, marche, n) = montage_s647(dx, cas);
+    let ny = a.domain().ny;
+    let [_, _, _, _, _, niveau, _, _, duree] = cas;
+    let niveau = niveau as f32;
+    let nx = a.domain().nx;
     let (mut t, mut premier, mut hb, mut crete) = (0u64, None, 0f64, 0f64);
     let fin = (duree * 1e6) as u64;
     while t < fin {
@@ -2043,6 +2034,26 @@ fn deferlement_s647(dx: f32, cas: [f64; 9]) -> (Option<(f64, f64, usize)>, f64, 
     }
     let sous = a.particles().iter().filter(|p| p[2] < a.seabed_height(((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1))).count();
     (premier, hb, crete, n, a.particle_count(), sous)
+}
+
+/// **S647–S648 — le montage** : l'onde solitaire posée sur la pente en escalier, l'air balistique actif. Rend (APIC, les marches, les
+/// particules posées).
+fn montage_s647(dx: f32, cas: [f64; 9]) -> (Apic3, Vec<f32>, usize) {
+    use crate::grand_evenement::OndeSolitaire;
+    let [d, h, cot, x1, x_pied, niveau, l, lz, _] = cas;
+    let (niveau, fond0) = (niveau as f32, (niveau - d) as f32);
+    let (nx, ny, nz) = ((l / dx as f64).round() as usize, 4usize, (lz / dx as f64).round() as usize);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let lzf = nz as f32 * dx;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| (fond0 + (((c % nx) as f32 + 0.5) * dx - x_pied as f32).max(0.) / cot as f32).min(lzf)).collect();
+    a.set_seabed(Some(&fond)).unwrap();
+    a.set_ballistic_air(true);
+    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let onde = OndeSolitaire { h, d, x1, g: 9.81 };
+    let m2 = marche.clone();
+    let n = a.seed(&|p| p[2] > m2[((p[0] / dx) as usize).min(nx - 1)] && p[2] < niveau + onde.eta(p[0] as f64) as f32).unwrap();
+    a.set_particle_velocities(&|p| ([if (p[0] as f64) < x_pied { onde.u(p[0] as f64) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])).unwrap();
+    (a, marche, n)
 }
 
 const CAS_S647: [f64; 9] = [0.5, 0.15, 12.0, 3.4, 5.696, 0.55, 12.8, 1.0, 6.0];
@@ -2076,3 +2087,126 @@ fn a_solitary_wave_plunges_on_a_mild_slope_and_not_on_a_steep_one_fine_s647() {
     let (_, x, ecart) = r.expect("critère 3 : le retournement");
     assert!(x < 11.696 && ecart >= 1, "critère 3 : avant le rivage au repos, une maille d'air au moins ({x}, {ecart})");
 }
+
+/// **S648 — le lecteur de l'air enfermé** : les mailles d'air que l'air libre (la rangée du haut) n'atteint pas par voisins (six). Rend
+/// (leur nombre, l'abscisse de leur centre).
+fn air_enferme_s648(a: &Apic3) -> (usize, f64) {
+    let Domain3 { nx, ny, nz, dx } = a.domain();
+    let l = a.labels();
+    let mut libre = vec![false; nx * ny * nz];
+    let mut pile: Vec<usize> = (0..nx * ny).map(|c| (nz - 1) * nx * ny + c).filter(|&c| l[c] == AIR).collect();
+    for &c in &pile {
+        libre[c] = true;
+    }
+    while let Some(c) = pile.pop() {
+        let (i, j, k) = (c % nx, (c / nx) % ny, c / (nx * ny));
+        let mut voir = |v: usize| {
+            if l[v] == AIR && !libre[v] {
+                libre[v] = true;
+                pile.push(v);
+            }
+        };
+        if i > 0 { voir(c - 1); }
+        if i + 1 < nx { voir(c + 1); }
+        if j > 0 { voir(c - nx); }
+        if j + 1 < ny { voir(c + nx); }
+        if k > 0 { voir(c - nx * ny); }
+        if k + 1 < nz { voir(c + nx * ny); }
+    }
+    let (mut n, mut sx) = (0usize, 0f64);
+    for c in 0..nx * ny * nz {
+        if l[c] == AIR && !libre[c] {
+            n += 1;
+            sx += ((c % nx) as f64 + 0.5) * dx as f64;
+        }
+    }
+    (n, if n > 0 { sx / n as f64 } else { 0. })
+}
+
+/// **S648 (1) — le lecteur éprouvé** (ADR-263 D2) : une couche d'eau à 0,6 m, rien ; avec une cavité posée (x ∈ [0,9 ; 1,1] m,
+/// z ∈ [0,25 ; 0,40] m, toute la largeur : 48 mailles), trouvée — au plus 48 mailles, centrée à 0,1 m près de 1,0 m.
+#[test]
+fn the_enclosed_air_reader_finds_a_posed_cavity_s648() {
+    let (nx, ny, nz, dx) = (40usize, 4usize, 20usize, 0.05f32);
+    for cavite in [false, true] {
+        let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        a.seed(&|p| p[2] < 0.6 && !(cavite && (0.9..1.1).contains(&p[0]) && (0.25..0.4).contains(&p[2]))).unwrap();
+        a.step_upto(1, ApicStage::Reconstruct).unwrap();
+        let (n, x) = air_enferme_s648(&a);
+        println!("S648 lecteur, cavité {cavite} : {n} mailles, centre {x:.3} m");
+        if cavite {
+            assert!(n > 0 && n <= 48 && (x - 1.0).abs() <= 0.1, "critère 1 : {n} {x}");
+        } else {
+            assert_eq!(n, 0, "critère 1 : la couche sans cavité");
+        }
+    }
+}
+
+/// **S648 — le rouleau** : l'onde de `cas` jusqu'à `duree`, l'air enfermé suivi à chaque pas après le premier retournement. Rend (le
+/// premier retournement `(t, x)`, l'apparition de l'air enfermé `(t, x)`, le plus grand nombre de mailles, la durée de vie (s), particules
+/// posées, gardées, sous le fond).
+#[allow(clippy::type_complexity)]
+fn rouleau_s648(dx: f32, cas: [f64; 9]) -> (Option<(f64, f64)>, Option<(f64, f64)>, usize, f64, usize, usize, usize) {
+    let (mut a, marche, n) = montage_s647(dx, cas);
+    let ny = a.domain().ny;
+    let fin = (cas[8] * 1e6) as u64;
+    let (mut t, mut premier, mut apparu, mut plus, mut dernier) = (0u64, None, None, 0usize, 0f64);
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        a.step(us).unwrap();
+        t += us;
+        let ts = t as f64 * 1e-6;
+        if premier.is_none() {
+            if let Some((i, _)) = retournement_s647(&a, ny / 2, &marche) {
+                premier = Some((ts, (i as f64 + 0.5) * dx as f64));
+            }
+        }
+        let (k, x) = air_enferme_s648(&a);
+        if k > 0 && premier.is_some() {
+            if apparu.is_none() {
+                apparu = Some((ts, x));
+            }
+            plus = plus.max(k);
+            dernier = ts;
+        }
+    }
+    let vie = apparu.map_or(0., |(t0, _)| dernier - t0);
+    let sous = a.particles().iter().filter(|p| p[2] < a.seabed_height(((p[0] / dx) as usize).min(a.domain().nx - 1), ((p[1] / dx) as usize).min(ny - 1))).count();
+    (premier, apparu, plus, vie, n, a.particle_count(), sous)
+}
+
+/// **S648** — (2)–(5) à 5 cm : l'onde de S647 jusqu'à 4 s ; celle de S644 jusqu'à 3 s.
+#[test]
+#[ignore = "≈ 6 min : le rouleau de S648 à 5 cm"]
+fn the_plunging_jet_encloses_air_s648() {
+    for (nom, mut cas) in [("1:12", CAS_S647), ("1:3", CAS_S644)] {
+        cas[8] = if nom == "1:12" { 4.0 } else { 3.0 };
+        let (premier, apparu, plus, vie, n, garde, sous) = rouleau_s648(0.05, cas);
+        println!("S648 {nom}, 5 cm : retournement {premier:?}, air enfermé {apparu:?}, au plus {plus} mailles, vie {vie:.2} s ; {n}/{garde}/{sous}");
+        assert_eq!((garde, sous), (n, 0), "critère 4");
+        if nom == "1:12" {
+            let ((t0, x0), (t1, x1)) = (premier.expect("le retournement"), apparu.expect("critère 2 : l'air enfermé"));
+            assert!(t1 > t0 && t1 - t0 <= 0.5 && x1 > x0, "critère 2 : {t0} {x0} {t1} {x1}");
+        } else {
+            assert_eq!((premier, apparu), (None, None), "critère 5");
+        }
+    }
+}
+
+#[test]
+#[ignore = "≈ 35 min : le rouleau de S648 à 2,5 cm"]
+fn the_plunging_jet_encloses_air_fine_s648() {
+    for (nom, mut cas) in [("1:12", CAS_S647), ("1:3", CAS_S644)] {
+        cas[8] = if nom == "1:12" { 4.0 } else { 3.0 };
+        let (premier, apparu, plus, vie, n, garde, sous) = rouleau_s648(0.025, cas);
+        println!("S648 {nom}, 2,5 cm : retournement {premier:?}, air enfermé {apparu:?}, au plus {plus} mailles, vie {vie:.2} s ; {n}/{garde}/{sous}");
+        assert_eq!((garde, sous), (n, 0), "critère 4");
+        if nom == "1:12" {
+            let ((t0, x0), (t1, x1)) = (premier.expect("le retournement"), apparu.expect("critère 2 : l'air enfermé"));
+            assert!(t1 > t0 && t1 - t0 <= 0.5 && x1 > x0, "critère 2 : {t0} {x0} {t1} {x1}");
+        } else {
+            assert_eq!((premier, apparu), (None, None), "critère 5");
+        }
+    }
+}
+

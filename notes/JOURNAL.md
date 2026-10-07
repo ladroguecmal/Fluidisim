@@ -1454,3 +1454,11 @@ Maillons **2**. Suivant : **S647, l'étape 3 du rouleau 3D** (le déferlement su
 actif. **Mesuré** : elle **se retourne** avant le rivage (2,64 s, 9,99 m à 2,5 cm ; `S₀` = 0,231, plongeant selon Grilli et al. 1997) ;
 l'onde de S644 (`S₀` = 1,13) ne déferle pas — aux deux mailles ; masse exacte. Maillons **1** (4.14, 4.16 avancent). Suivant : **S648,
 le rouleau : la forme et la vie** (le jet qui retombe, la poche d'air enfermée).
+
+## S648 — 2026-10-07 — le rouleau : le jet qui retombe et enferme l'air
+
+**Entrée.** En autonomie vers la v2. **Fait** ([preuve](../docs/validation/ROULEAU-AIR-S648.md)) : le lecteur de l'air enfermé, éprouvé
+sur une cavité posée (48 mailles, 48 lues) ; l'onde de S647 suivie au-delà du retournement. **Mesuré** à 2,5 cm : de l'air enfermé
+0,18 s après le retournement et 0,39 m en avant (le jet a retombé), 3,3 L sur 10 cm de large, vivant 1,18 s ; rien sur la pente 1:3 ;
+masse exacte. Non jugé : la quantité d'air (rien de publié relu ; +50 % de 5 à 2,5 cm). Maillons **1** (4.14, 4.16 avancent). Suivant :
+**S649, le découpage de la planète** (ADR-261 D2 : mesuré pendant S648, HEALPix contre cube-sphère).
