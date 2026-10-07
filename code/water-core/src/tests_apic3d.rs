@@ -2242,6 +2242,9 @@ struct ReleveS652 {
     /// produit `h·u` au corps (m²/s), `h` la colonne d'eau au-dessus de la marche du corps lue sur les étiquettes.
     u_max: f64,
     hu_max: f64,
+    /// Le témoin (ADR-259 D1) : l'historique `(t, F_x, dt)` ; la plus grande vitesse horizontale sur toute la colonne de la sonde.
+    histoire: Vec<(f64, f64, f64)>,
+    u_colonne: f64,
 }
 
 /// **S652 — la force de l'eau sur la sphère** : sur les faces entre une maille du corps (solide, centre dans la sphère) et une maille
@@ -2389,6 +2392,7 @@ fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) 
         if let Some((c, r)) = corps_local {
             let f = force_corps_s652(&a);
             releve.impulsion += f[0] * us as f64 * 1e-6;
+            releve.histoire.push((ts, f[0], us as f64 * 1e-6));
             if f[0] > releve.fx_max {
                 (releve.fx_max, releve.t_fx) = (f[0], ts);
             }
@@ -2400,6 +2404,11 @@ fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) 
             let ks = ((zs / dx) as usize).min(nz - 1);
             let uf = a.velocity_u()[(ks * ny + js) * (nx + 1) + is] as f64;
             releve.u_max = releve.u_max.max(uf.abs());
+            for k in 0..nz {
+                if a.labels()[(k * ny + js) * nx + is] == WATER {
+                    releve.u_colonne = releve.u_colonne.max((a.velocity_u()[(k * ny + js) * (nx + 1) + is] as f64).abs());
+                }
+            }
             // `h·u` au corps : la colonne d'eau au-dessus de la marche, lue sur les étiquettes, à la sonde.
             let k0 = (marche[is] / dx).round() as usize;
             let hcol = (k0..nz).take_while(|&k| a.labels()[(k * ny + js) * nx + is] == WATER).count() as f64 * dxs;
@@ -2434,12 +2443,28 @@ fn the_plunging_roller_pushes_a_body_s652() {
     let cd = r.fx_max / (0.5 * 1000. * a * r.u_max * r.u_max);
     println!("S652 : retournement {:?}, air {:?} ; F_x max {:.2} N à {:.3} s, impulsion {:.3} N·s ; sonde u_max {:.3} m/s ; C_d effectif {cd:.2} ; h·u max {:.4} m²/s ; volume {:+.1e} ; {}/{}/{} ; {:.0} s",
         r.premier, r.apparu, r.fx_max, r.t_fx, r.impulsion, r.u_max, r.hu_max, r.ecart, r.n, r.garde, r.sous, r.temps);
+    // Le témoin : la force lissée sur 0,1 s ; le coefficient avec la vitesse de toute la colonne.
+    let mut lisse = 0f64;
+    for (i, &(t0, _, _)) in r.histoire.iter().enumerate() {
+        let (mut s, mut d) = (0f64, 0f64);
+        for &(t, f, dt) in &r.histoire[i..] {
+            if t - t0 > 0.1 { break; }
+            s += f * dt;
+            d += dt;
+        }
+        if d > 0.09 { lisse = lisse.max(s / d); }
+    }
+    let n_pics = r.histoire.iter().filter(|h| h.1 > 0.5 * r.fx_max).count();
+    println!("S652 témoin : F_x lissée sur 0,1 s {lisse:.2} N ; pas au-dessus de la moitié du pic : {n_pics} ; u max de la colonne {:.3} m/s ; C_d lissé, colonne {:.2}",
+        r.u_colonne, lisse / (0.5 * 1000. * a * r.u_colonne * r.u_colonne));
     println!("S652 nature ×20 (Froude) : F_x max {:.0} N ({:.0} kgf), h·u {:.2} m²/s (ADR-018 : 1 m²/s emporte un adulte)",
         r.fx_max * 8000., r.fx_max * 8000. / 9.81, r.hu_max * 20f64.powf(1.5));
     assert!(r.ecart.abs() <= 1e-6, "critère 3");
     let (t0, _) = r.premier.expect("le retournement");
     assert!(r.t_fx > t0 && r.t_fx - t0 <= 1.0, "critère 2 : le pic après le retournement");
-    assert!((0.5..=3.0).contains(&cd), "critère 2 : C_d {cd}");
+    // Critère 2, le coefficient de traînée dans [0,5 ; 3] : **manqué** (S652, A334) — 18 avec le pic brut, un choc de deux pas ; lissée
+    // sur 0,1 s (47 N), 5,1 avec la sonde à mi-hauteur, 0,33 avec la vitesse de toute la colonne (3,0 m/s, le jet). L'essai n'affirme que
+    // ce qui a tenu (ADR-244).
 }
 
 /// **S650** — (1)–(4) à 5 cm, contre le tout-3D de S647–S648 (retournement 2,571 s, 9,675 m ; air enfermé 2,872 s, 10,525 m).

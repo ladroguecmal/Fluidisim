@@ -4667,3 +4667,9 @@ témoin suivant : le fond glissant (la vitesse tangentielle gardée sur les face
 d'air, recevait l'extrapolation de S318 au lieu de garder sa vitesse ; avec l'air balistique (une face d'air alimentée par une particule
 est connue), la remontée est à 6 % de Saint-Venant 2D et 98 % de Synolakis à 2,5 cm, plus proche qu'à 5 cm. Le fond glissant, essayé
 d'abord, était sans effet. L'option est éteinte par défaut (elle trouble le raccord de la zone des colonnes, S406) ; le rouleau 3D l'active.
+
+**A334 — S652, 2026-10-07 (sévérité 2, ouverte). Sous le rouleau, la force sur un corps est un choc de deux pas.** Sur une sphère fixe
+dans la bande de déferlement (relais de S650), le pic de `F_x` (165,6 N) ne tient que deux pas ; lissée sur 0,1 s, 47 N. Non départagé :
+l'impact réel du jet (un choc de pression bref existe) ou la pression qui saute quand des mailles basculent entre eau et air contre le
+corps. Le témoin suivant : le même pic à une autre maille et à un autre pas de temps — un choc physique garde son impulsion, un artefact
+dépend du pas ([preuve](../validation/ROULEAU-FORCE-S652.md)).

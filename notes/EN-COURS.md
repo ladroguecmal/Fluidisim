@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S652 — **en cours**. En autonomie vers la v2 ; le rouleau 3D. **Étape 5 — le rouleau qui agit** (6.7 : « le rouleau plongeant
+Session : S652 — **terminée**. En autonomie vers la v2 ; le rouleau 3D. **Étape 5 — le rouleau qui agit** (6.7 : « le rouleau plongeant
 qui décolle un nageur »).
 
 **L'instrument, construit et éprouvé d'abord (ADR-263 D2).** La force de l'eau sur la sphère d'APIC (S393), qui impose sa vitesse mais
@@ -83,7 +83,7 @@ forces ×8 000), la force, et le produit `h·u` au corps contre la règle d'ADR-
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'instrument et son épreuve ; le rouleau sur le corps ; (1)–(4).
+- [x] **P2** — l'instrument et son épreuve ; le rouleau sur le corps ; (1)–(4).
 - [ ] **P3** — preuve ; liste 6.7, 4.14 ; rituel.
 
 ### Notes de reprise
@@ -91,3 +91,5 @@ forces ×8 000), la force, et le produit `h·u` au corps contre la règle d'ADR-
   (la pression au centre de la voisine, une demi-maille hors de la face) ; corrigé avant toute mesure du rouleau (la pression extrapolée à
   la face) : **1,1285 × Archimède, `F_x`, `F_y` nuls — critère 1 tenu** (≤ 15 %). Reste : lancer `the_plunging_roller_pushes_a_body_s652`
   (`--ignored`, ≈ 6 min, sur une copie du binaire, ADR-265 D1), puis la preuve, 6.7, le rituel.
+- **P2 fini** — (1) tenu après correction (1,38 → 1,13) ; (2) le pic après le retournement (+0,15 s), **le `C_d` manqué** (18 brut ; lissé
+  5,1 ou 0,33 selon la vitesse de référence) — le pic est un choc de deux pas (A334) ; (3) tenu ; (4) à ×20, `h·u` 24 m²/s.

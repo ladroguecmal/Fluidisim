@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [Le rouleau 3D, étape 5 : la force du rouleau sur un corps — S652](validation/ROULEAU-FORCE-S652.md) : il emporte un nageur ; la force instantanée, un choc (A334).
 - [Le rouleau 3D, étape 4 : le relais 2D → 3D — S650](validation/RELAIS-2D-3D-S650.md) : Saint-Venant au large, APIC 3D sur la pente, la masse au bit.
 - [Le rouleau 3D : le jet qui retombe et enferme l'air — S648](validation/ROULEAU-AIR-S648.md) : la poche d'air du rouleau plongeant.
 - [Le rouleau 3D, étape 3 : l'onde qui plonge sur la pente — S647](validation/DEFERLEMENT-APIC3D-S647.md) : la classification de Grilli tenue, aux deux mailles.

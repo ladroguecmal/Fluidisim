@@ -632,7 +632,10 @@ pas recopiée ici (L137).
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *partiel* depuis S514 : les règles d'ADR-018 (la
   progression selon la profondeur, le produit d'emportement : 0,5 m à 2 m/s emporte un adulte) et le nageur d'ADR-023 §3 (corps commandé,
   contraint, sa commande dans le repère de la surface) — il cesse de faire route au seuil dérivé `πH/T = 0,7 m/s`, au point près
-  ([preuve](validation/ACTEUR-S514.md)). Manquent la poche d'air qui pousse un acteur et le rouleau plongeant qui décolle un nageur.
+  ([preuve](validation/ACTEUR-S514.md)). **S652** : le rouleau plongeant pousse un corps fixe — le pic de force après le retournement, l'impulsion 15,3 N·s ; à l'échelle ×20,
+  `h·u` = 24 m²/s, vingt-quatre fois le seuil qui emporte un adulte (ADR-018) ; la force instantanée, un choc de deux pas non départagé
+  (A334) ([preuve](validation/ROULEAU-FORCE-S652.md)). Manquent la poche d'air qui pousse un acteur, le corps libre que le rouleau emporte,
+  la force instantanée fiable.
 - [x] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *validé* (S512) : l'impulsion de masse ajoutée d'ADR-023 §2 à l'instant
   exact où la quille passe sous la surface, corps et eau entraînée d'une même quantité de mouvement ; la même à 2·10⁻¹⁶ près quelle que
   soit la phase du tick (l'échantillonnage au tick : 5,3 % de dispersion) ([preuve](validation/IMPACT-ENTREE-S512.md)).

@@ -1487,3 +1487,11 @@ tourne sur une copie du binaire d'essai (le verrou de Windows bloquait la compil
 travail fait pendant une attente appartient à la session suivante, déclaré et rejoué. ADR-263 D2 a servi deux fois (S647, S648).
 Maillons **2**. Suivant : **S652, l'étape 5 du rouleau** (la force du rouleau sur un corps).
 
+## S652 — 2026-10-07 — le rouleau 3D, étape 5 : la force du rouleau sur un corps
+
+**Entrée.** En autonomie vers la v2 (interrompue une fois par la limite d'usage, reprise). **Fait** ([preuve](../docs/validation/ROULEAU-FORCE-S652.md)) :
+l'instrument de force sur la sphère, éprouvé contre Archimède — 1,38 d'abord (la pression lue une demi-maille trop loin), 1,13 corrigé ;
+le rouleau du relais de S650 sur une sphère fixe. **Mesuré** : le pic de force 0,15 s après le retournement, l'impulsion 15,3 N·s, la masse
+au bit ; à l'échelle ×20, `h·u` = 24 m²/s (le seuil d'ADR-018 : 1). **Manqué** : le coefficient de traînée (18 brut) — le pic est un
+choc de deux pas, la vitesse de référence n'a pas de sens unique sous un rouleau (A334). Le plan du rouleau en cinq étapes est parcouru.
+Maillons **1** (6.7, 4.14 avancent). Suivant : **S653**, la suite des partiels de la physique (ADR-247).
