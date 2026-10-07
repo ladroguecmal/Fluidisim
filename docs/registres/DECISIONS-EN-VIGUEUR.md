@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**261 ADR** — actée : 210, proposée : 49, rétractée en partie : 2.
+**262 ADR** — actée : 211, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -137,7 +137,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [124](../adr/ADR-124-image-budget-et-effets-bornes.md) | Image, budget, puis effets volumiques bornés | actée | S201 | 001 007 127 | 125 126 127 191 192 |
 | [125](../adr/ADR-125-budget-image-60hz-deux-ms.md) | Profil initial : 60 images/s, eau2 ms par image | actée | S202 | 007 012 120 124 | 126 127 131 174 |
 | [126](../adr/ADR-126-emprise-d-un-impact-visible.md) | L'emprise d'un impact visible se dimensionne par ses coutures | actée | S203 | 060 124 125 | 127 128 132 142 |
-| [127](../adr/ADR-127-ambition-complete-construction-progressive.md) | Ambition finale complète, construction progressive par versions de plus en plus capables | actée | S204 | 124 125 126 | 131 141 149 174 178 179 180 181 182 183 185 186 187 188 189 190 191 192 193 197 221 222 |
+| [127](../adr/ADR-127-ambition-complete-construction-progressive.md) | Ambition finale complète, construction progressive par versions de plus en plus capables | actée | S204 | 124 125 126 | 131 141 149 174 178 179 180 181 182 183 185 186 187 188 189 190 191 192 193 197 221 222 262 |
 | [128](../adr/ADR-128-le-budget-de-pente-borne-les-perturbations.md) | Le budget de pente borne ce que les perturbations ajoutent, pas la mer | actée | S205 | 062 080 095 098 126 | 133 142 |
 | [129](../adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md) | Le chemin d'image de W radial passe par une table de Bessel précalculée | actée | S206 | 012 |  |
 | [130](../adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md) | La version interactive J1 rend l'eau sur GPU, par un hôte séparé | actée | S207 | 003 012 020 | 148 192 |
@@ -271,4 +271,5 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [258](../adr/ADR-258-trente-et-unieme-revue-de-methode.md) | Trente-et-unième revue de méthode (S631–S635) | actée | S636 | 222 257 | 259 |
 | [259](../adr/ADR-259-trente-deuxieme-revue-de-methode.md) | Trente-deuxième revue de méthode (S636–S640) | actée | S641 | 222 258 | 260 261 |
 | [260](../adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md) | I-08 et I-14 : ce qu'ils gouvernent | actée | S642 | 139 141 222 259 |  |
-| [261](../adr/ADR-261-reponses-du-2026-10-07.md) | Réponses du 2026-10-07 (les arbitrages de l'audit des intentions initiales) | actée | S642 | 259 |  |
+| [261](../adr/ADR-261-reponses-du-2026-10-07.md) | Réponses du 2026-10-07 (les arbitrages de l'audit des intentions initiales) | actée | S642 | 259 | 262 |
+| [262](../adr/ADR-262-indiscernable-du-reel-au-budget.md) | Indiscernable du réel, au budget | actée | S643 | 127 261 |  |

@@ -76,7 +76,7 @@ versé : points ajoutés ou reformulés, `etat_projet --check` à zéro ; (4) ce
 
 - [x] **P1** — jeton ; plan ; les deux sources relues en entier.
 - [x] **P2** — le registre ; l'ADR ; la liste.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) le registre couvre les 20 + 32 sections (34 + 31 lignes, recomptées par script) : garder 28 + 23, meilleure solution
