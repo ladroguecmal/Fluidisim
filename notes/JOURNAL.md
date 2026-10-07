@@ -1538,3 +1538,11 @@ le lecteur de l'eau autour du corps, éprouvé (0,466 m/s lus pour une sphère i
 au pic, le corps va à 0,90 (10 ms) et 0,91 (5 ms) fois l'eau qui l'entoure, au plus 0,98 sur toute la course — **A334 levée** : l'excès de
 S655 venait du comparant. **Le rouleau emporte un nageur** (6.7). L'utilisateur : « J'aimerais des sessions visuelles grâce à toutes les
 nouvelles avancées ». Maillons **1** (6.7 avance). Suivant : **S658, la séance visuelle** du rouleau.
+
+## S658 — 2026-10-07 — la séance visuelle du rouleau (R40)
+
+**Entrée.** La demande de l'utilisateur : des séances visuelles des avancées. **Fait** ([preuve](../docs/validation/SEANCE-VISUELLE-ROULEAU-S658.md)) :
+l'enregistrement du montage complet (S650–S657 : Saint-Venant au large, APIC 3D sur la plage, le plongeant, la sphère libre) ; le rendu
+d'atelier `outils/rendu_rouleau.py` (numpy, PIL) ; contrôlé (100 images, les particules du calcul, la sphère à 0,05 mm) ; vu avant l'envoi
+et refait (la zone des colonnes manquait). **Envoyé** : deux animations — **R40**, le verdict attendu. Maillons **2**. Suivant : **S659**,
+la suite des partiels de la physique, ou R40 s'il arrive.

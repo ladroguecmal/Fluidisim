@@ -2286,6 +2286,14 @@ fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) 
     relais_libre_s653(dx, x_r, ny_in, corps, None, 10_000)
 }
 
+thread_local! {
+    /// **S658 — l'enregistrement de la séance visuelle** : quand il est ouvert, le relais y écrit une image toutes les 0,04 s (f32,
+    /// petit-boutiste) — `t, n, x_r, n_sv, n_col`, la surface de Saint-Venant sur `[0 ; x_r]` (`n_sv` valeurs), celle des colonnes de la 3D
+    /// (`n_col` valeurs, la rangée médiane), la sphère `(x, z, r)` (r = 0
+    /// sans corps), puis `n` particules `(x, y, z, |v|)`, x global.
+    static SORTIE_S658: std::cell::RefCell<Option<std::io::BufWriter<std::fs::File>>> = const { std::cell::RefCell::new(None) };
+}
+
 /// **S653** — le relais, et, avec `masse` (kg), la sphère **libre**.
 fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>, masse: Option<f32>, pas_max_us: u64) -> ReleveS652 {
     use crate::grand_evenement::{OndeSolitaire, Plage};
@@ -2358,6 +2366,47 @@ fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f
         t += us;
         let col = a.columns.as_ref().unwrap();
         entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
+        // S658 : une image toutes les 0,04 s, si l'enregistrement est ouvert.
+        if (t / 40_000) != ((t - us) / 40_000) {
+            SORTIE_S658.with(|o| {
+                if let Some(w) = o.borrow_mut().as_mut() {
+                    use std::io::Write;
+                    let mut put = |v: f32| w.write_all(&v.to_le_bytes()).unwrap();
+                    put(t as f32 * 1e-6);
+                    put(a.particle_count() as f32);
+                    put(x_r as f32);
+                    put(i_r as f32);
+                    put(n_col as f32);
+                    for i in 0..i_r {
+                        let c = i * 3 + 1;
+                        put((sv.domaine.h[c] + sv.domaine.z[c]) as f32 + niveau);
+                    }
+                    // La surface des colonnes de la 3D (rangée médiane).
+                    let eta = a.columns_surface().unwrap();
+                    for i in 0..n_col {
+                        put(eta[(ny / 2) * nx + i]);
+                    }
+                    match a.body() {
+                        Some(b) => {
+                            put(b.center[0] + x_r as f32);
+                            put(b.center[2]);
+                            put(b.radius);
+                        }
+                        None => {
+                            put(0.);
+                            put(0.);
+                            put(0.);
+                        }
+                    }
+                    for (p, v) in a.particles().iter().zip(a.velocities()) {
+                        put(p[0] + x_r as f32);
+                        put(p[1]);
+                        put(p[2]);
+                        put((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt());
+                    }
+                }
+            });
+        }
         let ts = t as f64 * 1e-6;
         if let Some((c, r)) = corps_local {
             let f = force_corps_s652(&a);
@@ -2650,5 +2699,25 @@ fn the_free_body_against_the_water_around_5ms_s657() {
     println!("S657 5 ms : le corps au plus vite {vb:.3} m/s à {t:.3} s, l'eau autour {ve:.3} m/s (rapport {:.2}) ; rapport au plus {rmax:.2} ; volume {:+.1e}", vb / ve, r.ecart);
     assert!(r.ecart.abs() <= 1e-6, "critère 3");
     assert!(vb <= 1.2 * ve, "critère 2 : {vb} {ve}");
+}
+
+/// **S658 — la séance visuelle** : le montage de S657 (la sphère libre, le pas de 10 ms) enregistré dans `calculs/s658_rouleau.bin`.
+#[test]
+#[ignore = "≈ 8 min : l'enregistrement de la séance visuelle de S658"]
+fn record_the_roller_for_the_visual_session_s658() {
+    std::fs::create_dir_all("../../calculs").unwrap();
+    let f = std::fs::File::create("../../calculs/s658_rouleau.bin").unwrap();
+    SORTIE_S658.with(|o| *o.borrow_mut() = Some(std::io::BufWriter::new(f)));
+    let r = libre_s655(10_000);
+    SORTIE_S658.with(|o| {
+        use std::io::Write;
+        o.borrow_mut().as_mut().unwrap().flush().unwrap();
+        *o.borrow_mut() = None;
+    });
+    let dernier = r.trajet.iter().rfind(|p| p.0 <= 4.0).copied().unwrap_or_default();
+    println!("S658 enregistré : {} particules à la fin, la sphère à t = {:.3} s en x {:.4}, z {:.4}", r.garde, dernier.0, dernier.1, dernier.2);
+    for &(t, x, z) in r.trajet.iter().filter(|p| ((p.0 * 25.).round() - p.0 * 25.).abs() < 0.13) {
+        println!("S658 trajet {t:.3} {x:.4} {z:.4}");
+    }
 }
 

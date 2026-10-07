@@ -795,7 +795,8 @@ pas recopiée ici (L137).
   pièce 3 ; [preuve](validation/CIEL-PLUIE-S381.md), R30 reçue) ; **S382** : l'occultation du ciel et les ombres portées
   ([ADR-206](adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](validation/OCCULTATION-CIEL-S382.md), R31 reçue) ; **S392** : les surfaces mouillées (ADR-205, pièce 5a ; [preuve](validation/SURFACES-MOUILLEES-S392.md), R33 reçue pour l'instant, peaufinage à venir). Autres poses, animation et scénarios
   restent à valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système, et
-  **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3).
+  **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3). **S658** : la séance visuelle du rouleau (le relais, le plongeant, la sphère emportée), un rendu d'atelier — R40 envoyé, en
+  attente ([preuve](validation/SEANCE-VISUELLE-ROULEAU-S658.md)).
 
 ## 9. Activation, prédiction, budget et dégradation
 

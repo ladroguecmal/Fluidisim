@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S658 — **en cours**. Sur la demande de l'utilisateur (2026-10-07) : *« J'aimerais des sessions visuelles grâce à toutes les
+Session : S658 — **terminée**. Sur la demande de l'utilisateur (2026-10-07) : *« J'aimerais des sessions visuelles grâce à toutes les
 nouvelles avancées »*. **La séance visuelle du rouleau** : le montage complet de S650–S657 — Saint-Venant 2D au large, APIC 3D sur la
 plage, le déferlement plongeant, la poche d'air, la sphère libre emportée — enregistré, rendu en animations, envoyé pour un verdict (R40).
 
@@ -86,7 +86,9 @@ ce qu'elles montrent et à quel instant. (3) Le verdict reçu ou attendu, inscri
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'enregistrement ; le rendu ; l'envoi.
+- [x] **P2** — l'enregistrement ; le rendu ; l'envoi.
 - [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) relu : 100 images, 46 521 particules, la sphère à 0,048 mm ; (2) deux animations envoyées (la plage, le rouleau) — le
+  premier rendu, vu avant l'envoi, laissait vide la zone des colonnes : refait ; (3) R40 en attente (la boussole).
