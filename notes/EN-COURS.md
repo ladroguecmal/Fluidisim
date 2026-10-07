@@ -62,46 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S675 — **terminée**. En autonomie vers la v2 ; une séance visuelle, comme l'utilisateur les a demandées (R41 reçu en S663).
-Depuis S664, la côte 2D de B déferle, porte le niveau moyen et le courant de dérive : rien n'en a encore été montré.
-
-**Ce que la session fait.** L'essai ignoré `record_the_breaking_coast_for_the_visual_session_s675` écrit `calculs/s675_cote.bin`
-et `calculs/s675_controle.csv`. La mer de S667 est cuite sur la plage de S364, avec et sans déferlement.
-
-L'enregistrement contient :
-
-- **les profils** le long de `s` : la profondeur, `Hrms` avec et sans déferlement, `η̄`, `V` ;
-- **la surface vue de dessus** sur les 750 derniers mètres, 48 images à 0,5 s, les deux côtes ;
-- **une coupe** à `n` = 0 sur les 950 derniers mètres.
-
-`outils/rendu_cote.py` (numpy, PIL) en tire trois images :
-
-- `s675_dessus.gif`, la surface vue de dessus, avec et sans déferlement ;
-- `s675_coupe.gif`, la coupe sur le fond, avec le niveau moyen ;
-- `s675_profils.png`, les profils.
+Session : S676 — **en cours**. En autonomie vers la v2. **La trente-neuvième revue de méthode** (ADR-222 D4 : S671–S675).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : la côte sans déferlement, à côté. La même mer arrive au rivage avec `Hrms` 2,4 m sur 1 m de fond.
-- **instrument** : le rendu recalcule depuis le binaire `Hrms` au rivage, `η̄` au rivage et le pic de `V`, et les compare à
-  `s675_controle.csv`, que l'essai écrit. Ce qui départagerait : une lecture juste les retrouve au plancher `f32` (10⁻⁶ en relatif) ; un
-  décalage d'octets ou un axe permuté les manque de plusieurs ordres.
-- **calcul** (ce script) : l'enregistrement fait ≈ 14.1 Mo (asserté sous 20 Mo).
-- **ADR** : ADR-216 (le banc visuel), ADR-266.
-- **pièges** :
-  - la grille de la côte (`n` < 96 m, `s` < 3 950 m : `eval` rend `None` au-delà) ;
-  - `SimTime` en microsecondes ;
-  - la police (Segoe UI, pour les accents, S663) ;
-  - la côte sans déferlement est hors de son domaine près du rivage : le montrer comme témoin, sans le juger.
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-269.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-**Critères, écrits avant.** (1) Les trois images produites et regardées avant l'envoi. (2) Le contrôle relu à 10⁻⁶ en relatif. (3) R42
-posé à l'utilisateur, les fichiers envoyés.
+**Critères, écrits avant.** (1) ADR-270 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'enregistrement ; le rendu ; (1)–(2).
-- [x] **P3** — preuve ; R42 ; rituel.
+- [ ] **P2** — ADR-270.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) les trois images rendues, regardées, corrigées (textes coupés, coupe élargie, graduations) ; (2) le contrôle à 2,7·10⁻¹⁰ ; R42 posé.
