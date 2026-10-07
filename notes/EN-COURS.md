@@ -85,7 +85,7 @@ de la sonde ; la masse de l'eau exacte. (3) Refus : une masse nulle, négative o
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le corps libre dans le cœur ; (1)–(4).
-- [ ] **P3** — preuve ; liste 6.7, 6.4 ; rituel.
+- [x] **P3** — preuve ; liste 6.7, 6.4 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) à moitié : le centre à 1,3 cm du niveau, la vitesse 4,1 cm/s entre 3 et 4 s (borne 2, manqué ; décroissante, stable) ;

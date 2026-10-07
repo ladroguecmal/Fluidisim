@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 17:37 +02:00
+JETON            : libre
+Battement        : 2026-10-07 17:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S653 — le corps libre que le rouleau emporte ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S652 — le rouleau 3D, étape 5 : la force du rouleau sur un corps ([journal](notes/JOURNAL.md)). Avant : S651 (la trente-quatrième revue de méthode)
-Session suivante : **S653 — la suite des partiels de la physique** (ADR-247) : A334 (le choc sous le rouleau, à une autre maille et un autre pas), ou le corps libre emporté par le rouleau (le couplage deux sens de la sphère d'APIC) — choisir par ce que la liste attend le plus.
+Session en cours : aucune
+Dernière session : S653 — le corps libre que le rouleau emporte ([journal](notes/JOURNAL.md))
+Session suivante : **S654 — A334** : le rouleau de S653 (corps libre) à pas deux fois plus court (stable_step plafonné à 5 ms) — un choc physique garde son impulsion, un artefact dépend du pas ; selon le verdict, lisser la force ou corriger la pression au basculement des mailles.
 Maillons        : 1
-Registres       : dernier lot S650 (ADR-213 D3) ; le prochain au plus tard en S653
+Registres       : dernier lot S653 (ADR-213 D3) ; le prochain au plus tard en S656
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

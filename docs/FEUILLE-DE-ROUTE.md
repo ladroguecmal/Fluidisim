@@ -464,6 +464,8 @@ budget) ; le rouleau 3D, étape 2 — la vague qui monte la pente, la crête jus
 calculé, un instrument s'éprouve avant de juger) ; le rouleau 3D, étape 3 — l'onde qui plonge sur 1:12 et pas sur 1:3 (Grilli et al. 1997).
 **S648–S650** : le rouleau — le jet qui retombe et enferme l'air ; le découpage de la planète (ADR-264 : HEALPix pour les données, des
 grilles locales pour le calcul) ; le relais 2D → 3D (Saint-Venant au large, APIC 3D sur la pente, la masse au bit).
+**S651–S653** : la trente-quatrième revue (ADR-265 : les longs calculs sur une copie du binaire) ; la force du rouleau sur un corps (A334 :
+un choc de deux pas) ; le corps libre que le rouleau emporte (6.7 ; trop vite, A334).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
