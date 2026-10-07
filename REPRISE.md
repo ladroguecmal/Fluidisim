@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 00:28 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 00:30 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S684 — le raccord au rivage au repos (APIC 3D et Saint-Venant 2D) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S683 — Le relais au rivage, brique 3 : l'entrée à droite d'APIC ([journal](notes/JOURNAL.md))
 Session suivante : S684 — le raccord au rivage au repos : APIC 3D et Saint-Venant 2D côte à côte sur six plages
 Maillons        : 1 (4.14 : l'entrée à droite d'APIC)

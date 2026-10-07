@@ -62,45 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S683 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271).
+Session : S684 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271), l'étape 1 de la conception.
 
-**Ce que la session fait.** **L'entrée à droite** (`feed_right`, avec la sortie de S682) :
+**Ce que la session fait.** Le module `relais_rivage.rs` : `RelaisRivage` tient APIC 3D (bord droit ouvert, sa sortie et son entrée)
+et Saint-Venant 2D côte à côte, à la même maille et au même nombre de rangées. À chaque pas :
 
-- un volume donné par rangée s'ajoute à un **réservoir** ;
-- chaque quantum entier (`dx³/8`) devient une particule posée dans la dernière colonne, sur le réseau au quart de maille, à la place
-  la moins occupée sous la surface ;
-- la particule reçoit la vitesse d'entrée.
+1. l'état du bord 3D, le niveau `η` (la plus haute particule de la dernière colonne + `dx/4`) et la vitesse `u` moyenne, nourrit le
+   bord gauche de Saint-Venant (`h_e = η − z` de sa première maille) ;
+2. Saint-Venant fait son pas et rend son flux (S680) ;
+3. APIC reçoit ce flux comme vitesse de son bord droit, et fait entrer le reflux (S683) ;
+4. ce qu'APIC a laissé sortir (S682) contre ce que Saint-Venant a pris est gardé comme une dette par rangée.
 
-La masse se compte : particules × quantum + réservoir.
+La masse se compte : Saint-Venant + particules × quantum + réservoir − dette.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-272)
 
-- **témoin** : sans entrée, au bit (S682 et tous les essais d'APIC).
-- **instrument** : le bassin de S682, l'eau à 0,2 m, nourri à 0,1 m/s sur la hauteur mouillée du bord droit pendant 1 s (le volume de
-  chaque pas lu comme en S682). Ce que rendrait chaque hypothèse :
-  - une entrée juste rend le bilan exact (particules × quantum + réservoir = départ + entré, à 10⁻¹² près) et la colonne du bord peu
-    tassée ;
-  - des particules posées au même endroit (une place mal choisie) donnent une colonne surchargée et une vitesse parasite.
-- **calcul** (ce script) : ≈ 2.0 L, 128 particules ; le niveau monte de 10 mm, sous le quantum d'une couche de
-  particules (25 mm) : le niveau ne départage pas, le volume oui.
-- **ADR** : ADR-271.
+- **témoin** : APIC seul sur les mêmes plages (S678 : de 0,21 à 0,58 m/s).
+- **instrument** : l'eau au repos 2 s, la vitesse maximale des deux côtés, la masse. Ce que rendrait chaque hypothèse :
+  - un raccord juste rend **moins de 1 cm/s partout** et la masse exacte ;
+  - des niveaux mal accordés (`h_e` pris à un autre fond) font couler un flux au raccord, quelques cm/s ;
+  - une dette qui grandit trahit un échange mal compté.
+- **calcul** (ce script, qui asserte trois places au moins) :
+  - 1:3, eau 0.4 m, maille 0.05 m : le raccord à 3.03 mailles de fond, la ligne d'eau à 0.10 de maille ;
+  - 1:3, eau 0.4 m, maille 0.025 m : le raccord à 3.07 mailles de fond, la ligne d'eau à 0.20 de maille ;
+  - 1:10, eau 0.3 m, maille 0.05 m : le raccord à 3.01 mailles de fond, la ligne d'eau à 0.10 de maille ;
+  - 1:10, eau 0.3 m, maille 0.025 m : le raccord à 3.02 mailles de fond, la ligne d'eau à 0.20 de maille ;
+  - 1:3, eau 0.31 m, maille 0.05 m : le raccord à 3.23 mailles de fond, la ligne d'eau à 0.70 de maille ;
+  - 1:3, eau 0.31 m, maille 0.025 m : le raccord à 3.13 mailles de fond, la ligne d'eau à 0.40 de maille ;
+- **ADR** : ADR-271, ADR-272 D1.
 - **pièges** :
-  - la capacité réservée (une particule refusée est comptée, et son quantum reste au réservoir) ;
-  - le fond (une place sous le fond n'est pas une place) ;
-  - le réservoir négatif (le volume donné est positif ; la sortie est celle de S682).
+  - le bord de Saint-Venant prend un seul état extérieur pour toutes les rangées (la moyenne) : exact au repos et sur une côte
+    uniforme, non en général (noté) ;
+  - le pas de temps commun, le plus petit des deux ;
+  - le niveau du bord 3D, sans particule dans la colonne, pris au fond.
 
 **Critères, écrits avant.**
 
-1. Sans entrée, au bit.
-2. Le bilan exact à 10⁻¹² près.
-3. La dernière colonne à au plus 10 particules par maille mouillée.
-4. La vitesse maximale sous 0,5 m/s : l'entrée à 0,1 m/s, plus l'onde qu'elle lance (`√(g·h)·Δh/h` ≈ 0,07 m/s).
+1. Sur les six plages, l'eau au repos 2 s : la vitesse maximale sous **1 cm/s**, des deux côtés.
+2. La masse : Saint-Venant + particules × quantum + réservoir − dette, constante à 10⁻¹² près en relatif.
+3. Les essais d'APIC et de Saint-Venant inchangés.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'entrée ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — `relais_rivage.rs` ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) les essais d'APIC ; (2) 3,5·10⁻¹⁶ ; (3) 7,12 ; (4) 0,165 m/s.
