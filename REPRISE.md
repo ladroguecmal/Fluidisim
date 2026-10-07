@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 14:40 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 14:43 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S647 — le rouleau 3D, étape 3 : le déferlement sur la pente ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S646 — la trente-troisième revue de méthode (ADR-263) ([journal](notes/JOURNAL.md)). Avant : S645 (A333 levée : le jet de rive par l'air balistique)
 Session suivante : **S647 — le rouleau 3D, étape 3 : le déferlement sur la pente** dans APIC 3D (l'air balistique actif) — une onde solitaire plus haute, déferlante sur une pente douce ; le point de déferlement contre McCowan et S630–S633, le type contre Grilli et al. (1997) ; le lecteur du point et du type éprouvé d'abord sur un cas connu (ADR-263 D2).
 Maillons        : 2

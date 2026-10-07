@@ -62,16 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S646 — **terminée**. En autonomie vers la v2. **La trente-troisième revue de méthode** (ADR-222 D4 : S641–S645).
+Session : S647 — **en cours**. En autonomie vers la v2 ; la campagne du rouleau 3D. **Étape 3 — une onde qui déferle sur la pente**, dans
+APIC 3D, fond en escalier, l'air balistique actif (S645).
 
-**Critères, écrits avant.** (1) ADR-263 relit chaque session S641–S645 et sa friction ; (2) une protection nouvelle seulement pour une
-friction qui a coûté ; (3) la prochaine revue nommée.
+**Le jugement : la classification de Grilli, Svendsen et Subramanya (1997)**, vérifiée en ligne : le paramètre de pente
+`S₀ = 1,521·s/√(H₀/h₀)` ; glissant si `S₀ < 0,025`, plongeant si `0,025 < S₀ < 0,30`, frontal si `0,30 < S₀ < 0,37`, pas de déferlement
+au-delà. Leurs formules empiriques de la profondeur et de l'indice au déferlement n'ont pas pu être relues : elles ne jugent rien ici,
+`H_b/h_b` est seulement rapporté.
+
+**Le lecteur (ADR-263 D2), éprouvé d'abord.** Le retournement : dans une colonne de la rangée médiane, en montant depuis le fond, de l'eau,
+puis de l'air, puis de l'eau (`labels`) — la surface n'est plus un graphe ; l'écart d'air en mailles. Éprouvé sur deux cas posés à la main,
+reconstruits sans mouvement : une couche d'eau plate (aucun retournement) ; la même avec une lèvre d'eau posée au-dessus d'un vide d'air
+(retournement trouvé, à l'abscisse et avec l'écart posés).
+
+**Références, calculées avant** (ce script). Montage : `d` = 0.5 m, `H` = 0.15 m (`H/d` = 0.3), pente 1:12 : **`S₀` = 0.231 —
+plongeant**. L'onde à 2.30 m du pied (pied à 5.696 m), le rivage au repos à 11.70 m, domaine 12.8 × 1.0 m. Le cas de S644 :
+`S₀` = 1.13 > 0,37, pas de déferlement (vérifié en S644 à l'œil, ici par le lecteur). **Bornes assertées** (ADR-257 D1) : la queue
+de l'onde, le rivage dans le domaine, la crête sous le couvercle, aucune égalité centre/fond.
+
+**Critères, écrits avant.** (1) le lecteur : aucun retournement sur la couche plate, le retournement posé trouvé ; (2) les particules
+gardées, aucune sous le fond ; (3) **à 2,5 cm, l'onde déferle en plongeant** — un retournement d'au moins une maille d'air sous de l'eau,
+avant le rivage au repos ; (4) l'onde de S644 (`S₀` > 0,37) **ne déferle pas** (aucun retournement) ; (5) rapportés : le point de
+déferlement, `h_b`, `H_b/h_b`, la maille de 5 cm.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-263.
-- [x] **P3** — rituel.
+- [ ] **P2** — le lecteur et son épreuve ; le déferlement ; (1)–(5).
+- [ ] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-263 : D1, un compte écrit est calculé ; D2, un instrument de mesure s'éprouve avant de juger. Prochaine revue S651.
