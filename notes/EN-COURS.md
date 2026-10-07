@@ -62,35 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S598 — **terminée**. En autonomie (ADR-247), **4.4 — la profondeur adaptative, un domaine qui suit un objet qui coule** (absent).
-Première pièce : **le plan**, pas encore l'exécution dans δ.
+Session : S599 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S597–S598), puis **12.3 — le précalcul côtier
+stocké** (absent ; SPEC-005 §6) et, avec lui, la part côtière de **2.8** (absent ; la météo à la fin).
 
-**Ce que la session fait.** `coule.rs` : (a) **la descente prévue** d'une sphère plus dense que l'eau — la masse ajoutée `½ρ_w·V`, la
-traînée de Schiller–Naumann jusqu'à `Re` = 1 000 puis de Newton (`C_d` = 0,44) —, RK4 à pas fixe, f64 ; (b) **l'enveloppe verticale** du
-domaine : son bas reste sous l'objet **prévu `τ_a` plus tard** (le temps que δ grandisse), avec une marge, arrondi au quantum vers le bas,
-**jamais remonté** pendant la chute ; chaque descente du bas est un agrandissement (un changement de niveau, ADR-210), compté. Ne fait
-pas : l'exécution dans δ (le transfert d'état vers le domaine agrandi), l'objet qui remonte, les objets non sphériques.
+**Ce que la session fait.** `cotier.rs` : la **cuisson** d'une plage — pour 4 états de mer × 4 phases de marée, un `CoastalState` :
+un champ 2D au demi-mètre (hauteur de houle, `u`, `v`, intensité du rouleau) en **`f16`** et la polyligne de déferlement (S588) ; la
+hauteur hors de la zone de déferlement par la référence de B (levée), dedans saturée à `0,78·h` ; le rouleau, la dissipation
+`−d(E·c_g)/dx` ; `u`, `v` **nuls** tant que le courant de dérive littorale n'est pas calculé (écrit tel quel). **L'empreinte** (FNV-1a) des
+entrées : bathymétrie, états, phases — une plage dont le fond change est **obsolète**. **La recherche par paramètres** (I-09) : l'état le
+plus proche en `(Hs, phase)`, la phase repliée sur un tour — jamais un mélange de champs.
 
-**Références, calculées avant par ce script, avec son propre code.** Une boule d'acier de 0,1 m de rayon (7 800 kg/m³) dans l'eau de mer :
-la vitesse terminale de Newton `√(8·r·(ρ_s − ρ_w)·g/(3·ρ_w·C_d))` = **6.268812 m/s** (`Re` = 1.29e+06) ; la descente depuis le repos (RK4,
-dt = 10⁻⁴ s) : à 1, 2, 5, 10 s, **z = 3.23120 ; 9.16062 ; 27.93725 ; 59.28130 m**, `v` = 6.26881 m/s à 10 s.
-L'enveloppe : anticipation 2 s, marge 0,5 m, quantum 1 m, un domaine initial de 2 m.
+**Références, calculées avant** (ce script les écrit). Une plage de pente 0,04 (120 × 20 m, la grille de SPEC-005 : 240 × 40 texels), une
+houle de 8 s en incidence normale, Hs ∈ {0,5 ; 1 ; 1,5 ; 2} m, une marée de 1 m (η = 0 ; +1 ; 0 ; −1 m aux phases 0, ¼, ½, ¾). La profondeur
+de déferlement, par la levée de mes formules : **`h_b`** = 0.9343, 1.6414, 2.2892, 2.9043 m ; la ligne de déferlement à
+`x_b = (h_b − η)/0,04` — à Hs = 2 m, **47.6081 m** à marée haute et **97.6081 m** à marée basse (le déplacement
+`2 m/0,04` = 50 m). La taille : **76800 octets** par état (240 × 40 × 4 × 2), **1228800 octets** pour les seize (SPEC-005 : « 77 Ko »,
+« 1,2 Mo »).
 
-**Quantum** (ADR-236, ADR-249) : f64 ; le pas du code (10⁻³ s) contre 10⁻⁴ s — sous 10⁻⁶ relatif. **Critères, écrits avant.** (1) la vitesse
-terminale à 10⁻⁶ relatif ; (2) la profondeur aux quatre instants à 10⁻⁴ relatif ; (3) l'enveloppe, à chaque pas de 10 s : l'objet (son
-centre ± son rayon) dedans avec au moins la marge, le bas jamais remonté, multiple du quantum ; les agrandissements comptés et leur nombre
-égal à celui que le script compte avec sa propre descente ; (4) refus : rayon, densité non positifs, une sphère moins dense que l'eau.
+**Quantum** (ADR-236, ADR-249) : la ligne interpolée sur 0,5 m (de l'ordre de 0,1 mm, S588 au pas de 5 m : 5 mm) ; le `f16`, 2⁻¹¹ relatif.
+**Critères, écrits avant.** (1) la taille exacte ; (2) la ligne de déferlement de chaque état à 1 cm de `x_b`, son déplacement avec la marée ;
+(3) les hauteurs relues du `f16` à 2⁻¹⁰ relatif de leur valeur cuite, la hauteur saturée dans la zone de déferlement, le rouleau nul au
+large et positif dedans ; (4) la recherche : `(1,1 m ; 0,97)` → l'état `(1 m ; 0)` (la phase repliée), `(1,8 m ; 0,6)` → `(2 m ; ½)` ;
+(5) l'empreinte : deux cuissons identiques, la même ; un centimètre de fond changé en un nœud, une autre.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `coule.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 4.4 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `cotier.rs` et ses essais ; (1)–(5).
+- [ ] **P3** — preuve ; listes 12.3, 2.8 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **Avant l'essai, un manque du plan comblé** (ADR-244 D1) : le plan annonçait le nombre d'agrandissements « compté par le script », sans
-  l'avoir compté. Compté maintenant avec la descente du script (RK4 à 10⁻⁴ s) : l'enveloppe mise à jour toutes les 0,1 s de 0 à 10 s, le bas
-  `⌈(z(t + 2 s) + r + 0,5)/1⌉·1` s'il descend, depuis 2 m : **64 agrandissements**, le bas final à **73 m**.
-- **P2 fini** — terminale, descente, enveloppe (64, 73 m) tenues ; refus. Constat : 64 agrandissements en 10 s, trop pour δ. Suite 773.
-- **P3** — preuve COULE-S598 ; liste 4.4 (absent → partiel) et décompte ; index ; journal.
-

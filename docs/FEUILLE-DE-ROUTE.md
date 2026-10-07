@@ -427,6 +427,7 @@ du plan moyen) — la section 3 n'a plus d'absent.
 vingt-deuxième revue (ADR-249 : le script du plan refuse un seuil sous son quantum).
 **S593–S596** : **2.4, 11.2, 7.2 ouverts** (la ligne d'eau d'une rivière et son remous ; les régions de mer par descripteur ; le vol d'une
 goutte) ; la vingt-troisième revue (ADR-250 : une propriété d'ensemble sur un ensemble).
+**S597–S598** : **7.3 et 4.4 ouverts** (le nuage de microbulles ; la descente d'un objet qui coule et l'enveloppe de son domaine).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
