@@ -5,14 +5,14 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**263 ADR** — actée : 212, proposée : 49, rétractée en partie : 2.
+**264 ADR** — actée : 213, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
 | ADR | titre | statut lu | session | nomme en tête | nommé par (plus récents) |
 |---|---|---|---|---|---|
 | [001](../adr/ADR-001-decomposition-en-couches.md) | Décomposition de l'eau en quatre couches (B / W / δ / V) | proposée | S01 | 002 012 | 002 003 004 005 006 007 008 009 010 014 037 048 053 111 112 124 178 191 192 195 |
-| [002](../adr/ADR-002-referentiels-precision-planete.md) | Référentiels, précision numérique et planète sphérique | proposée | S01 | 001 | 003 004 006 010 020 028 |
+| [002](../adr/ADR-002-referentiels-precision-planete.md) | Référentiels, précision numérique et planète sphérique | proposée | S01 | 001 | 003 004 006 010 020 028 264 |
 | [003](../adr/ADR-003-horloge-et-determinisme.md) | Horloge de simulation et déterminisme du fond | proposée | S01 | 001 002 | 004 008 009 022 027 029 130 141 |
 | [004](../adr/ADR-004-etat-minimal-eau-simplifiee.md) | État minimal de l'eau simplifiée | proposée | S01 | 001 002 003 | 011 014 016 017 018 019 027 100 196 |
 | [005](../adr/ADR-005-zone-de-transition.md) | Zone de transition : éponge perturbative et transduction δ → W | proposée | S01 | 001 | 007 009 013 014 021 024 033 034 036 042 046 210 |
@@ -271,6 +271,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [258](../adr/ADR-258-trente-et-unieme-revue-de-methode.md) | Trente-et-unième revue de méthode (S631–S635) | actée | S636 | 222 257 | 259 |
 | [259](../adr/ADR-259-trente-deuxieme-revue-de-methode.md) | Trente-deuxième revue de méthode (S636–S640) | actée | S641 | 222 258 | 260 261 263 |
 | [260](../adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md) | I-08 et I-14 : ce qu'ils gouvernent | actée | S642 | 139 141 222 259 |  |
-| [261](../adr/ADR-261-reponses-du-2026-10-07.md) | Réponses du 2026-10-07 (les arbitrages de l'audit des intentions initiales) | actée | S642 | 259 | 262 |
+| [261](../adr/ADR-261-reponses-du-2026-10-07.md) | Réponses du 2026-10-07 (les arbitrages de l'audit des intentions initiales) | actée | S642 | 259 | 262 264 |
 | [262](../adr/ADR-262-indiscernable-du-reel-au-budget.md) | Indiscernable du réel, au budget | actée | S643 | 127 261 |  |
 | [263](../adr/ADR-263-trente-troisieme-revue-de-methode.md) | Trente-troisième revue de méthode (S641–S645) | actée | S646 | 222 259 |  |
+| [264](../adr/ADR-264-le-decoupage-de-la-planete.md) | Le découpage de la planète : HEALPix pour les données, des repères locaux pour le calcul | actée | S649 | 002 261 |  |

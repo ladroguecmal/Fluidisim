@@ -81,7 +81,7 @@ près ; (5) l'ADR, les points touchés (1.5, 7.7, 11.1, 12.3, 12.4), la note dat
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le script ; ADR-264 ; la liste.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — (4) rejoué : les mêmes nombres (HEALPix aires 1,002, angle 53° ; cube-sphère équiangulaire 1,402, 61°) ; (1) et (2)
