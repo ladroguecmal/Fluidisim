@@ -62,39 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S603 — **terminée**. En autonomie (ADR-247) : **12.5 — la portée d'une modification bornée par partition** (SPEC-005 §8 ; absent).
-La ligne qu'on sous-estime : **la bathymétrie**, dont la portée va jusqu'à l'isobathe où la plus longue houle cesse de sentir le fond —
-`h = λ` depuis ADR-196 D3 (et non `λ/2`).
+Session : S604 — **en cours**. En autonomie (ADR-247) : **12.2 — l'éditeur de rivières : dessin, validation bloquante, gravure**
+(SPEC-005 §5 ; absent). Le cœur de l'éditeur, sans son interface : ce que l'outil affiche en continu, ce qu'il refuse, ce qu'il grave.
 
-**Ce que la session fait.** Un module `portee.rs` : `isobathe_limite_m(T, g)` = `λ` à `h = λ` (`L₀·tanh 2π`) ; `celerite(h, T, g)` — la
-célérité de phase de la houle et sa dérivée en `h` (dispersion complète, Newton) ; le tracé d'un faisceau de rayons de houle par
-`refraction::tracer` (une profondeur équivalente `c²/g`) jusqu'à l'isobathe d'arrivée ; `portee_bathymetrie(scène, ancien, nouveau,
-support)` — **les plages à recuire** : aucune si le support reste plus profond que l'isobathe limite ; sinon les plages des rayons qui
-passent sur le support, avant et après. Ne fait pas : les quatre autres lignes de la table (contenant, nœud, tronçon, trait de côte), un
-trait de côte quelconque (ici une côte droite et des plages en intervalles de `y`), le branchement à `cotier::Bibliotheque`.
+**Ce que la session fait.** Un module `riviere.rs` : un réseau de biefs (une ligne d'eau tracée par sommets `(x, y, z)`, une largeur, un
+débit, un `n` de Manning ; des nœuds source, confluence, lac, mer) ; `profil` — par segment, la pente de la ligne d'eau, la hauteur
+normale de Manning (section rectangulaire), `v = Q/A`, `Fr = v/√(g·h)`, et les ressauts (`Fr` qui passe de plus de 1 à moins de 1) ;
+`valider` — les règles bloquantes de SPEC-005 §5.3 : la ligne d'eau descend strictement (tolérance nulle, aussi à travers un nœud),
+`ΣQ` entrant = sortant à chaque confluence, `v` dans une plage plausible (**0,1–3 m/s** par défaut, réglable : un torrent la relève),
+un lac a un exutoire ; `graver` — le fond `z_eau − h` au milieu de chaque segment, et les conflits où il creuse le terrain de plus d'un
+seuil. Ne fait pas : l'interface, la spline (des sommets ici), `largeur(s)` et `section_type(s)`, `debit(t)`, la cinquième règle (les
+régions de niveau marin pavent la planète), la gravure dans une carte de hauteurs.
 
-**Scène, et références calculées avant** (ce script les calcule par un traceur indépendant, numpy vectorisé). Houle de 8 s, plateau à
-1:200, 363 rayons partis à 24 km (121 départs tous les 200 m, trois directions : π, π ± 0,35), arrivée à l'isobathe 5 m, pas de 2 s, huit
-plages de 2 km. L'isobathe limite : **99.923142536 m** (à 20 km du rivage ; `K_s − 1` y vaut −4,0·10⁻⁵, ADR-196). Trois bosses (cos², rayon
-1,5 km) : **profonde** (centre (23 km, 1 km), 7 m ; le support, ancien et nouveau fond, ≥ **107.14 m**) — décalage max d'une arrivée **0.0568 m**, portée **∅** ; **entre λ/2 et λ** (centre (14 km, 1 km), 7 m ; ≥
-**62.14 m**) — décalage **8.958 m**, portée [1, 2, 3, 4, 5, 6, 7] (la règle `λ/2` l'aurait manquée) ; **côtière** (centre (6 km, 1 km), 12 m ; ≥ **17.51 m**) — décalage **788.0 m**,
-portée [2, 3, 4, 5, 6] : trois plages sur huit hors de cause.
+**Références, calculées avant** (ce script, par une bissection indépendante). Bief A (30 m³/s, 20 m, n = 0,035, pente 5·10⁻⁴) : `h` =
+**1.781932256 m**, `v` = 0.841783 m/s, `Fr` = 0.201335. **La faute de saisie** (le premier sommet tapé 69,5 au lieu de 20,0 : une chute de
+50 m, ×100) : `v` = **3.5191 m/s** > 3 — bloquée ; la faute inverse (÷100) : `v` = 0.1765 m/s — **elle passe** (`v ∝ S^0,3` : la règle
+de vitesse n'attrape qu'un sens ; à noter dans la preuve). Bief E (5 m³/s, 8 m, n = 0,03) : raide (6 m sur 300 m) `Fr` = **1.1765**,
+doux (0,1 m sur 400 m) `Fr` = **0.1457** — un ressaut entre les deux. Gravure du bief C (40 m³/s, 25 m, pente 5·10⁻⁴ : `h` =
+**1.832244795 m**) dans un terrain plat à 19,5 m : creusements **2.582244795** et **3.082244795 m** — deux conflits au seuil de 1 m ;
+à 17,7 m : 0.782244795 et 1.282244795 m — un conflit (le second segment).
 
-**Quantum** : f64 ; la tolérance d'un rayon est un demi-texel de la bibliothèque côtière (S599) : **0.25 m** ; l'accord entre traceurs
-**0.001 m** (rapport 250, asserté). **Critères, écrits avant.** (1) l'isobathe limite à 10⁻⁹ près ; `dc/dh` contre une
-différence centrée à 10⁻⁶ relatif, à 5, 30 et 90 m ; (2) sans bosse, les 363 rayons arrivent ; neuf arrivées rejoignent le traceur du plan à 0.001 m — départs à y = −4, 0, 4 km, directions
-π − 0,35, π, π + 0,35 : 4017.6787, -4000.0000, -12017.6787, 8017.6787, 0.0000, -8017.6787, 12017.6787, 4000.0000, -4017.6787 m ;
-(3) la bosse profonde : portée vide, et aucune arrivée décalée de plus de 0.25 m (le fond n'est plus senti) ; (4) la bosse entre λ/2 et λ :
-une arrivée décalée de plus de 10 × 0.25 m, portée non vide ; (5) la bosse côtière : la portée [2, 3, 4, 5, 6], et toute plage dont une arrivée
-change de plus de 0.25 m y est (les deux plages de ce rayon, avant et après) ; (6) refus : période, gravité ou pas non positifs, bornes non croissantes.
+**Quantum** : f64. **Critères, écrits avant.** (1) `h` du bief A à 10⁻⁹ m ; `v` de la faute à 10⁻⁶ ; (2) le réseau juste (A, B → confluence →
+C → lac → D → mer) : aucun défaut ; (3) chaque faute isolément, un défaut et un seul, du bon genre, au bon endroit : la chute ×100
+(vitesse ; A), un sommet qui remonte (le milieu de A à 20,1), un sommet plat (le milieu de A à 20,0 : tolérance nulle), un aval de
+nœud plus haut que l'amont (C parti de 19,1), B à 11 m³/s (confluence, écart
+1 m³/s), le lac sans exutoire ; la faute ÷100 : aucun défaut ; (4) le ressaut du bief E entre ses deux segments, `Fr` à 10⁻⁶ ; (5) la
+gravure : les creusements à 10⁻⁹ m et les conflits ({0, 1} à 19,5 m ; {1} à 17,7 m) ; (6) refus : largeur, débit, `n` non positifs,
+moins de deux sommets, un nœud hors du réseau.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `portee.rs` et ses essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 12.5 ; rituel.
+- [ ] **P2** — `riviere.rs` et ses essais ; (1)–(6).
+- [ ] **P3** — preuve ; liste 12.2 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus ; les arrivées rejoignent le traceur numpy à 10⁻¹¹ m ; bosse profonde 0,0568 m, ∅ ; entre λ/2 et λ 8,958 m ;
-  côtière 2–6. Suite 794.
-- **P3** — preuve PORTEE-S603 ; liste 12.5 (absent → partiel) et décompte ; index ; journal.
