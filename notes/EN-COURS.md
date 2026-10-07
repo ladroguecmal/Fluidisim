@@ -91,7 +91,7 @@ centre** — et le verdict du témoin. (3) Les essais de S659–S664 passent.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — les bords périodiques, la normalisation ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) 2·10⁻¹³ ; (2) le témoin : l'écart suivait `K_r` exactement — le remède, la levée par le flux oblique lue par l'opérateur

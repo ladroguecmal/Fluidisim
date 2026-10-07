@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 21:20 +02:00
+JETON            : libre
+Battement        : 2026-10-07 21:35 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S665 — les bords périodiques à phase tournée ; le facteur de Cote2D rejugé ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S664 — la côte 2D cuite dans B ([journal](notes/JOURNAL.md)). Avant : S663 (la séance visuelle du haut-fond de Berkhoff)
-Session suivante : **S665 — les bords latéraux périodiques à phase tournée** dans la marche de pente douce (A(n + W) = A(n)·e^(i·k₀·sin θ·W), tridiagonal cyclique) et la normalisation du départ par la levée WKB ; le facteur de Cote2D rejugé contre la côte 1D, K_r seul.
+Session en cours : aucune
+Dernière session : S665 — les bords périodiques, la normalisation, `K_r` : la côte 2D juste ([journal](notes/JOURNAL.md))
+Session suivante : **S666 — la trente-septième revue de méthode** (ADR-268, S661–S665) ; puis Cote2D à plusieurs composantes (un spectre) et sa mémoire sur une vraie côte (ADR-196 §3).
 Maillons        : 1
-Registres       : dernier lot S662 (ADR-213 D3) ; le prochain au plus tard en S665
+Registres       : dernier lot S665 (ADR-213 D3) ; le prochain au plus tard en S668
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

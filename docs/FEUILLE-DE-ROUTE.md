@@ -473,6 +473,8 @@ rituel (ADR-266).
 **R40 reçu** : « tout parait crédible » ; 2.7, le modèle parabolique de pente douce (Berkhoff 1982 : le pic tenu, les sections loin).
 **S660–S662** : le grand angle (un cinquième de l'écart) ; la trente-sixième revue (ADR-267 : l'instrument dit ce qui départagerait) ;
 la dispersion d'amplitude — **les quatre sections de Berkhoff à un dixième des mesures** (2.7).
+**S663–S665** : la séance visuelle de Berkhoff, **R41 reçu** (« Je valide, continue ») ; la côte 2D cuite dans B (Cote2D), puis juste — les
+bords périodiques tournés, le départ normalisé, la levée par le flux oblique : à 0,56 % de la côte 1D (2.7).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
