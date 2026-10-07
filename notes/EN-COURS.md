@@ -88,3 +88,8 @@ bit, deux évaluations ; refus : moins de deux sommets, `s` non croissant, une p
 - [ ] **P3** — preuve ; liste 3.4 ; rituel.
 
 ### Notes de reprise
+- **Avant la mesure, une faute du plan relevée** (ADR-236 D1) : l'amplitude du pic **échantillonné à la seconde** porte un quantum de
+  `2·(0,5/600)²` = 1.4e-06 relatif (l'instant du pic tombe jusqu'à 0,5 s d'une seconde entière, `T` = 600 s), au-dessus du seuil de 10⁻⁶ :
+  ce seuil, ainsi appliqué, est disqualifié. L'amplitude se mesure donc **à l'instant exact `t₀ + τ(s)`** (le quantum devient l'arrondi
+  f32, 6·10⁻⁸), seuil inchangé ; l'instant du pic reste mesuré à la seconde (à 1 s près).
+
