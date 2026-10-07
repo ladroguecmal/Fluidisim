@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S664 — **en cours**. En autonomie vers la v2 ; 2.7, « les chemins de B » et la bathymétrie 2D qu'ADR-196 §3 laissait au lot 2D.
+Session : S664 — **terminée**. En autonomie vers la v2 ; 2.7, « les chemins de B » et la bathymétrie 2D qu'ADR-196 §3 laissait au lot 2D.
 R41 reçu (« Je valide, continue »).
 
 **Ce que la session fait.** `Cote2D` (`bathymetrie_cote2d.rs`) : la côte cuite **en 2D** par le modèle de pente douce à grand angle
@@ -95,7 +95,10 @@ celui du centre (la marge tient). (3) Refus : une composante à plus de 45°, un
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `Cote2D` et ses essais ; (1)–(3).
+- [x] **P2** — `Cote2D` et ses essais ; (1)–(3).
 - [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) au bit ; (2) la phase 2,93° (tenu), le facteur 6,6 % et le bord 15 % (manqués) — démêlés : la normalisation au départ
+  (A = 1 où la levée vaut 0,990), les parois (le témoin de la marge), `K_r` (deux corrections rejetées : l'une instable, l'autre empire
+  l'eau mince ; pente_douce.rs remis à S662) ; (3) tenu.

@@ -44,6 +44,8 @@ pub mod bathymetrie;
 pub mod pente_douce;
 /// S364, liste 2.7 : la bathymétrie entre dans B — les tables cuites d'une côte à isobathes droites, par composante.
 pub mod bathymetrie_cote;
+/// S664 — la côte 2D cuite dans B par le modèle de pente douce (2.7).
+pub mod bathymetrie_cote2d;
 /// S367, liste 7.1 : le champ d'écume de B (ADR-014) — la référence : deux canaux, advection orbitale, déferlement.
 pub mod ecume;
 pub mod body;

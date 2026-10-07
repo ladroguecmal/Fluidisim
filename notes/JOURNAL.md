@@ -1591,3 +1591,11 @@ qui ignorait l'écriture en `f32`, rapportée) ; les accents corrigés avant l'e
 Suivant : **S664**, le modèle côtier lu par B (2.7).
 
 *Après S663, 2026-10-07* : **R41 reçu** — *« Je valide, continue »* (la séance visuelle du haut-fond de Berkhoff). Inscrit.
+
+## S664 — 2026-10-07 — la côte 2D cuite dans B
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/COTE-2D-S664.md)) : `Cote2D` — la côte cuite en 2D par
+le grand angle, lue par B. **Mesuré** : au bit au large ; la phase à 2,93° de la côte 1D de S364 sur 3,9 km (tenu) ; le facteur à 6,6 % et
+le bord à 15 % (manqués), démêlés en trois causes — la normalisation au départ, les parois (le témoin de la marge), `K_r` (deux corrections
+essayées puis rejetées, le modèle validé gardé). Maillons **1** (2.7 avance). Suivant : **S665, les bords périodiques à phase tournée** et la
+normalisation du départ, `K_r` jugé seul.
