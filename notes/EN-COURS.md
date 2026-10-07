@@ -62,30 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S595 — **terminée**. En autonomie (ADR-247), **7.2 — spray, embruns, gouttelettes** (absent). Première pièce : **la goutte**.
+Session : S596 — **terminée**. En autonomie, **la vingt-troisième revue de méthode** (ADR-222 D4 ; S591–S595) et **le lot** (dû).
 
-**Ce que la session fait.** `goutte.rs` : une goutte sphérique de rayon `r` dans l'air au repos — la poussée d'Archimède comprise, la
-traînée d'une sphère rigide par Schiller–Naumann, `C_d = 24/Re·(1 + 0,15·Re^0,687)` (de Stokes au régime quadratique) ; la vitesse
-terminale (bissection sur l'équilibre) ; le vol, RK4 à pas fixe en f64 (déterministe), jusqu'au retour à la surface (l'instant et le point
-de chute, interpolés). Ne fait pas : l'émission (le déferlement, la gerbe — d'où naissent les gouttes), le vent, l'évaporation, la
-déformation des grosses gouttes (au-delà de ~1 mm, `C_d` d'une sphère rigide surestime la vitesse terminale), le rendu.
-
-**Références, calculées avant par ce script, avec son propre code** (air 1,2 kg/m³, μ = 1,8·10⁻⁵ Pa·s). Vitesse terminale : `r` = 10 µm,
-**0.011992 m/s** (Stokes pur : 0.012097) ; `r` = 1 mm, **6.9556 m/s**. Une goutte de 0,5 mm lancée à 10 m/s à 45° : retombe en
-**0.90367 s** à **2.3030 m** (dans le vide : 10.1937 m).
-
-**Quantum** (ADR-236 D1, ADR-249 D1) : f64 ; la bissection à 10⁻¹² ; le pas du RK4 du code (10⁻⁴ s) contre celui du script (10⁻⁵ s) —
-erreur estimée sous 10⁻⁶ relatif. **Critères, écrits avant.** (1) les vitesses terminales à 10⁻³ relatif ; (2) le temps de vol et la portée
-à 10⁻³ relatif ; (3) une goutte très lourde (la masse volumique de l'air nulle) retrouve la portée du vide `v²/g` à 10⁻⁶ ; (4) refus :
-rayon, vitesse ou pas non positifs.
+**Ce que la session fait.** Relu : S591 (la revue), S592 (Manning), S593 (la rivière ; un essai de 65 s), S594 (les régions ; un tirage
+unique), S595 (la goutte). **ADR-250** : D1 ; L409 ; METHODE ; BOUSSOLE ; index. Le lot : feuille de route S593–S596.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `goutte.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 7.2 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-250, METHODE, L409, BOUSSOLE, index) ; le lot.
+- [ ] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — terminales 0,011992 et 6,9556 m/s ; vol 0,90367 s, 2,3030 m ; le vide à 10⁻¹⁰ ; refus. Suite 771.
-- **P3** — preuve GOUTTE-S595 ; liste 7.2 (absent → partiel) et décompte ; index ; journal.
-

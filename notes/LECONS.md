@@ -6682,3 +6682,9 @@ qu'il le soit. Le critère vérifiait l'assemblage ; la physique se jugeait aill
 **S582, S589 — le rapport imprimé, non lu.** Le script du plan de S589 écrivait lui-même « rapport au bruit : 1 » à côté d'un seuil ; le
 plan est parti ainsi, et la faute ne s'est vue qu'en codant l'essai. ADR-236 D1 disqualifie un tel seuil ; il fallait que le script le
 refuse au lieu de l'imprimer (ADR-249 D1).
+
+## L409
+
+**S594 — le tirage unique.** « Deux réalisations indépendantes mélangées perdent 21 % de leur hauteur » : vrai en moyenne sur les tirages. Le
+plan l'a jugé sur un couple de graines (42, 43), corrélé à ρ = −0,43 par ses mêmes composantes — 32 % de perte, le critère manqué. 800 couples
+ont retrouvé la moyenne (ADR-250 D1).

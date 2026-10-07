@@ -425,6 +425,8 @@ vingt et unième revue (ADR-248).
 du plan moyen) — la section 3 n'a plus d'absent.
 **S590–S592** : **2.3 et 2.5 ouverts** (le niveau d'un lac par son bilan ; la loi de Manning, un canal à sa hauteur normale) ; la
 vingt-deuxième revue (ADR-249 : le script du plan refuse un seuil sous son quantum).
+**S593–S596** : **2.4, 11.2, 7.2 ouverts** (la ligne d'eau d'une rivière et son remous ; les régions de mer par descripteur ; le vol d'une
+goutte) ; la vingt-troisième revue (ADR-250 : une propriété d'ensemble sur un ensemble).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

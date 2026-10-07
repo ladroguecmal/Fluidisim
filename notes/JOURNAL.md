@@ -1051,3 +1051,9 @@ mêmes composantes qui ne l'était pas (ρ = −0,43) ; l'ensemble sur 800 coupl
 **Entrée.** En autonomie (ADR-247) ; 7.2 (absent). **Fait** ([preuve](../docs/validation/GOUTTE-S595.md)) : `goutte.rs` — Schiller–Naumann,
 la vitesse terminale, le vol. **Mesuré** : les vitesses terminales et le vol aux références du script (son propre code), le vide à 10⁻¹⁰.
 Maillons **1** (7.2 : absent → partiel). Suivant : **S596, la vingt-troisième revue de méthode**, et le lot.
+
+## S596 — 2026-10-07 — la vingt-troisième revue de méthode (ADR-250) ; le lot
+
+**Entrée.** En autonomie ; revue et lot dus. **Friction** : une propriété d'ensemble jugée sur un seul tirage (S594) — **élargie** : un
+ensemble dont la taille est calculée au plan (ADR-250 D1, L409). Un essai de 65 s (S593) : rien à changer sous le plafond. A tenu :
+ADR-249 D1. Le lot : feuille de route S593–S596. Maillons **1**. Suivant : **S597**, un point absent.
