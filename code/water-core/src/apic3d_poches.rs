@@ -120,7 +120,8 @@ impl Apic3 {
     /// **S479 — les poches d'air enfermé** (ADR-220 D1). À l'initialisation (I-06) : la mémoire réservée auprès de l'hôte.
     /// Refus : déjà actives, ou mode relatif (`Domain`). Sans cet appel, le pas est celui d'avant, au bit.
     pub fn enable_air_pockets(&mut self, host: &mut HostServices) -> Result<(), Error> {
-        if self.poches.is_some() || self.is_relative() {
+        // S640 : ni avec le fond lisse.
+        if self.poches.is_some() || self.is_relative() || self.lisse.is_some() {
             return Err(Error::Domain);
         }
         let Domain3 { nx, ny, nz, .. } = self.domain;

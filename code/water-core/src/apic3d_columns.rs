@@ -149,7 +149,8 @@ impl Apic3 {
         if mask.len() != nx * ny {
             return Err(Error::Shape);
         }
-        if self.columns.is_some() {
+        // S640 : ni avec le fond lisse.
+        if self.columns.is_some() || self.lisse.is_some() {
             return Err(Error::Domain);
         }
         let bytes = columns_reserved_bytes(self.domain).ok_or(Error::Domain)?;

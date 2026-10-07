@@ -25,6 +25,9 @@
 //! **S639 — le fond** ([`Apic3::set_seabed`]) : une hauteur par colonne, mise en escalier — les mailles dont le centre est sous le fond
 //! sont solides (`SOLID`), leurs faces des parois immobiles ; les particules qui y entrent sont reposées au-dessus, sans vitesse
 //! descendante ; la reconstruction reflète les particules sous le fond, comme les parois (S389). Éprouvé : le repos sur une pente (S639).
+//!
+//! **S640 — le fond lisse** ([`Apic3::set_seabed_smooth`], `apic3d_lisse.rs`) : les faces coupées — chaque face porte sa fraction
+//! ouverte à l'eau, la projection les pondère (Batty, Bertails et Bridson 2007).
 
 use crate::delta3d::Domain3;
 use crate::delta_projection::Error;
@@ -117,6 +120,9 @@ pub struct Apic3 {
     pub(crate) gouttes: Option<Box<gouttes::Gouttes>>,
     /// **S639 — le fond en escalier** : par colonne (`j·nx + i`), le nombre de mailles solides depuis le bas ; `None`, pas de fond.
     pub(crate) seabed: Option<Vec<u16>>,
+    /// **S640 — le fond lisse** (`set_seabed_smooth`, `apic3d_lisse.rs`) : les hauteurs et les fractions ouvertes des faces ;
+    /// `None`, toutes les faces ouvertes — au bit.
+    pub(crate) lisse: Option<Box<lisse::FondLisse>>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -195,6 +201,7 @@ impl Apic3 {
             kernel: KERNEL_CELLS,
             body: None,
             seabed: None,
+            lisse: None,
             columns: None,
             background: [None; 2],
             background_time_s: 0.,
@@ -955,6 +962,8 @@ impl Apic3 {
             }
         }
         self.phi = phi;
+        // S640 : sous le fond lisse, `φ` étendu horizontalement depuis l'eau et l'air.
+        self.extend_phi_smooth();
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..nx {
@@ -996,6 +1005,8 @@ impl Apic3 {
             (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt() < b.radius + radius
         });
         // S639 : le fond reflète aussi — l'image `2·z_b − z` des particules proches, cherchée seulement près du fond de la colonne.
+        // S640 : avec le fond lisse, les images de l'escalier sont celles de chaque particule (`stair_images`), non de la maille.
+        let lisse = self.lisse.is_some();
         let fond = self.seabed.as_ref().map(|_| self.seabed_height(i, j)).filter(|&zb| zb > 0. && q[2] - zb < radius);
         // S639 : les contremarches — une voisine latérale dont le fond monte plus haut que celui de la colonne, à portée du noyau,
         // reflète à travers la face commune, comme une paroi, les particules sous son sommet.
@@ -1025,6 +1036,8 @@ impl Apic3 {
                         continue;
                     }
                     let p0 = self.x[k];
+                        // S640 : les images de l'escalier du fond lisse, puis celles des parois pour chacune.
+                        let escalier = if lisse { self.stair_images(p0, radius) } else { [None; 5] };
                         // Image : 1 — la particule ; −1 — reflétée par la paroi basse ; 2 — par la paroi haute.
                         let mirror = |v: f32, m: f32, l: f32| if m == 1. { v } else if m == -1. { -v } else { 2. * l - v };
                         for mx in images_x.iter().flatten() {
@@ -1042,6 +1055,9 @@ impl Apic3 {
                                         }
                                     };
                                     add(p);
+                                    for im in escalier.iter().flatten() {
+                                        add([mirror(im[0], *mx, lx), mirror(im[1], *my, ly), mirror(im[2], *mz, 0.)]);
+                                    }
                                     if let Some(zb) = fond {
                                         if p[2] >= zb && p[2] - zb < radius {
                                             add([p[0], p[1], 2. * zb - p[2]]);
@@ -1183,6 +1199,7 @@ impl Apic3 {
         mark("reconstruction");
         self.columns_label();
         self.label_seabed();
+        self.label_smooth();
         self.label_body();
         // S488 : les gouttes (rien sans `enable_droplets`).
         self.droplets_classify();
@@ -1232,6 +1249,7 @@ impl Apic3 {
         }
         self.move_body(dt);
         self.push_seabed();
+        self.push_smooth();
         // S399 : l'échange à la frontière de la zone des colonnes (rien sans zone).
         self.columns_exchange();
         mark("separation_corps_echange");
@@ -1333,6 +1351,8 @@ impl Apic3 {
     /// Toute face qui touche une maille solide prend la vitesse du corps — et, sous le fond (S639), une vitesse nulle. Appelé après
     /// chaque opération qui écrit les faces — sans quoi une extrapolation réécrirait la paroi (S320).
     fn impose_body(&mut self) {
+        // S640 : les faces fermées par le fond lisse.
+        self.impose_smooth();
         let Domain3 { nx, ny, nz, dx } = self.domain;
         if let Some(sb) = self.seabed.as_ref() {
             for j in 0..ny {
@@ -1440,7 +1460,8 @@ impl Apic3 {
         a.iter().zip(b).map(|(x, y)| *x as f64 * *y as f64).sum()
     }
 
-    /// `y = A·x` sur les mailles d'eau : `Σ (x_c − x_n)` vers l'eau, `x_c/θ` vers l'air, rien vers une paroi (sans `1/dx²`).
+    /// `y = A·x` sur les mailles d'eau : `Σ (x_c − x_n)` vers l'eau, `x_c/θ` vers l'air, rien vers une paroi (sans `1/dx²`) ; chaque
+    /// terme pondéré par la fraction ouverte de la face (S640).
     fn apply(&self, x: &[f32], y: &mut [f32]) {
         // S483 (ADR-222 D2) : une écriture par maille, en parallèle avec un système de tâches, au bit.
         let Domain3 { nx, ny, .. } = self.domain;
@@ -1453,10 +1474,12 @@ impl Apic3 {
                     continue;
                 }
                 let mut s = 0f32;
-                for (n, _, _) in self.neighbours(i, j, k).into_iter().flatten() {
+                for (n, f, axis) in self.neighbours(i, j, k).into_iter().flatten() {
+                    // S640 : pondéré par la fraction ouverte de la face (1 sans fond lisse — au bit).
+                    let a = self.fraction(axis, f);
                     match self.label[n] {
-                        WATER => s += x[c] - x[n],
-                        AIR => s += x[c] / self.theta(c, n),
+                        WATER => s += a * (x[c] - x[n]),
+                        AIR => s += a * x[c] / self.theta(c, n),
                         // Le corps : paroi mobile, flux imposé, pas de pression.
                         _ => {}
                     }
@@ -1491,23 +1514,30 @@ impl Apic3 {
                     let mut ghost = 0f32;
                     for (m, nb) in self.neighbours(i, j, k).into_iter().enumerate() {
                         let sign = if m % 2 == 0 { -1. } else { 1. };
-                        let face = match m {
-                            0 => self.u[(k * ny + j) * (nx + 1) + i],
-                            1 => self.u[(k * ny + j) * (nx + 1) + i + 1],
-                            2 => self.v[(k * (ny + 1) + j) * nx + i],
-                            3 => self.v[(k * (ny + 1) + j + 1) * nx + i],
-                            4 => self.w[(k * ny + j) * nx + i],
-                            _ => self.w[((k + 1) * ny + j) * nx + i],
+                        let (axis, f) = match m {
+                            0 => (0, (k * ny + j) * (nx + 1) + i),
+                            1 => (0, (k * ny + j) * (nx + 1) + i + 1),
+                            2 => (1, (k * (ny + 1) + j) * nx + i),
+                            3 => (1, (k * (ny + 1) + j + 1) * nx + i),
+                            4 => (2, (k * ny + j) * nx + i),
+                            _ => (2, ((k + 1) * ny + j) * nx + i),
                         };
-                        div += sign * face;
+                        let face = match axis {
+                            0 => self.u[f],
+                            1 => self.v[f],
+                            _ => self.w[f],
+                        };
+                        // S640 : la divergence et le laplacien pondérés par la fraction ouverte (1 sans fond lisse — au bit).
+                        let a = self.fraction(axis, f);
+                        div += sign * a * face;
                         if let Some((n, _, _)) = nb {
                             match self.label[n] {
-                                WATER => diag += 1.,
+                                WATER => diag += a,
                                 AIR => {
                                     let t = self.theta(c, n);
-                                    diag += 1. / t;
+                                    diag += a / t;
                                     // S444 : la valeur de `p′` à la surface, en mode relatif (nulle sans fond).
-                                    ghost += self.surface_pressure(c, n) / t;
+                                    ghost += a * self.surface_pressure(c, n) / t;
                                 }
                                 _ => {}
                             }
@@ -1565,7 +1595,8 @@ impl Apic3 {
                             continue;
                         }
                         let Some((n, f, axis)) = nb else { continue };
-                        if self.label[c] == SOLID || self.label[n] == SOLID {
+                        // S640 : une face fermée par le fond lisse n'est pas corrigée (elle reste nulle).
+                        if self.label[c] == SOLID || self.label[n] == SOLID || self.fraction(axis, f) == 0. {
                             continue;
                         }
                         let (wc, wn) = (self.label[c] == WATER, self.label[n] == WATER);
@@ -1662,9 +1693,11 @@ impl Apic3 {
                     if nb.iter().flatten().any(|(n, _, _)| self.label[*n] != WATER) {
                         continue;
                     }
-                    let div = self.u[(k * ny + j) * (nx + 1) + i + 1] - self.u[(k * ny + j) * (nx + 1) + i]
-                        + self.v[(k * (ny + 1) + j + 1) * nx + i] - self.v[(k * (ny + 1) + j) * nx + i]
-                        + self.w[((k + 1) * ny + j) * nx + i] - self.w[(k * ny + j) * nx + i];
+                    // S640 : pondérée par les fractions ouvertes (1 sans fond lisse — au bit).
+                    let (fu, fv, fw) = ((k * ny + j) * (nx + 1) + i, (k * (ny + 1) + j) * nx + i, (k * ny + j) * nx + i);
+                    let div = self.fraction(0, fu + 1) * self.u[fu + 1] - self.fraction(0, fu) * self.u[fu]
+                        + self.fraction(1, fv + nx) * self.v[fv + nx] - self.fraction(1, fv) * self.v[fv]
+                        + self.fraction(2, fw + nx * ny) * self.w[fw + nx * ny] - self.fraction(2, fw) * self.w[fw];
                     worst = worst.max(div.abs());
                 }
             }
@@ -1914,6 +1947,8 @@ mod gouttes;
 pub use gouttes::{ballistic_step, droplet_diameter, CD_GOUTTE, RHO_AIR, SIGMA_EAU, WEBER_RUPTURE};
 #[path = "apic3d_poches.rs"]
 mod poches;
+#[path = "apic3d_lisse.rs"]
+mod lisse;
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};
 

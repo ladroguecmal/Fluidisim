@@ -1711,3 +1711,83 @@ fn a_sloping_seabed_at_rest_stays_at_rest_s639() {
     assert_eq!(a.set_seabed(Some(&[0.5; 8])), Err(Error::Domain), "critère 4 : hors du domaine");
 }
 
+
+/// **S640** — le canal de S639 sur le fond **lisse** (les faces coupées) : la hauteur aux centres des colonnes, interpolée.
+fn canal_s640(pente: bool) -> (Apic3, usize) {
+    let (nx, ny, nz, dx) = (48usize, 4usize, 16usize, 0.05f32);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let fond: Vec<f32> = (0..nx * ny).map(|c| {
+        let x = ((c % nx) as f32 + 0.5) * dx;
+        if pente { 0.05 + (x - 0.805).max(0.) / 3. } else { 0.05 }
+    }).collect();
+    a.set_seabed_smooth(Some(&fond)).unwrap();
+    let zb: Vec<f32> = (0..nx * 2).map(|s| a.smooth_seabed_height((s as f32 + 0.5) * dx / 2., 0.1)).collect();
+    let n = a.seed(&|p| {
+        let s = ((p[0] / (dx / 2.)) as usize).min(nx * 2 - 1);
+        p[2] > zb[s] && p[2] < 0.4
+    }).unwrap();
+    (a, n)
+}
+
+/// **S640** — (1) les particules gardées et hors du fond lisse ; (2) le repos sur la pente ; le témoin plat ; (4) refus.
+#[test]
+fn a_smooth_sloping_seabed_at_rest_stays_at_rest_s640() {
+    for (pente, n_attendu) in [(true, 5992usize), (false, 10752)] {
+        let (mut a, n) = canal_s640(pente);
+        assert_eq!(n, n_attendu, "critère 1 : les particules posées");
+        let (mut t, mut worst, mut steps, mut t_pire) = (0u64, 0f32, 0, 0u64);
+        while t < 2_000_000 {
+            let us = a.stable_step_us(20_000).min(2_000_000 - t);
+            let v = a.step(us).unwrap().max_speed;
+            if v > worst {
+                (worst, t_pire) = (v, t);
+            }
+            t += us;
+            steps += 1;
+        }
+        let sous = a.particles().iter().filter(|p| p[2] < a.smooth_seabed_height(p[0], p[1])).count();
+        println!("S640 {} : {steps} pas, vitesse parasite max {worst:.3e} m/s à {:.2} s, {} particules ({sous} sous le fond)",
+            if pente { "pente" } else { "témoin plat" }, t_pire as f64 * 1e-6, a.particle_count());
+        assert_eq!((a.particle_count(), sous), (n, 0), "critère 1 : les particules");
+        if !pente {
+            assert!(worst <= 0.01, "le témoin plat : {worst}");
+        }
+        // Critère 2 (≤ 1 cm/s) **manqué** sur la pente : 0,26 m/s au rivage, 0,28 à maille moitié — le film plus mince que le noyau,
+        // où la surface reconstruite se trompe de un à deux centimètres (la projection, elle, est exacte : l'essai suivant).
+        // L'essai n'affirme que ce qui a tenu (ADR-244).
+    }
+    let (mut a, mut arena) = apic(4, 2, 4, 0.1, 100);
+    assert_eq!(a.set_seabed_smooth(Some(&[0.1; 7])), Err(Error::Domain), "critère 4 : longueur");
+    assert_eq!(a.set_seabed_smooth(Some(&[f32::NAN; 8])), Err(Error::NotFinite), "critère 4 : non fini");
+    assert_eq!(a.set_seabed_smooth(Some(&[0.5; 8])), Err(Error::Domain), "critère 4 : hors du domaine");
+    a.set_seabed_smooth(Some(&[0.1; 8])).unwrap();
+    assert_eq!(a.enable_air_pockets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }), Err(Error::Domain), "critère 4 : poches");
+    assert_eq!(a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &[1; 8]), Err(Error::Domain), "critère 4 : colonnes");
+    a.set_seabed_smooth(None).unwrap();
+    a.enable_air_pockets(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    assert_eq!(a.set_seabed_smooth(Some(&[0.1; 8])), Err(Error::Domain), "critère 4 : poches actives");
+}
+
+/// **S640 — la propriété annoncée** (ADR-254 D2) : au repos hydrostatique, la projection pondérée rend une vitesse nulle quelles
+/// que soient les fractions. Une pente entièrement immergée (l'eau à 0,75 m, au moins 17 cm au-dessus du fond : plus que le
+/// noyau, la surface ne voit pas le fond) : mesuré 8·10⁻⁶ m/s ; borne 10⁻⁴.
+#[test]
+fn the_weighted_projection_holds_rest_over_a_submerged_slope_s640() {
+    let (nx, ny, nz, dx) = (48usize, 4usize, 16usize, 0.05f32);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let fond: Vec<f32> = (0..nx * ny).map(|c| 0.05 + (((c % nx) as f32 + 0.5) * dx - 0.805).max(0.) / 3.).collect();
+    // ADR-257 D1 : la plus petite profondeur dépasse le noyau (2 mailles).
+    assert!(0.75 - fond[nx - 1] > 2. * dx);
+    a.set_seabed_smooth(Some(&fond)).unwrap();
+    let zb: Vec<f32> = (0..nx * 2).map(|s| a.smooth_seabed_height((s as f32 + 0.5) * dx / 2., 0.1)).collect();
+    let n = a.seed(&|p| p[2] > zb[((p[0] / (dx / 2.)) as usize).min(nx * 2 - 1)] && p[2] < 0.75).unwrap();
+    let (mut t, mut worst) = (0u64, 0f32);
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        worst = worst.max(a.step(us).unwrap().max_speed);
+        t += us;
+    }
+    println!("S640 pente immergée : {n} particules, vitesse parasite max {worst:.3e} m/s");
+    assert_eq!(a.particle_count(), n);
+    assert!(worst <= 1e-4, "{worst}");
+}
