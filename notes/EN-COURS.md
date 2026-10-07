@@ -62,25 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S641 — **terminée**. En autonomie (ADR-247). **La trente-deuxième revue de méthode** (ADR-222 D4 : S636–S640), **le lot**
-(feuille de route S638–S640), et **l'audit des intentions initiales** demandé par l'utilisateur (2026-10-07,
-[AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)) versé là où une session peut le verser seule
-(ADR-218 D2) : les intentions fondatrices absentes deviennent des points de la liste ; les dérives non décidées sont inscrites à leurs
-points ; ce qui relève de l'utilisateur lui est soumis, rien n'est tranché à sa place.
+Session : S642 — **en cours**. En autonomie (ADR-247). **Les corrections de l'audit** ([AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)
+§2.1, ADR-259) qu'une session tranche seule (ADR-222 : une décision technique que la mesure contredit se remplace).
 
-**Critères, écrits avant.** (1) ADR-259 relit chaque session S636–S640 et décide ; (2) la ligne S638–S640 de la feuille de route ; (3) les
-intentions 1.1–1.11 de l'audit deviennent onze points (*absents*, « ajouté en S641 »), le décompte et les dépendances suivent,
-`etat_projet.py --check` à zéro ; (4) 4.11 dit que son seuil n'est pas une règle reçue (ADR-112 D1) ; 13.2 ne dit plus C11 non exécuté ;
-7.8 porte le détail d'ADR-016 ; les mineurs de l'audit (1.15) vont aux « manquent » de leurs points ; (5) les questions de l'utilisateur
-au registre des questions ouvertes.
+**Ce que la session fait.** (a) **4.11** : `substitutif::mode_requis` ne prescrit plus `0,35·Hs` — ADR-112 D1 (« proposition historique
+non reçue », « aucun nombre de remplacement ») ; le seuil devient un paramètre de l'appelant, sans défaut. (b) **I-08** : ce qu'il gouverne,
+précisé par ADR (les champs de production de B, W, δ) ; l'inventaire des modules où `f64` domine, chacun rangé (V, référence ou instrument,
+outil hors ligne, calcul scalaire arrondi avant d'entrer dans un champ, **référence de champ qui doit sa version de production f32**) ; un
+contrôle dans `etat_projet.py --check` fait échouer un module nouveau non rangé. (c) **I-14** : la provenance étendue à la preuve qui a
+reçu la loi, avec sa référence publiée — les douze lois que l'audit nomme y sont citées (vérifié avant : Green, Brooks–Corey, Tomiyama,
+Schiller–Naumann, Willis, Rayleigh, Marshall–Palmer, Synolakis, Keller, Thacker, Davies–Taylor, Minnaert).
+
+**Critères, écrits avant.** (1) `mode_requis(max|δ|, seuil, par_nature)` : aucune constante de bascule dans le code ; essais : au seuil
+perturbatif, au-delà substitutif, par nature substitutif, un seuil non fini ou négatif refusé ; (2) ADR-260 et les deux amendements dans
+`01_INVARIANTS.md` ; (3) le contrôle des modules `f64` : à zéro sur le dépôt, et il échoue sur un module non rangé (essayé) ; (4) 4.11, 1.8 à
+jour ; la suite du cœur passe.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan ; le lot.
-- [x] **P2** — ADR-259 ; la liste, ses dépendances ; les questions.
-- [x] **P3** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — 4.11 ; ADR-260, les amendements, le contrôle ; la liste.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-259 (D1 : un témoin qui supprime une cause avant de nommer un remède ; D2 : une valeur tirée d'un ADR se cite avec ceux
-  qui le nomment ; D3 : le bilan global relit la liste contre les documents fondateurs) ; onze points ajoutés (121 → 132, absents 3 → 14),
-  leurs dépendances ; 4.11, 13.2, 7.8 et quatre « manquent » corrigés ; les questions de l'audit dans la boussole.

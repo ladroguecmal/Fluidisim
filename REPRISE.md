@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 13:05 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 13:11 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S642 — les corrections de l'audit : 4.11, I-08, I-14 ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S641 — la trente-deuxième revue de méthode ; l'audit versé dans la liste ([journal](notes/JOURNAL.md))
 Session suivante : **S642 — les corrections de l'audit** : 4.11 (le critère de bascule à instruire sur un couplage calculé, ou le seuil 0,35·Hs rangé en paramètre non reçu, ADR-112 D1) ; I-08 (les modules en f64 : amender ou rendre conformes) ; I-14 (les lois employées ajoutées à SPEC-001/002, ou un amendement). Puis le rouleau 3D (l'étape 2 sur l'escalier de S639, ou la surface en eau mince).
 Maillons        : 1
