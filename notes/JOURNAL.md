@@ -975,3 +975,10 @@ partiel.
 ([preuve](../docs/validation/TSUNAMI-RAYON-COURBE-S584.md)) : `sur_rayon`, Green et la réfraction ensemble. **Mesuré** : l'arrivée à 0,2 ms,
 l'amplitude à 8·10⁻⁶ de la forme fermée ; un critère vrai par construction, dit tel quel. Maillons **0** (3.4 avance). Suivant : **S585**,
 un point partiel ; revue à S586.
+
+## S585 — 2026-10-07 — la v2 : la liste à 100 %, la physique d'abord (ADR-247)
+
+**Entrée.** L'utilisateur : « L'objectif est de réaliser une v2. » Le dépôt n'en avait pas de définition ; deux questions posées, deux
+réponses : la v2 est **la liste à 100 %**, et **la physique d'abord**. Écrit en ADR-247 ; la boussole porte la v2 et suspend l'alternance
+d'ADR-191 jusqu'à l'intégration. Maillons **1**. Suivant : **S586, la vingt et unième revue de méthode**, puis les points absents.
+

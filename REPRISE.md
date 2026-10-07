@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 02:20 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 02:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S585 — ADR-247 (la v2 : la liste à 100 %, la physique d'abord) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S584 — le lot ; le tsunami sur un rayon courbe ([journal](notes/JOURNAL.md)). Avant : S583 (la réfraction par tracé de rayons)
 Session suivante : **S585 — un point partiel** (par la feuille de route et le tableau de bord). Revue à S586 (noter : un critère vrai par construction, S584 ; deux trajectoires de familles différentes, S583). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 0 — S584 : 3.4 avance (le rayon courbe)

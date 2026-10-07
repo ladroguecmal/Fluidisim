@@ -38,10 +38,11 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 |---|---|---|
 | ambition | complète ; une priorité ou un budget ne retirent rien ; seul l'utilisateur réduit | ADR-127 |
 | fin | la liste à 100 % | ADR-218 |
+| **v2** | **la liste à 100 %, la physique d'abord** (décision du 2026-10-07) ; l'intégration dans la scène et les revues visuelles ensuite ; l'alternance d'ADR-191 suspendue jusque-là | ADR-247 |
 | machine | **ce PC seul** — référence, cible de livraison ; les points à second matériel reformulés sur lui | ADR-174, ADR-219 D2 |
 | dépôt | **jamais poussé**, aucun dépôt distant | ADR-174, REPRISE §9 |
 | moteur | Godot moteur du jeu entier ; le rendu final de l'eau dans Godot, l'afficheur reste le banc | ADR-192, ADR-197 |
-| alternance | une session de rendu, une de physique | ADR-191 |
+| alternance | une session de rendu, une de physique — **suspendue** pour la v2, la physique d'abord | ADR-191, ADR-247 |
 | autonomie | les sessions s'enchaînent sans « Continue » ; les arbitrages techniques se tranchent ici, par écrit | ADR-215 D1, D2 |
 | visuel | mesurer plutôt que regarder : le banc visuel, des vidéos de référence, à traitement égal (le même codec) | ADR-216 |
 | type d'eau | une option d'édition de la carte, qui varie dans l'espace | ADR-217 |

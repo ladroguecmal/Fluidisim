@@ -62,27 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S584 — **terminée**. En autonomie : **le lot** (dû ; feuille de route S582–S583), puis **3.4 — le tsunami sur un rayon courbe** :
-S582 le propage sur un rayon droit, S583 trace des rayons qui se courbent ; les brancher.
+Session : S585 — **en cours**. **Décision de l'utilisateur, 2026-10-07** : « L'objectif est de réaliser une v2 » ; la v2 = **la liste à
+100 %** ; **la physique d'abord** (l'intégration et les revues visuelles ensuite). Écrite en **ADR-247** ; BOUSSOLE (la v2 ; l'alternance
+d'ADR-191 suspendue) ; index ; la mémoire.
 
-**Ce que la session fait.** `tsunami::sur_rayon(a0, h0, point, voisin, b0, profondeur)` : l'instant d'arrivée est l'instant du point du
-rayon tracé ; l'amplitude, `A₀·(h₀/h)^(1/4)·K_r` — Green et la réfraction ensemble (le flux d'énergie `A²·√h·b` conservé dans le tube de
-rayons).
-
-**Références, calculées avant** (ce script les écrit). Le fond de S583, un tsunami de 0,5 m lancé à 30° : à 190 km (`h` = 295 m),
-l'arrivée à **1 604,6227 s** (Simpson, S583) ; l'amplitude `0,5·(4000/295)^(1/4)·0,934944` = **0.897047 m** (Green seul : ×1.918932).
-
-**Quantum** (ADR-236 D1) : f64 ; `K_r` mesuré à 10⁻⁵ (S583). **Critères, écrits avant.** (1) l'arrivée à 0,01 s ; (2) l'amplitude à 10⁻⁴
-relatif ; (3) le flux `A²·√h·b` constant à 10⁻⁴ relatif en cinq points du rayon ; (4) refus : une profondeur non positive, un écart nul.
+**Ce que la session fait.** ADR-247 et ses renvois. Puis le choix des sessions suivantes selon D2 : les points absents d'abord, par
+campagne (au 2026-10-07 : 30 absents).
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `sur_rayon` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
+- [x] **P1** — jeton ; ADR-247, BOUSSOLE, index, mémoire.
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — arrivée 1 604,6229 s ; amplitude 0,897333 pour 0,897340 ; flux constant (vrai par construction — noté dans la preuve) ;
-  refus. Suite 761.
-- **P3** — preuve TSUNAMI-RAYON-COURBE-S584 ; liste 3.4 ; index ; journal ; le lot.
-
