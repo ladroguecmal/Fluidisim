@@ -407,7 +407,9 @@ pas recopiée ici (L137).
   Saint-Venant 2D rend le flux de ses bords — le bilan de volume à 4,6·10⁻¹⁵ ([preuve](validation/RELAIS-RIVAGE-FLUX-S680.md)). **S682** : la
   brique 2, la sortie à droite d'APIC — le compte exact, le volume sorti égal au flux de la face ([preuve](validation/RELAIS-RIVAGE-SORTIE-S682.md)).
   **S683** : la brique 3, l'entrée à droite — des particules posées pour un volume donné, un réservoir, le bilan à 3,5·10⁻¹⁶
-  ([preuve](validation/RELAIS-RIVAGE-ENTREE-S683.md)).
+  ([preuve](validation/RELAIS-RIVAGE-ENTREE-S683.md)). **S684 — le raccord au rivage au repos** (`relais_rivage.rs`) : APIC 3D et Saint-Venant 2D
+  côte à côte, **le repos tenu sur six plages à quelques µm/s** (APIC seul : 0,2 à 0,6 m/s), la masse au bit
+  ([preuve](validation/RELAIS-RIVAGE-REPOS-S684.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -128,6 +128,7 @@ pub mod delta_projection;
 pub mod delta3d;
 /// S388 — APIC en trois dimensions, la seconde représentation de δ (ADR-186, ADR-207 C4).
 pub mod apic3d;
+pub mod relais_rivage;
 /// S448 — le raccord d'une bande `Apic3` (eau totale) dans une mer `Volume3` (δ relatif), C7d-3c (ADR-214).
 pub mod band_in_sea;
 

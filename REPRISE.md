@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 00:30 +02:00
+JETON            : libre
+Battement        : 2026-10-08 00:46 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S684 — le raccord au rivage au repos (APIC 3D et Saint-Venant 2D) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S683 — Le relais au rivage, brique 3 : l'entrée à droite d'APIC ([journal](notes/JOURNAL.md))
-Session suivante : S684 — le raccord au rivage au repos : APIC 3D et Saint-Venant 2D côte à côte sur six plages
-Maillons        : 1 (4.14 : l'entrée à droite d'APIC)
+Session en cours : aucune
+Dernière session : S684 — Le raccord au rivage au repos ([journal](notes/JOURNAL.md)). Avant : S683 (Le relais au rivage, brique 3 : l'entrée à droite d'APIC)
+Session suivante : S685 — l'étape 2 du relais au rivage : l'onde solitaire à travers le raccord ; revue en S686
+Maillons        : 1 (4.14 : le repos au rivage tenu par le relais)
 Registres       : dernier lot S683 (ADR-213 D3) ; le prochain au plus tard en S686
 ```
 

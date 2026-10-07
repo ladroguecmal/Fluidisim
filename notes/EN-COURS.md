@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S684 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271), l'étape 1 de la conception.
+Session : S684 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271), l'étape 1 de la conception.
 
 **Ce que la session fait.** Le module `relais_rivage.rs` : `RelaisRivage` tient APIC 3D (bord droit ouvert, sa sortie et son entrée)
 et Saint-Venant 2D côte à côte, à la même maille et au même nombre de rangées. À chaque pas :
@@ -105,7 +105,8 @@ La masse se compte : Saint-Venant + particules × quantum + réservoir − dette
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `relais_rivage.rs` ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P2** — `relais_rivage.rs` ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) au plus 5,0·10⁻⁶ m/s sur les six plages ; (2) 5,4·10⁻¹⁶ ; (3) tenu. Le montage corrigé en route : Saint-Venant partait de 0,31 m, la 3D de 0,30 m (le réseau des particules) — il part maintenant du niveau de la 3D.

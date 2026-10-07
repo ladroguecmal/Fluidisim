@@ -1751,3 +1751,13 @@ des particules pour le reflux).
 particule posée à la place la moins occupée sous la surface. **Mesuré** : le bilan à 3,5·10⁻¹⁶ ; la colonne du bord à 7,12 par maille
 mouillée ; la vitesse maximale à 0,165 m/s. Maillons **1** (4.14). Suivant : **S684**, le raccord au repos, APIC et Saint-Venant côte à
 côte sur six plages.
+
+## S684 — 2026-10-08 — Le raccord au rivage au repos
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, étape 1. **Fait**
+([preuve](../docs/validation/RELAIS-RIVAGE-REPOS-S684.md)) : `relais_rivage.rs`, APIC 3D et Saint-Venant 2D côte à côte (le niveau du
+bord 3D nourrit Saint-Venant, son flux revient comme vitesse du bord d'APIC, une dette compte l'écart). **Mesuré** : sur six plages, l'eau
+au repos à quelques µm/s des deux côtés, cent mille fois mieux qu'APIC seul ; la masse à 5·10⁻¹⁶. Au premier essai, une plage manquait :
+Saint-Venant partait d'un niveau plus haut d'un centimètre que la 3D (le réseau des particules). Le plan l'avait annoncé ; le montage est
+corrigé. Maillons **1** (4.14 : « une surface fiable en eau mince au rivage au repos », tenue par le relais). Suivant : **S685**,
+l'étape 2 (l'onde solitaire à travers le raccord) ; la revue en S686.
