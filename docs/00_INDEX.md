@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [La côte 2D porte le niveau moyen et le courant de dérive — S673](validation/COTE-2D-NIVEAU-DERIVE-S673.md) : 13 cm au rivage, à 0,2 %.
 - [L'effet moyen de la houle : le niveau au rivage, le courant de dérive — S672](validation/HOULE-MOYENNE-S672.md) : trois références analytiques à 1 %.
 - [La côte 2D qui déferle : Cote2D jusqu'au rivage — S670](validation/COTE-2D-DEFERLANTE-S670.md) : chaque composante à 0,4 %.
 - [Le déferlement d'une mer dans la pente douce : Battjes et Janssen — S669](validation/DEFERLEMENT-PENTE-DOUCE-S669.md) : Hrms à 0,3 % de l'équilibre 1D.

@@ -86,64 +86,95 @@ pub fn niveau_moyen(s: &[f64], h: &[f64], sss: &dyn Fn(usize, f64) -> f64, eta0:
     Some(eta)
 }
 
-/// La contrainte de frottement moyenne le long de la côte, par `ρ` : `c_f·⟨|u|·u_n⟩`, `u = Σ u_c·cos(ω_c·t + φ_c) + (0, V)`, la moyenne
-/// sur une suite de temps équirépartie (`N` = 8192).
-fn frottement(vitesses: &[([f64; 2], f64)], v: f64, cf: f64) -> f64 {
+/// Les vitesses orbitales au fond `(u_s, u_n)` aux instants d'une suite équirépartie (`N` = 8192) : `u = Σ u_c·cos(ω_c·t + φ_c)`. Les
+/// phases initiales et le pas de temps sont des suites de Weyl (le nombre d'or, le nombre plastique), incommensurables aux périodes.
+fn echantillons(vitesses: &[([f64; 2], f64)]) -> Vec<[f64; 2]> {
     const N: usize = 8192;
-    // Les phases initiales et le pas de temps : des suites de Weyl (le nombre d'or, le nombre plastique), incommensurables aux périodes.
     let omega_max = vitesses.iter().map(|x| x.1).fold(0., f64::max);
     if !(omega_max > 0.) {
-        return cf * v.abs() * v;
+        return vec![[0., 0.]];
     }
     let dt = 0.754_877_666_246_692_8 * core::f64::consts::TAU / omega_max;
-    let mut somme = 0.;
-    for i in 0..N {
+    (0..N).map(|i| {
         let t = i as f64 * dt;
-        let (mut us, mut un) = (0., v);
+        let (mut us, mut un) = (0., 0.);
         for (c, (u, om)) in vitesses.iter().enumerate() {
             let phi = (c as f64 * 0.618_033_988_749_894_8).fract() * core::f64::consts::TAU;
             let cs = (om * t + phi).cos();
             us += u[0] * cs;
             un += u[1] * cs;
         }
-        somme += (us * us + un * un).sqrt() * un;
-    }
-    cf * somme / N as f64
+        [us, un]
+    }).collect()
+}
+
+/// La contrainte de frottement moyenne le long de la côte, par `ρ` : `c_f·⟨|u|·u_n⟩`, `u` = l'échantillon + `(0, V)`.
+fn frottement(u: &[[f64; 2]], v: f64, cf: f64) -> f64 {
+    let somme: f64 = u.iter().map(|w| {
+        let un = w[1] + v;
+        (w[0] * w[0] + un * un).sqrt() * un
+    }).sum();
+    cf * somme / u.len() as f64
 }
 
 /// **Le courant de dérive** `V` (m/s, le long de `+n`) qui équilibre la force `force = −dS_sn/ds` (m²/s², par `ρ`) par le frottement au
-/// fond `c_f·⟨|u|·u_n⟩` des vitesses orbitales `vitesses` ([`vitesse_au_fond`]). Bissection : le frottement croît avec `V`.
+/// fond `c_f·⟨|u|·u_n⟩` des vitesses orbitales `vitesses` ([`vitesse_au_fond`]). Le frottement croît avec `V` et s'annule en 0 (la
+/// loi des vitesses orbitales est symétrique) : la racine est encadrée, puis trouvée par fausse position (Illinois).
 pub fn courant_de_derive(force: f64, vitesses: &[([f64; 2], f64)], cf: f64) -> f64 {
     if force == 0. || !(cf > 0.) || !force.is_finite() {
         return 0.;
     }
+    let u = echantillons(vitesses);
     let signe = force.signum();
     let f = force.abs();
     // Une borne haute : sans houle, c_f·V² = f ; la houle n'ajoute que du frottement.
-    let mut hi = (f / cf).sqrt();
-    let mut lo = 0.;
-    for _ in 0..80 {
-        let v = 0.5 * (lo + hi);
-        if signe * frottement(vitesses, signe * v, cf) < f {
-            lo = v;
-        } else {
-            hi = v;
+    let g = |v: f64| signe * frottement(&u, signe * v, cf) - f;
+    let (mut lo, mut hi) = (0., (f / cf).sqrt());
+    let (mut glo, mut ghi) = (g(lo), g(hi));
+    if !(glo < 0.) {
+        return 0.;
+    }
+    if !(ghi > 0.) {
+        return signe * hi;
+    }
+    // Illinois : la fausse position, le poids de la borne qui reste deux fois de suite divisé par deux.
+    let mut cote = 0i8;
+    let mut v = hi;
+    for _ in 0..100 {
+        v = (lo * ghi - hi * glo) / (ghi - glo);
+        let gv = g(v);
+        if gv == 0. || hi - lo <= 1e-12 * hi {
+            break;
         }
-        if hi - lo <= 1e-12 * hi {
+        if gv < 0. {
+            (lo, glo) = (v, gv);
+            if cote == -1 {
+                ghi *= 0.5;
+            }
+            cote = -1;
+        } else {
+            (hi, ghi) = (v, gv);
+            if cote == 1 {
+                glo *= 0.5;
+            }
+            cote = 1;
+        }
+        if (gv / f).abs() <= 1e-13 {
             break;
         }
     }
-    signe * 0.5 * (lo + hi)
+    signe * v
 }
 
-/// **Le courant de dérive aux rangées** : `−dS_sn/ds` par différences centrées (décentrées aux bords), puis [`courant_de_derive`] à chaque
-/// rangée. `None` : des longueurs différentes, moins de deux rangées.
-pub fn derive_aux_rangees(s: &[f64], ssn: &[f64], vitesses: &[Vec<([f64; 2], f64)>], cf: f64) -> Option<Vec<f64>> {
+/// **Le courant de dérive aux rangées** : `−dS_sn/ds` par différences centrées (décentrées aux bords), puis [`courant_de_derive`] à une
+/// rangée sur `garder` (S673 : les rangées des tables), à partir de la première. `None` : des longueurs différentes, moins de deux rangées,
+/// `garder` nul.
+pub fn derive_aux_rangees(s: &[f64], ssn: &[f64], vitesses: &[Vec<([f64; 2], f64)>], cf: f64, garder: usize) -> Option<Vec<f64>> {
     let n = s.len();
-    if n < 2 || ssn.len() != n || vitesses.len() != n {
+    if n < 2 || ssn.len() != n || vitesses.len() != n || garder == 0 {
         return None;
     }
-    Some((0..n).map(|i| {
+    Some((0..n).step_by(garder).map(|i| {
         let (a, b) = if i == 0 { (0, 1) } else if i + 1 == n { (n - 2, n - 1) } else { (i - 1, i + 1) };
         let force = -(ssn[b] - ssn[a]) / (s[b] - s[a]);
         courant_de_derive(force, &vitesses[i], cf)

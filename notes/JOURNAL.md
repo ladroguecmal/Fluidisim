@@ -1664,3 +1664,11 @@ en `η̄`) et le courant de dérive (le frottement moyenné exactement sur le te
 à 0,10 % de Longuet-Higgins et Stewart, la remontée saturée à 0,73 % de Bowen, la dérive à 0,99 % de Longuet-Higgins 1970 à 1° (10,9 % à
 5° : le frottement n'y est plus linéaire). Maillons **1** (2.7, 12.3 avancent). Suivant : **S673**, `Cote2D` reçoit le niveau et le
 courant de sa mer.
+
+## S673 — 2026-10-07 — La côte 2D porte le niveau moyen et le courant de dérive
+
+**Entrée.** En autonomie vers la v2 ; 2.7 et 12.3. **Fait** ([preuve](../docs/validation/COTE-2D-NIVEAU-DERIVE-S673.md)) :
+`cuire_deferlante` reçoit `c_f`, calcule `η̄(s)` et `V(s)` de sa mer par rangée, et `eval` les ajoute ; `houle_moyenne` échantillonne une
+fois et cherche par Illinois. **Mesuré** : `η̄` à 0,21 % et `V` à 0,64 % de l'équilibre 1D ; 13 cm de remontée au rivage, 11 cm/s de
+courant ; sans déferlement, au bit. La cuisson coûtait 8,3 s, ramenée à 5,3 s. Maillons **1** (2.7, 12.3). Suivant : **S674**, la
+rétroaction du niveau sur le déferlement (13 % de profondeur au rivage), ou `Cote2D` dans Godot.

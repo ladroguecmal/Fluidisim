@@ -21,6 +21,7 @@
 use crate::background::{Background, Component};
 use crate::host::{AllocError, HostServices};
 use crate::bathymetrie::transformer;
+use crate::houle_moyenne::{contrainte, derive_aux_rangees, niveau_moyen, vitesse_au_fond, Onde};
 use crate::pente_douce::{nombre_d_onde, propager_spectre_periodique, Composante, Deferlement};
 use crate::phase::PhaseQ32;
 use crate::types::{SimTime, WaterSample, WorldPos};
@@ -56,6 +57,10 @@ pub struct Cote2D {
     /// Le vecteur d'onde local, dans les axes de B, rad/m.
     kv: Vec<[f32; 2]>,
     coth: Vec<f32>,
+    /// S673 — le niveau moyen `η̄` (m) et le courant de dérive `V` (m/s, le long de `t̂`) de chaque rangée des tables ; vides sans
+    /// déferlement.
+    niveau: Vec<f32>,
+    derive: Vec<f32>,
 }
 
 fn onde(c: &Component) -> (f64, f64) {
@@ -76,21 +81,28 @@ impl Cote2D {
     #[allow(clippy::too_many_arguments)]
     pub fn cuire_decime(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64, pas: f64,
         m: usize, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
-        Self::cuire_interne(host, fond, normale, origine, longueur, largeur, pas, m, false, profondeur)
+        Self::cuire_interne(host, fond, normale, origine, longueur, largeur, pas, m, None, profondeur)
     }
 
     /// **S670 — la côte qui déferle** : comme [`Cote2D::cuire_decime`], mais la mer de B déferle (Battjes et Janssen, S669) — toutes ses
     /// composantes marchent ensemble, amorties au même taux ; `γ` de Battjes et Stive, tiré de `Hrms₀ = 2·√(Σ a²)` et de la période
     /// moyenne `1/f̄`, `f̄ = Σ a²·f / Σ a²`. La profondeur reste positive : la côte s'arrête avant le jet de rive.
+    ///
+    /// **S673** : la mer pousse aussi l'eau ([`crate::houle_moyenne`]) — le niveau moyen `η̄(s)` (rapporté au bord du large) et le courant
+    /// de dérive `V(s)`, le frottement au fond `c_f` (`frottement`, ≈ 0,01 sur le sable) ; la côte supposée uniforme le long de ses bords :
+    /// l'énergie de chaque composante moyennée sur `n`, son vecteur d'onde par Snell. `eval` les ajoute.
     #[allow(clippy::too_many_arguments)]
     pub fn cuire_deferlante(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64,
-        pas: f64, m: usize, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
-        Self::cuire_interne(host, fond, normale, origine, longueur, largeur, pas, m, true, profondeur)
+        pas: f64, m: usize, frottement: f64, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
+        if !(frottement > 0. && frottement.is_finite()) {
+            return Err(Cote2DError::Geometrie);
+        }
+        Self::cuire_interne(host, fond, normale, origine, longueur, largeur, pas, m, Some(frottement), profondeur)
     }
 
     #[allow(clippy::too_many_arguments)]
     fn cuire_interne(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64, pas: f64,
-        m: usize, deferlement: bool, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
+        m: usize, frottement: Option<f64>, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
         if m == 0 {
             return Err(Cote2DError::Geometrie);
         }
@@ -125,6 +137,8 @@ impl Cote2D {
             facteur: Vec::with_capacity(nc * ns * nn),
             kv: Vec::with_capacity(nc * ns * nn),
             coth: Vec::with_capacity(nc * ns * nn),
+            niveau: Vec::new(),
+            derive: Vec::new(),
         };
         let mut ondes = Vec::with_capacity(nc);
         for c in composantes {
@@ -154,7 +168,7 @@ impl Cote2D {
         let spectre: Vec<Composante> = composantes.iter().zip(&ondes).zip(&departs).map(|((c, &(k0, omega, _, sin0)), d)| Composante {
             periode: core::f64::consts::TAU / omega, amplitude: c.amplitude as f64, incident: &**d, k_n: k0 * sin0 }).collect();
         // S670 : toutes les composantes marchent ensemble — sans déferlement, au bit des marches séparées (S669).
-        let regle = if deferlement {
+        let regle = if frottement.is_some() {
             let somme: f64 = spectre.iter().map(|c| c.amplitude * c.amplitude).sum();
             let f_moy = spectre.iter().map(|c| c.amplitude * c.amplitude / c.periode).sum::<f64>() / somme.max(f64::MIN_POSITIVE);
             (somme > 0.).then(|| Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, g))
@@ -163,6 +177,31 @@ impl Cote2D {
         };
         let champs = propager_spectre_periodique(&h, g, 0.0, (ns_m - 1) as f64 * pas, pas, n0, pas, nn_m, &spectre, regle)
             .map_err(|_| Cote2DError::Profondeur)?;
+        // S673 : le niveau moyen et le courant de dérive (`houle_moyenne`, S672), par rangée de la marche — l'énergie de chaque composante
+        // moyennée le long de la côte, son vecteur d'onde par Snell (`k_n` = `k₀·sin θ₀`, `k` linéaire à la profondeur moyenne de la rangée).
+        if let Some(cf) = frottement {
+            let s_m: Vec<f64> = (0..ns_m).map(|i| i as f64 * pas).collect();
+            let h_m: Vec<f64> = s_m.iter().map(|&s| (0..nn_m).map(|j| h(s, n0 + j as f64 * pas)).sum::<f64>() / nn_m as f64).collect();
+            let rangees: Vec<Vec<Onde>> = (0..ns_m).map(|i| {
+                spectre.iter().zip(&champs).map(|(c, champ)| {
+                    let omega = core::f64::consts::TAU / c.periode;
+                    let a2 = (0..nn_m).map(|j| {
+                        let (re, im) = champ.valeur(i, j);
+                        re * re + im * im
+                    }).sum::<f64>() / nn_m as f64;
+                    let k = nombre_d_onde(omega, h_m[i], g);
+                    Onde { amplitude: c.amplitude * a2.sqrt(), omega, k: [(k * k - c.k_n * c.k_n).max(0.).sqrt(), c.k_n] }
+                }).collect()
+            }).collect();
+            let (sss, ssn): (Vec<f64>, Vec<f64>) = rangees.iter().zip(&h_m).map(|(o, &hh)| contrainte(o, hh, g)).unzip();
+            let eta = niveau_moyen(&s_m, &h_m, &|i, _| sss[i], 0.0, g).ok_or(Cote2DError::Profondeur)?;
+            let vitesses: Vec<Vec<([f64; 2], f64)>> = rangees.iter().zip(&h_m).map(|(o, &hh)| o.iter().map(|w| vitesse_au_fond(w, hh)).collect()).collect();
+            let v = derive_aux_rangees(&s_m, &ssn, &vitesses, cf, m).ok_or(Cote2DError::Geometrie)?;
+            for it in 0..ns {
+                cote.niveau.push(eta[it * m] as f32);
+                cote.derive.push(v[it] as f32);
+            }
+        }
         for (&(k0, omega, cos0, sin0), champ) in ondes.iter().zip(&champs) {
             // ψ(s), comme la marche : la moyenne de k sur la rangée, aux demi-pas.
             let kb = |s: f64| (0..champ.ny).map(|j| nombre_d_onde(omega, h(s, champ.y0 + j as f64 * champ.dy), g)).sum::<f64>() / champ.ny as f64;
@@ -230,7 +269,7 @@ impl Cote2D {
 
     /// Octets des tables.
     pub fn octets(&self) -> usize {
-        4 * (self.phase.len() + self.facteur.len() + self.coth.len()) + 8 * self.kv.len()
+        4 * (self.phase.len() + self.facteur.len() + self.coth.len() + self.niveau.len() + self.derive.len()) + 8 * self.kv.len()
     }
 
     /// Les coordonnées de la côte `(s, n)` d'un point local de B, m.
@@ -304,6 +343,17 @@ impl Cote2D {
             out.normal[1] -= a * cs * kv[1];
             out.deta_dt -= uo * cs;
             steep += 2.0 * a * k * (1.0 / core::f32::consts::TAU);
+        }
+        // S673 : le niveau moyen et le courant de dérive de la rangée (linéaires en `s`).
+        if !self.niveau.is_empty() {
+            let u = s / self.pas;
+            let i = (u as usize).min(self.ns - 2);
+            let f = u - i as f32;
+            out.eta += self.niveau[i] + f * (self.niveau[i + 1] - self.niveau[i]);
+            let v = self.derive[i] + f * (self.derive[i + 1] - self.derive[i]);
+            let tv = [-self.normale[1], self.normale[0]];
+            out.u_total[0] += v * tv[0];
+            out.u_total[1] += v * tv[1];
         }
         out.normal[2] = 1.0;
         let nr = &mut out.normal;

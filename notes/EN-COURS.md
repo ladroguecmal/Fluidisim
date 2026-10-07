@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S673 — **en cours**. En autonomie vers la v2 ; 2.7 et 12.3. `houle_moyenne.rs` (S672) calcule le niveau moyen et le courant de
+Session : S673 — **terminée**. En autonomie vers la v2 ; 2.7 et 12.3. `houle_moyenne.rs` (S672) calcule le niveau moyen et le courant de
 dérive d'une côte droite ; `Cote2D` (S670) cuit la mer qui déferle. Ils ne se parlent pas encore.
 
 **Ce que la session fait.**
@@ -94,7 +94,8 @@ dans le sens de `S_sn` au large. (4) Rapportés : la remontée au rivage, le cre
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `Cote2D` ; `houle_moyenne` échantillonné ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; listes 2.7, 12.3 ; rituel.
+- [x] **P2** — `Cote2D` ; `houle_moyenne` échantillonné ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; listes 2.7, 12.3 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) au bit, S672 inchangé ; (2) `η̄` 0,21 %, `V` 0,64 % ; (3) eval à 6·10⁻⁸, le sens tenu ; (4) 13,0 cm au rivage, −2,2 cm au creux, 0,113 m/s ; 5,3 s (8,3 s avant Illinois et les seules rangées des tables).

@@ -80,7 +80,7 @@ fn the_longshore_current_matches_longuet_higgins_s672() {
         };
         let ssn: Vec<f64> = (0..n).map(|i| contrainte(&[onde(i)], h[i], G).1).collect();
         let vitesses: Vec<Vec<([f64; 2], f64)>> = (0..n).map(|i| vec![vitesse_au_fond(&onde(i), h[i])]).collect();
-        let v = derive_aux_rangees(&s, &ssn, &vitesses, cf).unwrap();
+        let v = derive_aux_rangees(&s, &ssn, &vitesses, cf, 1).unwrap();
         let mut pire = 0f64;
         for i in 0..n {
             if h[i] <= 1.5 + 1e-9 && h[i] >= 0.5 - 1e-9 {

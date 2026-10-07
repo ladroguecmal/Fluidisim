@@ -357,4 +357,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S670 | 2026-10-07 | 10 | 108 | 15 | 133 |
 | S671 | 2026-10-07 | 10 | 108 | 15 | 133 |
 | S672 | 2026-10-07 | 10 | 108 | 15 | 133 |
+| S673 | 2026-10-07 | 10 | 108 | 15 | 133 |
 <!-- fin de l'historique -->
