@@ -6717,3 +6717,9 @@ la mesure. Une borne du code se mesure d'abord sur la référence (ADR-254 D1).
 
 **S613–S614 — les murs jamais mouillés.** Le module de S613 annonçait des murs ; ses deux cas avaient des bords secs, et les murs
 n'exerçaient aucune pression. S614, à bord mouillé, a divergé. Une propriété écrite s'éprouve par un cas (ADR-254 D2).
+
+## L415
+
+**S613–S620 — l'`ε` hors de son échelle.** La vitesse désingularisée de S613 prenait `ε` = (1 mm)⁴ pour tenir Courant au front ; réemployé
+à l'ordre deux en S620, il amortissait les couches du rivage de Thacker, plus minces, et figeait l'écart à 0,030 dès 100². La mesure de
+convergence du plan l'a montré ; à (0,1 mm)⁴, l'ordre deux converge. Un paramètre de régularisation porte son échelle (ADR-255 D1).

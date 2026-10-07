@@ -62,35 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S620 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S617–S619), puis
-**l'ordre deux de `SaintVenant2D`** — un manque de 4.14 (la plage) et de 11.3 (la remontée) : l'ordre un est diffusif (un quart d'écart à
-Thacker après une période à 100²).
+Session : S621 — **terminée**. En autonomie, **la vingt-huitième revue de méthode** (ADR-222 D4 ; S616–S620).
 
-**Ce que la session fait.** `SaintVenant2D::regler_ordre_deux(ε)` : reconstruction MUSCL (minmod) de `h`, `η = h + z`, `u`, `v` par
-direction, pente nulle aux mailles de bord ; **reconstruction hydrostatique d'ordre deux** d'Audusse (2004) — les états de face reconstruits,
-le fond de face `η − h`, et le **terme source centré** `−g·h·Δz` qui garde le lac au repos ; Heun en temps ; vitesse de Kurganov–Petrova à
-`ε` = (0,1 mm)⁴ — l'`ε` de S613, (1 mm)⁴, amortissait les couches minces du rivage et figeait l'écart à 0,030 (mesuré au plan). L'ordre un
-et ses références ne changent pas. Sans allocation (tableaux préalloués, S619).
-
-**Références, calculées avant** (`s620_ref.py`, `s620_remontee.py`, numpy). **Thacker**, écart L1 après une période : **0.047826108** (50²),
-**0.015728084** (100²), **0.005876495** (200²) — l'ordre un donnait 0,427, 0,242, 0,129 : **8.9, 15.4,
-21.9 fois moins** ; rapport 100 → 200 : 2.676. Masse exacte, `h ≥ 0`, Courant ≤ 0.1897.
-Le lac au repos : 3.100e-16 m/s. **La remontée** (S614, bord gauche mouillé : les murs éprouvés, ADR-254 D2), maille 1, ½, ¼ m :
-**0.806045340, 0.843828715, 0.875314861 m** pour Synolakis 0.861419 (l'ordre un : 0,705, 0,793, 0,850) ;
-Courant ≤ 0.4071.
-
-**Quantum** : f64 ; la remontée à la cote d'une maille (`dx/cot β`). **Critères, écrits avant.** (1) les écarts L1 de Thacker égaux aux références
-à 10⁻⁹, chacun au moins huit fois sous celui de l'ordre un, le rapport 100 → 200 au moins 2,5 ; (2) masse à 10⁻¹³, `h ≥ 0`, aux trois
-résolutions et sur la plage ; (3) le lac au repos sous 10⁻¹⁴ m/s ; (4) les trois remontées égales aux références au bit ; à la maille de 1 m,
-plus près de Synolakis que l'ordre un ; à ¼ m, à moins de dix quanta (0,126 m) ; (5) les essais de S613, S614, S619 inchangés ; (6) refus :
-`ε` non positif.
+**Ce que la session fait.** Relu : S616 (la revue), S617 (9.10 : des gains choisis au plan), S618 (11.5 : un défaut I-06 relevé), S619 (le
+défaut levé), S620 (l'ordre deux : un `ε` hors de son échelle). **ADR-255** : D1 ; L415 ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — l'ordre deux dans `saint_venant_2d.rs` et ses essais ; (1)–(6).
-- [x] **P3** — preuve ; listes 4.14, 11.3 ; rituel (`--lot`).
+- [x] **P1** — jeton ; la revue (ADR-255, METHODE, L415, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus du premier essai, à 10⁻¹⁵ de numpy ; S613, S614, S619 inchangés. Suite : 808 essais listés.
-- **P3** — preuve ORDRE-DEUX-S620 ; lignes 4.14 et 11.3 ; index ; journal ; le lot.

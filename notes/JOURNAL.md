@@ -1241,3 +1241,10 @@ le lot et la physique des partiels.
 terme source centré, Heun, sans allocation. **Mesuré** contre numpy, à 10⁻¹⁵ : Thacker 0,048 → 0,016 → 0,006 (÷ 9 à 22), le lac immobile ;
 la remontée 0,806 → 0,875 m pour 0,861. **En route** (au plan) : l'`ε` de S613 figeait l'écart à 0,030 — (0,1 mm)⁴ à l'ordre deux. Maillons
 **1** (4.14 et 11.3 avancent ; aucun état ne change). Suivant : **S621**, la revue de méthode.
+
+## S621 — 2026-10-07 — la vingt-huitième revue de méthode (ADR-255)
+
+**Entrée.** En autonomie ; revue due. **Friction** : un paramètre de régularisation hérité hors de son échelle (l'`ε` de S613 figeait la
+convergence de l'ordre deux en S620) — **élargie** : il porte son échelle, confrontée au cas (ADR-255 D1, L415). Ont tenu : le garde-fou
+mesuré sur la référence, la propriété documentée éprouvée, le défaut I-06 relevé puis levé. Maillons **1**. Suivant : **S622**, la physique
+des partiels.
