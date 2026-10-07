@@ -62,30 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S597 — **terminée**. En autonomie (ADR-247), **7.3 — les microbulles visuelles** (absent).
+Session : S598 — **en cours**. En autonomie (ADR-247), **4.4 — la profondeur adaptative, un domaine qui suit un objet qui coule** (absent).
+Première pièce : **le plan**, pas encore l'exécution dans δ.
 
-**Ce que la session fait.** `microbulles.rs` : un **nuage** laissé par un déferlement — des classes de diamètre, `N` bulles par m² chacune,
-réparties uniformément sur une profondeur `D` ; chaque classe remonte à sa vitesse terminale (`bulle::vitesse_terminale`, Tomiyama, S540) ;
-la **fraction restante** d'une classe `max(0, 1 − v·t/D)` ; l'**épaisseur optique** `τ = Σ N·2·π·r²·fraction` (l'extinction géométrique,
-`Q_ext` = 2) ; l'**opacité** `1 − e^(−τ)` — ce que le rendu blanchit. Ne fait pas : la dissolution des bulles, l'émission (combien et de
-quelles tailles un déferlement en fait), la turbulence qui les retient, le rendu.
+**Ce que la session fait.** `coule.rs` : (a) **la descente prévue** d'une sphère plus dense que l'eau — la masse ajoutée `½ρ_w·V`, la
+traînée de Schiller–Naumann jusqu'à `Re` = 1 000 puis de Newton (`C_d` = 0,44) —, RK4 à pas fixe, f64 ; (b) **l'enveloppe verticale** du
+domaine : son bas reste sous l'objet **prévu `τ_a` plus tard** (le temps que δ grandisse), avec une marge, arrondi au quantum vers le bas,
+**jamais remonté** pendant la chute ; chaque descente du bas est un agrandissement (un changement de niveau, ADR-210), compté. Ne fait
+pas : l'exécution dans δ (le transfert d'état vers le domaine agrandi), l'objet qui remonte, les objets non sphériques.
 
-**Références, calculées avant** (ce script les écrit et vérifie la taille d'ensemble, ADR-250 D1). Pour situer (Stokes) : 50, 100, 200 µm
-remontent à **1.36, 5.44, 21.77 mm/s** ; un mètre se vide en 735, 184, 46 s. La
-référence de l'essai : la fraction analytique `max(0, 1 − v_t·t/D)` avec la vitesse terminale de Tomiyama, aux instants [10, 30, 60, 120] s.
+**Références, calculées avant par ce script, avec son propre code.** Une boule d'acier de 0,1 m de rayon (7 800 kg/m³) dans l'eau de mer :
+la vitesse terminale de Newton `√(8·r·(ρ_s − ρ_w)·g/(3·ρ_w·C_d))` = **6.268812 m/s** (`Re` = 1.29e+06) ; la descente depuis le repos (RK4,
+dt = 10⁻⁴ s) : à 1, 2, 5, 10 s, **z = 3.23120 ; 9.16062 ; 27.93725 ; 59.28130 m**, `v` = 6.26881 m/s à 10 s.
+L'enveloppe : anticipation 2 s, marge 0,5 m, quantum 1 m, un domaine initial de 2 m.
 
-**Quantum** (ADR-236, ADR-250) : une population de 10000 bulles par classe (profondeurs uniformes par une suite déterministe), intégrées
-une à une par `Bulle::pas` (le transitoire et la traînée implicite) ; l'écart-type d'une fraction ≤ 0,5/√N = 0.005.
-**Critères, écrits avant.** (1) la fraction submergée de chaque classe à 0.05 près de l'analytique, aux quatre instants ; (2) `τ(0)` égal
-à `Σ N·2·π·r²` à 10⁻¹² relatif, l'opacité décroissante ; (3) refus : diamètre, nombre ou profondeur non positifs.
+**Quantum** (ADR-236, ADR-249) : f64 ; le pas du code (10⁻³ s) contre 10⁻⁴ s — sous 10⁻⁶ relatif. **Critères, écrits avant.** (1) la vitesse
+terminale à 10⁻⁶ relatif ; (2) la profondeur aux quatre instants à 10⁻⁴ relatif ; (3) l'enveloppe, à chaque pas de 10 s : l'objet (son
+centre ± son rayon) dedans avec au moins la marge, le bas jamais remonté, multiple du quantum ; les agrandissements comptés et leur nombre
+égal à celui que le script compte avec sa propre descente ; (4) refus : rayon, densité non positifs, une sphère moins dense que l'eau.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `microbulles.rs` et ses essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 7.3 ; rituel.
+- [ ] **P2** — `coule.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 4.4 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — 12 fractions à 2·10⁻⁴ ; τ(0) ; l'opacité décroissante ; refus. Suite 772.
-- **P3** — preuve MICROBULLES-S597 ; liste 7.3 (absent → partiel) et décompte ; index ; journal.
+- **Avant l'essai, un manque du plan comblé** (ADR-244 D1) : le plan annonçait le nombre d'agrandissements « compté par le script », sans
+  l'avoir compté. Compté maintenant avec la descente du script (RK4 à 10⁻⁴ s) : l'enveloppe mise à jour toutes les 0,1 s de 0 à 10 s, le bas
+  `⌈(z(t + 2 s) + r + 0,5)/1⌉·1` s'il descend, depuis 2 m : **64 agrandissements**, le bas final à **73 m**.
 
