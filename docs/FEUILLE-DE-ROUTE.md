@@ -487,6 +487,9 @@ déferlement d'une mer tirée de la côte 2D — la ligne, la largeur, le flux d
 Saint-Venant 2D (ADR-271), le relais au rivage conçu, sa première brique (le flux des bords de Saint-Venant, au bilan exact) (4.14).
 **S681–S683** : la quarantième revue (ADR-272 : un remède jugé sur trois places de l'interface dans la maille) ; le relais au rivage,
 briques 2 et 3 — APIC 3D laisse sortir et fait entrer l'eau par son bord droit, au compte exact (4.14).
+**S684–S686** : le raccord au rivage au repos (six plages à quelques µm/s, la masse au bit) ; l'onde solitaire à travers lui (la
+remontée manquée de 15 %, localisée : l'onde portée par APIC) ; la quarante et unième revue (ADR-273 : un raccord jugé d'abord
+entre deux copies du même solveur) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

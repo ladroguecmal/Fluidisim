@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 01:18 +02:00
+JETON            : libre
+Battement        : 2026-10-08 01:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S686 — la quarante et unième revue de méthode (S681–S685) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S685 — L'onde solitaire à travers le raccord au rivage ([journal](notes/JOURNAL.md)). Avant : S684 (Le raccord au rivage au repos)
-Session suivante : S686 — la quarante et unième revue de méthode (S681–S685) ; puis S687, le raccord entre deux Saint-Venant
-Maillons        : 1 (4.14 : la transmission au raccord localisée)
-Registres       : dernier lot S683 (ADR-213 D3) ; le prochain au plus tard en S686
+Session en cours : aucune
+Dernière session : S686 — la quarante et unième revue de méthode (ADR-273) ([journal](notes/JOURNAL.md)). Avant : S685 (L'onde solitaire à travers le raccord au rivage)
+Session suivante : S687 — le raccord entre deux Saint-Venant (ADR-273 D1) ; revue en S691
+Maillons        : 0 (méthode : ADR-273)
+Registres       : dernier lot S686 (ADR-213 D3) ; le prochain au plus tard en S689
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

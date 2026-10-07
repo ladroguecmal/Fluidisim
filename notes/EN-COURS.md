@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S686 — **en cours**. En autonomie vers la v2. **La quarante et unième revue de méthode** (ADR-222 D4 : S681–S685) ; le lot
+Session : S686 — **terminée**. En autonomie vers la v2. **La quarante et unième revue de méthode** (ADR-222 D4 : S681–S685) ; le lot
 S684–S686.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
@@ -80,7 +80,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-273 ; METHODE.
-- [ ] **P3** — lot ; rituel.
+- [x] **P2** — ADR-273 ; METHODE.
+- [x] **P3** — lot ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-273 : D1 (un raccord jugé d'abord entre deux copies du même solveur), D2 (une seule source pour les deux côtés) ; la prochaine revue S691.

@@ -1771,3 +1771,10 @@ transmet le volume et le niveau ; c'est l'onde portée par APIC au large qui dif
 Saint-Venant). Le calcul du plan ne regardait que la crête. Les deux instruments qui départageront sont nommés : le raccord entre deux
 Saint-Venant, et le tout-APIC à air balistique. Maillons **1** (4.14 : la transmission localisée). Suivant : **S686, la quarante et
 unième revue de méthode** ; puis S687, le raccord seul.
+
+## S686 — 2026-10-08 — la quarante et unième revue de méthode (ADR-273)
+
+**Entrée.** La revue (S681–S685) ; le lot S684–S686. **Fait** : [ADR-273](../docs/adr/ADR-273-quarante-et-unieme-revue-de-methode.md).
+D1 : un raccord entre deux solveurs se juge d'abord entre deux copies du même solveur (S685 : le tout-Saint-Venant mêlait le raccord et
+l'onde portée par APIC). D2 : les deux côtés d'un montage couplé partent d'une seule source (S684 : deux niveaux écrits deux fois).
+Maillons **0** (méthode). Suivant : **S687**, le raccord entre deux Saint-Venant ; la revue en S691.
