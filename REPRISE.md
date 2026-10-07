@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 02:29 +02:00
+JETON            : libre
+Battement        : 2026-10-07 02:33 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S587 — le lot ; 3.3, la bulle d'une explosion sous-marine ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S586 — la vingt et unième revue de méthode (ADR-248) ([journal](notes/JOURNAL.md)). Avant : S585 (la v2 : la liste à 100 %, la physique d'abord)
-Session suivante : **S587 — le lot** (dû en S587) **et un point absent** (ADR-247 : la physique d'abord, les absents par campagne). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S586 : la vingt et unième revue (ADR-248)
-Registres       : dernier lot S584 (ADR-213 D3) ; le prochain au plus tard en S587
+Session en cours : aucune
+Dernière session : S587 — le lot ; la bulle d'une explosion sous-marine ([journal](notes/JOURNAL.md)). Avant : S586 (la vingt et unième revue de méthode)
+Session suivante : **S588 — un point absent** (ADR-247 : la physique d'abord ; restent 29 absents). Revue à S591. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S587 : 3.3 absent → partiel
+Registres       : dernier lot S587 (ADR-213 D3) ; le prochain au plus tard en S590
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -988,3 +988,10 @@ d'ADR-191 jusqu'à l'intégration. Maillons **1**. Suivant : **S586, la vingt et
 comparée appartient à la famille de la référence (ADR-248 D1, L406) ; un critère vrai par construction (S584) — **élargie** : il ne juge
 rien (D2, L407). Ont tenu : un seuil sous quantum relevé avant la mesure (S582), une portée demandée plutôt que supposée (S585). Maillons
 **1**. Suivant : **S587**, le lot (dû) et un point absent (ADR-247).
+
+## S587 — 2026-10-07 — le lot ; la bulle d'une explosion sous-marine
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S584–S586), puis 3.3 (absent). **La constante de Rayleigh éprouvée d'abord**
+par une intégration indépendante de l'équation de la cavité. **Fait** ([preuve](../docs/validation/EXPLOSION-BULLE-S587.md)) :
+`explosion.rs`. **Mesuré** : le rayon et la période d'une charge de 1 kg à 20 m à 10⁻⁹ ; les lois de Willis à 10⁻¹². Maillons **1** (3.3 :
+absent → partiel). Suivant : **S588**, un point absent.

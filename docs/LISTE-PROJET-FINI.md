@@ -156,7 +156,10 @@ pas recopiée ici (L137).
   (−0,72 sur quatre points à durée finie, la théorie même) ([preuve](validation/C07-RESONANCE-S525.md)) ; **S527 : l'angle à `Fr_h` = 2,14**
   (27,00° pour 27,83°, un instrument éprouvé sur la référence bruitée) — **C07 passe entier** ([preuve](validation/C07-PLANCHER-S527.md)).
   Manquent les durées longues.
-- [ ] **3.3 Explosions de surface et sous-marines** — *absent*.
+- [ ] **3.3 Explosions de surface et sous-marines** — *partiel* depuis S587 : **la bulle d'une explosion sous-marine** — le rayon
+  maximal, la période de Rayleigh (sa constante éprouvée par une intégration indépendante), les lois d'échelle de Willis à 10⁻¹²
+  ([preuve](validation/EXPLOSION-BULLE-S587.md)). Manquent les battements suivants, la migration, l'onde de choc, les ondes de surface
+  et la gerbe, les explosions de surface, l'entrée dans W.
 - [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *partiel* depuis S582 : **la propagation le long d'un
   rayon** — le temps de parcours exact par segment, la levée de Green, une impulsion polynomiale au bit ; l'heure d'arrivée et la hauteur
   à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)) ; **S584 : sur un rayon courbe** (le traceur de 3.6 : Green et la
@@ -830,7 +833,7 @@ pas recopiée ici (L137).
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
-| 3. Ondes (W) | 9 | 0 | 6 | 3 |
+| 3. Ondes (W) | 9 | 0 | 7 | 2 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
@@ -841,7 +844,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **81** | **30** |
+| **total** | **121** | **10** | **82** | **29** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S587 — **en cours**. En autonomie (ADR-247 : la physique d'abord, les absents) : **le lot** (dû ; feuille de route S584–S586),
+Session : S587 — **terminée**. En autonomie (ADR-247 : la physique d'abord, les absents) : **le lot** (dû ; feuille de route S584–S586),
 puis **3.3 — les explosions de surface et sous-marines** (absent ; ADR-001 : les ondes d'explosion sont de W). Première pièce : **la bulle
 d'une explosion sous-marine**.
 
@@ -84,7 +84,10 @@ fraction non positives.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `explosion.rs` et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 3.3 ; rituel (`--lot`).
+- [x] **P2** — `explosion.rs` et ses essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 3.3 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — R_max 1,097268 m, T 0,11685897 s ; ×2 et ×0,494175617660 ; refus. Suite 762.
+- **P3** — preuve EXPLOSION-BULLE-S587 ; liste 3.3 (absent → partiel) et décompte ; index ; journal ; le lot.
+
