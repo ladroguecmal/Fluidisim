@@ -62,40 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S604 — **terminée**. En autonomie (ADR-247) : **12.2 — l'éditeur de rivières : dessin, validation bloquante, gravure**
-(SPEC-005 §5 ; absent). Le cœur de l'éditeur, sans son interface : ce que l'outil affiche en continu, ce qu'il refuse, ce qu'il grave.
+Session : S605 — **en cours**. En autonomie (ADR-247) : **12.4 — l'eau en amont du terrain, le géoïde dans l'outil de terrain**
+(SPEC-005 §3–4 ; absent). Le « zéro » d'une scène est une distance au centre de la planète ; le squelette hydrographique est une entrée du
+terrain, jamais une sortie.
 
-**Ce que la session fait.** Un module `riviere.rs` : un réseau de biefs (une ligne d'eau tracée par sommets `(x, y, z)`, une largeur, un
-débit, un `n` de Manning ; des nœuds source, confluence, lac, mer) ; `profil` — par segment, la pente de la ligne d'eau, la hauteur
-normale de Manning (section rectangulaire), `v = Q/A`, `Fr = v/√(g·h)`, et les ressauts (`Fr` qui passe de plus de 1 à moins de 1) ;
-`valider` — les règles bloquantes de SPEC-005 §5.3 : la ligne d'eau descend strictement (tolérance nulle, aussi à travers un nœud),
-`ΣQ` entrant = sortant à chaque confluence, `v` dans une plage plausible (**0,1–3 m/s** par défaut, réglable : un torrent la relève),
-un lac a un exutoire ; `graver` — le fond `z_eau − h` au milieu de chaque segment, et les conflits où il creuse le terrain de plus d'un
-seuil. Ne fait pas : l'interface, la spline (des sommets ici), `largeur(s)` et `section_type(s)`, `debit(t)`, la cinquième règle (les
-régions de niveau marin pavent la planète), la gravure dans une carte de hauteurs.
+**Ce que la session fait.** Un module `geoide.rs` : `Geoide { rayon_m }` (le niveau moyen sphérique) ; `altitude(local)` — l'altitude
+au-dessus du niveau moyen d'un point du plan tangent d'une ancre ; `z_local(x, y, altitude)` — l'inverse ; `ecart_plan_tangent(d)` —
+`R·(1 − cos(d/R))`, la table de SPEC-005 §4 ; `Grille` (le terrain de l'outil, en `z` du plan tangent) et `conformer(grille, géoïde,
+biefs)` — **l'étape 2 de l'ordre imposé** : le terrain gravé pour satisfaire le squelette (les biefs de S604, leurs lignes d'eau en
+altitude), le squelette jamais modifié ; chaque cellule à moins d'une demi-largeur d'un segment descend au fond `z_eau − h` (Manning), placé
+par le géoïde. Ne fait pas : l'anomalie régionale et la marée du niveau moyen (ADR-002 §2.4), le trait de côte et la bathymétrie du
+squelette, les dérivations (étape 3), les ancres multiples.
 
-**Références, calculées avant** (ce script, par une bissection indépendante). Bief A (30 m³/s, 20 m, n = 0,035, pente 5·10⁻⁴) : `h` =
-**1.781932256 m**, `v` = 0.841783 m/s, `Fr` = 0.201335. **La faute de saisie** (le premier sommet tapé 69,5 au lieu de 20,0 : une chute de
-50 m, ×100) : `v` = **3.5191 m/s** > 3 — bloquée ; la faute inverse (÷100) : `v` = 0.1765 m/s — **elle passe** (`v ∝ S^0,3` : la règle
-de vitesse n'attrape qu'un sens ; à noter dans la preuve). Bief E (5 m³/s, 8 m, n = 0,03) : raide (6 m sur 300 m) `Fr` = **1.1765**,
-doux (0,1 m sur 400 m) `Fr` = **0.1457** — un ressaut entre les deux. Gravure du bief C (40 m³/s, 25 m, pente 5·10⁻⁴ : `h` =
-**1.832244795 m**) dans un terrain plat à 19,5 m : creusements **2.582244795** et **3.082244795 m** — deux conflits au seuil de 1 m ;
-à 17,7 m : 0.782244795 et 1.282244795 m — un conflit (le second segment).
+**Références, calculées avant** (ce script, en décimal à 50 chiffres). La table, `R` = 6 371 km : 1 km : 0.078480615 m ; 3 km : 0.706325525 m ; 10 km : 7.848059918 m ; 30 km : 70.632423247 m (SPEC-005 écrit 70,7 m à 30 km : un
+arrondi — 70,63). Le point (30 km, 0, 0) du plan tangent est à **70.632162227 m** au-dessus du niveau moyen. La gravure : un bief le long de
+`y` en `x` = 30 km (2 km, ligne d'eau 12,0 → 11,0 m, 20 m, 30 m³/s, n = 0,035 : `h` = 1.781932256 m), une grille de 10 m (20 × 200 cellules),
+le terrain à 15 m d'altitude : **400 cellules** dans le couloir, le plus grand creusement **5.779432256 m** ; dans un outil à
+plan tangent, le même fond serait à **70.655602 m** au-dessus de sa place.
 
-**Quantum** : f64. **Critères, écrits avant.** (1) `h` du bief A à 10⁻⁹ m ; `v` de la faute à 10⁻⁶ ; (2) le réseau juste (A, B → confluence →
-C → lac → D → mer) : aucun défaut ; (3) chaque faute isolément, un défaut et un seul, du bon genre, au bon endroit : la chute ×100
-(vitesse ; A), un sommet qui remonte (le milieu de A à 20,1), un sommet plat (le milieu de A à 20,0 : tolérance nulle), un aval de
-nœud plus haut que l'amont (C parti de 19,1), B à 11 m³/s (confluence, écart
-1 m³/s), le lac sans exutoire ; la faute ÷100 : aucun défaut ; (4) le ressaut du bief E entre ses deux segments, `Fr` à 10⁻⁶ ; (5) la
-gravure : les creusements à 10⁻⁹ m et les conflits ({0, 1} à 19,5 m ; {1} à 17,7 m) ; (6) refus : largeur, débit, `n` non positifs,
-moins de deux sommets, un nœud hors du réseau.
+**Quantum** : f64 au rayon de la planète (l'ulp de 6,4·10⁶ m : 9,3·10⁻¹⁰ m) ; la tolérance des allers-retours **10⁻⁸ m** (rapport 10,7).
+**Critères, écrits avant.** (1) la table à 10⁻⁹ relatif ; l'aller-retour altitude ↔ `z` à 10⁻⁸ m sur des points jusqu'à 50 km et ±100 m ;
+(2) l'altitude du point (30 km, 0, 0) à 10⁻⁸ m ; (3) la gravure : 400 cellules gravées, chacune à l'altitude de son fond à 10⁻⁸ m,
+le plus grand creusement à 10⁻⁸ m, les autres cellules inchangées au bit, le squelette inchangé ; (4) l'outil à plan tangent : l'écart
+du fond au centre du couloir à 10⁻⁶ m ; (5) refus : rayon non positif, grille vide ou pas non positif, un bief qui ne descend pas.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `riviere.rs` et ses essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 12.2 ; rituel.
+- [ ] **P2** — `geoide.rs` et ses essais ; (1)–(5).
+- [ ] **P3** — preuve ; liste 12.4 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus du premier essai ; chaque faute un seul défaut ; la faute ÷100 passe (attendu). Suite 795.
-- **P3** — preuve RIVIERE-S604 ; liste 12.2 (absent → partiel) et décompte ; index ; journal.
