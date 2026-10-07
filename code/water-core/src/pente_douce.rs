@@ -85,6 +85,12 @@ pub struct Champ {
 }
 
 impl Champ {
+    /// S660 — la phase de `A` (rad) au point de grille `(i, j)`.
+    pub fn phase(&self, i: usize, j: usize) -> f64 {
+        let c = self.a[i * self.ny + j];
+        c.im.atan2(c.re)
+    }
+
     /// Le rapport d'amplitude `|A|` au point `(x, y)`, interpolé (bilinéaire) ; `None` hors du domaine.
     pub fn amplitude(&self, x: f64, y: f64) -> Option<f64> {
         let (sx, sy) = ((x - self.x0) / self.dx, (y - self.y0) / self.dy);
@@ -168,6 +174,94 @@ pub fn propager(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: 
             diag[j] = C::new(1., 0.).sub(c1.add(C::new(lev, 0.)).scale(0.5 * dx));
         }
         // Thomas, complexe.
+        cp[0] = sup[0].div(diag[0]);
+        dp[0] = rhs[0].div(diag[0]);
+        for j in 1..ny {
+            let m = diag[j].sub(sub[j].mul(cp[j - 1]));
+            cp[j] = sup[j].div(m);
+            dp[j] = rhs[j].sub(sub[j].mul(dp[j - 1])).div(m);
+        }
+        let n1 = (n + 1) * ny;
+        a[n1 + ny - 1] = dp[ny - 1];
+        for j in (0..ny - 1).rev() {
+            a[n1 + j] = dp[j].sub(cp[j].mul(a[n1 + j + 1]));
+        }
+        (p0, k0, kb0) = (p1, k1, kb1);
+    }
+    Ok(Champ { nx, ny, x0, dx, y0, dy, a })
+}
+
+/// **S660 — le grand angle** (Booij 1981, Kirby 1986) : la racine de `∂_xφ = i·k̄·√(1 + X)·φ`,
+/// `X = [(k² − k̄²) + (1/p)·∂_y(p·∂_y)]/k̄²`, approchée par Padé [1,1] — `(1 + X/4)·(A_x − lev·A) = (i·k̄/2)·X·A`, `lev = −(p·k̄)_x/(2p·k̄)`
+/// traité en diagonale. À `X` petit, l'équation de `propager` ; à `X` nul, la levée. Crank–Nicolson, les coefficients au demi-pas.
+/// `incident(y)` : l'amplitude complexe `(re, im)` posée à `x0`.
+#[allow(clippy::too_many_arguments)]
+pub fn propager_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
+    incident: &dyn Fn(f64) -> (f64, f64)) -> Result<Champ, Refus> {
+    let ok = |v: f64| v > 0. && v.is_finite();
+    if !ok(periode) || !ok(g) || !ok(dx) || !ok(dy) || !(x1 > x0) || !(y1 > y0) || !x0.is_finite() || !y0.is_finite() {
+        return Err(Refus);
+    }
+    let (nx, ny) = (((x1 - x0) / dx).round() as usize + 1, ((y1 - y0) / dy).round() as usize + 1);
+    if ny < 3 || nx < 2 {
+        return Err(Refus);
+    }
+    let omega = 2. * std::f64::consts::PI / periode;
+    let rangee = |x: f64| -> Result<(Vec<f64>, Vec<f64>, f64), Refus> {
+        let (mut p, mut k) = (vec![0.; ny], vec![0.; ny]);
+        for j in 0..ny {
+            let hj = h(x, y0 + j as f64 * dy);
+            if !ok(hj) {
+                return Err(Refus);
+            }
+            (p[j], k[j]) = p_et_k(omega, hj, g);
+        }
+        let kb = k.iter().sum::<f64>() / ny as f64;
+        Ok((p, k, kb))
+    };
+    let mut a = vec![C::default(); nx * ny];
+    for j in 0..ny {
+        let (re, im) = incident(y0 + j as f64 * dy);
+        a[j] = C::new(re, im);
+    }
+    let (mut p0, mut k0, mut kb0) = rangee(x0)?;
+    let (mut sub, mut diag, mut sup, mut rhs) = (vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny]);
+    let (mut cp, mut dp) = (vec![C::default(); ny], vec![C::default(); ny]);
+    let d2 = dy * dy;
+    for n in 0..nx - 1 {
+        let x = x0 + (n + 1) as f64 * dx;
+        let (p1, k1, kb1) = rangee(x)?;
+        let kb = 0.5 * (kb0 + kb1);
+        let n0 = n * ny;
+        for j in 0..ny {
+            // X au demi-pas : (X·A)_j = x_l·A_{j−1} + x_c·A_j + x_u·A_{j+1}.
+            let pj = 0.5 * (p0[j] + p1[j]);
+            let kj = 0.5 * (k0[j] + k1[j]);
+            let pm = if j > 0 { 0.25 * (p0[j] + p1[j] + p0[j - 1] + p1[j - 1]) } else { 0. };
+            let pp = if j + 1 < ny { 0.25 * (p0[j] + p1[j] + p0[j + 1] + p1[j + 1]) } else { 0. };
+            let sc = 1. / (kb * kb);
+            let (xl, xu) = (sc * pm / (pj * d2), sc * pp / (pj * d2));
+            let xc = sc * ((kj * kj - kb * kb) - (pm + pp) / (pj * d2));
+            let (pk0, pk1) = (p0[j] * kb0, p1[j] * kb1);
+            let lev = -(pk1 - pk0) / dx / (pk0 + pk1);
+            // (1 + X/4)(A1 − A0)/dx − lev·(A1 + A0)/2 = (i·k̄/2)·X·(A1 + A0)/2 :
+            // à gauche (1 + X/4)/dx − lev/2 − (i·k̄/4)·X, à droite (1 + X/4)/dx + lev/2 + (i·k̄/4)·X.
+            let ik4 = C::new(0., kb / 4.);
+            let coef = |xv: f64, signe: f64| C::new(xv / (4. * dx), 0.).add(ik4.scale(signe * xv));
+            let (gl, gu) = (coef(xl, -1.), coef(xu, -1.));
+            let gc = C::new(1. / dx + xc / (4. * dx) - 0.5 * lev, 0.).sub(ik4.scale(xc));
+            let (dl, du) = (coef(xl, 1.), coef(xu, 1.));
+            let dc = C::new(1. / dx + xc / (4. * dx) + 0.5 * lev, 0.).add(ik4.scale(xc));
+            let mut r = a[n0 + j].mul(dc);
+            if j > 0 {
+                r = r.add(a[n0 + j - 1].mul(dl));
+            }
+            if j + 1 < ny {
+                r = r.add(a[n0 + j + 1].mul(du));
+            }
+            rhs[j] = r;
+            (sub[j], diag[j], sup[j]) = (gl, gc, gu);
+        }
         cp[0] = sup[0].div(diag[0]);
         dp[0] = rhs[0].div(diag[0]);
         for j in 1..ny {

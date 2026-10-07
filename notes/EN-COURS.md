@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S660 — **en cours**. En autonomie vers la v2 ; 2.7. En S659, le modèle parabolique aux petits angles s'écarte des mesures de
+Session : S660 — **terminée**. En autonomie vers la v2 ; 2.7. En S659, le modèle parabolique aux petits angles s'écarte des mesures de
 Berkhoff de 0,2 à 0,4 sur trois sections ; la maille et l'axe des mesures sont écartés.
 
 **Le témoin : le grand angle** (Booij 1981, Kirby 1986). De `∂_xφ = i·k̄·√(1 + X)·φ`, `X = [(k² − k̄²) + (1/p)·∂_y(p·∂_y)]/k̄²`, la racine
@@ -88,7 +88,10 @@ sections 2 et 5 (≥ 30 % chacune : l'angle). (3) Le critère de S659 rejugé (�
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `propager_grand_angle` ; les essais ; (1)–(3).
+- [x] **P2** — `propager_grand_angle` ; les essais ; (1)–(3).
 - [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) tenu (plat, levée ; l'oblique +0,091 % contre +1,036 %, lu sur la phase — le `|A|` du plan ne départageait pas, vu avant
+  la mesure) ; (2) les sections 2 et 5 baissent de 26 et 18 % : l'angle n'est qu'une part ; (3) les sections 2 et 3 sous 0,20, la 5 et la 7
+  manquées. Le shell a encore rejeté un heredoc long : le script en fichier (ADR-245 D3).

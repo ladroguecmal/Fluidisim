@@ -1557,3 +1557,11 @@ et les décisions de l'utilisateur.
 l'onde plane (2·10⁻¹⁴) et la levée (0,990551) ; sur le haut-fond de Berkhoff (1982), contre les mesures lues chez Basilisk, le pic à 11 %,
 mais des écarts de 0,2 à 0,4 sur trois sections — **critère manqué**, indépendant de la maille ; le témoin de l'axe (les mesures
 inversées) écarte une cause. Maillons **1** (2.7 avance). Suivant : **S660, le grand angle** (Kirby 1986) comme témoin.
+
+## S660 — 2026-10-07 — le témoin du grand angle sur le haut-fond de Berkhoff
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/GRAND-ANGLE-S660.md)) : `propager_grand_angle`
+(Padé [1,1]). **Mesuré** : juste à 0,091 % sur une onde oblique à 30° (les petits angles : 1,04 %) ; sur Berkhoff, chaque section rapprochée
+d'un cinquième (0,171 ; 0,161 ; 0,342 ; 0,233) — les sections 2 et 3 sous 0,20, la 5 et la 7 manquées ; le verdict du témoin : **l'angle
+n'est qu'une part**. Une faille du plan vue avant la mesure (l'onde oblique jugée sur `|A|`, qui ne départage rien). Maillons **1** (2.7
+avance). Suivant : **S661, la revue de méthode** (ADR-267), puis la non-linéarité (Kirby et Dalrymple 1984).

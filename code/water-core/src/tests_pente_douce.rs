@@ -82,3 +82,59 @@ fn the_measured_axis_is_flipped_s659() {
         assert!(s1 < s2, "l'axe inversé à x = {x}");
     }
 }
+
+/// **S660 (1)** — le grand angle : le plat, la levée ; l'onde oblique à 30° sur fond plat, son nombre d'onde en `x` lu sur la phase au
+/// centre (loin des parois) contre `k·cos 30°`. Le plan prévoyait `|A|` = 1 : il ne départage pas (une onde plane garde `|A|` = 1 dans
+/// les deux modèles) ; la phase seule départage — rapportée.
+#[test]
+fn the_wide_angle_model_holds_its_cases_s660() {
+    let un = |_y: f64| (1., 0.);
+    let plat = propager_grand_angle(&|_, _| 0.45, 1.0, G, 0., 20., 0.05, -1., 1., 0.05, &un).unwrap();
+    let pire = (0..=400).flat_map(|i| (0..=40).map(move |j| (i, j))).map(|(i, j)| (plat.amplitude(i as f64 * 0.05, -1. + j as f64 * 0.05).unwrap() - 1.).abs()).fold(0., f64::max);
+    let pente = propager_grand_angle(&|x, _| 0.45 - x / 50., 1.0, G, 0., 15., 0.01, -1., 1., 0.05, &un).unwrap();
+    let lev = pente.amplitude(15., 0.).unwrap();
+    println!("S660 grand angle : plat |A| − 1 au plus {pire:e} ; levée {lev:.6} (0,990551)");
+    assert!(pire <= 1e-6 && (lev / 0.990551 - 1.).abs() <= 0.005, "critère 1");
+    let k = nombre_d_onde(2. * std::f64::consts::PI, 0.45, G);
+    let ky = k * 0.5;
+    let obl = |y: f64| ((ky * y).cos(), (ky * y).sin());
+    let vrai = k * 30f64.to_radians().cos();
+    let champ = propager_grand_angle(&|_, _| 0.45, 1.0, G, 0., 6., 0.01, -20., 20., 0.02, &obl).unwrap();
+    let jc = champ.ny / 2;
+    let (mut deroule, mut prec) = (0f64, champ.phase(0, jc));
+    for i in 1..champ.nx {
+        let ph = champ.phase(i, jc);
+        let mut d = ph - prec;
+        while d > std::f64::consts::PI {
+            d -= 2. * std::f64::consts::PI;
+        }
+        while d < -std::f64::consts::PI {
+            d += 2. * std::f64::consts::PI;
+        }
+        deroule += d;
+        prec = ph;
+    }
+    let kx = k + deroule / 6.;
+    println!("S660 onde oblique 30° : grand angle k_x = {kx:.5} (vrai {vrai:.5}, {:+.3} %), |A| au centre {:.4} ; petits angles (formule) {:+.3} %",
+        100. * (kx / vrai - 1.), champ.amplitude(6., 0.).unwrap(), 100. * ((1. - 0.125) / 30f64.to_radians().cos() - 1.));
+}
+
+/// **S660 (2), (3)** — le grand angle sur le haut-fond de Berkhoff, à deux mailles.
+#[test]
+fn the_wide_angle_model_meets_berkhoff_s_shoal_s660() {
+    for d in [0.05f64, 0.025] {
+        let champ = propager_grand_angle(&berkhoff, 1.0, G, -10., 12., d, -10., 10., d, &|_| (1., 0.)).unwrap();
+        let mut rapport = String::new();
+        for (nom, section, x) in [("2 (x = 3)", &SECTION_2[..], Some(3.)), ("3 (x = 5)", &SECTION_3[..], Some(5.)), ("5 (x = 9)", &SECTION_5[..], Some(9.)), ("7 (y = 0)", &SECTION_7[..], None)] {
+            let (e, pm, pc) = ecart(&champ, section, x);
+            rapport += &format!(" ; section {nom} : écart {e:.3}, pic mesuré {pm:.3}, modèle {pc:.3}");
+        }
+        println!("S660 Berkhoff grand angle, maille {d} m{rapport}");
+        // Ce qui a tenu : le grand angle réduit l'écart de chaque section (S659 : 0,231 ; 0,197 ; 0,419 ; 0,288) ; les sections 2 et 3
+        // sous 0,20. Le verdict du témoin : la baisse des sections 2 et 5 (26 %, 18 %) n'atteint pas 30 % — l'angle n'est qu'une part.
+        let e = |s: &[(f64, f64)], x| ecart(&champ, s, x).0;
+        assert!(e(&SECTION_2, Some(3.)) < 0.231 && e(&SECTION_3, Some(5.)) < 0.197 && e(&SECTION_5, Some(9.)) < 0.419 && e(&SECTION_7, None) < 0.288);
+        assert!(e(&SECTION_2, Some(3.)) <= 0.20 && e(&SECTION_3, Some(5.)) <= 0.20);
+    }
+}
+
