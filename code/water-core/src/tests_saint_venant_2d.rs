@@ -305,3 +305,80 @@ fn a_periodic_long_wave_runs_up_as_keller_and_keller_predict_s625() {
         assert!(hmin >= 0.0, "critère 3 : 1/{k}");
     }
 }
+
+/// **S627** — l'état intermédiaire de Stoker `(h_m, u_m)` et la vitesse du ressaut, par bissection.
+fn stoker(hl: f64, hr: f64) -> (f64, f64, f64) {
+    let cl = (G * hl).sqrt();
+    let f = |hm: f64| {
+        let s = (G * hm * (hm + hr) / (2.0 * hr)).sqrt();
+        2.0 * (cl - (G * hm).sqrt()) - s * (1.0 - hr / hm)
+    };
+    let (mut lo, mut hi) = (hr, hl);
+    for _ in 0..200 {
+        let mi = 0.5 * (lo + hi);
+        if f(mi) > 0.0 { lo = mi } else { hi = mi }
+    }
+    let hm = 0.5 * (lo + hi);
+    (hm, 2.0 * (cl - (G * hm).sqrt()), (G * hm * (hm + hr) / (2.0 * hr)).sqrt())
+}
+
+/// **S627** — la hauteur exacte d'une rupture de barrage (Stoker si `hr > 0`, Ritter sinon), barrage en 50 m.
+fn barrage_exact(x: f64, t: f64, hl: f64, hr: f64) -> f64 {
+    let cl = (G * hl).sqrt();
+    let xi = (x - 50.0) / t;
+    let raref = (2.0 * cl - xi).powi(2) / (9.0 * G);
+    if hr == 0.0 {
+        return if xi <= -cl { hl } else if xi >= 2.0 * cl { 0.0 } else { raref };
+    }
+    let (hm, um, s) = stoker(hl, hr);
+    let cm = (G * hm).sqrt();
+    if xi <= -cl { hl } else if xi <= um - cm { raref } else if xi <= s { hm } else { hr }
+}
+
+/// **S627** — une rupture de barrage sur une bande : l'écart L1 à 6 s, la variation de masse, `h` min, le front au millimètre.
+fn barrage(dx: f64, hr: f64) -> (f64, f64, f64, f64) {
+    let (hl, ny) = (1.0, 3usize);
+    let nx = (100.0 / dx).round() as usize;
+    let xc = |i: usize| (i as f64 + 0.5) * dx;
+    let npas = (6.0 / (0.2 * dx / (G * hl).sqrt())).round() as usize;
+    let dt = 6.0 / npas as f64;
+    let h: Vec<f64> = (0..nx).flat_map(|i| [if xc(i) < 50.0 { hl } else { hr }; 3]).collect();
+    let mut d = SaintVenant2D::nouveau(nx, ny, dx, G, vec![0.0; nx * ny], h, vec![0.0; nx * ny], vec![0.0; nx * ny]).unwrap();
+    d.regler_ordre_deux(1e-16).unwrap();
+    let v0 = d.volume();
+    let mut hmin = 0.0f64;
+    for _ in 0..npas {
+        d.pas(dt).unwrap();
+        hmin = d.h.iter().fold(hmin, |m, &x| m.min(x));
+    }
+    let (mut num, mut den) = (0.0, 0.0);
+    for i in 0..nx {
+        let he = barrage_exact(xc(i), 6.0, hl, hr);
+        num += (d.h[i * ny + 1] - he).abs();
+        den += he.abs();
+    }
+    let front = (0..nx).filter(|&i| d.h[i * ny + 1] > 1e-3).map(xc).fold(f64::NEG_INFINITY, f64::max);
+    (num / den, d.volume() / v0 - 1.0, hmin, front)
+}
+
+/// **S627** — (1) les écarts L1 et les fronts ; (2) la convergence ; (3) le front sec ; (4) masse, positivité.
+#[test]
+fn the_moving_bore_and_the_dry_front_converge_to_stoker_and_ritter_s627() {
+    let refs_stoker = [0.0036729464924749895, 0.0017348457872390496, 0.00086067198348204];
+    let refs_ritter = [0.006745603398196467, 0.0033754853552410524, 0.0016938120167613775];
+    let fronts = [79.75, 81.625, 83.0625];
+    let x_mm = 50.0 + 6.0 * (2.0 * G.sqrt() - (9.0 * G * 1e-3).sqrt());
+    let (mut st, mut ri, mut fr) = (Vec::new(), Vec::new(), Vec::new());
+    for (k, dx) in [0.5, 0.25, 0.125].into_iter().enumerate() {
+        let (l1s, dms, hms, _) = barrage(dx, 0.5);
+        let (l1r, dmr, hmr, front) = barrage(dx, 0.0);
+        println!("S627 : maille {dx} m — Stoker L1 {l1s:e}, Ritter L1 {l1r:e}, front {front} m (exact {x_mm:.4})");
+        assert!((l1s - refs_stoker[k]).abs() < 1e-12 && (l1r - refs_ritter[k]).abs() < 1e-12 && front == fronts[k], "critère 1 : {dx}");
+        assert!(dms.abs() < 1e-13 && dmr.abs() < 1e-13 && hms >= 0.0 && hmr >= 0.0, "critère 4 : {dx}");
+        st.push(l1s);
+        ri.push(l1r);
+        fr.push(x_mm - front);
+    }
+    assert!(st[0] / st[1] >= 1.9 && st[1] / st[2] >= 1.9 && ri[0] / ri[1] >= 1.9 && ri[1] / ri[2] >= 1.9, "critère 2");
+    assert!(fr[0] > fr[1] && fr[1] > fr[2] && fr[2] > 0.0 && fr[0] / fr[1] >= 1.3 && fr[1] / fr[2] >= 1.3, "critère 3");
+}
