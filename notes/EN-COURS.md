@@ -70,6 +70,6 @@ défaut levé), S620 (l'ordre deux : un `ε` hors de son échelle). **ADR-255** 
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-255, METHODE, L415, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
