@@ -178,8 +178,11 @@ pas recopiée ici (L137).
 - [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *partiel* depuis S582 : **la propagation le long d'un
   rayon** — le temps de parcours exact par segment, la levée de Green, une impulsion polynomiale au bit ; l'heure d'arrivée et la hauteur
   à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)) ; **S584 : sur un rayon courbe** (le traceur de 3.6 : Green et la
-  réfraction ensemble, l'amplitude à 8·10⁻⁶ ; [preuve](validation/TSUNAMI-RAYON-COURBE-S584.md)). Manquent l'étalement d'une source
-  ponctuelle, les caustiques, la dispersion des sources courtes, le déferlement et le raffinement à la côte, l'événement de W qui le porte.
+  réfraction ensemble, l'amplitude à 8·10⁻⁶ ; [preuve](validation/TSUNAMI-RAYON-COURBE-S584.md)) ; **S622–S624, S629 : le raffinement à
+  la côte** — un domaine local de Saint-Venant 2D nourri à ses bords par `tsunami::niveau` lui-même le prolonge à 0,12 % près (le reste,
+  proportionnel à l'amplitude, est la non-linéarité que le domaine local ajoute) ; sur la pente, la remontée de Synolakis
+  ([preuve](validation/COUPLAGE-TSUNAMI-S629.md), [chaîne](validation/CHAINE-TSUNAMI-S624.md)). Manquent l'étalement d'une source
+  ponctuelle, les caustiques, la dispersion des sources courtes, le déferlement, l'événement de W qui le porte.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *partiel* depuis S588 : **la polyligne d'une côte droite** — McCowan sur la houle
   levée et réfractée, le flux dissipé en kW/m, la direction de crête, contre des formules indépendantes
   ([preuve](validation/DEFERLEMENT-S588.md)). Manquent une côte quelconque (marching squares, îles), la largeur de la zone, une polyligne

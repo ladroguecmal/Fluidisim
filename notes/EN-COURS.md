@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S629 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S626–S628), puis **3.4 —
+Session : S629 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S626–S628), puis **3.4 —
 « le raffinement à la côte »** : S622–S624 nourrissaient le domaine local d'une onde solitaire ; ici, de l'objet macroscopique lui-même,
 `tsunami::niveau` (S582).
 
@@ -89,7 +89,9 @@ non-linéarité) ; (4) à 5 mm, le reste après passage sous 10⁻⁴ de la crê
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
+- [x] **P2** — l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai, à 6·10⁻¹² au plus de numpy. Suite : 815 essais listés.
+- **P3** — preuve COUPLAGE-TSUNAMI-S629 ; ligne 3.4 ; index ; journal ; le lot.

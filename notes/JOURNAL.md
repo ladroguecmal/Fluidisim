@@ -1301,3 +1301,11 @@ sensibilité mesurée (ADR-256 D1, première application). Maillons **1** (4.14 
 l'exacte (le schéma l'est pour cette équation : le coefficient est vérifié) ; l'écoulement uniforme sur pente converge vers la hauteur
 normale (−1,8·10⁻⁴ → −4,6·10⁻⁵), celle de S604 à 10⁻⁶ près. Maillons **1** (4.14 avance). Suivant : **S629**, le lot et la physique des
 partiels.
+
+## S629 — 2026-10-07 — le lot ; le domaine local nourri par le tsunami macroscopique lui-même
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; le lot (feuille de route S626–S628), puis 3.4, « le raffinement à la côte ».
+**Fait** ([preuve](../docs/validation/COUPLAGE-TSUNAMI-S629.md)) : un essai — le domaine local, d'ordre deux, nourri à ses deux bords par
+`tsunami::niveau`. **Mesuré** : il prolonge l'objet macroscopique à 0,12 % près (crête 5 mm, maille 1 m) ; le reste est proportionnel à
+l'amplitude (la non-linéarité du local) ; tolérances posées sur la sensibilité mesurée. **En route** : un balayage vers le déferlement
+abandonné sans commit (trois effets mêlés). Maillons **1** (3.4 avance). Suivant : **S630**.
