@@ -512,7 +512,8 @@ pas recopiée ici (L137).
   (C21 par construction) ; surface rendue dans Godot ([preuve](validation/PISCINE-DELTA-S375.md)). Manquent une dynamique
   visible (maille de 5 à 10 cm : δ sur GPU), le panache calé, le bac tampon, la porte E ; **S637 : V qui déclenche δ** — au seuil de S564,
   δ amorcé au niveau du nœud puis relaxé vers sa masse (ADR-025 §3), le retard établi exactement `Q·(τ − dt)`
-  ([preuve](validation/ARTICULATION-S637.md)) ; c'est la porte E. **2026-09-26, décision de
+  ([preuve](validation/ARTICULATION-S637.md)) ; **S638 : le cycle de vie** — δ naît quand V bouge, meurt après 3 s de calme
+  ([preuve](validation/VIE-DELTA-S638.md)) ; c'est la porte E. **2026-09-26, décision de
   l'utilisateur** : la dynamique des contenants se calcule en 3D volumétrique ([ADR-200](adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md)) —
   premier cas, la piscine de S374 ([état de départ](validation/PISCINE-V-S374.md)).
 - [ ] **5.11 Eaux souterraines** — *absent* ; **hors du périmètre** par décision de l'utilisateur (2026-09-26,

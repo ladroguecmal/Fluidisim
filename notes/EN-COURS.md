@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S638 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S635–S637), puis **5.10 — le
+Session : S638 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S635–S637), puis **5.10 — le
 cycle de vie de δ attaché à V** (un manque de S637 : « la destruction de δ quand V se calme »).
 
 **Ce que la session fait.** `articulation::Vie` : à chaque pas de V, le changement de surface contre le dernier état publié (S564) — significatif :
@@ -81,7 +81,9 @@ couvre trois τ.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `Vie` et son essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 5.10 ; rituel (`--lot`).
+- [x] **P2** — `Vie` et son essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 5.10 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(3) tenus du premier essai. Suite : 822 essais listés.
+- **P3** — preuve VIE-DELTA-S638 ; ligne 5.10 ; index ; journal ; le lot.

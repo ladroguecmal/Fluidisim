@@ -1363,3 +1363,10 @@ physique des partiels.
 `articulation.rs` — `declenche`, `amorcer`, `forcer`. **Mesuré** : sous un robinet de 20 L/s, V déclenche δ au pas 13 (500 µm) ; δ né à son
 niveau suit sa masse avec le retard exact `Q·(τ − dt)` = 18 L (à 4·10⁻¹³ m³ de la récurrence) ; sa surface reste plate. Maillons **1**
 (5.10 avance). Suivant : **S638**, le lot et la physique des partiels.
+
+## S638 — 2026-10-07 — le lot ; le cycle de vie de δ attaché à V
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S635–S637), puis 5.10. **Fait** ([preuve](../docs/validation/VIE-DELTA-S638.md)) :
+`articulation::Vie`. **Mesuré** : publications aux pas 13, 26, 39 ; δ naît au pas 13, meurt au pas 69 (3 s de calme), son retard de masse
+à la mort à 10⁻¹⁵ de la référence. **Question de l'utilisateur** : « Que reste-t-il à réaliser ? » — répondue à partir de la liste. Maillons
+**1** (5.10 avance). Suivant : **S639**.
