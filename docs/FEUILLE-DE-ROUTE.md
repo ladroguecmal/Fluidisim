@@ -436,6 +436,8 @@ bathymétrie : l'isobathe h = λ, les plages à recuire) ; **12.2 ouvert** (le c
 (ADR-252 : un nombre de la preuve mesuré, jamais par incrément) ; **1.5 ouvert** (la grille d'adressage HydroGrid).
 **S608–S610** : **1.6 ouvert** (les niveaux d'activité des cellules) ; **4.11 ouvert** (le régime substitutif : la bascule, le champ
 total alimenté par B à ses bords) ; **9.6 ouvert** (le précalcul avant l'impact : translater, rebâtir, réallouer, libérer ; l'établissement).
+**S611–S613** : la vingt-sixième revue (ADR-253 : une phrase du plan qui dépend d'un nombre, assertée) ; **4.20 ouvert** (le changement de
+solveur par W) ; **4.14 ouvert** (le mouillage et le séchage en 2D, jugés sur Thacker) — la section 4 n'a plus d'absent.
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

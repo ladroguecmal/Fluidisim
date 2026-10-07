@@ -62,34 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S613 — **terminée**. En autonomie (ADR-247) : **4.14 — la plage : rouleau 3D, mouillage et séchage (C04)** (absent : C04 ne
-tournait que sur un véhicule 1D, la rupture de barrage sur lit sec). Cette session fait **le mouillage et le séchage en 2D**, jugés sur la
-solution analytique de Thacker (une nappe plane qui tourne dans une cuvette paraboloïde ; le rivage se déplace).
+Session : S614 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S611–S613), puis **11.3 — les très grands
+événements : macroscopiques au large, locaux à l'interaction** (absent). Le tsunami : le modèle macroscopique (S582, levée de Green) donne la
+hauteur au bord d'un domaine local ; le domaine local (Saint-Venant 2D de S613, une bande) calcule la remontée sur la plage.
 
-**Ce que la session fait.** Un module `saint_venant_2d.rs` : Saint-Venant 2D en volumes finis d'ordre un, **reconstruction hydrostatique**
-d'Audusse (positive, équilibrée), flux de Rusanov, murs aux bords, la vitesse **désingularisée à la Kurganov–Petrova** (`u = √2·h·q/√(h⁴ + max(h⁴, ε))`, `ε` = (1 mm)⁴) ; `pas(dt)` refuse un nombre de Courant
-au-delà de ½. Ne fait pas : le rouleau 3D, l'ordre deux, le frottement, la houle incidente sur une plage réelle, le branchement à δ.
+**Ce que la session fait.** Un module `grand_evenement.rs` : `hauteur_au_bord(rayon, A₀, s)` (la levée de Green du rayon de S582) ;
+`OndeSolitaire` (`η = H·sech²(γ(x − x₁))`, `γ = √(3H/4d³)`, `u = c·η/(d + η)`) ; `remontee_synolakis(H, d, cot β)` = `2,831·d·√cot β·(H/d)^(5/4)`
+(Synolakis 1987, onde non déferlante) ; `Plage` — une bande de trois mailles, fond plat à `d` puis pente `1/cot β`, l'onde posée à la distance
+canonique `arccosh(√20)/γ` du pied ; `remontee` — la plus haute cote mouillée (`h > 1 mm`). **En route, avant ce plan** : les murs de S613
+n'exerçaient aucune pression — sans effet à bords secs (Thacker, le lac : S613 inchangé, vérifié), faux à bord mouillé (la maille du bord
+accélérait) ; le flux de paroi `(0, ½gh², 0)` est ajouté (référence et code). Ne fait pas : l'entrée du niveau macroscopique au bord comme
+condition aux limites (ici, une onde solitaire de la hauteur donnée), le déferlement, le 3D local, le crash et le très grand navire.
 
-**Références, calculées avant** (`s613_ref.py`, numpy indépendant). Thacker (SWASHES) : `a` = 1 m, `h₀` = 0,1 m, domaine de 4 m, `η` = 0,5 ;
-période `T` = 4,485701 s ; `10·N` pas par période. Écart L1 de `h` après une période : **0.427088494** (50²), **0.242184670** (100²),
-**0.128641914** (200²) — rapports 1.7635 et 1.8826 : **l'ordre un, qui converge**. Masse : variation sous 10⁻¹³ aux trois ; `h` jamais
-négatif. Le centre de masse à 100² : T·250/1000 : (2.017083014, 2.475469549) ; T·500/1000 : (1.552226477, 2.058725469) ; T·1000/1000 : (2.395102837, 1.902849265) (l'exact : (2 ; 2,5), (1,5 ; 2), (2,5 ; 2) — l'oscillation amortie par la diffusion de l'ordre
-un). **Le lac au repos** (cote −0,05 m, bords secs), 500 pas : vitesse max **1.852e-16 m/s**.
+**Références, calculées avant** (`s614_ref.py`, numpy). Un tsunami de 4,14 cm à 4 000 m de fond, levé jusqu'à 10 m : **H = 0.185146429 m**
+(`H/d` = 0.018515, sous le déferlement de Synolakis, 0,044). Plage 1:19,85 ; Synolakis : **R = 0.861418706 m**. Le domaine local, maille de
+1, ½, ¼ m (pas 0,04/k s) : **R = 0.705289673, 0.793450882, 0.850125945 m** — la remontée converge vers la loi (-1.31 % au plus
+fin) ; masse exacte, `h ≥ 0`, Courant ≤ 0.4071.
 
-**Amendement, avant la mesure du code** (ADR-244 D1) : la première référence (vitesse `q/h` au-dessus de 10⁻⁶ m, nulle
-sous) atteignait **Courant 0,60** dans une maille presque sèche (`h` = 1,2·10⁻⁶ m) — le refus du critère (5) l'aurait arrêtée à 200² ; la
-vitesse désingularisée, Courant ne dépasse pas **0.1896** (asserté), et les références ci-dessus sont les nouvelles.
-
-**Quantum** : f64. **Critères, écrits avant.** (1) à 100², l'écart L1 et les trois centres de masse égaux aux références à 10⁻⁹ ; (2) les écarts
-L1 à 50² et 200² à 10⁻⁹ ; le rapport 100 → 200 au moins 1,8 ; (3) la masse à 10⁻¹³ relatif, `h ≥ 0` à chaque pas, aux trois résolutions ;
-(4) le lac au repos immobile sous 10⁻¹⁴ m/s ; (5) refus : moins de deux mailles, `dx` ou `dt` non positifs, un pas au-delà de Courant ½.
+**Quantum** : la remontée se lit à la cote d'une maille — `dx/cot β`, 0.012594 m au plus fin ; le seuil de l'écart à Synolakis, dix quanta,
+**0.125945 m** (asserté). **Critères, écrits avant.** (1) `H` de la levée égal à la référence à 10⁻¹² ; (2) les trois remontées égales aux
+références au bit (des cotes de mailles) ; (3) croissantes, et la plus fine à moins de 0.1259 m de Synolakis ; (4) masse à 10⁻¹³, `h ≥ 0`,
+aux trois mailles ; (5) un bord mouillé au repos (un bassin plat à 10 m, murs) ne bouge pas : vitesse sous 10⁻¹² m/s après 500 pas — le
+défaut des murs ; (6) refus : `H`, `d` ou `cot β` non positifs.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `saint_venant_2d.rs` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — les murs de `saint_venant_2d.rs`, `grand_evenement.rs` et leurs essais ; (1)–(6).
+- [ ] **P3** — preuve ; liste 11.3 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (1)–(5) tenus, à 10⁻¹⁵ de numpy, après l'amendement (vitesse désingularisée). Suite : 802 essais listés.
-- **P3** — preuve THACKER-S613 ; liste 4.14 (absent → partiel) et décompte ; index ; journal.
