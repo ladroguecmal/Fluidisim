@@ -62,25 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S681 — **terminée**. En autonomie vers la v2. **La quarantième revue de méthode** (ADR-222 D4 : S676–S680).
+Session : S682 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271, note de S680).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.** **La sortie à droite** (`enable_right_outlet`, avec les bords ouverts de S446) :
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-256 D2, ADR-270.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+- une particule qui franchit le bord droit n'est plus retenue par le domaine, elle est retirée ;
+- son volume (`dx³/8`) est compté par rangée `j` et au total (`right_outlet`) ;
+- éteinte par défaut ; refusée avec les gouttes et la zone des colonnes (leurs tableaux par particule).
 
-**Critères, écrits avant.** (1) ADR-272 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ou aurait coûté ; (3) la prochaine revue nommée.
+L'entrée (poser des particules pour un volume donné) est la brique suivante.
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-272)
+
+- **témoin** : sans la sortie, au bit (tous les essais d'APIC) ; le même bassin, le bord ouvert sans la sortie (les particules
+  s'entassent contre le bord).
+- **instrument** : un bassin à 0,4 m qui se vide par son bord droit ouvert à 0,1 m/s pendant 1 s, à 5 cm. Le volume compté contre deux
+  lectures :
+  - le compte des particules (exact, au bit) ;
+  - le flux de la face, `Σ u·dx²` sur les faces mouillées, intégré sur le pas.
+
+  Ce que rendrait chaque hypothèse :
+  - une sortie juste rend le compte exact et le flux à mieux que 10 % ;
+  - une particule retenue s'entasse au bord : la densité de la dernière colonne dépasse celle d'une colonne pleine ;
+  - un volume compté sans retrait (ou l'inverse) casse le compte exact.
+- **calcul** (ce script) : ≈ 4.00 L sortent, 256 particules. La surface baisse de 2.0 cm (5 %
+  de `h`) : la borne du flux à **10 %**.
+- **ADR** : ADR-271, ADR-272 (sans objet : aucune interface placée dans la maille n'est jugée ici).
+- **pièges** :
+  - `walls` impose la vitesse du bord à toutes les faces de droite, celles d'air comprises (la projection ne les lit pas) ;
+  - le retrait par échange avec la dernière particule (l'ordre change : le compte, non) ;
+  - la marge de la borne du domaine (`1e-3·dx`).
+
+**Critères, écrits avant.**
+
+1. Sans la sortie, tout au bit (le banc et les essais d'APIC).
+2. Le compte exact : particules au départ = particules restantes + retirées, et le volume compté = retirées × `dx³/8`.
+3. Le volume sorti à moins de **10 %** du flux de la face intégré.
+4. Aucune accumulation : la dernière colonne ne dépasse pas la densité d'une colonne pleine (8 par maille mouillée).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-272 ; METHODE.
-- [x] **P3** — rituel.
+- [ ] **P2** — la sortie ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-272 : cinq sessions relues ; D1 (un remède jugé sur trois places de l'interface dans la maille) ; la prochaine revue S686.
