@@ -1079,3 +1079,9 @@ constat — trop d'agrandissements pour δ. Maillons **1** (4.4 : absent → par
 **Mesuré** : la taille de SPEC-005 à l'octet, les lignes à 0,22 mm, la marée qui les déplace de 50 m. **En route** : une attente de l'essai hors
 du plan (une ligne pour chaque état) que la référence du plan contredisait — notée, puis corrigée. Maillons **2** (12.3, 2.8 : absent →
 partiel). Suivant : **S600**, un point absent ; revue à S601.
+
+## S600 — 2026-10-07 — la réserve d'événement
+
+**Entrée.** En autonomie (ADR-247) ; 9.13 (absent ; ADR-012 §6). **Fait** ([preuve](../docs/validation/RESERVE-EVENEMENT-S600.md)) :
+`ReserveEvenement`. **Mesuré** : les ticks renforcés comptés par le script, exactement — 165 sur 1 800 sous une crise continue, 15 et 15
+pour deux événements. Maillons **1** (9.13 : absent → partiel). Suivant : **S601, la vingt-quatrième revue de méthode**.

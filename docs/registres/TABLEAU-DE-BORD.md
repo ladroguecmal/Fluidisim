@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 93 — absents : 17.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 94 — absents : 16.
 
 ## Par campagne
 
@@ -19,7 +19,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K5** δ, le système | 0 | 12 | 2 | ◐4.2 ◐4.3 ◐4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
 | **K7** Les volumes finis | 1 | 8 | 0 | ◐5.2 ✅5.3 ◐5.4 ◐5.6 ◐5.7 ◐5.8 ◐5.9 ◐5.10 ◐5.12 |
-| **K8** Activation, prédiction, budget | 1 | 12 | 4 | ◐9.1 ◐9.2 ◐9.3 ·9.4 ✅9.5 ·9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ·9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
+| **K8** Activation, prédiction, budget | 1 | 13 | 3 | ◐9.1 ◐9.2 ◐9.3 ·9.4 ✅9.5 ·9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ◐9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
 | **K9** Réseau et persistance | 0 | 9 | 2 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ·10.5 ◐10.6 ◐10.8 ◐10.9 ·1.5 ◐3.7 ◐3.8 |
 | **K10** Grande échelle | 0 | 5 | 1 | ◐11.1 ◐11.2 ·11.3 ◐3.4 ◐2.1 ◐2.2 |
 | **K11** Outillage | 0 | 2 | 2 | ◐12.1 ◐12.3 ·12.4 ·12.5 |
@@ -119,7 +119,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 9.10 | absent | Profils de qualité, adaptation au matériel et à la charge |
 | 9.11 | partiel | 60 images/s avec 2 ms pour l'eau sur une scène représentative |
 | 9.12 | partiel | Aucune allocation à l'exécution |
-| 9.13 | absent | Dépassement critique temporaire |
+| 9.13 | partiel | Dépassement critique temporaire |
 | 10.1 | partiel | Réplication des événements sources, jamais de l'état |
 | 10.2 | partiel | Le serveur n'exécute que V |
 | 10.3 | partiel | Déterminisme bit à bit entre plateformes pour B, W répliqué et V |
@@ -271,4 +271,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S597 | 2026-10-07 | 10 | 90 | 20 | 120 |
 | S598 | 2026-10-07 | 10 | 91 | 19 | 120 |
 | S599 | 2026-10-07 | 10 | 93 | 17 | 120 |
+| S600 | 2026-10-07 | 10 | 94 | 16 | 120 |
 <!-- fin de l'historique -->

@@ -765,7 +765,10 @@ pas recopiée ici (L137).
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
   l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270 ; redimensionnement de δ 3D
   sans allocation, constaté à l'allocateur de la carte (S350). Système entier non éprouvé.
-- [ ] **9.13 Dépassement critique temporaire** sans retard global perceptible — *absent*.
+- [ ] **9.13 Dépassement critique temporaire** sans retard global perceptible — *partiel* depuis S600 : **la réserve d'événement**
+  d'ADR-012 §6 — +50 % pendant 0,5 s, 5 s de rechargement, le seul domaine critique ; sous une crise continue, 165 ticks renforcés sur
+  1 800 (4,6 % de dépassement moyen) ([preuve](validation/RESERVE-EVENEMENT-S600.md)). Manquent le branchement à l'ordonnanceur et la
+  mesure du retard perçu (B7).
 
 ## 10. Multijoueur, autorité et persistance
 
@@ -868,12 +871,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 1 | 8 | 4 |
+| 9. Activation et budget | 13 | 1 | 9 | 3 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 2 | 3 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **93** | **18** |
+| **total** | **121** | **10** | **94** | **17** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

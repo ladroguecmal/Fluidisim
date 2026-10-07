@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S600 — **en cours**. En autonomie (ADR-247), **9.13 — le dépassement critique temporaire sans retard global perceptible**
+Session : S600 — **terminée**. En autonomie (ADR-247), **9.13 — le dépassement critique temporaire sans retard global perceptible**
 (absent) : ADR-012 §6 — « une réserve d'événement : +50 % pendant 0,5 s au plus, un rechargement de 5 s, pour le seul domaine dont
 `W_gameplay` est maximal ; sans rechargement, la réserve devient le budget nominal ».
 
@@ -84,7 +84,10 @@ jamais au-dessus de 1,5 × le nominal ; (4) refus : un nominal non positif.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `ReserveEvenement` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 9.13 ; rituel.
+- [x] **P2** — `ReserveEvenement` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 9.13 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — 165 ; 15 et 15 ; les bornes ; refus ; un avertissement de compilation (une constante empruntée en mutable) corrigé. Suite 776.
+- **P3** — preuve RESERVE-EVENEMENT-S600 ; liste 9.13 (absent → partiel) et décompte ; index ; journal.
+
