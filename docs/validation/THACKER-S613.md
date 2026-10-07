@@ -40,3 +40,7 @@ presque sèche ; désingularisée à la Kurganov–Petrova, Courant reste sous 0
 
 Manquent : **le rouleau 3D**, l'ordre deux (moins diffusif), le frottement, une houle incidente sur une plage réelle (C04 en 2D sur une
 pente, le jet de rive), le branchement à δ et à la bibliothèque côtière (12.3).
+
+> **Note du 2026-10-07 (S614).** Les murs de ce module n'exerçaient aucune pression : sans effet ici (Thacker et le lac ont des bords
+> secs ; les références et les mesures ci-dessus sont inchangées, vérifié), mais faux à bord mouillé. Le flux de paroi `(0, ½gh², 0)` est
+> ajouté en S614 ([preuve](GRAND-EVENEMENT-S614.md) §3).

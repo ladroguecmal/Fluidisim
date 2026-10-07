@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S614 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S611–S613), puis **11.3 — les très grands
+Session : S614 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S611–S613), puis **11.3 — les très grands
 événements : macroscopiques au large, locaux à l'interaction** (absent). Le tsunami : le modèle macroscopique (S582, levée de Green) donne la
 hauteur au bord d'un domaine local ; le domaine local (Saint-Venant 2D de S613, une bande) calcule la remontée sur la plage.
 
@@ -88,7 +88,9 @@ défaut des murs ; (6) refus : `H`, `d` ou `cot β` non positifs.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — les murs de `saint_venant_2d.rs`, `grand_evenement.rs` et leurs essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 11.3 ; rituel (`--lot`).
+- [x] **P2** — les murs de `saint_venant_2d.rs`, `grand_evenement.rs` et leurs essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 11.3 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus du premier essai ; S613 inchangé avec les murs corrigés. Suite : 803 essais listés.
+- **P3** — preuve GRAND-EVENEMENT-S614 ; note datée à THACKER-S613 ; liste 11.3 (absent → partiel) et décompte ; index ; journal ; le lot.

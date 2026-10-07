@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 104 — absents : 6.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 105 — absents : 5.
 
 ## Par campagne
 
@@ -21,7 +21,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K7** Les volumes finis | 1 | 8 | 0 | ◐5.2 ✅5.3 ◐5.4 ◐5.6 ◐5.7 ◐5.8 ◐5.9 ◐5.10 ◐5.12 |
 | **K8** Activation, prédiction, budget | 1 | 15 | 1 | ◐9.1 ◐9.2 ◐9.3 ◐9.4 ✅9.5 ◐9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ◐9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
 | **K9** Réseau et persistance | 0 | 10 | 1 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ·10.5 ◐10.6 ◐10.8 ◐10.9 ◐1.5 ◐3.7 ◐3.8 |
-| **K10** Grande échelle | 0 | 5 | 1 | ◐11.1 ◐11.2 ·11.3 ◐3.4 ◐2.1 ◐2.2 |
+| **K10** Grande échelle | 0 | 6 | 0 | ◐11.1 ◐11.2 ◐11.3 ◐3.4 ◐2.1 ◐2.2 |
 | **K11** Outillage | 0 | 4 | 0 | ◐12.1 ◐12.3 ◐12.4 ◐12.5 |
 | **K12** La fin de l'eau | 0 | 6 | 1 | ◐2.8 ◐7.1 ◐7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
 | **K13** La validation du système, et l'eau dans le jeu | 0 | 4 | 2 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ·11.5 |
@@ -131,7 +131,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 10.9 | partiel | Requêtes de jeu |
 | 11.1 | partiel | Monde planétaire |
 | 11.2 | partiel | Nombreuses régions de mer décrites par descripteur |
-| 11.3 | absent | Très grands événements |
+| 11.3 | partiel | Très grands événements |
 | 11.4 | partiel | Nombreuses sources simultanées à coût maîtrisé |
 | 11.5 | absent | Matériel cible de livraison et seconde cible |
 | 12.1 | partiel | Cuisson reproductible, empreintes, obsolescence détectée |
@@ -285,4 +285,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S611 | 2026-10-07 | 10 | 102 | 8 | 120 |
 | S612 | 2026-10-07 | 10 | 103 | 7 | 120 |
 | S613 | 2026-10-07 | 10 | 104 | 6 | 120 |
+| S614 | 2026-10-07 | 10 | 105 | 5 | 120 |
 <!-- fin de l'historique -->

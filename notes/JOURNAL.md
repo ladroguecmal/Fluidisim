@@ -1186,3 +1186,11 @@ volumes finis d'ordre un, reconstruction hydrostatique d'Audusse, Rusanov, vites
 L1 à Thacker 0,43 → 0,24 → 0,13 (l'ordre un converge), masse exacte, `h ≥ 0`, le lac au repos immobile. **En route** : la première
 référence (vitesse `q/h`) dépassait Courant ½ dans une maille presque sèche — plan amendé avant la mesure du code (Kurganov–Petrova).
 Maillons **1** (4.14 : absent → partiel ; la section 4 n'a plus d'absent). Suivant : **S614**, le lot et un point absent.
+
+## S614 — 2026-10-07 — le lot ; un très grand événement, du large à la plage
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S611–S613), puis 11.3 (absent). **Fait** ([preuve](../docs/validation/GRAND-EVENEMENT-S614.md)) :
+`grand_evenement.rs` — la hauteur au bord par Green, l'onde solitaire, la plage, la remontée. **Mesuré** contre numpy, au bit : la remontée
+0,705 → 0,793 → 0,850 m quand la maille passe de 1 à ¼ m, pour 0,861 selon Synolakis. **En route** : la référence divergeait — les murs de
+S613 n'exerçaient aucune pression (sans effet à bords secs, faux à bord mouillé) ; corrigé, S613 inchangé, note datée à sa preuve.
+Maillons **1** (11.3 : absent → partiel). Suivant : **S615**, un point absent.

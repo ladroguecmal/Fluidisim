@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 07:10 +02:00
+JETON            : libre
+Battement        : 2026-10-07 07:15 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S614 — le lot ; 11.3, un très grand événement : du large à la plage ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S613 — le mouillage et le séchage en 2D (Thacker) ([journal](notes/JOURNAL.md)). Avant : S612 (le changement de solveur par W)
-Session suivante : **S614 — le lot (dû), puis un point absent** (ADR-247 ; restent 7). Revue à S616. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S613 : 4.14 absent → partiel
-Registres       : dernier lot S611 (ADR-213 D3) ; le prochain au plus tard en S614
+Session en cours : aucune
+Dernière session : S614 — le lot ; un très grand événement, du large à la plage ([journal](notes/JOURNAL.md)). Avant : S613 (le mouillage et le séchage en 2D)
+Session suivante : **S615 — un point absent** (ADR-247 ; restent 6, dont 7.8 à la fin et 13.4 après la physique). Revue à S616 ; le lot à S617. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S614 : 11.3 absent → partiel
+Registres       : dernier lot S614 (ADR-213 D3) ; le prochain au plus tard en S617
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

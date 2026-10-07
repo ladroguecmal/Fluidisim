@@ -825,7 +825,10 @@ pas recopiée ici (L137).
   ([preuve](validation/REGIONS-S594.md)). Manquent la période et la direction par région, la marée de chaque région, de nombreuses régions
   à coût borné, le placement sur la planète.
 - [ ] **11.3 Très grands événements** (tsunami, crash, très grand navire) : macroscopique au large,
-  3D locale à l'interaction — *absent*.
+  3D locale à l'interaction — *partiel* depuis S614 : le tsunami du large à la plage — la levée de Green du rayon (S582) donne la hauteur au
+  bord d'un domaine local de Saint-Venant 2D (S613), dont la remontée converge vers Synolakis (0,705 → 0,850 m pour 0,861)
+  ([preuve](validation/GRAND-EVENEMENT-S614.md)). Manquent le niveau du large imposé au bord, le déferlement, le local 3D, le crash et le
+  très grand navire.
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
   sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.
@@ -903,10 +906,10 @@ pas recopiée ici (L137).
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 11 | 1 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
-| 11. Grande échelle | 5 | 0 | 3 | 2 |
+| 11. Grande échelle | 5 | 0 | 4 | 1 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **104** | **7** |
+| **total** | **121** | **10** | **105** | **6** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
