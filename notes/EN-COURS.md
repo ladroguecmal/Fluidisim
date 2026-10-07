@@ -62,33 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S588 — **terminée**. En autonomie (ADR-247 : la physique d'abord), **3.5 — le déferlement** (absent ; « polyligne de SPEC-006
-§6 »). Une donnée **cuite** : dérivée hors ligne de la bathymétrie et de l'état de mer, republiée par phase de marée.
+Session : S589 — **en cours**. En autonomie (ADR-247), **3.9 — les couches fournies au-dessus du plan moyen pour δ** (absent ; A286) :
+le pas couplé mobile exige un champ prolongé au-dessus de `z = 0` **de façon incompressible** ; B refuse `z > 0` (ADR-113) ; Taylor d'ordre
+un n'est pas incompressible (`div = z·U_xz`), l'exponentielle `e^{kz}` amplifie les ondes courtes sous les crêtes des longues.
 
-**Ce que la session fait.** `deferlement.rs` : sur une grille de profondeurs (la côte orientée le long de `y`, le large vers `+x`), la
-hauteur de la houle en chaque nœud — levée et réfraction de la référence de B (`bathymetrie::transformer`, S362) —, l'écart
-`H − 0,78·h` (McCowan), et, ligne par ligne depuis le large, le premier passage par zéro, interpolé linéairement entre deux nœuds : un
-sommet de la polyligne. Chaque sommet porte le **flux d'énergie dissipé** `ρ·g·H²/8·c_g` (kW/m, SPEC-006 §6) et la **direction de crête**.
-Ne fait pas : une côte quelconque (les marching squares et le chaînage des segments), la largeur de la zone de déferlement, plusieurs
-phases de marée, la publication (le chemin poussé).
+**Ce que la session fait.** Le remède qu'A286 propose : `Background::vitesse_au_dessus(x, y, z, t)` — la vitesse horizontale **constante**
+au-dessus de `z = 0` (`U(z) = U(0)`), la verticale **fermée par la continuité** : `w(z) = w(0) − z·∇ₕ·U(0)` ; incompressible par
+construction, linéaire en `z` (pour un mode d'Airy, `w = −a·ω·cos φ·(1 + kz)` : l'ordre un de l'exponentielle). Mêmes phases entières que
+`eval_local`. Ne fait pas : W (les anneaux) au-dessus du plan, le raccord au pas couplé de δ (la réception contre l'oracle S253).
 
-**Références, calculées avant par ce script, avec ses propres formules** (dispersion par Newton, `K_s = √(c_g0/c_g)`, Snell,
-`K_r = √(cos θ₀/cos θ)`) : une plage `h = 0,02·x`, une houle de 2 m, 8 s, à 20° : **`h_b` = 2.841963 m**, **`x_b` = 142.0982 m**, `H_b` =
-2.216731 m, la crête à **8.0632°**, le flux dissipé **29.799753 kW/m**. Sur la grille de 5 m, l'interpolation linéaire place
-le croisement à **142.1033 m** (+0.0052 m de la racine : la courbure de l'écart entre deux nœuds).
+**Références, calculées avant** (ce script les écrit). Un mode de 1 m, λ = 50 m (`k` = 0.125664 rad/m, `ω` = 1.110298 rad/s), à `z` = 0,5 m :
+le témoin Taylor a une divergence de **8.7666e-03 s⁻¹** au plus ; l'écart à l'exponentielle sur `w`, `a·ω·(e^{kz} − 1 − kz)`, au plus
+**2.2383e-03 m/s**. Le bruit d'une divergence par différences finies centrées en f32 au pas de 1 cm : ≈ **1.3e-05 s⁻¹**.
 
-**Quantum** (ADR-236 D1) : l'interpolation, 5.2 mm ; f64 ailleurs. **Critères, écrits avant.** (1) chaque sommet de la
-polyligne (une par ligne de la grille) à 1 mm de 142.1033 m (l'algorithme) et à 0.010 m de la racine ; (2) le
-flux à 10⁻³ relatif de 29.799753 kW/m, la direction à 0,01° ; (3) une ligne sans déferlement (une houle trop petite pour la plus grande
-profondeur de la grille… ou une ligne toute à terre) : aucun sommet ; (4) refus : grille de moins de 2 × 2, tampon trop court.
+**Quantum** (ADR-236 D1) : ce bruit. **Critères, écrits avant.** (1) la divergence du prolongement, par différences finies, sous 10⁻³ de
+celle du témoin (rapport au bruit : 1) en 16 points ; (2) `w` égal à `−a·ω·cos φ·(1 + kz)` à 10⁻⁵ m/s, et
+son écart à l'exponentielle sous 2.2383e-03 m/s ; (3) à `z = 0`, `(u, v, w)` identiques **au bit** à la vitesse de surface
+d'`eval_local` (la continuité) ; (4) refus : `z < 0` ou non fini.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `deferlement.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.5 ; rituel.
+- [ ] **P2** — `vitesse_au_dessus` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.9 ; A286 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — 8 sommets à 142,1033 m ; flux 29,799763 kW/m ; crête 8,0634° ; une houle de 1 cm sans sommet ; refus. Suite 763.
-- **P3** — preuve DEFERLEMENT-S588 ; liste 3.5 (absent → partiel) et décompte ; index ; journal.
-
