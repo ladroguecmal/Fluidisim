@@ -62,31 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S668 — **terminée**. En autonomie vers la v2 ; 2.7. `Cote2D` coûte 160 Mo/km² pour 32 composantes au pas de 2 m (S667).
+Session : S669 — **en cours**. En autonomie vers la v2 ; 2.7 (« manquent… la dissipation au déferlement »). `Cote2D` s'arrête à 2 m de
+fond, avant que la mer de S667 ne déferle : sans dissipation, la levée croît sans borne vers le rivage.
 
-**Ce que la session fait.** **La marche et les tables découplées** : la marche à 2 m (sa justesse), les tables gardées un nœud sur `m` dans
-chaque direction (`Cote2D::cuire_decime`) — la mémoire divisée par `m²`. `cuire` est `cuire_decime` avec `m` = 1 (au bit).
+**Ce que la session fait.** **Le déferlement d'une mer dans la marche parabolique** : toutes les composantes marchent ensemble, rangée
+par rangée (`propager_spectre_periodique`). En chaque nœud, la mer entière donne `Hrms = 2·√(Σ (a_c·|A_c|)²)`, et Battjes et Janssen
+(1978) donnent `D/E = 2α·f̄·Q_b·(H_max/Hrms)²`, avec `H_max = 0,88/k̄·tanh(γ·k̄·h/0,88)` et `(1 − Q_b)/ln Q_b = −(Hrms/H_max)²`. Chaque
+composante est amortie au même taux (Chawla, Özkan-Haller et Kirby 1998, REF/DIF-S) : `A_x` reçoit `−(w/2)·A`, `w = (D/E)·ω/(p·k_x)`.
+`γ` vient de Battjes et Stive (1985) : `0,5 + 0,4·tanh(33·s₀)`. La marche de `marche_grand_angle` devient un état qui avance d'une
+rangée, sans changer son arithmétique.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet.
-- **instrument** : la côte 2D pleine (`m` = 1), la mer de huit composantes de S667, 60 points × 3 instants. Ce qui départagerait : une
-  décimation juste rend un écart de `η` qui croît comme `Δ²` (la loi d'ADR-196 D2) ; une faute d'indice (un nœud décalé) rend un écart
-  qui ne décroît pas avec `m`, ou dès `m` = 1.
-- **calcul** (ce script) : l'ordre attendu par la loi `Δ²` d'ADR-196 D2 — 0,9 mm à 4 m, 3,7 mm à 8 m, 15 mm à 16 m par mètre d'amplitude ;
-  le plancher : la tolérance d'image, **3 mm** (S201).
-- **ADR** : ADR-196 (D2, §3), ADR-268.
-- **pièges** : la période des bords périodiques (`W` = `nn_t·m·pas`, la marche) ; la longueur multiple du pas des tables ; la phase entre
-  deux nœuds des tables, moins d'un demi-tour (refusée sinon).
+- **témoin** : l'empreinte de trois marches existantes (Berkhoff linéaire et non linéaire, la plage périodique), prise avant le
+  remaniement : `4a10864d51e1108b`.
+- **instrument** : l'équilibre d'énergie 1D de la même mer (chaque composante réfractée par Snell, `dF_c/ds = −(D/E)·E_c`), intégré à
+  part (RK4 au mètre) dans l'essai. Ce qui départagerait : une dissipation juste suit la référence à la précision de la marche sans
+  déferlement ; un `Q_b` inversé ou un taux mal rapporté au flux s'en écarte de plusieurs dizaines de % (au calcul, avec la bissection
+  inversée : `Hrms` 0,20 m au lieu de 0,89 m à 2 m de fond).
+- **calcul** (scratchpad `s669_bj.py`) : `f̄` = 0,106 Hz, `Hrms₀` = 1,55 m, `γ` = 0,640 ; le déferlement commence vers 6 m de fond
+  (`Q_b` 0,006) ; à 2 m, `Hrms` 0,89 m, `Hrms/h` 0,45, `Q_b` 0,21. Le plancher de l'instrument : la marche sans déferlement s'écarte de
+  la côte 1D de 0,6 % en amplitude par composante (S665), d'où ≈ 0,6 % sur `Hrms`, plus le retard d'une rangée du taux (`w·dx` ≈ 0,1
+  au plus fort) — d'où la borne de **3 %**.
+- **ADR** : ADR-196, ADR-259 (le déferlement localisé, la dissipation au tableau 2.7), ADR-268.
+- **pièges** : la bissection de `Q_b` (son sens, vérifié au calcul) ; `E` en `a²/2` et `Hrms² = 8E` (une seule onde : `Hrms = 2a`) ; la
+  dissipation rapportée au flux normal (`c_g·cos θ`, ici `p·k_x/ω`) ; la profondeur sous 1 m, refusée par la marche.
 
-**Critères, écrits avant.** (1) `m` = 1 au bit de `cuire`. (2) Rapportés, pour `m` = 2, 4, 8 : `|Δη|` au plus contre la côte pleine, la
-mémoire ; **le plus grand `m` sous 3 mm**, et la mémoire d'un km² à 32 composantes à ce pas. (3) L'écart croît avec `m` (asserté).
+**Critères, écrits avant.** (1) Le remaniement au bit : l'empreinte inchangée ; la marche spectrale sans déferlement, au bit des marches
+séparées. (2) La mer de S667 sur une plage de 80 m à 1 m de fond : `Hrms(s)` de la marche à moins de **3 %** de la référence 1D, à
+chaque rangée. (3) Rapportés : l'écart sans déferlement à 1 m (la levée sans borne), et `Hrms/h` au rivage — entre 0,35 et 0,55 (le
+champ de Thornton et Guza (1982), ≈ 0,42, cité de mémoire : un repère de vraisemblance, pas une mesure).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `cuire_decime` ; l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — la marche par rangée ; `propager_spectre_periodique` ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) `m` = 1 au bit ; (2) `|Δη|` 0,21 / 0,70 / 4,3 mm à `m` = 2 / 4 / 8 ; le plus grand `m` sous 3 mm : 4 (tables à 8 m), 10 Mo/km² pour 32 composantes ; (3) croissant.
