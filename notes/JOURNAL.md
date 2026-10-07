@@ -1272,3 +1272,10 @@ Suivant : **S624**, la physique des partiels.
 qui assemble l'ordre deux, le bord forcé et l'onde solitaire. **Mesuré** au bit de numpy : la remontée forcée 0,806 → 0,869 → 0,901 m ;
 l'écart à l'étendu, 5,04 cm aux trois mailles — le raidissement non dispersif de l'étendu, non le bord. **En route** (au plan) : à 130 s,
 l'onde n'avait pas fini sa course. Maillons **1** (11.3 avance). Suivant : **S625**, la physique des partiels.
+
+## S625 — 2026-10-07 — une houle périodique sur une plage (Keller & Keller)
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 4.14, « une houle sur une plage réelle ». **Fait** ([preuve](../docs/validation/HOULE-PLAGE-S625.md)) :
+un essai — l'ordre deux, le bord caractéristique nourri d'une houle de 5 cm et 60 s, une pente 1:19,85. **Mesuré** : la remontée d'un cycle
+établi, 0,2502 → 0,2491 → 0,2493 m, pour 0,2492 selon Keller & Keller (à 0,05 % dès ½ m) ; à 10⁻¹³ m de numpy. **Fait en route** : l'éveil
+relancé à 9 h 25 pour 14 h (jusqu'à 23 h 25). Maillons **1** (4.14 avance). Suivant : **S626**, la revue de méthode et le lot.

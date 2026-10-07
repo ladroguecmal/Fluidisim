@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S625 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **4.14 — « une houle sur une plage réelle »** (un manque
+Session : S625 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **4.14 — « une houle sur une plage réelle »** (un manque
 de S613) : une houle longue périodique entre par le bord caractéristique (S622) et monte et descend une pente, cycle après cycle.
 
 **Ce que la session fait.** Aucun code nouveau dans le cœur : un essai — `SaintVenant2D` d'ordre deux (S620), `pas_avec_bord` (S622) nourri
@@ -82,7 +82,9 @@ de Keller & Keller aux trois mailles, de 0,1 % à ½ et ¼ m ; (3) `h ≥ 0`.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(3) tenus du premier essai ; l'accord avec numpy à 10⁻¹³ m (la tolérance de 10⁻⁶ n'a pas servi). Suite : 812 essais.
+- **P3** — preuve HOULE-PLAGE-S625 ; ligne 4.14 ; index ; journal.

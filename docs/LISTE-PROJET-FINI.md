@@ -329,8 +329,9 @@ pas recopiée ici (L137).
   Saint-Venant 2D, reconstruction hydrostatique, vitesse désingularisée ; jugés sur Thacker (le rivage tourne dans une cuvette) : l'ordre
   un converge (0,43 → 0,24 → 0,13), masse exacte, aucune hauteur négative, le lac au repos à bords secs immobile
   ([preuve](validation/THACKER-S613.md)) ; **S620** : l'ordre deux (MUSCL, reconstruction hydrostatique d'Audusse, Heun) — l'écart à
-  Thacker divisé par 9 à 22 (0,048 → 0,016 → 0,006) ([preuve](validation/ORDRE-DEUX-S620.md)). Manquent le rouleau 3D, une houle sur une
-  plage réelle, le frottement, le branchement à δ.
+  Thacker divisé par 9 à 22 (0,048 → 0,016 → 0,006) ([preuve](validation/ORDRE-DEUX-S620.md)) ; **S625** : une houle périodique entrée par
+  le bord monte la pente cycle après cycle — sa remontée à 0,05 % de Keller & Keller ([preuve](validation/HOULE-PLAGE-S625.md)).
+  Manquent le rouleau 3D, la houle déferlante, le frottement, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
