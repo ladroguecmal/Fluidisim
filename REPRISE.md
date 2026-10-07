@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 19:42 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 20:24 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S659 — 2.7, la bathymétrie 2D : le modèle parabolique de pente douce, jugé sur le haut-fond de Berkhoff ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S658 — la séance visuelle du rouleau (R40) ([journal](notes/JOURNAL.md)). Avant : S657 (le corps libre contre l'eau autour de lui)
 Session suivante : **S659** — selon R40 : si l'utilisateur répond, son verdict d'abord ; sinon la suite des partiels de la physique (ADR-247) — le choix par la liste (dépendances, front 0).
 Maillons        : 2

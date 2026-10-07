@@ -62,33 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S658 — **terminée**. Sur la demande de l'utilisateur (2026-10-07) : *« J'aimerais des sessions visuelles grâce à toutes les
-nouvelles avancées »*. **La séance visuelle du rouleau** : le montage complet de S650–S657 — Saint-Venant 2D au large, APIC 3D sur la
-plage, le déferlement plongeant, la poche d'air, la sphère libre emportée — enregistré, rendu en animations, envoyé pour un verdict (R40).
+Session : S659 — **en cours**. En autonomie vers la v2. **2.7, la bathymétrie 2D** (le point qui en débloque six) : il manque la
+bathymétrie 2D et la **diffraction des hauts-fonds isolés**, où les rayons de S583 font des caustiques. Le meilleur chemin au réalisme
+visé (S643) : un modèle de houle côtière cuit par rivage. Première pièce : **le modèle parabolique de pente douce** (Radder 1979) —
+réfraction et diffraction ensemble, une marche en `x`, Crank–Nicolson, tridiagonal en `y`.
 
-**Le rendu** : un rendu d'atelier (numpy et PIL, sans téléchargement), pour juger la physique — la forme du rouleau, le jet, la poche, la
-remontée, le corps emporté —, non le rendu final de Godot. Deux animations : la plage entière vue de côté, la zone du rouleau de près ;
-les particules colorées par leur vitesse, le fond en escalier, la surface de Saint-Venant au large, la sphère.
+**L'équation** (dérivée au plan, de `∇·(p∇φ) + k²pφ = 0`, `p = C·C_g`, `φ = A·e^(i∫k̄dx)`, `A_xx` négligé) :
+`A_x = −(p·k̄)_x/(2p·k̄)·A + i/(2p·k̄)·[(p·A_y)_y + p·(k² − k̄²)·A]`, `k̄(x)` la moyenne de `k` sur `y`. À une dimension, elle redonne
+`A ∝ (p·k)^(−½) ∝ C_g^(−½)` : la levée par le flux d'énergie.
+
+**La référence : les mesures de Berkhoff, Booy et Radder (1982)**, le haut-fond elliptique, lues dans l'exemple public de Basilisk
+(`basilisk.fr/src/examples/section-2, -3, -5, -7`, le rapport d'amplitude mesuré) : section 2 à x = 3 m, section 3 à x = 5 m, section 5 à
+x = 9 m (profils en `y`), section 7 sur `y` = 0 (profil en `x`). La géométrie (vérifiée dans le même exemple) : `h₀` = 0,45 m ; pente
+1:50 tournée de 20° (`x′ = x·cos 20° − y·sin 20°`, `y′ = x·sin 20° + y·cos 20°`, montée `(5,82 + x′)/50` pour `x′ ≥ −5,82`) ; le haut-fond
+`(x′/3)² + (y′/4)² ≤ 1`, épaisseur `−0,3 + 0,5·√(1 − (x′/3,75)² − (y′/5)²)` ; T = 1 s.
 
 **Contrôles du plan** (ADR-266)
 
-- **témoin** : sans objet — la séance montre, elle n'attribue rien.
-- **instrument** : l'enregistrement relu avant de rendre — le nombre de particules d'une image égale celui que le calcul compte, la position
-  de la sphère celle du relevé de S657 au même instant (à 1 mm).
-- **calcul** : les échelles du rendu (m par pixel) calculées par le script, la durée des images assertée (4 s, une image toutes les 0,04 s).
-- **ADR** : ADR-216 (le banc visuel ; l'utilisateur juge), ADR-262 (indiscernable du réel : ce rendu ne juge pas le réalisme visuel final).
-- **pièges** : la projection de côté superpose toute la largeur (le corps masque l'eau derrière lui) ; une vitesse saturée cache le jet
-  (l'échelle des couleurs bornée et dite) ; la taille des fichiers (sous 15 Mo chacun).
+- **témoin** : sans objet au départ ; un écart aux mesures se localise ensuite par les deux cas analytiques (le plat, la levée) et le
+  pas de maille.
+- **instrument** : le lecteur est `|A|` ; éprouvé sur deux cas de réponse connue — l'onde plane sur fond plat (`|A|` = 1) et la levée à
+  incidence normale sur une pente 1:50 de 0,45 à 0,15 m (0.990551, `√(C_g0/C_g)`, ce script).
+- **calcul** : `k(h)` par Newton, la levée de référence, la profondeur minimale (0.1336 m > 0, asserté), par ce script.
+- **ADR** : ADR-264 (le calcul en grilles locales), ADR-260 (un module `f64` rangé : O, un outil de cuisson), ADR-262, ADR-263 D2.
+- **pièges** : **l'axe `y` des mesures est inversé** (Basilisk trace `-$1`) ; la normalisation (les mesures sont des rapports à
+  l'amplitude incidente) ; l'erreur de l'approximation parabolique aux angles obliques (la pente est tournée de 20°) ; les parois
+  latérales (réfléchissantes, `A_y` = 0) ; la non-linéarité de l'expérience, que le modèle linéaire ne rend pas.
 
-**Critères, écrits avant.** (1) L'enregistrement relu (les deux contrôles de l'instrument). (2) Deux animations envoyées à l'utilisateur, avec
-ce qu'elles montrent et à quel instant. (3) Le verdict reçu ou attendu, inscrit (R40).
+**Critères, écrits avant.** (1) Le plat : `|A|` = 1 à 10⁻⁶ sur 20 m. (2) La levée à incidence normale : à 0,5 % de 0.9906. (3) Berkhoff,
+à la maille fine : l'écart quadratique moyen du rapport d'amplitude aux mesures **≤ 0,20 sur chacune des quatre sections**, et le pic de la
+section 3 (2,21 mesuré) à 15 % ; deux mailles rapportées.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — l'enregistrement ; le rendu ; l'envoi.
-- [x] **P3** — preuve ; rituel.
+- [x] **P1** — jeton ; plan ; les mesures récupérées.
+- [ ] **P2** — `pente_douce.rs` et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.7, 3.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) relu : 100 images, 46 521 particules, la sphère à 0,048 mm ; (2) deux animations envoyées (la plage, le rouleau) — le
-  premier rendu, vu avant l'envoi, laissait vide la zone des colonnes : refait ; (3) R40 en attente (la boussole).
