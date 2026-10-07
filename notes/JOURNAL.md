@@ -1431,3 +1431,12 @@ dans APIC 3D sur la pente 1:3 de S639, jugée contre Synolakis et Saint-Venant 2
 maille fine. **A333** ouverte (le jet de rive court). L'utilisateur : *« Continue en autonomie jusqu'à la v2 ou vers v2 »*. Maillons **1**
 (4.14 avance). Suivant : **S645, A333 — le témoin du fond glissant**, puis l'étape 3 (le déferlement).
 
+## S645 — 2026-10-07 — A333 levée : le jet de rive par l'air balistique
+
+**Entrée.** En autonomie vers la v2 ; A333 (S644). **Fait** ([preuve](../docs/validation/JET-DE-RIVE-S645.md)) : deux témoins. Le fond
+glissant (`set_seabed_slip`) — sans effet, écarté. **L'air balistique** (`set_ballistic_air`) — le film du jet de rive, étiqueté d'air,
+recevait l'extrapolation au lieu de garder sa vitesse : la remontée passe de 0,187 à **0,225 m** à 2,5 cm (6 % de Saint-Venant, 98 % de
+Synolakis), convergente. **A333 levée.** L'option reste éteinte par défaut (elle trouble S406, le raccord des colonnes) ; le rouleau 3D
+l'active. Maillons **1** (4.14 avance). Suivant : **S646, la revue de méthode** (ADR-263, S641–S645), puis l'étape 3 du rouleau (le
+déferlement).
+

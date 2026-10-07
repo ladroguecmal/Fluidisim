@@ -1796,11 +1796,12 @@ fn the_weighted_projection_holds_rest_over_a_submerged_slope_s640() {
 /// deux de S620) sur la même plage, à la maille `dx`. Rend (remontée APIC, remontée Saint-Venant, particules posées, gardées, sous le
 /// fond, la plus haute particule au-dessus du front). Références au plan (`s644_plan.py`).
 fn onde_sur_pente_s644(dx: f32) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
-    onde_sur_pente_fond_s644(dx, false)
+    onde_sur_pente_fond_s644(dx, false, false, false)
 }
 
 /// `lisse` : le fond lisse de S640 (les faces coupées) au lieu de l'escalier — le témoin qui supprime les contremarches (ADR-259 D1).
-fn onde_sur_pente_fond_s644(dx: f32, lisse: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+/// `glissant` : le fond glissant (S645) ; `balistique` : l'air balistique (S645, A333).
+fn onde_sur_pente_fond_s644(dx: f32, lisse: bool, glissant: bool, balistique: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let (d, h, cot, x1, x_pied, niveau, fond0) = (0.35f64, 0.07f64, 3.0f64, 2.80f64, 4.768f64, 0.40f32, 0.05f32);
     let (nx, ny, nz) = ((6.6 / dx).round() as usize, 4usize, (0.8 / dx).round() as usize);
@@ -1815,6 +1816,8 @@ fn onde_sur_pente_fond_s644(dx: f32, lisse: bool) -> (f64, f64, usize, usize, us
     } else {
         a.set_seabed(Some(&fond)).unwrap();
     }
+    a.set_seabed_slip(glissant);
+    a.set_ballistic_air(balistique);
     let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
     let onde = OndeSolitaire { h, d, x1, g: 9.81 };
     // Le fond lisse, interpolé entre les centres des colonnes comme `set_seabed_smooth` (le canal ne varie pas en `y`).
@@ -1836,8 +1839,9 @@ fn onde_sur_pente_fond_s644(dx: f32, lisse: bool) -> (f64, f64, usize, usize, us
     let dxs = dx as f64;
     // Le témoin (ADR-259 D1) : la crête au pied, `max z` des particules d'une maille avant le pied, plus `dx/4` (le réseau).
     let (mut t, mut front, mut haut, mut crete) = (0u64, f32::NEG_INFINITY, 0f32, 0f32);
-    while t < 3_000_000 {
-        let us = a.stable_step_us(10_000).min(3_000_000 - t);
+    let duree = 3_000_000u64;
+    while t < duree {
+        let us = a.stable_step_us(10_000).min(duree - t);
         a.step(us).unwrap();
         t += us;
         let mut f = f32::NEG_INFINITY;
@@ -1868,7 +1872,7 @@ fn onde_sur_pente_fond_s644(dx: f32, lisse: bool) -> (f64, f64, usize, usize, us
     let mut crete_sv = 0f64;
     let i_pied = ((x_pied - dxs) / dxs) as usize;
     let pas = 0.1 * dxs;
-    for _ in 0..(3.0 / pas).round() as usize {
+    for _ in 0..(duree as f64 * 1e-6 / pas).round() as usize {
         plage.domaine.pas(pas).unwrap();
         crete_sv = crete_sv.max(plage.domaine.h[i_pied * 3 + 1] + plage.fond_x[i_pied]);
         if let Some(c) = plage.cote_mouillee(1e-3) {
@@ -1905,8 +1909,41 @@ fn a_solitary_wave_runs_up_the_slope_in_apic3d_fine_s644() {
 #[ignore = "≈ 6 min : le témoin du fond lisse de S644, aux deux mailles"]
 fn the_smooth_bed_witness_of_the_runup_s644() {
     for dx in [0.05f32, 0.025] {
-        let (_, sv, n, garde, sous, haut, cr) = onde_sur_pente_fond_s644(dx, true);
+        let (_, sv, n, garde, sous, haut, cr) = onde_sur_pente_fond_s644(dx, true, false, false);
         println!("S644 fond lisse {dx} m : remontée par les particules {haut:.4} m, Saint-Venant {sv:.4} m, crête au pied {:.4} m", cr[0]);
+        assert_eq!((garde, sous), (n, 0));
+    }
+}
+
+/// **S645 — A333 levée** : l'air balistique (le film mince, étiqueté d'air, garde sa vitesse au lieu de l'extrapolation) ; la même onde
+/// que S644. (1) les particules ; (2) la remontée lue par les étiquettes à 20 % de Saint-Venant 2D à 5 cm (mesuré 0,250 contre 0,219 ;
+/// la marche fait 5 cm) — à 2,5 cm, à 10 % et plus près (l'essai suivant).
+#[test]
+fn ballistic_air_lets_the_swash_run_up_s645() {
+    let (r, sv, n, garde, sous, haut, cr) = onde_sur_pente_fond_s644(0.05, false, false, true);
+    println!("S645 air balistique, 5 cm : étiquettes {r:.4} m, particules {haut:.4} m, Saint-Venant {sv:.4} m ; crête {:.4} m", cr[0]);
+    assert_eq!((garde, sous), (n, 0), "critère 1");
+    assert!((r / sv - 1.).abs() <= 0.2, "{r} {sv}");
+}
+
+/// **S645** — à 2,5 cm : mesuré 0,225 m (étiquettes), 0,2307 (particules), Saint-Venant 0,2398, Synolakis 0,2295 ; la crête 0,0730 m
+/// contre 0,0745.
+#[test]
+#[ignore = "≈ 5 min : la maille de 2,5 cm de S645"]
+fn ballistic_air_lets_the_swash_run_up_fine_s645() {
+    let (r, sv, n, garde, sous, haut, cr) = onde_sur_pente_fond_s644(0.025, false, false, true);
+    println!("S645 air balistique, 2,5 cm : étiquettes {r:.4} m, particules {haut:.4} m, Saint-Venant {sv:.4} m ; crête {:.4} m", cr[0]);
+    assert_eq!((garde, sous), (n, 0), "critère 1");
+    assert!((r / sv - 1.).abs() <= 0.1 && (r / sv - 1.).abs() < (0.25 / 0.2190 - 1f64).abs(), "{r} {sv}");
+}
+
+/// **S645 — le témoin du fond glissant** (ADR-259 D1), écarté : par les particules 0,1860 m (5 cm), 0,1855 (2,5 cm) — sans effet.
+#[test]
+#[ignore = "≈ 6 min : le témoin du fond glissant de S645"]
+fn the_slip_bed_witness_s645() {
+    for dx in [0.05f32, 0.025] {
+        let (_, sv, n, garde, sous, haut, _) = onde_sur_pente_fond_s644(dx, false, true, false);
+        println!("S645 fond glissant {dx} m : particules {haut:.4} m, Saint-Venant {sv:.4} m");
         assert_eq!((garde, sous), (n, 0));
     }
 }

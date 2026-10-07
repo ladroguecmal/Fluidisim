@@ -123,6 +123,12 @@ pub struct Apic3 {
     /// **S640 — le fond lisse** (`set_seabed_smooth`, `apic3d_lisse.rs`) : les hauteurs et les fractions ouvertes des faces ;
     /// `None`, toutes les faces ouvertes — au bit.
     pub(crate) lisse: Option<Box<lisse::FondLisse>>,
+    /// **S645 — le fond glissant** (`set_seabed_slip`) : sous l'escalier, les faces tangentielles du dessus des marches prennent la
+    /// vitesse de la face juste au-dessus ; `false`, le défaut : nulles (S639).
+    pub(crate) seabed_slip: bool,
+    /// **S645 — l'air balistique** (`set_ballistic_air`) : une face d'air qu'une particule a alimentée garde sa vitesse (et la gravité)
+    /// au lieu de recevoir l'extrapolation ; `false`, le défaut : extrapolée (S318).
+    pub(crate) ballistic_air: bool,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -202,6 +208,8 @@ impl Apic3 {
             body: None,
             seabed: None,
             lisse: None,
+            seabed_slip: false,
+            ballistic_air: false,
             columns: None,
             background: [None; 2],
             background_time_s: 0.,
@@ -403,6 +411,19 @@ impl Apic3 {
         }
         self.seabed = Some(f.iter().map(|&h| (0..nz).filter(|&k| (k as f32 + 0.5) * dx < h).count() as u16).collect());
         Ok(())
+    }
+
+    /// **S645 — le fond glissant** : les faces `u`/`v` de la maille solide du dessus d'une colonne, quand elles séparent deux mailles
+    /// solides, prennent la vitesse de la face de même position juste au-dessus — l'interpolation vers une particule de la moitié basse
+    /// de la première maille d'eau ne mêle plus une vitesse nulle (A333). Une face de contremarche et la face `w` du dessus restent nulles.
+    pub fn set_seabed_slip(&mut self, on: bool) {
+        self.seabed_slip = on;
+    }
+
+    /// **S645 — l'air balistique** : une face d'air alimentée par une particule est tenue pour connue par l'extrapolation — le film
+    /// mince, étiqueté d'air, garde sa vitesse et la gravité au lieu de recevoir celle de l'eau derrière lui (A333).
+    pub fn set_ballistic_air(&mut self, on: bool) {
+        self.ballistic_air = on;
     }
 
     /// **S639** — la hauteur du fond en escalier de la colonne `(i, j)` (m) ; 0 sans fond.
@@ -1367,6 +1388,30 @@ impl Apic3 {
                     }
                 }
             }
+            // S645 : le fond glissant — les faces tangentielles du dessus des marches, recopiées d'au-dessus.
+            if self.seabed_slip {
+                for j in 0..ny {
+                    for i in 0..nx {
+                        let c = sb[j * nx + i] as usize;
+                        if c == 0 || c >= nz {
+                            continue;
+                        }
+                        let (k, k0) = (c - 1, c);
+                        if i > 0 && sb[j * nx + i - 1] as usize >= c {
+                            self.u[(k * ny + j) * (nx + 1) + i] = self.u[(k0 * ny + j) * (nx + 1) + i];
+                        }
+                        if i + 1 < nx && sb[j * nx + i + 1] as usize >= c {
+                            self.u[(k * ny + j) * (nx + 1) + i + 1] = self.u[(k0 * ny + j) * (nx + 1) + i + 1];
+                        }
+                        if j > 0 && sb[(j - 1) * nx + i] as usize >= c {
+                            self.v[(k * (ny + 1) + j) * nx + i] = self.v[(k0 * (ny + 1) + j) * nx + i];
+                        }
+                        if j + 1 < ny && sb[(j + 1) * nx + i] as usize >= c {
+                            self.v[(k * (ny + 1) + j + 1) * nx + i] = self.v[(k0 * (ny + 1) + j + 1) * nx + i];
+                        }
+                    }
+                }
+            }
         }
         let Some(b) = self.body else {
             self.walls();
@@ -1726,6 +1771,13 @@ impl Apic3 {
                     1 => touches(i, j - 1, k) || touches(i, j, k),
                     _ => touches(i, j, k - 1) || touches(i, j, k),
                 };
+                // S645 : l'air balistique — une face qu'une particule a alimentée est connue.
+                let fed = self.ballistic_air && match axis {
+                    0 => self.wu[f],
+                    1 => self.wv[f],
+                    _ => self.ww[f],
+                } > 0.;
+                let ok = ok || fed;
                 let valid = match axis {
                     0 => &mut self.valid_u,
                     1 => &mut self.valid_v,

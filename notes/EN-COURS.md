@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S645 — **en cours**. En autonomie, vers la v2 (« continue en autonomie jusqu'à la v2 », 2026-10-07). **A333** : le jet de rive
+Session : S645 — **terminée**. En autonomie, vers la v2 (« continue en autonomie jusqu'à la v2 », 2026-10-07). **A333** : le jet de rive
 d'APIC 3D court d'un cinquième (S644).
 
 **L'hypothèse.** Sur l'escalier, les faces des mailles du fond sont mises à zéro (`impose_body`). Le dessus des marches est donc glissant
@@ -82,7 +82,10 @@ tiennent ; les essais d'APIC 3D passent.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le fond glissant ; les mesures ; (1)–(3).
+- [x] **P2** — le fond glissant ; les mesures ; (1)–(3).
 - [ ] **P3** — preuve ; A333 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — le fond glissant : sans effet (0,186 m aux deux mailles), écarté ; la durée : sans effet ; **l'air balistique** (la seconde
+  hypothèse, nommée à la mesure) : 0,225 m à 2,5 cm (étiquettes), 6 % de Saint-Venant, 98 % de Synolakis, convergent — **A333 levée**.
+  Actif partout, il casse S406 (le raccord des colonnes, −5,77 mm/s) : éteint par défaut, le rouleau l'active. 51 essais d'APIC 3D.

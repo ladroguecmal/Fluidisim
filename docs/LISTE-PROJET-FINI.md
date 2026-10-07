@@ -370,8 +370,10 @@ pas recopiée ici (L137).
   0,26 m/s (critère manqué, sans convergence en maille) : la cause est le film d'eau plus mince que le noyau, où la surface reconstruite
   se trompe — non l'escalier, comme S639 l'avait cru ([preuve](validation/FACES-COUPEES-APIC3D-S640.md)) ; **S644 — étape 2** : une onde
   solitaire non déferlante monte la pente 1:3 dans APIC 3D — la crête intacte au pied, la remontée à 82 % de Synolakis et 78 % de
-  Saint-Venant 2D, sans convergence (critère manqué ; le jet de rive court, A333) ([preuve](validation/REMONTEE-APIC3D-S644.md)).
-  Manquent une surface fiable en eau mince au rivage, le jet de rive juste, le déferlement en 3D, le relais 2D → 3D, le branchement à δ.
+  Saint-Venant 2D, sans convergence (critère manqué ; le jet de rive court, A333) ([preuve](validation/REMONTEE-APIC3D-S644.md)) ;
+  **S645 — A333 levée** : l'air balistique (le film étiqueté d'air garde sa vitesse) — la remontée à 6 % de Saint-Venant 2D et 98 % de
+  Synolakis à 2,5 cm, convergente ([preuve](validation/JET-DE-RIVE-S645.md)). Manquent une surface fiable en eau mince au rivage au repos,
+  l'air balistique avec la zone des colonnes, le déferlement en 3D, le relais 2D → 3D, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

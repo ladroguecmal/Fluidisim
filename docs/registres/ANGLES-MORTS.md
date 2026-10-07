@@ -4662,3 +4662,8 @@ arrive intacte au pied ; sans contremarches (fond lisse), la remontée est la m�
 départagées : la vitesse tangentielle nulle sur les faces fermées du fond (une paroi non glissante pour une lame d'une ou deux mailles) ;
 la surface reconstruite en eau mince (S640) ; une différence Euler/eau peu profonde sur pente raide, peu probable à cette ampleur. Le
 témoin suivant : le fond glissant (la vitesse tangentielle gardée sur les faces du fond) ([preuve](../validation/REMONTEE-APIC3D-S644.md)).
+
+*Note du 2026-10-07, S645, sur A333* ([JET-DE-RIVE-S645](../validation/JET-DE-RIVE-S645.md)) : **levée.** Le film du jet de rive, étiqueté
+d'air, recevait l'extrapolation de S318 au lieu de garder sa vitesse ; avec l'air balistique (une face d'air alimentée par une particule
+est connue), la remontée est à 6 % de Saint-Venant 2D et 98 % de Synolakis à 2,5 cm, plus proche qu'à 5 cm. Le fond glissant, essayé
+d'abord, était sans effet. L'option est éteinte par défaut (elle trouble le raccord de la zone des colonnes, S406) ; le rouleau 3D l'active.
