@@ -77,6 +77,8 @@ pub mod coule;
 pub mod cotier;
 /// S603 — la portée d'une modification de bathymétrie (liste 12.5 ; SPEC-005 §8).
 pub mod portee;
+/// S604 — l'éditeur de rivières : profil, validation bloquante, gravure (liste 12.2 ; SPEC-005 §5).
+pub mod riviere;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
