@@ -839,7 +839,10 @@ pas recopiée ici (L137).
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
   sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.
-- [ ] **11.5 Matériel cible de livraison et seconde cible** (B7 complet, A98) — *absent*. **Depuis S476** (ADR-219 D2) :
+- [ ] **11.5 Matériel cible de livraison et seconde cible** (B7 complet, A98) — *partiel* depuis S618 : le banc B7 des modules de la v2
+  sur ce PC et sur la seconde cible bridée (budget ÷ 3) — coûts médians et capacités dérivées (I-16) ; un domaine 2D de 159² mailles par
+  tick, 92² bridé ([preuve](validation/B7-CIBLE-S618.md)). Un défaut relevé : `SaintVenant2D::pas` alloue (I-06). Manquent A98 (une
+  seconde plateforme), le GPU bridé, la scène entière. **Depuis S476** (ADR-219 D2) :
   ce PC est la cible de livraison ; la seconde cible devient le bridage de 9.10.
 
 ## 12. Outillage auteur et données cuites
@@ -913,10 +916,10 @@ pas recopiée ici (L137).
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 12 | 0 |
 | 10. Multijoueur | 9 | 1 | 8 | 0 |
-| 11. Grande échelle | 5 | 0 | 4 | 1 |
+| 11. Grande échelle | 5 | 0 | 5 | 0 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **107** | **4** |
+| **total** | **121** | **10** | **108** | **3** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

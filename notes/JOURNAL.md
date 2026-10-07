@@ -1218,3 +1218,11 @@ un matériel trois fois plus lent, `q` = 1/12 et 25 paquets W au lieu de 75. **E
 libre pendant l'engagement pompaient (douze inversions) — plafonnement et gains plus doux. Maillons **1** (9.10 : absent → partiel ; la
 section 9 n'a plus d'absent). Suivant : **S618** — restent 4 absents : 7.8 (à la fin), 11.5 (le matériel cible, dont la seconde cible est
 le bridage de 9.10), 13.4 (le jeu, après la physique).
+
+## S618 — 2026-10-07 — le banc B7 des modules de la v2
+
+**Entrée.** En autonomie (ADR-247) ; 11.5 (absent). **Fait** ([preuve](../docs/validation/B7-CIBLE-S618.md)) : l'exemple `b7_cible` — le
+coût médian de cinq modules de la v2 sur ce PC et leurs capacités pour un budget de 2 ms et pour la seconde cible bridée (÷ 3). **Mesuré** :
+Saint-Venant 2D 78,6 ns par maille-pas (159² mailles par tick ; 92² bridé), domaine 1D 1,1 ns, trains W 22 ns, tsunami 30 ns. **Défaut
+relevé** : `SaintVenant2D::pas` alloue à chaque pas (I-06) — à préallouer. Maillons **1** (11.5 : absent → partiel ; restent 3 absents :
+7.8 à la fin, 13.4 après la physique, 5.11 hors périmètre). Suivant : **S619**, la physique des partiels — d'abord le défaut I-06.

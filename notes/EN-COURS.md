@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S618 — **en cours**. En autonomie (ADR-247) : **11.5 — le matériel cible de livraison et la seconde cible** (B7 complet, A98 ;
+Session : S618 — **terminée**. En autonomie (ADR-247) : **11.5 — le matériel cible de livraison et la seconde cible** (B7 complet, A98 ;
 absent). ADR-219 D2 : ce PC est la cible ; la seconde cible est le bridage de 9.10. Cette session mesure, sur ce PC, le coût des modules
 construits pour la v2 et en dérive les capacités (I-16, `qualite::Capacites`), pour la cible et pour la seconde cible.
 
@@ -81,7 +81,10 @@ performance n'est posé avant la mesure (ADR-012 §8 : les valeurs se mesurent s
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `b7_cible.rs`, sa mesure ; (1)–(3).
-- [ ] **P3** — preuve ; liste 11.5 ; rituel.
+- [x] **P2** — `b7_cible.rs`, sa mesure ; (1)–(3).
+- [x] **P3** — preuve ; liste 11.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — cinq coûts, étalements 1,05–1,24 ; capacités inscrites. **Défaut relevé** : `SaintVenant2D::pas` alloue à chaque pas
+  (I-06) — point de file : préallouer ses tableaux de travail, re-mesurer.
+- **P3** — preuve B7-CIBLE-S618 ; liste 11.5 (absent → partiel) et décompte ; index ; journal.

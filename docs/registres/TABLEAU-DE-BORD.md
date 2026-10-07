@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 107 — absents : 3.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 108 — absents : 2.
 
 ## Par campagne
 
@@ -24,7 +24,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K10** Grande échelle | 0 | 6 | 0 | ◐11.1 ◐11.2 ◐11.3 ◐3.4 ◐2.1 ◐2.2 |
 | **K11** Outillage | 0 | 4 | 0 | ◐12.1 ◐12.3 ◐12.4 ◐12.5 |
 | **K12** La fin de l'eau | 0 | 6 | 1 | ◐2.8 ◐7.1 ◐7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
-| **K13** La validation du système, et l'eau dans le jeu | 0 | 4 | 2 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ·11.5 |
+| **K13** La validation du système, et l'eau dans le jeu | 0 | 5 | 1 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ◐11.5 |
 
 **Points ouverts hors de toute campagne : 0**.
 
@@ -133,7 +133,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 11.2 | partiel | Nombreuses régions de mer décrites par descripteur |
 | 11.3 | partiel | Très grands événements |
 | 11.4 | partiel | Nombreuses sources simultanées à coût maîtrisé |
-| 11.5 | absent | Matériel cible de livraison et seconde cible |
+| 11.5 | partiel | Matériel cible de livraison et seconde cible |
 | 12.1 | partiel | Cuisson reproductible, empreintes, obsolescence détectée |
 | 12.2 | partiel | Éditeur de rivières |
 | 12.3 | partiel | Précalcul côtier stocké |
@@ -289,4 +289,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S615 | 2026-10-07 | 10 | 106 | 4 | 120 |
 | S616 | 2026-10-07 | 10 | 106 | 4 | 120 |
 | S617 | 2026-10-07 | 10 | 107 | 3 | 120 |
+| S618 | 2026-10-07 | 10 | 108 | 2 | 120 |
 <!-- fin de l'historique -->
