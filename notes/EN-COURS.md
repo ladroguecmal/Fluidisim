@@ -71,6 +71,6 @@ lot : feuille de route S578–S581.
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-246, BOUSSOLE, index) ; le lot.
-- [ ] **P2** — rituel (`--lot`).
+- [x] **P2** — rituel (`--lot`).
 
 ### Notes de reprise

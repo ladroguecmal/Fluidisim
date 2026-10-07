@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 01:58 +02:00
+JETON            : libre
+Battement        : 2026-10-07 02:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S581 — la vingtième revue de méthode ; le lot ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S580 — le courant de marée ([journal](notes/JOURNAL.md)). Avant : S579 (la marée dans la surface de B)
-Session suivante : **S581 — la vingtième revue de méthode** (S576–S580 ; ADR-222 D4) : frictions — un signe faux dans une formule du plan (S578) ; un critère sous le quantum évité de justesse par le script (S579 : la vitesse en différences finies, rapport 8, remplacée par la dérivée analytique) ; ce qui a tenu (les nombres du plan écrits par le script, S576–S580 ; ADR-245 appliqué). Puis le lot (dû en S581) et un point partiel. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 0 — S580 : 2.2 avance (le courant de marée)
-Registres       : dernier lot S578 (ADR-213 D3) ; le prochain au plus tard en S581
+Session en cours : aucune
+Dernière session : S581 — la vingtième revue de méthode (ADR-246) ; le lot ([journal](notes/JOURNAL.md)). Avant : S580 (le courant de marée)
+Session suivante : **S582 — un point partiel** (par la feuille de route et le tableau de bord). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S581 : la vingtième revue (ADR-246)
+Registres       : dernier lot S581 (ADR-213 D3) ; le prochain au plus tard en S584
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
