@@ -62,35 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S623 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S620–S622), puis
-**4.11 — la restauration depuis une graine** (ADR-022 §3, I-17) : la moitié laissée par S609. ADR-013 §4 : un domaine substitutif né faux met
-une minute à s'établir (60,65 s mesurées en S610) — d'où la graine cuite hors ligne.
+Session : S624 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **11.3 — la chaîne entière** : le tsunami de S614
+(`H/d` = 0,0185, d'amplitude finie) entre par le bord caractéristique de S622 et remonte la plage — S622 n'avait éprouvé le bord qu'à 2 mm.
 
-**Ce que la session fait.** Un module `graine.rs` : `SeedState` (genre, paramètres de cuisson `hs`, `tp`, `θ`, phase de marée, liquide ; la
-grille ; la hauteur totale et la vitesse en f16 ; l'identifiant = l'empreinte du contenu) ; `condense` — **réservé à un hôte de cuisson** :
-compilé seulement sous `cfg(test)` ou la fonctionnalité `cuisson` (L19 : l'interdit inexprimable — un hôte de jeu n'a pas la fonction) ;
-`restaurer(paramètres, tolérance, volume du nœud en ml)` — refusé au-delà de la tolérance de paramètres, la forme renormalisée sur la masse du
-nœud V (autoritaire) ; `choisir` — la graine la plus proche dans la tolérance, jamais une interpolation de champs (I-09) ;
-`Domaine1D::depuis_etat`. Ne fait pas : le 2D, la graine côtière de 12.3 branchée, la mesure de la tolérance (banc B4).
+**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai qui assemble `SaintVenant2D` d'ordre deux (S620), `pas_avec_bord`
+(S622) et l'onde solitaire de `grand_evenement` (S614) ; le domaine commence au bord, à 500 m du pied de la plage 1:19,85, au repos ;
+l'onde entre de 500 m au large. Contre le même domaine prolongé de 1 100 m au large, l'onde posée dedans. Ne fait pas : le niveau lu dans
+le tsunami macroscopique lui-même (sa forme est une impulsion polynomiale, la loi de Synolakis veut une onde solitaire), le déferlement.
 
-**Références, calculées avant** (`s623_ref.py`, numpy). Le domaine de S609/S610 né au repos sous B, avancé 120 s ; sa graine (2 + η et u en
-f16) ; le nœud tient **399998810 ml** par mètre de largeur ; la graine en porte 400.0048828125 m³ ; restaurée et renormalisée :
-**399.9988100000 m³**. Restauré avec B décalé de 120 s : écart initial à B **0.002478421581 m** (sous 5 mm) — **établi en 0.05 s**, un
-pas, contre 60,65 s depuis le repos (S610).
+**Références, calculées avant** (`s624_ref.py`, numpy ; 170 s — une première mesure à 130 s arrêtait l'onde avant le haut de sa course).
+Remontée **forcée**, maille 1, ½, ¼ m : **0.806045340, 0.869017632, 0.900503778 m** ; **étendue** : 0.856423174, 0.919395466, 0.950881612 m. L'écart
+étendu − forcé vaut **0.050377834 m aux trois mailles** : il ne dépend pas de la maille — c'est le raidissement de l'onde, que Saint-Venant
+non dispersif accumule sur les 500 m de plus de l'étendu (une onde solitaire réelle, dispersive, garde sa forme), non un artefact du bord.
+Synolakis : 0,861419 m ; le forcé à ¼ m en est à 0.0391 m.
 
-**Quantum** : le ml (10⁻⁶ m³) ; le f16 (2·10⁻³ m à 2 m). **Critères, écrits avant.** (1) le volume restauré à moins d'1 ml de celui du nœud ;
-(2) l'écart initial à B égal à la référence à 10⁻⁹ m, sous 5 mm, et l'établissement en un pas ; (3) la tolérance : `hs` à ±10 %, `tp` à
-±0,5 s, `θ` à ±0,1 rad, la même phase — dedans, restauré ; dehors (chacun à son tour), refusé ; (4) `choisir` : `hs` = 0,21 m parmi des
-graines à 0,1, 0,2, 0,4, 0,8 m → celle de 0,2 ; `hs` = 0,3 m → aucune ; (5) l'identifiant : le même contenu, la même empreinte ; un seul f16
-changé, une autre ; (6) refus : un volume de nœud non positif, des tableaux de taille fausse.
+**Quantum** : la cote d'une maille, `dx/cot β` (0.012594 m à ¼ m). **Critères, écrits avant.** (1) les trois remontées forcées et
+les deux étendues à 1 et ½ m égales aux références (au bit : des cotes de mailles) ; (2) l'écart étendu − forcé le même aux mailles 1 et ½ m
+(à 10⁻⁹ m) ; (3) le forcé croissant avec la maille et, à ¼ m, à moins de dix quanta de Synolakis ; (4) `h ≥ 0`.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `graine.rs`, `depuis_etat` et leurs essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 4.11 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 11.3 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus du premier essai, au bit de numpy ; fonctionnalité `cuisson` ajoutée au `Cargo.toml` ; construit sans
-  avertissement avec et sans elle. Suite : 810 essais listés.
-- **P3** — preuve GRAINE-S623 ; ligne 4.11 ; index ; journal ; le lot.
