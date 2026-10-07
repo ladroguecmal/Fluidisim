@@ -70,6 +70,6 @@ exploration abandonnée : un montage hors de ses bornes), S630 (les contours). *
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-257, METHODE, L418, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
