@@ -452,6 +452,8 @@ le ressaut mobile et le front sec (Stoker, Ritter : C04 en 2D) ; le frottement d
 squares, chaînage) ; la trentième revue (ADR-257 : un montage porte ses bornes, assertées).
 **S632–S634** : le déferlement le long des rayons de houle et ses sommets (3.5 : la hauteur réfractée par une côte courbe) ; le
 frottement et Coriolis dans le courant de marée (2.2).
+**S635–S637** : le dégel par le bilan d'énergie (7.6) ; la trente-et-unième revue (ADR-258 : rien à changer) ; V qui déclenche δ et le
+tient par la masse (5.10, ADR-025 §3).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

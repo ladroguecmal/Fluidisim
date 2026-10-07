@@ -62,32 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S637 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **5.10 — l'articulation V↔δ** : un manque nommé, « V qui
-déclenche δ » ; et la mécanique d'ADR-025 §3 — l'amorçage au niveau du nœud, la relaxation de la masse de δ vers celle du nœud.
+Session : S638 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S635–S637), puis **5.10 — le
+cycle de vie de δ attaché à V** (un manque de S637 : « la destruction de δ quand V se calme »).
 
-**Ce que la session fait.** Un module `articulation.rs` : `amorcer(grille, niveau)` — δ (`SaintVenant2D`) né au niveau de V ; `forcer(δ, volume du
-nœud, dt_V, τ)` — la correction `(M_nœud − M_δ)·dt_V/τ`, une couche uniforme sur les mailles mouillées (le relief de la surface intact) ;
-`declenche(nœud, publié, formes, g, seuil)` — le seuil de S564 en hauteur de surface. δ n'écrit jamais dans V (C21 : aucune fonction ne le
-permet). Ne fait pas : un bassin quelconque (ici à fond plat : niveau = volume/aire), la dérive d'un solveur réel, la destruction de δ quand V
-se calme.
+**Ce que la session fait.** `articulation::Vie` : à chaque pas de V, le changement de surface contre le dernier état publié (S564) — significatif :
+publier, remettre le calme à zéro, et faire **naître** δ s'il n'existe pas ; sinon, compter le calme, et faire **mourir** δ après `calme_requis`
+pas (l'hystérésis d'ADR-022 §2.6 : une fenêtre au moins égale au retour d'équilibre, ici 3 τ). Ne fait pas : le coût de restauration
+d'un δ substitutif dans la fenêtre (ADR-022), plusieurs δ sur un nœud.
 
-**Références, calculées avant** (ce script). La piscine de S564 (50 m², 1 m), un robinet de l'hôte de 2 L par pas de V (10 Hz) : la surface
-monte de **40.0 µm** par pas ; au seuil de 500 µm, V déclenche δ au pas **13**, au niveau **1.000520000 m**. Après, 300 pas :
-le retard de masse `V − M_δ`, de 0.001800000 m³ au premier pas, s'établit à **0.018000000 m³** — `Q·(τ − dt)`, exact en pas discrets ;
-au niveau, 360.0 µm (ADR-025 §3 : sous le perceptible). **Bornes du montage** (ADR-257 D1, assertées) : 300 pas établissent le
-régime (`(1 − dt/τ)³⁰⁰` = 2·10⁻¹⁴) ; la piscine ne déborde pas.
+**Références, calculées avant** (ce script). La piscine de S637, le robinet ouvert 50 pas (5 s) puis fermé, le seuil de 500 µm, le calme requis
+**30 pas** (3 s ≥ 3 τ). Publications aux pas **[13, 26, 39]** ; δ naît au pas **13** et meurt au pas **69** ; son retard de
+masse à la mort : **2.382232398e-03 m³**. **Bornes du montage** (ADR-257 D1, assertées) : la mort tient dans la fenêtre de 200 pas ; le calme
+couvre trois τ.
 
-**Quantum** : le ml (V) ; f64 (δ). **Critères, écrits avant.** (1) le déclenchement au pas 13, pas avant ; (2) δ amorcé au niveau du nœud
-à 10⁻¹² m ; (3) à chaque pas, le retard de masse égal à la référence à 10⁻⁹ m³ (la masse de δ ne bouge que par le forçage : murs, aucun
-flux) ; établi à `Q·(τ − dt)` ; (4) la surface de δ reste plate : vitesse sous 10⁻¹² m/s ; (5) V ne reçoit que le robinet : son volume
-exact au ml (assemblage, C21) ; (6) refus : `τ` ou `dt_V` non positifs.
+**Quantum** : le pas de V. **Critères, écrits avant.** (1) les publications [13, 26, 39], une naissance au pas 13, une mort au pas
+69 ; (2) le retard de masse de δ à sa mort égal à la référence à 10⁻⁹ m³ ; (3) refus : un calme requis nul.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `articulation.rs` et son essai ; (1)–(6).
-- [x] **P3** — preuve ; liste 5.10 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `Vie` et son essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 5.10 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus du premier essai. Suite : 821 essais listés.
-- **P3** — preuve ARTICULATION-S637 ; ligne 5.10 ; index ; journal.
