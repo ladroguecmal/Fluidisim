@@ -62,26 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S686 — **terminée**. En autonomie vers la v2. **La quarante et unième revue de méthode** (ADR-222 D4 : S681–S685) ; le lot
-S684–S686.
+Session : S687 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. ADR-273 D1 : le raccord se juge d'abord entre
+deux copies du même solveur.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.**
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-259 D1, ADR-267 D1, ADR-272.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+- **Le bord droit de Saint-Venant à flux imposé** (`pas_avec_flux_droit`) : la face droite fait passer le flux de masse donné par
+  rangée, avec le flux de quantité de mouvement `F·u + ½·g·h²` de la maille de bord. C'est l'équivalent du bord droit d'APIC, qui
+  reçoit `F/h`.
+- **Le raccord seul** : le domaine du large, un Saint-Venant, porte l'onde jusqu'à 5,35 m. Le raccord est le schéma de
+  `RelaisRivage` : l'état du bord du large nourrit le bord caractéristique du rivage ; le flux rendu revient au large comme flux imposé.
 
-**Critères, écrits avant.** (1) ADR-273 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+L'onde de S644 et le tout-Saint-Venant de S685, le même état initial.
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273)
+
+- **témoin** : le tout-Saint-Venant de S685 (0,2190 et 0,2398 m) ; sans flux imposé, Saint-Venant au bit (S613–S680).
+- **instrument** : la remontée et la masse. Ce que rendrait chaque hypothèse :
+  - si le schéma de raccord est juste, la remontée du tout-Saint-Venant à l'écart du bord caractéristique près (S622), et donc **l'écart
+    de S685 vient de l'onde portée par APIC** ;
+  - si le schéma est en faute, le même déficit que S685 (−15 %) ;
+  - si le flux est mal rendu, une masse qui dérive.
+- **calcul** (ce script) : 18 mailles par largeur d'onde à 5 cm, 36 à 2,5 cm ; l'écart attendu ≈ 3,2 % et ≈ 1,6 % (S622 : 2,9 % à 20,
+  1,3 % à 40). La borne, **6 %**.
+- **ADR** : ADR-271, ADR-273, ADR-268 D1.
+- **pièges** :
+  - les deux domaines lisent l'état avant leur pas, comme le relais ;
+  - la quantité de mouvement du flux imposé, à la vitesse de la maille de bord ;
+  - le bord gauche du rivage et le flux imposé du large, au même pas.
+
+**Critères, écrits avant.**
+
+1. Saint-Venant sans flux imposé, au bit.
+2. La remontée du raccord seul à moins de **6 %** du tout-Saint-Venant, à 5 et 2,5 cm.
+3. La masse des deux domaines constante à 10⁻¹² près.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-273 ; METHODE.
-- [x] **P3** — lot ; rituel.
+- [ ] **P2** — le flux imposé ; le raccord seul ; (1)–(3).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-273 : D1 (un raccord jugé d'abord entre deux copies du même solveur), D2 (une seule source pour les deux côtés) ; la prochaine revue S691.
