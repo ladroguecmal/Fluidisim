@@ -62,34 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S592 — **terminée**. En autonomie (ADR-247), **2.5 — les canaux** (absent) ; la base de 2.4 (les rivières).
+Session : S593 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S590–S592), puis **2.4 — les rivières** (absent ;
+« débit macroscopique qui contraint les perturbations locales »). Première pièce : **l'état macroscopique d'une rivière** dans V — sa
+ligne d'eau, avec le **remous** qu'un seuil aval lui impose, et la vitesse moyenne de chaque bief (ce que δ et W devront respecter).
 
-**Ce que la session fait.** Une loi d'arête de V : **`Flow::Manning { width_mm, length_mm, roughness_e6, outlet_slope_e6 }`** — un bief de
-canal rectangulaire entre deux nœuds : `Q = (1/n)·A·R^(2/3)·√S_f`, `A = b·ȳ`, `R = A/(b + 2ȳ)`, la profondeur moyenne `ȳ` des deux côtés au
-seuil, la pente de frottement `S_f = Δh/L` entre les deux surfaces ; vers dehors (`to = None`), la sortie en régime uniforme : `S_f` = la
-pente du lit donnée, `ȳ` la profondeur amont. Paramètres entiers (I-10 ; ADR-249 D2) : `n·10⁶`, la pente `·10⁶`. Ajoutée à la validation,
-à l'instantané (son empreinte) et au pas ; les liquides de V l'héritent (la couche au seuil).
+**Le montage.** La loi de Manning de S592 : vingt biefs de 100 × 5 m, `S` = 10⁻³, `n` = 0,015, 5 m³/s apportés en amont ; le dernier bief
+se vide par un déversoir de 5 m (`C_d` = 0,62) dont la crête est à 1,5 m au-dessus de son fond ; trois heures au pas de 0,05 s (le pas de 1 s
+oscillerait : sous le remous, la surface est presque plate et `dQ/dΔh` grand — calculé : l'amplitude d'oscillation `(dt·C/A)²` passe de
+~8 cm à ~10⁻⁵ m).
 
-**Le montage.** Dix biefs de 100 × 5 m, le lit descendant de `S·L` = 0,1 m de bief en bief (`S` = 10⁻³), chaque arête au milieu de la
-marche (la profondeur moyenne y vaut celle des biefs en régime uniforme) ; 5 m³/s apportés au premier (la pluie sur 1,8 km² à 10 mm/h) ;
-la sortie en régime uniforme ; `n` = 0,015 ; trois heures au pas d'une seconde.
+**Références, calculées avant** (ce script les écrit). (1) **L'état stationnaire exact du même découpage** (de l'aval vers l'amont, chaque
+surface par bissection sur la loi de l'arête) : les profondeurs **0.7618, 0.7861, 0.8181, 0.8585, 0.9075, 0.9646, 1.0291, 1.0998, 1.1756, 1.2557, 1.3392, 1.4255, 1.5139, 1.6042, 1.6958, 1.7887, 1.8825, 1.9771, 2.0724, 2.1682** m, de l'amont à l'aval ; la
+charge sur le seuil 0.66819 m. (2) **La ligne d'eau continue de l'onde diffusive** (`dy/dx = S − S_f` : le modèle de V, sans inertie) :
+l'écart au découpage, **0.75 mm** au plus. (3) **La ligne d'eau complète** (`dy/dx = (S − S_f)/(1 − Fr²)`) : l'écart de l'onde
+diffusive, **40.4 mm** au plus — l'inertie que V n'a pas, publiée, sans critère.
 
-**Références, calculées avant** (ce script les écrit et vérifie ses rapports seuil/quantum, ADR-249 D1). La **hauteur normale** (bissection
-sur Manning) : **`y_n` = 0.706106 m** ; la vitesse 1.4162 m/s, le Froude 0.538 (fluvial) ; la constante de temps d'un bief ≈ 13.6 s
-(le pas d'une seconde est stable) ; le remplissage ≈ 706 s ; l'essai dure 10800 s.
-
-**Quantum** (ADR-236 D1) : 1 ml sur 500 m² (2e-09 m) ; le débit, 1 ml par seconde (2·10⁻⁷ relatif). **Critères, écrits avant.**
-(1) la profondeur de chacun des dix biefs à 1 mm de `y_n` ; (2) le débit de chaque arête, en moyenne sur la dernière minute, à 10⁻³ de
-5 m³/s ; (3) le bilan exact au millilitre ; (4) l'instantané de V accepte la loi et la restaure au bit (l'empreinte la porte) ; la suite
-entière inchangée.
+**Quantum** (ADR-236 D1 ; ADR-249 D1 vérifié par le script) : 1 ml sur 500 m² ; le pas de temps (l'oscillation ~10⁻⁵ m). **Critères,
+écrits avant.** (1) chaque profondeur à 1 mm de la référence (1) ; (2) à 1.5 mm de la ligne diffusive continue ;
+(3) la vitesse moyenne de chaque bief, `Q/(b·y)`, publiée et à 10⁻³ de `Q/(b·y_réf)` ; le bilan au millilitre ; (4) la ligne complète :
+l'écart publié.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — la loi, l'instantané, l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 2.5 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 2.4 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — dix biefs à 0,70611 m (y_n 0,706106) ; 5,00000 m³/s ; bilan exact ; instantané au bit ; suite 766.
-- **P3** — preuve CANAL-MANNING-S592 ; liste 2.5 (absent → partiel) et décompte ; index ; journal.
-

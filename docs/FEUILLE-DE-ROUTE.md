@@ -423,6 +423,8 @@ comme départ, un seuil dans une seule fonction) ; 2.2 avance — la marée harm
 vingt et unième revue (ADR-248).
 **S587–S589** : **3.3, 3.5, 3.9 ouverts** (la bulle d'une explosion sous-marine, la polyligne de déferlement, la vitesse de B au-dessus
 du plan moyen) — la section 3 n'a plus d'absent.
+**S590–S592** : **2.3 et 2.5 ouverts** (le niveau d'un lac par son bilan ; la loi de Manning, un canal à sa hauteur normale) ; la
+vingt-deuxième revue (ADR-249 : le script du plan refuse un seuil sous son quantum).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
