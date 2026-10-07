@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S654 — **en cours**. En autonomie vers la v2. **A334** : sous le rouleau, la force sur un corps est un choc de deux pas (S652 :
+Session : S654 — **terminée**. En autonomie vers la v2. **A334** : sous le rouleau, la force sur un corps est un choc de deux pas (S652 :
 165,6 N brut, 47 N lissé sur 0,1 s) ; libre, le corps est lancé plus vite que l'eau (S653 : 4,68 contre 1,80 m/s).
 
 **Le témoin (ADR-259 D1).** Le même rouleau, le pas plafonné à **5 ms** au lieu de 10 (`stable_step_us`), la sphère fixe (S652) puis
@@ -76,7 +76,9 @@ non départagé, rapporté. Sphère libre : la vitesse du corps à 5 ms, rapport
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le pas plafonné en paramètre ; les deux essais (copies du binaire, en parallèle) ; le verdict.
+- [x] **P2** — le pas plafonné en paramètre ; les deux essais (copies du binaire, en parallèle) ; le verdict.
 - [ ] **P3** — preuve ; A334 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — fixe : pic −16 %, lissée −2 %, impulsion +41 % → (c) non départagé ; libre : 4,68 → 2,56 m/s. Réattribuée : le couplage
+  explicite. (Le paramètre du pas, avec le plan, au commit P1.)

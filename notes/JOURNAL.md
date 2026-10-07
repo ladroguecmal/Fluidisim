@@ -1503,3 +1503,12 @@ de S652 dans le cœur) et `set_body_mass` — la sphère libre, couplage explici
 oscillation décroît (stable ; le critère de 2 cm/s à 3–4 s manqué de peu) ; sous le rouleau, **emportée de 2,03 m en 1,5 s**, la masse au
 bit ; **sa vitesse dépasse l'eau** (4,68 contre 1,80 m/s) — les chocs d'A334. Maillons **1** (6.7 avance). Suivant : **S654, A334** — le
 même rouleau à pas deux fois plus court (un choc physique garde son impulsion, un artefact dépend du pas).
+
+## S654 — 2026-10-07 — A334, le témoin du pas de temps
+
+**Entrée.** En autonomie vers la v2 ; A334. **Fait** ([preuve](../docs/validation/A334-PAS-S654.md)) : le rouleau à pas moitié, la sphère
+fixe et libre, en parallèle sur deux copies du binaire. **Mesuré** : la force lissée inchangée (−2 %), le pic −16 %, l'impulsion +41 % —
+non départagé selon les critères écrits ; la vitesse du corps libre 4,68 → 2,56 m/s : **l'excès vient du couplage explicite**, non de la
+force. L'utilisateur demande « Finis quand ? » — répondu : 134 points, 10 validés ; de l'ordre de 400 à 700 sessions, une à deux semaines
+de travail continu au mieux, plus lentes sur le coût, Godot/DyingStar et les verdicts. Maillons **2**. Suivant : **S655, la masse ajoutée
+implicite** du corps libre.

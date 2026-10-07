@@ -635,8 +635,9 @@ pas recopiée ici (L137).
   ([preuve](validation/ACTEUR-S514.md)). **S652** : le rouleau plongeant pousse un corps fixe — le pic de force après le retournement, l'impulsion 15,3 N·s ; à l'échelle ×20,
   `h·u` = 24 m²/s, vingt-quatre fois le seuil qui emporte un adulte (ADR-018) ; la force instantanée, un choc de deux pas non départagé
   (A334) ([preuve](validation/ROULEAU-FORCE-S652.md)). **S653** : le corps **libre** (`set_body_mass`, couplage explicite, contact
-  au fond) — il flotte à son tirant, le rouleau l'emporte de 2,03 m en 1,5 s ; sa vitesse (4,68 m/s) dépasse l'eau (1,80) : les chocs d'A334
-  ([preuve](validation/CORPS-LIBRE-S653.md)). Manquent la poche d'air qui pousse un acteur, la vitesse du corps juste (A334), la rotation.
+  au fond) — il flotte à son tirant, le rouleau l'emporte de 2,03 m en 1,5 s ; sa vitesse (4,68 m/s) dépasse l'eau (1,80)
+  ([preuve](validation/CORPS-LIBRE-S653.md)) ; **S654** : à pas moitié, 2,56 m/s, la force lissée inchangée — l'excès vient du couplage
+  explicite, non de la force ([preuve](validation/A334-PAS-S654.md)). Manquent la poche d'air qui pousse un acteur, la vitesse du corps juste (A334), la rotation.
 - [x] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *validé* (S512) : l'impulsion de masse ajoutée d'ADR-023 §2 à l'instant
   exact où la quille passe sous la surface, corps et eau entraînée d'une même quantité de mouvement ; la même à 2·10⁻¹⁶ près quelle que
   soit la phase du tick (l'échantillonnage au tick : 5,3 % de dispersion) ([preuve](validation/IMPACT-ENTREE-S512.md)).

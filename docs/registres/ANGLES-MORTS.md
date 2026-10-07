@@ -4677,3 +4677,8 @@ dépend du pas ([preuve](../validation/ROULEAU-FORCE-S652.md)).
 *Note du 2026-10-07, S653, sur A334* ([CORPS-LIBRE-S653](../validation/CORPS-LIBRE-S653.md)) : avec la sphère **libre** (2 kg), les chocs
 la lancent à 4,68 m/s quand l'eau de la colonne va à 1,80 — A334 limite désormais 6.7 (le corps emporté). Le témoin, inchangé : un pas
 deux fois plus court.
+
+*Note du 2026-10-07, S654, sur A334* ([A334-PAS-S654](../validation/A334-PAS-S654.md)) : **non départagée selon les critères écrits,
+réattribuée pour le corps libre.** À pas moitié, la force lissée ne change pas (−2 %), le pic baisse de 16 %, l'impulsion sur 4 s bouge de
+41 % ; la vitesse du corps libre, elle, passe de 4,68 à 2,56 m/s : l'excès vient du **couplage explicite** (l'effet de masse ajoutée), non
+de la lecture de la force. Le remède suivant : la masse ajoutée traitée implicitement.
