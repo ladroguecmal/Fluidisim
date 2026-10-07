@@ -62,31 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S630 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **3.5 — le déferlement sur une côte quelconque** : S588
-ne savait qu'une côte droite (un sommet par ligne) ; son manque nommé : « les marching squares et le chaînage des segments ».
+Session : S631 — **terminée**. En autonomie, **la trentième revue de méthode** (ADR-222 D4 ; S626–S630).
 
-**Ce que la session fait.** `deferlement::contours(…)` : l'écart `H − 0,78·h` aux nœuds (la convention de S588 : la terre à +∞) ; sur chaque
-maille, les arêtes où l'écart change de signe, le point de passage interpolé depuis le nœud qui déferle (`t = f_p/(f_p − f_q)`, 0 si `f_p`
-est infini, comme S588) ; les segments d'une maille, le cas selle tranché par la moyenne du centre (non éprouvé) ; le chaînage par les
-arêtes partagées — les polylignes ouvertes d'abord, puis les fermées (premier point répété). Donnée cuite (SPEC-006 §6) : la fonction alloue
-sa sortie, hors exécution. Ne fait pas : la hauteur réfractée par une côte courbe (la houle de `transformer` suppose des isobathes
-parallèles : l'île est prise en incidence normale), le flux dissipé et la direction de crête sur les sommets du contour.
-
-**Références, calculées avant** (`s630_ref.py`, Python indépendant : la levée par bissection sur `k`). Une île conique (pente 0,02, rivage à
-100 m), houle de 8 s et 1,5 m, maille de 5 m sur 1 km : la profondeur de déferlement **2.289178940 m**, le cercle **r_b = 214.458946980 m** ;
-**340 points** de passage, à au plus **0.012357134 m** du cercle. Deux îles disjointes (centres à −200 et 250 m) :
-**680** points. La côte droite : la grille de pente 0,02, houle oblique de 0,2 rad.
-
-**Quantum** : f64. **Critères, écrits avant.** (1) la côte droite : une polyligne ouverte, ses sommets ceux de `polyligne` (S588) à 10⁻¹² m ;
-(2) l'île : une polyligne fermée de 340 sommets distincts, l'écart radial maximal égal à la référence à 10⁻⁹ m ; (3) les deux îles :
-deux polylignes fermées, 680 sommets ; (4) refus : grille de moins de 2 × 2, pas non positif, tampon trop court.
+**Ce que la session fait.** Relu : S626 (la revue), S627 (Stoker, Ritter), S628 (le frottement), S629 (le couplage au tsunami ; une
+exploration abandonnée : un montage hors de ses bornes), S630 (les contours). **ADR-257** : D1 ; L418 ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `contours` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.5 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-257, METHODE, L418, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai ; l'écart radial de l'île au bit de Python. Suite : 816 essais listés.
-- **P3** — preuve CONTOURS-S630 ; ligne 3.5 ; index ; journal.

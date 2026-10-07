@@ -1316,3 +1316,9 @@ abandonné sans commit (trois effets mêlés). Maillons **1** (3.4 avance). Suiv
 `deferlement::contours`. **Mesuré** : la côte droite redonne les 11 sommets de S588 à 10⁻¹² m ; une île conique, une polyligne fermée de
 340 sommets à au plus 1,24 cm du cercle exact (au bit d'un calcul Python indépendant) ; deux îles, deux polylignes. Maillons **1** (3.5
 avance). Suivant : **S631**, la revue de méthode.
+
+## S631 — 2026-10-07 — la trentième revue de méthode (ADR-257)
+
+**Entrée.** En autonomie ; revue due. **Friction** : un montage employé hors de ses bornes, trois fois (S622, S624, S629) — **élargie** :
+ses bornes s'assertent, d'abord quand il est réemployé (ADR-257 D1, L418). Ont tenu : la tolérance posée sur la sensibilité, l'attribution
+par deux variations. Maillons **1**. Suivant : **S632**, le lot et la physique des partiels.

@@ -6735,3 +6735,9 @@ a été manqué et consigné ; S625, avec une tolérance posée en connaissance 
 **S622 — les montages qui n'isolaient pas le bord.** Une onde solitaire plus large que le bassin, puis une amplitude où la propagation non
 linéaire au large s'ajoutait : deux fois l'écart semblait venir du bord. Faire varier l'amplitude (il plafonnait) puis la maille (il
 convergeait) l'a rendu au numérique. Deux variations avant d'attribuer (ADR-256 D2).
+
+## L418
+
+**S622, S624, S629 — le montage hors de ses bornes.** Une onde solitaire plus large que le bassin ; une durée plus courte que le trajet de
+l'onde ; la plage de S625, haute d'un mètre, réemployée pour des remontées de plusieurs mètres — l'eau butait au mur. Trois fois vu aux
+valeurs, avant la mesure du code ; une exploration perdue. Les bornes d'un montage s'assertent (ADR-257 D1).
