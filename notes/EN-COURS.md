@@ -89,7 +89,7 @@ sections 2 et 5 (≥ 30 % chacune : l'angle). (3) Le critère de S659 rejugé (�
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — `propager_grand_angle` ; les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) tenu (plat, levée ; l'oblique +0,091 % contre +1,036 %, lu sur la phase — le `|A|` du plan ne départageait pas, vu avant
