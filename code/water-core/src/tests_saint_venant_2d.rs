@@ -117,3 +117,23 @@ fn a_planar_surface_rotates_in_a_paraboloid_with_wetting_and_drying_s613() {
     assert_eq!(lac.pas(0.0), Err(Refus), "critère 5 : dt");
     assert_eq!(lac.pas(1.0), Err(Refus), "critère 5 : Courant");
 }
+
+/// **S619** — (2) les tableaux de travail préalloués : aucune réallocation en 100 pas, et un clone qui fait les mêmes pas reste au bit.
+#[test]
+fn a_step_reuses_its_work_arrays_s619() {
+    let nx = 50;
+    let (h, u, v) = exact(nx, 0.0);
+    let qx = h.iter().zip(&u).map(|(a, b)| a * b).collect();
+    let qy = h.iter().zip(&v).map(|(a, b)| a * b).collect();
+    let mut d = SaintVenant2D::nouveau(nx, nx, LD / nx as f64, G, fond(nx), h, qx, qy).unwrap();
+    let avant = d.adresses_travail();
+    let mut jumeau = d.clone();
+    for _ in 0..100 {
+        d.pas(0.005).unwrap();
+        jumeau.pas(0.005).unwrap();
+    }
+    assert_eq!(d.adresses_travail(), avant, "critère 2 : aucune réallocation");
+    let au_bit = d.h.iter().chain(&d.qx).chain(&d.qy).zip(jumeau.h.iter().chain(&jumeau.qx).chain(&jumeau.qy)).all(|(a, b)| a.to_bits() == b.to_bits());
+    println!("S619 : 100 pas sans réallocation ; le clone au bit : {au_bit}");
+    assert!(au_bit, "critère 2 : le clone au bit");
+}

@@ -28,6 +28,19 @@ pub struct SaintVenant2D {
     pub h: Vec<f64>,
     pub qx: Vec<f64>,
     pub qy: Vec<f64>,
+    travail: Travail,
+}
+
+/// **S619** — les tableaux de travail d'un pas, alloués une fois à la construction (I-06 : aucune allocation à l'exécution).
+#[derive(Clone, Debug)]
+struct Travail {
+    u: Vec<f64>,
+    v: Vec<f64>,
+    dh: Vec<f64>,
+    dqx: Vec<f64>,
+    dqy: Vec<f64>,
+    fx: Vec<[f64; 5]>,
+    fy: Vec<[f64; 5]>,
 }
 
 fn vitesse(h: f64, q: f64) -> f64 {
@@ -54,7 +67,9 @@ impl SaintVenant2D {
         if nx < 2 || ny < 2 || !(dx > 0.0) || !(g > 0.0) || [z.len(), h.len(), qx.len(), qy.len()] != [n; 4] || h.iter().any(|&v| !(v >= 0.0)) {
             return Err(Refus);
         }
-        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy })
+        let travail = Travail { u: vec![0.0; n], v: vec![0.0; n], dh: vec![0.0; n], dqx: vec![0.0; n], dqy: vec![0.0; n],
+            fx: vec![[0.0; 5]; (nx - 1) * ny], fy: vec![[0.0; 5]; nx * (ny - 1)] };
+        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, travail })
     }
 
     /// La masse (volume, m³).
@@ -67,22 +82,27 @@ impl SaintVenant2D {
         self.h.iter().zip(self.qx.iter().zip(&self.qy)).map(|(&h, (&a, &b))| vitesse(h, a).abs().max(vitesse(h, b).abs())).fold(0.0, f64::max)
     }
 
-    /// **Un pas** de `dt` ; refusé (rien n'est modifié) si le nombre de Courant dépasse ½.
+    /// **Un pas** de `dt` ; refusé (l'état n'est pas modifié) si le nombre de Courant dépasse ½. N'alloue rien (S619).
     pub fn pas(&mut self, dt: f64) -> Result<(), Refus> {
         let (nx, ny, g) = (self.nx, self.ny, self.g);
-        let u: Vec<f64> = self.h.iter().zip(&self.qx).map(|(&h, &q)| vitesse(h, q)).collect();
-        let v: Vec<f64> = self.h.iter().zip(&self.qy).map(|(&h, &q)| vitesse(h, q)).collect();
+        let Travail { u, v, dh, dqx, dqy, fx, fy } = &mut self.travail;
+        for k in 0..nx * ny {
+            u[k] = vitesse(self.h[k], self.qx[k]);
+            v[k] = vitesse(self.h[k], self.qy[k]);
+        }
         let cmax = (0..nx * ny).map(|k| u[k].abs().max(v[k].abs()) + (g * self.h[k]).sqrt()).fold(0.0, f64::max);
         if !(dt > 0.0) || cmax * dt / self.dx > 0.5 {
             return Err(Refus);
         }
         let n = nx * ny;
-        let (mut dh, mut dqx, mut dqy) = (vec![0.0; n], vec![0.0; n], vec![0.0; n]);
+        dh.fill(0.0);
+        dqx.fill(0.0);
+        dqy.fill(0.0);
         // Faces en x : d'abord ce qui quitte chaque maille de gauche, puis ce qui entre dans celle de droite.
-        let fx: Vec<[f64; 5]> = (0..(nx - 1) * ny).map(|k| {
+        for (k, f) in fx.iter_mut().enumerate() {
             let r = k + ny;
-            flux(g, self.h[k], u[k], v[k], self.z[k], self.h[r], u[r], v[r], self.z[r])
-        }).collect();
+            *f = flux(g, self.h[k], u[k], v[k], self.z[k], self.h[r], u[r], v[r], self.z[r]);
+        }
         for (k, f) in fx.iter().enumerate() {
             dh[k] -= f[0];
             dqx[k] -= f[1] + f[3];
@@ -95,10 +115,10 @@ impl SaintVenant2D {
         }
         // Faces en y : le même flux, `u` et `v` échangés.
         let gauche = |m: usize| (m / (ny - 1)) * ny + m % (ny - 1);
-        let fy: Vec<[f64; 5]> = (0..nx * (ny - 1)).map(|m| {
+        for (m, f) in fy.iter_mut().enumerate() {
             let (k, r) = (gauche(m), gauche(m) + 1);
-            flux(g, self.h[k], v[k], u[k], self.z[k], self.h[r], v[r], u[r], self.z[r])
-        }).collect();
+            *f = flux(g, self.h[k], v[k], u[k], self.z[k], self.h[r], v[r], u[r], self.z[r]);
+        }
         for (m, f) in fy.iter().enumerate() {
             let k = gauche(m);
             dh[k] -= f[0];
@@ -129,6 +149,15 @@ impl SaintVenant2D {
             self.qy[i] += k * dqy[i];
         }
         Ok(())
+    }
+
+    /// **S619** — l'adresse et la capacité de chaque tableau de travail (pour vérifier qu'aucun pas ne réalloue).
+    #[cfg(test)]
+    fn adresses_travail(&self) -> [(usize, usize); 7] {
+        let t = &self.travail;
+        [(t.u.as_ptr() as usize, t.u.capacity()), (t.v.as_ptr() as usize, t.v.capacity()), (t.dh.as_ptr() as usize, t.dh.capacity()),
+            (t.dqx.as_ptr() as usize, t.dqx.capacity()), (t.dqy.as_ptr() as usize, t.dqy.capacity()),
+            (t.fx.as_ptr() as usize, t.fx.capacity()), (t.fy.as_ptr() as usize, t.fy.capacity())]
     }
 }
 
