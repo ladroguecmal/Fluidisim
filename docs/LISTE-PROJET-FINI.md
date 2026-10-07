@@ -157,7 +157,10 @@ pas recopiée ici (L137).
   (27,00° pour 27,83°, un instrument éprouvé sur la référence bruitée) — **C07 passe entier** ([preuve](validation/C07-PLANCHER-S527.md)).
   Manquent les durées longues.
 - [ ] **3.3 Explosions de surface et sous-marines** — *absent*.
-- [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *absent*.
+- [ ] **3.4 Tsunamis** : propagation macroscopique, puis raffinement à la côte — *partiel* depuis S582 : **la propagation le long d'un
+  rayon** — le temps de parcours exact par segment, la levée de Green, une impulsion polynomiale au bit ; l'heure d'arrivée et la hauteur
+  à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)). Manquent l'étalement d'une source ponctuelle, les rayons qui se courbent
+  (3.6), la dispersion des sources courtes, le déferlement et le raffinement à la côte, l'événement de W qui le porte.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *absent*.
 - [ ] **3.7 Événements horodatés, journaux, instantanés et restauration avec perte connue** —
@@ -824,7 +827,7 @@ pas recopiée ici (L137).
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
-| 3. Ondes (W) | 9 | 0 | 4 | 5 |
+| 3. Ondes (W) | 9 | 0 | 5 | 4 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
@@ -835,7 +838,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **79** | **32** |
+| **total** | **121** | **10** | **80** | **31** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

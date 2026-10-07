@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [La propagation macroscopique d'un tsunami — S582](validation/TSUNAMI-S582.md) : le temps de parcours exact, Green, l'arrivée à la côte au bit.
 - [Le courant de marée — S580](validation/COURANT-MAREE-S580.md) : `−g·∇η` de la carte cotidale ; l'onde progressive retrouvée, en phase avec le niveau.
 - [La marée dans la surface de B — S579](validation/MAREE-DANS-B-S579.md) : `η`, `∂η/∂t`, `w` de l'échantillon de B ; la composition B + W exacte.
 - [La carte cotidale — S578](validation/CARTE-COTIDALE-S578.md) : l'amplitude complexe interpolée, sans `atan2` ; une onde progressive dans un chenal.

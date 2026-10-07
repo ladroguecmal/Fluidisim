@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S582 — **en cours**. En autonomie, **3.4 — les tsunamis** (absent ; « propagation macroscopique, puis raffinement à la côte »).
+Session : S582 — **terminée**. En autonomie, **3.4 — les tsunamis** (absent ; « propagation macroscopique, puis raffinement à la côte »).
 ADR-001 §3.1 : un tsunami est un objet de W — dérivé d'un événement horodaté, déterministe —, pas un très grand domaine δ.
 
 **Ce que la session fait.** `tsunami.rs` : un **profil de profondeur le long d'un rayon** (des sommets `(s, h)`, linéaire entre eux) ; le
@@ -84,12 +84,15 @@ bit, deux évaluations ; refus : moins de deux sommets, `s` non croissant, une p
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `tsunami.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.4 ; rituel.
+- [x] **P2** — `tsunami.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.4 ; rituel.
 
 ### Notes de reprise
 - **Avant la mesure, une faute du plan relevée** (ADR-236 D1) : l'amplitude du pic **échantillonné à la seconde** porte un quantum de
   `2·(0,5/600)²` = 1.4e-06 relatif (l'instant du pic tombe jusqu'à 0,5 s d'une seconde entière, `T` = 600 s), au-dessus du seuil de 10⁻⁶ :
   ce seuil, ainsi appliqué, est disqualifié. L'amplitude se mesure donc **à l'instant exact `t₀ + τ(s)`** (le quantum devient l'arrondi
   f32, 6·10⁻⁸), seuil inchangé ; l'instant du pic reste mesuré à la seconde (à 1 s près).
+- **P2 fini** — τ au µs (5 048,187773 ; 6 009,747349) ; Green et le flux ; le pic à 5 444 s pour 5 443,751, 0,5942325 m à l'instant exact ;
+  nul avant ; refus. Suite 758.
+- **P3** — preuve TSUNAMI-S582 ; liste 3.4 (absent → partiel) et décompte ; index ; journal.
 

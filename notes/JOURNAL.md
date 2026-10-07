@@ -952,3 +952,11 @@ tiré de la carte cotidale par `∂u/∂t = −g·∇η`, sans la profondeur ; `
 **Entrée.** En autonomie ; revue et lot dus. **Relu** S576–S580 : un signe faux au plan sans effet (la forme physique était jugée), une
 coupure de session reprise sans perte, un critère sous le quantum écarté au plan. **Aucune protection nouvelle** : rien ne s'est répété
 (ADR-246). Le lot : feuille de route S578–S581. Maillons **1**. Suivant : **S582**, un point partiel.
+
+## S582 — 2026-10-07 — la propagation macroscopique d'un tsunami
+
+**Entrée.** En autonomie ; 3.4 (absent). **La formule du segment éprouvée d'abord** par Simpson (ADR-239 D1). **Fait**
+([preuve](../docs/validation/TSUNAMI-S582.md)) : `tsunami.rs` — le temps de parcours exact, Green, une impulsion polynomiale au bit.
+**Mesuré** : l'arrivée à la côte au µs, la hauteur à 10⁻⁹, le pic à l'heure prédite. **Avant la mesure**, un seuil du plan sous son quantum
+relevé et écrit aux notes (l'amplitude mesurée à l'instant exact, seuil inchangé). Maillons **1** (3.4 : absent → partiel). Suivant :
+**S583**, un point partiel.
