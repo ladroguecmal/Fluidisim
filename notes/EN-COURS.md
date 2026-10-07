@@ -87,7 +87,7 @@ ce qu'elles montrent et à quel instant. (3) Le verdict reçu ou attendu, inscri
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — l'enregistrement ; le rendu ; l'envoi.
-- [ ] **P3** — preuve ; rituel.
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) relu : 100 images, 46 521 particules, la sphère à 0,048 mm ; (2) deux animations envoyées (la plage, le rouleau) — le
