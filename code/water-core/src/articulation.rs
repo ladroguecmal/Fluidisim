@@ -47,6 +47,53 @@ pub fn forcer(dom: &mut SaintVenant2D, volume_noeud_m3: f64, dt_v_s: f64, tau_s:
     Ok(correction)
 }
 
+/// **S638** — ce qu'un pas de V décide de δ.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Evenement {
+    Rien,
+    Naissance,
+    Mort,
+}
+
+/// **S638 — le cycle de vie de δ attaché à un nœud** : le dernier volume publié, δ vivant ou non, le calme compté.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Vie {
+    pub publie_ml: i64,
+    pub vivant: bool,
+    pub calme: u32,
+    pub calme_requis: u32,
+}
+
+impl Vie {
+    /// Rien de vivant ; `publie_ml` le volume publié au départ ; `calme_requis` pas de calme avant la mort (l'hystérésis d'ADR-022 §2.6).
+    pub fn nouvelle(publie_ml: i64, calme_requis: u32) -> Result<Vie, Refus> {
+        if calme_requis == 0 {
+            return Err(Refus);
+        }
+        Ok(Vie { publie_ml, vivant: false, calme: 0, calme_requis })
+    }
+
+    /// **Un pas de V** : un changement significatif publie, remet le calme à zéro et fait naître δ s'il n'existe pas ; sinon le calme
+    /// compte, et δ meurt au bout de `calme_requis` pas.
+    pub fn pas(&mut self, node: &HydroNode, shapes: &Shapes<'_>, g_eff: [f32; 3], seuil_um: f64) -> Result<Evenement, Error> {
+        if declenche(node, self.publie_ml, shapes, g_eff, seuil_um)? {
+            self.publie_ml = node.volume_ml;
+            self.calme = 0;
+            if !self.vivant {
+                self.vivant = true;
+                return Ok(Evenement::Naissance);
+            }
+        } else if self.vivant {
+            self.calme += 1;
+            if self.calme >= self.calme_requis {
+                self.vivant = false;
+                return Ok(Evenement::Mort);
+            }
+        }
+        Ok(Evenement::Rien)
+    }
+}
+
 #[cfg(test)]
 #[path = "tests_articulation.rs"]
 mod tests;

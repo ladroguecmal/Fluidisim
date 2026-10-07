@@ -61,3 +61,53 @@ fn the_v_node_triggers_delta_and_holds_its_mass_s637() {
     assert_eq!(forcer(&mut dom, 1.0, 0.0, 1.0), Err(Refus), "critère 6 : dt_V");
     assert_eq!(forcer(&mut dom, 1.0, 0.1, 0.0), Err(Refus), "critère 6 : τ");
 }
+
+/// **S638** — (1) publications, naissance, mort ; (2) le retard de masse à la mort ; (3) refus.
+#[test]
+fn delta_is_born_when_v_moves_and_dies_when_v_is_calm_s638() {
+    let t = boite([0, 0, 0], [10_000_000, 5_000_000, 2_000_000]);
+    let formes = [VolumeShape::new(&t).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let bas = [0.0f32, 0.0, -9.81];
+    let mut node = HydroNode { volume_ml: 50_000_000, capacity_ml: formes[0].capacity_ml(), origin_um: [0; 3], shape: 0 };
+    let mut vie = Vie::nouvelle(node.volume_ml, 30).unwrap();
+    let (mut dom, mut publications, mut naissances, mut mort) = (None::<SaintVenant2D>, Vec::new(), Vec::new(), None);
+    for pas in 1..=200 {
+        if pas <= 50 {
+            node.volume_ml += 2_000;
+        }
+        let avant = vie.publie_ml;
+        let e = vie.pas(&node, &shapes, bas, 500.0).unwrap();
+        if vie.publie_ml != avant {
+            publications.push(pas);
+        }
+        match e {
+            Evenement::Naissance => {
+                naissances.push(pas);
+                let mut d = amorcer(20, 10, 0.5, 9.81, vec![0.0; 200], node.volume_ml as f64 * 1e-6 / 50.0).unwrap();
+                d.regler_ordre_deux(1e-16).unwrap();
+                dom = Some(d);
+            }
+            Evenement::Mort => {
+                let d = dom.as_mut().unwrap();
+                forcer(d, node.volume_ml as f64 * 1e-6, 0.1, 1.0).unwrap();
+                mort = Some((pas, node.volume_ml as f64 * 1e-6 - d.volume()));
+                dom = None;
+            }
+            Evenement::Rien => {
+                if let Some(d) = dom.as_mut() {
+                    for _ in 0..4 {
+                        d.pas(0.025).unwrap();
+                    }
+                    forcer(d, node.volume_ml as f64 * 1e-6, 0.1, 1.0).unwrap();
+                }
+            }
+        }
+    }
+    println!("S638 : publications {publications:?}, naissances {naissances:?}, mort {mort:?}");
+    assert_eq!((publications, naissances), (vec![13, 26, 39], vec![13]), "critère 1");
+    let (pas_mort, retard) = mort.unwrap();
+    assert_eq!(pas_mort, 69, "critère 1 : la mort");
+    assert!((retard - 0.0023822323977071846).abs() < 1e-9, "critère 2");
+    assert_eq!(Vie::nouvelle(0, 0), Err(Refus), "critère 3");
+}
