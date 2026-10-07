@@ -62,23 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S656 — **terminée**. **La trente-cinquième revue de méthode** (ADR-222 D4 : S651–S655), et la demande de l'utilisateur
-(2026-10-07) : *« Les erreurs que tu réalises viennent d'où ? »*, puis *« Corrige et apprend de tes erreurs »*.
+Session : S657 — **en cours**. En autonomie vers la v2 ; 6.7. En S655, le corps libre (la masse ajoutée implicite) dépassait à 5 ms la
+vitesse de la sonde — une sonde restée à sa position de départ.
 
-**Ce que la session fait.** ADR-266 : les erreurs de S609 et S639–S655, rangées en six familles ; les cinq contrôles que chaque plan porte
-désormais, dans un bloc **Contrôles du plan** — (1) les causes candidates et le **témoin** qui en supprime une, avant tout remède ; (2)
-l'**instrument** et le comparant éprouvés sur un cas connu ; (3) les nombres **calculés** ; (4) les **ADR** qui nomment celui qu'on
-applique, lus ; (5) les **pièges** connus du domaine, nommés. **Le rituel le vérifie** : à partir de S657, `rituel.py fin` refuse un plan
-sans le bloc ou sans l'un des cinq mots (« sans objet » se dit, il ne s'omet pas).
+**Contrôles du plan** (ADR-266)
 
-**Critères, écrits avant.** (1) ADR-266 ; (2) la vérification dans `rituel.py`, éprouvée sur trois textes : un plan complet (accepté), un
-plan sans le bloc (refusé), un plan où manque « pièges » (refusé) ; (3) la règle dans `notes/METHODE.md` ; (4) la prochaine revue nommée.
+- **témoin** : deux causes candidates de l'excès de S655 — (a) le comparant mal placé, (b) un reste du couplage. Le comparant local
+  supprime (a) : si l'excès disparaît contre l'eau autour du corps, c'était (a).
+- **instrument** : la vitesse de l'eau autour du corps — le plus grand module de la vitesse, aux centres des mailles d'eau voisines d'une
+  maille du corps — éprouvée d'abord sur un cas connu : une sphère **imposée** à 0,5 m/s dans une eau au repos ; le lecteur doit lire entre
+  0,3 et 0,7 m/s (l'eau poussée par le corps va à sa vitesse sur ses faces, moins à leur centre).
+- **calcul** : aucun nombre nouveau ; la masse (2,094 kg), le montage et les pas sont ceux de S653–S655.
+- **ADR** : ADR-263 D2 (l'instrument d'abord), ADR-259 D1 (le témoin), ADR-266 ; le schéma de S655 appliqué tel quel.
+- **pièges** : un corps hors de l'eau n'a pas d'eau autour de lui (le rapport n'est lu que si au moins quatre mailles d'eau le touchent) ;
+  le jet balistique, plus rapide que l'eau sous lui ; la masse ajoutée.
+
+**Critères, écrits avant.** (1) Le lecteur : 0,3 à 0,7 m/s sur le cas imposé. (2) Sous le rouleau, aux deux pas (10 et 5 ms) : à
+l'instant où le corps est le plus rapide, sa vitesse au plus **1,2 fois** celle de l'eau autour de lui ; rapportés, le rapport au plus sur
+toute la course, et les vitesses aux deux pas. (3) La masse au bit.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-266 ; le contrôle du rituel et son épreuve ; METHODE.
-- [x] **P3** — rituel.
+- [ ] **P2** — le lecteur et son épreuve ; les deux pas en parallèle ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-266 (six familles ; D1 le bloc de cinq contrôles ; D2 le rituel le vérifie dès S657, éprouvé sur trois textes ; D3 la mémoire) ; METHODE (une ligne « en écrivant le plan ») ; L420.
