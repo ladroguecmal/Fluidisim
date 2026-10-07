@@ -13,7 +13,12 @@
 //! amortit les couches minces du rivage (S620). Éprouvés : la positivité, la masse, le lac au repos à bords secs (S613, S620), les murs
 //! mouillés (S614, S620).
 //!
-//! Ne fait pas : le rouleau 3D, le frottement, la houle incidente sur une plage réelle, le branchement à δ.
+//! **S622 — le niveau du large imposé au bord gauche** ([`SaintVenant2D::pas_avec_bord`], ordre deux seulement) : une frontière
+//! caractéristique — l'invariant entrant de l'extérieur `w⁺ = u_e + 2√(g·h_e)`, le sortant de la maille de bord `w⁻ = u₀ − 2√(g·h₀)`, l'état
+//! fantôme `c = (w⁺ − w⁻)/4`, `h = c²/g`, `u = (w⁺ + w⁻)/2`, `v = v₀` ; le flux de Rusanov fantôme–maille remplace la pression de paroi.
+//! Éprouvés : la fidélité (contre un domaine étendu) et l'absorption (S622).
+//!
+//! Ne fait pas : le rouleau 3D, le frottement, les trois autres faces forcées, la houle incidente sur une plage réelle, le branchement à δ.
 
 /// Une entrée refusée : moins de deux mailles par côté, `dx` ou `dt` non positifs, des tableaux de taille fausse, un pas au-delà de
 /// Courant ½.
@@ -71,6 +76,33 @@ fn vitesse(h: f64, q: f64, eps4: f64) -> f64 {
 
 fn minmod(a: f64, b: f64) -> f64 {
     if a * b > 0.0 { if a.abs() < b.abs() { a } else { b } } else { 0.0 }
+}
+
+/// Le flux de Rusanov entre deux états `(h, u normal, v tangentiel)`.
+#[allow(clippy::too_many_arguments)]
+fn rusanov(g: f64, hl: f64, ul: f64, vl: f64, hr: f64, ur: f64, vr: f64) -> [f64; 3] {
+    let c = (ul.abs() + (g * hl).sqrt()).max(ur.abs() + (g * hr).sqrt());
+    [
+        0.5 * (hl * ul + hr * ur) - 0.5 * c * (hr - hl),
+        0.5 * (hl * ul * ul + 0.5 * g * hl * hl + hr * ur * ur + 0.5 * g * hr * hr) - 0.5 * c * (hr * ur - hl * ul),
+        0.5 * (hl * ul * vl + hr * ur * vr) - 0.5 * c * (hr * vr - hl * vl),
+    ]
+}
+
+/// **S622** — la face gauche forcée par l'extérieur `(h_e, u_e)` : la pression de paroi retirée, le flux fantôme–maille ajouté.
+#[allow(clippy::too_many_arguments)]
+fn corriger_bord(ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, he: f64, ue: f64) {
+    for j in 0..ny {
+        let h0 = h[j];
+        let (u0, v0) = (vitesse(h0, qx[j], eps4), vitesse(h0, qy[j], eps4));
+        let (wp, wm) = (ue + 2.0 * (g * he).sqrt(), u0 - 2.0 * (g * h0).sqrt());
+        let cg = (wp - wm) / 4.0;
+        let f = rusanov(g, cg * cg / g, (wp + wm) / 2.0, v0, h0, u0, v0);
+        t.dqx[j] -= 0.5 * g * (h0 * h0);
+        t.dh[j] += f[0];
+        t.dqx[j] += f[1];
+        t.dqy[j] += f[2];
+    }
 }
 
 /// **S620** — l'opérateur d'ordre deux : remplit `dh`, `dqx`, `dqy` (multipliés par `dt/dx` au pas) depuis l'état `(h, qx, qy)`.
@@ -204,6 +236,19 @@ impl SaintVenant2D {
 
     /// **Un pas** de `dt` ; refusé (l'état n'est pas modifié) si le nombre de Courant dépasse ½. N'alloue rien (S619).
     pub fn pas(&mut self, dt: f64) -> Result<(), Refus> {
+        self.pas_interne(dt, None)
+    }
+
+    /// **S622 — un pas, la face gauche forcée** par l'extérieur `exterieur(t) = (h_e, u_e)` (hauteur d'eau et vitesse du large au bord) ; `t`
+    /// l'instant du début du pas. Ordre deux seulement (l'extérieur à `t`, puis à `t + dt`) ; refusé à l'ordre un.
+    pub fn pas_avec_bord(&mut self, dt: f64, t: f64, exterieur: &dyn Fn(f64) -> (f64, f64)) -> Result<(), Refus> {
+        if self.ordre2.is_none() || !t.is_finite() {
+            return Err(Refus);
+        }
+        self.pas_interne(dt, Some((t, exterieur)))
+    }
+
+    fn pas_interne(&mut self, dt: f64, bord: Option<(f64, &dyn Fn(f64) -> (f64, f64))>) -> Result<(), Refus> {
         let (nx, ny, g, eps4) = (self.nx, self.ny, self.g, self.eps4);
         let Travail { u, v, dh, dqx, dqy, fx, fy } = &mut self.travail;
         for k in 0..nx * ny {
@@ -222,12 +267,20 @@ impl SaintVenant2D {
             o.qx0.copy_from_slice(&self.qx);
             o.qy0.copy_from_slice(&self.qy);
             operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o);
+            if let Some((t, ext)) = bord {
+                let (he, ue) = ext(t);
+                corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+            }
             for i in 0..n {
                 self.h[i] += k * self.travail.dh[i];
                 self.qx[i] += k * self.travail.dqx[i];
                 self.qy[i] += k * self.travail.dqy[i];
             }
             operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o);
+            if let Some((t, ext)) = bord {
+                let (he, ue) = ext(t + dt);
+                corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+            }
             for i in 0..n {
                 let (h2, x2, y2) = (self.h[i] + k * self.travail.dh[i], self.qx[i] + k * self.travail.dqx[i], self.qy[i] + k * self.travail.dqy[i]);
                 self.h[i] = 0.5 * (o.h0[i] + h2);
