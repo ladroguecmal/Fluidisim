@@ -95,6 +95,8 @@ pub mod changement_solveur;
 pub mod saint_venant_2d;
 /// S614 — un très grand événement du large à la plage : Green, l'onde solitaire, la remontée (liste 11.3).
 pub mod grand_evenement;
+/// S615 — les grandes formes cohérentes entre clients : la coupure passe-bas avant W (liste 10.5).
+pub mod coherence_clients;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
