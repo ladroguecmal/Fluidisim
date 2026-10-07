@@ -62,16 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S651 — **terminée**. En autonomie vers la v2. **La trente-quatrième revue de méthode** (ADR-222 D4 : S646–S650).
+Session : S652 — **en cours**. En autonomie vers la v2 ; le rouleau 3D. **Étape 5 — le rouleau qui agit** (6.7 : « le rouleau plongeant
+qui décolle un nageur »).
 
-**Critères, écrits avant.** (1) ADR-265 relit chaque session S646–S650 ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**L'instrument, construit et éprouvé d'abord (ADR-263 D2).** La force de l'eau sur la sphère d'APIC (S393), qui impose sa vitesse mais
+ne recevait rien : la somme, sur les faces entre une maille du corps et une maille d'eau, de la pression de la maille d'eau fois `dx²`,
+dirigée vers le corps. Cas connu : 40 × 8 × 20 mailles de 5 cm, eau à 0,3 m, au repos, sphère `r` = 0,1 m centrée en (1,0 ; 0,2 ;
+0,15) m, immergée : **32 mailles de corps, `V` = 0.004000 m³, Archimède `ρgV` = 39.240 N** (`ρ` = 1000, `g` = 9,81).
+
+**Le rouleau.** Le relais de S650, élargi à 8 mailles (0,4 m), une sphère fixe `r` = 0,1 m à x = 10,4 m (après le retournement de
+S650, 9,825 m), posée sur sa marche (0.40 m) : centre à z = 0.50 m, à demi immergée au repos (le niveau à 0,5 m).
+
+**Critères, écrits avant.** (1) L'instrument au repos : `F_z` à 15 % de `ρgV` (le biais de la pression lue au centre de la maille voisine,
+une demi-maille hors de la face, est rapporté) ; `|F_x|`, `|F_y|` ≤ 1 % de `F_z`. (2) Sous le rouleau : le pic de `F_x` vient après le
+retournement, dans la seconde qui suit ; le coefficient de traînée effectif `F_x,max / (½ρ·A·u_max²)`, `A` = πr² = 0.0314 m², `u_max` la
+plus grande vitesse horizontale de la grille trois mailles avant le corps, à mi-hauteur d'eau au repos, est dans [0,5 ; 3] — l'ordre de la
+traînée d'un corps trapu (Morison). (3) La masse, comme S650. (4) Rapportés : l'impulsion `∫F_x dt` ; à l'échelle de la nature ×20 (Froude :
+forces ×8 000), la force, et le produit `h·u` au corps contre la règle d'ADR-018 (0,5 m à 2 m/s emporte un adulte : 1 m²/s).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-265.
-- [x] **P3** — rituel.
+- [ ] **P2** — l'instrument et son épreuve ; le rouleau sur le corps ; (1)–(4).
+- [ ] **P3** — preuve ; liste 6.7, 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-265 : D1, un long calcul sur une copie du binaire (éprouvé) ; D2, le travail d'attente appartient à la session suivante, déclaré. Prochaine revue S656.
