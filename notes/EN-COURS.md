@@ -62,30 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S679 — **terminée**. En autonomie vers la v2 ; K3, 4.14. S678 a montré que le film du rivage ne se règle pas dans APIC 3D
-(quatre plages sur six). **Une session de conception** : le film confié à Saint-Venant 2D, le relais dans les deux sens.
+Session : S680 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage
+([conception](../docs/registres/RELAIS-RIVAGE-S679.md), ADR-271).
+
+**L'interface, précisée.** La conception prévoyait un flux HLL calculé à part et imposé aux deux côtés. Plus simple et aussi exact :
+
+- Saint-Venant 2D garde son bord caractéristique (S622, S628), nourri par l'état de la dernière colonne 3D ;
+- il **rend le flux de masse qu'il a réellement fait passer** pendant le pas, par rangée : la moyenne de ses deux étages de Heun,
+  exactement ce qui change son volume ;
+- APIC retire ou pose des particules pour ce même volume, et un réservoir garde le reste d'un quantum de particule.
+
+**Ce que la session fait.** La première brique : `SaintVenant2D` garde, à chaque pas forcé, le flux de masse de ses bords gauche et
+droit par rangée (`flux_des_bords`).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet (une conception).
-- **instrument** : pour chaque étape de la campagne, l'essai qui la jugera et ce qu'il rendrait sous chaque hypothèse, écrits dans la
-  conception ; le premier, le repos des six plages de S678.
-- **calcul** (scratchpad `s679.py`) : le raccord au moins à trois mailles de profondeur (0,15 m à 5 cm) ; l'onde de S647 y aurait
-  `H/h` = 0.70, soit le déferlement lui-même. Le raccord se place donc au-delà de la plongée.
-- **ADR** : ADR-178 (lot 5), ADR-259, ADR-268 D2.
+- **témoin** : les essais de S613–S628, aux mêmes sorties (le relevé ne touche pas l'arithmétique).
+- **instrument** : le bilan de volume. Ce qui départagerait : un flux relevé juste rend
+  `ΔV = dt·dx·Σ_j flux_j`, pas après pas, à l'arrondi près (10⁻¹² en relatif du volume) ; un étage de Heun oublié, ou le flux d'un seul
+  étage, s'en écarte de l'ordre de la variation du flux pendant le pas.
+- **calcul** : aucun nombre nouveau ; le plancher, l'arrondi `f64` d'une somme de quelques milliers de mailles (≈ 10⁻¹³ en relatif).
+- **ADR** : ADR-271.
 - **pièges** :
-  - la zone des colonnes refuse le fond lisse (S640) ;
-  - le bord ouvert de droite d'APIC (`set_open_boundaries`) n'a jamais servi ;
-  - la masse : un seul flux d'interface, appliqué aux deux côtés.
+  - Heun : `U ← U + ½·k·(L(U) + L(U¹))`, donc le flux du pas est la demi-somme des deux étages ;
+  - le signe : entrant positif à gauche, sortant positif à droite ;
+  - le frottement après le pas ne change pas le volume.
 
-**Critères, écrits avant.** (1) La conception écrite : les rôles, l'interface, la masse, les étapes et leurs essais. (2) L'ADR qui
-décide que le film du rivage appartient à Saint-Venant 2D.
+**Critères, écrits avant.**
+
+1. Une houle entrée par le bord gauche (S622) et un bord droit forcé : à chaque pas, `ΔV` égal à `dt·dx·Σ(flux gauche − flux droit)` à
+   10⁻¹² près en relatif.
+2. Les essais de S613–S628 aux mêmes sorties.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la conception ; ADR-271.
-- [x] **P3** — rituel.
+- [ ] **P2** — `flux_des_bords` ; l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; la conception, note ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — RELAIS-RIVAGE-S679 (les rôles, l'interface, la masse, cinq étapes et leurs essais) ; ADR-271.

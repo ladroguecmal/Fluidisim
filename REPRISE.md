@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 23:51 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 23:53 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S680 — le relais au rivage, brique 1 : Saint-Venant 2D rend le flux de ses bords ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S679 — La conception du relais au rivage (ADR-271) ([journal](notes/JOURNAL.md)). Avant : S678 (Le film du rivage dans APIC 3D : deux causes, un remède partiel)
 Session suivante : S680 — l'étape 1 du relais au rivage : le raccord au repos sur les six plages de S678
 Maillons        : 0 (conception : ADR-271)
