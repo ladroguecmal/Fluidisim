@@ -1647,3 +1647,11 @@ déferlement, jusqu'au rivage ; la revue en S671.
 chemin, au bit (l'empreinte des tables inchangée). **Mesuré** : chaque composante à **0,40 %** de l'équilibre d'énergie 1D jusqu'à 1 m
 de fond ; `Hrms/h` 0,51 au rivage ; sans déferlement, `η` y était faux jusqu'à 1,2 m. Maillons **1** (2.7 avance). Suivant : **S671, la
 trente-huitième revue de méthode** (ADR-269).
+
+## S671 — 2026-10-07 — la trente-huitième revue de méthode (ADR-269)
+
+**Entrée.** La revue (S666–S670) ; le lot S669–S671. **Fait** : [ADR-269](../docs/adr/ADR-269-trente-huitieme-revue-de-methode.md).
+Aucune règle nouvelle : la seule friction, une voie nommée « à mesurer » écartée par un calcul resté dans le bloc-notes (le pas adapté,
+×1,4), n'a rien coûté. Elle est écrite dans l'ADR et dans une note datée de la preuve de S668. La bissection inversée de S669 est
+couverte par ADR-253 D1. Maillons **0** (méthode). Suivant : **S672**, 2.7 — le niveau moyen au rivage (*setup*) et les courants de
+dérive tirés du `Hrms` de `Cote2D`, ou `Cote2D` dans Godot ; la prochaine revue en S676.

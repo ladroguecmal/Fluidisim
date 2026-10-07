@@ -48,3 +48,17 @@ toutes les côtes d'une planète à la fois. Restent à mesurer :
 - **des transformations partagées** entre composantes voisines ;
 - une côte non uniforme le long de ses bords ;
 - la côte 2D dans les autres chemins de B et dans Godot.
+
+## Note du 2026-10-07 (S671, [ADR-269](../adr/ADR-269-trente-huitieme-revue-de-methode.md))
+
+**Le pas adapté au gradient de `k`, estimé puis écarté.** Sur la plage 1:50 de S364, la mer de S667, une erreur d'interpolation de la
+correction sous 0,5 mm (`Δ²/8·Σ a_c·|dk_c/ds|`) permet :
+
+- 100 m de pas au large (80 m de fond) ;
+- 24 m à 40 m de fond ;
+- 10 m à 20 m ;
+- 3 m à 4 m.
+
+Cela fait 339 rangées contre 487 à 8 m, **un gain de ×1,4 seulement** : la zone côtière, où `k` varie, demande le pas fin. Le gain
+grandirait sur un plateau plat de plusieurs kilomètres ; il se remesurera sur une vraie côte. La session suivante (S669) a pris la
+dissipation au déferlement.
