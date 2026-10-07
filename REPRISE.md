@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 23:15 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 23:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S678 — le film du rivage dans APIC 3D (4.14) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S677 — La zone de déferlement tirée de la côte 2D ([journal](notes/JOURNAL.md))
 Session suivante : S678 — K3 : la ligne de déferlement par phase de marée, ou une autre pièce de K3
 Maillons        : 1 (3.5 : la zone de déferlement d'une mer)

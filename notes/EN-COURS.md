@@ -62,48 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S677 — **terminée**. En autonomie vers la v2 ; K3, 3.5 (« manquent… la largeur de la zone »). La polyligne de S588–S633 est
-tirée de McCowan, un seuil sur une houle unique. La côte 2D porte maintenant une mer qui déferle par Battjes et Janssen, avec sa
-fraction de vagues déferlées `Q_b` et sa dissipation `D` en chaque nœud.
+Session : S678 — **en cours**. En autonomie vers la v2 ; K3, 4.14 (« manquent une surface fiable en eau mince au rivage au repos »).
+Sur le fond lisse (S640), l'eau au repos avec un rivage court à **0,26 m/s**. En deçà de la profondeur du noyau, la surface de Zhu et
+Bridson se trompe de un à deux centimètres dans le film.
 
-**Ce que la session fait.**
+**Ce que la session fait.** **La surface du film par sa dernière couche** (`film_smooth`, après l'extension de `φ` sous le fond).
 
-- **`Cote2D` garde `Q_b` et `D`** (par `ρ`) à chaque nœud des tables, avec déferlement : 8 octets par nœud, communs aux composantes.
-- **`Cote2D::zone_de_deferlement(seuil)`** rend les polylignes où `Q_b` = `seuil`, dans les axes locaux de B. Les carrés de marche de
-  S630 sont séparés du calcul de l'écart (`deferlement::contours_du_champ`), au bit.
-- **`Cote2D::dissipation_par_metre(ρ)`** rend `∫ D ds`, moyennée le long de la côte, en kW/m.
+- Dans une colonne dont l'eau est moins profonde que trois mailles, la surface est la plus haute particule plus `dx/4` (la demi-
+  distance entre couches), corrigée de l'écart de lecture du noyau à cette place dans la maille (`lattice_read_error`, une table de
+  64 décalages cuite avec le fond).
+- `φ = z − surface` y est mêlé à `φ` du noyau, avec un poids 1 sous deux mailles de profondeur, 0 au-delà de trois.
+- Une colonne éclaboussée (moins de la moitié des particules qu'elle aurait pleine) garde `φ` du noyau.
+
+Au repos, le film et l'eau profonde lisent ainsi la même surface.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : les essais de S630 (les contours d'une côte quelconque), aux mêmes sorties.
-- **instrument** : l'équilibre d'énergie 1D de S669, sans rétroaction (la côte cuite en une marche), avec son propre `Q_b` (une
-  bissection sur `ln Q`). Ce qui départagerait :
-  - une dissipation juste rend `∫D ds` égal au flux perdu de la référence ;
-  - un `D` sans `g`, ou sans `f̄`, s'en écarte d'un facteur ;
-  - un indice de table décalé déplace la ligne de plusieurs pas.
-- **calcul** (scratchpad `s677_calc.py`, et ce script qui asserte) :
-  - le flux du large vaut 21,7 kW/m ; 20,7 kW/m sont perdus, égaux à `∫D ds` ;
-  - la zone commence à `Q_b` = 1 %, à s = 3 717 m (5,66 m de fond), et mesure 233 m de large ;
-  - le plancher du début : `Hrms` à 0,4 % donne Δs ≈ 1.2 m, d'où la borne de **3 m** ;
-  - l'énergie : le flux au rivage (4,5 % du flux du large) à 0,8 % près, d'où la borne de **2 %**.
-- **ADR** : ADR-196, ADR-268 ; SPEC-006 §6.
+- **témoin** : la pente immergée de S640 (l'eau partout plus profonde que trois mailles : rien ne change, au bit) ; la même plage sans
+  la correction de lecture (`φ` du film sans l'écart du noyau).
+- **instrument** : l'essai de repos de S640 sur la pente, avec rivage, la vitesse maximale sur 2 s, à 5 cm et 2,5 cm. Ce que
+  rendrait chaque hypothèse :
+  - si la surface du film est la cause et que la correction est juste, **moins de 1 cm/s** aux deux mailles ;
+  - si la correction de lecture manque, **quelques cm/s** (le calcul ci-dessous) ;
+  - si le film n'est pas la cause, ou que la colonne est mal lue, **0,26 m/s** comme avant.
+- **calcul** (scratchpad `s678_calc.py`, ce script qui asserte) : la lecture du noyau varie de −1,18 à +1,73 mm sur une maille de 5 cm ;
+  sans correction, la marche entre film et eau profonde entretient jusqu'à **3.8 cm/s** dans un film de 2 cm (asserté
+  au-dessus du critère).
+- **ADR** : ADR-259 D1 (le témoin), ADR-268 D2 (un remède jugé sous une seule cause), ADR-254 D2.
 - **pièges** :
-  - `E = ρg·a²/2` : le premier calcul de ce plan comptait `g` deux fois. `Hrms` au rivage, retrouvé à 0,511 m, l'a montré ;
-  - la grille des contours (`x` le plus rapide) : `s` en `x`, `n` en `y` ;
-  - les axes locaux de B : `x = n̂·(s + origine) + t̂·n`.
+  - la place de la surface dans la maille, `frac(η/dx − ½)` ;
+  - les gouttes (`is_droplet`), hors du film ;
+  - les mailles sous le fond, qui gardent `SOLID` par `label_smooth` ;
+  - S644 au fond lisse (le témoin de la remontée, ignoré, 6 min) changera : rapporté, non jugé.
 
 **Critères, écrits avant.**
 
-1. Le partage de `contours` : au bit (les essais de S630 inchangés).
-2. `∫D ds` de la côte (une marche) à moins de **2 %** du flux perdu de la référence 1D.
-3. À `Q_b` = 1 %, une polyligne ouverte sur toute la largeur, chacun de ses sommets à moins de **3 m** du début 1D.
-4. Rapportés : la largeur de la zone, le flux dissipé en kW/m, la côte au point fixe (S674) comparée.
+1. Au repos sur la pente avec rivage : au plus **1 cm/s** sur 2 s, à 5 cm et à 2,5 cm.
+2. La pente immergée : au bit d'avant (8·10⁻⁶ m/s).
+3. Le témoin sans correction rapporté, au-dessus de 1 cm/s comme le calcul l'annonce.
+4. Les essais de S639 à S658 (le fond en escalier) inchangés.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `contours_du_champ` ; `Q_b`, `D` dans `Cote2D` ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.5 ; rituel.
+- [ ] **P2** — `film_smooth` ; les essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) au bit ; (2) 0,94 % ; (3) une ligne, 97 sommets, à 0,13 m ; (4) début 3 716 m (5,7 m), largeur 234 m, ≈ 21 kW/m.
