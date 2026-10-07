@@ -1614,3 +1614,10 @@ modèle. **Mesuré** : `Cote2D` à **0,56 %** de la côte 1D, la phase à 3,65°
 calculée avec le plancher de son instrument (S662 : l'ordre `ε` pris pour `ε²` ; S663 : 10⁻¹² exigé d'un champ `f32`) ; D2, un remède
 essayé sous une autre cause nommée encore active est suspendu, non rejeté (S664 : la correction de `K_r`, juste, écartée sous les parois
 puis reprise en S665). Maillons **2**. Suivant : **S667, Cote2D à plusieurs composantes** et sa mémoire sur une vraie côte.
+
+## S667 — 2026-10-07 — Cote2D à huit composantes : la composition, la mémoire
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/COTE-2D-SPECTRE-S667.md)) : une mer de huit composantes
+sur la côte 2D, jugée contre la côte 1D sous une borne calculée en chaque point (ADR-268 D1). **Mesuré** : 180/180 sous la borne, `η` à
+0,5 cm (`Hs` 2,2 m) ; la cuisson 1,5 s ; **la mémoire, 160 Mo/km² pour 32 composantes** au pas de 2 m — trop pour une planète. Maillons
+**1** (2.7 avance). Suivant : **S668, la mémoire réduite** (le pas adapté, les transformations partagées — ADR-196 §3).

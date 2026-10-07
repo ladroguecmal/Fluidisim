@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S667 — **en cours**. En autonomie vers la v2 ; 2.7. `Cote2D` (S664–S665) n'a été jugée que sur une composante. **Une mer de huit
+Session : S667 — **terminée**. En autonomie vers la v2 ; 2.7. `Cote2D` (S664–S665) n'a été jugée que sur une composante. **Une mer de huit
 composantes** (périodes 7 à 12 s, directions −20° à +20°, `Hs` = 2.19 m) sur la plage de S364 : la composition jugée contre la côte 1D,
 la mémoire et le temps de cuisson mesurés, extrapolés à une vraie côte.
 
@@ -85,7 +85,8 @@ voie de réduction qu'ADR-196 §3 nomme (des transformations partagées entre co
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(2).
+- [x] **P2** — l'essai ; (1)–(2).
 - [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) 180/180 sous la borne (rapport 0,78), `|Δη|` 0,5 cm ; (2) 1,5 s pour 8 composantes ; 160 Mo/km² pour 32 composantes au pas de 2 m.

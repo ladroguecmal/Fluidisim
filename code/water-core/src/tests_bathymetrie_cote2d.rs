@@ -97,3 +97,55 @@ fn the_2d_coast_refuses_what_it_cannot_cook_s664() {
     assert!(matches!(Cote2D::cuire(&mut host, &b, [0.0, 0.0], 0.0, 400.0, 40.0, 2.0, &|s, _| plage(s)), Err(Cote2DError::Geometrie)));
     assert!(matches!(Cote2D::cuire(&mut host, &b, [0.0, 1.0], 0.0, 400.0, 0.0, 2.0, &|s, _| plage(s)), Err(Cote2DError::Geometrie)));
 }
+
+/// **S667** — huit composantes (7 à 12 s, −20° à +20°) : `η` de la côte 2D contre la côte 1D, sous la borne de composition calculée en
+/// chaque point depuis les écarts de chaque composante ; la mémoire et le temps de cuisson rapportés.
+#[test]
+fn the_2d_coast_composes_a_sea_of_eight_components_s667() {
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15f32, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let comps: Vec<Component> = (0..8).map(|i| {
+        let mut c = composante(t[i], a[i], th[i].to_radians());
+        c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+        c
+    }).collect();
+    let b = fond(&comps);
+    let (mut alloc, services) = (Hote, Hote);
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    let un = Cote::cuire(&mut host, &b, [0.0, 1.0], 0.0, LONGUEUR, 2.0, &plage).unwrap();
+    let horloge = std::time::Instant::now();
+    let deux = Cote2D::cuire(&mut host, &b, [0.0, 1.0], 0.0, LONGUEUR, 200.0, 2.0, &|s, _| plage(s)).unwrap();
+    let duree = horloge.elapsed().as_secs_f64();
+    let (mut pire_rapport, mut pire_dz, mut dessous) = (0f32, 0f32, 0usize);
+    let mut n_points = 0;
+    for i in 0..60 {
+        let y = 50.0 + i as f32 * 63.0;
+        let x = -90.0 + (i as f32 * 37.0) % 180.0;
+        let local = [x, y, 0.0];
+        let (s2, n2) = deux.coordonnees(local);
+        // La borne de composition : Σ a_c·f_c·(|Δφ_c| + |Δf_c|/f_c), des écarts de chaque composante en ce point.
+        let mut borne = 0f32;
+        for (ci, c) in b.components().iter().enumerate() {
+            let (p1, f1, _, _) = un.interpoler(ci, y).unwrap();
+            let (p2, f2, _, _) = deux.interpoler(ci, s2, n2).unwrap();
+            let dphi = (p2.0.wrapping_sub(p1.0) as i32) as f32 / 4_294_967_296.0 * core::f32::consts::TAU;
+            borne += c.amplitude * f1 * (dphi.abs() + (f2 - f1).abs() / f1);
+        }
+        for tt in [0u64, 5_300_000, 47_100_000] {
+            let (e1, e2) = (un.eval_local(&b, local, SimTime(tt)).unwrap().eta, deux.eval_local(&b, local, SimTime(tt)).unwrap().eta);
+            let dz = (e2 - e1).abs();
+            pire_dz = pire_dz.max(dz);
+            pire_rapport = pire_rapport.max(dz / borne.max(1e-6));
+            dessous += usize::from(dz <= borne * (1.0 + 1e-5) + 1e-6);
+            n_points += 1;
+        }
+    }
+    let par_comp = deux.octets() as f64 / 8.0;
+    let (ns, nn, pas) = deux.noeuds();
+    let km2 = 1e6 / (pas as f64 * pas as f64) * 20.0 * 32.0 / 1e6;
+    println!("S667 : {dessous}/{n_points} sous la borne, rapport au plus {pire_rapport:.3}, |Δη| au plus {:.1} cm ; cuisson {duree:.2} s pour 8 composantes ({ns} × {nn} nœuds), {:.2} Mo par composante ; 1 km² à {pas} m, 32 composantes : {km2:.0} Mo",
+        100.0 * pire_dz, par_comp / 1e6);
+    assert_eq!(dessous, n_points, "critère 1 : la composition");
+}
+
