@@ -438,6 +438,8 @@ bathymétrie : l'isobathe h = λ, les plages à recuire) ; **12.2 ouvert** (le c
 total alimenté par B à ses bords) ; **9.6 ouvert** (le précalcul avant l'impact : translater, rebâtir, réallouer, libérer ; l'établissement).
 **S611–S613** : la vingt-sixième revue (ADR-253 : une phrase du plan qui dépend d'un nombre, assertée) ; **4.20 ouvert** (le changement de
 solveur par W) ; **4.14 ouvert** (le mouillage et le séchage en 2D, jugés sur Thacker) — la section 4 n'a plus d'absent.
+**S614–S616** : **11.3 ouvert** (un très grand événement, du large à la plage : Green, Synolakis ; les murs de S613 corrigés) ;
+**10.5 ouvert** (les grandes formes cohérentes entre clients) ; la vingt-septième revue (ADR-254).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
