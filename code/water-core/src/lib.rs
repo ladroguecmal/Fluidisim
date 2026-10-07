@@ -73,6 +73,8 @@ pub mod goutte;
 pub mod microbulles;
 /// S598 — la profondeur adaptative : la descente d'un objet, l'enveloppe de son domaine (liste 4.4).
 pub mod coule;
+/// S599 — la bibliothèque côtière (listes 12.3, 2.8 ; SPEC-005 §6).
+pub mod cotier;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
