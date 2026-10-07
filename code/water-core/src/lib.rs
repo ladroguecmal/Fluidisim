@@ -67,6 +67,8 @@ pub mod explosion;
 pub mod deferlement;
 /// S594 — les régions de mer par descripteur (liste 11.2 ; I-09).
 pub mod regions;
+/// S595 — la goutte : vitesse terminale et vol (liste 7.2).
+pub mod goutte;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
