@@ -457,6 +457,9 @@ tient par la masse (5.10, ADR-025 §3).
 **S638–S640** : le cycle de vie de δ attaché à V (5.10) ; le rouleau 3D, étapes 1 et 1 bis (4.14) — le fond en pente puis les faces
 coupées dans APIC 3D, exactes sous l'eau, le rivage en eau mince manqué (L419) ; l'audit des intentions initiales (demande de
 l'utilisateur).
+**S641–S644** : la trente-deuxième revue (ADR-259) ; l'audit versé dans la liste (121 → 134 points) ; les corrections (4.11, I-08 et I-14 :
+ADR-260) ; les réponses de l'utilisateur (ADR-261) ; la réévaluation des intentions fondatrices (ADR-262 : indiscernable du réel, au
+budget) ; le rouleau 3D, étape 2 — la vague qui monte la pente, la crête juste, le jet de rive court (A333).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 13:29 +02:00
+JETON            : libre
+Battement        : 2026-10-07 14:01 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S644 — le rouleau 3D, étape 2 : la vague qui monte la pente dans APIC 3D ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S643 — la réévaluation des intentions fondatrices ([journal](notes/JOURNAL.md)). Avant : S642 (les corrections de l'audit)
-Session suivante : **S644 — le rouleau 3D, étape 2** : une vague non déferlante qui monte la pente dans APIC 3D (le fond en escalier de S639, 1,5 cm/s de frémissement au rivage), jugée contre Synolakis et Saint-Venant 2D ; puis l'étude du découpage de la planète (ADR-261 D2).
-Maillons        : 3
-Registres       : dernier lot S641 (ADR-213 D3) ; le prochain au plus tard en S644
+Session en cours : aucune
+Dernière session : S644 — le rouleau 3D, étape 2 : l'onde solitaire qui monte la pente ([journal](notes/JOURNAL.md))
+Session suivante : **S645 — A333, le jet de rive court** : le témoin du fond glissant (la vitesse tangentielle gardée sur les faces du fond, la normale seule annulée) ; s'il lève l'écart, le fond glissant par défaut ; puis l'étape 3 du rouleau 3D (le déferlement, contre la classification de Grilli et al. 1997).
+Maillons        : 1
+Registres       : dernier lot S644 (ADR-213 D3) ; le prochain au plus tard en S647
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

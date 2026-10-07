@@ -86,7 +86,7 @@ sur la surface (aucune particule détachée au-dessus du front de plus d'une mai
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — l'essai (5 cm dans la suite, 2,5 cm `#[ignore]`) ; (1)–(4).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) tenu ; **(2) manqué** : par les étiquettes 0,150 m aux deux mailles (le plan se trompait : la marche fait une maille, la
