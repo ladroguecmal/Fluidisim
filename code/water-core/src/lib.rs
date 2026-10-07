@@ -87,6 +87,8 @@ pub mod hydro_grid;
 pub mod activite;
 /// S609 — le régime substitutif : la bascule, un domaine propriétaire du champ total (liste 4.11 ; ADR-001 §3.3).
 pub mod substitutif;
+/// S610 — le précalcul avant l'impact : translater, rebâtir, réallouer, libérer ; l'établissement (liste 9.6 ; ADR-013 §3–4).
+pub mod precalcul;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;

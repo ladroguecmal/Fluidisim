@@ -58,6 +58,13 @@ impl Domaine1D {
         Ok(Domaine1D { g, h, dx, dt, pas: 0, eta, u })
     }
 
+    /// **S610** — le domaine né au repos (`η = 0`, `u = 0`) : faux sous B, il doit s'établir (ADR-013 §4).
+    pub fn au_repos(g: f64, h: f64, dx: f64, n: usize, dt: f64) -> Result<Domaine1D, Refus> {
+        let mut d = Domaine1D::depuis_b(g, h, dx, n, dt, &|_, _| (0.0, 0.0), &[])?;
+        d.u.fill(0.0);
+        Ok(d)
+    }
+
     /// Un pas de `tₙ` à `tₙ₊₁`.
     pub fn avancer(&mut self, b: Exterieur<'_>) {
         let (g, h, dx, dt, n) = (self.g, self.h, self.dx, self.dt, self.eta.len());
@@ -79,6 +86,11 @@ impl Domaine1D {
     /// L'élévation totale aux centres des mailles.
     pub fn eta(&self) -> &[f64] {
         &self.eta
+    }
+
+    /// Le pas de temps (s).
+    pub fn temps_pas(&self) -> f64 {
+        self.dt
     }
 
     /// L'instant courant (s).
