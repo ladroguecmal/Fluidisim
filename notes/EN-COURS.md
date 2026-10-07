@@ -84,7 +84,7 @@ forces ×8 000), la force, et le produit `h·u` au corps contre la règle d'ADR-
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — l'instrument et son épreuve ; le rouleau sur le corps ; (1)–(4).
-- [ ] **P3** — preuve ; liste 6.7, 4.14 ; rituel.
+- [x] **P3** — preuve ; liste 6.7, 4.14 ; rituel.
 
 ### Notes de reprise
 - **P2 en cours (interrompu : limite d'usage)** — l'instrument de force construit ; son épreuve (critère 1) a d'abord lu 1,38 × Archimède

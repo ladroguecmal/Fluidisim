@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 16:35 +02:00
+JETON            : libre
+Battement        : 2026-10-07 17:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S652 — le rouleau 3D, étape 5 : le rouleau qui agit sur un corps ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S651 — la trente-quatrième revue de méthode (ADR-265) ([journal](notes/JOURNAL.md)). Avant : S650 (le rouleau 3D, étape 4 : le relais 2D → 3D)
-Session suivante : **S652 — le rouleau 3D, étape 5 : le rouleau qui agit** — la force du rouleau sur un corps rigide posé dans la bande de déferlement (6.7), jugée par la quantité de mouvement de l'eau et contre une force de traînée de référence ; le relais de S650 comme montage.
-Maillons        : 2
+Session en cours : aucune
+Dernière session : S652 — le rouleau 3D, étape 5 : la force du rouleau sur un corps ([journal](notes/JOURNAL.md)). Avant : S651 (la trente-quatrième revue de méthode)
+Session suivante : **S653 — la suite des partiels de la physique** (ADR-247) : A334 (le choc sous le rouleau, à une autre maille et un autre pas), ou le corps libre emporté par le rouleau (le couplage deux sens de la sphère d'APIC) — choisir par ce que la liste attend le plus.
+Maillons        : 1
 Registres       : dernier lot S650 (ADR-213 D3) ; le prochain au plus tard en S653
 ```
 
