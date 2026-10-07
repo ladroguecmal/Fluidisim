@@ -59,6 +59,8 @@ pub mod glace;
 pub mod maree;
 /// S582 — le tsunami, sa propagation macroscopique (liste 3.4).
 pub mod tsunami;
+/// S583 — la réfraction bathymétrique par tracé de rayons (liste 3.6).
+pub mod refraction;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
