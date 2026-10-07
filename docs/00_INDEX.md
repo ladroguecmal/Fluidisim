@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Les paliers de confiance des objets contrôlables — S602](validation/CONFIANCE-S602.md) : la confiance réduite par le jeu ; l'horizon d'ADR-013.
 - [La réserve d'événement — S600](validation/RESERVE-EVENEMENT-S600.md) : +50 % pendant 0,5 s, 5 s de rechargement (ADR-012 §6).
 - [La bibliothèque côtière — S599](validation/COTIER-S599.md) : seize états en f16, la polyligne, la recherche par paramètres, l'empreinte.
 - [La descente d'un objet qui coule et l'enveloppe de son domaine — S598](validation/COULE-S598.md) : Newton, la masse ajoutée ; le domaine prévu, au quantum.

@@ -720,7 +720,10 @@ pas recopiée ici (L137).
   **S537 : un corps quelconque** — le contact par le sommet le plus bas de l'enveloppe convexe : une planche tournante à 1,3·10⁻¹⁰ s de
   l'analytique, quand sa sphère englobante la faisait toucher 38,8 ms trop tôt ([preuve](validation/CORPS-QUELCONQUE-S537.md)). Manquent
   un corps non convexe, le vent, l'entrée orientée consommée par δ.
-- [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.
+- [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *partiel* depuis S602 : la confiance que le
+  jeu réduit (un facteur sur `a_max`), l'horizon utile d'ADR-013 (sa table retrouvée), le palier qui recule (le vaisseau lourd de T2 à T3), la
+  réévaluation par palier ([preuve](validation/CONFIANCE-S602.md)). Manquent la source des facteurs, la table des `a_max` par archétype,
+  l'hystérésis, le branchement au domaine épars.
 - [x] **9.5 Événement prédit, confirmé ou rétracté**, sans retour arrière du temps — *validé* (S510) :
   cause et confirmation des impacts dans le journal (ADR-056) ; **le consommateur** (`wave_consumer`, le chemin d'image) — confirmation au
   même effet au bit, rejet et correction en fondu (1,6 et 2,3 % de saut d'image au plus), aucun retour du temps
@@ -871,12 +874,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 1 | 9 | 3 |
+| 9. Activation et budget | 13 | 1 | 10 | 2 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 2 | 3 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **94** | **17** |
+| **total** | **121** | **10** | **95** | **16** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

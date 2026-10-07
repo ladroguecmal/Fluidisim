@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S602 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S599–S601), puis **9.4 — les objets contrôlables :
+Session : S602 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S599–S601), puis **9.4 — les objets contrôlables :
 paliers de confiance ; confiance réduite par le jeu** (absent). Les paliers d'ADR-013 §2 existent (`ballistic::tier`, S405, pour 9.3) ;
 manque ce qui est propre aux objets contrôlables.
 
@@ -84,7 +84,10 @@ un facteur sous 1 ou non fini.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `Confiance` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 9.4 ; rituel (`--lot`).
+- [x] **P2** — `Confiance` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 9.4 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — les horizons ; T2 → T3 ; 200 cas au bit ; la réévaluation ; refus. Suite 777.
+- **P3** — preuve CONFIANCE-S602 ; liste 9.4 (absent → partiel) et décompte ; index ; journal ; le lot.
+

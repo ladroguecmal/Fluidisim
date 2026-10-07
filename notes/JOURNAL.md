@@ -1091,3 +1091,10 @@ pour deux événements. Maillons **1** (9.13 : absent → partiel). Suivant : **
 **Entrée.** En autonomie ; revue due. **Friction** : un nombre promis au plan sans être calculé (S598), une attente d'essai que le plan
 n'avait pas (S599) — **élargie** : le plan se relit contre ses critères avant l'essai (ADR-251 D1, L410). Ont tenu : les tailles d'ensemble,
 les comptes exacts, les formules indépendantes. Maillons **1**. Suivant : **S602**, le lot (dû) et un point absent.
+
+## S602 — 2026-10-07 — le lot ; les paliers de confiance des objets contrôlables
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S599–S601), puis 9.4 (absent). **Fait** ([preuve](../docs/validation/CONFIANCE-S602.md)) :
+`Confiance`, `horizon_utile`, `palier_controlable`, `reevaluation_s`. **Mesuré** : la table d'ADR-013 retrouvée, un vaisseau qui recule de
+T2 à T3 quand le jeu divise sa confiance, 200 cas au bit de `tier` en pleine confiance. Maillons **1** (9.4 : absent → partiel). Suivant :
+**S603**, un point absent.
