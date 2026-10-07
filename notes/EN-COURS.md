@@ -62,34 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S609 — **terminée**. En autonomie (ADR-247) : **4.11 — le régime substitutif quand δ n'est plus petit, restauré depuis graine
-(I-17)** (absent). ADR-001 §3.3 : la bascule à `max|δ| > 0,35·Hs_local` (ou par nature) ; le domaine devient **propriétaire du champ
-total** dans son emprise, et B+W ne l'alimentent plus que par ses frontières (générateur en entrée, absorbeur en sortie). La restauration
-depuis une graine (ADR-022 §3) est la session suivante.
+Session : S610 — **en cours**. En autonomie (ADR-247) : **9.6 — le précalcul avant l'impact : domaines, allocations, collisions, état
+initial, avance plus rapide que le temps réel** (absent). ADR-013 §3 : en T2, δ vaut 0 — un domaine préparé ne porte que des blocs ; un
+déplacement de l'impact prévu se corrige en translatant l'ensemble, sans erreur ; les seuls seuils sont réallouer, rebâtir, libérer. §4 :
+l'avance temporelle n'est légitime que pour un domaine substitutif, qui naît faux et doit s'établir.
 
-**Ce que la session fait.** Un module `substitutif.rs` : `Mode`, `mode_requis(max|δ|, Hs, par_nature)` ; `Domaine1D` — l'eau peu profonde
-linéaire du champ **total** sur grille décalée, schéma avant-arrière, et aux deux bords **Flather contre B** (`u = u_B ± √(g/h)·(η − η_B)`, B centré comme le schéma : `u_B` à la face et au demi-pas, `η_B`
-au centre de la maille voisine) :
-B y entre, ce qui sort du domaine en sort. Ne fait pas : un solveur substitutif non linéaire (le rouleau, la cavité — l'APIC 3D en serait
-un), W aux frontières, le 2D/3D, la graine.
+**Ce que la session fait.** Un module `precalcul.rs` : `Preparation` — les blocs (colonnes) d'un domaine préparé autour d'un impact prévu,
+sur le réseau de blocs du référentiel, sa capacité réservée, son `dx`, δ = 0 ; `reviser(nouvelle prévision)` → `Decision` : **translater**
+(un déplacement d'un nombre entier de blocs : ré-indexer, exact), **rebâtir l'ensemble** dans la capacité (un déplacement hors réseau),
+**réallouer** (au-delà de la capacité), **rebâtir au nouveau `dx`**, **libérer** (l'événement n'aura pas lieu) ; `etablissement` — le temps
+qu'un domaine substitutif né au repos met à rejoindre B (S609), mesuré, contre la borne d'ADR-013 §4 (`L/c_g` à `L/c_g + 2T`). Ne fait pas :
+les collisions et proxys, l'avance mesurée en temps réel d'un domaine 3D, la graine qui remplace l'établissement (4.11, 12.3).
 
-**Références, calculées avant** (ce script, par une implémentation numpy indépendante). Profondeur 2 m (`c` = 4.429447 m/s), 200 m en 400
-mailles, pas de 0,05 s ; B : une onde longue progressive de 0,1 m et 40 m. **B seul**, le domaine initialisé sur B : après 60 s, l'écart
-au champ de B **6.285449e-04 m** (la dispersion du schéma). **Une bosse** de 5 cm (gaussienne de 5 m au milieu) ajoutée au champ total : à
-10 s, deux moitiés de **0.025003 m** ; à 60 s, une fois sorties, il en reste **3.256827e-04 m** — 1.303 % d'une moitié.
+**Références, calculées avant** (ce script). **L'établissement** (le domaine de S609 né au repos, B de 0,1 m et 40 m : `T` = 9.030473 s,
+`L/c` = 45.152364 s) : l'écart à B passe définitivement sous 5 % de l'amplitude à **60.65 s**, dans la borne
+[45.152 ; 63.213] s ; l'écart à 120 s : 1.913472e-03 m. **La préparation** (blocs de 2 m, rayon 9 m, impact prévu en
+(100,3 ; 50,7)) : **86 blocs** ; déplacé de (6 ; −4) m — trois blocs, moins deux — l'ensemble translaté est celui qu'on aurait
+préparé là (asserté) ; déplacé de (0,3 ; 0,3) m, l'ensemble rebâti compte **89 blocs**.
 
-**Quantum** : f64. **Critères, écrits avant.** (1) l'écart à B seul à 60 s, égal à la référence à 10⁻⁹ m près, et sous 1 mm ; (2) la moitié
-à 10 s et le reste à 60 s égaux aux références à 10⁻⁹ m ; le reste sous 2 % d'une moitié (les frontières laissent sortir ; la réflexion de Flather discret, 1,3 %, mesurée au plan
-— une première version, B pris au pas entier et au bord, laissait 4,3 mm d'écart à B seul) ; (3) la bascule :
-perturbatif à `max|δ|` = 0,35·Hs, substitutif au-delà ou par nature ; (4) refus : profondeur, `dx`, pas non positifs, nombre de Courant
-`c·dt/dx` ≥ 1.
+**Quantum** : le pas de temps (0,05 s) ; des blocs entiers. **Critères, écrits avant.** (1) l'établissement à un pas près de la référence,
+dans la borne d'ADR-013 §4 ; (2) la préparation : 86 blocs, δ = 0 au bit ; translatée de (6 ; −4) m, identique au bit à la préparation
+directe, décision « translater » ; (3) déplacée de (0,3 ; 0,3) m : 89 blocs — « rebâtir » avec une capacité de 90, « réallouer » avec une
+capacité de 86 ; un autre `dx` : « rebâtir au `dx` » ; l'événement annulé : « libérer » ; (4) refus : rayon
+ou `dx` non positifs, une capacité sous l'ensemble initial.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `substitutif.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 4.11 ; rituel.
+- [ ] **P2** — `precalcul.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 9.6 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus ; identique au bit à numpy. Suite : 799 essais listés (mesurée).
-- **P3** — preuve SUBSTITUTIF-S609 ; liste 4.11 (absent → partiel) et décompte ; index ; journal.
