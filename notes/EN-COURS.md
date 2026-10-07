@@ -62,30 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S624 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **11.3 — la chaîne entière** : le tsunami de S614
-(`H/d` = 0,0185, d'amplitude finie) entre par le bord caractéristique de S622 et remonte la plage — S622 n'avait éprouvé le bord qu'à 2 mm.
+Session : S625 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **4.14 — « une houle sur une plage réelle »** (un manque
+de S613) : une houle longue périodique entre par le bord caractéristique (S622) et monte et descend une pente, cycle après cycle.
 
-**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai qui assemble `SaintVenant2D` d'ordre deux (S620), `pas_avec_bord`
-(S622) et l'onde solitaire de `grand_evenement` (S614) ; le domaine commence au bord, à 500 m du pied de la plage 1:19,85, au repos ;
-l'onde entre de 500 m au large. Contre le même domaine prolongé de 1 100 m au large, l'onde posée dedans. Ne fait pas : le niveau lu dans
-le tsunami macroscopique lui-même (sa forme est une impulsion polynomiale, la loi de Synolakis veut une onde solitaire), le déferlement.
+**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai — `SaintVenant2D` d'ordre deux (S620), `pas_avec_bord` (S622) nourri
+d'une houle `η = A·sin ωt`, `u = √(g/d)·η` ; une pente 1:19,85 précédée de 300 m de fond plat à 10 m ; huit périodes ; la remontée d'un cycle
+établi — le maximum, sur les deux dernières, de la surface `z + h` de la maille mouillée la plus haute (continue, non quantifiée). La
+référence analytique : **Keller & Keller (1964)**, `R = 2A/√(J₀(2kL)² + J₁(2kL)²)`, que Carrier & Greenspan (1958) montrent exacte aussi
+pour la remontée non linéaire d'une houle non déferlante. Ne fait pas : la houle déferlante, la dispersion, la houle oblique.
 
-**Références, calculées avant** (`s624_ref.py`, numpy ; 170 s — une première mesure à 130 s arrêtait l'onde avant le haut de sa course).
-Remontée **forcée**, maille 1, ½, ¼ m : **0.806045340, 0.869017632, 0.900503778 m** ; **étendue** : 0.856423174, 0.919395466, 0.950881612 m. L'écart
-étendu − forcé vaut **0.050377834 m aux trois mailles** : il ne dépend pas de la maille — c'est le raidissement de l'onde, que Saint-Venant
-non dispersif accumule sur les 500 m de plus de l'étendu (une onde solitaire réelle, dispersive, garde sa forme), non un artefact du bord.
-Synolakis : 0,861419 m ; le forcé à ¼ m en est à 0.0391 m.
+**Références, calculées avant** (`s625_ref.py`, numpy ; `J₀`, `J₁` par leurs séries). `A` = 5 cm, `T` = 60 s (λ = 594 m) : `2kL` =
+4.197441, **R = 0.249190301 m** (`R/A` = 4.9838) ; non déferlante (`R·ω²/(g·tan²β)` = 0.1098 < 1). Remontée
+mesurée, maille 1, ½, ¼ m : **0.250237555, 0.249060917, 0.249310645 m** — +0.420 %, -0.052 %, +0.048 %.
 
-**Quantum** : la cote d'une maille, `dx/cot β` (0.012594 m à ¼ m). **Critères, écrits avant.** (1) les trois remontées forcées et
-les deux étendues à 1 et ½ m égales aux références (au bit : des cotes de mailles) ; (2) l'écart étendu − forcé le même aux mailles 1 et ½ m
-(à 10⁻⁹ m) ; (3) le forcé croissant avec la maille et, à ¼ m, à moins de dix quanta de Synolakis ; (4) `h ≥ 0`.
+**Quantum** : f64 ; l'accord avec numpy est demandé à **10⁻⁶ m**, non au bit — S622 a mesuré que le limiteur minmod amplifie un ulp jusqu'à
+10⁻⁸ m dans les zones presque plates. **Critères, écrits avant.** (1) les trois remontées égales aux références à 10⁻⁶ m ; (2) à moins de 1 %
+de Keller & Keller aux trois mailles, de 0,1 % à ½ et ¼ m ; (3) `h ≥ 0`.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 11.3 ; rituel.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai, au bit. Suite : 811 essais listés.
-- **P3** — preuve CHAINE-TSUNAMI-S624 ; ligne 11.3 ; index ; journal.
