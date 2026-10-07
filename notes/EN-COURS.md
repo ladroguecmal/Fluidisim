@@ -62,46 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S687 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. ADR-273 D1 : le raccord se juge d'abord entre
-deux copies du même solveur.
+Session : S688 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. S687 : le schéma de raccord est juste.
+ADR-273 D1 demande encore la référence du côté d'APIC. La lecture de la remontée avait un quantum (S687).
 
 **Ce que la session fait.**
 
-- **Le bord droit de Saint-Venant à flux imposé** (`pas_avec_flux_droit`) : la face droite fait passer le flux de masse donné par
-  rangée, avec le flux de quantité de mouvement `F·u + ½·g·h²` de la maille de bord. C'est l'équivalent du bord droit d'APIC, qui
-  reçoit `F/h`.
-- **Le raccord seul** : le domaine du large, un Saint-Venant, porte l'onde jusqu'à 5,35 m. Le raccord est le schéma de
-  `RelaisRivage` : l'état du bord du large nourrit le bord caractéristique du rivage ; le flux rendu revient au large comme flux imposé.
-
-L'onde de S644 et le tout-Saint-Venant de S685, le même état initial.
+1. **Le côté d'APIC.** Le niveau au raccord, pas à pas, dans le relais et dans le tout-APIC sur le même fond lisse, la même onde,
+   jusqu'à 1,6 s, avant le retour de la réflexion.
+2. **La remontée sous la maille.** Le niveau de l'eau (`h + z`) à la plus haute maille mouillée, au lieu de son fond. Elle est lue
+   sur le relais, le tout-Saint-Venant et le raccord seul.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273)
 
-- **témoin** : le tout-Saint-Venant de S685 (0,2190 et 0,2398 m) ; sans flux imposé, Saint-Venant au bit (S613–S680).
-- **instrument** : la remontée et la masse. Ce que rendrait chaque hypothèse :
-  - si le schéma de raccord est juste, la remontée du tout-Saint-Venant à l'écart du bord caractéristique près (S622), et donc **l'écart
-    de S685 vient de l'onde portée par APIC** ;
-  - si le schéma est en faute, le même déficit que S685 (−15 %) ;
-  - si le flux est mal rendu, une masse qui dérive.
-- **calcul** (ce script) : 18 mailles par largeur d'onde à 5 cm, 36 à 2,5 cm ; l'écart attendu ≈ 3,2 % et ≈ 1,6 % (S622 : 2,9 % à 20,
-  1,3 % à 40). La borne, **6 %**.
-- **ADR** : ADR-271, ADR-273, ADR-268 D1.
+- **témoin** : le raccord seul (S687), qui doit redonner le tout-Saint-Venant aussi à la nouvelle lecture.
+- **instrument** : ce que rendrait chaque hypothèse.
+  - (1) Si le raccord ne perturbe pas la 3D, le même niveau que le tout-APIC jusqu'à 1,6 s. Une réflexion au raccord le ferait
+    différer dès le passage de la crête.
+  - (2) La nouvelle lecture, sans marche, rend le raccord seul égal au tout-Saint-Venant aux trois mailles. L'écart du relais au
+    tout-Saint-Venant y devient ce que porte APIC.
+- **calcul** (ce script) : au raccord, 16 cm de fond ; la réflexion revient vers 2.1 s (asserté après 1,6 s). La lecture du
+  niveau du bord 3D, une particule (continue en mouvement).
+- **ADR** : ADR-273, ADR-268 D1 (la borne au-dessus du plancher de la lecture).
 - **pièges** :
-  - les deux domaines lisent l'état avant leur pas, comme le relais ;
-  - la quantité de mouvement du flux imposé, à la vitesse de la maille de bord ;
-  - le bord gauche du rivage et le flux imposé du large, au même pas.
+  - le tout-APIC sur fond lisse a le défaut du film au rivage (S640), mais il ne revient au raccord qu'avec la réflexion ;
+  - la lecture sous la maille demande `h` > 1 mm, comme l'ancienne.
 
 **Critères, écrits avant.**
 
-1. Saint-Venant sans flux imposé, au bit.
-2. La remontée du raccord seul à moins de **6 %** du tout-Saint-Venant, à 5 et 2,5 cm.
-3. La masse des deux domaines constante à 10⁻¹² près.
+1. Le niveau au raccord du relais à moins de **10 %** de la crête de celui du tout-APIC, à chaque pas jusqu'à 1,6 s, à 5 et 2,5 cm.
+2. Le raccord seul à moins de **1 %** du tout-Saint-Venant, à la nouvelle lecture, aux trois mailles.
+3. Rapportés : la remontée du relais, du tout-Saint-Venant et Synolakis, à la nouvelle lecture.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le flux imposé ; le raccord seul ; (1)–(3).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — les essais ; (1)–(3).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) tenu ; (2) tenu à 2,5 cm (0,00 %), et 1,25 cm en route ; à 5 cm −7,61 % = une marche de la lecture (`dx/3`), la borne de 6 % était sous ce quantum (ADR-268 D1, non appliquée à la lecture) ; (3) tenu.

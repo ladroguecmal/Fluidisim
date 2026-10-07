@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 01:30 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 01:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S688 — le relais jugé du côté d'APIC ; la remontée lue sous la maille ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S687 — Le raccord seul, entre deux Saint-Venant ([journal](notes/JOURNAL.md)). Avant : S686 (la quarante et unième revue de méthode)
 Session suivante : S688 — le relais au rivage contre le tout-APIC à air balistique (S645), la lecture de la remontée sous la maille
 Maillons        : 1 (4.14 : le schéma de raccord juste)
