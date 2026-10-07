@@ -62,25 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S655 — **terminée**. En autonomie vers la v2. Le corps libre de S653 est lancé plus vite que l'eau par son couplage explicite
-(S654 : 4,68 m/s à 10 ms, 2,56 à 5 ms, la force lissée inchangée).
+Session : S656 — **en cours**. **La trente-cinquième revue de méthode** (ADR-222 D4 : S651–S655), et la demande de l'utilisateur
+(2026-10-07) : *« Les erreurs que tu réalises viennent d'où ? »*, puis *« Corrige et apprend de tes erreurs »*.
 
-**Le remède.** La masse ajoutée traitée implicitement : `(m + m_a)·aₙ₊₁ = F + m·g + m_a·aₙ`. À l'équilibre (`aₙ₊₁ = aₙ`), c'est
-`m·a = F + m·g` : rien ne change. `m_a = ½·ρ·V_imm` (la sphère), `V_imm` les mailles du corps où `φ < 0` — la reconstruction reflète l'eau
-à travers la sphère (S393) — fois `dx³`. L'accélération du pas précédent est gardée. Sans masse, au bit.
+**Ce que la session fait.** ADR-266 : les erreurs de S609 et S639–S655, rangées en six familles ; les cinq contrôles que chaque plan porte
+désormais, dans un bloc **Contrôles du plan** — (1) les causes candidates et le **témoin** qui en supprime une, avant tout remède ; (2)
+l'**instrument** et le comparant éprouvés sur un cas connu ; (3) les nombres **calculés** ; (4) les **ADR** qui nomment celui qu'on
+applique, lus ; (5) les **pièges** connus du domaine, nommés. **Le rituel le vérifie** : à partir de S657, `rituel.py fin` refuse un plan
+sans le bloc ou sans l'un des cinq mots (« sans objet » se dit, il ne s'omet pas).
 
-**Critères, écrits avant.** (1) Sous le rouleau (le montage de S653), la vitesse au plus du corps libre à 10 et à 5 ms **à 20 % l'une de
-l'autre**, et chacune au plus la vitesse de l'eau de la colonne ; le corps emporté de plus de 0,5 m ; la masse au bit. (2) La flottaison de
-S653 tient toujours (le centre à 2 cm du niveau ; aucune croissance). (3) Les essais d'APIC 3D passent.
+**Critères, écrits avant.** (1) ADR-266 ; (2) la vérification dans `rituel.py`, éprouvée sur trois textes : un plan complet (accepté), un
+plan sans le bloc (refusé), un plan où manque « pièges » (refusé) ; (3) la règle dans `notes/METHODE.md` ; (4) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la masse ajoutée ; les deux pas en parallèle ; (1)–(3).
-- [x] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
+- [ ] **P2** — ADR-266 ; le contrôle du rituel et son épreuve ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) à moitié : 1,87 (10 ms) contre 2,32 (5 ms), 19–24 % ; à 5 ms au-dessus de la sonde (1,50) — manqué ; la sonde restait
-  à la position de départ du corps (un comparant non éprouvé) ; (2) tenu, la flottaison sous 1 cm/s (le critère de S653 tenu en entier) ;
-  (3) tenu. L'utilisateur : « Les erreurs que tu réalises viennent d'où ? », puis « Corrige et apprend de tes erreurs » — la mémoire
-  persistante écrite ; l'ADR en S656.
