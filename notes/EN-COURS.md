@@ -71,13 +71,15 @@ les particules qui y entrent sont repoussées au-dessus (sans vitesse descendant
 particules sous le fond, comme les parois (S389) et la sphère (S393). Le réglage alloue, le pas non. Ne fait pas : les faces coupées (un
 fond lisse), la vague (étape 2).
 
-**Références, calculées avant** (ce script). Un canal de 48 × 4 × 16 mailles de 5 cm (2,4 × 0,2 × 0,8 m) ; fond plat à 5 cm jusqu'à 0,8 m puis
-pente 1:3 ; eau au repos à 0,4 m — le rivage à **1.850 m**. **860 mailles solides** ; **5984 particules** posées (au-dessus de
-l'escalier, sous le niveau). Le témoin : le même canal à fond plat (5 cm), 10752 particules. **Bornes du montage** (ADR-257 D1, assertées) :
+**Références, calculées avant** (ce script). Un canal de 48 × 4 × 16 mailles de 5 cm (2,4 × 0,2 × 0,8 m) ; fond plat à 5 cm jusqu'à 0,805 m puis
+pente 1:3 ; eau au repos à 0,4 m — le rivage à **1.855 m**. **852 mailles solides** ; **6048 particules** posées (au-dessus de
+l'escalier, sous le niveau). **Amendement, avant toute mesure de repos** : la pente partait de 0,8 m, où `(k + ½)·dx = fond(x)`
+exactement pour `i = 3k + 14` — f32 et f64 tranchaient ces égalités différemment (6 016 particules contre 5 984) ; à 0,805 m, aucune
+égalité (asserté, ADR-257 D1). Le témoin : le même canal à fond plat (5 cm), 10752 particules. **Bornes du montage** (ADR-257 D1, assertées) :
 le rivage dans le domaine, le fond sous le couvercle.
 
-**Quantum** : la maille (5 cm) ; la vitesse en f32. **Critères, écrits avant** — ceux du repos de S388 et S393. (1) 860 mailles solides,
-5984 particules, aucune perdue en 2 s, aucune sous le fond de sa colonne ; (2) la vitesse parasite ≤ 1 cm/s sur 2 s ; (3) le témoin à fond
+**Quantum** : la maille (5 cm) ; la vitesse en f32. **Critères, écrits avant** — ceux du repos de S388 et S393. (1) 852 mailles solides,
+6048 particules, aucune perdue en 2 s, aucune sous le fond de sa colonne ; (2) la vitesse parasite ≤ 1 cm/s sur 2 s ; (3) le témoin à fond
 plat, ≤ 1 cm/s ; (4) refus : une longueur fausse, une valeur non finie ou hors de [0, hauteur du domaine].
 
 ### Plan
