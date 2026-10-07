@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 07:22 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 07:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S616 — la vingt-septième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S615 — les grandes formes cohérentes entre clients, les détails locaux libres ([journal](notes/JOURNAL.md)). Avant : S614 (le lot)
 Session suivante : **S616 — la vingt-septième revue de méthode** (ADR-222 D4 ; S611–S615), puis la suite (ADR-247 ; restent 5 absents : 7.8 à la fin, 9.10 et 11.5 le matériel, 13.4 le jeu). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 1 — S615 : 10.5 absent → partiel

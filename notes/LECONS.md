@@ -6706,3 +6706,14 @@ nombre de preuve se mesure (ADR-252 D1).
 **S608, S610 — la phrase non assertée.** Le plan de S608 disait « la cellule de B » quand son script en comptait deux ; celui de S610
 promettait une réallocation que le déplacement choisi ne provoquait pas (86 blocs avant et après). Les deux vues en lisant la sortie,
 avant le commit ; une assertion dans le script les aurait refusées seule (ADR-253 D1).
+
+## L413
+
+**S613 — le garde-fou que la référence ignorait.** Le plan promettait un refus au-delà de Courant ½ ; son script ne calculait pas le
+Courant de sa propre référence, qui montait à 0,60 dans une maille presque sèche. Le code a refusé le pas ; le plan a été amendé avant
+la mesure. Une borne du code se mesure d'abord sur la référence (ADR-254 D1).
+
+## L414
+
+**S613–S614 — les murs jamais mouillés.** Le module de S613 annonçait des murs ; ses deux cas avaient des bords secs, et les murs
+n'exerçaient aucune pression. S614, à bord mouillé, a divergé. Une propriété écrite s'éprouve par un cas (ADR-254 D2).

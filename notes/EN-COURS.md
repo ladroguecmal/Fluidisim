@@ -62,32 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S615 — **terminée**. En autonomie (ADR-247) : **10.5 — les grandes formes cohérentes entre clients, les détails locaux libres**
-(absent). δ n'est jamais le même d'un client à l'autre (SPEC-003 : jamais D1 ; une autre maille, d'autres détails semés localement). La
-grande forme passe à W, répliqué, au-delà d'une coupure `λ_cut` (B2, ADR-001) ; le reste demeure local et libre.
+Session : S616 — **terminée**. En autonomie, **la vingt-septième revue de méthode** (ADR-222 D4 ; S611–S615).
 
-**Ce que la session fait.** Un module `coherence_clients.rs` : `filtre_gaussien(profil, dx, σ)` — la coupure passe-bas (noyau tronqué à 4σ,
-normalisé) ; `transduire_coupe(domaine, σ)` — la transduction de S612 sur la seule part passe-bas de δ (`η` et `ū` filtrés), le reste
-laissé au client. Ne fait pas : le 2D/3D, le choix de `λ_cut` par la physique (ici `σ` = 1 m), l'autorité de l'émission de W (qui émet
-l'événement répliqué : 10.1), le transport.
-
-**Références, calculées avant** (`s615_ref.py`, numpy). La même cause — une bosse de 5 cm — chez deux clients : **A** (maille 0,5 m, pas de
-détail) et **B** (maille 0,25 m, des rides locales de 1 mm à 1 m de longueur d'onde sur 40 m, semées par le client). À 5 s, la coupure
-(`σ` = 1 m) puis la transduction. À **15 s**, les W des deux clients diffèrent de **1.116420231e-04 m** pour une crête de 0.024016 m
-(0.465 %) ; leurs restes locaux à 5 s diffèrent de **4.328374884e-04 m** — les détails sont libres ; les rides
-fuient dans W de **2.734537962e-05 m** (2.73 % de leur amplitude, par les bords de la zone ridée) ; **sans coupure**, les
-deux W diffèrent de **4.335598843e-04 m** (3.9 fois plus).
-
-**Quantum** : f64. **Critères, écrits avant.** (1) l'écart des W à 15 s égal à la référence à 10⁻⁹ m, sous 1 % de la crête ; (2) l'écart des
-restes égal à la référence à 10⁻⁹ m, au-dessus de 0,25 mm ; (3) la fuite des rides égale à la référence à 10⁻⁹ m, sous 5 % de leur amplitude ;
-(4) sans coupure, l'écart des W égal à la référence à 10⁻⁹ m, plus de trois fois celui avec coupure ; (5) refus : `σ` ou `dx` non positifs.
+**Ce que la session fait.** Relu : S611 (la revue, le lot), S612 (4.20), S613 (4.14 : un garde-fou que la référence ignorait), S614 (11.3 :
+les murs de S613, jamais mouillés), S615 (10.5). **ADR-254** : D1, D2 ; L413, L414 ; METHODE (trente-cinq règles) ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `coherence_clients.rs` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; liste 10.5 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-254, METHODE, L413–L414, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(5) tenus du premier essai. Suite : 804 essais listés.
-- **P3** — preuve COHERENCE-CLIENTS-S615 ; liste 10.5 (absent → partiel) et décompte ; index ; journal.

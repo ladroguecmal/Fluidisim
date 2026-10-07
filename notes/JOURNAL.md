@@ -1201,3 +1201,10 @@ Maillons **1** (11.3 : absent → partiel). Suivant : **S615**, un point absent.
 la coupure passe-bas, la transduction de la seule part longue de δ. **Mesuré** contre numpy : deux clients (maille 0,5 m sans détail ;
 0,25 m avec des rides semées localement) ; leurs W à 0,46 % de la crête l'un de l'autre, leurs restes à 0,43 mm ; sans coupure, l'écart des W
 quadruple. Maillons **1** (10.5 : absent → partiel ; la section 10 n'a plus d'absent). Suivant : **S616**, la revue de méthode.
+
+## S616 — 2026-10-07 — la vingt-septième revue de méthode (ADR-254)
+
+**Entrée.** En autonomie ; revue due. **Frictions** : un garde-fou du code que la référence du plan n'avait pas mesuré (S613, Courant 0,60)
+— **élargie** (ADR-254 D1, L413) ; une propriété documentée qu'aucun cas n'éprouvait (les murs de S613, faux à bord mouillé, S614) —
+**ajoutée** (D2, L414). Ont tenu : les implémentations indépendantes, les phrases assertées, la suite mesurée. Maillons **1**. Suivant :
+**S617**, le lot et la suite (restent 5 absents : 7.8, 9.10, 11.5, 13.4 — et la physique des partiels).
