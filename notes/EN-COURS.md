@@ -62,14 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S601 — **terminée**. En autonomie, **la vingt-quatrième revue de méthode** (ADR-222 D4 ; S596–S600).
+Session : S602 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S599–S601), puis **9.4 — les objets contrôlables :
+paliers de confiance ; confiance réduite par le jeu** (absent). Les paliers d'ADR-013 §2 existent (`ballistic::tier`, S405, pour 9.3) ;
+manque ce qui est propre aux objets contrôlables.
 
-**Ce que la session fait.** Relu : S596 (la revue), S597 (les microbulles), S598 (un compte promis), S599 (une attente hors du plan), S600
-(la réserve). **ADR-251** : D1 ; L410 ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** Dans `ballistic.rs` : `Confiance { facteur_jeu }` — le jeu réduit la confiance en multipliant la capacité de
+manœuvre (`a_max` effectif = `a_max·facteur`, `facteur ≥ 1` : un pilote erratique, une perte de contrôle annoncée) ; `horizon_utile(a_max, R,
+confiance)` = `√(2R/a_max_effectif)` ; `palier_controlable(t, a_max, R, confiance)` — le palier d'ADR-013 sous la confiance réduite ;
+`reevaluation_s(palier)` — T4 réévalué à 2 Hz (0,5 s), les autres à chaque tick. Ne fait pas : la source des facteurs (le jeu), la table des
+`a_max` par archétype (ADR-013 §8.2 : l'équipe véhicules), l'hystérésis entre paliers.
+
+**Références, calculées avant** (ce script les écrit et vérifie la table d'ADR-013 au dixième). Horizons : avion de chasse **1.414214 s**
+(1,4), avion en perte de contrôle **3.651484 s** (3,7), vaisseau lourd **4.898979 s** (4,9). Le vaisseau lourd à 4 s de
+l'impact : l'enveloppe 40 m ≤ 60 m → **T2** ; le jeu divise la confiance par deux (facteur 2) : 80 m > 60 m → **T3**, l'horizon
+tombé à **3.464102 s**.
+
+**Quantum** : f64 ; des paliers (des valeurs discrètes). **Critères, écrits avant.** (1) les trois horizons à 10⁻¹² ; (2) les deux paliers ;
+un facteur 1 rend le palier de `tier` au bit, sur une grille de 200 cas ; (3) la réévaluation : 0,5 s en T4, le tick ailleurs ; (4) refus :
+un facteur sous 1 ou non fini.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-251, METHODE, L410, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `Confiance` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 9.4 ; rituel (`--lot`).
 
 ### Notes de reprise
