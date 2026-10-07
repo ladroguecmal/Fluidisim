@@ -148,3 +148,9 @@ ancre et un plan tangent.
 ## Note datée du 2026-10-07 (S642)
 
 §2.4 : la cube-sphère n'est plus retenue d'avance — HEALPix (celui de DyingStar) ou cube-sphère se tranche par une étude mesurée, performance et résultat ([ADR-261](ADR-261-reponses-du-2026-10-07.md) D2).
+
+## Note datée du 2026-10-07 (S649)
+
+§2.4 : tranché par [ADR-264](ADR-264-le-decoupage-de-la-planete.md) — HEALPix, celui du terrain de DyingStar, découpe et indexe les données
+planétaires de l'eau ; le calcul reste dans des référentiels locaux ; un modèle global hors ligne peut calculer sur une cube-sphère et cuire
+en HEALPix.

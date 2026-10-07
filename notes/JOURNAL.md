@@ -1462,3 +1462,12 @@ sur une cavité posée (48 mailles, 48 lues) ; l'onde de S647 suivie au-delà du
 0,18 s après le retournement et 0,39 m en avant (le jet a retombé), 3,3 L sur 10 cm de large, vivant 1,18 s ; rien sur la pente 1:3 ;
 masse exacte. Non jugé : la quantité d'air (rien de publié relu ; +50 % de 5 à 2,5 cm). Maillons **1** (4.14, 4.16 avancent). Suivant :
 **S649, le découpage de la planète** (ADR-261 D2 : mesuré pendant S648, HEALPix contre cube-sphère).
+
+## S649 — 2026-10-07 — le découpage de la planète (ADR-264)
+
+**Entrée.** La décision déléguée par l'utilisateur (ADR-261 D2, « le plus puissant »). **Fait** :
+[ADR-264](../docs/adr/ADR-264-le-decoupage-de-la-planete.md) — mesuré (`outils/decoupage_planete.py`, ~49 000 cellules) : HEALPix aires
+égales à 0,2 %, cellules moins bien formées (53°) ; cube-sphère équiangulaire mieux formée (61°), aires à 40 %. **Décidé** : HEALPix
+découpe et indexe les données planétaires de l'eau, tuile pour tuile avec le terrain de DyingStar ; le calcul reste en grilles locales ;
+un modèle global hors ligne peut calculer en cube-sphère et cuire en HEALPix. Déclaré : la mesure faite pendant S648, rejouée. Maillons
+**2**. Suivant : **S650, le rouleau, étape 4 — le relais 2D → 3D**.

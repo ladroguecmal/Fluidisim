@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S649 — **en cours**. Décision technique déléguée par l'utilisateur (ADR-261 D2 : *« le plus puissant, niveau performance et
+Session : S649 — **terminée**. Décision technique déléguée par l'utilisateur (ADR-261 D2 : *« le plus puissant, niveau performance et
 résultat final »*) : **HEALPix (celui de DyingStar) ou la cube-sphère** pour découper la planète.
 
 **Déclaré** : la mesure a été faite pendant l'attente du calcul de S648 (le script dans le carnet de la session). Elle est versée ici
@@ -80,7 +80,10 @@ près ; (5) l'ADR, les points touchés (1.5, 7.7, 11.1, 12.3, 12.4), la note dat
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le script ; ADR-264 ; la liste.
+- [x] **P2** — le script ; ADR-264 ; la liste.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — (4) rejoué : les mêmes nombres (HEALPix aires 1,002, angle 53° ; cube-sphère équiangulaire 1,402, 61°) ; (1) et (2)
+  désignent HEALPix ; (3) aucun solveur ne calcule sur les tuiles — la forme ne départage pas ; (5) ADR-264, 1.5, 7.7, 11.1, 12.3, 12.4,
+  note dans ADR-002. Le script : `outils/decoupage_planete.py` (`calculs/` n'est pas versionné).

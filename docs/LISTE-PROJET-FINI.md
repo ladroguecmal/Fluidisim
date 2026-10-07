@@ -86,7 +86,8 @@ pas recopiée ici (L137).
   rebasage), parents, enfants, voisins ; les zones actives d'intérêts mobiles ; l'échange par écart, encodé, que le client rejoue au bit
   ([preuve](validation/HYDROGRID-S607.md)). Manquent la subdivision de publication par type (R07), le routage de W, l'index de V, la
   pertinence réseau. **S643** ([réévaluation](registres/REEVALUATION-INTENTIONS-S643.md)) : sur la planète, la grille fixe devient un index hiérarchique sphérique (HEALPix ou cube-sphère,
-  l'étude d'ADR-261 D2), les calculs dans des référentiels locaux.
+  l'étude d'ADR-261 D2), les calculs dans des référentiels locaux. **S649** : HEALPix, celui du terrain de DyingStar, découpe et indexe les données planétaires de l'eau ; le calcul reste en
+  grilles locales ([ADR-264](adr/ADR-264-le-decoupage-de-la-planete.md)).
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *partiel* depuis S608 : les cinq niveaux de la
   source (inactive, simplifiée, partielle, active, détail) lus sur la HydroGrid ; un domaine non aligné couvre chaque cellule d'un volume
   exact, conservé à travers le découpage ; le détail dit la précision du solveur, non la subdivision ([preuve](validation/ACTIVITE-S608.md)).
@@ -689,7 +690,7 @@ pas recopiée ici (L137).
   ([preuve](validation/TRAVERSABILITE-AGENTS-S573.md)) ; **S574 : la glace porteuse** — `ice_h`, `ice_capacity_kg` (Gold), l'échéance où
   elle portera une charge ([preuve](validation/GLACE-S574.md)) ; **S577 : la marée de B** prévoit les gués
   ([preuve](validation/MAREE-S577.md)). Manquent la température, la source réelle des échantillons (B, W, V répliqués), le danger dans un
-  courant qui varie. Manque aussi la visibilité sous l'eau publiée pour l'IA (ADR-018 §7.4, [audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.15).
+  courant qui varie. Manque aussi la visibilité sous l'eau publiée pour l'IA (ADR-018 §7.4, [audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.15). **S649** : les tuiles publiées sont des tuiles HEALPix ([ADR-264](adr/ADR-264-le-decoupage-de-la-planete.md)).
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
   DyingStar (ADR-219). Ce qu'ADR-016 et SPEC-006 §4.2–4.3 en attendent ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.14) : trois fonds sonores et un flux d'événements, le
   délai du son, la coupure presque totale sous l'eau, l'effet des bulles, le son du remplissage, les champs audio de `WaveEvent`, la pluie.
@@ -903,7 +904,8 @@ pas recopiée ici (L137).
 ## 11. Grande échelle et très grands événements
 
 - [ ] **11.1 Monde planétaire** : planète sphérique, coordonnées lointaines, référentiels multiples
-  (ADR-002) — *partiel* : positions monde entières et ancres. Pas de sphère. Le découpage de la planète, HEALPix ou cube-sphère, se tranche par une étude mesurée — performance et résultat ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D2).
+  (ADR-002) — *partiel* : positions monde entières et ancres. Pas de sphère. Le découpage de la planète, HEALPix ou cube-sphère, se tranche par une étude mesurée — performance et résultat ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D2). **S649** : tranché — HEALPix pour les données (aires égales à 0,2 %, la clé du terrain), des référentiels locaux pour le calcul
+  ([ADR-264](adr/ADR-264-le-decoupage-de-la-planete.md)).
 - [ ] **11.2 Nombreuses régions de mer décrites par descripteur**, transitions par paramètres (I-09) — *partiel* depuis S594 : le
   **descripteur** (Hs, niveau moyen), les poids en partition de l'unité, la mer de B mise à l'échelle du paramètre local — la hauteur gardée
   dans la transition (2,0009 m pour 2), quand le mélange des champs la perd (21 % en moyenne sur 800 couples, 32 % pour un couple)
@@ -943,13 +945,13 @@ pas recopiée ici (L137).
 - [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *partiel* depuis S599 : **la bibliothèque d'une plage** — seize états en `f16`
   (1 228 800 octets, la taille de SPEC-005), la polyligne de chacun, la recherche par paramètres (I-09), l'empreinte qui dit l'obsolescence
   ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D3** : le précalcul partout où il y a un rivage, procédural ou à la demande — non une cinquantaine de plages
-  placées à la main.
+  placées à la main. **S649** : indexé par la tuile de terrain HEALPix ([ADR-264](adr/ADR-264-le-decoupage-de-la-planete.md)).
 - [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *partiel* depuis S605 : le géoïde dans l'outil (le plan tangent d'une ancre ↔ l'altitude, sans
   perte au rayon de la planète ; la table de SPEC-005 §4), le terrain gravé pour le squelette — l'étape 2 de l'ordre imposé, les biefs
   jamais modifiés ; un lit à 30 km placé à 10⁻¹⁴ m, là où un outil à plan tangent le mettrait 70,7 m trop haut
   ([preuve](validation/GEOIDE-S605.md)). Manquent l'anomalie et la marée du niveau moyen, la côte du squelette, l'étape 3. **Depuis S476**
   (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D1** : l'ordre s'inverse — le relief d'abord, l'eau placée ensuite (mers, océans, rivières), le relief recalculé
-  à sa proximité ; l'outil d'édition de planète complet viendra plus tard.
+  à sa proximité ; l'outil d'édition de planète complet viendra plus tard. **S649** : la bathymétrie et le rivage lus dans la même tuile HEALPix que le relief ([ADR-264](adr/ADR-264-le-decoupage-de-la-planete.md)).
 - [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *partiel* depuis S603 : **la bathymétrie** — l'isobathe
   limite `h = λ` (ADR-196 D3), le faisceau de rayons de houle (dispersion complète), les plages à recuire : aucune sous l'isobathe limite
   (une bosse sous 107 m : 6 cm d'arrivée), trois plages sur huit intactes pour une bosse côtière ; la règle `λ/2` aurait manqué une bosse
