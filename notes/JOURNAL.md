@@ -1293,3 +1293,11 @@ des partiels.
 un essai de deux ruptures de barrage analytiques sur l'ordre deux. **Mesuré** : Stoker et Ritter convergent à l'ordre un attendu aux chocs
 (3,7·10⁻³ → 8,6·10⁻⁴ ; 6,7·10⁻³ → 1,7·10⁻³), le front sec s'approche de sa position exacte ; la tolérance d'accord avec numpy posée sur la
 sensibilité mesurée (ADR-256 D1, première application). Maillons **1** (4.14 avance ; C04 en 2D). Suivant : **S628**.
+
+## S628 — 2026-10-07 — le frottement de Manning et le bord droit
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 4.14, le frottement. **Fait** ([preuve](../docs/validation/FROTTEMENT-S628.md)) :
+`regler_frottement` (semi-implicite), `pas_avec_bords` (le bord droit caractéristique). **Mesuré** contre numpy : un écoulement freiné à
+l'exacte (le schéma l'est pour cette équation : le coefficient est vérifié) ; l'écoulement uniforme sur pente converge vers la hauteur
+normale (−1,8·10⁻⁴ → −4,6·10⁻⁵), celle de S604 à 10⁻⁶ près. Maillons **1** (4.14 avance). Suivant : **S629**, le lot et la physique des
+partiels.

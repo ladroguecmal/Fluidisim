@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S628 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **4.14 — le frottement** (un manque depuis S613), et le lien
+Session : S628 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **4.14 — le frottement** (un manque depuis S613), et le lien
 avec l'éditeur de rivières (S604) : la hauteur normale de Manning.
 
 **Ce que la session fait.** `SaintVenant2D::regler_frottement(n)` : le frottement de Manning, appliqué semi-implicitement après le pas,
@@ -88,7 +88,9 @@ change) ; (5) refus : `n` négatif ou non fini ; le bord droit à l'ordre un.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le frottement, le bord droit, leurs essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P2** — le frottement, le bord droit, leurs essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus du premier essai ; les 30 essais S6xx passent. Suite : 814 essais listés.
+- **P3** — preuve FROTTEMENT-S628 ; ligne 4.14 ; index ; journal.
