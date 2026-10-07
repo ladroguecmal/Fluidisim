@@ -62,14 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S596 — **terminée**. En autonomie, **la vingt-troisième revue de méthode** (ADR-222 D4 ; S591–S595) et **le lot** (dû).
+Session : S597 — **en cours**. En autonomie (ADR-247), **7.3 — les microbulles visuelles** (absent).
 
-**Ce que la session fait.** Relu : S591 (la revue), S592 (Manning), S593 (la rivière ; un essai de 65 s), S594 (les régions ; un tirage
-unique), S595 (la goutte). **ADR-250** : D1 ; L409 ; METHODE ; BOUSSOLE ; index. Le lot : feuille de route S593–S596.
+**Ce que la session fait.** `microbulles.rs` : un **nuage** laissé par un déferlement — des classes de diamètre, `N` bulles par m² chacune,
+réparties uniformément sur une profondeur `D` ; chaque classe remonte à sa vitesse terminale (`bulle::vitesse_terminale`, Tomiyama, S540) ;
+la **fraction restante** d'une classe `max(0, 1 − v·t/D)` ; l'**épaisseur optique** `τ = Σ N·2·π·r²·fraction` (l'extinction géométrique,
+`Q_ext` = 2) ; l'**opacité** `1 − e^(−τ)` — ce que le rendu blanchit. Ne fait pas : la dissolution des bulles, l'émission (combien et de
+quelles tailles un déferlement en fait), la turbulence qui les retient, le rendu.
+
+**Références, calculées avant** (ce script les écrit et vérifie la taille d'ensemble, ADR-250 D1). Pour situer (Stokes) : 50, 100, 200 µm
+remontent à **1.36, 5.44, 21.77 mm/s** ; un mètre se vide en 735, 184, 46 s. La
+référence de l'essai : la fraction analytique `max(0, 1 − v_t·t/D)` avec la vitesse terminale de Tomiyama, aux instants [10, 30, 60, 120] s.
+
+**Quantum** (ADR-236, ADR-250) : une population de 10000 bulles par classe (profondeurs uniformes par une suite déterministe), intégrées
+une à une par `Bulle::pas` (le transitoire et la traînée implicite) ; l'écart-type d'une fraction ≤ 0,5/√N = 0.005.
+**Critères, écrits avant.** (1) la fraction submergée de chaque classe à 0.05 près de l'analytique, aux quatre instants ; (2) `τ(0)` égal
+à `Σ N·2·π·r²` à 10⁻¹² relatif, l'opacité décroissante ; (3) refus : diamètre, nombre ou profondeur non positifs.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-250, METHODE, L409, BOUSSOLE, index) ; le lot.
-- [x] **P2** — rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `microbulles.rs` et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 7.3 ; rituel.
 
 ### Notes de reprise
