@@ -71,6 +71,8 @@ pub mod regions;
 pub mod goutte;
 /// S597 — le nuage de microbulles (liste 7.3).
 pub mod microbulles;
+/// S598 — la profondeur adaptative : la descente d'un objet, l'enveloppe de son domaine (liste 4.4).
+pub mod coule;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
