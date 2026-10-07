@@ -216,6 +216,44 @@ impl<'a> CarteCotidale<'a> {
         }
         Ok(c)
     }
+
+    /// **S634 — le courant de marée avec frottement et Coriolis**, m/s : pour chaque composante, la solution harmonique établie de
+    /// `∂u/∂t + r·u − f·v = −g·∂η/∂x`, `∂v/∂t + r·v + f·u = −g·∂η/∂y` (`f` le paramètre de Coriolis, `r` le frottement linéarisé, s⁻¹) —
+    /// avec `a = iω + r` et `G` le gradient complexe de l'interpolation (celui de [`Self::courant`]) : `U = −g·(a·Gx + f·Gy)/(a² + f²)`,
+    /// `V = −g·(a·Gy − f·Gx)/(a² + f²)`, `u = Re U·cos ωt − Im U·sin ωt`. `f` = `r` = 0 redonne `courant`. Refus : hors de la grille, `g`
+    /// non positif, `r` négatif, une valeur non finie.
+    pub fn courant_amorti(&self, x: f64, y: f64, t: SimTime, g: f32, f: f32, r: f32) -> Result<[f32; 2], Refus> {
+        if !(g > 0.0) || !g.is_finite() || !(r >= 0.0) || !r.is_finite() || !f.is_finite() {
+            return Err(Refus);
+        }
+        self.niveau(x, y, t)?;
+        let (u, v) = ((x - self.origine[0]) / self.pas_m, (y - self.origine[1]) / self.pas_m);
+        let (i, j) = ((u as usize).min(self.nx - 2), (v as usize).min(self.ny - 2));
+        let (fx, fy) = ((u - i as f64) as f32, (v - j as f64) as f32);
+        let pas = self.pas_m as f32;
+        let mul = |p: [f32; 2], q: [f32; 2]| [p[0] * q[0] - p[1] * q[1], p[0] * q[1] + p[1] * q[0]];
+        let mut c = [0.0f32; 2];
+        for k in 0..self.n {
+            let base = k * self.nx * self.ny;
+            let at = |ii: usize, jj: usize| self.h[base + jj * self.nx + ii];
+            let (pa, pb, pc, pd) = (at(i, j), at(i + 1, j), at(i, j + 1), at(i + 1, j + 1));
+            let gx = |n: usize| ((pb[n] - pa[n]) * (1.0 - fy) + (pd[n] - pc[n]) * fy) / pas;
+            let gy = |n: usize| ((pc[n] - pa[n]) * (1.0 - fx) + (pd[n] - pb[n]) * fx) / pas;
+            let (gxc, gyc) = ([gx(0), gx(1)], [gy(0), gy(1)]);
+            let a = [r, pulsation(self.frequences_q32[k])];
+            let aa = mul(a, a);
+            let d = [aa[0] + f * f, aa[1]];
+            let (nu, nv) = (mul(a, gxc), mul(a, gyc));
+            let (nu, nv) = ([nu[0] + f * gyc[0], nu[1] + f * gyc[1]], [nv[0] - f * gxc[0], nv[1] - f * gxc[1]]);
+            let dd = d[0] * d[0] + d[1] * d[1];
+            let div = |n: [f32; 2]| [-g * (n[0] * d[0] + n[1] * d[1]) / dd, -g * (n[1] * d[0] - n[0] * d[1]) / dd];
+            let (uc, vc) = (div(nu), div(nv));
+            let (s, co) = PhaseQ32::from_time(self.frequences_q32[k], t).sin_cos();
+            c[0] += uc[0] * co - uc[1] * s;
+            c[1] += vc[0] * co - vc[1] * s;
+        }
+        Ok(c)
+    }
 }
 
 /// **S580 — le courant de marée dans l'échantillon de B** : ajouté à la vitesse horizontale `u_total[0..2]` ; le reste inchangé.

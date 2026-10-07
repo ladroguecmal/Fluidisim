@@ -212,3 +212,68 @@ fn the_tidal_current_follows_the_progressive_wave_s580() {
         "critère 3 : le reste au bit");
     assert_eq!(carte.courant(-1.0, 0.0, SimTime(0), 9.81), Err(Refus), "critère 4");
 }
+
+/// **S634** — (1) contre S580 ; (2) contre une intégration RK4 ; (3) l'atténuation ; (4) l'ellipse ; (5) refus.
+#[test]
+fn tidal_current_with_friction_and_coriolis_matches_its_integration_s634() {
+    let m2 = 12.4206012f64;
+    let k = 2.0 * core::f64::consts::PI / 400_000.0;
+    let mut h = Vec::new();
+    for _j in 0..3 {
+        for i in 0..3 {
+            let x = 10_000.0 * i as f64;
+            h.push([(k * x).cos() as f32, -(k * x).sin() as f32]);
+        }
+    }
+    let carte = CarteCotidale::new(&[m2], [0.0, 0.0], 10_000.0, 3, 3, &h, 0.0).unwrap();
+    let (x, y, g) = (13_000.0, 7_000.0, 9.81f32);
+    let st = |t: f64| SimTime((t * 1e6).round() as u64);
+    let periode = m2 * 3600.0;
+
+    let mut pire0 = 0.0f32;
+    for n in 0..200 {
+        let t = st(n as f64 * periode / 200.0);
+        let (a, b) = (carte.courant(x, y, t, g).unwrap(), carte.courant_amorti(x, y, t, g, 0.0, 0.0).unwrap());
+        pire0 = pire0.max((a[0] - b[0]).abs()).max((a[1] - b[1]).abs());
+    }
+    println!("S634 : f = r = 0, écart à S580 {pire0:e} m/s");
+    assert!(pire0 < 1e-6, "critère 1");
+
+    let (f, r) = (1e-4f64, 1e-4f64);
+    let u0 = |t: f64| { let c = carte.courant(x, y, st(t), g).unwrap(); [c[0] as f64, c[1] as f64] };
+    let deriv = |t: f64, w: [f64; 2]| { let b = u0(t); let (u, v) = (b[0] + w[0], b[1] + w[1]); [-r * u + f * v, -r * v - f * u] };
+    let (dt, npas) = (60.0, 14_400usize);
+    let mut w = { let b = u0(0.0); [-b[0], -b[1]] };
+    let mut pire = 0.0f64;
+    for n in 0..npas {
+        let t = n as f64 * dt;
+        let k1 = deriv(t, w);
+        let k2 = deriv(t + dt / 2.0, [w[0] + dt / 2.0 * k1[0], w[1] + dt / 2.0 * k1[1]]);
+        let k3 = deriv(t + dt / 2.0, [w[0] + dt / 2.0 * k2[0], w[1] + dt / 2.0 * k2[1]]);
+        let k4 = deriv(t + dt, [w[0] + dt * k3[0], w[1] + dt * k3[1]]);
+        for c in 0..2 {
+            w[c] += dt / 6.0 * (k1[c] + 2.0 * k2[c] + 2.0 * k3[c] + k4[c]);
+        }
+        let t1 = t + dt;
+        if t1 >= npas as f64 * dt - periode {
+            let a = carte.courant_amorti(x, y, st(t1), g, f as f32, r as f32).unwrap();
+            let b = u0(t1);
+            pire = pire.max((b[0] + w[0] - a[0] as f64).abs()).max((b[1] + w[1] - a[1] as f64).abs());
+        }
+    }
+    println!("S634 : contre l'intégration RK4, écart max sur la dernière période {pire:e} m/s");
+    assert!(pire < 1e-6, "critère 2");
+
+    let maxi = |ff: f32, rr: f32, axe: usize| (0..1000).map(|n| {
+        let t = st(5.0 * 86_400.0 + n as f64 * periode / 1000.0);
+        carte.courant_amorti(x, y, t, g, ff, rr).unwrap()[axe].abs()
+    }).fold(0.0f32, f32::max) as f64;
+    let att = maxi(0.0, 1e-4, 0) / maxi(0.0, 0.0, 0);
+    let ell = maxi(1e-4, 0.0, 1) / maxi(1e-4, 0.0, 0);
+    println!("S634 : atténuation {att} (attendue 0,814749) ; ellipse {ell} (attendue 0,711648)");
+    assert!((att - 0.8147486702618919).abs() < 1e-4, "critère 3");
+    assert!((ell - 0.7116480277751258).abs() < 1e-4, "critère 4");
+
+    assert_eq!(carte.courant_amorti(x, y, st(0.0), g, 0.0, -1e-4), Err(Refus), "critère 5 : r");
+    assert_eq!(carte.courant_amorti(x, y, st(0.0), 0.0, 0.0, 0.0), Err(Refus), "critère 5 : g");
+}
