@@ -62,28 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S638 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S635–S637), puis **5.10 — le
-cycle de vie de δ attaché à V** (un manque de S637 : « la destruction de δ quand V se calme »).
+Session : S639 — **en cours**. En autonomie (ADR-247), sur la demande de l'utilisateur (2026-10-07 : « reprend avec 1 », le plan du **rouleau
+3D** en cinq étapes, accepté : « Ok très bien »). **Étape 1 — le fond en pente dans APIC 3D, au repos** (4.14, 4.16).
 
-**Ce que la session fait.** `articulation::Vie` : à chaque pas de V, le changement de surface contre le dernier état publié (S564) — significatif :
-publier, remettre le calme à zéro, et faire **naître** δ s'il n'existe pas ; sinon, compter le calme, et faire **mourir** δ après `calme_requis`
-pas (l'hystérésis d'ADR-022 §2.6 : une fenêtre au moins égale au retour d'équilibre, ici 3 τ). Ne fait pas : le coût de restauration
-d'un δ substitutif dans la fenêtre (ADR-022), plusieurs δ sur un nœud.
+**Ce que la session fait.** `Apic3::set_seabed(fond)` : une hauteur de fond par colonne, mise en **escalier** (les mailles dont le centre est
+sous le fond deviennent solides : `SOLID`, comme la sphère de S393) ; à chaque pas, les faces qui touchent le fond sont des parois immobiles,
+les particules qui y entrent sont repoussées au-dessus (sans vitesse descendante), et la reconstruction de la surface **reflète** les
+particules sous le fond, comme les parois (S389) et la sphère (S393). Le réglage alloue, le pas non. Ne fait pas : les faces coupées (un
+fond lisse), la vague (étape 2).
 
-**Références, calculées avant** (ce script). La piscine de S637, le robinet ouvert 50 pas (5 s) puis fermé, le seuil de 500 µm, le calme requis
-**30 pas** (3 s ≥ 3 τ). Publications aux pas **[13, 26, 39]** ; δ naît au pas **13** et meurt au pas **69** ; son retard de
-masse à la mort : **2.382232398e-03 m³**. **Bornes du montage** (ADR-257 D1, assertées) : la mort tient dans la fenêtre de 200 pas ; le calme
-couvre trois τ.
+**Références, calculées avant** (ce script). Un canal de 48 × 4 × 16 mailles de 5 cm (2,4 × 0,2 × 0,8 m) ; fond plat à 5 cm jusqu'à 0,8 m puis
+pente 1:3 ; eau au repos à 0,4 m — le rivage à **1.850 m**. **860 mailles solides** ; **5984 particules** posées (au-dessus de
+l'escalier, sous le niveau). Le témoin : le même canal à fond plat (5 cm), 10752 particules. **Bornes du montage** (ADR-257 D1, assertées) :
+le rivage dans le domaine, le fond sous le couvercle.
 
-**Quantum** : le pas de V. **Critères, écrits avant.** (1) les publications [13, 26, 39], une naissance au pas 13, une mort au pas
-69 ; (2) le retard de masse de δ à sa mort égal à la référence à 10⁻⁹ m³ ; (3) refus : un calme requis nul.
+**Quantum** : la maille (5 cm) ; la vitesse en f32. **Critères, écrits avant** — ceux du repos de S388 et S393. (1) 860 mailles solides,
+5984 particules, aucune perdue en 2 s, aucune sous le fond de sa colonne ; (2) la vitesse parasite ≤ 1 cm/s sur 2 s ; (3) le témoin à fond
+plat, ≤ 1 cm/s ; (4) refus : une longueur fausse, une valeur non finie ou hors de [0, hauteur du domaine].
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `Vie` et son essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 5.10 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `set_seabed` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(3) tenus du premier essai. Suite : 822 essais listés.
-- **P3** — preuve VIE-DELTA-S638 ; ligne 5.10 ; index ; journal ; le lot.
