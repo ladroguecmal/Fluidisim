@@ -204,7 +204,35 @@ pub fn propager(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: 
 #[allow(clippy::too_many_arguments)]
 pub fn propager_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
     incident: &dyn Fn(f64) -> (f64, f64)) -> Result<Champ, Refus> {
-    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, None)
+    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, None, None)
+}
+
+/// **S665 — les bords périodiques à phase tournée** : comme [`propager_grand_angle`], mais `A(n + W) = A(n)·e^(i·k_n·W)`, `W = ny·dy`,
+/// `ny` nœuds de `y0` par `dy` (le nœud `ny` est le nœud 0 tourné) — exacts pour une côte uniforme le long de ses bords, sans parois.
+/// La profondeur est lue périodique aussi.
+#[allow(clippy::too_many_arguments)]
+pub fn propager_periodique(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, dy: f64, ny: usize,
+    incident: &dyn Fn(f64) -> (f64, f64), k_n: f64) -> Result<Champ, Refus> {
+    if ny < 3 || !k_n.is_finite() || !(dy > 0.) {
+        return Err(Refus);
+    }
+    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y0 + (ny - 1) as f64 * dy, dy, incident, None, Some(k_n))
+}
+
+/// La résolution tridiagonale (Thomas) : `sub[j]·x[j−1] + diag[j]·x[j] + sup[j]·x[j+1] = r[j]`.
+fn thomas(sub: &[C], diag: &[C], sup: &[C], r: &[C], x: &mut [C], cp: &mut [C], dp: &mut [C]) {
+    let n = diag.len();
+    cp[0] = sup[0].div(diag[0]);
+    dp[0] = r[0].div(diag[0]);
+    for j in 1..n {
+        let m = diag[j].sub(sub[j].mul(cp[j - 1]));
+        cp[j] = sup[j].div(m);
+        dp[j] = r[j].sub(sub[j].mul(dp[j - 1])).div(m);
+    }
+    x[n - 1] = dp[n - 1];
+    for j in (0..n - 1).rev() {
+        x[j] = dp[j].sub(cp[j].mul(x[j + 1]));
+    }
 }
 
 /// **S662 — le nombre d'onde d'une onde d'amplitude `a`** (m) : la forme composite de Kirby et Dalrymple (1986),
@@ -241,12 +269,12 @@ pub fn propager_non_lineaire(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, 
     if !(a0 >= 0. && a0.is_finite()) {
         return Err(Refus);
     }
-    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, Some(a0))
+    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, Some(a0), None)
 }
 
 #[allow(clippy::too_many_arguments)]
 fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
-    incident: &dyn Fn(f64) -> (f64, f64), a0: Option<f64>) -> Result<Champ, Refus> {
+    incident: &dyn Fn(f64) -> (f64, f64), a0: Option<f64>, torsion: Option<f64>) -> Result<Champ, Refus> {
     let ok = |v: f64| v > 0. && v.is_finite();
     if !ok(periode) || !ok(g) || !ok(dx) || !ok(dy) || !(x1 > x0) || !(y1 > y0) || !x0.is_finite() || !y0.is_finite() {
         return Err(Refus);
@@ -274,12 +302,15 @@ fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64
         a[j] = C::new(re, im);
     }
     let (mut p0, mut k0, mut kb0) = rangee(x0)?;
+    let mut k0_lin = k0.clone();
     let (mut sub, mut diag, mut sup, mut rhs) = (vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny]);
     let (mut cp, mut dp) = (vec![C::default(); ny], vec![C::default(); ny]);
     let d2 = dy * dy;
     for n in 0..nx - 1 {
         let x = x0 + (n + 1) as f64 * dx;
         let (p1, mut k1, kb1) = rangee(x)?;
+        // S665 : le flux d'énergie se compte avec le `k` linéaire (la dispersion d'amplitude ne touche que la phase, Kirby et Dalrymple).
+        let k1_lin = k1.clone();
         let n0 = n * ny;
         // S662 : la dispersion d'amplitude — le k de la nouvelle rangée, à l'amplitude de la rangée courante (retardée d'un pas).
         if let Some(a0) = a0 {
@@ -293,12 +324,54 @@ fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64
             // X au demi-pas : (X·A)_j = x_l·A_{j−1} + x_c·A_j + x_u·A_{j+1}.
             let pj = 0.5 * (p0[j] + p1[j]);
             let kj = 0.5 * (k0[j] + k1[j]);
-            let pm = if j > 0 { 0.25 * (p0[j] + p1[j] + p0[j - 1] + p1[j - 1]) } else { 0. };
-            let pp = if j + 1 < ny { 0.25 * (p0[j] + p1[j] + p0[j + 1] + p1[j + 1]) } else { 0. };
+            let per = torsion.is_some();
+            let jm = if j > 0 { Some(j - 1) } else if per { Some(ny - 1) } else { None };
+            let jp = if j + 1 < ny { Some(j + 1) } else if per { Some(0) } else { None };
+            let pm = jm.map_or(0., |m| 0.25 * (p0[j] + p1[j] + p0[m] + p1[m]));
+            let pp = jp.map_or(0., |q| 0.25 * (p0[j] + p1[j] + p0[q] + p1[q]));
             let sc = 1. / (kb * kb);
             let (xl, xu) = (sc * pm / (pj * d2), sc * pp / (pj * d2));
             let xc = sc * ((kj * kj - kb * kb) - (pm + pp) / (pj * d2));
-            let (pk0, pk1) = (p0[j] * kb0, p1[j] * kb1);
+            // S665 : la levée par le flux d'énergie d'une onde oblique, `p·k_x·|A|²`, `k_x = √(k² − k_n²)` et `k_n = ∂_n arg A` lu sur la
+            // rangée courante (l'invariant de Snell, sans dérivée en x) — le facteur de réfraction `K_r` que la levée `p·k̄` omettait
+            // (S664–S665 : l'écart à la côte 1D suivait `K_r` exactement, une fois les parois et la normalisation ôtées). À incidence
+            // normale, `k_n` = 0 et `p·k_x` = `p·k`.
+            // S665 : `k_x` lu par l'opérateur du modèle lui-même — `A_x/A = (i·k̄/2)·χ/(1 + χ/4)` (hors levée), `χ = (X·A)/A` — d'où
+            // `k_x = k̄·(1 + ½·Re[χ/(1 + χ/4)])` : pour une onde plane oblique, le `cos θ` de Padé ; en diffraction, ce que le modèle propage
+            // (`√(k² − (∂_n arg A)²)`, juste en réfraction, se trompait derrière le haut-fond de Berkhoff). `χ` de chaque rangée avec ses propres
+            // coefficients, sur `A` de la rangée courante : aucune dérivée en x (la version retardée divergeait, S664). Régularisé aux nœuds.
+            let voisins = {
+                let (mut am, mut ap) = (jm.map(|m| a[n0 + m]), jp.map(|q| a[n0 + q]));
+                if let Some(kn) = torsion {
+                    let w = ny as f64 * dy;
+                    if j == 0 {
+                        am = am.map(|v| v.mul(C::new((kn * w).cos(), -(kn * w).sin())));
+                    }
+                    if j + 1 == ny {
+                        ap = ap.map(|v| v.mul(C::new((kn * w).cos(), (kn * w).sin())));
+                    }
+                }
+                (am, ap)
+            };
+            let aj = a[n0 + j];
+            let kx_rangee = |pr: &[f64], kr: &[f64], kbr: f64| -> f64 {
+                let pmr = jm.map_or(0., |m| 0.5 * (pr[j] + pr[m]));
+                let ppr = jp.map_or(0., |q| 0.5 * (pr[j] + pr[q]));
+                let scr = 1. / (kbr * kbr);
+                let mut xa = aj.scale(scr * ((kr[j] * kr[j] - kbr * kbr) - (pmr + ppr) / (pr[j] * d2)));
+                if let Some(v) = voisins.0 {
+                    xa = xa.add(v.scale(scr * pmr / (pr[j] * d2)));
+                }
+                if let Some(v) = voisins.1 {
+                    xa = xa.add(v.scale(scr * ppr / (pr[j] * d2)));
+                }
+                let chi = xa.mul(C::new(aj.re, -aj.im)).scale(1. / (aj.re * aj.re + aj.im * aj.im + 0.01));
+                let f = chi.div(C::new(1., 0.).add(chi.scale(0.25)));
+                (kbr * (1. + 0.5 * f.re)).clamp(0.3 * kbr, 1.5 * kbr)
+            };
+            let kx0 = kx_rangee(&p0, &k0_lin, kb0);
+            let kx1 = kx_rangee(&p1, &k1_lin, kb1);
+            let (pk0, pk1) = (p0[j] * kx0, p1[j] * kx1);
             let lev = -(pk1 - pk0) / dx / (pk0 + pk1);
             // (1 + X/4)(A1 − A0)/dx − lev·(A1 + A0)/2 = (i·k̄/2)·X·(A1 + A0)/2 :
             // à gauche (1 + X/4)/dx − lev/2 − (i·k̄/4)·X, à droite (1 + X/4)/dx + lev/2 + (i·k̄/4)·X.
@@ -315,22 +388,59 @@ fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64
             if j + 1 < ny {
                 r = r.add(a[n0 + j + 1].mul(du));
             }
+            // S665 : le raccord périodique tourné — `A_{−1} = A_{ny−1}·e^(−i·k_n·W)`, `A_{ny} = A_0·e^(i·k_n·W)`.
+            if let Some(kn) = torsion {
+                let w = ny as f64 * dy;
+                let (tau, tau_inv) = (C::new((kn * w).cos(), (kn * w).sin()), C::new((kn * w).cos(), -(kn * w).sin()));
+                if j == 0 {
+                    r = r.add(a[n0 + ny - 1].mul(tau_inv).mul(dl));
+                }
+                if j + 1 == ny {
+                    r = r.add(a[n0].mul(tau).mul(du));
+                }
+            }
             rhs[j] = r;
             (sub[j], diag[j], sup[j]) = (gl, gc, gu);
         }
-        cp[0] = sup[0].div(diag[0]);
-        dp[0] = rhs[0].div(diag[0]);
-        for j in 1..ny {
-            let m = diag[j].sub(sub[j].mul(cp[j - 1]));
-            cp[j] = sup[j].div(m);
-            dp[j] = rhs[j].sub(sub[j].mul(dp[j - 1])).div(m);
-        }
         let n1 = (n + 1) * ny;
-        a[n1 + ny - 1] = dp[ny - 1];
-        for j in (0..ny - 1).rev() {
-            a[n1 + j] = dp[j].sub(cp[j].mul(a[n1 + j + 1]));
+        match torsion {
+            None => {
+                let mut x = vec![C::default(); 0];
+                x.resize(ny, C::default());
+                thomas(&sub, &diag, &sup, &rhs, &mut x, &mut cp, &mut dp);
+                a[n1..n1 + ny].copy_from_slice(&x);
+            }
+            Some(kn) => {
+                // Sherman–Morrison (Numerical Recipes, `cyclic`) : β = A[0][ny−1] = sub[0]·e^(−i·k_n·W), α = A[ny−1][0] = sup[ny−1]·e^(i·k_n·W).
+                let w = ny as f64 * dy;
+                let (tau, tau_inv) = (C::new((kn * w).cos(), (kn * w).sin()), C::new((kn * w).cos(), -(kn * w).sin()));
+                let beta = sub[0].mul(tau_inv);
+                let alpha = sup[ny - 1].mul(tau);
+                let gamma = C::new(0., 0.).sub(diag[0]);
+                let mut bb = diag.clone();
+                bb[0] = diag[0].sub(gamma);
+                bb[ny - 1] = diag[ny - 1].sub(alpha.mul(beta).div(gamma));
+                let mut sub0 = sub.clone();
+                sub0[0] = C::default();
+                let mut sup0 = sup.clone();
+                sup0[ny - 1] = C::default();
+                let mut x = vec![C::default(); ny];
+                thomas(&sub0, &bb, &sup0, &rhs, &mut x, &mut cp, &mut dp);
+                let mut u = vec![C::default(); ny];
+                u[0] = gamma;
+                u[ny - 1] = alpha;
+                let mut z = vec![C::default(); ny];
+                thomas(&sub0, &bb, &sup0, &u, &mut z, &mut cp, &mut dp);
+                let num = x[0].add(beta.mul(x[ny - 1]).div(gamma));
+                let den = C::new(1., 0.).add(z[0]).add(beta.mul(z[ny - 1]).div(gamma));
+                let fact = num.div(den);
+                for j in 0..ny {
+                    a[n1 + j] = x[j].sub(fact.mul(z[j]));
+                }
+            }
         }
         (p0, k0, kb0) = (p1, k1, kb1);
+        k0_lin = k1_lin;
     }
     Ok(Champ { nx, ny, x0, dx, y0, dy, a })
 }

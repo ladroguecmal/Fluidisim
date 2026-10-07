@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S665 — **en cours**. En autonomie vers la v2 ; 2.7. En S664, le facteur de `Cote2D` manquait (6,6 % au centre, 15 % au bord) ;
+Session : S665 — **terminée**. En autonomie vers la v2 ; 2.7. En S664, le facteur de `Cote2D` manquait (6,6 % au centre, 15 % au bord) ;
 trois causes nommées : la normalisation au départ, les parois de la marche, `K_r`.
 
 **Ce que la session fait.** (a) **Les bords périodiques à phase tournée** dans la marche à grand angle : `A(n + W) = A(n)·e^(i·k_n·W)`,
@@ -90,7 +90,10 @@ centre** — et le verdict du témoin. (3) Les essais de S659–S664 passent.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les bords périodiques, la normalisation ; (1)–(3).
+- [x] **P2** — les bords périodiques, la normalisation ; (1)–(3).
 - [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) 2·10⁻¹³ ; (2) le témoin : l'écart suivait `K_r` exactement — le remède, la levée par le flux oblique lue par l'opérateur
+  (k linéaire dans le flux) : le facteur 0,56 %, la phase 3,65°, le bord 0 ; (3) passent ; Berkhoff non linéaire 0,101 ; 0,099 ; 0,094 ;
+  0,125. Deux versions divergentes essayées et rejetées (le retard, le k non linéaire dans le flux).

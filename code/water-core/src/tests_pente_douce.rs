@@ -235,3 +235,32 @@ fn record_berkhoff_for_the_visual_session_s663() {
     println!("S663 enregistré : {} × {}", c.nx, c.ny);
 }
 
+/// **S665 (1)** — les bords périodiques éprouvés : une onde plane oblique à 30° sur fond plat garde `|A|` = 1 et `∂_n arg A` = `k₀ sin θ`
+/// partout (à 10⁻⁶) ; avec des parois, des franges.
+#[test]
+fn periodic_twisted_edges_carry_an_oblique_plane_wave_s665() {
+    let k = nombre_d_onde(2. * std::f64::consts::PI / 10., 80., G);
+    let kn = k * 0.5;
+    let obl = |y: f64| ((kn * y).cos(), (kn * y).sin());
+    let (ny, dy) = (100usize, 2.0);
+    let champ = propager_periodique(&|_, _| 80., 10., G, 0., 400., 2., 0., dy, ny, &obl, kn).unwrap();
+    let (mut pire_a, mut pire_k) = (0f64, 0f64);
+    for i in 0..champ.nx {
+        for j in 0..ny {
+            let (re, im) = champ.valeur(i, j);
+            pire_a = pire_a.max(((re * re + im * im).sqrt() - 1.).abs());
+            if j + 1 < ny {
+                let d = (champ.phase(i, j + 1) - champ.phase(i, j) + 3. * std::f64::consts::PI).rem_euclid(2. * std::f64::consts::PI) - std::f64::consts::PI;
+                pire_k = pire_k.max((d / dy - kn).abs() / kn);
+            }
+        }
+    }
+    let parois = propager_grand_angle(&|_, _| 80., 10., G, 0., 400., 2., 0., (ny - 1) as f64 * dy, dy, &obl).unwrap();
+    let franges = (0..parois.nx).flat_map(|i| (0..ny).map(move |j| (i, j))).map(|(i, j)| {
+        let (re, im) = parois.valeur(i, j);
+        ((re * re + im * im).sqrt() - 1.).abs()
+    }).fold(0., f64::max);
+    println!("S665 périodique : |A| − 1 au plus {pire_a:e}, ∂n arg A relatif {pire_k:e} ; avec parois, franges {franges:.3}");
+    assert!(pire_a <= 1e-6 && pire_k <= 1e-6, "critère 1");
+}
+

@@ -78,12 +78,11 @@ fn the_2d_coast_matches_the_1d_coast_on_straight_isobaths_s664() {
     }
     println!("S664{lignes}");
     println!("S664 : facteur au plus {:.3} %, phase au plus {pire_p:.2}°, bord {:.3} % ; tables {} Mo", 100.0 * pire_f, 100.0 * pire_bord, deux.octets() as f64 / 1e6);
-    // Critère 2 : la phase à 15° — **tenu** (2,93°) ; le facteur à 2 % et le bord à 1 % — **manqués** (6,6 % ; 15 %) : (a) la marche
-    // part de `A` = 1 à 80 m, où la levée vaut déjà 0,990 (le bord du large à λ₀/2, non λ₀ : ADR-196 D3) ; (b) les parois de la marche,
-    // qui pèsent jusqu'au centre (la marge doublée change le centre) ; (c) peut-être `K_r` (une correction par Snell a empiré l'eau
-    // mince : rejetée). Le témoin suivant : des bords latéraux périodiques à phase tournée (S665). L'essai n'affirme que ce qui a tenu.
+    // S664 : la phase tenue (2,93°), le facteur (6,6 %) et le bord (15 %) manqués — la normalisation, les parois, `K_r` nommés.
+    // S665 : les bords périodiques tournés, le départ normalisé, la levée par le flux oblique (`K_r`) — le facteur à 0,56 %, le bord à 0.
     assert!(pire_p <= 15.0, "critère 2 : la phase");
-    let _ = (pire_f, pire_bord);
+    assert!(pire_f <= 0.02, "critère 2 : le facteur");
+    assert!(pire_bord <= 0.01, "critère 2 : le bord");
 }
 
 /// (3) les refus.

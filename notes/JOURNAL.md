@@ -1599,3 +1599,11 @@ le grand angle, lue par B. **Mesuré** : au bit au large ; la phase à 2,93° de
 le bord à 15 % (manqués), démêlés en trois causes — la normalisation au départ, les parois (le témoin de la marge), `K_r` (deux corrections
 essayées puis rejetées, le modèle validé gardé). Maillons **1** (2.7 avance). Suivant : **S665, les bords périodiques à phase tournée** et la
 normalisation du départ, `K_r` jugé seul.
+
+## S665 — 2026-10-07 — les bords périodiques, la normalisation, `K_r` : la côte 2D juste
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/COTE-2D-JUSTE-S665.md)) : les bords périodiques à phase
+tournée (Sherman–Morrison ; une onde oblique exacte à 10⁻¹³, des franges de 113 % avec des parois) ; le départ normalisé par la levée WKB ;
+le témoin — l'écart restant suivait **`K_r` exactement** ; le remède, la levée par le flux oblique `p·k_x`, `k_x` lu par l'opérateur du
+modèle. **Mesuré** : `Cote2D` à **0,56 %** de la côte 1D, la phase à 3,65°, le bord à 0 ; Berkhoff toujours à un dixième (0,101 ; 0,099 ;
+0,094 ; 0,125), le pic à 2 %. Maillons **1** (2.7 avance). Suivant : **S666, la revue de méthode** (ADR-268).

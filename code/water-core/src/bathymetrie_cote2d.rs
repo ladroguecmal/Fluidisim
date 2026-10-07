@@ -19,7 +19,8 @@
 
 use crate::background::{Background, Component};
 use crate::host::{AllocError, HostServices};
-use crate::pente_douce::{nombre_d_onde, propager_grand_angle};
+use crate::bathymetrie::transformer;
+use crate::pente_douce::{nombre_d_onde, propager_periodique};
 use crate::phase::PhaseQ32;
 use crate::types::{SimTime, WaterSample, WorldPos};
 
@@ -105,14 +106,15 @@ impl Cote2D {
             if !(cos0 >= 45f64.to_radians().cos()) {
                 return Err(Cote2DError::TropOblique);
             }
-            // La marche : la marge latérale `longueur·tan θ`, arrondie au pas.
-            let marge = ((longueur * (sin0.abs() / cos0)) / pas).ceil() * pas;
-            let (y0, y1) = (n0 - marge, -n0 + marge);
+            // S665 : la marche à bords périodiques tournés (`A(n + W) = A(n)·e^(i·k_n·W)`, `W = nn·pas`), sans marge ; le départ normalisé par
+            // le facteur WKB du bord du large (la référence de S362) — la levée n'y vaut pas encore 1 si le bord est en deçà de λ₀.
             let kn = k0 * sin0;
+            let theta0 = sin0.atan2(cos0);
             // Toute la marche, marge comprise, doit être mouillée : la marche refuse une profondeur non positive.
             let h = |s: f64, n: f64| profondeur(s, n);
-            let champ = propager_grand_angle(&h, core::f64::consts::TAU / omega, g, 0.0, (ns - 1) as f64 * pas, pas, y0, y1, pas,
-                &|n| ((kn * n).cos(), (kn * n).sin())).map_err(|_| Cote2DError::Profondeur)?;
+            let depart = |n: f64| transformer(omega, theta0, 1.0, profondeur(0.0, n), g).map_or(1.0, |e| e.amplitude);
+            let champ = propager_periodique(&h, core::f64::consts::TAU / omega, g, 0.0, (ns - 1) as f64 * pas, pas, n0, pas, nn,
+                &|n| (depart(n) * (kn * n).cos(), depart(n) * (kn * n).sin()), kn).map_err(|_| Cote2DError::Profondeur)?;
             // ψ(s), comme la marche : la moyenne de k sur la rangée, aux demi-pas.
             let kb = |s: f64| (0..champ.ny).map(|j| nombre_d_onde(omega, h(s, champ.y0 + j as f64 * champ.dy), g)).sum::<f64>() / champ.ny as f64;
             let mut psi = vec![0.0f64; ns];
@@ -121,7 +123,7 @@ impl Cote2D {
                 kbs[i] = kb(i as f64 * pas);
                 psi[i] = psi[i - 1] + 0.5 * (kbs[i - 1] + kbs[i]) * pas;
             }
-            let j_decal = (marge / pas).round() as usize;
+            let j_decal = 0usize;
             let arg = |i: usize, j: usize| {
                 let (re, im) = champ.valeur(i, j);
                 im.atan2(re)
