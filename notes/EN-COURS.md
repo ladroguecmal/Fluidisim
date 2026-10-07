@@ -85,7 +85,7 @@ verdict inscrit (R41), reçu ou attendu.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — l'enregistrement ; le rendu ; l'envoi.
-- [ ] **P3** — preuve ; rituel.
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) les écarts recalculés égaux ; l'amplitude relue à 9·10⁻⁸ — la borne de 10⁻¹² du plan ignorait l'écriture en `f32` ; (2)

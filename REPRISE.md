@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 20:52 +02:00
+JETON            : libre
+Battement        : 2026-10-07 20:59 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S663 — la séance visuelle de Berkhoff (R41) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S662 — la non-linéarité sur le haut-fond de Berkhoff ([journal](notes/JOURNAL.md))
-Session suivante : **S663 — une séance visuelle de Berkhoff** (la houle qui se focalise derrière le haut-fond : la carte d'amplitude des trois modèles, contre les mesures) ; puis le modèle côtier lu par B.
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S663 — la séance visuelle du haut-fond de Berkhoff (R41) ([journal](notes/JOURNAL.md)). Avant : S662 (la non-linéarité sur le haut-fond de Berkhoff)
+Session suivante : **S664** — selon R41 ; sinon 2.7 : le champ côtier cuit lu par B (la houle réfractée et diffractée par la bathymétrie, servie à la mer de la scène), ou le point du front 0 que la liste attend le plus.
+Maillons        : 2
 Registres       : dernier lot S662 (ADR-213 D3) ; le prochain au plus tard en S665
 ```
 
