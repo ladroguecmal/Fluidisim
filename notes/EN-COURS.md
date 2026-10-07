@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S617 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S614–S616), puis **9.10 — les profils de qualité,
+Session : S617 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S614–S616), puis **9.10 — les profils de qualité,
 l'adaptation au matériel et à la charge** (I-16 ; absent). I-16 : un profil ne déclare que des allocations ; une capacité se calcule depuis
 des coûts mesurés. ADR-012 §5 : un régulateur PI sur `q ∈ [0, 1]` — **non écrit** (note de S351).
 
@@ -89,7 +89,10 @@ seconde, aucune remontée dans les 30 images d'une descente (assemblage : par co
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `qualite.rs` et ses essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 9.10 ; rituel (`--lot`).
+- [x] **P2** — `qualite.rs` et ses essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 9.10 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus ; la trajectoire identique au bit à la référence (fichier de données `tests_qualite_reference.txt`). Suite :
+  805 essais listés.
+- **P3** — preuve QUALITE-S617 ; liste 9.10 (absent → partiel) et décompte ; index ; journal ; le lot.

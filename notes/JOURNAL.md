@@ -1208,3 +1208,13 @@ quadruple. Maillons **1** (10.5 : absent → partiel ; la section 10 n'a plus d'
 — **élargie** (ADR-254 D1, L413) ; une propriété documentée qu'aucun cas n'éprouvait (les murs de S613, faux à bord mouillé, S614) —
 **ajoutée** (D2, L414). Ont tenu : les implémentations indépendantes, les phrases assertées, la suite mesurée. Maillons **1**. Suivant :
 **S617**, le lot et la suite (restent 5 absents : 7.8, 9.10, 11.5, 13.4 — et la physique des partiels).
+
+## S617 — 2026-10-07 — le lot ; le régulateur de qualité et les capacités dérivées
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S614–S616), puis 9.10 (absent). **Fait** ([preuve](../docs/validation/QUALITE-S617.md)) :
+`qualite.rs` — les capacités dérivées d'I-16, le régulateur PI d'ADR-012 §5. **Mesuré**, au bit d'une référence Python : `q` descend dès la
+première image d'un événement, s'établit à l'équilibre exact, remonte en 3,6 s ; trois inversions pour trois changements de charge ; sur
+un matériel trois fois plus lent, `q` = 1/12 et 25 paquets W au lieu de 75. **En route** (au plan) : les premiers gains et une intégrale
+libre pendant l'engagement pompaient (douze inversions) — plafonnement et gains plus doux. Maillons **1** (9.10 : absent → partiel ; la
+section 9 n'a plus d'absent). Suivant : **S618** — restent 4 absents : 7.8 (à la fin), 11.5 (le matériel cible, dont la seconde cible est
+le bridage de 9.10), 13.4 (le jeu, après la physique).

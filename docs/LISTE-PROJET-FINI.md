@@ -773,7 +773,11 @@ pas recopiée ici (L137).
   ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)) : construit, non reçu,
   il ne compte pas. **S350** : en 3D, le redimensionnement
   est reçu au bit et le coût suit la surface (§6) — le moyen dont le rang 1 se sert.
-- [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*. **Depuis S476** (un seul PC,
+- [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *partiel* depuis S617 : les capacités dérivées
+  d'I-16 (un matériel trois fois plus lent : trois fois moins de paquets W, sans toucher au profil) et le régulateur PI d'ADR-012 §5 —
+  descente en une image, remontée rampée, engagement de 30 images, sans pompage (3 inversions pour trois changements de charge), à
+  l'équilibre exact ([preuve](validation/QUALITE-S617.md)). Manquent la mesure sur ce PC bridé, le branchement à l'ordonnanceur, les
+  profils nommés. **Depuis S476** (un seul PC,
   ADR-219 D2) : l'adaptation se mesure sur ce PC en bridant le budget, la résolution et le pilote (WARP comme matériel faible).
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
   scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
@@ -907,12 +911,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 1 | 11 | 1 |
+| 9. Activation et budget | 13 | 1 | 12 | 0 |
 | 10. Multijoueur | 9 | 1 | 8 | 0 |
 | 11. Grande échelle | 5 | 0 | 4 | 1 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **106** | **5** |
+| **total** | **121** | **10** | **107** | **4** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

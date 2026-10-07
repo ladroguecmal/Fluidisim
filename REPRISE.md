@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 07:29 +02:00
+JETON            : libre
+Battement        : 2026-10-07 07:35 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S617 — le lot ; 9.10, le régulateur de qualité et les capacités dérivées ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S616 — la vingt-septième revue de méthode (ADR-254) ([journal](notes/JOURNAL.md)). Avant : S615 (les grandes formes cohérentes entre clients, les détails locaux libres)
-Session suivante : **S617 — le lot (dû), puis la suite** (ADR-247 ; restent 5 absents : 7.8 à la fin, 9.10 et 11.5 le matériel, 13.4 le jeu ; puis les partiels, la physique d'abord). Revue à S621. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S616 : la revue
-Registres       : dernier lot S614 (ADR-213 D3) ; le prochain au plus tard en S617
+Session en cours : aucune
+Dernière session : S617 — le lot ; le régulateur de qualité et les capacités dérivées ([journal](notes/JOURNAL.md)). Avant : S616 (la vingt-septième revue de méthode)
+Session suivante : **S618 — 11.5, le matériel cible** (ADR-247 ; restent 4 absents : 7.8 à la fin, 11.5, 13.4 après la physique), ou la physique des partiels. Revue à S621 ; le lot à S620. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S617 : 9.10 absent → partiel
+Registres       : dernier lot S617 (ADR-213 D3) ; le prochain au plus tard en S620
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
