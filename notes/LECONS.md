@@ -6749,3 +6749,10 @@ valeurs, avant la mesure du code ; une exploration perdue. Les bornes d'un monta
 maille ne séparait pas les deux causes. Une session entière de faces coupées l'a montré : exactes sous l'eau (8·10⁻⁶ m/s), elles
 s'emballent au rivage (0,26 m/s). Le témoin qui isole — la même pente **entièrement immergée** — tient en dix secondes de calcul. Avant de
 nommer un remède, une variation qui supprime l'une des causes candidates, pas seulement une qui les change toutes (ADR-256 D2).
+
+## L420
+
+**S609, S639–S655 — des protections écrites, non appliquées.** Relu à la demande de l'utilisateur : presque chaque erreur avait déjà sa
+protection dans METHODE (le témoin, l'instrument éprouvé, les nombres assertés, les ADR qui nomment) — elle n'avait pas été chargée au
+moment du plan. Une table de trente-six lignes ne se relit pas d'elle-même ; un bloc de cinq lignes, exigé par le rituel, si (ADR-266).
+

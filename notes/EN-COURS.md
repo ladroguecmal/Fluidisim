@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S656 — **en cours**. **La trente-cinquième revue de méthode** (ADR-222 D4 : S651–S655), et la demande de l'utilisateur
+Session : S656 — **terminée**. **La trente-cinquième revue de méthode** (ADR-222 D4 : S651–S655), et la demande de l'utilisateur
 (2026-10-07) : *« Les erreurs que tu réalises viennent d'où ? »*, puis *« Corrige et apprend de tes erreurs »*.
 
 **Ce que la session fait.** ADR-266 : les erreurs de S609 et S639–S655, rangées en six familles ; les cinq contrôles que chaque plan porte
@@ -77,7 +77,8 @@ plan sans le bloc (refusé), un plan où manque « pièges » (refusé) ; (3) la
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-266 ; le contrôle du rituel et son épreuve ; METHODE.
+- [x] **P2** — ADR-266 ; le contrôle du rituel et son épreuve ; METHODE.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-266 (six familles ; D1 le bloc de cinq contrôles ; D2 le rituel le vérifie dès S657, éprouvé sur trois textes ; D3 la mémoire) ; METHODE (une ligne « en écrivant le plan ») ; L420.

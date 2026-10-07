@@ -96,6 +96,20 @@ def debut() -> int:
     return 0
 
 
+# S656 (ADR-266) : les cinq contrôles qu'un plan porte, à partir de S657 — un mot par contrôle, dans le bloc « Contrôles du plan ».
+CONTROLES = ("témoin", "instrument", "calcul", "ADR", "pièges")
+CONTROLES_DEPUIS = 657
+
+
+def controles_manquants(section: str) -> list[str]:
+    """Ce qui manque au bloc « **Contrôles du plan** » de la session en cours : le bloc lui-même, ou l'un des cinq mots (« sans objet »
+    se dit, il ne s'omet pas). Le bloc va de son titre à la prochaine ligne de titre (`###`) ou à la fin."""
+    if "**Contrôles du plan**" not in section:
+        return ["le bloc « **Contrôles du plan** » (ADR-266)"]
+    bloc = section.split("**Contrôles du plan**", 1)[1].split("\n###", 1)[0]
+    return [f"le contrôle « {m} » (ADR-266)" for m in CONTROLES if m.lower() not in bloc.lower()]
+
+
 def fin(argv) -> int:
     def option(nom, defaut=None):
         return argv[argv.index(nom) + 1] if nom in argv else defaut
@@ -110,6 +124,9 @@ def fin(argv) -> int:
     plan = re.findall(r"^- \[([ x>])\] \*\*(P[\w-]+)\*\*", en.split("## Session en cours", 1)[-1], flags=re.M)
     if not plan:
         manques.append("EN-COURS : aucun plan lu")
+    # S656 (ADR-266) : les contrôles du plan, à partir de S657.
+    if n >= CONTROLES_DEPUIS:
+        manques += [f"EN-COURS : {m}" for m in controles_manquants(en.split("## Session en cours", 1)[-1])]
     else:
         ouvertes = [p for c, p in plan[:-1] if c != "x"]
         if ouvertes:

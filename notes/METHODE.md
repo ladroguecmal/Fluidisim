@@ -14,6 +14,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 
 | moment | protection | leçons | contrôle |
 |---|---|---|---|
+| **en écrivant le plan** | **Le bloc « Contrôles du plan »** : le témoin, l'instrument, le calcul, les ADR qui nomment, les pièges du domaine — cinq lignes, « sans objet » se dit (ADR-266, à la demande de l'utilisateur) | L419, L420 | `rituel.py fin` refuse sans le bloc, à partir de S657 |
 | **avant de conclure** | Une grandeur conservée — masse, hash, invariant — ne prouve ni précision, ni volume, ni résolution : mesurer la grandeur d'usage elle-même | L277, L366, L370 | — |
 | | Attribuer un effet demande un témoin qui en est privé ; éteindre un à un les termes absents du témoin | L136, L354 | — |
 | | Une convergence se lit sur trois points au moins, et juge un ordre, pas un déplacement | L274, L361 | — |

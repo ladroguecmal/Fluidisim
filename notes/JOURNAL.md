@@ -1521,3 +1521,13 @@ m_a·aₙ`, `m_a` = ½ρ·V immergé lu sur φ. **Mesuré** : la flottaison sous
 la position de départ du corps (un comparant non éprouvé). **L'utilisateur** : « Les erreurs que tu réalises viennent d'où ? » — six
 familles relevées ; « Corrige et apprend de tes erreurs » — la mémoire persistante écrite, l'ADR en S656. Maillons **1** (6.7 avance).
 Suivant : **S656, la revue de méthode** (ADR-266 : les contrôles du plan, vérifiés par le rituel).
+
+## S656 — 2026-10-07 — la trente-cinquième revue : les erreurs relevées, les contrôles du plan
+
+**Entrée.** La revue (S651–S655) et la demande de l'utilisateur : « Corrige et apprend de tes erreurs ». **Fait** :
+[ADR-266](../docs/adr/ADR-266-trente-cinquieme-revue-de-methode.md) — six familles d'erreurs (S609, S639–S655) ; presque toutes avaient
+déjà leur protection, non appliquée au moment du plan (L420). **D1** : chaque plan porte un bloc « Contrôles du plan » de cinq lignes
+(témoin, instrument, calcul, ADR qui nomment, pièges du domaine) ; **D2** : `rituel.py fin` le refuse absent dès S657 (éprouvé sur trois
+textes) ; **D3** : la mémoire persistante. Maillons **2**. Suivant : **S657, la vitesse du corps contre l'eau autour de lui** — le premier
+plan sous ADR-266.
+
