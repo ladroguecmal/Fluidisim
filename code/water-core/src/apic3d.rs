@@ -118,6 +118,9 @@ pub struct Apic3 {
     pub(crate) bin_fresh: bool,
     /// **S488 (K2-4)** — les gouttes (`enable_droplets`, `apic3d_gouttes.rs`) ; `None`, le défaut : le pas d'avant, au bit.
     pub(crate) gouttes: Option<Box<gouttes::Gouttes>>,
+    /// **S682 — la sortie à droite** (`enable_right_outlet`) : le volume des particules retirées au bord droit, par rangée `j` au dernier
+    /// pas (m³), puis le total et le nombre ; `None`, le défaut : le domaine retient les particules — au bit.
+    pub(crate) sortie_droite: Option<Box<SortieDroite>>,
     /// **S639 — le fond en escalier** : par colonne (`j·nx + i`), le nombre de mailles solides depuis le bas ; `None`, pas de fond.
     pub(crate) seabed: Option<Vec<u16>>,
     /// **S640 — le fond lisse** (`set_seabed_smooth`, `apic3d_lisse.rs`) : les hauteurs et les fractions ouvertes des faces ;
@@ -224,6 +227,7 @@ impl Apic3 {
             jobs: None,
             bin_fresh: false,
             gouttes: None,
+            sortie_droite: None,
         })
     }
 
@@ -307,6 +311,53 @@ impl Apic3 {
         })?;
         self.open_x = Some(vec![0.; n]);
         Ok(())
+    }
+
+    /// **S682 — la sortie à droite** (le relais au rivage, ADR-271) : une particule qui franchit le bord droit n'est plus retenue par
+    /// le domaine ; elle est retirée et son volume (`dx³/8`) compté par rangée ([`Apic3::right_outlet`]). Demande les bords ouverts ;
+    /// refusée avec les gouttes et la zone des colonnes. Réservée à la configuration (I-06).
+    pub fn enable_right_outlet(&mut self, host: &mut HostServices) -> Result<(), Error> {
+        if self.open_x.is_none() || self.sortie_droite.is_some() || self.gouttes.is_some() || self.columns.is_some() {
+            return Err(Error::Domain);
+        }
+        let ny = self.domain.ny;
+        host.alloc.alloc_persistent(ny * 8).map_err(|e| match e {
+            AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
+        })?;
+        self.sortie_droite = Some(Box::new(SortieDroite { pas: vec![0.; ny], total: 0., retirees: 0 }));
+        Ok(())
+    }
+
+    /// S682 — la sortie à droite : `(le volume retiré par rangée au dernier pas, m³ ; le volume total ; le nombre de particules)` ;
+    /// `None` sans sortie.
+    pub fn right_outlet(&self) -> Option<(&[f64], f64, u64)> {
+        self.sortie_droite.as_ref().map(|s| (&s.pas[..], s.total, s.retirees))
+    }
+
+    /// S682 : retire les particules au-delà du bord droit, compte leur volume.
+    fn drain_right(&mut self) {
+        let Some(mut s) = self.sortie_droite.take() else { return };
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let lx = nx as f32 * dx;
+        let quantum = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        s.pas.fill(0.);
+        let mut k = 0;
+        while k < self.n {
+            if self.x[k][0] >= lx {
+                let j = ((self.x[k][1] / dx) as usize).min(ny - 1);
+                s.pas[j] += quantum;
+                s.total += quantum;
+                s.retirees += 1;
+                let last = self.n - 1;
+                self.x[k] = self.x[last];
+                self.vel[k] = self.vel[last];
+                self.c[k] = self.c[last];
+                self.n = last;
+            } else {
+                k += 1;
+            }
+        }
+        self.sortie_droite = Some(s);
     }
 
     /// S446 : les vitesses normales des bords ouverts, `left` en `i = 0` et `right` en `i = nx`, chacune `ny·nz` valeurs rangées
@@ -685,6 +736,13 @@ impl Apic3 {
             self.bin_count[c] += 1;
         }
     }
+}
+
+/// S682 — le compte de la sortie à droite.
+pub(crate) struct SortieDroite {
+    pub(crate) pas: Vec<f64>,
+    pub(crate) total: f64,
+    pub(crate) retirees: u64,
 }
 
 /// Le noyau de la reconstruction, `(1 − s²/R²)³` pour `s < R`.
@@ -1370,6 +1428,7 @@ impl Apic3 {
             return Ok(partial);
         }
         self.advect(dt);
+        self.drain_right();
         mark("advection");
         if upto == ApicStage::Advect {
             return Ok(partial);
@@ -1970,6 +2029,8 @@ impl Apic3 {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let (lx, ly, lz) = (nx as f32 * dx, ny as f32 * dx, nz as f32 * dx);
         let margin = 1e-3 * dx;
+        // S682 : avec la sortie à droite, le bord droit ne retient plus.
+        let x_haut = if self.sortie_droite.is_some() { f32::MAX } else { lx - margin };
         // S444 : en mode relatif, la vitesse de l'eau est `U + u′` — B à l'instant du début du pas, puis du milieu.
         let t0 = self.background_time_s;
         let relative = self.is_relative();
@@ -1997,7 +2058,7 @@ impl Apic3 {
                     let v1 = with_b(this, this.grid_velocity(p), p, t0);
                     let mid = [p[0] + 0.5 * dt * v1[0], p[1] + 0.5 * dt * v1[1], p[2] + 0.5 * dt * v1[2]];
                     let v2 = with_b(this, this.grid_velocity(mid), mid, t0 + 0.5 * dt as f64);
-                    q[0] = (p[0] + dt * v2[0]).clamp(margin, lx - margin);
+                    q[0] = (p[0] + dt * v2[0]).clamp(margin, x_haut);
                     q[1] = (p[1] + dt * v2[1]).clamp(margin, ly - margin);
                     q[2] = (p[2] + dt * v2[2]).clamp(margin, lz - margin);
                 }

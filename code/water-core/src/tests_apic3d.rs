@@ -2790,3 +2790,47 @@ fn record_the_roller_for_the_visual_session_s658() {
     }
 }
 
+/// **S682 — la sortie à droite** : un bassin de 2 m × 0,1 m, l'eau à 0,4 m (5 cm), le bord droit ouvert à 0,1 m/s pendant 1 s. Rend
+/// (particules au départ, restantes, retirées, volume compté, flux de la face intégré, densité de la dernière colonne par maille mouillée).
+fn vidange_s682(sortie: bool) -> (usize, usize, u64, f64, f64, f64) {
+    let (nx, ny, nz, dx) = (40usize, 2usize, 16usize, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let n0 = a.seed(&|p| p[2] < 0.4).unwrap();
+    a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    if sortie {
+        a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    }
+    a.set_open_boundaries(&vec![0.; ny * nz], &vec![0.1; ny * nz]).unwrap();
+    let (mut t, mut flux) = (0u64, 0f64);
+    while t < 1_000_000 {
+        let us = a.stable_step_us(10_000).min(1_000_000 - t);
+        a.step(us).unwrap();
+        // Les faces de droite dont la maille est d'eau, à l'étiquette du pas.
+        let mouillees = (0..nz).flat_map(|k| (0..ny).map(move |j| (j, k))).filter(|&(j, k)| a.label[(k * ny + j) * nx + nx - 1] == WATER).count();
+        flux += 0.1 * (dx as f64).powi(2) * mouillees as f64 * us as f64 * 1e-6;
+        t += us;
+    }
+    let (ret, vol) = a.right_outlet().map_or((0, 0.), |(_, v, r)| (r, v));
+    let derniere = a.particles().iter().filter(|p| p[0] >= (nx - 1) as f32 * dx).count();
+    let mouillees = (0..nz * ny).filter(|&c| a.label[(c / ny * ny + c % ny) * nx + nx - 1] == WATER).count().max(1);
+    (n0, a.particle_count(), ret, vol, flux, derniere as f64 / mouillees as f64)
+}
+
+/// **S682** — (2) le compte exact ; (3) le volume sorti à 10 % du flux de la face ; (4) aucune accumulation ; le témoin sans la sortie ;
+/// les refus.
+#[test]
+fn the_right_outlet_drains_particles_with_an_exact_count_s682() {
+    let (n0, n, ret, vol, flux, dens) = vidange_s682(true);
+    println!("S682 : {n0} particules, {n} restent, {ret} retirées ; volume compté {:.3} L, flux de la face {:.3} L ({:+.1} %) ; dernière colonne {dens:.2} par maille mouillée",
+        vol * 1e3, flux * 1e3, 100. * (vol / flux - 1.));
+    let (_, nt, _, _, _, dt) = vidange_s682(false);
+    println!("S682 témoin, sans la sortie : {nt} particules, dernière colonne {dt:.2} par maille mouillée");
+    assert_eq!(n0, n + ret as usize, "critère 2 : le compte");
+    // Le quantum, de `dx` en `f32` (0,05 n'y est pas exact) ; la somme de quanta égaux, à l'arrondi près.
+    assert!((vol / (ret as f64 * (0.05f32 as f64).powi(3) / 8.) - 1.).abs() < 1e-12, "critère 2 : le volume");
+    assert!((vol / flux - 1.).abs() < 0.10, "critère 3");
+    assert!(dens <= 8.0, "critère 4");
+    let (mut a, mut arena) = apic(4, 2, 4, 0.1, 100);
+    assert_eq!(a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }), Err(Error::Domain), "sans bords ouverts");
+}
+

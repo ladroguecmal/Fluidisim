@@ -1735,3 +1735,11 @@ défaut qui dépend de la place d'une interface dans la maille se juge sur trois
 montage du plan aux deux mailles et manquait ailleurs). Le `g` compté deux fois de S677 est couvert par ADR-239 D1. Maillons **0**
 (méthode). Suivant : **S682**, la brique 2 du relais au rivage (le bord droit d'APIC qui retire et pose des particules) ; la revue en
 S686.
+
+## S682 — 2026-10-08 — Le relais au rivage, brique 2 : la sortie à droite d'APIC
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. **Fait**
+([preuve](../docs/validation/RELAIS-RIVAGE-SORTIE-S682.md)) : `enable_right_outlet`. Les particules qui franchissent le bord droit sont
+retirées et leur volume compté par rangée. **Mesuré** : le compte exact ; 4,000 L sortis pour 4,000 L de flux de face ; la dernière
+colonne à 8,00 particules par maille mouillée (le témoin s'entasse à 20). Maillons **1** (4.14). Suivant : **S683**, la brique 3 (poser
+des particules pour le reflux).

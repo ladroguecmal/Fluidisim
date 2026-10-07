@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S682 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271, note de S680).
+Session : S682 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271, note de S680).
 
 **Ce que la session fait.** **La sortie à droite** (`enable_right_outlet`, avec les bords ouverts de S446) :
 
@@ -103,7 +103,8 @@ L'entrée (poser des particules pour un volume donné) est la brique suivante.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la sortie ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — la sortie ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) les 57 essais d'APIC ; (2) exact ; (3) 4,000 L contre 4,000 L ; (4) 8,00 (le témoin : 20,0). L'assertion du volume comparait d'abord à `dx` en `f64` : le quantum vient de `dx` en `f32`.
