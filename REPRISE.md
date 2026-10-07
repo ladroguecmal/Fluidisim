@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 21:43 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 21:44 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S668 — la mémoire de Cote2D réduite (la marche fine, les tables décimées) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S667 — Cote2D à huit composantes : la composition, la mémoire ([journal](notes/JOURNAL.md)). Avant : S666 (la trente-septième revue de méthode)
 Session suivante : **S668 — la mémoire de Cote2D réduite** (ADR-196 §3) : le pas adapté au gradient de k (grossier au large, fin au rivage) ou les transformations partagées entre composantes voisines — mesuré contre la côte pleine (η, la mémoire).
 Maillons        : 1

@@ -62,31 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S667 — **terminée**. En autonomie vers la v2 ; 2.7. `Cote2D` (S664–S665) n'a été jugée que sur une composante. **Une mer de huit
-composantes** (périodes 7 à 12 s, directions −20° à +20°, `Hs` = 2.19 m) sur la plage de S364 : la composition jugée contre la côte 1D,
-la mémoire et le temps de cuisson mesurés, extrapolés à une vraie côte.
+Session : S668 — **en cours**. En autonomie vers la v2 ; 2.7. `Cote2D` coûte 160 Mo/km² pour 32 composantes au pas de 2 m (S667).
+
+**Ce que la session fait.** **La marche et les tables découplées** : la marche à 2 m (sa justesse), les tables gardées un nœud sur `m` dans
+chaque direction (`Cote2D::cuire_decime`) — la mémoire divisée par `m²`. `cuire` est `cuire_decime` avec `m` = 1 (au bit).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet au départ.
-- **instrument** : la côte 1D de S364 (`Cote::eval`), la même mer. Ce qui départagerait : **une composition juste** rend un écart de `η`
-  sous la borne calculée par point depuis les écarts de chaque composante (`Σ a_c·f_c·(|Δφ_c| + |Δf_c|/f_c)`) ; **une diaphonie** entre
-  composantes (un indice de table décalé, une direction mal tournée) la dépasse.
-- **calcul** : la borne par point, calculée par l'essai (son ordre, ce script : ≈ 19.1 cm — le plancher de l'instrument,
-  ADR-268 D1) ; `Hs` < 2,5 m (asserté : au large du déferlement à 2 m).
-- **ADR** : ADR-196 (§3 : la mémoire d'une bathymétrie 2D, ses voies), ADR-264, ADR-268.
-- **pièges** : une composante qui s'éloigne de la côte ou à plus de 45° (refusée) ; la mémoire (`ns·nn·20` octets par composante) ; le
-  temps de cuisson qui croît avec la marge… absente désormais (les bords périodiques).
+- **témoin** : sans objet.
+- **instrument** : la côte 2D pleine (`m` = 1), la mer de huit composantes de S667, 60 points × 3 instants. Ce qui départagerait : une
+  décimation juste rend un écart de `η` qui croît comme `Δ²` (la loi d'ADR-196 D2) ; une faute d'indice (un nœud décalé) rend un écart
+  qui ne décroît pas avec `m`, ou dès `m` = 1.
+- **calcul** (ce script) : l'ordre attendu par la loi `Δ²` d'ADR-196 D2 — 0,9 mm à 4 m, 3,7 mm à 8 m, 15 mm à 16 m par mètre d'amplitude ;
+  le plancher : la tolérance d'image, **3 mm** (S201).
+- **ADR** : ADR-196 (D2, §3), ADR-268.
+- **pièges** : la période des bords périodiques (`W` = `nn_t·m·pas`, la marche) ; la longueur multiple du pas des tables ; la phase entre
+  deux nœuds des tables, moins d'un demi-tour (refusée sinon).
 
-**Critères, écrits avant.** (1) À 60 points × 3 instants, sur la plage, `|η₂D − η₁D|` sous la borne de composition **en chaque point**.
-(2) Rapportés : la mémoire et le temps de cuisson par composante ; leur extrapolation à 1 km² et 32 composantes au pas de 2 m — et la
-voie de réduction qu'ADR-196 §3 nomme (des transformations partagées entre composantes voisines), à mesurer ensuite.
+**Critères, écrits avant.** (1) `m` = 1 au bit de `cuire`. (2) Rapportés, pour `m` = 2, 4, 8 : `|Δη|` au plus contre la côte pleine, la
+mémoire ; **le plus grand `m` sous 3 mm**, et la mémoire d'un km² à 32 composantes à ce pas. (3) L'écart croît avec `m` (asserté).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(2).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — `cuire_decime` ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) 180/180 sous la borne (rapport 0,78), `|Δη|` 0,5 cm ; (2) 1,5 s pour 8 composantes ; 160 Mo/km² pour 32 composantes au pas de 2 m.
