@@ -1343,3 +1343,10 @@ le flux à 2·10⁻⁵ et la direction à 6·10⁻⁷ de l'analytique, au bit de
 `CarteCotidale::courant_amorti` — la solution harmonique établie avec `f` et `r`. **Mesuré** : S580 retrouvé à `f = r = 0` ; une intégration
 RK4 indépendante rejointe à 2,3·10⁻⁷ m/s ; l'atténuation `ω/√(ω² + r²)` et l'ellipse `f/ω` à 10⁻⁶. Maillons **1** (2.2 avance). Suivant :
 **S635**, le lot et la physique des partiels.
+
+## S635 — 2026-10-07 — le lot ; le dégel physique par le bilan d'énergie
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; le lot (feuille de route S632–S634), puis 7.6, le dégel physique. **Fait**
+([preuve](../docs/validation/DEGEL-S635.md)) : `flux_de_fonte`, `epaisseur_fondue`, `duree_de_fonte`. **Mesuré** : la glace de S575 (0,61 m)
+fond en 12,02 jours sous 180 W/m² ; le lac la rend par quanta, la masse à l'entier, la glace nulle à l'heure 289 ; l'énergie reçue et la
+chaleur latente à un quantum près à chaque heure. Maillons **1** (7.6 avance). Suivant : **S636**, la revue de méthode.

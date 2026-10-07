@@ -624,7 +624,9 @@ pas recopiée ici (L137).
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *partiel* depuis S574 : **la glace** — la croissance de Stefan, la portance de Gold (la table de SPEC-002
   reproduite ligne à ligne), la flottaison, la formation en plaque ([preuve](validation/GLACE-S574.md)) ; **S575 : C15 passe** — la
   glace d'un lac comme couche de V, gelée par quanta exacts, la masse à l'entier sur un cycle gel/dégel ([preuve](validation/C15-GLACE-S575.md)).
-  Manquent la vapeur, un dégel physique (le bilan d'énergie), la glace dans B et δ, le gel borné aux plans d'eau gelables (ADR-027 §3),
+  **S635 : le dégel physique** — le bilan d'énergie de surface ; le lac de S575 fond en 12 jours sous 180 W/m², la masse à l'entier,
+  l'énergie fermée à un quantum près ([preuve](validation/DEGEL-S635.md)). Manquent la vapeur, l'infrarouge et le regel nocturne, la
+  glace dans B et δ, le gel borné aux plans d'eau gelables (ADR-027 §3),
   le rendu. Décidé : l'évaporation et le gel des contenants passent par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *partiel* depuis S570 : **l'échantillon** (le produit

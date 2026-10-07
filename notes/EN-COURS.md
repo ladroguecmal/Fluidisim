@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S635 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S632–S634), puis **7.6 — un
+Session : S635 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S632–S634), puis **7.6 — un
 dégel physique (le bilan d'énergie)** : le dégel de S575 était une rampe posée à la main.
 
 **Ce que la session fait.** Dans `glace.rs` : `flux_de_fonte(T_air, α, albédo, S)` — `q = α·T_air + (1 − albédo)·S` (W/m², nul s'il est
@@ -83,7 +83,9 @@ référence à 10⁻⁶ s ; (2) le lac : la masse à l'entier à chaque heure, l
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — le dégel et son essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 7.6 ; rituel (`--lot`).
+- [x] **P2** — le dégel et son essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 7.6 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai. Suite : 820 essais listés.
+- **P3** — preuve DEGEL-S635 ; ligne 7.6 ; index ; journal ; le lot.
