@@ -1123,3 +1123,10 @@ d'une ancre ↔ l'altitude au-dessus du niveau moyen, la table de SPEC-005 §4, 
 l'ordre imposé). **Mesuré** : l'aller-retour à 4·10⁻¹⁴ m jusqu'à 50 km ; un lit à 30 km de l'ancre, 400 cellules à leur fond à 10⁻¹⁴ m —
 un outil à plan tangent l'aurait mis 70,66 m trop haut. **En route** : la table de SPEC-005 écrit 70,7 m à 30 km, 70,63 m pour 6 371 km
 (note datée). Maillons **1** (12.4 : absent → partiel ; la section 12 n'a plus d'absent). Suivant : **S606**, la revue de méthode.
+
+## S606 — 2026-10-07 — la vingt-cinquième revue de méthode (ADR-252)
+
+**Entrée.** En autonomie ; revue due. **Friction** : la taille de la suite écrite par incrément (S602 : 777 ; mesurée en S603 : 793
+listés, 17 ignorés) — **élargie** : un nombre de la preuve se mesure par une commande nommée (ADR-252 D1, L411). Ont tenu : les assertions
+du script du plan, qui ont arrêté trois nombres faux en S603–S604 avant toute mesure ; le rappel du lot par le rituel. Maillons **1**.
+Suivant : **S607**, un point absent.

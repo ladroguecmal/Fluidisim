@@ -6694,3 +6694,9 @@ ont retrouvé la moyenne (ADR-250 D1).
 **S598, S599 — le plan non relu.** S598 promettait un compte « fait par le script » que le script n'avait pas fait ; l'essai de S599 exigeait
 une ligne de déferlement pour chaque état quand la référence du plan en plaçait une hors de la grille. Les deux rattrapés par les notes
 avant de juger (ADR-244 D1) ; une relecture du plan contre ses critères avant l'essai les aurait évités (ADR-251 D1).
+
+## L411
+
+**S589–S602 — la taille de la suite par incrément.** Chaque preuve écrivait « suite du cœur : N » comme la précédente plus les essais
+ajoutés. S603 l'a mesurée : 793 essais listés en S602, dont 17 ignorés — la preuve disait 777. Deux bases mêlées et une dérive d'un ; un
+nombre de preuve se mesure (ADR-252 D1).

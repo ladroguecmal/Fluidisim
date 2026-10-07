@@ -62,36 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S605 — **terminée**. En autonomie (ADR-247) : **12.4 — l'eau en amont du terrain, le géoïde dans l'outil de terrain**
-(SPEC-005 §3–4 ; absent). Le « zéro » d'une scène est une distance au centre de la planète ; le squelette hydrographique est une entrée du
-terrain, jamais une sortie.
+Session : S606 — **terminée**. En autonomie, **la vingt-cinquième revue de méthode** (ADR-222 D4 ; S601–S605).
 
-**Ce que la session fait.** Un module `geoide.rs` : `Geoide { rayon_m }` (le niveau moyen sphérique) ; `altitude(local)` — l'altitude
-au-dessus du niveau moyen d'un point du plan tangent d'une ancre ; `z_local(x, y, altitude)` — l'inverse ; `ecart_plan_tangent(d)` —
-`R·(1 − cos(d/R))`, la table de SPEC-005 §4 ; `Grille` (le terrain de l'outil, en `z` du plan tangent) et `conformer(grille, géoïde,
-biefs)` — **l'étape 2 de l'ordre imposé** : le terrain gravé pour satisfaire le squelette (les biefs de S604, leurs lignes d'eau en
-altitude), le squelette jamais modifié ; chaque cellule à moins d'une demi-largeur d'un segment descend au fond `z_eau − h` (Manning), placé
-par le géoïde. Ne fait pas : l'anomalie régionale et la marée du niveau moyen (ADR-002 §2.4), le trait de côte et la bathymétrie du
-squelette, les dérivations (étape 3), les ancres multiples.
-
-**Références, calculées avant** (ce script, en décimal à 50 chiffres). La table, `R` = 6 371 km : 1 km : 0.078480615 m ; 3 km : 0.706325525 m ; 10 km : 7.848059918 m ; 30 km : 70.632423247 m (SPEC-005 écrit 70,7 m à 30 km : un
-arrondi — 70,63). Le point (30 km, 0, 0) du plan tangent est à **70.632162227 m** au-dessus du niveau moyen. La gravure : un bief le long de
-`y` en `x` = 30 km (2 km, ligne d'eau 12,0 → 11,0 m, 20 m, 30 m³/s, n = 0,035 : `h` = 1.781932256 m), une grille de 10 m (20 × 200 cellules),
-le terrain à 15 m d'altitude : **400 cellules** dans le couloir, le plus grand creusement **5.779432256 m** ; dans un outil à
-plan tangent, le même fond serait à **70.655602 m** au-dessus de sa place.
-
-**Quantum** : f64 au rayon de la planète (l'ulp de 6,4·10⁶ m : 9,3·10⁻¹⁰ m) ; la tolérance des allers-retours **10⁻⁸ m** (rapport 10,7).
-**Critères, écrits avant.** (1) la table à 10⁻⁹ relatif ; l'aller-retour altitude ↔ `z` à 10⁻⁸ m sur des points jusqu'à 50 km et ±100 m ;
-(2) l'altitude du point (30 km, 0, 0) à 10⁻⁸ m ; (3) la gravure : 400 cellules gravées, chacune à l'altitude de son fond à 10⁻⁸ m,
-le plus grand creusement à 10⁻⁸ m, les autres cellules inchangées au bit, le squelette inchangé ; (4) l'outil à plan tangent : l'écart
-du fond au centre du couloir à 10⁻⁶ m ; (5) refus : rayon non positif, grille vide ou pas non positif, un bief qui ne descend pas.
+**Ce que la session fait.** Relu : S601 (la revue), S602 (9.4), S603 (12.5 : trois nombres arrêtés par le script du plan), S604 (12.2 :
+un script d'édition échoué suivi d'un autre), S605 (12.4 : le lot rappelé par le rituel). Mesuré : la suite du cœur, **796 essais
+listés, 17 ignorés**. **ADR-252** : D1 ; L411 ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `geoide.rs` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; liste 12.4 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-252, METHODE, L411, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(5) tenus ; l'aller-retour à 4·10⁻¹⁴ m (les formes sans soustraction de rayons) ; 400 cellules à leur fond. Suite 796.
-- **P3** — preuve GEOIDE-S605 ; liste 12.4 (absent → partiel) et décompte ; note datée à SPEC-005 §4 ; index ; journal.
