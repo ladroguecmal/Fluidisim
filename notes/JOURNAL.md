@@ -1330,3 +1330,9 @@ côte courbe. **Fait** ([preuve](../docs/validation/RAYONS-DEFERLEMENT-S632.md))
 sur une côte droite, le déferlement à 1,9 cm → 1,0 mm de l'analytique quand le pas des rayons passe de 2 à ½ s ; autour d'une île, en miroir
 exact, plus au large qu'en incidence normale (233 m contre 214). Bornes du montage assertées (ADR-257 D1, première application). Maillons
 **1** (3.5 avance). Suivant : **S633**.
+
+## S633 — 2026-10-07 — les sommets de déferlement le long d'un faisceau
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 3.5. **Fait** ([preuve](../docs/validation/SOMMETS-RAYONS-S633.md)) :
+`deferlement::sommets_sur_rayons` — position, flux dissipé, direction de crête, dans l'ordre du faisceau. **Mesuré** : sur une côte droite,
+le flux à 2·10⁻⁵ et la direction à 6·10⁻⁷ de l'analytique, au bit de numpy. Maillons **1** (3.5 avance). Suivant : **S634**.

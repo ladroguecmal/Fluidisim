@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 10:54 +02:00
+JETON            : libre
+Battement        : 2026-10-07 10:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S633 — 3.5, les sommets de SPEC-006 §6 le long des rayons ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S632 — le lot ; le déferlement le long des rayons de houle ([journal](notes/JOURNAL.md)). Avant : S631 (la trentième revue de méthode)
-Session suivante : **S633 — la physique des partiels** (ADR-247). Revue à S636 ; le lot à S635. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
-Maillons        : 1 — S632 : 3.5 avance (les rayons)
+Session en cours : aucune
+Dernière session : S633 — les sommets de déferlement le long d'un faisceau ([journal](notes/JOURNAL.md)). Avant : S632 (le lot)
+Session suivante : **S634 — la physique des partiels** (ADR-247). Revue à S636 ; le lot à S635. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
+Maillons        : 1 — S633 : 3.5 avance (les sommets)
 Registres       : dernier lot S632 (ADR-213 D3) ; le prochain au plus tard en S635
 ```
 

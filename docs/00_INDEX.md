@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Les sommets de déferlement le long d'un faisceau — S633](validation/SOMMETS-RAYONS-S633.md) : position, flux, direction ; la polyligne chaînée.
 - [Le déferlement le long des rayons de houle — S632](validation/RAYONS-DEFERLEMENT-S632.md) : la hauteur réfractée par une côte courbe.
 - [Le déferlement sur une côte quelconque — S630](validation/CONTOURS-S630.md) : marching squares et chaînage ; l'île sur son cercle.
 - [Le domaine local nourri par le tsunami macroscopique — S629](validation/COUPLAGE-TSUNAMI-S629.md) : tsunami::niveau aux bords, 0,12 %.

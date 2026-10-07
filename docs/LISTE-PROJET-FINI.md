@@ -188,8 +188,9 @@ pas recopiée ici (L137).
   ([preuve](validation/DEFERLEMENT-S588.md)) ; **S630 : une côte quelconque** — marching squares et chaînage ; la côte droite redonne S588,
   une île se referme sur le cercle exact à 1 cm près (maille de 5 m), deux îles donnent deux lignes ([preuve](validation/CONTOURS-S630.md)).
   **S632 : la hauteur réfractée par une côte courbe** — le déferlement le long des rayons de houle dispersifs, à 1 mm de l'analytique sur
-  une côte droite, plus au large autour d'une île ([preuve](validation/RAYONS-DEFERLEMENT-S632.md)). Manquent les caustiques, le
-  chaînage des points de rayons, le flux et la direction sur le contour, la largeur de la zone, une polyligne par phase de marée, la
+  une côte droite, plus au large autour d'une île ([preuve](validation/RAYONS-DEFERLEMENT-S632.md)) ; **S633** : les sommets complets
+  le long d'un faisceau ordonné — position, flux dissipé, direction de crête, à 2·10⁻⁵ de l'analytique
+  ([preuve](validation/SOMMETS-RAYONS-S633.md)). Manquent les caustiques, la largeur de la zone, une polyligne par phase de marée, la
   publication.
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
   (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).

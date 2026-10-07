@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S633 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **3.5** — achever les rayons de S632 : les sommets de SPEC-006
+Session : S633 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **3.5** — achever les rayons de S632 : les sommets de SPEC-006
 §6 (position, flux dissipé, direction de crête) le long d'un faisceau ordonné — la polyligne chaînée d'une côte quelconque.
 
 **Ce que la session fait.** `deferlement::sommets_sur_rayons(rayons, b₀, …)` : pour chaque rayon du faisceau (son voisin : le suivant, ou le
@@ -80,7 +80,9 @@ du rayon, interpolé) ; les sommets dans l'ordre du faisceau. Ne fait pas : les 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `sommets_sur_rayons` et son essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 3.5 ; rituel.
+- [x] **P2** — `sommets_sur_rayons` et son essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(3) tenus du premier essai. Suite : 818 essais listés.
+- **P3** — preuve SOMMETS-RAYONS-S633 ; ligne 3.5 ; index ; journal.
