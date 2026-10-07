@@ -62,33 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S593 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S590–S592), puis **2.4 — les rivières** (absent ;
-« débit macroscopique qui contraint les perturbations locales »). Première pièce : **l'état macroscopique d'une rivière** dans V — sa
-ligne d'eau, avec le **remous** qu'un seuil aval lui impose, et la vitesse moyenne de chaque bief (ce que δ et W devront respecter).
+Session : S594 — **en cours**. En autonomie (ADR-247), **11.2 — de nombreuses régions de mer décrites par descripteur, transitions par
+paramètres** (absent ; I-09 : « on interpole des paramètres, jamais des réalisations »).
 
-**Le montage.** La loi de Manning de S592 : vingt biefs de 100 × 5 m, `S` = 10⁻³, `n` = 0,015, 5 m³/s apportés en amont ; le dernier bief
-se vide par un déversoir de 5 m (`C_d` = 0,62) dont la crête est à 1,5 m au-dessus de son fond ; trois heures au pas de 0,05 s (le pas de 1 s
-oscillerait : sous le remous, la surface est presque plate et `dQ/dΔh` grand — calculé : l'amplitude d'oscillation `(dt·C/A)²` passe de
-~8 cm à ~10⁻⁵ m).
+**Ce que la session fait.** `regions.rs` : un **descripteur** de région (Hs, niveau moyen) sur un rectangle ; `parametres_en(x, y)` : les
+poids de chaque région — 1 à l'intérieur, une transition en `smoothstep` sur une bande de largeur donnée à son bord —, normalisés (une
+partition de l'unité), et les **paramètres mélangés** ; `echelle(échantillon, s)` : l'échantillon de B mis à l'échelle de `Hs_local/Hs_réf`
+(les composantes de B sont les mêmes partout, ADR-004 §2.1 ; seule leur amplitude suit le paramètre) et décalé du niveau moyen local. Ne
+fait pas : la période et la direction par région (elles changent les composantes : à faire par pondération spectrale), la marée par
+région (la carte cotidale, S578, s'y attache ensuite), le placement des régions sur la planète (11.1).
 
-**Références, calculées avant** (ce script les écrit). (1) **L'état stationnaire exact du même découpage** (de l'aval vers l'amont, chaque
-surface par bissection sur la loi de l'arête) : les profondeurs **0.7618, 0.7861, 0.8181, 0.8585, 0.9075, 0.9646, 1.0291, 1.0998, 1.1756, 1.2557, 1.3392, 1.4255, 1.5139, 1.6042, 1.6958, 1.7887, 1.8825, 1.9771, 2.0724, 2.1682** m, de l'amont à l'aval ; la
-charge sur le seuil 0.66819 m. (2) **La ligne d'eau continue de l'onde diffusive** (`dy/dx = S − S_f` : le modèle de V, sans inertie) :
-l'écart au découpage, **0.75 mm** au plus. (3) **La ligne d'eau complète** (`dy/dx = (S − S_f)/(1 − Fr²)`) : l'écart de l'onde
-diffusive, **40.4 mm** au plus — l'inertie que V n'a pas, publiée, sans critère.
+**Références, calculées avant** (ce script les écrit). Deux régions, Hs = 1.0 et 3.0 m, une bande de 1 000 m. Au milieu de la bande :
+le **mélange des paramètres** donne **Hs = 2.0 m** ; le **témoin** — mélanger deux réalisations indépendantes, chacune à son Hs, à
+½–½ — donne **Hs = 1.5811 m** (−20.9 %) ; à Hs égal, la perte vaut **29.3 %** (A11).
 
-**Quantum** (ADR-236 D1 ; ADR-249 D1 vérifié par le script) : 1 ml sur 500 m² ; le pas de temps (l'oscillation ~10⁻⁵ m). **Critères,
-écrits avant.** (1) chaque profondeur à 1 mm de la référence (1) ; (2) à 1.5 mm de la ligne diffusive continue ;
-(3) la vitesse moyenne de chaque bief, `Q/(b·y)`, publiée et à 10⁻³ de `Q/(b·y_réf)` ; le bilan au millilitre ; (4) la ligne complète :
-l'écart publié.
+**Quantum** (ADR-236 D1) : la mesure de Hs (`4·σ(η)` sur 2 h au pas de 0,5 s, 9 points) — son erreur estimée par l'écart entre deux
+fenêtres d'une heure, mesuré ; le seuil 5 % doit le dépasser d'un facteur 10 (vérifié dans l'essai avant de juger).
+**Critères, écrits avant.** (1) les poids : une partition de l'unité partout (à 10⁻⁶), 1 à l'intérieur d'une région, continus à travers la
+bande ; (2) au milieu de la bande, Hs mesuré à 5 % de 2.0 m, et le témoin à 5 % de 1.5811 m (la perte
+mesurée) ; (3) loin de la bande, l'échantillon de chaque région au bit de B mis à son échelle ; (4) refus : un rectangle vide, une
+bande non positive, un point hors de toute région.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 2.4 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `regions.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 11.2 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — 0,014 mm du découpage exact ; les vitesses ; le bilan. L'essai dure 65 s (216 000 pas) — le plus long du cœur. Suite 767.
-- **P3** — preuve RIVIERE-REMOUS-S593 ; liste 2.4 (absent → partiel) et décompte ; index ; journal ; le lot.
-
