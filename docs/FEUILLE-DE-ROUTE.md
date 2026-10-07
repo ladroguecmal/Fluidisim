@@ -471,6 +471,8 @@ vitesse ramenée) ; la trente-cinquième revue — les erreurs relevées à la d
 rituel (ADR-266).
 **S657–S659** : A334 levée (le corps libre à 0,9 fois l'eau qui l'entoure — le rouleau emporte un nageur) ; la séance visuelle du rouleau,
 **R40 reçu** : « tout parait crédible » ; 2.7, le modèle parabolique de pente douce (Berkhoff 1982 : le pic tenu, les sections loin).
+**S660–S662** : le grand angle (un cinquième de l'écart) ; la trente-sixième revue (ADR-267 : l'instrument dit ce qui départagerait) ;
+la dispersion d'amplitude — **les quatre sections de Berkhoff à un dixième des mesures** (2.7).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

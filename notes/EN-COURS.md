@@ -90,7 +90,7 @@ Au plan (ce script), l'onde raide va plus vite : au sommet du haut-fond, `a = 2,
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — la dispersion d'amplitude ; les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) à moitié : `k` au point exact ; la limite à 10⁻⁹ manquée (9,76·10⁻⁸ — le terme d'ordre `ε` de la forme composite, que
