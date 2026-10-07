@@ -70,6 +70,6 @@ unique), S595 (la goutte). **ADR-250** : D1 ; L409 ; METHODE ; BOUSSOLE ; index.
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-250, METHODE, L409, BOUSSOLE, index) ; le lot.
-- [ ] **P2** — rituel (`--lot`).
+- [x] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
