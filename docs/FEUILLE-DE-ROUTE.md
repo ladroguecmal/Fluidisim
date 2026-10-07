@@ -432,6 +432,8 @@ goutte) ; la vingt-troisième revue (ADR-250 : une propriété d'ensemble sur un
 vingt-quatrième revue (ADR-251 : le plan relu contre ses critères avant l'essai).
 **S602–S604** : **9.4 ouvert** (les paliers de confiance des objets contrôlables) ; **12.5 ouvert** (la portée d'une modification de
 bathymétrie : l'isobathe h = λ, les plages à recuire) ; **12.2 ouvert** (le cœur de l'éditeur de rivières).
+**S605–S607** : **12.4 ouvert** (le géoïde dans l'outil de terrain, le terrain gravé pour le squelette) ; la vingt-cinquième revue
+(ADR-252 : un nombre de la preuve mesuré, jamais par incrément) ; **1.5 ouvert** (la grille d'adressage HydroGrid).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

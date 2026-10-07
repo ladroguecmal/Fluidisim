@@ -62,34 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S607 — **terminée**. En autonomie (ADR-247) : **1.5 — la grille 3D de référence stable : adressage, zones actives, échanges
-client/serveur** (ADR-006 §2 ; absent, conçu). La seule structure que serveur et clients partagent ; elle ne contient aucune eau.
+Session : S608 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S605–S607), puis **1.6 — cellules, domaines et
+solveurs distincts, niveaux d'activité des cellules** (ADR-006 ; absent, conçu). La source (`architecture_globale` §3.3) nomme cinq
+niveaux : inactive, simplifiée, partiellement active, simulation active, niveau de détail supérieur — et dit que le niveau spatial et la
+précision physique ne sont pas équivalents.
 
-**Ce que la session fait.** Un module `hydro_grid.rs` : `CellId { frame: u32, niveau: u8, morton: u64 }` — cellule de base 64 m, trois
-niveaux (64 / 512 / 4 096 m : le troisième est la région de rebasage d'ADR-002 §2.3, asserté), Morton 3D à 20 bits par axe (±33 554 km
-au niveau 0) ; `cellule(frame, niveau, position)`, `coordonnees`, `parent` (`morton >> 9`), `enfants` (une plage contiguë de 512 clés),
-`voisins` (26) ; `ZonesActives` — les cellules de niveau 0 qu'une boule d'intérêt touche, et leurs ancêtres ; `Echange` — l'écart entre
-deux états (ajouts, retraits, triés), encodé en octets (8 + 12 par cellule) et décodé : le client reconstruit l'état du serveur. Ne fait pas :
-la subdivision de publication par type de donnée (R07), le routage d'un événement W, l'index des volumes V, le transport réseau (10.1).
+**Ce que la session fait.** Un module `activite.rs` : `Activite` (les cinq niveaux, ordonnés) ; `DomaineMeta` — ce que le serveur sait
+d'un domaine (référentiel, origine, `dx` parmi les six niveaux d'ADR-006 §3.2, blocs de 8³ mailles) — ; `couverture` — le volume de chaque
+cellule de 64 m de la HydroGrid couvert par les blocs d'un domaine, **non alignés** sur elle ; `niveaux` — par cellule : détail supérieur si
+un domaine de `dx ≤ dx_detail` la touche (la précision, non la subdivision), active si un domaine la couvre entière, partielle s'il la
+touche, simplifiée si W la marque, inactive sinon. Ne fait pas : l'hystérésis des niveaux (celle des domaines existe, ADR-006 §4,
+`scheduler::ON/OFF`), la forme réduite d'une perturbation qui disparaît (§3.4), la publication des niveaux au réseau.
 
-**Références, calculées avant** (ce script, par une implémentation Python indépendante). Clés : 0xe00000000000000, 0xa92492492492493, 0x624924924905a, 0x2a492492693, 0x5b6db6db6db6db6 (les
-points [(0, (0.0, 0.0, 0.0)), (0, (100.0, -50.0, 7.0)), (1, (-5000.0, 2000.0, 0.0)), (2, (40000.0, -300.0, 5.0)), (0, (-33554432.0, 33554431.0, -1.0))]). Trois intérêts mobiles sur dix pas (une barque de 100 m de rayon à 30 m par pas ; un point fixe de 200 m ; un nageur de
-64 m à 25 m par pas) : tailles [305, 309, 308, 307, 306, 308, 305, 308, 306, 308] ; ajouts [305, 10, 11, 7, 7, 13, 8, 14, 6, 11] ; retraits [0, 6, 12, 8, 8, 11, 11, 11, 8, 9] ; octets par message [3668, 200, 284, 188, 188, 296, 236, 308, 176, 248] (total
-**5792**) ; au dernier pas, **14** parents de niveau 1 et **8** de niveau 2.
+**Références, calculées avant** (ce script, en rationnels exacts). Domaine A (`dx` 0,5 m, origine (3,3 ; −1,7 ; −65,7), 40 × 40 × 17
+blocs) : **36 cellules** touchées, **2** pleines ([(1, 0, -1), (1, 1, -1)]), volume 1740800 m³ (= blocs × 4³). Domaine B
+(`dx` 0,05 m, 50 × 50 × 5 blocs posé dans une cellule pleine de A, il dépasse dans celle du dessus) : 2 cellules. W : neuf cellules d'un sillage. Avec `dx_detail` =
+0,10 m, les niveaux (inactive, simplifiée, partielle, active, détail) : **[0, 6, 33, 1, 2]**. Fractions couvertes par A : (0, 0, -2) : 0.025192871093750 ; (1, 0, -1) : 1.000000000000000 ; (2, 2, -1) : 0.261130371093750 ; (1, 0, 0) : 0.035937500000000.
 
-**Quantum** : des entiers (des clés). **Critères, écrits avant.** (1) les cinq clés au bit ; l'aller-retour `cellule` ↔ `coordonnees` sur
-10⁵ points pseudo-aléatoires ; (2) le parent de la cellule d'un point est la cellule du point au niveau supérieur (les mêmes 10⁵ points,
-niveaux 0 → 1 → 2) ; les 512 enfants d'une cellule de niveau 1 forment la plage `[p·512, (p+1)·512)` et ont ce parent ; (3) 26 voisins à
-Chebyshev 1, tous distincts ; (4) les tailles, ajouts, retraits et octets des dix pas, égaux à la référence ; après chaque message, l'état du
-client égal à celui du serveur, au bit ; les comptes de parents 14 et 8 ; (5) le niveau 2 vaut 4 096 m, le seuil de rebasage ;
-(6) refus : niveau > 2, position hors de portée ou non finie, message tronqué.
+**Quantum** : f64 ; la couverture est un volume en m³, exacte en rationnels, en f64 à l'arrondi (10⁻⁹ relatif). **Critères, écrits
+avant.** (1) le nombre de cellules touchées et pleines de A, et les quatre fractions à 10⁻¹² ; (2) la somme des volumes couverts égale au
+volume des blocs, à 10⁻⁹ relatif — pour A et pour B ; (3) le compte des cinq niveaux [0, 6, 33, 1, 2] ; les 2 cellules de B ([(1, 0, -1), (1, 0, 0)]) au niveau détail, dont
+une que A couvre entière ; (4) refus : un `dx` hors des six niveaux, un domaine d'un autre référentiel ne couvre rien.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `hydro_grid.rs` et ses essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 1.5 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `activite.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 1.6 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus du premier essai ; dix messages rejoués au bit. Suite : 797 essais listés (mesurée).
-- **P3** — preuve HYDROGRID-S607 ; liste 1.5 (absent → partiel) et décompte ; index ; journal.
