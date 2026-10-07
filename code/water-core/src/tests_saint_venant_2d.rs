@@ -137,3 +137,48 @@ fn a_step_reuses_its_work_arrays_s619() {
     println!("S619 : 100 pas sans réallocation ; le clone au bit : {au_bit}");
     assert!(au_bit, "critère 2 : le clone au bit");
 }
+
+/// **S620** — l'ordre deux : (1) Thacker aux trois résolutions ; (2) masse, positivité ; (3) le lac au repos ; (6) refus.
+#[test]
+fn second_order_cuts_the_thacker_error_by_an_order_of_magnitude_s620() {
+    let refs = [(50usize, 0.04782610765813885, 0.4270884943083992), (100, 0.015728083697586923, 0.24218466972342975),
+        (200, 0.005876494835705057, 0.1286419144167166)];
+    let mut l1s = Vec::new();
+    for (nx, r, ordre1) in refs {
+        let periode = 2.0 * core::f64::consts::PI / omega();
+        let npas = 10 * nx;
+        let dt = periode / npas as f64;
+        let (h, u, v) = exact(nx, 0.0);
+        let qx = h.iter().zip(&u).map(|(a, b)| a * b).collect();
+        let qy = h.iter().zip(&v).map(|(a, b)| a * b).collect();
+        let mut d = SaintVenant2D::nouveau(nx, nx, LD / nx as f64, G, fond(nx), h, qx, qy).unwrap();
+        d.regler_ordre_deux(1e-16).unwrap();
+        let v0 = d.volume();
+        let mut hmin = 0.0f64;
+        for _ in 0..npas {
+            d.pas(dt).unwrap();
+            hmin = d.h.iter().fold(hmin, |m, &x| m.min(x));
+        }
+        let he = exact(nx, periode).0;
+        let l1 = d.h.iter().zip(&he).map(|(a, b)| (a - b).abs()).sum::<f64>() / he.iter().sum::<f64>();
+        let dm = d.volume() / v0 - 1.0;
+        println!("S620 : ordre deux, {nx}² — L1 {l1} (ordre un {ordre1}, ×{:.1}), masse {dm:e}, h min {hmin}", ordre1 / l1);
+        assert!((l1 - r).abs() < 1e-9 && ordre1 / l1 >= 8.0, "critère 1 à {nx}²");
+        assert!(dm.abs() < 1e-13 && hmin >= 0.0, "critère 2 à {nx}²");
+        l1s.push(l1);
+    }
+    assert!(l1s[1] / l1s[2] >= 2.5, "critère 1 : la convergence");
+
+    let nx = 100;
+    let z = fond(nx);
+    let h: Vec<f64> = z.iter().map(|z| (-0.05 - z).max(0.0)).collect();
+    let mut lac = SaintVenant2D::nouveau(nx, nx, LD / nx as f64, G, z, h, vec![0.0; nx * nx], vec![0.0; nx * nx]).unwrap();
+    lac.regler_ordre_deux(1e-16).unwrap();
+    let dt = 2.0 * core::f64::consts::PI / omega() / 1000.0;
+    for _ in 0..200 {
+        lac.pas(dt).unwrap();
+    }
+    println!("S620 : lac au repos à l'ordre deux, vitesse max {:e} m/s", lac.vitesse_max());
+    assert!(lac.vitesse_max() < 1e-14, "critère 3");
+    assert_eq!(lac.regler_ordre_deux(0.0), Err(Refus), "critère 6");
+}
