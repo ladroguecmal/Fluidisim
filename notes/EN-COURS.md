@@ -67,14 +67,18 @@ tournait que sur un véhicule 1D, la rupture de barrage sur lit sec). Cette sess
 solution analytique de Thacker (une nappe plane qui tourne dans une cuvette paraboloïde ; le rivage se déplace).
 
 **Ce que la session fait.** Un module `saint_venant_2d.rs` : Saint-Venant 2D en volumes finis d'ordre un, **reconstruction hydrostatique**
-d'Audusse (positive, équilibrée), flux de Rusanov, murs aux bords, vitesse nulle sous `h ≤ 10⁻⁶ m` ; `pas(dt)` refuse un nombre de Courant
+d'Audusse (positive, équilibrée), flux de Rusanov, murs aux bords, la vitesse **désingularisée à la Kurganov–Petrova** (`u = √2·h·q/√(h⁴ + max(h⁴, ε))`, `ε` = (1 mm)⁴) ; `pas(dt)` refuse un nombre de Courant
 au-delà de ½. Ne fait pas : le rouleau 3D, l'ordre deux, le frottement, la houle incidente sur une plage réelle, le branchement à δ.
 
 **Références, calculées avant** (`s613_ref.py`, numpy indépendant). Thacker (SWASHES) : `a` = 1 m, `h₀` = 0,1 m, domaine de 4 m, `η` = 0,5 ;
-période `T` = 4,485701 s ; `10·N` pas par période. Écart L1 de `h` après une période : **0.431424651** (50²), **0.245620430** (100²),
-**0.128686360** (200²) — rapports 1.7565 et 1.9087 : **l'ordre un, qui converge**. Masse : variation sous 10⁻¹³ aux trois ; `h` jamais
-négatif. Le centre de masse à 100² : T·250/1000 : (2.016625851, 2.476355709) ; T·500/1000 : (1.549315348, 2.060239372) ; T·1000/1000 : (2.397602500, 1.896863730) (l'exact : (2 ; 2,5), (1,5 ; 2), (2,5 ; 2) — l'oscillation amortie par la diffusion de l'ordre
+période `T` = 4,485701 s ; `10·N` pas par période. Écart L1 de `h` après une période : **0.427088494** (50²), **0.242184670** (100²),
+**0.128641914** (200²) — rapports 1.7635 et 1.8826 : **l'ordre un, qui converge**. Masse : variation sous 10⁻¹³ aux trois ; `h` jamais
+négatif. Le centre de masse à 100² : T·250/1000 : (2.017083014, 2.475469549) ; T·500/1000 : (1.552226477, 2.058725469) ; T·1000/1000 : (2.395102837, 1.902849265) (l'exact : (2 ; 2,5), (1,5 ; 2), (2,5 ; 2) — l'oscillation amortie par la diffusion de l'ordre
 un). **Le lac au repos** (cote −0,05 m, bords secs), 500 pas : vitesse max **1.852e-16 m/s**.
+
+**Amendement, avant la mesure du code** (ADR-244 D1) : la première référence (vitesse `q/h` au-dessus de 10⁻⁶ m, nulle
+sous) atteignait **Courant 0,60** dans une maille presque sèche (`h` = 1,2·10⁻⁶ m) — le refus du critère (5) l'aurait arrêtée à 200² ; la
+vitesse désingularisée, Courant ne dépasse pas **0.1896** (asserté), et les références ci-dessus sont les nouvelles.
 
 **Quantum** : f64. **Critères, écrits avant.** (1) à 100², l'écart L1 et les trois centres de masse égaux aux références à 10⁻⁹ ; (2) les écarts
 L1 à 50² et 200² à 10⁻⁹ ; le rapport 100 → 200 au moins 1,8 ; (3) la masse à 10⁻¹³ relatif, `h ≥ 0` à chaque pas, aux trois résolutions ;
