@@ -97,6 +97,8 @@ pub mod saint_venant_2d;
 pub mod grand_evenement;
 /// S615 — les grandes formes cohérentes entre clients : la coupure passe-bas avant W (liste 10.5).
 pub mod coherence_clients;
+/// S617 — les profils de qualité (I-16) et le régulateur d'ADR-012 §5 (liste 9.10).
+pub mod qualite;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
