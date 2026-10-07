@@ -80,7 +80,7 @@ coûté ; (3) la prochaine revue nommée.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-267.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — ADR-267 : D1, la ligne « instrument » dit ce qui départagerait ; D2, un script de plus de vingt lignes en fichier. Les contrôles ont servi deux fois (S657, S659). Prochaine revue S666.
