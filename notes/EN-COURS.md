@@ -62,40 +62,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S673 — **terminée**. En autonomie vers la v2 ; 2.7 et 12.3. `houle_moyenne.rs` (S672) calcule le niveau moyen et le courant de
-dérive d'une côte droite ; `Cote2D` (S670) cuit la mer qui déferle. Ils ne se parlent pas encore.
+Session : S674 — **en cours**. En autonomie vers la v2 ; 2.7. `Cote2D` (S673) relève le niveau de 13 cm au rivage, mais sa mer déferle
+encore sur la profondeur au repos : 13 % de profondeur manque au rivage.
 
-**Ce que la session fait.**
-
-- **`Cote2D::cuire_deferlante` reçoit `c_f`.** Par rangée de la marche, l'énergie de chaque composante est moyennée le long de la
-  côte ; son vecteur d'onde vient de Snell (`k_n = k₀·sin θ₀`). La rangée donne `S_ss` et `S_sn`, puis `η̄(s)` et `V(s)`, stockés
-  par rangée des tables (8 octets par rangée).
-- **`eval`** ajoute `η̄` à `η` et `V·t̂` à `u_total`. Sans déferlement, rien ne change (au bit).
-- **`houle_moyenne`** : les vitesses au fond sont échantillonnées une fois par rangée, avant la bissection (le coût, ce script).
+**Ce que la session fait.** **Le point fixe du niveau.** `cuire_deferlante` marche sur `h + η̄(s)`, recalcule `η̄`, et recommence
+jusqu'à `|Δη̄|` < 1 mm (au plus 8 marches ; le nombre est gardé). Les tables (`k`, `coth`) sont cuites sur la profondeur totale. Le
+courant n'est calculé qu'à la dernière marche.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : `cuire_decime`, sans déferlement, au bit (l'empreinte de S670, `40c657593a299c83`) ; les essais S672 aux mêmes valeurs.
-- **instrument** : l'équilibre d'énergie 1D de S669, donnant les amplitudes par composante, passé par `houle_moyenne` : `η̄_ref(s)`,
-  `V_ref(s)`. Ce qui départagerait :
-  - une moyenne le long de la côte juste suit la référence au plancher ;
-  - un signe d'axe faux (`t̂` retourné) inverse le courant ;
-  - un indice de rangée décalé déplace le pic de `V` de la bande.
-- **calcul** (ce script) : le plancher — 0,8 % sur `S` (0,40 % par composante, S670) ; d'où **3 %** du pic pour `η̄` et **5 %** du pic
-  pour `V` ; le coût, ≈ 0,8·10⁹ opérations pour 1 976 rangées.
+- **témoin** : l'itération 0 est S673 (12,94 cm au calcul, 13,0 cm mesurés) ; sans déferlement, au bit (aucune itération).
+- **instrument** : le même point fixe en 1D dans l'essai — l'équilibre d'énergie de S669 sur `h + η̄_ref`, `η̄_ref` par
+  `houle_moyenne`. Ce qui départagerait :
+  - une rétroaction juste suit la référence au plancher de S673 ;
+  - une profondeur totale oubliée dans les tables, ou dans le déferlement, laisse `Hrms` au rivage à 0,512 m au lieu de 0,552 m (8 %) ;
+  - une itération mal raccordée ne converge pas en trois marches.
+- **calcul** (scratchpad `s674_calc.py`, et ce script qui asserte) : au rivage, `Hrms` 0,512 → **0,552 m** (+7,8 %), `η̄` 12,94 → **12,56
+  cm** ; `|Δη̄|` 129 mm, 4,0 mm, 0,14 mm, **trois marches**. Les bornes de S673 : 3 % du pic pour `η̄`, 5 % pour `V`, 2 % par composante.
 - **ADR** : ADR-196, ADR-268.
-- **pièges** : `t̂ = (−n_y, n_x)`, le même que `coordonnees` ; `η̄(0)` = 0, rapporté au bord du large (le creux y est de 10⁻⁵ m) ; `V` hors
-  de la bande, où `dS_sn/ds` n'est que bruit numérique.
+- **pièges** : la profondeur des tables (`coth`, `k̄` de `ψ`) prise sur la même `h + η̄` que la marche ; le départ (`η̄(0)` = 0) inchangé ;
+  la dernière marche faite avec l'avant-dernier `η̄` (l'écart, sous 1 mm).
 
-**Critères, écrits avant.** (1) Sans déferlement, au bit ; S672 aux mêmes valeurs. (2) `η̄` des tables à **3 %** du pic de `η̄_ref`, `V` à
-**5 %** du pic de `V_ref`, à chaque rangée. (3) `eval` : `η` relevé de `η̄(s)` interpolé (à 10⁻⁵ m), `u_total` de `V·t̂` ; le courant
-dans le sens de `S_sn` au large. (4) Rapportés : la remontée au rivage, le creux le plus bas, le pic de `V`, le coût de la cuisson.
+**Critères, écrits avant.** (1) Sans déferlement, au bit ; l'itération 0 au bit de S673. (2) Contre le point fixe 1D : le facteur de
+chaque composante à **2 %**, `η̄` à **3 %** du pic, `V` à **5 %** du pic. (3) Convergence sous 1 mm en **au plus 4** marches. (4)
+Rapportés : `Hrms` et `η̄` au rivage avant et après, le coût.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `Cote2D` ; `houle_moyenne` échantillonné ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; listes 2.7, 12.3 ; rituel.
+- [ ] **P2** — le point fixe dans `cuire_interne` ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) au bit, S672 inchangé ; (2) `η̄` 0,21 %, `V` 0,64 % ; (3) eval à 6·10⁻⁸, le sens tenu ; (4) 13,0 cm au rivage, −2,2 cm au creux, 0,113 m/s ; 5,3 s (8,3 s avant Illinois et les seules rangées des tables).
