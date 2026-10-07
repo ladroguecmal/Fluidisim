@@ -1565,3 +1565,11 @@ inversées) écarte une cause. Maillons **1** (2.7 avance). Suivant : **S660, le
 d'un cinquième (0,171 ; 0,161 ; 0,342 ; 0,233) — les sections 2 et 3 sous 0,20, la 5 et la 7 manquées ; le verdict du témoin : **l'angle
 n'est qu'une part**. Une faille du plan vue avant la mesure (l'onde oblique jugée sur `|A|`, qui ne départage rien). Maillons **1** (2.7
 avance). Suivant : **S661, la revue de méthode** (ADR-267), puis la non-linéarité (Kirby et Dalrymple 1984).
+
+## S661 — 2026-10-07 — la trente-sixième revue de méthode (ADR-267)
+
+**Entrée.** La revue (S656–S660), la première sous les contrôles du plan. **Fait** :
+[ADR-267](../docs/adr/ADR-267-trente-sixieme-revue-de-methode.md) — les contrôles ont servi (S657 : le comparant éprouvé ; S659 : l'axe
+inversé nommé puis vérifié) ; D1, la ligne « instrument » écrit ce que le lecteur rendrait sous chaque hypothèse (S660 : un `|A|` qui ne
+départageait rien, vu par chance) ; D2, un script de plus de vingt lignes en fichier (deux heredocs rejetés). Maillons **2**. Suivant :
+**S662, la non-linéarité** sur le haut-fond de Berkhoff.
