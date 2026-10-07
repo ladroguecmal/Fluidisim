@@ -37,6 +37,9 @@ mod spectrum_reference_s147;
 #[cfg(test)]
 #[path = "tests_background_spectrum.rs"]
 mod tests_background_spectrum;
+#[cfg(test)]
+#[path = "tests_au_dessus.rs"]
+mod tests_au_dessus;
 
 /// S340 : pourquoi [`Background::from_components`] refuse une liste.
 #[derive(Debug)]
@@ -318,6 +321,31 @@ impl Background {
             a[2] -= ao * phase.sin();
         }
         Some(a)
+    }
+
+    /// **S589 — la vitesse au-dessus du plan moyen** (liste 3.9, A286) : ce que le pas couplé mobile de δ lit au-dessus de `z = 0`, où
+    /// B ne s'évalue pas (ADR-113). La vitesse horizontale **constante** (`U(z) = U(0)`), la verticale **fermée par la continuité** :
+    /// `w(z) = w(0) − z·∇ₕ·U(0)` — incompressible par construction, linéaire en `z` (pour un mode d'Airy, `w = −a·ω·cos φ·(1 + kz)`,
+    /// l'ordre un de `e^{kz}`, sans l'amplification des ondes courtes). Mêmes phases et même ordre de sommation qu'`eval_local` : à
+    /// `z = 0`, la vitesse de surface au bit. `None` si `z < 0`, non fini, ou hors du domaine local.
+    pub fn vitesse_au_dessus(&self, xy: [f32; 2], z: f32, t: SimTime) -> Option<[f32; 3]> {
+        if !(z >= 0.0) || !z.is_finite() || !admits_local([xy[0], xy[1], 0.0]) {
+            return None;
+        }
+        let (mut v, mut div) = ([0f32; 3], 0f32);
+        for c in &self.components {
+            let phase = phase_spatiale(c, xy)
+                .wrapping_add(PhaseQ32(c.phase0.0.wrapping_sub(PhaseQ32::from_time(c.freq_q32, t).0)));
+            let (sn, cs) = (phase.sin(), phase.cos());
+            let omega = (c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32;
+            let uo = c.amplitude * omega;
+            v[0] += uo * sn * c.dir[0];
+            v[1] += uo * sn * c.dir[1];
+            v[2] -= uo * cs;
+            div += uo * (c.k_turns_per_m * core::f32::consts::TAU) * cs;
+        }
+        v[2] -= z * div;
+        Some(v)
     }
 
     /// Chemin interne après conversion commune B/W ; mêmes opérations que eval.
