@@ -90,3 +90,13 @@ bande non positive, un point hors de toute région.
 - [ ] **P3** — preuve ; liste 11.2 ; rituel.
 
 ### Notes de reprise
+- **Première mesure : (1), (3), (4) et (2) pour les paramètres tenus (Hs 2,0009 m) ; (2) pour le témoin manqué — 1,3619 m pour 1,5811.**
+  Relu d'abord (ADR-239 D1), par une mesure de chaque mer : Hs 0,2001 et 0,2001, mais **ρ = −0,43** entre les graines 42 et 43. La formule
+  avec ρ, `√((1 + 9 + 2·ρ·3)/4)`, redonne 1,361 m : elle est juste ; l'hypothèse d'indépendance ne l'était pas. Deux réalisations aux mêmes
+  composantes ont une corrélation fixe `Σaₖ²·cos Δφₖ/Σaₖ²`, nulle **en moyenne sur les tirages** seulement (écart-type ~0,3 pour ~10
+  composantes efficaces) — ce n'est pas un défaut de B (SplitMix, bien mélangé). Le critère (2) témoin, posé sur un couple, reste
+  **manqué** et publié.
+- **Vérification ajoutée en route** (ADR-244 D1, avant l'essai) : l'**ensemble** — la moyenne de Hs² du témoin sur 800 couples de graines
+  (un point, 2 h au pas de 2 s) ; attendu `(1 + 9)/4` = 2,5 (Hs 1,5811) ; l'écart-type de la moyenne ≈ 6·0,3/(4·√800) = 0,016 sur Hs² ; un
+  seuil de 0,25 sur Hs² (≈ 5 % sur Hs) lui laisse un rapport ≈ 16 (ADR-236).
+
