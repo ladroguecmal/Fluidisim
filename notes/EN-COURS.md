@@ -78,7 +78,7 @@ plan sans le bloc (refusé), un plan où manque « pièges » (refusé) ; (3) la
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-266 ; le contrôle du rituel et son épreuve ; METHODE.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — ADR-266 (six familles ; D1 le bloc de cinq contrôles ; D2 le rituel le vérifie dès S657, éprouvé sur trois textes ; D3 la mémoire) ; METHODE (une ligne « en écrivant le plan ») ; L420.

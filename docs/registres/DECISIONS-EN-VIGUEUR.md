@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**265 ADR** — actée : 214, proposée : 49, rétractée en partie : 2.
+**266 ADR** — actée : 215, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -232,7 +232,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 263 265 |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 263 265 266 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 226 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 | 226 |
 | [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |
@@ -275,4 +275,5 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [262](../adr/ADR-262-indiscernable-du-reel-au-budget.md) | Indiscernable du réel, au budget | actée | S643 | 127 261 |  |
 | [263](../adr/ADR-263-trente-troisieme-revue-de-methode.md) | Trente-troisième revue de méthode (S641–S645) | actée | S646 | 222 259 | 265 |
 | [264](../adr/ADR-264-le-decoupage-de-la-planete.md) | Le découpage de la planète : HEALPix pour les données, des repères locaux pour le calcul | actée | S649 | 002 261 |  |
-| [265](../adr/ADR-265-trente-quatrieme-revue-de-methode.md) | Trente-quatrième revue de méthode (S646–S650) | actée | S651 | 222 263 |  |
+| [265](../adr/ADR-265-trente-quatrieme-revue-de-methode.md) | Trente-quatrième revue de méthode (S646–S650) | actée | S651 | 222 263 | 266 |
+| [266](../adr/ADR-266-trente-cinquieme-revue-de-methode.md) | Trente-cinquième revue de méthode (S651–S655) : les erreurs relevées, les contrôles du plan | actée | S656 | 222 265 |  |

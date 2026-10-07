@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 19:02 +02:00
+JETON            : libre
+Battement        : 2026-10-07 19:05 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S656 — la trente-cinquième revue de méthode (ADR-266 : les contrôles du plan) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S655 — la masse ajoutée implicite du corps libre ([journal](notes/JOURNAL.md)). Avant : S654 (A334, le témoin du pas de temps)
-Session suivante : **S656 — la trente-cinquième revue de méthode** (ADR-266) : les erreurs relevées à la demande de l'utilisateur (six familles) ; les cinq contrôles du plan rendus obligatoires et vérifiés par le rituel ; puis la vitesse du corps contre l'eau autour de lui.
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S656 — la trente-cinquième revue : les erreurs relevées, les contrôles du plan ([journal](notes/JOURNAL.md)). Avant : S655 (la masse ajoutée implicite du corps libre)
+Session suivante : **S657 — la vitesse du corps libre contre l'eau autour de lui** (le comparant corrigé : la vitesse de l'eau dans les mailles qui touchent le corps, au même instant) ; le premier plan avec le bloc « Contrôles du plan » (ADR-266).
+Maillons        : 2
 Registres       : dernier lot S653 (ADR-213 D3) ; le prochain au plus tard en S656
 ```
 
