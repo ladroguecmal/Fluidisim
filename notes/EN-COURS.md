@@ -77,7 +77,7 @@ non départagé, rapporté. Sphère libre : la vitesse du corps à 5 ms, rapport
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le pas plafonné en paramètre ; les deux essais (copies du binaire, en parallèle) ; le verdict.
-- [ ] **P3** — preuve ; A334 ; rituel.
+- [x] **P3** — preuve ; A334 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — fixe : pic −16 %, lissée −2 %, impulsion +41 % → (c) non départagé ; libre : 4,68 → 2,56 m/s. Réattribuée : le couplage
