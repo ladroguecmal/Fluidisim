@@ -1440,3 +1440,10 @@ Synolakis), convergente. **A333 levée.** L'option reste éteinte par défaut (e
 l'active. Maillons **1** (4.14 avance). Suivant : **S646, la revue de méthode** (ADR-263, S641–S645), puis l'étape 3 du rouleau (le
 déferlement).
 
+## S646 — 2026-10-07 — la trente-troisième revue de méthode (ADR-263)
+
+**Entrée.** La revue (S641–S645). **Fait** : [ADR-263](../docs/adr/ADR-263-trente-troisieme-revue-de-methode.md) — D1, un compte écrit dans
+un document est calculé (S642, S643 : deux comptes de tête faux, rattrapés par script) ; D2, un instrument de mesure s'éprouve sur un cas
+connu avant de juger (S644 : la remontée lue par les étiquettes ne voyait pas le film). ADR-259 D1 a servi en S645 (A333 levée).
+Maillons **2**. Suivant : **S647, l'étape 3 du rouleau 3D** (le déferlement sur la pente).
+

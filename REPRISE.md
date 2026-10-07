@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 14:38 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S646 — la trente-troisième revue de méthode (ADR-263) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S645 — A333 levée : le jet de rive par l'air balistique ([journal](notes/JOURNAL.md)). Avant : S644 (le rouleau 3D, étape 2 : l'onde solitaire qui monte la pente)
 Session suivante : **S646 — la revue de méthode** (ADR-263, S641–S645) ; puis **l'étape 3 du rouleau 3D** : une onde qui déferle sur la pente dans APIC 3D (l'air balistique actif), le point et le type de déferlement jugés contre McCowan et la classification de Grilli et al. (1997).
 Maillons        : 1

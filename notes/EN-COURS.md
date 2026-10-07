@@ -62,30 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S645 — **terminée**. En autonomie, vers la v2 (« continue en autonomie jusqu'à la v2 », 2026-10-07). **A333** : le jet de rive
-d'APIC 3D court d'un cinquième (S644).
+Session : S646 — **terminée**. En autonomie vers la v2. **La trente-troisième revue de méthode** (ADR-222 D4 : S641–S645).
 
-**L'hypothèse.** Sur l'escalier, les faces des mailles du fond sont mises à zéro (`impose_body`). Le dessus des marches est donc glissant
-pour la vitesse normale, mais l'interpolation de la grille vers les particules (`grid_to_particles`, trilinéaire) mêle à la vitesse
-horizontale d'une particule, dans la moitié basse de la première maille d'eau, la vitesse **nulle** des faces `u`/`v` de la maille solide
-dessous. Une lame d'une ou deux mailles est alors freinée comme contre une paroi non glissante.
-
-**Le témoin (ADR-259 D1).** Le fond glissant (`set_seabed_slip(true)`) : les faces `u`/`v` de la maille solide du dessus d'une colonne,
-quand elles séparent deux mailles solides, prennent la vitesse de la face de même position juste au-dessus. Une face de contremarche, qui
-sépare une maille solide d'une maille d'eau, reste nulle (sa vitesse est normale). La face `w` du dessus reste nulle.
-
-**Critères, écrits avant.** (1) Avec le fond glissant, la remontée de S644 lue par les particules : **A333 levée** si elle est à 10 % de
-Saint-Venant 2D à 2,5 cm (0,240 m) et plus proche à 2,5 qu'à 5 cm ; sinon l'hypothèse est écartée et rapportée telle. (2) Le repos de
-S639 (le témoin plat ≤ 1 cm/s, la pente mesurée) avec le fond glissant ; (3) le fond glissant par défaut seulement si (1) et (2)
-tiennent ; les essais d'APIC 3D passent.
+**Critères, écrits avant.** (1) ADR-263 relit chaque session S641–S645 et sa friction ; (2) une protection nouvelle seulement pour une
+friction qui a coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le fond glissant ; les mesures ; (1)–(3).
-- [x] **P3** — preuve ; A333 ; rituel.
+- [x] **P2** — ADR-263.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — le fond glissant : sans effet (0,186 m aux deux mailles), écarté ; la durée : sans effet ; **l'air balistique** (la seconde
-  hypothèse, nommée à la mesure) : 0,225 m à 2,5 cm (étiquettes), 6 % de Saint-Venant, 98 % de Synolakis, convergent — **A333 levée**.
-  Actif partout, il casse S406 (le raccord des colonnes, −5,77 mm/s) : éteint par défaut, le rouleau l'active. 51 essais d'APIC 3D.
+- **P2 fini** — ADR-263 : D1, un compte écrit est calculé ; D2, un instrument de mesure s'éprouve avant de juger. Prochaine revue S651.
