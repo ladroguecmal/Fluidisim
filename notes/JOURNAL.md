@@ -1743,3 +1743,11 @@ S686.
 retirées et leur volume compté par rangée. **Mesuré** : le compte exact ; 4,000 L sortis pour 4,000 L de flux de face ; la dernière
 colonne à 8,00 particules par maille mouillée (le témoin s'entasse à 20). Maillons **1** (4.14). Suivant : **S683**, la brique 3 (poser
 des particules pour le reflux).
+
+## S683 — 2026-10-08 — Le relais au rivage, brique 3 : l'entrée à droite d'APIC
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. **Fait**
+([preuve](../docs/validation/RELAIS-RIVAGE-ENTREE-S683.md)) : `feed_right`. Un réservoir par rangée ; chaque quantum devient une
+particule posée à la place la moins occupée sous la surface. **Mesuré** : le bilan à 3,5·10⁻¹⁶ ; la colonne du bord à 7,12 par maille
+mouillée ; la vitesse maximale à 0,165 m/s. Maillons **1** (4.14). Suivant : **S684**, le raccord au repos, APIC et Saint-Venant côte à
+côte sur six plages.

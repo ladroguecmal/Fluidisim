@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [Le relais au rivage, brique 3 : l'entrée à droite d'APIC 3D — S683](validation/RELAIS-RIVAGE-ENTREE-S683.md) : le bilan à 3,5·10⁻¹⁶.
 - [Le relais au rivage, brique 2 : la sortie à droite d'APIC 3D — S682](validation/RELAIS-RIVAGE-SORTIE-S682.md) : le compte exact.
 - [Le relais au rivage, brique 1 : le flux des bords de Saint-Venant — S680](validation/RELAIS-RIVAGE-FLUX-S680.md) : le bilan à 4,6·10⁻¹⁵.
 - [Le film du rivage dans APIC 3D : deux causes, un remède partiel — S678](validation/FILM-RIVAGE-S678.md) : critère manqué.

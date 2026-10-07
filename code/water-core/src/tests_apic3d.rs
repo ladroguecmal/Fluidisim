@@ -2834,3 +2834,42 @@ fn the_right_outlet_drains_particles_with_an_exact_count_s682() {
     assert_eq!(a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }), Err(Error::Domain), "sans bords ouverts");
 }
 
+/// **S683 — l'entrée à droite** : le bassin de S682, l'eau à 0,2 m, nourri par le bord droit à 0,1 m/s sur sa hauteur mouillée pendant
+/// 1 s. (2) le bilan exact ; (3) la dernière colonne à au plus 10 particules par maille mouillée ; (4) la vitesse sous 0,5 m/s.
+#[test]
+fn the_right_inlet_poses_particles_for_a_given_volume_s683() {
+    let (nx, ny, nz, dx) = (40usize, 2usize, 16usize, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let n0 = a.seed(&|p| p[2] < 0.2).unwrap();
+    a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    a.set_open_boundaries(&vec![0.; ny * nz], &vec![-0.1; ny * nz]).unwrap();
+    assert_eq!(a.feed_right(&[0.; 1], [0.; 3]), Err(Error::Shape));
+    assert_eq!(a.feed_right(&[-1., 0.], [0.; 3]), Err(Error::Domain));
+    let q = (dx as f64).powi(3) / 8.;
+    let (mut t, mut vmax, mut pire) = (0u64, 0f32, 0f64);
+    while t < 1_000_000 {
+        let us = a.stable_step_us(10_000).min(1_000_000 - t);
+        let vol: Vec<f64> = (0..ny).map(|j| {
+            let mouillees = (0..nz).filter(|&k| a.label[(k * ny + j) * nx + nx - 1] == WATER).count();
+            0.1 * (dx as f64).powi(2) * mouillees as f64 * us as f64 * 1e-6
+        }).collect();
+        a.feed_right(&vol, [-0.1, 0., 0.]).unwrap();
+        vmax = vmax.max(a.step(us).unwrap().max_speed);
+        let (res, entre, _, _) = a.right_inlet().unwrap();
+        let (_, sorti, _) = a.right_outlet().unwrap();
+        let bilan = a.particle_count() as f64 * q + res.iter().sum::<f64>() + sorti - (n0 as f64 * q + entre);
+        pire = pire.max(bilan.abs() / (n0 as f64 * q));
+        t += us;
+    }
+    let (res, entre, posees, refusees) = a.right_inlet().unwrap();
+    let derniere = a.particles().iter().filter(|p| p[0] >= (nx - 1) as f32 * dx).count();
+    let mouillees = (0..nz * ny).filter(|&c| a.label[c * nx + nx - 1] == WATER).count().max(1);
+    let dens = derniere as f64 / mouillees as f64;
+    println!("S683 : {:.3} L reçus, {posees} posées ({refusees} refusées), réservoir {:.2} cm³ ; bilan au plus {pire:.1e} ; dernière colonne {dens:.2} par maille mouillée ; vitesse max {vmax:.3} m/s",
+        entre * 1e3, res.iter().sum::<f64>() * 1e6);
+    assert!(pire < 1e-12, "critère 2");
+    assert!(dens <= 10.0, "critère 3");
+    assert!(vmax < 0.5, "critère 4");
+}
+

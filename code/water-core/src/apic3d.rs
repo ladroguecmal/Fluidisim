@@ -324,7 +324,8 @@ impl Apic3 {
         host.alloc.alloc_persistent(ny * 8).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
-        self.sortie_droite = Some(Box::new(SortieDroite { pas: vec![0.; ny], total: 0., retirees: 0 }));
+        self.sortie_droite = Some(Box::new(SortieDroite { pas: vec![0.; ny], total: 0., retirees: 0, reservoir: vec![0.; ny], entre: 0., posees: 0,
+            refusees: 0 }));
         Ok(())
     }
 
@@ -332,6 +333,94 @@ impl Apic3 {
     /// `None` sans sortie.
     pub fn right_outlet(&self) -> Option<(&[f64], f64, u64)> {
         self.sortie_droite.as_ref().map(|s| (&s.pas[..], s.total, s.retirees))
+    }
+
+    /// **S683 — l'entrée à droite** : `volumes` (m³, par rangée `j`, positifs) s'ajoutent au réservoir de chaque rangée ; chaque quantum
+    /// entier (`dx³/8`) devient une particule posée dans la dernière colonne, sur le réseau au quart de maille, à la place la moins
+    /// occupée sous la surface (la plus haute particule de la colonne plus `dx/4`) et au-dessus du fond, la plus basse d'abord ; elle
+    /// reçoit `vitesse`. Une particule que la capacité refuse est comptée, son quantum reste au réservoir. Demande la sortie à droite.
+    pub fn feed_right(&mut self, volumes: &[f64], vitesse: [f32; 3]) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(mut s) = self.sortie_droite.take() else { return Err(Error::Domain) };
+        if volumes.len() != ny {
+            self.sortie_droite = Some(s);
+            return Err(Error::Shape);
+        }
+        if volumes.iter().any(|v| !v.is_finite()) || vitesse.iter().any(|v| !v.is_finite()) {
+            self.sortie_droite = Some(s);
+            return Err(Error::NotFinite);
+        }
+        if volumes.iter().any(|&v| v < 0.) {
+            self.sortie_droite = Some(s);
+            return Err(Error::Domain);
+        }
+        let quantum = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let h = dx / PER_AXIS as f32;
+        let nz2 = PER_AXIS * nz;
+        let mut occupation = vec![0u32; PER_AXIS * PER_AXIS * nz2];
+        for j in 0..ny {
+            s.reservoir[j] += volumes[j];
+            s.entre += volumes[j];
+            if s.reservoir[j] < quantum {
+                continue;
+            }
+            // L'occupation des places de la rangée dans la dernière colonne, et la surface.
+            occupation.fill(0);
+            let (x0, y0) = ((nx - 1) as f32 * dx, j as f32 * dx);
+            let mut haut = f32::MIN;
+            for k in 0..self.n {
+                let p = self.x[k];
+                if p[0] >= x0 && p[1] >= y0 && p[1] < y0 + dx {
+                    let a = (((p[0] - x0) / h) as usize).min(PER_AXIS - 1);
+                    let b = (((p[1] - y0) / h) as usize).min(PER_AXIS - 1);
+                    let c = ((p[2] / h) as usize).min(nz2 - 1);
+                    occupation[(c * PER_AXIS + b) * PER_AXIS + a] += 1;
+                    haut = haut.max(p[2]);
+                }
+            }
+            while s.reservoir[j] >= quantum {
+                let mut choix: Option<(u32, usize)> = None;
+                for c in 0..nz2 {
+                    for b in 0..PER_AXIS {
+                        for a in 0..PER_AXIS {
+                            let q = [x0 + (a as f32 + 0.5) * h, y0 + (b as f32 + 0.5) * h, (c as f32 + 0.5) * h];
+                            let zb = if self.lisse.is_some() { self.smooth_seabed_height(q[0], q[1]) } else { self.seabed_height(nx - 1, j) };
+                            let surface = if haut > f32::MIN { haut + 0.5 * h } else { zb + dx };
+                            if q[2] <= zb + 0.05 * dx || (q[2] > surface && choix.is_some()) {
+                                continue;
+                            }
+                            let i = (c * PER_AXIS + b) * PER_AXIS + a;
+                            if choix.is_none_or(|(o, _)| occupation[i] < o) {
+                                choix = Some((occupation[i], i));
+                            }
+                        }
+                    }
+                }
+                let Some((_, i)) = choix else { break };
+                if self.n >= self.x.len() {
+                    s.refusees += 1;
+                    break;
+                }
+                let (a, b, c) = (i % PER_AXIS, (i / PER_AXIS) % PER_AXIS, i / (PER_AXIS * PER_AXIS));
+                let m = self.n;
+                self.x[m] = [x0 + (a as f32 + 0.5) * h, y0 + (b as f32 + 0.5) * h, (c as f32 + 0.5) * h];
+                self.vel[m] = vitesse;
+                self.c[m] = [[0.; 3]; 3];
+                self.n += 1;
+                occupation[i] += 1;
+                haut = haut.max(self.x[m][2]);
+                s.reservoir[j] -= quantum;
+                s.posees += 1;
+            }
+        }
+        self.sortie_droite = Some(s);
+        Ok(())
+    }
+
+    /// S683 — l'entrée à droite : `(le réservoir par rangée, m³ ; le volume reçu ; les particules posées ; refusées)` ; `None` sans
+    /// sortie à droite.
+    pub fn right_inlet(&self) -> Option<(&[f64], f64, u64, u64)> {
+        self.sortie_droite.as_ref().map(|s| (&s.reservoir[..], s.entre, s.posees, s.refusees))
     }
 
     /// S682 : retire les particules au-delà du bord droit, compte leur volume.
@@ -738,11 +827,16 @@ impl Apic3 {
     }
 }
 
-/// S682 — le compte de la sortie à droite.
+/// S682 — le compte de la sortie à droite ; S683, celui de l'entrée.
 pub(crate) struct SortieDroite {
     pub(crate) pas: Vec<f64>,
     pub(crate) total: f64,
     pub(crate) retirees: u64,
+    /// S683 — par rangée, le volume reçu qui n'a pas encore fait un quantum (m³).
+    pub(crate) reservoir: Vec<f64>,
+    pub(crate) entre: f64,
+    pub(crate) posees: u64,
+    pub(crate) refusees: u64,
 }
 
 /// Le noyau de la reconstruction, `(1 − s²/R²)³` pour `s < R`.

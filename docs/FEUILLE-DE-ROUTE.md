@@ -485,6 +485,8 @@ solutions analytiques), portés par `Cote2D` (13 cm au rivage), le niveau rétro
 déferlement d'une mer tirée de la côte 2D — la ligne, la largeur, le flux dissipé (3.5).
 **S678–S680** : le film du rivage dans APIC 3D — deux causes nommées, un remède qui ne tient pas partout ; le film confié à
 Saint-Venant 2D (ADR-271), le relais au rivage conçu, sa première brique (le flux des bords de Saint-Venant, au bilan exact) (4.14).
+**S681–S683** : la quarantième revue (ADR-272 : un remède jugé sur trois places de l'interface dans la maille) ; le relais au rivage,
+briques 2 et 3 — APIC 3D laisse sortir et fait entrer l'eau par son bord droit, au compte exact (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

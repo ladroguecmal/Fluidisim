@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S683 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271).
+Session : S683 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271).
 
 **Ce que la session fait.** **L'entrée à droite** (`feed_right`, avec la sortie de S682) :
 
@@ -99,7 +99,8 @@ La masse se compte : particules × quantum + réservoir.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'entrée ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — l'entrée ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) les essais d'APIC ; (2) 3,5·10⁻¹⁶ ; (3) 7,12 ; (4) 0,165 m/s.
