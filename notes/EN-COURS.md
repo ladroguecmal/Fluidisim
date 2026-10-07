@@ -62,47 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S685 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 2 de la conception.
+Session : S686 — **en cours**. En autonomie vers la v2. **La quarante et unième revue de méthode** (ADR-222 D4 : S681–S685) ; le lot
+S684–S686.
 
-**Ce que la session fait.** L'onde solitaire de S644 (`H/d` = 0,2, pente 1:3, non déferlante) part dans APIC 3D. Elle traverse le
-raccord à trois mailles de fond, et monte la plage dans Saint-Venant 2D. Le relais est jugé contre :
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- le tout-Saint-Venant, depuis le même état initial ;
-- Synolakis (0.2295 m).
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-259 D1, ADR-267 D1, ADR-272.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-L'état initial, dans les deux montages : l'onde et sa vitesse au large du pied, l'eau au repos au-delà.
-
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-272)
-
-- **témoin** : le tout-Saint-Venant, le même état initial, la même lecture de la remontée (la plus haute maille mouillée, `h` > 1 mm,
-  moyennée sur les rangées).
-- **instrument** : la remontée maximale sur 3 s, et la masse. Ce que rendrait chaque hypothèse :
-  - un flux bien transmis rend la remontée du tout-Saint-Venant, à l'écart près de l'onde portée par APIC au large (≈ 4 %, le calcul) ;
-  - un raccord qui réfléchit ou retient l'eau rend une remontée tronquée de plusieurs dizaines de % ;
-  - une dette qui grandit trahit un échange mal compté.
-- **calcul** (ce script) :
-  - le raccord **à 5,35 m aux deux mailles**, à 16,4 cm de fond (3,3 et 6,6 mailles). À 2,5 cm, la règle des trois mailles le
-    mettrait à 5,575 m, où l'onde levée par Green dépasse McCowan (`H/h` = 1,25, refusé par le script). ADR-271 D1 le veut au-delà du
-    déferlement ;
-  - l'onde y fait ≈ 8,6 cm, `H/h` = 0,55 (asserté sous 0,78) ;
-  - l'écart attendu au tout-Saint-Venant : ≈ 4.2 % (la crête d'APIC au pied, 3 % au-dessus, S644). La borne, **10 %**.
-- **ADR** : ADR-271, ADR-272 (sans objet : une onde, non un repos).
-- **pièges** :
-  - l'état initial du relais : Saint-Venant au repos au-delà du raccord, APIC sans l'onde au-delà du pied ; le tout-Saint-Venant, de même ;
-  - le pas commun : la CFL de Saint-Venant (`√(g·h)` + `u`) ;
-  - le bord de Saint-Venant prend la moyenne des rangées (la côte est uniforme).
-
-**Critères, écrits avant.**
-
-1. La remontée du relais à moins de **10 %** de celle du tout-Saint-Venant, à 5 et 2,5 cm.
-2. La masse : Saint-Venant + particules × quantum + réservoir − dette, constante à 10⁻¹² près en relatif.
-3. Rapportés : la remontée contre Synolakis, la dette, la crête au raccord.
+**Critères, écrits avant.** (1) ADR-273 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — ADR-273 ; METHODE.
+- [ ] **P3** — lot ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) **manqué** : −15,2 % et −13,9 % du tout-Saint-Venant. Localisé : le volume transmis égal (+1,6 %), `η` et `u` du bord 3D lus juste ; l'onde portée par APIC diffère de celle de Saint-Venant (dispersion). Le calcul du plan ne regardait que la crête. (2) tenu.
