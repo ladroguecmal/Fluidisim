@@ -62,26 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S648 — **terminée**. En autonomie vers la v2 ; le rouleau 3D. **La forme et la vie du rouleau** : après le retournement de S647,
-le jet retombe devant la crête et **enferme de l'air** — la signature d'un déferlement plongeant.
+Session : S649 — **en cours**. Décision technique déléguée par l'utilisateur (ADR-261 D2 : *« le plus puissant, niveau performance et
+résultat final »*) : **HEALPix (celui de DyingStar) ou la cube-sphère** pour découper la planète.
 
-**Le lecteur (ADR-263 D2), éprouvé d'abord.** L'air enfermé : les mailles d'air que l'air libre (la rangée du haut) n'atteint pas, en
-remplissage par voisins (six), dans tout le domaine — leur nombre, et l'abscisse de leur centre. Éprouvé sur une couche d'eau à 0,6 m
-(rien) et la même avec une cavité posée — x ∈ [0,9 ; 1,1] m, z ∈ [0,25 ; 0,40] m, toute la largeur : **48 mailles** posées ;
-le lecteur doit la trouver, au plus 48 mailles (la reconstruction épaissit l'eau), centrée à 0,1 m près de 1,0 m.
+**Déclaré** : la mesure a été faite pendant l'attente du calcul de S648 (le script dans le carnet de la session). Elle est versée ici
+(`calculs/s649_decoupage.py`) et rejouée ; ses nombres ne changent pas ce qui suit, écrit avant la reprise.
 
-**Critères, écrits avant.** (1) le lecteur ; (2) sur l'onde de S647, **à 2,5 cm, de l'air enfermé apparaît dans les 0,5 s qui suivent le
-premier retournement, en avant de lui** (le jet a retombé) ; (3) rapportés : son volume le plus grand, sa durée de vie (de l'apparition à la
-disparition), à 5 et 2,5 cm ; (4) la masse ; (5) l'onde de S644 n'enferme pas d'air (elle ne déferle pas). Ne juge pas : la quantité d'air
-contre une mesure publiée (aucune n'a pu être relue).
+**Ce qui est découpé.** Pas la grille de calcul (B analytique, W d'événements, δ et V en référentiels locaux, I-08) : les **données
+planétaires** de l'eau — bathymétrie, rivage, précalcul côtier, régions, glace, tuiles publiées, circulation cuite — et leur raccord avec
+le terrain de DyingStar.
+
+**Critères de décision, écrits avant la reprise.** (1) pour des données par unité de surface, l'égalité des aires prime (écart ≤ 1 %) ;
+(2) la clé commune avec le terrain de DyingStar (aucun rééchantillonnage terrain ↔ eau) ; (3) la forme des cellules ne compte que pour un
+solveur qui calculerait sur elles — si aucun ne le fait, elle ne départage pas ; (4) le script rejoué rend les mêmes nombres, au chiffre
+près ; (5) l'ADR, les points touchés (1.5, 7.7, 11.1, 12.3, 12.4), la note datée dans ADR-002.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le lecteur et son épreuve ; le rouleau ; (1)–(5).
-- [x] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
+- [ ] **P2** — le script ; ADR-264 ; la liste.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(5) tenus : le lecteur (48 mailles posées, 48 lues) ; à 2,5 cm l'air enfermé 0,18 s après le retournement, 0,39 m en
-  avant, 210 mailles (3,3 L), vie 1,18 s ; 5 cm : +0,30 s, 18 mailles, 1,12 s ; 1:3 rien ; masse exacte. En attendant le calcul :
-  l'étude du découpage de la planète mesurée (HEALPix contre cube-sphère), son ADR en brouillon pour S649.
