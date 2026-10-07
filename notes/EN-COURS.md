@@ -62,42 +62,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S688 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. S687 : le schéma de raccord est juste.
-ADR-273 D1 demande encore la référence du côté d'APIC. La lecture de la remontée avait un quantum (S687).
+Session : S689 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 3 (le reflux).
 
-**Ce que la session fait.**
+**Ce que la session fait.** **La dette remboursée au quantum.** S685 laissait la dette (ce que Saint-Venant a pris moins ce qu'APIC a
+laissé sortir) s'accumuler : 2 à 3 quanta par rangée en 3 s. Désormais :
 
-1. **Le côté d'APIC.** Le niveau au raccord, pas à pas, dans le relais et dans le tout-APIC sur le même fond lisse, la même onde,
-   jusqu'à 1,6 s, avant le retour de la réflexion.
-2. **La remontée sous la maille.** Le niveau de l'eau (`h + z`) à la plus haute maille mouillée, au lieu de son fond. Elle est lue
-   sur le relais, le tout-Saint-Venant et le raccord seul.
+- quand elle atteint un quantum, APIC rend la particule de sa dernière colonne la plus proche du bord (`take_right`) ;
+- quand elle descend sous moins un quantum, Saint-Venant reçoit ce volume dans sa première maille.
+
+La masse reste exacte, et la dette sous un quantum par rangée. Puis l'onde de S685 est suivie 10 s : elle monte, redescend, repasse
+dans la 3D, et ressort encore.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273)
 
-- **témoin** : le raccord seul (S687), qui doit redonner le tout-Saint-Venant aussi à la nouvelle lecture.
+- **témoin** : S685 sans remboursement (la dette à 2 à 3 quanta par rangée en 3 s).
 - **instrument** : ce que rendrait chaque hypothèse.
-  - (1) Si le raccord ne perturbe pas la 3D, le même niveau que le tout-APIC jusqu'à 1,6 s. Une réflexion au raccord le ferait
-    différer dès le passage de la crête.
-  - (2) La nouvelle lecture, sans marche, rend le raccord seul égal au tout-Saint-Venant aux trois mailles. L'écart du relais au
-    tout-Saint-Venant y devient ce que porte APIC.
-- **calcul** (ce script) : au raccord, 16 cm de fond ; la réflexion revient vers 2.1 s (asserté après 1,6 s). La lecture du
-  niveau du bord 3D, une particule (continue en mouvement).
-- **ADR** : ADR-273, ADR-268 D1 (la borne au-dessus du plancher de la lecture).
+  - Si le reflux passe bien, la masse reste exacte, la dette sous un quantum, la colonne du bord peu tassée, et aucune vitesse
+    parasite.
+  - Une entrée mal placée tasse la colonne du bord, ou lance des particules.
+  - Un remboursement faux fait dériver la masse.
+- **calcul** (ce script) : la dette de S685, 2,1 quanta par rangée à 5 cm et 2,9 à 2,5 cm. Le remboursement a donc de quoi agir.
+- **ADR** : ADR-271, ADR-273.
 - **pièges** :
-  - le tout-APIC sur fond lisse a le défaut du film au rivage (S640), mais il ne revient au raccord qu'avec la réflexion ;
-  - la lecture sous la maille demande `h` > 1 mm, comme l'ancienne.
+  - rendre une particule d'une colonne sans eau (aucune : la dette attend) ;
+  - ajouter un volume à Saint-Venant dans une maille sèche (une hauteur positive, au bit du volume) ;
+  - le signe de la dette.
 
 **Critères, écrits avant.**
 
-1. Le niveau au raccord du relais à moins de **10 %** de la crête de celui du tout-APIC, à chaque pas jusqu'à 1,6 s, à 5 et 2,5 cm.
-2. Le raccord seul à moins de **1 %** du tout-Saint-Venant, à la nouvelle lecture, aux trois mailles.
-3. Rapportés : la remontée du relais, du tout-Saint-Venant et Synolakis, à la nouvelle lecture.
+1. Sur 10 s, à 5 cm : la masse à 10⁻¹² près.
+2. La dette de chaque rangée sous un quantum, à chaque pas.
+3. La dernière colonne sous 10 particules par maille mouillée.
+4. La vitesse des particules sous 1 m/s (la vitesse de l'onde au raccord, `√(g·h)` ≈ 1,3 m/s, n'est pas une vitesse de particule).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les essais ; (1)–(3).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — le remboursement ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) tenu : 5,2 % et 1,3 % ; (2) manqué à 5 et 2,5 cm (−3,46 %, −1,14 %), tenu à 1,25 cm (−0,64 %), convergent — la borne de 1 % n'était pas calculée ; (3) le relais à 87 % et 91 % de Synolakis ; le tout-Saint-Venant, non convergé, dépasse Synolakis.

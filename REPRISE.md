@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 01:57 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 01:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S689 — le reflux à travers le raccord au rivage ; la dette remboursée ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S688 — Le relais au rivage jugé du côté d'APIC ; la remontée sous la maille ([journal](notes/JOURNAL.md)). Avant : S687 (Le raccord seul, entre deux Saint-Venant)
 Session suivante : S689 — le reflux à travers le raccord au rivage (l'étape 3)
 Maillons        : 1 (4.14 : le relais jugé du côté d'APIC)
