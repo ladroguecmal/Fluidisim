@@ -291,4 +291,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S617 | 2026-10-07 | 10 | 107 | 3 | 120 |
 | S618 | 2026-10-07 | 10 | 108 | 2 | 120 |
 | S619 | 2026-10-07 | 10 | 108 | 2 | 120 |
+| S620 | 2026-10-07 | 10 | 108 | 2 | 120 |
 <!-- fin de l'historique -->

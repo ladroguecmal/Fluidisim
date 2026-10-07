@@ -1233,3 +1233,11 @@ relevé** : `SaintVenant2D::pas` alloue à chaque pas (I-06) — à préallouer.
 les tableaux de travail de `SaintVenant2D::pas` préalloués. **Mesuré** : S613 et S614 au bit, aucune réallocation en 100 pas, le coût
 78,55 → 42,01 ns par maille-pas (218² mailles par tick). Maillons **1** (le défaut levé ; aucun point ne change d'état). Suivant : **S620**,
 le lot et la physique des partiels.
+
+## S620 — 2026-10-07 — le lot ; Saint-Venant 2D d'ordre deux
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; le lot (feuille de route S617–S619), puis l'ordre deux de `SaintVenant2D`
+(4.14, 11.3). **Fait** ([preuve](../docs/validation/ORDRE-DEUX-S620.md)) : MUSCL minmod, reconstruction hydrostatique d'ordre deux d'Audusse,
+terme source centré, Heun, sans allocation. **Mesuré** contre numpy, à 10⁻¹⁵ : Thacker 0,048 → 0,016 → 0,006 (÷ 9 à 22), le lac immobile ;
+la remontée 0,806 → 0,875 m pour 0,861. **En route** (au plan) : l'`ε` de S613 figeait l'écart à 0,030 — (0,1 mm)⁴ à l'ordre deux. Maillons
+**1** (4.14 et 11.3 avancent ; aucun état ne change). Suivant : **S621**, la revue de méthode.

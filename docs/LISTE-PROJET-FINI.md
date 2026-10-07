@@ -326,7 +326,9 @@ pas recopiée ici (L137).
 - [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *partiel* depuis S613 : **le mouillage et le séchage en 2D** —
   Saint-Venant 2D, reconstruction hydrostatique, vitesse désingularisée ; jugés sur Thacker (le rivage tourne dans une cuvette) : l'ordre
   un converge (0,43 → 0,24 → 0,13), masse exacte, aucune hauteur négative, le lac au repos à bords secs immobile
-  ([preuve](validation/THACKER-S613.md)). Manquent le rouleau 3D, l'ordre deux, une houle sur une plage réelle, le branchement à δ.
+  ([preuve](validation/THACKER-S613.md)) ; **S620** : l'ordre deux (MUSCL, reconstruction hydrostatique d'Audusse, Heun) — l'écart à
+  Thacker divisé par 9 à 22 (0,048 → 0,016 → 0,006) ([preuve](validation/ORDRE-DEUX-S620.md)). Manquent le rouleau 3D, une houle sur une
+  plage réelle, le frottement, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
@@ -834,8 +836,8 @@ pas recopiée ici (L137).
 - [ ] **11.3 Très grands événements** (tsunami, crash, très grand navire) : macroscopique au large,
   3D locale à l'interaction — *partiel* depuis S614 : le tsunami du large à la plage — la levée de Green du rayon (S582) donne la hauteur au
   bord d'un domaine local de Saint-Venant 2D (S613), dont la remontée converge vers Synolakis (0,705 → 0,850 m pour 0,861)
-  ([preuve](validation/GRAND-EVENEMENT-S614.md)). Manquent le niveau du large imposé au bord, le déferlement, le local 3D, le crash et le
-  très grand navire.
+  ([preuve](validation/GRAND-EVENEMENT-S614.md)) ; **S620** : à l'ordre deux, 0,806 → 0,875 m ([preuve](validation/ORDRE-DEUX-S620.md)).
+  Manquent le niveau du large imposé au bord, le déferlement, le local 3D, le crash et le très grand navire.
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
   sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.

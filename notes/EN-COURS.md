@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S620 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S617–S619), puis
+Session : S620 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S617–S619), puis
 **l'ordre deux de `SaintVenant2D`** — un manque de 4.14 (la plage) et de 11.3 (la remontée) : l'ordre un est diffusif (un quart d'écart à
 Thacker après une période à 100²).
 
@@ -88,7 +88,9 @@ plus près de Synolakis que l'ordre un ; à ¼ m, à moins de dix quanta (0,126 
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — l'ordre deux dans `saint_venant_2d.rs` et ses essais ; (1)–(6).
-- [ ] **P3** — preuve ; listes 4.14, 11.3 ; rituel (`--lot`).
+- [x] **P2** — l'ordre deux dans `saint_venant_2d.rs` et ses essais ; (1)–(6).
+- [x] **P3** — preuve ; listes 4.14, 11.3 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus du premier essai, à 10⁻¹⁵ de numpy ; S613, S614, S619 inchangés. Suite : 808 essais listés.
+- **P3** — preuve ORDRE-DEUX-S620 ; lignes 4.14 et 11.3 ; index ; journal ; le lot.
