@@ -63,6 +63,8 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
   superficielle de DyingStar (`develop`), hors du dépôt, dans `C:/Users/antoi/FluidisimExterne/`.
 - **En attente de lui aujourd'hui** : le **SDK .NET 9** (le C# de DyingStar ne se compile pas sans lui) — à demander quand on en aura
   besoin. Refusée (S482) : la relance planifiée. Une question nouvelle s'inscrit ici, une ligne, et se retire quand il a répondu.
+- **Posées le 2026-10-07 (audit S640)** : le sens terrain–eau ; HEALPix ou cube-sphère ; quelles plages ; la glace hors des lacs ; l'air
+  respirable ; les grandes zones de déferlement ; B3, le jury, l'intégration à plusieurs machines ; la cible d'I-03 ([audit](docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)).
 
 ## Comment on travaille — l'essentiel
 

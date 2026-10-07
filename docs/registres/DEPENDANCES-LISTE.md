@@ -50,13 +50,13 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 46 | 1.7, 1.8, 2.6, 2.7, 3.2, 3.8, 3.9, 4.2, 4.4, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 7.1, 7.6, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
-| **1** | 29 | 1.1, 1.3, 1.5, 2.1, 2.3, 2.4, 2.9, 3.6, 3.7, 4.1, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 12.5 |
-| **2** | 11 | 1.6, 2.5, 3.3, 3.4, 3.5, 4.9, 4.12, 6.7, 7.5, 10.6, 12.2 |
-| **3** | 5 | 3.1, 4.3, 4.14, 5.9, 7.3 |
-| **4** | 5 | 4.10, 6.6, 8.4, 13.2, 13.3 |
+| **0** | 47 | 1.7, 1.8, 2.6, 2.7, 3.2, 3.8, 3.9, 4.2, 4.4, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 6.10, 7.1, 7.6, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
+| **1** | 33 | 1.1, 1.3, 1.5, 1.9, 2.1, 2.3, 2.4, 2.9, 3.6, 3.7, 4.1, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 7.9, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 11.6, 12.5, 13.5 |
+| **2** | 13 | 1.6, 2.5, 2.10, 3.3, 3.4, 3.5, 4.9, 4.12, 5.14, 6.7, 7.5, 10.6, 12.2 |
+| **3** | 6 | 3.1, 4.3, 4.14, 4.22, 5.9, 7.3 |
+| **4** | 6 | 4.10, 6.6, 6.9, 8.4, 13.2, 13.3 |
 | **5** | 2 | 11.3, 13.4 |
-| **E** | 13 | 1.4, 2.2, 2.8, 4.5, 4.11, 5.5, 5.11, 7.8, 8.7, 8.10, 9.9, 9.12, 12.3 |
+| **E** | 15 | 1.4, 2.2, 2.8, 3.10, 4.5, 4.11, 5.5, 5.11, 5.13, 7.8, 8.7, 8.10, 9.9, 9.12, 12.3 |
 
 **Ce qu'on demandera à l'utilisateur**, au moment où le point bloque (ADR-190 D5) :
 
@@ -79,22 +79,24 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **1.4** Point d'entrée unique, orchestrateur des régimes | H | `WaterSystem`, qui porte l'ordonnanceur, l'oubli et l'estimateur de coût | 1.6, 9.9 | 9.12 | **E**, par 9.9 |
 | **1.5** Grille 3D de référence stable | B | la grille de référence et ses zones actives (ADR-006) | 10.1 | 1.6, 4.9 | **1** |
 | **1.6** Cellules, domaines et solveurs distincts, niveaux d'activité des cellules | B | — | 1.5 | 1.4, 4.3, 4.11 | **2** |
-| **1.7** Horloge de simulation entière et phases déterministes | H | le déterminisme entre les chemins d'exécution de ce PC (ADR-219 D2) | — | — | **0** |
-| **1.8** Référentiels, précision f32 locale, `g_eff` injectée | H | les référentiels mobiles, puis la planète (ADR-002) | — | 4.17, 11.1 | **0** |
+| **1.7** Horloge de simulation entière et phases déterministes | H | le déterminisme entre les chemins d'exécution de ce PC (ADR-219 D2) | — | 1.9 | **0** |
+| **1.8** Référentiels, précision f32 locale, `g_eff` injectée | H | les référentiels mobiles, puis la planète (ADR-002) | — | 4.17, 11.1, 11.6 | **0** |
+| **1.9** Horloge du client synchronisée, identité du fond contrôlée | H | l'horloge du client et l'empreinte du fond comparée (ADR-003 §2) | 1.7 | — | **1** |
 
 ### 2. Grandes masses d'eau et fond (B)
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
 | **2.1** Mer et océan : état de mer spectral déterministe, sans état par cellule | A | anisotropie, asymétrie des pentes, B1 complet | 11.2 | 13.3 | **1** |
-| **2.2** Houles longues, mers croisées, marée, niveau moyen variable | A | marée, niveau moyen variable, adoption par défaut | 2.8 | — | **E**, par 2.8 |
-| **2.3** Lacs | A | — | 2.6, 2.7 | — | **1** |
-| **2.4** Rivières | A | — | 2.6, 2.7 | 2.5, 12.2 | **1** |
+| **2.2** Houles longues, mers croisées, marée, niveau moyen variable | A | marée, niveau moyen variable, adoption par défaut | 2.8 | 3.10 | **E**, par 2.8 |
+| **2.3** Lacs | A | — | 2.6, 2.7 | 2.10 | **1** |
+| **2.4** Rivières | A | — | 2.6, 2.7 | 2.5, 5.14, 12.2 | **1** |
 | **2.5** Canaux | A | — | 2.4 | — | **2** |
 | **2.6** Courants macroscopiques à niveau de détail propre | A | le courant macroscopique, du vecteur au champ (ADR-011) | — | 2.3, 2.4, 6.2 | **0** |
 | **2.7** Bathymétrie | A | l'entrée dans B, isobathes droites, faite (ADR-196, S364) ; les chemins de B et Godot, puis la 2D et la marée ; hauts-fonds isolés | — | 1.3, 2.3, 2.4, 2.8, 2.9, 3.4, 3.5, 3.6, 4.14 | **0** |
 | **2.8** Précalcul côtier et météo | A | — | 2.7, 3.6 | 2.2, 5.5, 12.3 | **E** — la fin du projet : météo et son en dernier (ADR-197 D5) |
 | **2.9** Dérivées du fond pour les couches volumiques | A | — | 2.7 | — | **1** |
+| **2.10** Vagues de vent bornées par le fetch | A | la borne du fetch sur les vagues de vent d'un lac | 2.3 | — | **2** |
 
 ### 3. Ondes propagatives (W)
 
@@ -104,11 +106,12 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **3.2** Sillages de bateaux | A | durées longues ; C07 passe entier (S519–S527) | — | 6.6, 13.2 | **0** |
 | **3.3** Explosions de surface et sous-marines | A | la source d'explosion de W, champ lointain | 4.16, 7.4 | — | **2** |
 | **3.4** Tsunamis | A | — | 2.7, 3.6 | 11.3 | **2** |
-| **3.5** Déferlement | A | — | 2.7, 3.6 | 4.14 | **2** |
+| **3.5** Déferlement | A | — | 2.7, 3.6 | 3.10, 4.14 | **2** |
 | **3.6** Réfraction bathymétrique des ondes | A | — | 2.7 | 2.8, 3.4, 3.5 | **1** |
 | **3.7** Événements horodatés, journaux, instantanés et restauration avec perte connue | A | — | 10.1 | — | **1** |
 | **3.8** Composition B+W sans refus sur toute scène | A | la saturation par la pression seule (A261) | — | — | **0** |
 | **3.9** Couches W fournies au-dessus du plan moyen pour δ | A | W évalué au-dessus du plan moyen, comme B (ADR-154) | — | 1.1, 4.6 | **0** |
+| **3.10** Rochers où la houle brise en permanence | A | les rochers qui brisent, tirés de h < 1,28·H et de la marée | 2.2, 3.5 | — | **E**, par 2.2 |
 
 ### 4. Simulation volumique locale (δ)
 
@@ -121,11 +124,11 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **4.5** Création, croissance, réduction et disparition visuellement gratuites | B | une disparition progressive | — | — | **E** — un verdict visuel des passages (A319) |
 | **4.6** Entrée des vagues de B/W dans le domaine | C | la houle progressive traversante sur une durée utile ; B4 | 3.9 | — | **1** |
 | **4.7** Frontière sans réflexion ni rupture visible | C | la réflexion d'un front oblique ; C05 | — | 13.2 | **0** |
-| **4.8** Sortie des perturbations vers W | C | A320 (les termes croisés sous forme de Bernoulli), puis l'ordre E, critère refondu (ADR-198) | — | 1.1 | **0** |
+| **4.8** Sortie des perturbations vers W | C | A320 (les termes croisés sous forme de Bernoulli), puis l'ordre E, critère refondu (ADR-198) | — | 1.1, 4.22 | **0** |
 | **4.9** Fusion et séparation de domaines | B | — | 1.5, 4.2 | — | **2** |
 | **4.10** Adaptation interne | B | — | 4.3 | — | **4** |
 | **4.11** Régime substitutif | B | — | 1.6, 4.20, 12.3 | — | **E**, par 12.3 |
-| **4.12** Cavité et gerbe d'impact | B | le raccord particules ↔ colonnes (A316) | 4.16, 7.4 | 3.1, 7.3, 13.3 | **2** |
+| **4.12** Cavité et gerbe d'impact | B | le raccord particules ↔ colonnes (A316) | 4.16, 7.4 | 3.1, 4.22, 7.3, 13.3 | **2** |
 | **4.13** Proche-coque et gerbe d'étrave | B | la coque en marche dans la production de δ | 4.16 | 6.6 | **1** |
 | **4.14** Plage | B | — | 2.7, 3.5, 4.16 | — | **3** |
 | **4.15** Rochers et obstacles immergés | B | le couplage à B/W sur fond coupé ; un modèle de turbulence | — | 6.2 | **0** |
@@ -135,21 +138,24 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **4.19** Coût de δ compatible avec le budget | B | d'autres scènes ; plusieurs domaines en direct ; un 99ᵉ centile en direct | — | 9.11 | **0** |
 | **4.20** Changement de solveur pendant une simulation | B | — | 4.16 | 4.11 | **1** |
 | **4.21** Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine | C | le mode relatif dans la production GPU ; W ; A320 | — | — | **0** |
+| **4.22** Retour d'une gerbe vers W | B | — | 4.8, 4.12 | — | **3** |
 
 ### 5. Volumes finis et inondations (V)
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **5.2** Géométrie réelle des contenants | H | la précision des grands volumes (A269) ; des formes courbes cuites | — | 5.9 | **0** |
+| **5.2** Géométrie réelle des contenants | H | la précision des grands volumes (A269) ; des formes courbes cuites | — | 5.9, 11.6 | **0** |
 | **5.4** Vannes et pompes | H | le `C_d` selon l'ouverture ; pertes et énergie de la pompe | — | 5.8 | **0** |
-| **5.5** Pluie selon l'exposition au ciel, absorption par le sol | H | l'absorption par le sol ; la pluie hors contenant ; l'exposition calculée depuis les objets posés | 2.8 | — | **E**, par 2.8 |
+| **5.5** Pluie selon l'exposition au ciel, absorption par le sol | H | l'absorption par le sol ; la pluie hors contenant ; l'exposition calculée depuis les objets posés | 2.8 | 5.13 | **E**, par 2.8 |
 | **5.6** Seuil adaptatif à l'échelle du contenant | H | le seuil adaptatif | — | — | **0** |
 | **5.7** Plusieurs liquides | H | `liquid_id` (A17) | — | — | **0** |
 | **5.8** Réseau fermé sous pression | H | — | 5.4 | — | **1** |
 | **5.9** Compartiments, brèches, inondation de navire, limitée par l'air | H | C17 passé (S538), l'évent à débit limité (S547) ; la flottabilité de la poche, les brèches en jeu | 5.2, 7.5 | 6.6, 13.2 | **3** |
-| **5.10** Articulation V↔δ | H | une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ | — | 1.1, 13.2 | **0** |
+| **5.10** Articulation V↔δ | H | une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ | — | 1.1, 5.14, 13.2 | **0** |
 | **5.11** Eaux souterraines | H | — | — | — | **E** — hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **5.12** Capture et restauration de V | H | le stockage durable | 10.1 | 10.6 | **1** |
+| **5.13** Naissance et mort des flaques | H | le cycle des flaques : V_min, hystérésis, durée de vie | 5.5 | — | **E**, par 5.5 |
+| **5.14** V rend son eau à la rivière, à la mer, au caniveau | C | — | 2.4, 5.10 | — | **2** |
 
 ### 6. Solides et flottabilité
 
@@ -158,6 +164,8 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **6.2** Forces de l'eau sur les objets | H | W derrière la requête | 2.6, 4.15 | 6.7 | **1** |
 | **6.6** Grands navires | H | la barge envahie faite (S548) ; la carène libre, la poche porteuse, plusieurs compartiments | 3.2, 4.13, 5.9 | 11.3 | **4** |
 | **6.7** Acteur poussé, renversé ou déplacé par l'eau | B | — | 6.2 | — | **2** |
+| **6.9** L'eau aérée porte moins | H | l'aération dans la poussée | 7.3 | — | **4** |
+| **6.10** L'affichage des corps animé par δ | H | le ressort d'affichage borné | — | — | **0** |
 
 ### 7. Phénomènes secondaires
 
@@ -165,12 +173,13 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 |---|---|---|---|---|---|
 | **7.1** Écume et moutons | A | sources de W, δ, vent ; demi-vies et transfert (B9) | — | 8.4, 13.2, 13.3 | **0** |
 | **7.2** Spray, embruns, gouttelettes | B | — | 4.16 | 8.4, 9.9 | **1** |
-| **7.3** Microbulles visuelles | B | — | 4.12 | 8.4 | **3** |
+| **7.3** Microbulles visuelles | B | — | 4.12 | 6.9, 8.4 | **3** |
 | **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 8.4, 13.2 | **1** |
 | **7.5** Air comprimé, vide, eau dans le vide | B | la poche comprimée d'un corps faite (S539) ; l'adiabatique, la poche qui s'échappe, le vide | 7.4 | 5.9 | **2** |
-| **7.6** Glace et vapeur | H | — | — | 13.2 | **0** |
+| **7.6** Glace et vapeur | H | — | — | 7.9, 13.2 | **0** |
 | **7.7** Danger et traversabilité | H | la publication par tuiles depuis B, W et V (ADR-018) | — | — | **0** |
 | **7.8** Audio de l'eau | H | les événements et paramètres publiés (ADR-016) | — | — | **E** — la fin du projet, par Wwise, l'audio du jeu (ADR-197 D5, ADR-219) |
+| **7.9** La glace qui cède | H | la rupture de la glace sous charge | 7.6 | — | **1** |
 
 ### 8. Rendu et niveaux de détail visuels
 
@@ -227,6 +236,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **11.3** Très grands événements | H | — | 3.4, 6.6 | — | **5** |
 | **11.4** Nombreuses sources simultanées à coût maîtrisé | H | la généralisation, le LOD temporel | 8.3 | — | **1** |
 | **11.5** Matériel cible de livraison et seconde cible | H | ce PC, cible de livraison ; la seconde cible : le bridage de 9.10 (ADR-219 D2) | 9.10 | 13.3 | **1** |
+| **11.6** Verser d'un référentiel à un autre | H | — | 1.8, 5.2 | — | **1** |
 
 ### 12. Outillage auteur et données cuites
 
@@ -242,9 +252,10 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **13.1** Harnais de validation | H | les étages manquants de SPEC-003 | — | — | **0** |
+| **13.1** Harnais de validation | H | les étages manquants de SPEC-003 | — | 13.5 | **0** |
 | **13.2** Les 23 cas canoniques passent sur le système | H | chaque cas exécuté sur le système | 3.2, 4.7, 4.17, 4.18, 5.9, 5.10, 7.1, 7.4, 7.6, 10.6 | 13.4 | **4** |
 | **13.3** Les onze bancs rendent leur verdict | H | chaque banc exécuté | 2.1, 4.3, 4.12, 7.1, 8.6, 9.1, 11.5 | — | **4** |
 | **13.4** L'eau dans le jeu | H | lire les dépôts publics de DyingStar ; le jeu d'essai sur sa pile (ADR-219 D3) | 9.11, 10.1, 11.1, 12.4, 13.2 | — | **5** |
+| **13.5** Rejeu, saturation, dérive des coûts | H | le rejeu d'une session enregistrée ; la dérive des coûts | 13.1 | — | **1** |
 
 <!-- fin des tables -->

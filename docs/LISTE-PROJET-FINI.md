@@ -97,6 +97,9 @@ pas recopiée ici (L137).
 - [ ] **1.8 Référentiels, précision f32 locale, `g_eff` injectée** (ADR-002, I-07, I-08) — *partiel* :
   positions monde et ancres locales, `g_eff` par volume. Manquent les référentiels mobiles et la
   planète sphérique.
+- [ ] **1.9 Horloge du client synchronisée, identité du fond contrôlée** (ADR-003 §2.1, §2.4 ; ajouté en S641) — *absent* : la
+  correction douce de l'horloge du client (±0,1 %), sa resynchronisation après une coupure de 5 s, l'empreinte de la mer comparée entre
+  client et serveur à 1 Hz. Rien n'existe ; 1.7 et 10.3 ne les nomment pas ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.9).
 
 ## 2. Grandes masses d'eau et fond (B)
 
@@ -155,6 +158,9 @@ pas recopiée ici (L137).
 - [ ] **2.9 Dérivées du fond pour les couches volumiques**, sous et au-dessus du plan moyen —
   *partiel* : B reçu en eau profonde uniforme (ADR-113, S177 ; ADR-154, S254). Manquent la
   profondeur finie et la bathymétrie.
+- [ ] **2.10 Vagues de vent bornées par le fetch**, lacs et baies (ADR-011 §5, SPEC-001 §4, ADR-004 §2.2 ; ajouté en S641) —
+  *absent* : « le système doit l'imposer » — la hauteur des vagues d'un plan d'eau fermé limitée par la longueur sur laquelle souffle
+  le vent. 2.3 n'en pose aucune borne ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.4).
 
 ## 3. Ondes propagatives (W)
 
@@ -207,6 +213,9 @@ pas recopiée ici (L137).
   — `U` constant, `W` fermé par la continuité : incompressible (divergence 10⁻⁶ contre 10⁻² pour Taylor), continu au bit à `z = 0`
   ([preuve](validation/AU-DESSUS-S589.md)). Manquent W (les anneaux) au-dessus du plan et la réception dans le pas couplé mobile contre
   l'oracle S253.
+- [ ] **3.10 Rochers où la houle brise en permanence** (source §11.3, ADR-013 §7.4, ADR-023 §4 ; ajouté en S641) — *absent* : un
+  terme dérivé, publié comme ligne de déferlement (`BreakerVertex`), la liste tirée de `h < 1,28·H`, allumée et éteinte par la marée.
+  3.5 et 4.15 ne le couvrent qu'en général ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.5).
 
 ## 4. Simulation volumique locale (δ)
 
@@ -308,8 +317,10 @@ pas recopiée ici (L137).
   §3.3 (`max|δ| > 0,35·Hs`, ou par nature) ; un domaine 1D propriétaire du champ total, alimenté par B à ses bords (Flather) — B reproduit à
   0,6 mm sur 60 s, une perturbation sortie à 1,3 % près ([preuve](validation/SUBSTITUTIF-S609.md)) ; **S623** : la graine (`SeedState`,
   ADR-022 §3) — `condense` réservé à un hôte de cuisson, la tolérance de paramètres, la masse du nœud autoritaire (au ml) ; restauré,
-  le domaine est établi en un pas au lieu de 60,65 s ([preuve](validation/GRAINE-S623.md)). Manquent un solveur substitutif non
-  linéaire, le 2D/3D, la bascule d'un domaine δ réel.
+  le domaine est établi en un pas au lieu de 60,65 s ([preuve](validation/GRAINE-S623.md)). **Audit S640** : le seuil `0,35·Hs` n'est
+  pas une règle reçue — ADR-112 D1 le dit « proposition historique non reçue », le critère « reste à instruire sur un couplage
+  effectivement calculé » ; S609 l'a pris dans ADR-001 §3.3 sans lire les ADR qui le nomment (ADR-259 D2). Manquent le critère de
+  bascule instruit, un solveur substitutif non linéaire, le 2D/3D, la bascule d'un domaine δ réel.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
   exacte ; mais **son temps ne converge pas encore** à trois mailles (2,20 → 2,30 → 2,40 `√(D/g)`, S326),
@@ -453,6 +464,8 @@ pas recopiée ici (L137).
   fois l'amplitude de la mer** en deux minutes (≈ 0,04 s⁻¹ sous 2,5 cm, ≈ 0,10 sous 5 cm) ; **S322** :
   ce n'est pas le pas de temps, taux à 0,8 % près de 20 à 2,5 ms ([preuve](validation/MER-S319.md)
   §4, §8). Il bloquait l'ordre E de 4.8 ; la voie est tranchée en S369 (ci-dessus).
+- [ ] **4.22 Retour d'une gerbe vers W** (source §13.3, ADR-014 §4 ; ajouté en S641) — *absent* : au-delà de 5 L, la masse
+  projetée qui retombe émet un événement d'onde ; en deçà, elle ne laisse que de l'écume ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.6).
 
 ## 5. Volumes finis et inondations (V)
 
@@ -525,6 +538,12 @@ pas recopiée ici (L137).
   [ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) D4 : pas de terrain réaliste à hydrologie) — gardé pour mémoire.
 - [ ] **5.12 Capture et restauration de V** — *partiel* : noyau restauré au bit (S229). Manquent le
   stockage durable et le réseau.
+- [ ] **5.13 Naissance et mort des flaques** (source §2.2, ADR-010 §5 et §7, ADR-022 §4.3, ADR-027 §5 ; ajouté en S641) —
+  *absent* : un nœud de V naît au-delà de `V_min` = 2 L accumulés par le terrain, meurt avec une hystérésis ; le mouillage de surface
+  absorbe le reste ; un nœud sans propriétaire disparaît après 30 min. 5.5 ne parle de la flaque que pour l'infiltration
+  ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.2).
+- [ ] **5.14 V rend son eau à la rivière, à la mer, au caniveau** (source §2.2 ; ajouté en S641) — *absent* : une masse de V transférée
+  vers B, W ou δ ; 5.3 s'arrête à « l'hôte lit le déversé » ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.3).
 
 ## 6. Solides et flottabilité
 
@@ -596,6 +615,11 @@ pas recopiée ici (L137).
 - [x] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *validé* (S512) : l'impulsion de masse ajoutée d'ADR-023 §2 à l'instant
   exact où la quille passe sous la surface, corps et eau entraînée d'une même quantité de mouvement ; la même à 2·10⁻¹⁶ près quelle que
   soit la phase du tick (l'échantillonnage au tick : 5,3 % de dispersion) ([preuve](validation/IMPACT-ENTREE-S512.md)).
+- [ ] **6.9 L'eau aérée porte moins** (source §13.1, ADR-014 §5.2, ADR-021 §5, SPEC-004 §2, SPEC-006 §4.5 ; ajouté en S641) —
+  *absent* : l'aération, autoritaire (`A_rep`, `WaterSample.aeration`), réduit la flottabilité — un nageur s'enfonce dans l'eau blanche,
+  un navire perd de sa portance. 7.3 est visuel ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.1).
+- [ ] **6.10 L'affichage des corps animé par δ** (ADR-008 §1, SPEC-004 §7.2 ; ajouté en S641) — *absent* : un ressort borné (8 cm,
+  3°) entre la position physique d'un corps et sa position affichée, que δ anime sans autorité ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.8).
 
 ## 7. Phénomènes secondaires
 
@@ -646,9 +670,13 @@ pas recopiée ici (L137).
   ([preuve](validation/TRAVERSABILITE-AGENTS-S573.md)) ; **S574 : la glace porteuse** — `ice_h`, `ice_capacity_kg` (Gold), l'échéance où
   elle portera une charge ([preuve](validation/GLACE-S574.md)) ; **S577 : la marée de B** prévoit les gués
   ([preuve](validation/MAREE-S577.md)). Manquent la température, la source réelle des échantillons (B, W, V répliqués), le danger dans un
-  courant qui varie.
+  courant qui varie. Manque aussi la visibilité sous l'eau publiée pour l'IA (ADR-018 §7.4, [audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.15).
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
-  DyingStar (ADR-219).
+  DyingStar (ADR-219). Ce qu'ADR-016 et SPEC-006 §4.2–4.3 en attendent ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.14) : trois fonds sonores et un flux d'événements, le
+  délai du son, la coupure presque totale sous l'eau, l'effet des bulles, le son du remplissage, les champs audio de `WaveEvent`, la pluie.
+- [ ] **7.9 La glace qui cède** (ADR-017 §4, §7.3, §7.5 ; ADR-018 §5 ; ajouté en S641) — *absent* : la rupture en plaques
+  flottantes, l'événement émis, la masse rendue à V, la surface qui s'effondre sous qui y marchait ; la neige sur la glace, le
+  brise-glace. 7.6 et 7.7 couvrent la croissance et la charge admissible ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.7).
 
 ## 8. Rendu et niveaux de détail visuels
 
@@ -681,7 +709,7 @@ pas recopiée ici (L137).
   particules, les eaux chargées, les caustiques sur les objets et dans l'eau (piste : un volume de caustiques par
   tranches, [comparable](COMPARABLES-EXTERNES.md) lu en S400). **S474–S477** : le type d'eau — sept préréglages tirés de trois
   constituants, une carte qui le fait varier dans l'espace, le côtier réglé contre une vidéo de référence
-  ([TYPE-EAU-S474](validation/TYPE-EAU-S474.md)).
+  ([TYPE-EAU-S474](validation/TYPE-EAU-S474.md)). Manque aussi un niveau de détail propre à la transparence, aux caustiques et aux particules (source §16, [audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.15).
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *partiel* depuis S365 : dans Godot, la
   caméra sous l'eau — la surface vue d'en dessous, **fenêtre de Snell** rendue à 0,05° de `arcsin(1/n)` et réflexion
   totale au-delà ; le milieu, `exp(−c·d)` par canal à 0,004 près, la lumière de l'eau, le fond et ses caustiques
@@ -691,7 +719,7 @@ pas recopiée ici (L137).
   un ménisque calé sur une photographie ([preuve](validation/DEMI-IMMERGEE-S371.md)) ; **S373** : la brume de l'air réglée
   par pixel à demi immergée (§10). Manquent le fond dans le miroir,
   bulles, écume vue d'en dessous, rayons, turbidité, gouttes sur le hublot, l'échelle radiométrique du ciel et du soleil
-  (la fenêtre terne, §6), le coût du profil immergé entier (B11), les deux mixages audio (à la fin).
+  (la fenêtre terne, §6), le coût du profil immergé entier (B11), les deux mixages audio (à la fin). Manque aussi la transition d'exposition en entrant dans l'eau (ADR-019 §7.2, [audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.15).
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
   (touche D : B seul, B+δ 4 ms, B+δ au pas d'image), couche GPU à 7·10⁻⁸ m de sa lecture CPU,
@@ -866,7 +894,7 @@ pas recopiée ici (L137).
   **S622** : le niveau du large imposé au bord — une frontière caractéristique, fidèle (l'écart à un domaine étendu converge, 0,6 % à
   ¼ m) et absorbante (10⁻⁹ m après sortie) ([preuve](validation/BORD-FORCE-S622.md)) ; **S624** : la chaîne entière — le tsunami entre
   par le bord et remonte (0,806 → 0,901 m) ([preuve](validation/CHAINE-TSUNAMI-S624.md)). Manquent la dispersion, le déferlement, le
-  local 3D, le crash et le très grand navire.
+  local 3D, le crash et le très grand navire. Manque aussi l'effondrement massif (zones §20, [audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.15).
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
   sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.
@@ -876,6 +904,8 @@ pas recopiée ici (L137).
   42 ns par maille-pas, 218² par tick ([preuve](validation/PREALLOCATION-S619.md)). Manquent A98 (une
   seconde plateforme), le GPU bridé, la scène entière. **Depuis S476** (ADR-219 D2) :
   ce PC est la cible de livraison ; la seconde cible devient le bridage de 9.10.
+- [ ] **11.6 Verser d'un référentiel à un autre** (ADR-002 §3 ; ajouté en S641) — *absent* : un liquide versé depuis un vaisseau
+  en vol, ou d'un référentiel mobile à un autre, sa masse et sa vitesse transportées ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.11).
 
 ## 12. Outillage auteur et données cuites
 
@@ -915,7 +945,7 @@ pas recopiée ici (L137).
   [preuve](validation/C16-ACCELERE-S542.md)) ; **C21 depuis S544–S545** (fixe et accéléré ;
   [preuve](validation/C21-MASSE-S544.md)) ; **C09 depuis S555–S557** (la masse ; l'énergie du schéma, conservée ;
   [preuve](validation/ENERGIE-DISCRETE-S557.md)) ; **C15 depuis S575** (la glace d'un lac ; [preuve](validation/C15-GLACE-S575.md)).
-  Non exécutés : C05, C11, C14. **C18 partiel**
+  Non exécutés : C05, C14 (C11 passé depuis S498, voir 6.1). **C18 partiel**
   (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
   cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
   chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par
@@ -933,25 +963,31 @@ pas recopiée ici (L137).
   régression du jeu — une surprise pour son équipe : rien ne se publie.
 
 ---
+- [ ] **13.5 Rejeu, saturation, dérive des coûts** (SPEC-003 §7.1, §7.2, §8, §9.2 ; ajouté en S641) — *absent* : le rejeu de
+  sessions réelles, la batterie de saturation, la dérive des coûts suivie dans le temps, la recherche du commit fautif. Le banc de
+  non-régression (S483) n'en tient pas lieu ; SPEC-003 les dit « intention, pas état » depuis S321 ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.10).
 
 ## Décompte
 
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
-| 1. Socle | 8 | 1 | 7 | 0 |
-| 2. Grandes masses (B) | 9 | 0 | 9 | 0 |
-| 3. Ondes (W) | 9 | 0 | 9 | 0 |
-| 4. Volumique (δ) | 21 | 0 | 21 | 0 |
-| 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
-| 6. Solides | 8 | 5 | 3 | 0 |
-| 7. Secondaires | 8 | 0 | 7 | 1 |
+| 1. Socle | 9 | 1 | 7 | 1 |
+| 2. Grandes masses (B) | 10 | 0 | 9 | 1 |
+| 3. Ondes (W) | 10 | 0 | 9 | 1 |
+| 4. Volumique (δ) | 22 | 0 | 21 | 1 |
+| 5. Volumes finis (V) | 14 | 2 | 9 | 3 |
+| 6. Solides | 10 | 5 | 3 | 2 |
+| 7. Secondaires | 9 | 0 | 7 | 2 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 12 | 0 |
 | 10. Multijoueur | 9 | 1 | 8 | 0 |
-| 11. Grande échelle | 5 | 0 | 5 | 0 |
+| 11. Grande échelle | 6 | 0 | 5 | 1 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
-| 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **108** | **3** |
+| 13. Validation | 5 | 0 | 3 | 2 |
+| **total** | **132** | **10** | **108** | **14** |
+
+*S641, 2026-10-07* : **onze points ajoutés**, absents — les intentions des documents fondateurs qu'aucun point ne portait
+([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md), demandé par l'utilisateur) ; 121 → 132.
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

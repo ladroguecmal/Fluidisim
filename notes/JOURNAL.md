@@ -1389,3 +1389,15 @@ est exacte) ; le témoin plat à 3·10⁻⁶ ; **avec un rivage, 0,26 m/s — cr
 le noyau fausse la surface reconstruite. L'escalier de S639 reste meilleur au rivage (1,5 cm/s) ; son attribution est corrigée (L419).
 **En parallèle** : l'utilisateur demande la relecture des documents fondateurs (intentions oubliées, changées, caduques) — confiée à un
 agent : [l'audit](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md) (15 absentes, 9 changements implicites, 10 caduques). Maillons **1** (4.14 avance). Suivant : **S641, revue de méthode et lot**, puis le choix de l'étape 2.
+
+## S641 — 2026-10-07 — la trente-deuxième revue de méthode ; l'audit versé dans la liste
+
+**Entrée.** En autonomie (ADR-247) ; la revue (S636–S640), le lot (S638–S640), l'audit des intentions initiales demandé par
+l'utilisateur. **Fait** : [ADR-259](../docs/adr/ADR-259-trente-deuxieme-revue-de-methode.md) — D1, un témoin qui supprime une cause
+avant de nommer un remède (S639 avait mal attribué) ; D2, une valeur tirée d'un ADR se cite avec ceux qui le nomment (S609 avait rétabli
+le seuil `0,35·Hs` qu'ADR-111/112 avaient retiré) ; D3, le bilan global relit la liste contre les documents fondateurs. **La liste** :
+onze points ajoutés, absents (121 → 132) — l'eau aérée qui porte moins, les flaques, V vers la mer, le fetch, les rochers qui brisent,
+la gerbe vers W, la glace qui cède, le ressort d'affichage, l'horloge du client, verser entre référentiels, le rejeu ; 4.11, 13.2, 7.8
+corrigés. Les huit arbitrages de l'audit posés à l'utilisateur (boussole). Maillons **1**. Suivant : **S642, les corrections** (4.11,
+I-08, I-14).
+

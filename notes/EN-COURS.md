@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S641 — **en cours**. En autonomie (ADR-247). **La trente-deuxième revue de méthode** (ADR-222 D4 : S636–S640), **le lot**
+Session : S641 — **terminée**. En autonomie (ADR-247). **La trente-deuxième revue de méthode** (ADR-222 D4 : S636–S640), **le lot**
 (feuille de route S638–S640), et **l'audit des intentions initiales** demandé par l'utilisateur (2026-10-07,
 [AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)) versé là où une session peut le verser seule
 (ADR-218 D2) : les intentions fondatrices absentes deviennent des points de la liste ; les dérives non décidées sont inscrites à leurs
@@ -77,7 +77,10 @@ au registre des questions ouvertes.
 ### Plan
 
 - [x] **P1** — jeton ; plan ; le lot.
-- [ ] **P2** — ADR-259 ; la liste, ses dépendances ; les questions.
+- [x] **P2** — ADR-259 ; la liste, ses dépendances ; les questions.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-259 (D1 : un témoin qui supprime une cause avant de nommer un remède ; D2 : une valeur tirée d'un ADR se cite avec ceux
+  qui le nomment ; D3 : le bilan global relit la liste contre les documents fondateurs) ; onze points ajoutés (121 → 132, absents 3 → 14),
+  leurs dépendances ; 4.11, 13.2, 7.8 et quatre « manquent » corrigés ; les questions de l'audit dans la boussole.
