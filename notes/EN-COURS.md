@@ -62,44 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S594 — **terminée**. En autonomie (ADR-247), **11.2 — de nombreuses régions de mer décrites par descripteur, transitions par
-paramètres** (absent ; I-09 : « on interpole des paramètres, jamais des réalisations »).
+Session : S595 — **en cours**. En autonomie (ADR-247), **7.2 — spray, embruns, gouttelettes** (absent). Première pièce : **la goutte**.
 
-**Ce que la session fait.** `regions.rs` : un **descripteur** de région (Hs, niveau moyen) sur un rectangle ; `parametres_en(x, y)` : les
-poids de chaque région — 1 à l'intérieur, une transition en `smoothstep` sur une bande de largeur donnée à son bord —, normalisés (une
-partition de l'unité), et les **paramètres mélangés** ; `echelle(échantillon, s)` : l'échantillon de B mis à l'échelle de `Hs_local/Hs_réf`
-(les composantes de B sont les mêmes partout, ADR-004 §2.1 ; seule leur amplitude suit le paramètre) et décalé du niveau moyen local. Ne
-fait pas : la période et la direction par région (elles changent les composantes : à faire par pondération spectrale), la marée par
-région (la carte cotidale, S578, s'y attache ensuite), le placement des régions sur la planète (11.1).
+**Ce que la session fait.** `goutte.rs` : une goutte sphérique de rayon `r` dans l'air au repos — la poussée d'Archimède comprise, la
+traînée d'une sphère rigide par Schiller–Naumann, `C_d = 24/Re·(1 + 0,15·Re^0,687)` (de Stokes au régime quadratique) ; la vitesse
+terminale (bissection sur l'équilibre) ; le vol, RK4 à pas fixe en f64 (déterministe), jusqu'au retour à la surface (l'instant et le point
+de chute, interpolés). Ne fait pas : l'émission (le déferlement, la gerbe — d'où naissent les gouttes), le vent, l'évaporation, la
+déformation des grosses gouttes (au-delà de ~1 mm, `C_d` d'une sphère rigide surestime la vitesse terminale), le rendu.
 
-**Références, calculées avant** (ce script les écrit). Deux régions, Hs = 1.0 et 3.0 m, une bande de 1 000 m. Au milieu de la bande :
-le **mélange des paramètres** donne **Hs = 2.0 m** ; le **témoin** — mélanger deux réalisations indépendantes, chacune à son Hs, à
-½–½ — donne **Hs = 1.5811 m** (−20.9 %) ; à Hs égal, la perte vaut **29.3 %** (A11).
+**Références, calculées avant par ce script, avec son propre code** (air 1,2 kg/m³, μ = 1,8·10⁻⁵ Pa·s). Vitesse terminale : `r` = 10 µm,
+**0.011992 m/s** (Stokes pur : 0.012097) ; `r` = 1 mm, **6.9556 m/s**. Une goutte de 0,5 mm lancée à 10 m/s à 45° : retombe en
+**0.90367 s** à **2.3030 m** (dans le vide : 10.1937 m).
 
-**Quantum** (ADR-236 D1) : la mesure de Hs (`4·σ(η)` sur 2 h au pas de 0,5 s, 9 points) — son erreur estimée par l'écart entre deux
-fenêtres d'une heure, mesuré ; le seuil 5 % doit le dépasser d'un facteur 10 (vérifié dans l'essai avant de juger).
-**Critères, écrits avant.** (1) les poids : une partition de l'unité partout (à 10⁻⁶), 1 à l'intérieur d'une région, continus à travers la
-bande ; (2) au milieu de la bande, Hs mesuré à 5 % de 2.0 m, et le témoin à 5 % de 1.5811 m (la perte
-mesurée) ; (3) loin de la bande, l'échantillon de chaque région au bit de B mis à son échelle ; (4) refus : un rectangle vide, une
-bande non positive, un point hors de toute région.
+**Quantum** (ADR-236 D1, ADR-249 D1) : f64 ; la bissection à 10⁻¹² ; le pas du RK4 du code (10⁻⁴ s) contre celui du script (10⁻⁵ s) —
+erreur estimée sous 10⁻⁶ relatif. **Critères, écrits avant.** (1) les vitesses terminales à 10⁻³ relatif ; (2) le temps de vol et la portée
+à 10⁻³ relatif ; (3) une goutte très lourde (la masse volumique de l'air nulle) retrouve la portée du vide `v²/g` à 10⁻⁶ ; (4) refus :
+rayon, vitesse ou pas non positifs.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `regions.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 11.2 ; rituel.
+- [ ] **P2** — `goutte.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 7.2 ; rituel.
 
 ### Notes de reprise
-- **Première mesure : (1), (3), (4) et (2) pour les paramètres tenus (Hs 2,0009 m) ; (2) pour le témoin manqué — 1,3619 m pour 1,5811.**
-  Relu d'abord (ADR-239 D1), par une mesure de chaque mer : Hs 0,2001 et 0,2001, mais **ρ = −0,43** entre les graines 42 et 43. La formule
-  avec ρ, `√((1 + 9 + 2·ρ·3)/4)`, redonne 1,361 m : elle est juste ; l'hypothèse d'indépendance ne l'était pas. Deux réalisations aux mêmes
-  composantes ont une corrélation fixe `Σaₖ²·cos Δφₖ/Σaₖ²`, nulle **en moyenne sur les tirages** seulement (écart-type ~0,3 pour ~10
-  composantes efficaces) — ce n'est pas un défaut de B (SplitMix, bien mélangé). Le critère (2) témoin, posé sur un couple, reste
-  **manqué** et publié.
-- **Vérification ajoutée en route** (ADR-244 D1, avant l'essai) : l'**ensemble** — la moyenne de Hs² du témoin sur 800 couples de graines
-  (un point, 2 h au pas de 2 s) ; attendu `(1 + 9)/4` = 2,5 (Hs 1,5811) ; l'écart-type de la moyenne ≈ 6·0,3/(4·√800) = 0,016 sur Hs² ; un
-  seuil de 0,25 sur Hs² (≈ 5 % sur Hs) lui laisse un rapport ≈ 16 (ADR-236).
-- **P2 fini** — (1), (3), (4) tenus ; (2) paramètres 2,0009 m tenu ; (2) témoin d'un couple 1,3619 m manqué (ρ = −0,43) ; l'ensemble sur
-  800 couples 2,5038 pour 2,5. Suite 770.
-- **P3** — preuve REGIONS-S594 ; liste 11.2 (absent → partiel) et décompte ; index ; journal.
-
