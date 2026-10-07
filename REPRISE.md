@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 03:25 +02:00
+JETON            : libre
+Battement        : 2026-10-07 03:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S595 — 7.2, le vol d'une goutte ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S594 — les régions de mer par descripteur (I-09) ([journal](notes/JOURNAL.md)). Avant : S593 (le lot)
-Session suivante : **S595 — un point absent** (ADR-247 ; restent 23). Revue à S596 (noter : une hypothèse d'indépendance posée sur un seul tirage, S594). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S594 : 11.2 absent → partiel
+Session en cours : aucune
+Dernière session : S595 — le vol d'une goutte ([journal](notes/JOURNAL.md)). Avant : S594 (les régions de mer par descripteur)
+Session suivante : **S596 — la vingt-troisième revue de méthode** (S591–S595 ; ADR-222 D4) et le lot (dû en S596) : à noter — une hypothèse d'indépendance posée sur un seul tirage (S594), un essai de 65 s (S593) ; ce qui a tenu (ADR-249 D1 appliqué, S592–S595 ; trois références pour la rivière, S593). Puis un point absent (ADR-247 ; restent 22). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S595 : 7.2 absent → partiel
 Registres       : dernier lot S593 (ADR-213 D3) ; le prochain au plus tard en S596
 ```
 

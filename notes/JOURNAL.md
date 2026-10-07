@@ -1045,3 +1045,9 @@ poids en partition de l'unité, la mer de B à l'échelle du paramètre local. *
 **Le témoin d'un couple manqué** (1,3619 pour 1,5811) : la formule relue d'abord était juste — c'est l'indépendance de deux réalisations aux
 mêmes composantes qui ne l'était pas (ρ = −0,43) ; l'ensemble sur 800 couples, ajouté par les notes, retrouve 2,5038 pour 2,5. Maillons **1**
 (11.2 : absent → partiel). Suivant : **S595**, un point absent ; revue à S596.
+
+## S595 — 2026-10-07 — le vol d'une goutte
+
+**Entrée.** En autonomie (ADR-247) ; 7.2 (absent). **Fait** ([preuve](../docs/validation/GOUTTE-S595.md)) : `goutte.rs` — Schiller–Naumann,
+la vitesse terminale, le vol. **Mesuré** : les vitesses terminales et le vol aux références du script (son propre code), le vide à 10⁻¹⁰.
+Maillons **1** (7.2 : absent → partiel). Suivant : **S596, la vingt-troisième revue de méthode**, et le lot.

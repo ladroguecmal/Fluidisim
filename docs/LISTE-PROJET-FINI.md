@@ -565,7 +565,9 @@ pas recopiée ici (L137).
   (scénarios 2 et 3 de B9) ; suspendu par l'utilisateur sauf références photographiques (2026-09-26).
   **Depuis S476** ([ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D5) : la suspension levée — les vidéos V2 (déferlement) et V3
   (impact) sont la référence du banc.
-- [ ] **7.2 Spray, embruns, gouttelettes** — *absent*.
+- [ ] **7.2 Spray, embruns, gouttelettes** — *partiel* depuis S595 : **la goutte** — la traînée de Schiller–Naumann, la vitesse terminale
+  (10 µm : 1,2 cm/s ; 1 mm : 6,96 m/s), le vol et la chute, contre un code indépendant ([preuve](validation/GOUTTE-S595.md)). Manquent
+  l'émission (le déferlement, les gerbes), le vent, l'évaporation, la déformation des grosses gouttes, le rendu.
 - [ ] **7.3 Microbulles visuelles** — *absent*.
 - [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *partiel* depuis S479 (**S540 : C13 passe** — les petites
   bulles de 0,1 à 5 mm à −6 à −9 % de SPEC-002 §2, selon `−g_eff` ; [preuve](validation/C13-BULLES-S540.md)) : l'air enfermé en poches
@@ -856,14 +858,14 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
-| 7. Secondaires | 8 | 0 | 5 | 3 |
+| 7. Secondaires | 8 | 0 | 6 | 2 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **88** | **23** |
+| **total** | **121** | **10** | **89** | **22** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

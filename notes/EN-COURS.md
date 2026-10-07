@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S595 — **en cours**. En autonomie (ADR-247), **7.2 — spray, embruns, gouttelettes** (absent). Première pièce : **la goutte**.
+Session : S595 — **terminée**. En autonomie (ADR-247), **7.2 — spray, embruns, gouttelettes** (absent). Première pièce : **la goutte**.
 
 **Ce que la session fait.** `goutte.rs` : une goutte sphérique de rayon `r` dans l'air au repos — la poussée d'Archimède comprise, la
 traînée d'une sphère rigide par Schiller–Naumann, `C_d = 24/Re·(1 + 0,15·Re^0,687)` (de Stokes au régime quadratique) ; la vitesse
@@ -82,7 +82,10 @@ rayon, vitesse ou pas non positifs.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `goutte.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 7.2 ; rituel.
+- [x] **P2** — `goutte.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 7.2 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — terminales 0,011992 et 6,9556 m/s ; vol 0,90367 s, 2,3030 m ; le vide à 10⁻¹⁰ ; refus. Suite 771.
+- **P3** — preuve GOUTTE-S595 ; liste 7.2 (absent → partiel) et décompte ; index ; journal.
+
