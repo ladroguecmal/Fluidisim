@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 10:33 +02:00
+JETON            : libre
+Battement        : 2026-10-07 10:38 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S630 — 3.5, le déferlement sur une côte quelconque : marching squares et chaînage ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S629 — le lot ; le domaine local nourri par le tsunami macroscopique lui-même ([journal](notes/JOURNAL.md)). Avant : S628 (le frottement de Manning et le bord droit)
-Session suivante : **S630 — la physique des partiels** (ADR-247). Revue à S631 ; le lot à S632. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
-Maillons        : 1 — S629 : 3.4 avance (le raffinement à la côte)
+Session en cours : aucune
+Dernière session : S630 — le déferlement sur une côte quelconque ([journal](notes/JOURNAL.md)). Avant : S629 (le lot)
+Session suivante : **S631 — la trentième revue de méthode** (ADR-222 D4 ; S626–S630), puis la physique des partiels. Le lot à S632. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
+Maillons        : 1 — S630 : 3.5 avance (côte quelconque)
 Registres       : dernier lot S629 (ADR-213 D3) ; le prochain au plus tard en S632
 ```
 

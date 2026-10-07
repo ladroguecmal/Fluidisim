@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S630 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **3.5 — le déferlement sur une côte quelconque** : S588
+Session : S630 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **3.5 — le déferlement sur une côte quelconque** : S588
 ne savait qu'une côte droite (un sommet par ligne) ; son manque nommé : « les marching squares et le chaînage des segments ».
 
 **Ce que la session fait.** `deferlement::contours(…)` : l'écart `H − 0,78·h` aux nœuds (la convention de S588 : la terre à +∞) ; sur chaque
@@ -84,7 +84,9 @@ deux polylignes fermées, 680 sommets ; (4) refus : grille de moins de 2 × 2, p
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `contours` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.5 ; rituel.
+- [x] **P2** — `contours` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai ; l'écart radial de l'île au bit de Python. Suite : 816 essais listés.
+- **P3** — preuve CONTOURS-S630 ; ligne 3.5 ; index ; journal.

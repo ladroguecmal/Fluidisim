@@ -185,8 +185,10 @@ pas recopiée ici (L137).
   ponctuelle, les caustiques, la dispersion des sources courtes, le déferlement, l'événement de W qui le porte.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *partiel* depuis S588 : **la polyligne d'une côte droite** — McCowan sur la houle
   levée et réfractée, le flux dissipé en kW/m, la direction de crête, contre des formules indépendantes
-  ([preuve](validation/DEFERLEMENT-S588.md)). Manquent une côte quelconque (marching squares, îles), la largeur de la zone, une polyligne
-  par phase de marée, la publication.
+  ([preuve](validation/DEFERLEMENT-S588.md)) ; **S630 : une côte quelconque** — marching squares et chaînage ; la côte droite redonne S588,
+  une île se referme sur le cercle exact à 1 cm près (maille de 5 m), deux îles donnent deux lignes ([preuve](validation/CONTOURS-S630.md)).
+  Manquent la hauteur réfractée par une côte courbe, le flux et la direction sur le contour, la largeur de la zone, une polyligne par
+  phase de marée, la publication.
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
   (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).
   Manquent les caustiques, la diffraction, les ondes courtes (dispersives), le branchement au tsunami (3.4) et l'entrée dans W.

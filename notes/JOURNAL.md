@@ -1309,3 +1309,10 @@ partiels.
 `tsunami::niveau`. **Mesuré** : il prolonge l'objet macroscopique à 0,12 % près (crête 5 mm, maille 1 m) ; le reste est proportionnel à
 l'amplitude (la non-linéarité du local) ; tolérances posées sur la sensibilité mesurée. **En route** : un balayage vers le déferlement
 abandonné sans commit (trois effets mêlés). Maillons **1** (3.4 avance). Suivant : **S630**.
+
+## S630 — 2026-10-07 — le déferlement sur une côte quelconque
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 3.5, « les marching squares et le chaînage ». **Fait** ([preuve](../docs/validation/CONTOURS-S630.md)) :
+`deferlement::contours`. **Mesuré** : la côte droite redonne les 11 sommets de S588 à 10⁻¹² m ; une île conique, une polyligne fermée de
+340 sommets à au plus 1,24 cm du cercle exact (au bit d'un calcul Python indépendant) ; deux îles, deux polylignes. Maillons **1** (3.5
+avance). Suivant : **S631**, la revue de méthode.
