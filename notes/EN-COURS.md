@@ -62,49 +62,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S682 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271, note de S680).
+Session : S683 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271).
 
-**Ce que la session fait.** **La sortie à droite** (`enable_right_outlet`, avec les bords ouverts de S446) :
+**Ce que la session fait.** **L'entrée à droite** (`feed_right`, avec la sortie de S682) :
 
-- une particule qui franchit le bord droit n'est plus retenue par le domaine, elle est retirée ;
-- son volume (`dx³/8`) est compté par rangée `j` et au total (`right_outlet`) ;
-- éteinte par défaut ; refusée avec les gouttes et la zone des colonnes (leurs tableaux par particule).
+- un volume donné par rangée s'ajoute à un **réservoir** ;
+- chaque quantum entier (`dx³/8`) devient une particule posée dans la dernière colonne, sur le réseau au quart de maille, à la place
+  la moins occupée sous la surface ;
+- la particule reçoit la vitesse d'entrée.
 
-L'entrée (poser des particules pour un volume donné) est la brique suivante.
+La masse se compte : particules × quantum + réservoir.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-272)
 
-- **témoin** : sans la sortie, au bit (tous les essais d'APIC) ; le même bassin, le bord ouvert sans la sortie (les particules
-  s'entassent contre le bord).
-- **instrument** : un bassin à 0,4 m qui se vide par son bord droit ouvert à 0,1 m/s pendant 1 s, à 5 cm. Le volume compté contre deux
-  lectures :
-  - le compte des particules (exact, au bit) ;
-  - le flux de la face, `Σ u·dx²` sur les faces mouillées, intégré sur le pas.
-
-  Ce que rendrait chaque hypothèse :
-  - une sortie juste rend le compte exact et le flux à mieux que 10 % ;
-  - une particule retenue s'entasse au bord : la densité de la dernière colonne dépasse celle d'une colonne pleine ;
-  - un volume compté sans retrait (ou l'inverse) casse le compte exact.
-- **calcul** (ce script) : ≈ 4.00 L sortent, 256 particules. La surface baisse de 2.0 cm (5 %
-  de `h`) : la borne du flux à **10 %**.
-- **ADR** : ADR-271, ADR-272 (sans objet : aucune interface placée dans la maille n'est jugée ici).
+- **témoin** : sans entrée, au bit (S682 et tous les essais d'APIC).
+- **instrument** : le bassin de S682, l'eau à 0,2 m, nourri à 0,1 m/s sur la hauteur mouillée du bord droit pendant 1 s (le volume de
+  chaque pas lu comme en S682). Ce que rendrait chaque hypothèse :
+  - une entrée juste rend le bilan exact (particules × quantum + réservoir = départ + entré, à 10⁻¹² près) et la colonne du bord peu
+    tassée ;
+  - des particules posées au même endroit (une place mal choisie) donnent une colonne surchargée et une vitesse parasite.
+- **calcul** (ce script) : ≈ 2.0 L, 128 particules ; le niveau monte de 10 mm, sous le quantum d'une couche de
+  particules (25 mm) : le niveau ne départage pas, le volume oui.
+- **ADR** : ADR-271.
 - **pièges** :
-  - `walls` impose la vitesse du bord à toutes les faces de droite, celles d'air comprises (la projection ne les lit pas) ;
-  - le retrait par échange avec la dernière particule (l'ordre change : le compte, non) ;
-  - la marge de la borne du domaine (`1e-3·dx`).
+  - la capacité réservée (une particule refusée est comptée, et son quantum reste au réservoir) ;
+  - le fond (une place sous le fond n'est pas une place) ;
+  - le réservoir négatif (le volume donné est positif ; la sortie est celle de S682).
 
 **Critères, écrits avant.**
 
-1. Sans la sortie, tout au bit (le banc et les essais d'APIC).
-2. Le compte exact : particules au départ = particules restantes + retirées, et le volume compté = retirées × `dx³/8`.
-3. Le volume sorti à moins de **10 %** du flux de la face intégré.
-4. Aucune accumulation : la dernière colonne ne dépasse pas la densité d'une colonne pleine (8 par maille mouillée).
+1. Sans entrée, au bit.
+2. Le bilan exact à 10⁻¹² près.
+3. La dernière colonne à au plus 10 particules par maille mouillée.
+4. La vitesse maximale sous 0,5 m/s : l'entrée à 0,1 m/s, plus l'onde qu'elle lance (`√(g·h)·Δh/h` ≈ 0,07 m/s).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la sortie ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — l'entrée ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) les 57 essais d'APIC ; (2) exact ; (3) 4,000 L contre 4,000 L ; (4) 8,00 (le témoin : 20,0). L'assertion du volume comparait d'abord à `dx` en `f64` : le quantum vient de `dx` en `f32`.

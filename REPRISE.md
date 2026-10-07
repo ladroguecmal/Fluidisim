@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 00:20 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 00:21 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S683 — le relais au rivage, brique 3 : poser des particules au bord droit ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S682 — Le relais au rivage, brique 2 : la sortie à droite d'APIC ([journal](notes/JOURNAL.md)). Avant : S681 (la quarantième revue de méthode)
 Session suivante : S683 — la brique 3 du relais au rivage : poser des particules au bord droit pour le reflux
 Maillons        : 1 (4.14 : la sortie à droite d'APIC)
