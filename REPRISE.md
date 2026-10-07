@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 02:51 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 02:52 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S590 — le lot ; 2.3, le niveau moyen d'un lac par son bilan ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S589 — la vitesse de B au-dessus du plan moyen (A286) ([journal](notes/JOURNAL.md)). Avant : S588 (la polyligne de déferlement)
 Session suivante : **S590 — le lot** (dû en S590) **et un point absent** (ADR-247 ; restent 27 absents, plus aucun en section 3). Revue à S591. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 1 — S589 : 3.9 absent → partiel

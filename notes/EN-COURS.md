@@ -62,36 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S589 — **terminée**. En autonomie (ADR-247), **3.9 — les couches fournies au-dessus du plan moyen pour δ** (absent ; A286) :
-le pas couplé mobile exige un champ prolongé au-dessus de `z = 0` **de façon incompressible** ; B refuse `z > 0` (ADR-113) ; Taylor d'ordre
-un n'est pas incompressible (`div = z·U_xz`), l'exponentielle `e^{kz}` amplifie les ondes courtes sous les crêtes des longues.
+Session : S590 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S587–S589), puis **2.3 — les lacs** (absent ;
+« niveau moyen, apports, courants faibles »). Première pièce : **le niveau moyen d'un lac par son bilan d'eau**, dans V — un lac est un
+contenant (ADR-010) : ses apports (la pluie sur son bassin versant, ADR-204), son évaporation, son exutoire (un déversoir).
 
-**Ce que la session fait.** Le remède qu'A286 propose : `Background::vitesse_au_dessus(x, y, z, t)` — la vitesse horizontale **constante**
-au-dessus de `z = 0` (`U(z) = U(0)`), la verticale **fermée par la continuité** : `w(z) = w(0) − z·∇ₕ·U(0)` ; incompressible par
-construction, linéaire en `z` (pour un mode d'Airy, `w = −a·ω·cos φ·(1 + kz)` : l'ordre un de l'exponentielle). Mêmes phases entières que
-`eval_local`. Ne fait pas : W (les anneaux) au-dessus du plan, le raccord au pas couplé de δ (la réception contre l'oracle S253).
+**Ce que la session fait.** Un essai de V, sans code neuf de loi : un lac de 1 000 × 1 000 m (forme volumique, 12 m de haut), plein
+jusqu'à la crête de son exutoire (10 m) ; la pluie de 10 mm/h sur un bassin versant de 3,6 km² ; une évaporation de 5 mm/jour ; un
+déversoir de 20 m (`C_d` = 0,62) vers dehors. Au pas de 10 s.
 
-**Références, calculées avant** (ce script les écrit). Un mode de 1 m, λ = 50 m (`k` = 0.125664 rad/m, `ω` = 1.110298 rad/s), à `z` = 0,5 m :
-le témoin Taylor a une divergence de **8.7666e-03 s⁻¹** au plus ; l'écart à l'exponentielle sur `w`, `a·ω·(e^{kz} − 1 − kz)`, au plus
-**2.2383e-03 m/s**. Le bruit d'une divergence par différences finies centrées en f32 au pas de 1 cm : ≈ **1.3e-05 s⁻¹**.
+**Références, calculées avant** (ce script les écrit). Apports **10.0000 m³/s**, évaporation 0.05787 m³/s ; l'équilibre du déversoir
+`Q = (2/3)·C_d·b·√(2g)·H^(3/2)` : **H = 0.419308 m** au-dessus de la crête ; la constante de temps près de l'équilibre
+`τ = A/(dQ/dH)` = **28117 s** (7.8 h, ADR-240 D2) ; le temps pour arriver à 1 mm de l'équilibre (RK4 fin) :
+**179210 s** (49.8 h). L'essai dure 72 h.
 
-**Quantum** (ADR-236 D1) : ce bruit. **Critères, écrits avant.** (1) la divergence du prolongement, par différences finies, sous 10⁻³ de
-celle du témoin (rapport au bruit : 1) en 16 points ; (2) `w` égal à `−a·ω·cos φ·(1 + kz)` à 10⁻⁵ m/s, et
-son écart à l'exponentielle sous 2.2383e-03 m/s ; (3) à `z = 0`, `(u, v, w)` identiques **au bit** à la vitesse de surface
-d'`eval_local` (la continuité) ; (4) refus : `z < 0` ou non fini.
+**Quantum** (ADR-236 D1) : 1 ml sur 10⁶ m² — 10⁻⁹ m ; le millimètre de surface est le quantum utile (5.6). **Critères, écrits avant.** (1) le
+niveau final à 1 mm de `10 + H` ; (2) le bilan exact au millilitre : le volume final moins l'initial égale la pluie reçue moins le
+déversé moins l'évaporé (les transferts de chaque pas) ; (3) le niveau à 49.8 h à 2 mm de l'équilibre (la référence RK4 au même pas).
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `vitesse_au_dessus` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.9 ; A286 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.3 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **Avant la mesure, une faute du plan relevée** (ADR-236 D1) : le script avait imprimé, pour le critère (1), un rapport au bruit de « 1 »
-  (des différences finies f32 au pas de 1 cm : bruit ≈ 1,3·10⁻⁵ s⁻¹ contre un seuil de 8.8e-06) — le seuil, ainsi appliqué, est
-  disqualifié. Procédure corrigée, seuil inchangé : différences centrées au pas de 0,5 m et 0,25 m, combinées par Richardson (troncature
-  en `h⁴` ≈ 7.2e-08, bruit ≈ 2.4e-07 s⁻¹ ; rapport au seuil ≈ 36). Le témoin Taylor passe par la même
-  procédure.
-- **P2 fini** — divergence 9,9·10⁻⁷ (témoin 1,3·10⁻²) ; w à 5,8·10⁻⁸ ; l'exponentielle à sa borne ; au bit à z = 0 ; refus. Suite 764.
-- **P3** — preuve AU-DESSUS-S589 ; liste 3.9 (absent → partiel) et décompte ; note A286 ; index ; journal.
-

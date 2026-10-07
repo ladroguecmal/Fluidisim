@@ -421,6 +421,8 @@ comme départ, un seuil dans une seule fonction) ; 2.2 avance — la marée harm
 **S582–S583** : **3.4 ouvert** (la propagation macroscopique d'un tsunami) ; **3.6 ouvert** (la réfraction par tracé de rayons).
 **S584–S586** : 3.4 avance (le tsunami sur un rayon courbe) ; **la v2 décidée** (ADR-247 : la liste à 100 %, la physique d'abord) ; la
 vingt et unième revue (ADR-248).
+**S587–S589** : **3.3, 3.5, 3.9 ouverts** (la bulle d'une explosion sous-marine, la polyligne de déferlement, la vitesse de B au-dessus
+du plan moyen) — la section 3 n'a plus d'absent.
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
