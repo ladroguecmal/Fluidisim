@@ -62,23 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S654 — **terminée**. En autonomie vers la v2. **A334** : sous le rouleau, la force sur un corps est un choc de deux pas (S652 :
-165,6 N brut, 47 N lissé sur 0,1 s) ; libre, le corps est lancé plus vite que l'eau (S653 : 4,68 contre 1,80 m/s).
+Session : S655 — **en cours**. En autonomie vers la v2. Le corps libre de S653 est lancé plus vite que l'eau par son couplage explicite
+(S654 : 4,68 m/s à 10 ms, 2,56 à 5 ms, la force lissée inchangée).
 
-**Le témoin (ADR-259 D1).** Le même rouleau, le pas plafonné à **5 ms** au lieu de 10 (`stable_step_us`), la sphère fixe (S652) puis
-libre (S653). Un choc physique garde son impulsion et son pic (la pression d'impact ne dépend pas du pas) ; un artefact de basculement
-entre eau et air donne un pic par pas : sa force double quand le pas est divisé par deux, son impulsion reste.
+**Le remède.** La masse ajoutée traitée implicitement : `(m + m_a)·aₙ₊₁ = F + m·g + m_a·aₙ`. À l'équilibre (`aₙ₊₁ = aₙ`), c'est
+`m·a = F + m·g` : rien ne change. `m_a = ½·ρ·V_imm` (la sphère), `V_imm` les mailles du corps où `φ < 0` — la reconstruction reflète l'eau
+à travers la sphère (S393) — fois `dx³`. L'accélération du pas précédent est gardée. Sans masse, au bit.
 
-**Critères de verdict, écrits avant.** Sphère fixe, de 10 à 5 ms : (a) **artefact** si le pic brut croît de plus de 50 % et que
-l'impulsion varie de moins de 20 % ; (b) **choc physique** si le pic et l'impulsion varient tous deux de moins de 20 % ; (c) sinon,
-non départagé, rapporté. Sphère libre : la vitesse du corps à 5 ms, rapportée contre 4,68 m/s (10 ms) et la vitesse de la colonne.
+**Critères, écrits avant.** (1) Sous le rouleau (le montage de S653), la vitesse au plus du corps libre à 10 et à 5 ms **à 20 % l'une de
+l'autre**, et chacune au plus la vitesse de l'eau de la colonne ; le corps emporté de plus de 0,5 m ; la masse au bit. (2) La flottaison de
+S653 tient toujours (le centre à 2 cm du niveau ; aucune croissance). (3) Les essais d'APIC 3D passent.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le pas plafonné en paramètre ; les deux essais (copies du binaire, en parallèle) ; le verdict.
-- [x] **P3** — preuve ; A334 ; rituel.
+- [ ] **P2** — la masse ajoutée ; les deux pas en parallèle ; (1)–(3).
+- [ ] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — fixe : pic −16 %, lissée −2 %, impulsion +41 % → (c) non départagé ; libre : 4,68 → 2,56 m/s. Réattribuée : le couplage
-  explicite. (Le paramètre du pas, avec le plan, au commit P1.)

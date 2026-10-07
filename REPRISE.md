@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 18:43 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 18:44 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S655 — la masse ajoutée implicite du corps libre ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S654 — A334, le témoin du pas de temps ([journal](notes/JOURNAL.md)). Avant : S653 (le corps libre que le rouleau emporte)
 Session suivante : **S655 — la masse ajoutée implicite du corps libre** : l'inertie m + m_a (m_a = ½ρV immergé pour une sphère) dans la mise à jour du corps ; critère : la vitesse du corps libre sous le rouleau à 10 et à 5 ms à 20 % l'une de l'autre, au plus celle de l'eau ; la flottaison inchangée.
 Maillons        : 2
