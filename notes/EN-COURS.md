@@ -71,6 +71,6 @@ listés, 17 ignorés**. **ADR-252** : D1 ; L411 ; METHODE ; BOUSSOLE ; index.
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-252, METHODE, L411, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
