@@ -46,6 +46,7 @@ D = {
  "2.8": ("A", "—", ["2.7", "3.6"], "la fin du projet : météo et son en dernier (ADR-197 D5)"),
  "2.9": ("A", "—", ["2.7"], None),
  "2.10": ("A", "la borne du fetch sur les vagues de vent d'un lac", ["2.3"], None),
+ "2.11": ("C", "la densité en champ transporté ; l'embouchure", ["2.4", "6.1"], None),
  "3.1": ("A", "l'eau peu profonde faite (S528) ; la gerbe, la profondeur variable", ["4.12"], None),
  "3.2": ("A", "durées longues ; C07 passe entier (S519–S527)", [], None),
  "3.3": ("A", "la source d'explosion de W, champ lointain", ["4.16", "7.4"], None),

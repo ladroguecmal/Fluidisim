@@ -1412,3 +1412,13 @@ relief avec recalcul de proximité ; le découpage le plus puissant, par étude 
 « performance et réalisme insane » ; glace sans limite ; air respirable (7.10) ; un seul travailleur, un seul PC. Maillons **2**. Suivant :
 **S643, la réévaluation des intentions fondatrices** (ADR-261 D3).
 
+## S643 — 2026-10-07 — la réévaluation des intentions fondatrices
+
+**Entrée.** Sur la demande de l'utilisateur (ADR-261 D3). **Fait** : [le registre](../docs/registres/REEVALUATION-INTENTIONS-S643.md) —
+les 52 sections des deux sources jugées : 51 lignes gardées (dont plusieurs resserrées ou étendues), 10 remplacées par une meilleure
+solution (la grille fixe par un index sphérique, les niveaux prédéfinis par les blocs épars, les microbulles physiques par leur effet,
+le précalcul côtier partout…), 4 dépassées (le plafond de 200 m, le choix du solveur par banc, deux formes). **[ADR-262](../docs/adr/ADR-262-indiscernable-du-reel-au-budget.md)** :
+le critère devient *indiscernable du réel, au budget* — le budget un plafond, l'activation sur l'erreur visible. **2.11** ajouté (la
+densité de l'eau en champ ; 134 points). Maillons **3** — justification : une demande de l'utilisateur, la troisième session de cadrage ;
+la suivante revient à la physique. Suivant : **S644, le rouleau 3D, étape 2** (la vague sur la pente, sur l'escalier de S639).
+

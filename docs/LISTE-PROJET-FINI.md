@@ -85,7 +85,8 @@ pas recopiée ici (L137).
   *partiel* depuis S607 : la `HydroGrid` d'ADR-006 §2 — Morton 3D hiérarchique (64 / 512 / 4 096 m, le dernier niveau aligné sur le
   rebasage), parents, enfants, voisins ; les zones actives d'intérêts mobiles ; l'échange par écart, encodé, que le client rejoue au bit
   ([preuve](validation/HYDROGRID-S607.md)). Manquent la subdivision de publication par type (R07), le routage de W, l'index de V, la
-  pertinence réseau.
+  pertinence réseau. **S643** ([réévaluation](registres/REEVALUATION-INTENTIONS-S643.md)) : sur la planète, la grille fixe devient un index hiérarchique sphérique (HEALPix ou cube-sphère,
+  l'étude d'ADR-261 D2), les calculs dans des référentiels locaux.
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *partiel* depuis S608 : les cinq niveaux de la
   source (inactive, simplifiée, partielle, active, détail) lus sur la HydroGrid ; un domaine non aligné couvre chaque cellule d'un volume
   exact, conservé à travers le découpage ; le détail dit la précision du solveur, non la subdivision ([preuve](validation/ACTIVITE-S608.md)).
@@ -142,7 +143,8 @@ pas recopiée ici (L137).
   (la période de rencontre exacte, `λ/(c + U)`), le profil exact, un corps traîné qui dérive à 0,4 % de l'analytique
   ([preuve](validation/COURANT-S513.md)) ; **S534 : C1**, le champ 2D régional — une grille bilinéaire, sa pente (`g∇η = −(u·∇)u`) et
   son accélération : un corps neutre tient une rotation solide à 0,025 % ([preuve](validation/COURANT-C1-S534.md)). Manquent la production
-  et le flux des grilles C1, l'advection des vagues par un courant variable, C3 (le champ local de δ), les rivières, les canaux.
+  et le flux des grilles C1, l'advection des vagues par un courant variable, C3 (le champ local de δ), les rivières, les canaux. **S643** ([réévaluation](registres/REEVALUATION-INTENTIONS-S643.md)) : sans limite de réalisme, le courant de fond devient une circulation planétaire cuite (vent, marée,
+  densité).
 - [ ] **2.7 Bathymétrie** : hauts-fonds, effet sur les vagues avant la zone physique — *partiel* depuis S362 : la
   **référence** linéaire dans le cœur — profondeur finie, levée, réfraction de Snell sur isobathes droites, phase
   intégrée, profondeur de déferlement (McCowan) —, tenue contre Fenton–McKee et la levée minimale des manuels
@@ -152,7 +154,8 @@ pas recopiée ici (L137).
   nombre d'onde effectif `k·tanh kh` dans la pression de W, le chemin profond au bit, le sillage à `Fr_h` = 0,9 à 2,0 % de la référence
   par 5 m de fond (121 % de la profonde) ([preuve](validation/W-PROFONDEUR-S522.md)). Manquent la bathymétrie 2D (et sous W) et la
   diffraction des hauts-fonds isolés, la marée, la dissipation au déferlement, la non-linéarité peu profonde (A234), et
-  les autres chemins de B jusqu'à la scène de Godot.
+  les autres chemins de B jusqu'à la scène de Godot. **S643** ([réévaluation](registres/REEVALUATION-INTENTIONS-S643.md)) : la meilleure solution au réalisme visé, un modèle spectral de houle côtière cuit par rivage
+  (réfraction, diffraction, frottement, déferlement).
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *partiel* depuis S599 pour le côtier (la bibliothèque de 12.3 ;
   [preuve](validation/COTIER-S599.md)) ; la météo **à la fin** (ADR-197 D5), un système
   complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).
@@ -162,6 +165,9 @@ pas recopiée ici (L137).
 - [ ] **2.10 Vagues de vent bornées par le fetch**, lacs et baies (ADR-011 §5, SPEC-001 §4, ADR-004 §2.2 ; ajouté en S641) —
   *absent* : « le système doit l'imposer » — la hauteur des vagues d'un plan d'eau fermé limitée par la longueur sur laquelle souffle
   le vent. 2.3 n'en pose aucune borne ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.4).
+- [ ] **2.11 La densité de l'eau : salinité et température** (zones §15 ; [réévaluation](registres/REEVALUATION-INTENTIONS-S643.md) ; ajouté en S643) — *absent* : la densité devient
+  un champ — l'eau douce porte moins que l'eau de mer (2,44 %, `body.rs` la tient en paramètre), l'embouchure les mêle, la stratification
+  et sa flottabilité ; la température par la glace et la vapeur (7.6).
 
 ## 3. Ondes propagatives (W)
 
@@ -247,7 +253,8 @@ pas recopiée ici (L137).
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *partiel* depuis S598 : **le plan** — la descente prévue
   d'un objet (masse ajoutée, Newton) et l'enveloppe verticale de son domaine (anticipation, marge, quantum, jamais remontée), contre un code
   indépendant ([preuve](validation/COULE-S598.md)). Manquent l'exécution dans δ, la politique de paliers (64 agrandissements en 10 s : trop),
-  un objet qui remonte, les objets non sphériques.
+  un objet qui remonte, les objets non sphériques. **S643** : aucun plafond de profondeur — les 200 m évoqués par la source (zones §21) sont dépassés ; la profondeur suit
+  l'événement et le coût ([ADR-262](adr/ADR-262-indiscernable-du-reel-au-budget.md) D4).
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
   repart de δ = 0 (S344), et **ce qui entre dans un domaine qui se déplace naît au repos**, au bit
@@ -779,7 +786,7 @@ pas recopiée ici (L137).
   ([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170) ; **`W_perception` calculé** — part
   d'écran — pour la bande δ (S279) puis **deux domaines δ 3D** qui se disputent un budget (S344,
   [preuve](validation/ARBITRAGE-3D-S344.md)). Manquent `W_gameplay`, qui vient du jeu, `W_urgence`, et un banc B8
-  qui fixe les seuils ; ils sont calibrés par hôte (ADR-171).
+  qui fixe les seuils ; ils sont calibrés par hôte (ADR-171). **S643** : le critère d'activation devient l'erreur que la simplification produirait à l'écran ([ADR-262](adr/ADR-262-indiscernable-du-reel-au-budget.md) D3).
 - [ ] **9.2 Domaine prédictif orienté devant le joueur** — *partiel* **depuis S401**, en référence : le domaine épars s'étend
   **devant** un objet, le long de sa vitesse, sur l'horizon d'ADR-013 §2, élargi de `½·a_max·t²` — 100 % de 300 manœuvres
   bornées dans l'ensemble prévu ; revu chaque seconde, une source à 10 m/s y reste, et en sort à 0,62 s sans prévision
@@ -846,7 +853,7 @@ pas recopiée ici (L137).
   pointe 2,962 ms au premier passage ; CPU ~4,1 ms, pointes ~26 ms
   ([preuve](validation/CUISSON-SILLAGE-S267.md)). Le budget global n'est pas reçu ; **δ 3D à 1,92 ms au 99ᵉ
   centile par image** (30 Hz en deux parts, S348), mesuré seul. Profil de travail : ADR-174 D3, **non
-  opposable pendant la construction physique** mais toujours mesuré et publié (ADR-178 D4).
+  opposable pendant la construction physique** mais toujours mesuré et publié (ADR-178 D4). **S643** : le budget est un plafond, non une cible ; à réalisme égal, le moins cher gagne ([ADR-262](adr/ADR-262-indiscernable-du-reel-au-budget.md) D2).
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
   l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270 ; redimensionnement de δ 3D
   sans allocation, constaté à l'allocateur de la carte (S350). Système entier non éprouvé.
@@ -983,7 +990,7 @@ pas recopiée ici (L137).
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 9 | 1 | 7 | 1 |
-| 2. Grandes masses (B) | 10 | 0 | 9 | 1 |
+| 2. Grandes masses (B) | 11 | 0 | 9 | 2 |
 | 3. Ondes (W) | 10 | 0 | 9 | 1 |
 | 4. Volumique (δ) | 22 | 0 | 21 | 1 |
 | 5. Volumes finis (V) | 14 | 2 | 9 | 3 |
@@ -995,9 +1002,9 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 6 | 0 | 5 | 1 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 5 | 0 | 3 | 2 |
-| **total** | **133** | **10** | **108** | **15** |
+| **total** | **134** | **10** | **108** | **16** |
 
-*S642* : **7.10** ajouté, absent — l'air respirable ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D5) ; 132 → 133. *S641, 2026-10-07* : **onze points ajoutés**, absents — les intentions des documents fondateurs qu'aucun point ne portait
+*S643* : **2.11** ajouté, absent — la densité de l'eau ([réévaluation](registres/REEVALUATION-INTENTIONS-S643.md)) ; 133 → 134. *S642* : **7.10** ajouté, absent — l'air respirable ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D5) ; 132 → 133. *S641, 2026-10-07* : **onze points ajoutés**, absents — les intentions des documents fondateurs qu'aucun point ne portait
 ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md), demandé par l'utilisateur) ; 121 → 132.
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce

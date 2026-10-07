@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S643 — **en cours**. Sur la demande de l'utilisateur ([ADR-261](../docs/adr/ADR-261-reponses-du-2026-10-07.md) D3 : *« toutes
+Session : S643 — **terminée**. Sur la demande de l'utilisateur ([ADR-261](../docs/adr/ADR-261-reponses-du-2026-10-07.md) D3 : *« toutes
 les anciennes intentions doivent être jugées dépassées ou non, de meilleure solution […] l'objectif reste le même d'une performance et
 réalisme insane »*). **La réévaluation des intentions fondatrices** : chaque section des deux documents sources
 (`systeme_eau_architecture_globale`, §1–§20 ; `zones_ouvertes`, §2–§32) jugée — **gardée**, **dépassée**, ou **remplacée par une meilleure
@@ -75,7 +75,10 @@ versé : points ajoutés ou reformulés, `etat_projet --check` à zéro ; (4) ce
 ### Plan
 
 - [x] **P1** — jeton ; plan ; les deux sources relues en entier.
-- [ ] **P2** — le registre ; l'ADR ; la liste.
+- [x] **P2** — le registre ; l'ADR ; la liste.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) le registre couvre les 20 + 32 sections (34 + 31 lignes, recomptées par script) : garder 28 + 23, meilleure solution
+  6 + 4, dépassée 0 + 4 ; (2) chaque remplacement nommé ; (3) 2.11 ajouté (134 points), 1.5, 2.6, 2.7, 4.4, 9.1, 9.11 précisés ; (4)
+  ADR-262 — indiscernable du réel, au budget ; le budget, un plafond ; l'activation sur l'erreur visible ; aucun plafond arbitraire.
