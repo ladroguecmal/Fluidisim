@@ -1655,3 +1655,12 @@ Aucune règle nouvelle : la seule friction, une voie nommée « à mesurer » é
 ×1,4), n'a rien coûté. Elle est écrite dans l'ADR et dans une note datée de la preuve de S668. La bissection inversée de S669 est
 couverte par ADR-253 D1. Maillons **0** (méthode). Suivant : **S672**, 2.7 — le niveau moyen au rivage (*setup*) et les courants de
 dérive tirés du `Hrms` de `Cote2D`, ou `Cote2D` dans Godot ; la prochaine revue en S676.
+
+## S672 — 2026-10-07 — L'effet moyen de la houle : le niveau au rivage, le courant de dérive
+
+**Entrée.** En autonomie vers la v2 ; 2.7 et 12.3 (« manquent le courant de dérive littorale »). **Fait**
+([preuve](../docs/validation/HOULE-MOYENNE-S672.md)) : `houle_moyenne.rs`, avec la contrainte de radiation, le niveau moyen (implicite
+en `η̄`) et le courant de dérive (le frottement moyenné exactement sur le temps). **Mesuré** contre trois solutions analytiques : le creux
+à 0,10 % de Longuet-Higgins et Stewart, la remontée saturée à 0,73 % de Bowen, la dérive à 0,99 % de Longuet-Higgins 1970 à 1° (10,9 % à
+5° : le frottement n'y est plus linéaire). Maillons **1** (2.7, 12.3 avancent). Suivant : **S673**, `Cote2D` reçoit le niveau et le
+courant de sa mer.

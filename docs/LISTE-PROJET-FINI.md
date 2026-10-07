@@ -169,6 +169,8 @@ pas recopiée ici (L137).
   **la dissipation au déferlement** d'une mer entière dans la marche parabolique (Battjes et Janssen 1978) — `Hrms` à 0,3 % de
   l'équilibre d'énergie 1D jusqu'à 1 m de fond, `Hrms/h` 0,51 au rivage ([preuve](validation/DEFERLEMENT-PENTE-DOUCE-S669.md)). **S670** :
   `Cote2D` déferle jusqu'au rivage (1 m) — chaque composante à 0,4 % de l'équilibre 1D ([preuve](validation/COTE-2D-DEFERLANTE-S670.md)).
+  **S672** : **le niveau moyen et le courant de dérive** (`houle_moyenne.rs`) — la contrainte de radiation ; le creux, la remontée
+  saturée et la dérive à 0,1 %, 0,7 % et 1 % de Longuet-Higgins et Stewart, Bowen, Longuet-Higgins 1970 ([preuve](validation/HOULE-MOYENNE-S672.md)).
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *partiel* depuis S599 pour le côtier (la bibliothèque de 12.3 ;
   [preuve](validation/COTIER-S599.md)) ; la météo **à la fin** (ADR-197 D5), un système
   complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).
@@ -967,7 +969,9 @@ pas recopiée ici (L137).
   proximité.
 - [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *partiel* depuis S599 : **la bibliothèque d'une plage** — seize états en `f16`
   (1 228 800 octets, la taille de SPEC-005), la polyligne de chacun, la recherche par paramètres (I-09), l'empreinte qui dit l'obsolescence
-  ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D3** : le précalcul partout où il y a un rivage, procédural ou à la demande — non une cinquantaine de plages
+  ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles. **S672** : le
+  courant de dérive d'une côte droite, calculé des ondes qui l'atteignent (à 1 % de Longuet-Higgins 1970) ([preuve](validation/HOULE-MOYENNE-S672.md)) ;
+  manque sa place dans la bibliothèque. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D3** : le précalcul partout où il y a un rivage, procédural ou à la demande — non une cinquantaine de plages
   placées à la main. **S649** : indexé par la tuile de terrain HEALPix ([ADR-264](adr/ADR-264-le-decoupage-de-la-planete.md)).
 - [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *partiel* depuis S605 : le géoïde dans l'outil (le plan tangent d'une ancre ↔ l'altitude, sans
   perte au rayon de la planète ; la table de SPEC-005 §4), le terrain gravé pour le squelette — l'étape 2 de l'ordre imposé, les biefs

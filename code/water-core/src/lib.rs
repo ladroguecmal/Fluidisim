@@ -46,6 +46,7 @@ pub mod pente_douce;
 pub mod bathymetrie_cote;
 /// S664 — la côte 2D cuite dans B par le modèle de pente douce (2.7).
 pub mod bathymetrie_cote2d;
+pub mod houle_moyenne;
 /// S367, liste 7.1 : le champ d'écume de B (ADR-014) — la référence : deux canaux, advection orbitale, déferlement.
 pub mod ecume;
 pub mod body;

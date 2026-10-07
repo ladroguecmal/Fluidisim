@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S672 — **en cours**. En autonomie vers la v2 ; 2.7 et 12.3 (« manquent le courant de dérive littorale »). `Cote2D` déferle
+Session : S672 — **terminée**. En autonomie vers la v2 ; 2.7 et 12.3 (« manquent le courant de dérive littorale »). `Cote2D` déferle
 (S670), mais la mer qui déferle pousse aussi l'eau : elle relève le niveau moyen au rivage et entraîne un courant le long de la côte.
 
 **Ce que la session fait.** Le module `houle_moyenne.rs` (catégorie O) traite une côte uniforme le long de ses bords, rangée par rangée.
@@ -101,7 +101,8 @@ La côte 2D les recevra en S673.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `houle_moyenne.rs` ; les essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7, 12.3 ; rituel.
+- [x] **P2** — `houle_moyenne.rs` ; les essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 2.7, 12.3 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) 0,10 % ; (2) 0,73 % ; (3) 0,99 % à 1°, 10,9 % à 5° (le frottement non linéaire). Les valeurs du calcul du plan, retrouvées.
