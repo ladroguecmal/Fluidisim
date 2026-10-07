@@ -47,6 +47,8 @@ pub struct SaintVenant2D {
     frottement_n: f64,
     travail: Travail,
     ordre2: Option<Ordre2>,
+    /// S680 — le flux de masse (m²/s par rangée) du dernier pas à travers la face gauche (entrant) puis la droite (sortant) ; nul sur un mur.
+    flux_bords: Vec<f64>,
 }
 
 /// **S620** — les tableaux de l'ordre deux, alloués au réglage : `η`, les quatre pentes d'une direction, l'état du début du pas (Heun).
@@ -96,13 +98,16 @@ fn rusanov(g: f64, hl: f64, ul: f64, vl: f64, hr: f64, ur: f64, vr: f64) -> [f64
 
 /// **S622** — la face gauche forcée par l'extérieur `(h_e, u_e)` : la pression de paroi retirée, le flux fantôme–maille ajouté.
 #[allow(clippy::too_many_arguments)]
-fn corriger_bord(ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, he: f64, ue: f64) {
+#[allow(clippy::too_many_arguments)]
+fn corriger_bord(ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, he: f64, ue: f64, releve: &mut [f64]) {
     for j in 0..ny {
         let h0 = h[j];
         let (u0, v0) = (vitesse(h0, qx[j], eps4), vitesse(h0, qy[j], eps4));
         let (wp, wm) = (ue + 2.0 * (g * he).sqrt(), u0 - 2.0 * (g * h0).sqrt());
         let cg = (wp - wm) / 4.0;
         let f = rusanov(g, cg * cg / g, (wp + wm) / 2.0, v0, h0, u0, v0);
+        // S680 : le flux de masse du pas, la demi-somme des deux étages de Heun.
+        releve[j] += 0.5 * f[0];
         t.dqx[j] -= 0.5 * g * (h0 * h0);
         t.dh[j] += f[0];
         t.dqx[j] += f[1];
@@ -112,7 +117,8 @@ fn corriger_bord(ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64]
 
 /// **S628** — la face droite forcée par l'extérieur `(h_e, u_e)` : la pression de paroi rendue, le flux maille–fantôme retiré.
 #[allow(clippy::too_many_arguments)]
-fn corriger_bord_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, he: f64, ue: f64) {
+fn corriger_bord_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, he: f64, ue: f64,
+    releve: &mut [f64]) {
     for j in 0..ny {
         let k = (nx - 1) * ny + j;
         let hn = h[k];
@@ -120,6 +126,7 @@ fn corriger_bord_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &
         let (wp, wm) = (un + 2.0 * (g * hn).sqrt(), ue - 2.0 * (g * he).sqrt());
         let cg = (wp - wm) / 4.0;
         let f = rusanov(g, hn, un, vn, cg * cg / g, (wp + wm) / 2.0, vn);
+        releve[j] += 0.5 * f[0];
         t.dqx[k] += 0.5 * g * (hn * hn);
         t.dh[k] -= f[0];
         t.dqx[k] -= f[1];
@@ -231,7 +238,7 @@ impl SaintVenant2D {
         }
         let travail = Travail { u: vec![0.0; n], v: vec![0.0; n], dh: vec![0.0; n], dqx: vec![0.0; n], dqy: vec![0.0; n],
             fx: vec![[0.0; 5]; (nx - 1) * ny], fy: vec![[0.0; 5]; nx * (ny - 1)] };
-        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, frottement_n: 0.0, travail, ordre2: None })
+        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, frottement_n: 0.0, travail, ordre2: None, flux_bords: vec![0.0; 2 * ny] })
     }
 
     /// **S620 — passer à l'ordre deux**, avec le `ε` de la vitesse désingularisée (m⁴) ; alloue ses tableaux ici, jamais au pas.
@@ -253,6 +260,12 @@ impl SaintVenant2D {
         }
         self.frottement_n = n;
         Ok(())
+    }
+
+    /// **S680 — le flux de masse des bords** au dernier pas, par rangée (m²/s) : `(gauche, entrant ; droite, sortant)` — la demi-somme des
+    /// deux étages de Heun, exactement ce qui a changé le volume : `ΔV = dt·dx·Σ_j (gauche_j − droite_j)`. Nul sur un mur.
+    pub fn flux_des_bords(&self) -> (&[f64], &[f64]) {
+        self.flux_bords.split_at(self.ny)
     }
 
     /// La masse (volume, m³).
@@ -299,9 +312,11 @@ impl SaintVenant2D {
             return Err(Refus);
         }
         let n = nx * ny;
+        self.flux_bords.fill(0.0);
         if let Some(o) = self.ordre2.as_mut() {
             // Heun : U¹ = U + k·L(U) ; U² = U¹ + k·L(U¹) ; U ← ½(U + U²).
             let k = dt / self.dx;
+            let (gauche_f, droite_f) = self.flux_bords.split_at_mut(ny);
             o.h0.copy_from_slice(&self.h);
             o.qx0.copy_from_slice(&self.qx);
             o.qy0.copy_from_slice(&self.qy);
@@ -309,11 +324,11 @@ impl SaintVenant2D {
             if let Some((t, gauche, droite)) = bord {
                 if let Some(ext) = gauche {
                     let (he, ue) = ext(t);
-                    corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                    corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue, gauche_f);
                 }
                 if let Some(ext) = droite {
                     let (he, ue) = ext(t);
-                    corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                    corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue, droite_f);
                 }
             }
             for i in 0..n {
@@ -325,11 +340,11 @@ impl SaintVenant2D {
             if let Some((t, gauche, droite)) = bord {
                 if let Some(ext) = gauche {
                     let (he, ue) = ext(t + dt);
-                    corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                    corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue, gauche_f);
                 }
                 if let Some(ext) = droite {
                     let (he, ue) = ext(t + dt);
-                    corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                    corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue, droite_f);
                 }
             }
             for i in 0..n {

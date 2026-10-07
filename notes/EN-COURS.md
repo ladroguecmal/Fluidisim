@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S680 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage
+Session : S680 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage
 ([conception](../docs/registres/RELAIS-RIVAGE-S679.md), ADR-271).
 
 **L'interface, précisée.** La conception prévoyait un flux HLL calculé à part et imposé aux deux côtés. Plus simple et aussi exact :
@@ -97,7 +97,8 @@ droit par rangée (`flux_des_bords`).
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `flux_des_bords` ; l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; la conception, note ; rituel.
+- [x] **P2** — `flux_des_bords` ; l'essai ; (1)–(2).
+- [x] **P3** — preuve ; la conception, note ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) 4,6·10⁻¹⁵ ; nul sur un mur ; (2) identiques.

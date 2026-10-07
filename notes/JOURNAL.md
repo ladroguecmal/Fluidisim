@@ -1720,3 +1720,10 @@ rivage appartient à Saint-Venant 2D, APIC 3D garde la bande où la surface se r
 [la conception](../docs/registres/RELAIS-RIVAGE-S679.md) en cinq étapes, chacune avec son essai et ce qu'il rendrait. Obstacle nommé :
 la zone des colonnes refuse le fond lisse. Maillons **0** (conception). Suivant : **S680**, l'étape 1, le raccord au repos sur les six
 plages de S678.
+
+## S680 — 2026-10-08 — Le relais au rivage, brique 1 : le flux des bords de Saint-Venant
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271). **Fait**
+([preuve](../docs/validation/RELAIS-RIVAGE-FLUX-S680.md)) : l'interface précisée (le bord caractéristique de Saint-Venant nourri par la
+3D, son flux rendu, un réservoir de particules côté APIC) ; `flux_des_bords`. **Mesuré** : le bilan de volume à 4,6·10⁻¹⁵ sur 2 000
+pas ; S613–S628 identiques. Maillons **1** (4.14). Suivant : **S681, la quarantième revue de méthode** ; puis la brique 2.

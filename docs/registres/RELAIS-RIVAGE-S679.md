@@ -65,3 +65,14 @@ Ce que chaque essai rendrait est écrit avant (ADR-267 D1).
 
 - La bande 3D qui naît et meurt avec la vague (S637–S638), ensuite.
 - La zone sèche du jeu (le sable mouillé, la trace de l'écume) : l'écume est suspendue.
+
+## Note du 2026-10-08 (S680) — l'interface précisée
+
+- **Le flux unique** n'est pas un HLL calculé à part. Saint-Venant 2D garde son bord caractéristique (S622, S628), nourri par l'état de
+  la dernière colonne 3D, et rend le flux de masse qu'il a fait passer (`flux_des_bords`, la demi-somme des deux étages de Heun).
+- **APIC** retire ou pose des particules pour ce volume, et un réservoir garde le reste d'un quantum. La masse se compte au bit :
+  volume de Saint-Venant + particules × quantum + réservoir.
+- **L'ordre des briques** :
+  1. le flux des bords de Saint-Venant ([S680](../validation/RELAIS-RIVAGE-FLUX-S680.md)) ;
+  2. le bord droit d'APIC qui retire et pose des particules ;
+  3. le raccord au repos (l'étape 1 de la conception).

@@ -403,7 +403,8 @@ pas recopiée ici (L137).
   **S678** : le film du rivage au repos — deux causes trouvées (la surface du film, les faces à peine ouvertes) ; leur remède tient le
   repos à quelques mm/s sur quatre plages sur six, pas sur toutes (éteint par défaut) ; la suite, le film confié à Saint-Venant 2D
   ([preuve](validation/FILM-RIVAGE-S678.md)). **S679** : décidé ([ADR-271](adr/ADR-271-le-film-du-rivage-a-saint-venant.md)) et conçu
-  ([RELAIS-RIVAGE-S679](registres/RELAIS-RIVAGE-S679.md)) : le relais au rivage dans les deux sens, en cinq étapes.
+  ([RELAIS-RIVAGE-S679](registres/RELAIS-RIVAGE-S679.md)) : le relais au rivage dans les deux sens, en cinq étapes. **S680** : la brique 1,
+  Saint-Venant 2D rend le flux de ses bords — le bilan de volume à 4,6·10⁻¹⁵ ([preuve](validation/RELAIS-RIVAGE-FLUX-S680.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

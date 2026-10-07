@@ -446,3 +446,40 @@ fn manning_friction_holds_the_normal_depth_on_a_slope_s628() {
     let ext = |_: f64| (1.0, 0.0);
     assert_eq!(un_ordre.pas_avec_bords(0.01, 0.0, None, Some(&ext)), Err(Refus), "critère 5 : l'ordre un");
 }
+
+/// **S680** — le flux des bords rend le bilan de volume : une houle entrée par la gauche (S622), le bord droit forcé (S628), un fond en
+/// pente ; à chaque pas, `ΔV = dt·dx·Σ_j (gauche_j − droite_j)` à 10⁻¹² près en relatif.
+#[test]
+fn the_boundary_fluxes_balance_the_volume_s680() {
+    let (nx, ny, dx, g) = (120usize, 3usize, 0.5f64, 9.81f64);
+    let z: Vec<f64> = (0..nx * ny).map(|k| 0.004 * (k / ny) as f64 * dx).collect();
+    let h: Vec<f64> = z.iter().map(|z| (1.0 - z).max(0.0)).collect();
+    let mut s = SaintVenant2D::nouveau(nx, ny, dx, g, z, h, vec![0.0; nx * ny], vec![0.0; nx * ny]).unwrap();
+    s.regler_ordre_deux(1e-16).unwrap();
+    let omega = core::f64::consts::TAU / 8.0;
+    let gauche = move |t: f64| {
+        let a = 0.1 * (omega * t).sin();
+        (1.0 + a, a * (g / 1.0f64).sqrt())
+    };
+    let droite = |_t: f64| (0.75, 0.0);
+    let (mut t, mut pire, mut entre) = (0.0f64, 0f64, 0f64);
+    let dt = 0.02;
+    for _ in 0..2000 {
+        let v0 = s.volume();
+        s.pas_avec_bords(dt, t, Some(&gauche), Some(&droite)).unwrap();
+        let (fg, fd) = s.flux_des_bords();
+        let attendu = dt * dx * (fg.iter().sum::<f64>() - fd.iter().sum::<f64>());
+        pire = pire.max(((s.volume() - v0) - attendu).abs() / v0);
+        entre += dt * dx * fg.iter().sum::<f64>();
+        t += dt;
+    }
+    let (fg, _) = s.flux_des_bords();
+    println!("S680 : 2000 pas, |ΔV − dt·dx·Σflux|/V au plus {pire:.2e} ; entré par la gauche {entre:.3} m³ ; dernier flux gauche {:.4} m²/s", fg[0]);
+    assert!(pire < 1e-12, "critère 1");
+    // Sur un mur, rien.
+    let mut m = SaintVenant2D::nouveau(4, 2, 1.0, g, vec![0.0; 8], vec![1.0; 8], vec![0.1; 8], vec![0.0; 8]).unwrap();
+    m.regler_ordre_deux(1e-16).unwrap();
+    m.pas(0.01).unwrap();
+    assert!(m.flux_des_bords().0.iter().chain(m.flux_des_bords().1).all(|&f| f == 0.0));
+}
+
