@@ -446,6 +446,8 @@ le défaut I-06 de `SaintVenant2D` corrigé (×1,87) — il ne reste d'absents q
 son échelle) ; le niveau du large imposé au bord (une frontière caractéristique fidèle et absorbante).
 **S623–S625** : la graine d'un domaine substitutif (4.11 : un pas au lieu d'une minute) ; la chaîne du tsunami entré par le bord (11.3) ;
 une houle périodique sur une plage (4.14 : la remontée de Keller & Keller à 0,05 %).
+**S626–S628** : la vingt-neuvième revue (ADR-256 : la tolérance au-dessus de la sensibilité, un écart attribué par deux variations) ;
+le ressaut mobile et le front sec (Stoker, Ritter : C04 en 2D) ; le frottement de Manning et le bord droit.
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

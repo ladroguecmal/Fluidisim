@@ -62,35 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S628 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **4.14 — le frottement** (un manque depuis S613), et le lien
-avec l'éditeur de rivières (S604) : la hauteur normale de Manning.
+Session : S629 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S626–S628), puis **3.4 —
+« le raffinement à la côte »** : S622–S624 nourrissaient le domaine local d'une onde solitaire ; ici, de l'objet macroscopique lui-même,
+`tsunami::niveau` (S582).
 
-**Ce que la session fait.** `SaintVenant2D::regler_frottement(n)` : le frottement de Manning, appliqué semi-implicitement après le pas,
-`q ← q/(1 + dt·g·n²·|u|/h^(4/3))` ; `pas_avec_bords(dt, t, gauche, droite)` : le bord droit caractéristique, miroir de celui de S622 (ordre
-deux). Deux essais : **(A)** un écoulement uniforme freiné (h = 1 m, u₀ = 1 m/s, n = 0,03, 1 000 m entre murs) — la vitesse au milieu à 20 s
-contre `1/u = 1/u₀ + g·n²·t/h^(4/3)` (le schéma semi-implicite est exact pour `du/dt = −a·u²` : l'essai ne vérifie que le coefficient,
-ADR-248) ; **(B)** un écoulement uniforme sur pente (S = 5·10⁻⁴, n = 0,035, q = 1,5 m²/s, 2 000 m) tenu entre deux bords nourris de l'état
-normal — la hauteur au milieu après 600 s contre la hauteur normale d'un chenal large `(q·n/√S)^(3/5)` = **1.668801113 m**. Ne fait pas : le
-frottement sur la plage (S625 sans frottement), un `n` variable, la loi de Manning d'un chenal étroit (le rayon hydraulique).
+**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai. Un rayon de 4 000 m à 10 m sur 50 km, prolongé de 2 km de fond plat
+— le domaine local, d'ordre deux ; ses deux bords caractéristiques (S622, S628) reçoivent `tsunami::niveau` (f32) et `u = √(g/h)·η` ; une
+impulsion de demi-durée 60 s. À la jauge (1 km dans le domaine), l'écart maximal du niveau local au niveau macroscopique, rapporté à la crête.
+Ne fait pas : le domaine local sur la pente (S624 le fait avec une onde solitaire), la dispersion.
 
-**Références, calculées avant** (`s628_ref.py`, numpy). (A) à 20 s, pas 0,04 / 0,02 / 0,01 s : `u` = 0.849920957350966, ... ; l'exact
-0.849920957350966. (B) la hauteur au milieu, maille 4 / 2 / 1 m : **1.668500219, 1.668649333,
-1.668724889 m** — écarts relatifs -1.803e-04, -9.095e-05, -4.568e-05 (l'ordre un) ; l'écart maximal le long du
-chenal 6.363e-04, 3.210e-04, 1.612e-04 m. La formule rectangulaire de S604 pour un chenal de
-10⁶ m : 1.668803341 m (à 1.3e-06 du chenal large). **Sensibilité** à un ulp (ADR-256 D1) : au plus 6.7e-16 m.
+**En route, avant ce plan** : un balayage de la remontée d'une houle en amplitude (vers le déferlement) a été abandonné sans commit — la
+remontée dépassait Keller & Keller de 1,5 %, 3,3 %, 20 %, l'incidence linéaire au bord et le raidissement sur le fond plat mêlés au
+déferlement (ADR-256 D2).
 
-**Quantum** : f64 ; la tolérance d'accord avec numpy, **10⁻¹²**, au moins dix fois la sensibilité (asserté). **Critères, écrits avant.** (1) (A) :
-la vitesse égale à l'exacte et à la référence à 10⁻¹² aux trois pas ; (2) (B) : la hauteur au milieu et l'écart maximal égaux aux références à
-10⁻¹² ; l'écart relatif à la hauteur normale divisé par au moins 1,8 à chaque raffinement, sous 10⁻⁴ à 1 m ; (3) `riviere::hauteur_normale`
-(S604) pour un chenal de 10⁶ m à moins de 10⁻⁵ de la hauteur normale large ; (4) les essais de S613–S627 inchangés (sans frottement, rien ne
-change) ; (5) refus : `n` négatif ou non fini ; le bord droit à l'ordre un.
+**Références, calculées avant** (`s629_ref.py`, numpy). Crête à la jauge 5 mm (`A₀` = 1,118 mm) : écart relatif, maille 4 / 2 / 1 m,
+**3.128833e-03, 1.279170e-03, 1.242549e-03** ; crête 20 mm : 5.052937e-03, 4.970474e-03,
+4.951854e-03. À maille fine, l'écart est **proportionnel à l'amplitude** (rapport 3.985 pour 4) : la non-linéarité du domaine
+local, absente du modèle macroscopique linéaire ; la part numérique converge (D2). Après le passage : 3.122e-07 m (5 mm),
+4.992e-06 m (20 mm). **Sensibilité** à un ulp (D1) : 2.1e-12 sur l'écart relatif, 2.5e-14 m sur le reste.
+
+**Quantum** : f64 ; les tolérances d'accord avec numpy, **10⁻¹⁰** (écart relatif) et **10⁻¹² m** (reste), au moins dix fois la sensibilité
+(asserté). **Critères, écrits avant.** (1) les six écarts relatifs et les six restes égaux aux références à ces tolérances ; (2) à 5 mm,
+l'écart décroît avec la maille et passe sous 0,2 % à 1 m ; (3) à 1 m, le rapport des écarts 20 mm / 5 mm entre 3,5 et 4,5 (la
+non-linéarité) ; (4) à 5 mm, le reste après passage sous 10⁻⁴ de la crête.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — le frottement, le bord droit, leurs essais ; (1)–(5).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (1)–(5) tenus du premier essai ; les 30 essais S6xx passent. Suite : 814 essais listés.
-- **P3** — preuve FROTTEMENT-S628 ; ligne 4.14 ; index ; journal.
