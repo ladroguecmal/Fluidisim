@@ -1589,3 +1589,5 @@ l'enregistrement des trois modèles ; le rendu `outils/rendu_berkhoff.py` — la
 concentrent), la carte de l'amplitude, les quatre sections contre les mesures ; contrôlé (les écarts égaux à S662 ; une borne du plan
 qui ignorait l'écriture en `f32`, rapportée) ; les accents corrigés avant l'envoi. **Envoyé** : R41, le verdict attendu. Maillons **2**.
 Suivant : **S664**, le modèle côtier lu par B (2.7).
+
+*Après S663, 2026-10-07* : **R41 reçu** — *« Je valide, continue »* (la séance visuelle du haut-fond de Berkhoff). Inscrit.

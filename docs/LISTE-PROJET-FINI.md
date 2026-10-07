@@ -801,7 +801,7 @@ pas recopiée ici (L137).
   restent à valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système, et
   **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3). **S658** : la séance visuelle du rouleau (le relais, le plongeant, la sphère emportée), un rendu d'atelier — **R40 reçu** :
   « tout parait crédible » ([preuve](validation/SEANCE-VISUELLE-ROULEAU-S658.md)). **S663** : la séance visuelle de Berkhoff (la surface, la carte,
-  les sections) — R41 envoyé ([preuve](validation/SEANCE-VISUELLE-BERKHOFF-S663.md)).
+  les sections) — **R41 reçu** : « Je valide, continue » ([preuve](validation/SEANCE-VISUELLE-BERKHOFF-S663.md)).
 
 ## 9. Activation, prédiction, budget et dégradation
 

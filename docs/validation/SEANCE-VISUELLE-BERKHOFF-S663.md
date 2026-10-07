@@ -33,4 +33,5 @@ porte.
 
 ## Le verdict
 
-**R41, envoyé le 2026-10-07, en attente.**
+**R41, envoyé le 2026-10-07 — reçu le même jour** : *« Je valide, continue »*. La houle sur le haut-fond (la surface, la carte, les
+sections contre les mesures) est validée à l'œil, sur le rendu d'atelier.
