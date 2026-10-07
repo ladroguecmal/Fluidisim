@@ -129,6 +129,8 @@ pub struct Apic3 {
     /// **S645 — l'air balistique** (`set_ballistic_air`) : une face d'air qu'une particule a alimentée garde sa vitesse (et la gravité)
     /// au lieu de recevoir l'extrapolation ; `false`, le défaut : extrapolée (S318).
     pub(crate) ballistic_air: bool,
+    /// **S653 — le corps libre** (`set_body_mass`) : la masse de la sphère, kg ; `None`, le défaut : la sphère imposée (S393), au bit.
+    pub(crate) body_mass: Option<f32>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -210,6 +212,7 @@ impl Apic3 {
             lisse: None,
             seabed_slip: false,
             ballistic_air: false,
+            body_mass: None,
             columns: None,
             background: [None; 2],
             background_time_s: 0.,
@@ -429,6 +432,71 @@ impl Apic3 {
     /// **S639** — la hauteur du fond en escalier de la colonne `(i, j)` (m) ; 0 sans fond.
     pub fn seabed_height(&self, i: usize, j: usize) -> f32 {
         self.seabed.as_ref().map_or(0., |s| s[j * self.domain.nx + i] as f32 * self.domain.dx)
+    }
+
+    /// **S653 — le corps libre** : avec une masse (kg), la sphère reçoit à chaque pas la force de pression de l'eau
+    /// ([`Apic3::body_force`]) et son poids (`g_eff`), et suit sa vitesse ; le pas suivant impose cette vitesse à l'eau — un couplage
+    /// **explicite**, stable tant que le corps pèse plus que sa masse ajoutée (½ρV pour une sphère). Un contact simple : le corps ne
+    /// descend pas sous le fond de sa colonne ni ne sort du domaine. `None` : la sphère imposée, au bit. Refus : une masse nulle ou
+    /// négative (`Domain`), non finie (`NotFinite`).
+    pub fn set_body_mass(&mut self, mass: Option<f32>) -> Result<(), Error> {
+        if let Some(m) = mass {
+            if !m.is_finite() {
+                return Err(Error::NotFinite);
+            }
+            if m <= 0. {
+                return Err(Error::Domain);
+            }
+        }
+        self.body_mass = mass;
+        Ok(())
+    }
+
+    /// **S652–S653 — la force de pression de l'eau sur la sphère**, N : sur les faces entre une maille du corps (solide, centre dans
+    /// la sphère) et une maille d'eau, la pression à la face — extrapolée linéairement des deux mailles d'eau le long de la normale
+    /// (lue au centre de la voisine, elle est une demi-maille trop loin : 1,38 × Archimède au repos ; extrapolée, 1,13, le biais d'un
+    /// corps de 32 mailles en escalier) — fois `dx²`, dirigée vers le corps. Zéro sans corps.
+    pub fn body_force(&self) -> [f64; 3] {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(b) = self.body else { return [0.; 3] };
+        let (l, p) = (&self.label, &self.p);
+        let mut f = [0f64; 3];
+        let surf = (dx * dx) as f64;
+        let pas = [1isize, nx as isize, (nx * ny) as isize];
+        let dims = [nx, ny, nz];
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+                    let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+                    let c = (k * ny + j) * nx + i;
+                    if l[c] != SOLID || e[0] * e[0] + e[1] * e[1] + e[2] * e[2] >= b.radius * b.radius {
+                        continue;
+                    }
+                    let pos = [i, j, k];
+                    for axe in 0..3 {
+                        for (d, signe) in [(-1isize, 1f64), (1, -1.)] {
+                            let (n1, n2) = (pos[axe] as isize + d, pos[axe] as isize + 2 * d);
+                            if n1 < 0 || n1 >= dims[axe] as isize {
+                                continue;
+                            }
+                            let v = (c as isize + d * pas[axe]) as usize;
+                            if l[v] != WATER {
+                                continue;
+                            }
+                            let v2 = (c as isize + 2 * d * pas[axe]) as usize;
+                            let pf = if n2 >= 0 && n2 < dims[axe] as isize && l[v2] == WATER {
+                                1.5 * p[v] as f64 - 0.5 * p[v2] as f64
+                            } else {
+                                p[v] as f64
+                            };
+                            f[axe] += signe * pf * surf;
+                        }
+                    }
+                }
+            }
+        }
+        f
     }
 
     pub fn body(&self) -> Option<Sphere3> {
@@ -1243,6 +1311,15 @@ impl Apic3 {
         self.impose_body();
         let (iterations, residual) = if self.poches.is_some() { self.project_with_pockets(dt) } else { self.project(dt) };
         mark("projection");
+        // S653 : le corps libre — la force de pression et le poids changent sa vitesse (explicite).
+        if let (Some(m), Some(mut b)) = (self.body_mass, self.body) {
+            let f = self.body_force();
+            for a in 0..3 {
+                b.velocity[a] += dt * f[a] as f32 / m;
+            }
+            b.velocity[2] -= dt * self.g_eff;
+            self.body = Some(b);
+        }
         let divergence = self.divergence_metric();
         let partial = ApicReport { iterations, residual, divergence, max_speed: 0. };
         if upto == ApicStage::Project {
@@ -1450,8 +1527,24 @@ impl Apic3 {
         for a in 0..3 {
             b.center[a] += b.velocity[a] * dt;
         }
-        self.body = Some(b);
         let Domain3 { nx, ny, nz, dx } = self.domain;
+        // S653 : le contact du corps libre — ni sous le fond de sa colonne, ni hors du domaine ; la vitesse normale annulée.
+        if self.body_mass.is_some() {
+            let hauts = [nx as f32 * dx - b.radius, ny as f32 * dx - b.radius, nz as f32 * dx - b.radius];
+            let (ic, jc) = (((b.center[0] / dx).max(0.) as usize).min(nx - 1), ((b.center[1] / dx).max(0.) as usize).min(ny - 1));
+            let bas = [b.radius, b.radius, b.radius + self.seabed_height(ic, jc)];
+            for a in 0..3 {
+                if b.center[a] < bas[a] {
+                    b.center[a] = bas[a];
+                    b.velocity[a] = b.velocity[a].max(0.);
+                }
+                if b.center[a] > hauts[a] {
+                    b.center[a] = hauts[a];
+                    b.velocity[a] = b.velocity[a].min(0.);
+                }
+            }
+        }
+        self.body = Some(b);
         let (lx, ly, lz) = (nx as f32 * dx, ny as f32 * dx, nz as f32 * dx);
         let (reach, margin) = (b.radius + 0.05 * dx, 1e-3 * dx);
         for k in 0..self.n {

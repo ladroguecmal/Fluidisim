@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S653 — **en cours**. En autonomie vers la v2 (ADR-247) ; 6.7 : « le corps libre que le rouleau emporte ».
+Session : S653 — **terminée**. En autonomie vers la v2 (ADR-247) ; 6.7 : « le corps libre que le rouleau emporte ».
 
 **Ce que la session fait.** La sphère d'APIC devient **libre** (`Apic3::set_body_mass`) : à chaque pas, après la projection, la force de
 pression sur elle — l'instrument de S652 passé dans le cœur (`Apic3::body_force`) — et son poids (`g_eff`) changent sa vitesse
@@ -84,7 +84,9 @@ de la sonde ; la masse de l'eau exacte. (3) Refus : une masse nulle, négative o
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le corps libre dans le cœur ; (1)–(4).
+- [x] **P2** — le corps libre dans le cœur ; (1)–(4).
 - [ ] **P3** — preuve ; liste 6.7, 6.4 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) à moitié : le centre à 1,3 cm du niveau, la vitesse 4,1 cm/s entre 3 et 4 s (borne 2, manqué ; décroissante, stable) ;
+  (2) à moitié : emporté de 2,03 m, la masse au bit, **la vitesse 4,68 m/s contre 1,80 — manqué** (A334) ; (3), (4) tenus.

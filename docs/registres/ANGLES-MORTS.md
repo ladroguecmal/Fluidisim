@@ -4673,3 +4673,7 @@ dans la bande de déferlement (relais de S650), le pic de `F_x` (165,6 N) ne tie
 l'impact réel du jet (un choc de pression bref existe) ou la pression qui saute quand des mailles basculent entre eau et air contre le
 corps. Le témoin suivant : le même pic à une autre maille et à un autre pas de temps — un choc physique garde son impulsion, un artefact
 dépend du pas ([preuve](../validation/ROULEAU-FORCE-S652.md)).
+
+*Note du 2026-10-07, S653, sur A334* ([CORPS-LIBRE-S653](../validation/CORPS-LIBRE-S653.md)) : avec la sphère **libre** (2 kg), les chocs
+la lancent à 4,68 m/s quand l'eau de la colonne va à 1,80 — A334 limite désormais 6.7 (le corps emporté). Le témoin, inchangé : un pas
+deux fois plus court.

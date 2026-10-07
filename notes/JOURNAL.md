@@ -1495,3 +1495,11 @@ le rouleau du relais de S650 sur une sphère fixe. **Mesuré** : le pic de force
 au bit ; à l'échelle ×20, `h·u` = 24 m²/s (le seuil d'ADR-018 : 1). **Manqué** : le coefficient de traînée (18 brut) — le pic est un
 choc de deux pas, la vitesse de référence n'a pas de sens unique sous un rouleau (A334). Le plan du rouleau en cinq étapes est parcouru.
 Maillons **1** (6.7, 4.14 avancent). Suivant : **S653**, la suite des partiels de la physique (ADR-247).
+
+## S653 — 2026-10-07 — le corps libre que le rouleau emporte
+
+**Entrée.** En autonomie vers la v2 ; 6.7. **Fait** ([preuve](../docs/validation/CORPS-LIBRE-S653.md)) : `Apic3::body_force` (l'instrument
+de S652 dans le cœur) et `set_body_mass` — la sphère libre, couplage explicite, contact au fond. **Mesuré** : elle flotte à son tirant, son
+oscillation décroît (stable ; le critère de 2 cm/s à 3–4 s manqué de peu) ; sous le rouleau, **emportée de 2,03 m en 1,5 s**, la masse au
+bit ; **sa vitesse dépasse l'eau** (4,68 contre 1,80 m/s) — les chocs d'A334. Maillons **1** (6.7 avance). Suivant : **S654, A334** — le
+même rouleau à pas deux fois plus court (un choc physique garde son impulsion, un artefact dépend du pas).

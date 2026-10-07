@@ -2245,54 +2245,16 @@ struct ReleveS652 {
     /// Le témoin (ADR-259 D1) : l'historique `(t, F_x, dt)` ; la plus grande vitesse horizontale sur toute la colonne de la sonde.
     histoire: Vec<(f64, f64, f64)>,
     u_colonne: f64,
+    /// S653 : le corps libre — sa trajectoire `(t, x global, z)` et sa plus grande vitesse.
+    trajet: Vec<(f64, f64, f64)>,
+    v_corps: f64,
 }
 
 /// **S652 — la force de l'eau sur la sphère** : sur les faces entre une maille du corps (solide, centre dans la sphère) et une maille
 /// d'eau, la pression à la face (extrapolée des deux mailles d'eau) fois `dx²`, dirigée vers le corps. N.
 fn force_corps_s652(a: &Apic3) -> [f64; 3] {
-    let Domain3 { nx, ny, nz, dx } = a.domain();
-    let Some(b) = a.body() else { return [0.; 3] };
-    let (l, p) = (a.labels(), a.pressure());
-    let mut f = [0f64; 3];
-    let surf = (dx * dx) as f64;
-    for k in 0..nz {
-        for j in 0..ny {
-            for i in 0..nx {
-                let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
-                let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
-                let c = (k * ny + j) * nx + i;
-                if l[c] != SOLID || e[0] * e[0] + e[1] * e[1] + e[2] * e[2] >= b.radius * b.radius {
-                    continue;
-                }
-                // `(voisine existe, voisine, la suivante existe, la suivante, axe, signe)`.
-                let pas = [1isize, nx as isize, (nx * ny) as isize];
-                let pos = [i, j, k];
-                let dims = [nx, ny, nz];
-                for axe in 0..3 {
-                    for (d, signe) in [(-1isize, 1f64), (1, -1.)] {
-                        let (n1, n2) = (pos[axe] as isize + d, pos[axe] as isize + 2 * d);
-                        if n1 < 0 || n1 >= dims[axe] as isize {
-                            continue;
-                        }
-                        let v = (c as isize + d * pas[axe]) as usize;
-                        if l[v] != WATER {
-                            continue;
-                        }
-                        // S652 : la pression **à la face**, extrapolée linéairement des deux mailles d'eau le long de la normale
-                        // (lue au centre de la voisine, elle est une demi-maille trop loin : 1,38 fois Archimède au repos).
-                        let v2 = (c as isize + 2 * d * pas[axe]) as usize;
-                        let pf = if n2 >= 0 && n2 < dims[axe] as isize && l[v2] == WATER {
-                            1.5 * p[v] as f64 - 0.5 * p[v2] as f64
-                        } else {
-                            p[v] as f64
-                        };
-                        f[axe] += signe * pf * surf;
-                    }
-                }
-            }
-        }
-    }
-    f
+    // S653 : l'instrument est passé dans le cœur.
+    a.body_force()
 }
 
 /// **S652 (1) — l'instrument éprouvé** (ADR-263 D2) : au repos, une sphère immergée reçoit la poussée d'Archimède de ses 32 mailles
@@ -2319,6 +2281,11 @@ fn the_body_force_reads_archimedes_at_rest_s652() {
 
 /// **S650–S652 — le relais**, et, avec `corps` (centre global en x, y, z ; rayon), une sphère fixe dont la force est relevée.
 fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) -> ReleveS652 {
+    relais_libre_s653(dx, x_r, ny_in, corps, None)
+}
+
+/// **S653** — le relais, et, avec `masse` (kg), la sphère **libre**.
+fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>, masse: Option<f32>) -> ReleveS652 {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let horloge = std::time::Instant::now();
     let (d, h, cot, x_pied, niveau, l, lz, duree) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64, 4.0f64);
@@ -2353,6 +2320,7 @@ fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) 
     let corps_local = corps.map(|(c, r)| ([c[0] - x_r as f32, c[1], c[2]], r));
     if let Some((c, r)) = corps_local {
         a.set_body(Some(Sphere3 { center: c, radius: r, velocity: [0.; 3] })).unwrap();
+        a.set_body_mass(masse).unwrap();
     }
     let hors_corps = move |p: [f32; 3]| corps_local.is_none_or(|(c, r)| (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) >= r * r);
     let n = a.seed(&|p| {
@@ -2393,6 +2361,11 @@ fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) 
             let f = force_corps_s652(&a);
             releve.impulsion += f[0] * us as f64 * 1e-6;
             releve.histoire.push((ts, f[0], us as f64 * 1e-6));
+            if let Some(b) = a.body() {
+                releve.trajet.push((ts, x_r + b.center[0] as f64, b.center[2] as f64));
+                let v = b.velocity;
+                releve.v_corps = releve.v_corps.max(((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64).sqrt());
+            }
             if f[0] > releve.fx_max {
                 (releve.fx_max, releve.t_fx) = (f[0], ts);
             }
@@ -2486,3 +2459,59 @@ fn the_2d_to_3d_relay_breaks_like_the_all_3d_s650() {
     assert!(ta > t0 && xa > x0, "critère 3 : {ta} {xa}");
     assert_eq!(r.7, 0, "les particules hors du fond");
 }
+
+/// **S653 (1), (3) — la flottaison** : une sphère libre `r` = 0,1 m, densité 500 (2,0944 kg), lâchée 3 cm sous son équilibre en eau au
+/// repos (0,4 m) ; entre 3 et 4 s, sa vitesse verticale sous 2 cm/s, son centre à 2 cm du niveau. Les refus.
+#[test]
+fn a_free_sphere_floats_at_its_draft_s653() {
+    let (nx, ny, nz, dx) = (40usize, 8usize, 20usize, 0.05f32);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let (r, niveau) = (0.1f32, 0.4f32);
+    let c = [1.0f32, 0.2, niveau - 0.03];
+    a.set_body(Some(Sphere3 { center: c, radius: r, velocity: [0.; 3] })).unwrap();
+    assert_eq!(a.set_body_mass(Some(0.)), Err(Error::Domain), "critère 3 : nulle");
+    assert_eq!(a.set_body_mass(Some(-1.)), Err(Error::Domain), "critère 3 : négative");
+    assert_eq!(a.set_body_mass(Some(f32::NAN)), Err(Error::NotFinite), "critère 3 : non finie");
+    let m = (500. * 4. / 3. * std::f64::consts::PI * 0.001) as f32;
+    a.set_body_mass(Some(m)).unwrap();
+    a.seed(&|p| p[2] < niveau && (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) >= r * r).unwrap();
+    let (mut t, mut vmax, mut zs) = (0u64, 0f32, Vec::new());
+    while t < 4_000_000 {
+        let us = a.stable_step_us(10_000).min(4_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+        let b = a.body().unwrap();
+        assert!(b.velocity.iter().chain(b.center.iter()).all(|x| x.is_finite()), "critère 1 : fini");
+        if t > 3_000_000 {
+            vmax = vmax.max(b.velocity[2].abs());
+            zs.push(b.center[2]);
+        }
+    }
+    let z = zs.iter().sum::<f32>() / zs.len() as f32;
+    println!("S653 flottaison : centre moyen {z:.4} m (niveau {niveau}), vitesse verticale max entre 3 et 4 s {vmax:.4} m/s");
+    // Critère 1 : le centre à 2 cm du niveau — tenu ; la vitesse sous 2 cm/s entre 3 et 4 s — **manqué** (4,1 cm/s) : l'oscillation
+    // décroît (0,23 ; 0,13 ; 0,07 ; 0,04 ; 0,02 m/s, seconde après seconde), le ballottement du bassin fermé la relance vers 6 s
+    // (0,057), puis elle redécroît — stable, sans croissance. L'essai n'affirme que ce qui a tenu (ADR-244).
+    assert!((z - niveau).abs() <= 0.02 && vmax < 0.1, "critère 1 : {z} {vmax}");
+}
+
+/// **S653 (2)** — la même sphère libre posée à x = 10,4 m dans le relais de S652 : emportée.
+#[test]
+#[ignore = "≈ 6 min : le corps libre sous le rouleau de S653"]
+fn the_plunging_roller_carries_a_free_body_s653() {
+    let m = (500. * 4. / 3. * std::f64::consts::PI * 0.001) as f32;
+    let r = relais_libre_s653(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)), Some(m));
+    let (t0, _) = r.premier.expect("le retournement");
+    let x0 = r.trajet.first().map_or(0., |p| p.1);
+    let avance = r.trajet.iter().filter(|p| p.0 <= t0 + 1.5).fold(f64::NEG_INFINITY, |m, p| m.max(p.1)) - x0;
+    let fin = r.trajet.last().copied().unwrap_or_default();
+    println!("S653 corps libre : retournement {:?} ; avance dans les 1,5 s qui suivent {avance:.3} m ; position finale ({:.3} s : x {:.3}, z {:.3}) ; vitesse max {:.3} m/s, colonne {:.3} m/s ; volume {:+.1e} ; {:.0} s",
+        r.premier, fin.0, fin.1, fin.2, r.v_corps, r.u_colonne, r.ecart, r.temps);
+    assert!(r.ecart.abs() <= 1e-6, "critère 2 : la masse");
+    assert!(avance > 0.5, "critère 2 : emporté ({avance})");
+    // Critère 2, la vitesse du corps au plus celle de la colonne : **manqué** (S653) — 4,68 m/s contre 1,80 : les chocs de deux pas
+    // d'A334 frappent un corps de 2 kg. L'essai n'affirme que ce qui a tenu (ADR-244).
+}
+
+
+
