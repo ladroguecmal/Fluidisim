@@ -71,7 +71,7 @@ coûté ; (3) la prochaine revue nommée.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-265.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — ADR-265 : D1, un long calcul sur une copie du binaire (éprouvé) ; D2, le travail d'attente appartient à la session suivante, déclaré. Prochaine revue S656.
