@@ -49,6 +49,9 @@ pub struct SaintVenant2D {
     ordre2: Option<Ordre2>,
     /// S680 — le flux de masse (m²/s par rangée) du dernier pas à travers la face gauche (entrant) puis la droite (sortant) ; nul sur un mur.
     flux_bords: Vec<f64>,
+    /// S687 — le flux imposé à la face droite pour le pas en cours (`pas_avec_flux_droit`).
+    flux_impose: Vec<f64>,
+    flux_actif: bool,
 }
 
 /// **S620** — les tableaux de l'ordre deux, alloués au réglage : `η`, les quatre pentes d'une direction, l'état du début du pas (Heun).
@@ -131,6 +134,24 @@ fn corriger_bord_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &
         t.dh[k] -= f[0];
         t.dqx[k] -= f[1];
         t.dqy[k] -= f[2];
+    }
+}
+
+/// **S687** — la face droite à flux de masse imposé `flux[j]` (sortant, m²/s) : la pression de paroi rendue, le flux
+/// `(F, F·u + ½·g·h², F·v)` de la maille de bord retiré.
+#[allow(clippy::too_many_arguments)]
+fn imposer_flux_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, flux: &[f64],
+    releve: &mut [f64]) {
+    for j in 0..ny {
+        let k = (nx - 1) * ny + j;
+        let hn = h[k];
+        let (un, vn) = (vitesse(hn, qx[k], eps4), vitesse(hn, qy[k], eps4));
+        let f0 = flux[j];
+        releve[j] += 0.5 * f0;
+        t.dqx[k] += 0.5 * g * (hn * hn);
+        t.dh[k] -= f0;
+        t.dqx[k] -= f0 * un + 0.5 * g * hn * hn;
+        t.dqy[k] -= f0 * vn;
     }
 }
 
@@ -238,7 +259,8 @@ impl SaintVenant2D {
         }
         let travail = Travail { u: vec![0.0; n], v: vec![0.0; n], dh: vec![0.0; n], dqx: vec![0.0; n], dqy: vec![0.0; n],
             fx: vec![[0.0; 5]; (nx - 1) * ny], fy: vec![[0.0; 5]; nx * (ny - 1)] };
-        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, frottement_n: 0.0, travail, ordre2: None, flux_bords: vec![0.0; 2 * ny] })
+        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, frottement_n: 0.0, travail, ordre2: None, flux_bords: vec![0.0; 2 * ny],
+            flux_impose: vec![0.0; ny], flux_actif: false })
     }
 
     /// **S620 — passer à l'ordre deux**, avec le `ε` de la vitesse désingularisée (m⁴) ; alloue ses tableaux ici, jamais au pas.
@@ -298,6 +320,19 @@ impl SaintVenant2D {
         self.pas_interne(dt, Some((t, gauche, droite)))
     }
 
+    /// **S687 — un pas, la face droite à flux de masse imposé** `flux[j]` (sortant, m²/s, par rangée), la gauche forcée ou non ; ordre deux
+    /// seulement. Le relais au rivage vu du côté du large : ce que le rivage a pris quitte le large.
+    pub fn pas_avec_flux_droit(&mut self, dt: f64, t: f64, gauche: Option<&dyn Fn(f64) -> (f64, f64)>, flux: &[f64]) -> Result<(), Refus> {
+        if self.ordre2.is_none() || !t.is_finite() || flux.len() != self.ny || flux.iter().any(|f| !f.is_finite()) {
+            return Err(Refus);
+        }
+        self.flux_impose.copy_from_slice(flux);
+        self.flux_actif = true;
+        let r = self.pas_interne(dt, Some((t, gauche, None)));
+        self.flux_actif = false;
+        r
+    }
+
     #[allow(clippy::type_complexity)]
     fn pas_interne(&mut self, dt: f64, bord: Option<(f64, Option<&dyn Fn(f64) -> (f64, f64)>, Option<&dyn Fn(f64) -> (f64, f64)>)>)
         -> Result<(), Refus> {
@@ -331,6 +366,9 @@ impl SaintVenant2D {
                     corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue, droite_f);
                 }
             }
+            if self.flux_actif {
+                imposer_flux_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, &self.flux_impose, droite_f);
+            }
             for i in 0..n {
                 self.h[i] += k * self.travail.dh[i];
                 self.qx[i] += k * self.travail.dqx[i];
@@ -346,6 +384,9 @@ impl SaintVenant2D {
                     let (he, ue) = ext(t + dt);
                     corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue, droite_f);
                 }
+            }
+            if self.flux_actif {
+                imposer_flux_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, &self.flux_impose, droite_f);
             }
             for i in 0..n {
                 let (h2, x2, y2) = (self.h[i] + k * self.travail.dh[i], self.qx[i] + k * self.travail.dqx[i], self.qy[i] + k * self.travail.dqy[i]);

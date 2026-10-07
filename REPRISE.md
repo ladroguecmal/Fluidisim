@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 01:21 +02:00
+JETON            : libre
+Battement        : 2026-10-08 01:30 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S687 — le raccord seul, entre deux Saint-Venant (ADR-273 D1) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S686 — la quarante et unième revue de méthode (ADR-273) ([journal](notes/JOURNAL.md)). Avant : S685 (L'onde solitaire à travers le raccord au rivage)
-Session suivante : S687 — le raccord entre deux Saint-Venant (ADR-273 D1) ; revue en S691
-Maillons        : 0 (méthode : ADR-273)
+Session en cours : aucune
+Dernière session : S687 — Le raccord seul, entre deux Saint-Venant ([journal](notes/JOURNAL.md)). Avant : S686 (la quarante et unième revue de méthode)
+Session suivante : S688 — le relais au rivage contre le tout-APIC à air balistique (S645), la lecture de la remontée sous la maille
+Maillons        : 1 (4.14 : le schéma de raccord juste)
 Registres       : dernier lot S686 (ADR-213 D3) ; le prochain au plus tard en S689
 ```
 

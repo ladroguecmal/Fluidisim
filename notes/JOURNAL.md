@@ -1778,3 +1778,11 @@ unième revue de méthode** ; puis S687, le raccord seul.
 D1 : un raccord entre deux solveurs se juge d'abord entre deux copies du même solveur (S685 : le tout-Saint-Venant mêlait le raccord et
 l'onde portée par APIC). D2 : les deux côtés d'un montage couplé partent d'une seule source (S684 : deux niveaux écrits deux fois).
 Maillons **0** (méthode). Suivant : **S687**, le raccord entre deux Saint-Venant ; la revue en S691.
+
+## S687 — 2026-10-08 — Le raccord seul, entre deux Saint-Venant
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; ADR-273 D1. **Fait** ([preuve](../docs/validation/RACCORD-SEUL-S687.md)) : le bord droit
+de Saint-Venant à flux imposé ; le raccord seul, le schéma du relais entre deux Saint-Venant. **Mesuré** : à 2,5 et 1,25 cm, le tout-
+Saint-Venant redonné au dix-millième, la masse au bit. À 5 cm, l'écart (−7,6 %) est une marche de la lecture de la remontée : la borne
+du plan était sous ce quantum, ADR-268 D1 non appliquée à la lecture. Le schéma est juste ; le déficit de S685 vient de l'onde portée
+par APIC. Maillons **1** (4.14). Suivant : **S688**, le relais contre le tout-APIC à air balistique (S645).

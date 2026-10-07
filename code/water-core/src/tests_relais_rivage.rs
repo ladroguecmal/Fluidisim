@@ -133,3 +133,73 @@ fn a_solitary_wave_crosses_the_shore_relay_s685() {
     }
 }
 
+/// **S687 — le raccord seul** (ADR-273 D1) : Saint-Venant des deux côtés, raccordés par le schéma de `RelaisRivage` — l'état du bord du
+/// large (niveau, vitesse, moyennés sur les rangées) nourrit le bord caractéristique du rivage ; le flux rendu quitte le large par son bord
+/// droit à flux imposé. Rend (la remontée du raccord seul, celle du tout-Saint-Venant, le pire écart de masse relatif).
+fn raccord_seul_s687(dx: f64) -> (f64, f64, f64) {
+    use crate::grand_evenement::OndeSolitaire;
+    let (niveau, cot, x_pied, fond0, l, ny) = (0.40f64, 3.0f64, 4.768f64, 0.05f64, 6.6f64, 4usize);
+    let onde = OndeSolitaire { h: 0.07, d: 0.35, x1: 2.80, g: 9.81 };
+    let fond = move |x: f64| fond0 + (x - x_pied).max(0.) / cot;
+    let eta = move |x: f64| if x < x_pied { onde.eta(x) } else { 0. };
+    let vit = move |x: f64| if x < x_pied { onde.u(x) } else { 0. };
+    let domaine = |x0: f64, n: usize, initial: bool| {
+        let xc = |k: usize| x0 + ((k / ny) as f64 + 0.5) * dx;
+        let z: Vec<f64> = (0..n * ny).map(|k| fond(xc(k))).collect();
+        let h: Vec<f64> = (0..n * ny).map(|k| (niveau + if initial { eta(xc(k)) } else { 0. } - z[k]).max(0.)).collect();
+        let q: Vec<f64> = (0..n * ny).map(|k| if initial { h[k] * vit(xc(k)) } else { 0. }).collect();
+        let mut s = SaintVenant2D::nouveau(n, ny, dx, 9.81, z, h, q, vec![0.; n * ny]).unwrap();
+        s.regler_ordre_deux(1e-16).unwrap();
+        s
+    };
+    let nl = (5.35 / dx).round() as usize;
+    let lx = nl as f64 * dx;
+    let nr = ((l - lx) / dx).round() as usize;
+    let (mut large, mut rivage, mut tout) = (domaine(0., nl, true), domaine(lx, nr, false), domaine(0., (l / dx).round() as usize, true));
+    let v0 = large.volume() + rivage.volume();
+    let dt = 0.4 * dx / (0.5 + (9.81 * 0.45f64).sqrt());
+    let (mut t, mut r_rac, mut r_tout, mut pire) = (0f64, f64::MIN, f64::MIN, 0f64);
+    while t < 3.0 {
+        // L'état du bord du large, avant les pas (comme le relais).
+        let (mut e, mut u) = (0f64, 0f64);
+        for j in 0..ny {
+            let k = (nl - 1) * ny + j;
+            e += large.h[k] + large.z[k];
+            u += large.qx[k] / large.h[k].max(1e-6);
+        }
+        let (e, u) = (e / ny as f64, u / ny as f64);
+        let he = (e - rivage.z[0]).max(0.);
+        let ext = move |_t: f64| (he, u);
+        rivage.pas_avec_bords(dt, t, Some(&ext), None).unwrap();
+        let flux: Vec<f64> = rivage.flux_des_bords().0.to_vec();
+        large.pas_avec_flux_droit(dt, t, None, &flux).unwrap();
+        tout.pas(dt).unwrap();
+        r_rac = r_rac.max(remontee_s685(&rivage, niveau));
+        r_tout = r_tout.max(remontee_s685(&tout, niveau));
+        pire = pire.max(((large.volume() + rivage.volume()) - v0).abs() / v0);
+        t += dt;
+    }
+    (r_rac, r_tout, pire)
+}
+
+/// **S687** — (2) la remontée du raccord seul à 6 % du tout-Saint-Venant, à 5 et 2,5 cm — tenu à 2,5 cm (et 1,25 cm, en route) ; à 5 cm,
+/// l'écart est d'une marche de la lecture ; (3) la masse à 10⁻¹² près.
+#[test]
+fn the_shore_relay_scheme_alone_between_two_saint_venant_s687() {
+    let mesures: Vec<(f64, f64, f64, f64)> = [0.05f64, 0.025, 0.0125].iter().map(|&dx| {
+        let (r, rt, pire) = raccord_seul_s687(dx);
+        println!("S687 {dx} m : remontée du raccord seul {r:.4} m, tout-Saint-Venant {rt:.4} m ({:+.2} %) ; masse {pire:.1e}", 100. * (r / rt - 1.));
+        (dx, r, rt, pire)
+    }).collect();
+    for (dx, r, rt, pire) in mesures {
+        // À 5 cm, le critère (6 %) est sous le quantum de la lecture : la plus haute maille mouillée monte par marches de `dx/3` sur la
+        // pente, 1,67 cm, 7,6 % de la remontée — l'écart mesuré en est exactement une. N'affirme que ce qui a tenu (ADR-244).
+        if dx < 0.05 {
+            assert!((r / rt - 1.).abs() < 0.06, "critère 2 : {dx}");
+        } else {
+            assert!(((rt - r) - dx / 3.).abs() < 1e-9, "à 5 cm, une marche de la lecture : {}", rt - r);
+        }
+        assert!(pire < 1e-12, "critère 3");
+    }
+}
+

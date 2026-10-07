@@ -411,7 +411,9 @@ pas recopiée ici (L137).
   côte à côte, **le repos tenu sur six plages à quelques µm/s** (APIC seul : 0,2 à 0,6 m/s), la masse au bit
   ([preuve](validation/RELAIS-RIVAGE-REPOS-S684.md)). **S685** : l'onde de S644 à travers le raccord — la masse au bit, le volume transmis ;
   la remontée 14 à 15 % sous le tout-Saint-Venant (critère manqué), parce que l'onde portée par APIC n'est pas celle de Saint-Venant ;
-  les instruments qui départageront nommés ([preuve](validation/RELAIS-RIVAGE-ONDE-S685.md)).
+  les instruments qui départageront nommés ([preuve](validation/RELAIS-RIVAGE-ONDE-S685.md)). **S687** : le raccord seul, entre deux
+  Saint-Venant — il redonne le tout-Saint-Venant au dix-millième (2,5 et 1,25 cm), la masse au bit : le déficit de S685 vient de l'onde
+  portée par APIC ([preuve](validation/RACCORD-SEUL-S687.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
