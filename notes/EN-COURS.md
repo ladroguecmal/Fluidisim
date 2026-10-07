@@ -62,39 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S583 — **terminée**. En autonomie, **3.6 — la réfraction bathymétrique des ondes** (absent) ; elle sert 3.4 (les rayons d'un
-tsunami se courbent). La référence de B (S362) ne traite que des isobathes droites et parallèles ; ici, un fond quelconque.
+Session : S584 — **en cours**. En autonomie : **le lot** (dû ; feuille de route S582–S583), puis **3.4 — le tsunami sur un rayon courbe** :
+S582 le propage sur un rayon droit, S583 trace des rayons qui se courbent ; les brancher.
 
-**Ce que la session fait.** `refraction.rs` : le **tracé d'un rayon** d'onde longue (`c = √(g·h)`) sur un fond `h(x, y)` fourni avec son
-gradient par l'appelant — `ẋ = c·cos θ`, `ẏ = c·sin θ`, `θ̇ = sin θ·∂c/∂x − cos θ·∂c/∂y` —, Runge-Kutta d'ordre 4 à pas de temps fixe
-(f64, déterministe) ; le **coefficient de réfraction** `K_r = √(b₀/b)` par deux rayons voisins (l'écart mesuré perpendiculairement au
-rayon). Ne fait pas : les caustiques (`b → 0`), la diffraction, la réfraction des ondes courtes (la dispersion : `c` dépend alors de
-`k·h`), l'entrée dans W.
+**Ce que la session fait.** `tsunami::sur_rayon(a0, h0, point, voisin, b0, profondeur)` : l'instant d'arrivée est l'instant du point du
+rayon tracé ; l'amplitude, `A₀·(h₀/h)^(1/4)·K_r` — Green et la réfraction ensemble (le flux d'énergie `A²·√h·b` conservé dans le tube de
+rayons).
 
-**Références, calculées avant** (ce script les écrit). Un fond `h = 4 000 − 0,0195·x` (m), un rayon lancé à 30° de la normale aux
-isobathes : Snell, `sin θ/c` constant — à `x` = 190 km (`h` = 295 m), **θ = 7.804001°** ; l'instant d'arrivée, `∫ dx/(c·cos θ)`
-par Simpson (10⁶ intervalles) : **1604.6227 s** ; l'ordonnée atteinte `∫ tan θ dx` : **72949.931 m** ; `K_r = √(cos θ₀/cos θ)` =
-**0.934944**.
+**Références, calculées avant** (ce script les écrit). Le fond de S583, un tsunami de 0,5 m lancé à 30° : à 190 km (`h` = 295 m),
+l'arrivée à **1 604,6227 s** (Simpson, S583) ; l'amplitude `0,5·(4000/295)^(1/4)·0,934944` = **0.897047 m** (Green seul : ×1.918932).
 
-**Quantum** (ADR-236 D1) : f64 ; l'erreur du RK4 au pas d'une seconde (`c` ≈ 200 m/s, la courbure lente) — estimée sous 10⁻⁹ relatif ;
-l'instant d'arrivée mesuré par interpolation linéaire entre deux pas. **Critères, écrits avant.** (1) `sin θ/c` constant le long du rayon à
-10⁻⁹ relatif ; (2) l'instant où le rayon passe `x` = 190 km à 0,01 s de 1604.6227 s, l'ordonnée à 0,1 m de 72949.931 m ; (3) `K_r` à 10⁻⁴ de
-0.934944 (deux rayons écartés de 100 m) ; (4) un fond uniforme : le rayon droit, `θ` constant au bit ; refus : profondeur non positive,
-pas non positif, tampon trop court.
+**Quantum** (ADR-236 D1) : f64 ; `K_r` mesuré à 10⁻⁵ (S583). **Critères, écrits avant.** (1) l'arrivée à 0,01 s ; (2) l'amplitude à 10⁻⁴
+relatif ; (3) le flux `A²·√h·b` constant à 10⁻⁴ relatif en cinq points du rayon ; (4) refus : une profondeur non positive, un écart nul.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `refraction.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.6 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `sur_rayon` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **Première mesure : (1) et (2) tenus, (3) manqué — `K_r` 0,981 pour 0,935.** Relu d'abord (ADR-239 D1) par un tracé indépendant en Python :
-  il redonne 0,981 — le module est juste. **Le montage était faux** : le rayon voisin partait à 30° d'un point situé 50 m plus au large,
-  donc avec un autre invariant de Snell (`sin θ/c` plus petit de 1,2·10⁻⁴) ; l'écart d'angle se cumule sur 190 km (10 m sur 115). La
-  formule `K_r = √(cos θ₀/cos θ)` vaut pour deux rayons **de la même famille** (même invariant). Correction : le rayon voisin part avec
-  l'angle que Snell lui donne à son abscisse, `sin θ_b = sin θ₀·c(x_b)/c(0)`. Critère inchangé.
-- **P2 fini** — Snell 3,1·10⁻¹¹ ; arrivée 1 604,6229 s ; y 72 949,930 m ; `K_r` 0,934931 après correction du montage ; fond plat au bit ;
-  refus. Pour la revue de S586 : deux trajectoires comparées doivent appartenir à la même famille (le même invariant). Suite 760.
-- **P3** — preuve REFRACTION-S583 ; liste 3.6 (absent → partiel) et décompte ; index ; journal.
-

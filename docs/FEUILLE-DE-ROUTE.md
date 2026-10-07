@@ -418,6 +418,7 @@ prochain franchissement) ; la dix-huitième revue (ADR-244 : un essai n'affirme 
 comme départ, un seuil dans une seule fonction) ; 2.2 avance — la marée harmonique à phases entières.
 **S578–S581** : 2.2 avance trois fois — la carte cotidale, la marée dans la surface de B, le courant de marée ; la vingtième revue
 (ADR-246 : rien de neuf).
+**S582–S583** : **3.4 ouvert** (la propagation macroscopique d'un tsunami) ; **3.6 ouvert** (la réfraction par tracé de rayons).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
