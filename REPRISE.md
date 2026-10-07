@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 21:36 +02:00
+JETON            : libre
+Battement        : 2026-10-07 21:38 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S666 — la trente-septième revue de méthode (ADR-268) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S665 — les bords périodiques, la normalisation, `K_r` : la côte 2D juste ([journal](notes/JOURNAL.md))
-Session suivante : **S666 — la trente-septième revue de méthode** (ADR-268, S661–S665) ; puis Cote2D à plusieurs composantes (un spectre) et sa mémoire sur une vraie côte (ADR-196 §3).
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S666 — la trente-septième revue de méthode (ADR-268) ([journal](notes/JOURNAL.md)). Avant : S665 (les bords périodiques, la normalisation, `K_r` : la côte 2D juste)
+Session suivante : **S667 — Cote2D à plusieurs composantes** (un spectre de B) : la mémoire et le coût de cuisson mesurés sur une côte réelle d'échelle, l'interpolation entre composantes voisines (ADR-196 §3).
+Maillons        : 2
 Registres       : dernier lot S665 (ADR-213 D3) ; le prochain au plus tard en S668
 ```
 

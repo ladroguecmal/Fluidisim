@@ -80,7 +80,7 @@ coûté ; (3) la prochaine revue nommée.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-268.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — ADR-268 : D1, une borne calculée avec le plancher de son instrument ; D2, un remède essayé sous une autre cause active est suspendu. Prochaine revue S671.
