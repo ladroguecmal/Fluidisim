@@ -144,3 +144,62 @@ fn the_tsunami_entering_through_the_boundary_runs_up_the_beach_s624() {
     assert!((ecarts[0] - ecarts[1]).abs() < 1e-9, "critère 2");
     assert!(f[0] < f[1] && f[1] < f[2] && (f[2] - syn).abs() <= 10.0 * 0.25 / 19.85, "critère 3");
 }
+
+/// **S629** — le domaine local nourri par `tsunami::niveau` à ses deux bords : l'écart relatif à la jauge et le reste après passage.
+fn couplage(a0: f64, dx: f64) -> (f64, f64) {
+    use crate::tsunami::{niveau, Tsunami};
+    let (d, ny) = (10.0f64, 3usize);
+    let sommets = [[0.0, 4000.0], [50_000.0, 10.0], [52_000.0, 10.0]];
+    let rayon = Rayon::new(&sommets, G).unwrap();
+    let ts = Tsunami { a0_m: a0, t0_s: 0.0, demi_duree_s: 60.0 };
+    let eta = |s: f64, t: f64| niveau(&rayon, &ts, s, t).unwrap() as f64;
+    let nx = (2000.0 / dx).round() as usize;
+    let xc = |i: usize| (i as f64 + 0.5) * dx;
+    let mut dom = SaintVenant2D::nouveau(nx, ny, dx, G, vec![-d; nx * ny], vec![d; nx * ny], vec![0.0; nx * ny], vec![0.0; nx * ny]).unwrap();
+    dom.regler_ordre_deux(1e-16).unwrap();
+    let dt = 0.3 * dx / (G * d).sqrt();
+    let t_debut = rayon.temps(50_000.0).unwrap() - 60.0 - 10.0;
+    let mut ij = 0;
+    for i in 0..nx {
+        if (xc(i) - 1000.0).abs() < (xc(ij) - 1000.0).abs() {
+            ij = i;
+        }
+    }
+    let gauche = |t: f64| {
+        let e = eta(50_000.0, t);
+        (d + e, (G / d).sqrt() * e)
+    };
+    let droite = |t: f64| {
+        let e = eta(52_000.0, t);
+        (d + e, (G / d).sqrt() * e)
+    };
+    let (mut pire, mut crete) = (0.0f64, 0.0f64);
+    for i in 0..(350.0 / dt).round() as usize {
+        let t = t_debut + i as f64 * dt;
+        dom.pas_avec_bords(dt, t, Some(&gauche), Some(&droite)).unwrap();
+        let macro_ = eta(50_000.0 + xc(ij), t + dt);
+        pire = pire.max((dom.h[ij * ny + 1] - d - macro_).abs());
+        crete = crete.max(macro_);
+    }
+    let reste = (0..nx).map(|i| (dom.h[i * ny + 1] - d).abs()).fold(0.0, f64::max);
+    (pire / crete, reste)
+}
+
+/// **S629** — (1) contre numpy ; (2) la convergence à 5 mm ; (3) la non-linéarité ; (4) le reste.
+#[test]
+fn the_local_domain_is_fed_by_the_macroscopic_tsunami_itself_s629() {
+    let refs = [(0.001118, 4.0, 0.0031288326688869916, 3.113132223120374e-07), (0.001118, 2.0, 0.0012791704451829038, 3.1196122129983905e-07),
+        (0.001118, 1.0, 0.0012425488125737583, 3.122253442455758e-07), (0.004472, 4.0, 0.005052936649428429, 4.976838118508908e-06),
+        (0.004472, 2.0, 0.004970474063298831, 4.987496497577126e-06), (0.004472, 1.0, 0.004951853897806816, 4.991828017608668e-06)];
+    let mut rel = Vec::new();
+    for (a0, dx, r_ref, reste_ref) in refs {
+        let (r, reste) = couplage(a0, dx);
+        println!("S629 : A₀ {a0}, maille {dx} m — écart relatif {r:e} (numpy à {:e}), reste {reste:e} m", (r - r_ref).abs());
+        assert!((r - r_ref).abs() < 1e-10 && (reste - reste_ref).abs() < 1e-12, "critère 1 : {a0}, {dx}");
+        rel.push((r, reste));
+    }
+    assert!(rel[0].0 > rel[1].0 && rel[1].0 > rel[2].0 && rel[2].0 < 2e-3, "critère 2");
+    let rapport = rel[5].0 / rel[2].0;
+    assert!((3.5..=4.5).contains(&rapport), "critère 3 : {rapport}");
+    assert!(rel[2].1 < 1e-4 * 0.005, "critère 4");
+}
