@@ -70,6 +70,6 @@ tenus du premier essai. **ADR-258** : aucune règle nouvelle ; METHODE ; BOUSSOL
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-258, METHODE, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
