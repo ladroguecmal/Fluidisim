@@ -62,25 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S619 — **terminée**. En autonomie (ADR-247 : la physique des partiels, après les absents). D'abord **le défaut relevé en S618** :
-`SaintVenant2D::pas` alloue ses tableaux de travail à chaque pas (sept `Vec`), contraire à **I-06** (aucune allocation à l'exécution).
+Session : S620 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S617–S619), puis
+**l'ordre deux de `SaintVenant2D`** — un manque de 4.14 (la plage) et de 11.3 (la remontée) : l'ordre un est diffusif (un quart d'écart à
+Thacker après une période à 100²).
 
-**Ce que la session fait.** Les tableaux de travail (`u`, `v`, `dh`, `dqx`, `dqy`, les flux des faces en `x` et en `y`) deviennent des
-champs du domaine, alloués une fois à la construction ; `pas` les réutilise. L'arithmétique et l'ordre des opérations ne changent pas.
-Ne fait pas : l'ordre deux, le parallélisme, le passage par l'allocateur de l'hôte (`HostServices`, I-06 au sens strict : la réserve
-déclarée avant `seal()`) — noté.
+**Ce que la session fait.** `SaintVenant2D::regler_ordre_deux(ε)` : reconstruction MUSCL (minmod) de `h`, `η = h + z`, `u`, `v` par
+direction, pente nulle aux mailles de bord ; **reconstruction hydrostatique d'ordre deux** d'Audusse (2004) — les états de face reconstruits,
+le fond de face `η − h`, et le **terme source centré** `−g·h·Δz` qui garde le lac au repos ; Heun en temps ; vitesse de Kurganov–Petrova à
+`ε` = (0,1 mm)⁴ — l'`ε` de S613, (1 mm)⁴, amortissait les couches minces du rivage et figeait l'écart à 0,030 (mesuré au plan). L'ordre un
+et ses références ne changent pas. Sans allocation (tableaux préalloués, S619).
 
-**Quantum** : le bit. **Critères, écrits avant.** (1) les essais de S613 et S614 passent sans changer une référence (l'arithmétique au bit) ;
-(2) sur 100 pas d'un domaine de 50², les adresses et capacités des tableaux de travail ne changent pas (aucune réallocation) — et les
-résultats d'un domaine sont identiques au bit à ceux d'un clone qui a fait les mêmes pas ; (3) le banc B7 re-mesuré : le coût par
-maille-pas de `SaintVenant2D`, inscrit à côté de celui de S618 (78,55 ns), sans seuil posé avant la mesure.
+**Références, calculées avant** (`s620_ref.py`, `s620_remontee.py`, numpy). **Thacker**, écart L1 après une période : **0.047826108** (50²),
+**0.015728084** (100²), **0.005876495** (200²) — l'ordre un donnait 0,427, 0,242, 0,129 : **8.9, 15.4,
+21.9 fois moins** ; rapport 100 → 200 : 2.676. Masse exacte, `h ≥ 0`, Courant ≤ 0.1897.
+Le lac au repos : 3.100e-16 m/s. **La remontée** (S614, bord gauche mouillé : les murs éprouvés, ADR-254 D2), maille 1, ½, ¼ m :
+**0.806045340, 0.843828715, 0.875314861 m** pour Synolakis 0.861419 (l'ordre un : 0,705, 0,793, 0,850) ;
+Courant ≤ 0.4071.
+
+**Quantum** : f64 ; la remontée à la cote d'une maille (`dx/cot β`). **Critères, écrits avant.** (1) les écarts L1 de Thacker égaux aux références
+à 10⁻⁹, chacun au moins huit fois sous celui de l'ordre un, le rapport 100 → 200 au moins 2,5 ; (2) masse à 10⁻¹³, `h ≥ 0`, aux trois
+résolutions et sur la plage ; (3) le lac au repos sous 10⁻¹⁴ m/s ; (4) les trois remontées égales aux références au bit ; à la maille de 1 m,
+plus près de Synolakis que l'ordre un ; à ¼ m, à moins de dix quanta (0,126 m) ; (5) les essais de S613, S614, S619 inchangés ; (6) refus :
+`ε` non positif.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — les tableaux de travail préalloués ; (1)–(3).
-- [x] **P3** — preuve ; liste ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — l'ordre deux dans `saint_venant_2d.rs` et ses essais ; (1)–(6).
+- [ ] **P3** — preuve ; listes 4.14, 11.3 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — S613, S614 au bit ; aucune réallocation en 100 pas ; 78,55 → 42,01 ns par maille-pas. Suite : 806 essais listés.
-- **P3** — preuve PREALLOCATION-S619 ; note datée à B7-CIBLE-S618 ; ligne 11.5 ; index ; journal.

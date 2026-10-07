@@ -440,6 +440,8 @@ total alimenté par B à ses bords) ; **9.6 ouvert** (le précalcul avant l'impa
 solveur par W) ; **4.14 ouvert** (le mouillage et le séchage en 2D, jugés sur Thacker) — la section 4 n'a plus d'absent.
 **S614–S616** : **11.3 ouvert** (un très grand événement, du large à la plage : Green, Synolakis ; les murs de S613 corrigés) ;
 **10.5 ouvert** (les grandes formes cohérentes entre clients) ; la vingt-septième revue (ADR-254).
+**S617–S619** : **9.10 ouvert** (le régulateur de qualité, les capacités dérivées) ; **11.5 ouvert** (le banc B7 des modules de la v2) ;
+le défaut I-06 de `SaintVenant2D` corrigé (×1,87) — il ne reste d'absents que 7.8, 13.4 (différés) et 5.11 (hors périmètre).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
