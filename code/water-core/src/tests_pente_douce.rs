@@ -182,3 +182,56 @@ fn the_nonlinear_model_meets_berkhoff_s_shoal_s662() {
     }
 }
 
+/// **S663 — l'enregistrement de la séance visuelle** : les trois modèles sur le haut-fond de Berkhoff (5 cm), écrits dans
+/// `calculs/s663_berkhoff.bin` (petit-boutiste : `nx, ny` en u32 ; `x0, dx, y0, dy` en f64 ; `ψ(x)` en f64, la phase de référence ;
+/// puis, pour chaque modèle — petits angles, grand angle, non linéaire —, `re` et `im` en f32, `nx × ny`, `x` lent) ; et, pour le
+/// contrôle, `calculs/s663_controle.csv` : l'amplitude du modèle non linéaire aux points des quatre sections, par `Champ::amplitude`.
+#[test]
+#[ignore = "≈ 5 s : l'enregistrement de la séance visuelle de S663"]
+fn record_berkhoff_for_the_visual_session_s663() {
+    use std::io::Write;
+    let d = 0.05;
+    let champs = [
+        propager(&berkhoff, 1.0, G, -10., 12., d, -10., 10., d).unwrap(),
+        propager_grand_angle(&berkhoff, 1.0, G, -10., 12., d, -10., 10., d, &|_| (1., 0.)).unwrap(),
+        propager_non_lineaire(&berkhoff, 1.0, G, -10., 12., d, -10., 10., d, &|_| (1., 0.), 0.0232).unwrap(),
+    ];
+    let c = &champs[2];
+    // La phase de référence, comme le modèle la marche : la moyenne de k sur y, aux demi-pas.
+    let omega = 2. * std::f64::consts::PI;
+    let kb = |x: f64| (0..c.ny).map(|j| nombre_d_onde(omega, berkhoff(x, c.y0 + j as f64 * c.dy), G)).sum::<f64>() / c.ny as f64;
+    let mut psi = vec![0f64; c.nx];
+    for i in 1..c.nx {
+        let (xa, xb) = (c.x0 + (i - 1) as f64 * c.dx, c.x0 + i as f64 * c.dx);
+        psi[i] = psi[i - 1] + 0.5 * (kb(xa) + kb(xb)) * c.dx;
+    }
+    std::fs::create_dir_all("../../calculs").unwrap();
+    let mut f = std::io::BufWriter::new(std::fs::File::create("../../calculs/s663_berkhoff.bin").unwrap());
+    f.write_all(&(c.nx as u32).to_le_bytes()).unwrap();
+    f.write_all(&(c.ny as u32).to_le_bytes()).unwrap();
+    for v in [c.x0, c.dx, c.y0, c.dy] {
+        f.write_all(&v.to_le_bytes()).unwrap();
+    }
+    for v in &psi {
+        f.write_all(&v.to_le_bytes()).unwrap();
+    }
+    for ch in &champs {
+        for part in 0..2 {
+            for i in 0..ch.nx {
+                for j in 0..ch.ny {
+                    let (re, im) = ch.valeur(i, j);
+                    f.write_all(&(if part == 0 { re } else { im } as f32).to_le_bytes()).unwrap();
+                }
+            }
+        }
+    }
+    let mut g = std::fs::File::create("../../calculs/s663_controle.csv").unwrap();
+    for (nom, section, x) in [("2", &SECTION_2[..], Some(3.)), ("3", &SECTION_3[..], Some(5.)), ("5", &SECTION_5[..], Some(9.)), ("7", &SECTION_7[..], None)] {
+        for &(pos, mesure) in section {
+            let (px, py) = match x { Some(x) => (x, -pos), None => (pos, 0.) };
+            writeln!(g, "{nom},{px},{py},{mesure},{}", c.amplitude(px, py).unwrap()).unwrap();
+        }
+    }
+    println!("S663 enregistré : {} × {}", c.nx, c.ny);
+}
+

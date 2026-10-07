@@ -800,7 +800,8 @@ pas recopiée ici (L137).
   ([ADR-206](adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](validation/OCCULTATION-CIEL-S382.md), R31 reçue) ; **S392** : les surfaces mouillées (ADR-205, pièce 5a ; [preuve](validation/SURFACES-MOUILLEES-S392.md), R33 reçue pour l'instant, peaufinage à venir). Autres poses, animation et scénarios
   restent à valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système, et
   **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3). **S658** : la séance visuelle du rouleau (le relais, le plongeant, la sphère emportée), un rendu d'atelier — **R40 reçu** :
-  « tout parait crédible » ([preuve](validation/SEANCE-VISUELLE-ROULEAU-S658.md)).
+  « tout parait crédible » ([preuve](validation/SEANCE-VISUELLE-ROULEAU-S658.md)). **S663** : la séance visuelle de Berkhoff (la surface, la carte,
+  les sections) — R41 envoyé ([preuve](validation/SEANCE-VISUELLE-BERKHOFF-S663.md)).
 
 ## 9. Activation, prédiction, budget et dégradation
 

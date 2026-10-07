@@ -1581,3 +1581,11 @@ d'amplitude de Kirby et Dalrymple (1986) dans le grand angle. **Mesuré** : **le
 0,091 ; 0,101), le pic à 7 % — le critère de S659 tenu ; le témoin : la non-linéarité portait l'essentiel de l'écart (−73 %, −57 %). La
 limite linéaire manquée telle qu'écrite (un terme d'ordre `ε` que le plan prenait pour `ε²`), vérifiée proportionnelle. Maillons **1**
 (2.7 avance). Suivant : **S663**, le modèle côtier vers B ou une séance visuelle de Berkhoff.
+
+## S663 — 2026-10-07 — la séance visuelle du haut-fond de Berkhoff (R41)
+
+**Entrée.** Les séances visuelles demandées par l'utilisateur. **Fait** ([preuve](../docs/validation/SEANCE-VISUELLE-BERKHOFF-S663.md)) :
+l'enregistrement des trois modèles ; le rendu `outils/rendu_berkhoff.py` — la surface animée (les crêtes qui se courbent et se
+concentrent), la carte de l'amplitude, les quatre sections contre les mesures ; contrôlé (les écarts égaux à S662 ; une borne du plan
+qui ignorait l'écriture en `f32`, rapportée) ; les accents corrigés avant l'envoi. **Envoyé** : R41, le verdict attendu. Maillons **2**.
+Suivant : **S664**, le modèle côtier lu par B (2.7).

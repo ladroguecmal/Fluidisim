@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S663 — **en cours**. Une séance visuelle (l'utilisateur les a demandées ; R40 reçu) : **la houle sur le haut-fond de Berkhoff**,
+Session : S663 — **terminée**. Une séance visuelle (l'utilisateur les a demandées ; R40 reçu) : **la houle sur le haut-fond de Berkhoff**,
 S659–S662. Trois images, envoyées pour un verdict (R41) : la carte de l'amplitude vue de dessus (le modèle non linéaire, le haut-fond, les
 lignes de mesure) ; les quatre sections, les mesures contre les trois modèles ; la surface animée sur une période (les crêtes qui se
 courbent et se concentrent).
@@ -84,7 +84,9 @@ verdict inscrit (R41), reçu ou attendu.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'enregistrement ; le rendu ; l'envoi.
+- [x] **P2** — l'enregistrement ; le rendu ; l'envoi.
 - [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) les écarts recalculés égaux ; l'amplitude relue à 9·10⁻⁸ — la borne de 10⁻¹² du plan ignorait l'écriture en `f32` ; (2)
+  trois images envoyées (les accents corrigés avant l'envoi) ; (3) R41 en attente (la boussole).

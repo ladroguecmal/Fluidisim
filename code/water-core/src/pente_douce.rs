@@ -85,6 +85,12 @@ pub struct Champ {
 }
 
 impl Champ {
+    /// S663 — l'amplitude complexe `(re, im)` au point de grille `(i, j)`.
+    pub fn valeur(&self, i: usize, j: usize) -> (f64, f64) {
+        let c = self.a[i * self.ny + j];
+        (c.re, c.im)
+    }
+
     /// S660 — la phase de `A` (rad) au point de grille `(i, j)`.
     pub fn phase(&self, i: usize, j: usize) -> f64 {
         let c = self.a[i * self.ny + j];

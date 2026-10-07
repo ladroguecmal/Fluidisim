@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [La séance visuelle du haut-fond de Berkhoff — S663](validation/SEANCE-VISUELLE-BERKHOFF-S663.md) : R41, la surface, la carte, les sections.
 - [La non-linéarité sur le haut-fond de Berkhoff — S662](validation/NON-LINEAIRE-BERKHOFF-S662.md) : les quatre sections à un dixième des mesures.
 - [Le témoin du grand angle sur le haut-fond de Berkhoff — S660](validation/GRAND-ANGLE-S660.md) : un cinquième de l'écart ; la non-linéarité ensuite.
 - [La bathymétrie 2D : le modèle parabolique de pente douce — S659](validation/PENTE-DOUCE-S659.md) : Berkhoff (1982) ; le pic tenu, les sections loin.
