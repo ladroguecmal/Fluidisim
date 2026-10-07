@@ -103,6 +103,34 @@ pub fn ajuster_glace(node: &mut crate::hydro_network::HydroNode, ligne: &mut [i6
     Ok(q)
 }
 
+// --- S635 — le dégel physique (le bilan d'énergie de surface).
+
+/// **S635 — le flux de fonte** à la surface de la glace, W/m² : `q = α·T_air + (1 − albédo)·S` — la convection de l'air (`α`, W/m²/K ;
+/// `T_air` en °C au-dessus de 0) et le soleil absorbé (`S`, W/m²) ; nul s'il est négatif (alors la glace croît : Stefan). Ne compte ni
+/// l'infrarouge, ni l'eau sous la glace, ni la neige. Refus : `α` ou `S` négatifs, un albédo hors de [0, 1], une valeur non finie.
+pub fn flux_de_fonte(t_air: f64, alpha: f64, albedo: f64, solaire: f64) -> Result<f64, Refus> {
+    if !t_air.is_finite() || !(0.0..=1.0).contains(&albedo) {
+        return Err(Refus);
+    }
+    let (alpha, solaire) = (fini_positif(alpha)?, fini_positif(solaire)?);
+    Ok((alpha * t_air + (1.0 - albedo) * solaire).max(0.0))
+}
+
+/// **S635 — l'épaisseur après `t` secondes de fonte** sous le flux `q` : `max(0, h₀ − q·t/(ρ_glace·L))`.
+pub fn epaisseur_fondue(h0: f64, q: f64, t: f64) -> Result<f64, Refus> {
+    let (h0, q, t) = (fini_positif(h0)?, fini_positif(q)?, fini_positif(t)?);
+    Ok((h0 - q * t / (RHO_GLACE * L_FUSION)).max(0.0))
+}
+
+/// **S635 — la durée de fonte** d'une épaisseur `h₀` sous le flux `q > 0`, s.
+pub fn duree_de_fonte(h0: f64, q: f64) -> Result<f64, Refus> {
+    let h0 = fini_positif(h0)?;
+    if !(q > 0.0) || !q.is_finite() {
+        return Err(Refus);
+    }
+    Ok(h0 * RHO_GLACE * L_FUSION / q)
+}
+
 #[cfg(test)]
 #[path = "tests_glace.rs"]
 mod tests;

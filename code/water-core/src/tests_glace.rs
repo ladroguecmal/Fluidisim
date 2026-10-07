@@ -90,3 +90,37 @@ fn a_sheltered_lake_freezes_and_thaws_without_losing_water_s575() {
     let (_, sous_la_houle) = lac_s575(30, 0.2);
     assert_eq!(sous_la_houle, [200_000_000, 0], "critère 3 : pas de plaque sous Hs = 0,2 m");
 }
+
+/// **S635** — (1) le flux, la durée ; (2) le lac fond, la masse à l'entier ; (3) le bilan d'énergie ; (4) refus.
+#[test]
+fn the_lake_ice_melts_by_its_energy_balance_s635() {
+    let q = flux_de_fonte(5.0, 20.0, 0.6, 200.0).unwrap();
+    let (mut node, mut ligne) = lac_s575(30, 0.0);
+    let h0 = ligne[1] as f64 / 1e8;
+    let t_fonte = duree_de_fonte(h0, q).unwrap();
+    println!("S635 : q = {q} W/m², h₀ = {h0} m, fonte en {t_fonte} s");
+    assert!(q == 180.0 && (t_fonte - 1038299.4354444445).abs() < 1e-6, "critère 1");
+    let masse = |l: &[i64; 2]| 1000 * l[0] + 917 * l[1];
+    let m0 = masse(&ligne);
+    let (glace0, e_quantum) = (ligne[1] / 1000, 0.917 * L_FUSION);
+    let mut nulle = None;
+    for heure in 1..=20 * 24 {
+        let t = heure as f64 * 3600.0;
+        ajuster_glace(&mut node, &mut ligne, 0, 1, 100.0, epaisseur_fondue(h0, q, t).unwrap()).unwrap();
+        assert_eq!(masse(&ligne), m0, "critère 2 : la masse à l'heure {heure}");
+        if ligne[1] > 0 {
+            let recue = q * 100.0 * t;
+            let latente = (glace0 - ligne[1] / 1000) as f64 * e_quantum;
+            assert!((recue - latente).abs() < e_quantum, "critère 3 : à l'heure {heure}, {recue} contre {latente}");
+        } else if nulle.is_none() {
+            nulle = Some(heure);
+        }
+    }
+    println!("S635 : glace nulle à l'heure {nulle:?} ; eau {} ml", ligne[0]);
+    assert_eq!(nulle, Some(289), "critère 2 : la glace nulle à l'heure 289");
+    assert_eq!(ligne, [200_000_000, 0], "critère 2 : l'eau rendue");
+    assert_eq!(flux_de_fonte(5.0, -1.0, 0.6, 200.0), Err(Refus), "critère 4 : α");
+    assert_eq!(flux_de_fonte(5.0, 20.0, 1.2, 200.0), Err(Refus), "critère 4 : albédo");
+    assert_eq!(flux_de_fonte(5.0, 20.0, 0.6, -1.0), Err(Refus), "critère 4 : S");
+    assert_eq!(flux_de_fonte(f64::NAN, 20.0, 0.6, 200.0), Err(Refus), "critère 4 : non fini");
+}
