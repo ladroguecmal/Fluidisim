@@ -826,7 +826,11 @@ pas recopiée ici (L137).
   ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles.
 - [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *absent*. **Depuis S476**
   (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite.
-- [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *absent*.
+- [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *partiel* depuis S603 : **la bathymétrie** — l'isobathe
+  limite `h = λ` (ADR-196 D3), le faisceau de rayons de houle (dispersion complète), les plages à recuire : aucune sous l'isobathe limite
+  (une bosse sous 107 m : 6 cm d'arrivée), trois plages sur huit intactes pour une bosse côtière ; la règle `λ/2` aurait manqué une bosse
+  à 62 m (9 m d'arrivée) ([preuve](validation/PORTEE-S603.md)). Manquent les quatre autres lignes de la table, un trait de côte quelconque,
+  le branchement à la cuisson côtière.
 
 ## 13. Validation du système
 
@@ -877,9 +881,9 @@ pas recopiée ici (L137).
 | 9. Activation et budget | 13 | 1 | 10 | 2 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
-| 12. Outillage | 5 | 0 | 2 | 3 |
+| 12. Outillage | 5 | 0 | 3 | 2 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **95** | **16** |
+| **total** | **121** | **10** | **96** | **15** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

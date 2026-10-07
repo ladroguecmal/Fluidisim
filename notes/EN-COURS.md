@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S603 — **en cours**. En autonomie (ADR-247) : **12.5 — la portée d'une modification bornée par partition** (SPEC-005 §8 ; absent).
+Session : S603 — **terminée**. En autonomie (ADR-247) : **12.5 — la portée d'une modification bornée par partition** (SPEC-005 §8 ; absent).
 La ligne qu'on sous-estime : **la bathymétrie**, dont la portée va jusqu'à l'isobathe où la plus longue houle cesse de sentir le fond —
 `h = λ` depuis ADR-196 D3 (et non `λ/2`).
 
@@ -91,7 +91,10 @@ change de plus de 0.25 m y est (les deux plages de ce rayon, avant et après) ; 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `portee.rs` et ses essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 12.5 ; rituel.
+- [x] **P2** — `portee.rs` et ses essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 12.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus ; les arrivées rejoignent le traceur numpy à 10⁻¹¹ m ; bosse profonde 0,0568 m, ∅ ; entre λ/2 et λ 8,958 m ;
+  côtière 2–6. Suite 794.
+- **P3** — preuve PORTEE-S603 ; liste 12.5 (absent → partiel) et décompte ; index ; journal.

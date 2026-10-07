@@ -1098,3 +1098,12 @@ les comptes exacts, les formules indépendantes. Maillons **1**. Suivant : **S60
 `Confiance`, `horizon_utile`, `palier_controlable`, `reevaluation_s`. **Mesuré** : la table d'ADR-013 retrouvée, un vaisseau qui recule de
 T2 à T3 quand le jeu divise sa confiance, 200 cas au bit de `tier` en pleine confiance. Maillons **1** (9.4 : absent → partiel). Suivant :
 **S603**, un point absent.
+
+## S603 — 2026-10-07 — la portée d'une modification de bathymétrie
+
+**Entrée.** En autonomie (ADR-247) ; 12.5 (absent). **Fait** ([preuve](../docs/validation/PORTEE-S603.md)) : `portee.rs` — l'isobathe
+limite `h = λ`, la célérité de houle et sa dérivée, un faisceau de rayons par `refraction::tracer`, les plages à recuire. **Mesuré** contre
+un traceur numpy indépendant : une bosse sous l'isobathe limite déplace une arrivée de 6 cm (portée vide), une bosse entre λ/2 et λ de
+9 m, une bosse côtière laisse trois plages sur huit intactes. **En route** : la profondeur minimale du support estimée à la main (107,5 m)
+était fausse (107,14 m) — le script du plan la calcule sur une grille ; un rayon qui franchit une borne de plage de 6 cm ne change rien
+(la garde compte les décalages, non les franchissements). Maillons **1** (12.5 : absent → partiel). Suivant : **S604**, un point absent.
