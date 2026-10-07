@@ -62,31 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S627 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **4.14, côté déferlement** : en eau peu profonde, une vague
-brisée est un ressaut mobile ; Saint-Venant le porte comme un choc. Cette session juge la capture des chocs de l'ordre deux (S620) sur deux
-ruptures de barrage analytiques — **Stoker** (fond mouillé, un ressaut) et **Ritter** (fond sec : C04, jusqu'ici en 1D seulement, porté en
-2D).
+Session : S628 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **4.14 — le frottement** (un manque depuis S613), et le lien
+avec l'éditeur de rivières (S604) : la hauteur normale de Manning.
 
-**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai, une bande de trois mailles, 100 m, le barrage à 50 m, 1 m d'eau à
-gauche, 0,5 m (Stoker) ou rien (Ritter) à droite ; t = 6 s ; l'écart L1 de `h` aux solutions exactes, mailles 0,5 / 0,25 / 0,125 m. Ne fait
-pas : le déferlement d'une houle sur une pente (le passage du front lisse au ressaut), le rouleau 3D.
+**Ce que la session fait.** `SaintVenant2D::regler_frottement(n)` : le frottement de Manning, appliqué semi-implicitement après le pas,
+`q ← q/(1 + dt·g·n²·|u|/h^(4/3))` ; `pas_avec_bords(dt, t, gauche, droite)` : le bord droit caractéristique, miroir de celui de S622 (ordre
+deux). Deux essais : **(A)** un écoulement uniforme freiné (h = 1 m, u₀ = 1 m/s, n = 0,03, 1 000 m entre murs) — la vitesse au milieu à 20 s
+contre `1/u = 1/u₀ + g·n²·t/h^(4/3)` (le schéma semi-implicite est exact pour `du/dt = −a·u²` : l'essai ne vérifie que le coefficient,
+ADR-248) ; **(B)** un écoulement uniforme sur pente (S = 5·10⁻⁴, n = 0,035, q = 1,5 m²/s, 2 000 m) tenu entre deux bords nourris de l'état
+normal — la hauteur au milieu après 600 s contre la hauteur normale d'un chenal large `(q·n/√S)^(3/5)` = **1.668801113 m**. Ne fait pas : le
+frottement sur la plage (S625 sans frottement), un `n` variable, la loi de Manning d'un chenal étroit (le rayon hydraulique).
 
-**Références, calculées avant** (`s627_ref.py`, numpy). Stoker : l'état intermédiaire `h_m` = 0.726920446 m, `u_m` = 0.923363902 m/s, le
-ressaut à **2.957918120 m/s**. Écart L1 — Stoker : **3.672946492e-03, 1.734845787e-03, 8.606719835e-04** (rapports 2.117, 2.016) ;
-Ritter : **6.745603398e-03, 3.375485355e-03, 1.693812017e-03** (1.998, 1.993) — l'ordre un, attendu aux chocs et au front sec. Le
-front de Ritter au millimètre : 79.75, 81.625, 83.0625 m pour **85.802285 m** exact — il s'en approche lentement (6.052, 4.177,
-2.740 m). Masse exacte, `h ≥ 0`. **Sensibilité** (ADR-256 D1 : `h` gauche perturbée d'un ulp) : au plus 8.8e-17 sur l'écart L1.
+**Références, calculées avant** (`s628_ref.py`, numpy). (A) à 20 s, pas 0,04 / 0,02 / 0,01 s : `u` = 0.849920957350966, ... ; l'exact
+0.849920957350966. (B) la hauteur au milieu, maille 4 / 2 / 1 m : **1.668500219, 1.668649333,
+1.668724889 m** — écarts relatifs -1.803e-04, -9.095e-05, -4.568e-05 (l'ordre un) ; l'écart maximal le long du
+chenal 6.363e-04, 3.210e-04, 1.612e-04 m. La formule rectangulaire de S604 pour un chenal de
+10⁶ m : 1.668803341 m (à 1.3e-06 du chenal large). **Sensibilité** à un ulp (ADR-256 D1) : au plus 6.7e-16 m.
 
-**Quantum** : f64 ; la tolérance d'accord avec numpy, **10⁻¹²**, au moins dix fois la sensibilité mesurée (asserté). **Critères, écrits avant.**
-(1) les six écarts L1 égaux aux références à 10⁻¹², les trois fronts égaux ; (2) chaque raffinement divise l'écart L1 par au moins 1,9 ; (3) le
-front sec s'approche de sa position exacte, la distance divisée par au moins 1,3 à chaque raffinement ; (4) masse à 10⁻¹³, `h ≥ 0`.
+**Quantum** : f64 ; la tolérance d'accord avec numpy, **10⁻¹²**, au moins dix fois la sensibilité (asserté). **Critères, écrits avant.** (1) (A) :
+la vitesse égale à l'exacte et à la référence à 10⁻¹² aux trois pas ; (2) (B) : la hauteur au milieu et l'écart maximal égaux aux références à
+10⁻¹² ; l'écart relatif à la hauteur normale divisé par au moins 1,8 à chaque raffinement, sous 10⁻⁴ à 1 m ; (3) `riviere::hauteur_normale`
+(S604) pour un chenal de 10⁶ m à moins de 10⁻⁵ de la hauteur normale large ; (4) les essais de S613–S627 inchangés (sans frottement, rien ne
+change) ; (5) refus : `n` négatif ou non fini ; le bord droit à l'ordre un.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [ ] **P2** — le frottement, le bord droit, leurs essais ; (1)–(5).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai, à 10⁻¹⁷ de numpy. Suite : 813 essais listés.
-- **P3** — preuve BARRAGES-S627 ; ligne 4.14 ; index ; journal.
