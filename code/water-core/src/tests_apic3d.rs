@@ -1768,6 +1768,75 @@ fn a_smooth_sloping_seabed_at_rest_stays_at_rest_s640() {
     assert_eq!(a.set_seabed_smooth(Some(&[0.1; 8])), Err(Error::Domain), "critère 4 : poches actives");
 }
 
+/// **S678** — le canal de S640 à la maille `dx` : la pente 1:3 au-delà de 0,805 m, l'eau à 0,4 m, un rivage au milieu de la pente.
+fn canal_s678(dx: f32) -> (Apic3, usize) {
+    canal_pente_s678(dx, 3.0, 0.4)
+}
+
+/// Le même canal, la pente `1:cot` et l'eau à `niveau` (m).
+fn canal_pente_s678(dx: f32, cot: f32, niveau: f32) -> (Apic3, usize) {
+    let r = (0.05 / dx).round() as usize;
+    let (nx, ny, nz) = (48 * r, 4usize, 16 * r);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let fond: Vec<f32> = (0..nx * ny).map(|c| 0.05 + (((c % nx) as f32 + 0.5) * dx - 0.805).max(0.) / cot).collect();
+    a.set_seabed_smooth(Some(&fond)).unwrap();
+    let zb: Vec<f32> = (0..nx * 2).map(|s| a.smooth_seabed_height((s as f32 + 0.5) * dx / 2., 0.1)).collect();
+    let n = a.seed(&|p| p[2] > zb[((p[0] / (dx / 2.)) as usize).min(nx * 2 - 1)] && p[2] < niveau).unwrap();
+    (a, n)
+}
+
+/// La vitesse maximale sur 2 s, et quand.
+fn repos_s678(a: &mut Apic3) -> (f32, f64) {
+    let (mut t, mut worst, mut quand) = (0u64, 0f32, 0u64);
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        let v = a.step(us).unwrap().max_speed;
+        if v > worst {
+            (worst, quand) = (v, t);
+        }
+        t += us;
+    }
+    (worst, quand as f64 * 1e-6)
+}
+
+/// **S678 — le film du rivage au repos**, les deux remèdes essayés (S678). Rapporte la vitesse parasite maximale sur 2 s, sur trois
+/// plages et deux mailles, pour : rien ; le film seul (le remède du plan) ; le film et les faces de moins de 40 % d'ouverture
+/// extrapolées. Mesuré (la preuve) : le film seul manque partout ; les deux ensemble tiennent sur la plage 1:3 à 0,4 m, aux deux
+/// mailles, et manquent ailleurs. N'affirme que ce qui a tenu (ADR-244) : sans film ni seuil, le comportement d'avant au bit.
+#[test]
+#[ignore = "≈ 8 min : le film du rivage, trois plages, deux mailles, trois réglages"]
+fn the_shore_film_remedies_measured_s678() {
+    for (cot, niveau) in [(3.0f32, 0.4f32), (10.0, 0.18), (3.0, 0.31)] {
+        for dx in [0.05f32, 0.025] {
+            let mut ligne = String::new();
+            for (nom, film, seuil) in [("rien", false, 0f32), ("film", true, 0.), ("film+faces", true, 0.4)] {
+                let (mut a, n) = canal_pente_s678(dx, cot, niveau);
+                {
+                    let l = a.lisse.as_mut().unwrap();
+                    l.film = film;
+                    l.seuil_face = seuil;
+                }
+                let (v, quand) = repos_s678(&mut a);
+                assert_eq!(a.particle_count(), n);
+                ligne += &format!(" {nom} {v:.4} m/s ({quand:.2} s) ;");
+                if (cot, niveau, film, seuil) == (3.0, 0.4, true, 0.4) {
+                    assert!(v <= 0.01, "le seul cas qui a tenu : {v}");
+                }
+            }
+            println!("S678 pente 1:{cot}, eau {niveau} m, dx {dx} m :{ligne}");
+        }
+    }
+    let (mut a, _) = canal_s678(0.05);
+    {
+        let l = a.lisse.as_mut().unwrap();
+        l.film = true;
+        l.seuil_face = 0.4;
+        l.film_sans_lecture = true;
+    }
+    let (v, quand) = repos_s678(&mut a);
+    println!("S678 témoin, film+faces sans la correction de lecture, 1:3, 0,05 m : {v:.4} m/s à {quand:.2} s");
+}
+
 /// **S640 — la propriété annoncée** (ADR-254 D2) : au repos hydrostatique, la projection pondérée rend une vitesse nulle quelles
 /// que soient les fractions. Une pente entièrement immergée (l'eau à 0,75 m, au moins 17 cm au-dessus du fond : plus que le
 /// noyau, la surface ne voit pas le fond) : mesuré 8·10⁻⁶ m/s ; borne 10⁻⁴.

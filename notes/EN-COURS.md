@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S678 — **en cours**. En autonomie vers la v2 ; K3, 4.14 (« manquent une surface fiable en eau mince au rivage au repos »).
+Session : S678 — **terminée**. En autonomie vers la v2 ; K3, 4.14 (« manquent une surface fiable en eau mince au rivage au repos »).
 Sur le fond lisse (S640), l'eau au repos avec un rivage court à **0,26 m/s**. En deçà de la profondeur du noyau, la surface de Zhu et
 Bridson se trompe de un à deux centimètres dans le film.
 
@@ -105,7 +105,8 @@ Au repos, le film et l'eau profonde lisent ainsi la même surface.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `film_smooth` ; les essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P2** — `film_smooth` ; les essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) **manqué** : le film seul 0,33 / 0,22 m/s. Trouvé en route (aux notes, ADR-244) : les faces à peine ouvertes, seconde cause ; film + faces extrapolées (< 40 %) : 2,5 / 3,1 mm/s sur la plage du plan, 4 plages sur 6 ; manque sur 1:10 à 5 cm (0,39) et 1:3 à 0,31 m à 2,5 cm (0,15). Éteints par défaut, au bit d'avant. (2) tenu ; (3) 1,66 cm/s ; (4) par construction.

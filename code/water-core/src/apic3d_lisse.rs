@@ -25,6 +25,11 @@
 //! les images essayées (plan tangent : 1,2 m/s ; miroir horizontal : 4,4 ; avec `φ` prolongé : 0,22–0,46) y échouent ; le fond en
 //! escalier de S639, dont les contremarches font un mur au rivage, y reste meilleur (1,5 cm/s).
 //!
+//! **S678 — le film du rivage** : là où l'eau d'une colonne est moins profonde que trois mailles, la surface est celle de sa
+//! dernière couche de particules (`+ dx/4`), corrigée de l'écart que le noyau lirait d'une nappe au repos à cette place dans la
+//! maille ; `φ = z − surface` y est mêlé à celui du noyau (poids 1 sous deux mailles, 0 au-delà de trois). Au repos, le film et
+//! l'eau profonde lisent la même surface.
+//!
 //! Ne fait pas : les poches d'air ni la zone des colonnes avec le fond lisse (refusées ensemble) ; un fond sous la forme d'une
 //! distance signée générale.
 
@@ -34,6 +39,8 @@ use super::*;
 pub const ECHANTILLONS_FACE: usize = 16;
 /// Les tours de l'extension horizontale de `φ` sous le fond : assez pour une maille coupée sur une pente de 1:30.
 pub const TOURS_EXTENSION: u8 = 16;
+/// S678 — les décalages de la table de lecture du noyau, sur une maille.
+pub const LECTURES: usize = 64;
 
 /// Le fond lisse et les fractions ouvertes des faces.
 pub(crate) struct FondLisse {
@@ -50,6 +57,15 @@ pub(crate) struct FondLisse {
     pub(crate) au: Vec<f32>,
     pub(crate) av: Vec<f32>,
     pub(crate) aw: Vec<f32>,
+    /// S678 — l'écart de lecture du noyau d'une nappe au repos (m), la surface à `m/LECTURES` de maille au-dessus d'un centre.
+    pub(crate) lecture: Vec<f32>,
+    /// S678 — le film du rivage (`film_smooth`), **éteint par défaut** : il n'a pas tenu le repos sur toutes les plages (S678).
+    pub(crate) film: bool,
+    /// S678 — le témoin : le film sans la correction de lecture.
+    pub(crate) film_sans_lecture: bool,
+    /// S678 — une face ouverte de moins que cette fraction ne donne pas sa vitesse aux particules : elle est extrapolée des faces
+    /// voisines, comme une face d'air (sa fraction reste dans la projection).
+    pub(crate) seuil_face: f32,
 }
 
 impl FondLisse {
@@ -100,7 +116,11 @@ impl Apic3 {
             return Err(Error::Domain);
         }
         let marches = h.iter().map(|&h| (0..nz).filter(|&k| (k as f32 + 0.5) * dx < h).count() as u16).collect();
-        let mut f = FondLisse { hauteurs: h.to_vec(), marches, dessous: vec![false; nx * ny * nz], tour: vec![0; nx * ny], au: vec![0.; (nx + 1) * ny * nz], av: vec![0.; nx * (ny + 1) * nz], aw: vec![0.; nx * ny * (nz + 1)] };
+        let lecture = (0..LECTURES).map(|m| {
+            let e = lattice_read_error(dx as f64, self.kernel as f64, self.radius as f64, m as f64 / LECTURES as f64);
+            if e.is_finite() { e as f32 } else { 0. }
+        }).collect();
+        let mut f = FondLisse { hauteurs: h.to_vec(), marches, dessous: vec![false; nx * ny * nz], tour: vec![0; nx * ny], au: vec![0.; (nx + 1) * ny * nz], av: vec![0.; nx * (ny + 1) * nz], aw: vec![0.; nx * ny * (nz + 1)], lecture, film: false, film_sans_lecture: false, seuil_face: 0. };
         let n = ECHANTILLONS_FACE;
         let pas = |a: usize, s: usize| (a as f32 + (s as f32 + 0.5) / n as f32) * dx;
         // La part ouverte d'un segment vertical `[z_k, z_k + dx]` au-dessus du fond `zb` : exacte.
@@ -255,6 +275,58 @@ impl Apic3 {
             }
         }
         self.lisse = Some(l);
+    }
+
+    /// **S678 — le film du rivage.** Dans une colonne dont l'eau est moins profonde que trois mailles, la surface est sa plus haute
+    /// particule plus la demi-distance entre couches, corrigée de l'écart de lecture du noyau à cette place dans la maille ;
+    /// `φ = z − surface` y est mêlé à `φ` du noyau, poids `(3·dx − profondeur)/dx` borné à `[0, 1]`. Une colonne qui n'a pas la moitié
+    /// des particules d'une colonne pleine de cette profondeur (une éclaboussure) garde le noyau ; les gouttes ne comptent pas.
+    pub(crate) fn film_smooth(&mut self) {
+        let Some(l) = self.lisse.as_ref() else { return };
+        if !l.film || l.lecture.is_empty() {
+            return;
+        }
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let demi = dx / (2 * PER_AXIS) as f32;
+        let par_metre = (PER_AXIS * PER_AXIS * PER_AXIS) as f32 / dx;
+        for j in 0..ny {
+            for i in 0..nx {
+                let (mut haut, mut n) = (f32::MIN, 0usize);
+                for k in 0..nz {
+                    let c = self.cell(i, j, k);
+                    for s in self.bin_start[c]..self.bin_start[c + 1] {
+                        let q = self.order[s as usize] as usize;
+                        if self.is_droplet(q) {
+                            continue;
+                        }
+                        haut = haut.max(self.x[q][2]);
+                        n += 1;
+                    }
+                }
+                if n == 0 {
+                    continue;
+                }
+                let eta = haut + demi;
+                let profondeur = eta - l.hauteurs[j * nx + i];
+                let w = ((3. * dx - profondeur) / dx).clamp(0., 1.);
+                if w == 0. || (n as f32) < 0.5 * profondeur.max(0.) * par_metre {
+                    continue;
+                }
+                let surface = if l.film_sans_lecture {
+                    eta
+                } else {
+                    let u = (eta / dx - 0.5).rem_euclid(1.) * LECTURES as f32;
+                    let a = (u as usize).min(LECTURES - 1);
+                    let f = u - a as f32;
+                    eta + l.lecture[a] + f * (l.lecture[(a + 1) % LECTURES] - l.lecture[a])
+                };
+                for k in 0..nz {
+                    let c = self.cell(i, j, k);
+                    let film = (k as f32 + 0.5) * dx - surface;
+                    self.phi[c] = w * film + (1. - w) * self.phi[c];
+                }
+            }
+        }
     }
 
     /// Une maille dont les six faces sont fermées est solide.

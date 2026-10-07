@@ -1702,3 +1702,13 @@ niveau de marée, ou la non-linéarité peu profonde (A234) ; la prochaine revue
 (séparés au bit) ; le flux dissipé par mètre. **Mesuré** contre l'équilibre 1D : `∫D ds` à 0,94 %, la ligne `Q_b` = 1 % à 0,13 m du
 début ; la zone de 234 m dissipe ≈ 21 kW/m. Le calcul du plan comptait d'abord `g` deux fois ; `Hrms` au rivage, retrouvé, l'a montré
 avant l'écriture du plan. Maillons **1** (3.5). Suivant : **S678**.
+
+## S678 — 2026-10-07 — Le film du rivage dans APIC 3D : deux causes, un remède partiel
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 (« une surface fiable en eau mince au rivage au repos »). **Fait**
+([preuve](../docs/validation/FILM-RIVAGE-S678.md)) : la surface du film par sa dernière couche, corrigée de la lecture du noyau (le
+plan). **Mesuré** : critère (1) **manqué**, le film seul donnant 0,33 m/s. Localisé ensuite : la particule la plus rapide est à la pointe
+de la ligne d'eau, où des faces à peine ouvertes donnent des vitesses fausses. Fermer ces faces avait été écarté en S640 sous une autre
+cause active ; rejugé ici (ADR-268 D2), et extrapolé plutôt que fermé, il tient le repos à quelques mm/s avec le film, mais sur quatre
+plages sur six seulement. Les deux remèdes sont éteints par défaut. La suite : confier le film du rivage à Saint-Venant 2D (le relais
+dans les deux sens). Maillons **1** (4.14 : deux causes nommées). Suivant : **S679**.

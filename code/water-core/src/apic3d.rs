@@ -1078,6 +1078,8 @@ impl Apic3 {
         self.phi = phi;
         // S640 : sous le fond lisse, `φ` étendu horizontalement depuis l'eau et l'air.
         self.extend_phi_smooth();
+        // S678 : le film du rivage, par sa dernière couche.
+        self.film_smooth();
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..nx {
@@ -1901,6 +1903,11 @@ impl Apic3 {
                     _ => self.ww[f],
                 } > 0.;
                 let ok = ok || fed;
+                // S678 : une face à peine ouverte par le fond lisse est extrapolée, non lue.
+                let ok = ok && self.lisse.as_ref().is_none_or(|l| {
+                    let a = self.fraction(axis, f);
+                    a == 0. || a >= l.seuil_face
+                });
                 let valid = match axis {
                     0 => &mut self.valid_u,
                     1 => &mut self.valid_v,

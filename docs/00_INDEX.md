@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [Le film du rivage dans APIC 3D : deux causes, un remède partiel — S678](validation/FILM-RIVAGE-S678.md) : critère manqué.
 - [La zone de déferlement tirée de la côte 2D — S677](validation/ZONE-DEFERLEMENT-S677.md) : la ligne à 0,13 m, le flux à 0,94 %.
 - [La séance visuelle de la côte qui déferle — S675](validation/SEANCE-VISUELLE-COTE-S675.md) : R42 posé.
 - [Le niveau moyen rétroagit sur le déferlement — S674](validation/RETROACTION-NIVEAU-S674.md) : point fixe en trois marches.
