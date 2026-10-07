@@ -1549,3 +1549,11 @@ la suite des partiels de la physique, ou R40 s'il arrive.
 
 *Après S658, 2026-10-07* : **R40 reçu** — *« tout parait crédible »* (la séance visuelle du rouleau). Inscrit dans la preuve, la liste (8.10)
 et les décisions de l'utilisateur.
+
+## S659 — 2026-10-07 — 2.7 : le modèle parabolique de pente douce
+
+**Entrée.** En autonomie vers la v2 ; 2.7 (il en débloque six). **Fait** ([preuve](../docs/validation/PENTE-DOUCE-S659.md)) :
+`pente_douce.rs` — réfraction et diffraction d'une houle sur une bathymétrie 2D (Radder 1979, Crank–Nicolson). **Mesuré** : exact sur
+l'onde plane (2·10⁻¹⁴) et la levée (0,990551) ; sur le haut-fond de Berkhoff (1982), contre les mesures lues chez Basilisk, le pic à 11 %,
+mais des écarts de 0,2 à 0,4 sur trois sections — **critère manqué**, indépendant de la maille ; le témoin de l'axe (les mesures
+inversées) écarte une cause. Maillons **1** (2.7 avance). Suivant : **S660, le grand angle** (Kirby 1986) comme témoin.

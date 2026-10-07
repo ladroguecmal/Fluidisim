@@ -40,6 +40,8 @@ pub mod background;
 pub mod background_spectrum;
 /// S362, liste 2.7 : la référence de la houle qui sent le fond — profondeur finie, levée, réfraction, déferlement.
 pub mod bathymetrie;
+/// S659 — le modèle parabolique de pente douce (2.7) : réfraction et diffraction sur une bathymétrie 2D, un outil de cuisson.
+pub mod pente_douce;
 /// S364, liste 2.7 : la bathymétrie entre dans B — les tables cuites d'une côte à isobathes droites, par composante.
 pub mod bathymetrie_cote;
 /// S367, liste 7.1 : le champ d'écume de B (ADR-014) — la référence : deux canaux, advection orbitale, déferlement.

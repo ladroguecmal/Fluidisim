@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S659 — **en cours**. En autonomie vers la v2. **2.7, la bathymétrie 2D** (le point qui en débloque six) : il manque la
+Session : S659 — **terminée**. En autonomie vers la v2. **2.7, la bathymétrie 2D** (le point qui en débloque six) : il manque la
 bathymétrie 2D et la **diffraction des hauts-fonds isolés**, où les rayons de S583 font des caustiques. Le meilleur chemin au réalisme
 visé (S643) : un modèle de houle côtière cuit par rivage. Première pièce : **le modèle parabolique de pente douce** (Radder 1979) —
 réfraction et diffraction ensemble, une marche en `x`, Crank–Nicolson, tridiagonal en `y`.
@@ -96,7 +96,9 @@ section 3 (2,21 mesuré) à 15 % ; deux mailles rapportées.
 ### Plan
 
 - [x] **P1** — jeton ; plan ; les mesures récupérées.
-- [ ] **P2** — `pente_douce.rs` et ses essais ; (1)–(3).
+- [x] **P2** — `pente_douce.rs` et ses essais ; (1)–(3).
 - [ ] **P3** — preuve ; liste 2.7, 3.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) 2·10⁻¹⁴ ; (2) 0,990551 exact ; (3) manqué : écarts 0,231 ; 0,197 ; 0,419 ; 0,288, le pic de la section 3 à 11 %. Le
+  témoin de l'axe : l'inversion juste. Nommées : les petits angles, la non-linéarité. R40 reçu avant la session (« tout parait crédible »).

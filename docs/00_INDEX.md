@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [La bathymétrie 2D : le modèle parabolique de pente douce — S659](validation/PENTE-DOUCE-S659.md) : Berkhoff (1982) ; le pic tenu, les sections loin.
 - [La séance visuelle du rouleau — S658](validation/SEANCE-VISUELLE-ROULEAU-S658.md) : R40, les animations du rouleau et de la sphère emportée.
 - [Le corps libre contre l'eau autour de lui — S657](validation/CORPS-LIBRE-EAU-S657.md) : A334 levée ; le rouleau emporte un nageur.
 - [La masse ajoutée implicite du corps libre — S655](validation/MASSE-AJOUTEE-S655.md) : le couplage stabilisé ; le comparant à revoir.

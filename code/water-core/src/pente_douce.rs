@@ -1,0 +1,200 @@
+//! **Le modèle parabolique de pente douce** (S659, liste 2.7 ; Radder 1979) — la réfraction **et la diffraction** d'une houle
+//! monochromatique sur une bathymétrie 2D, là où les rayons (S583) font des caustiques : derrière un haut-fond isolé.
+//!
+//! De l'équation de pente douce `∇·(p∇φ) + k²pφ = 0` (`p = C·C_g`), avec `φ = A·e^(i∫k̄ dx)` et `A_xx` négligé (l'onde va vers les `x`
+//! croissants, la diffraction latérale gardée) :
+//!
+//! `A_x = −(p·k̄)_x / (2p·k̄) · A + i/(2p·k̄) · [(p·A_y)_y + p·(k² − k̄²)·A]`,
+//!
+//! `k̄(x)` la moyenne de `k` sur `y`. À une dimension, `A ∝ (p·k)^(−½) ∝ C_g^(−½)` : la levée par le flux d'énergie. Marche en `x` par
+//! Crank–Nicolson (`(p·k̄)_x` aux demi-pas), tridiagonal complexe en `y` (Thomas), parois latérales réfléchissantes (`A_y` = 0).
+//!
+//! Un outil de cuisson (ADR-260 : O) : il prépare hors du jeu le champ d'une houle sur un rivage ; il ne tourne pas dans le pas. Ne fait pas :
+//! la réflexion (l'approximation parabolique la néglige), les grands angles (l'erreur croît avec l'obliquité), le déferlement, la
+//! non-linéarité, le courant.
+
+/// Une entrée refusée : période, pas ou étendue non positifs ou non finis, une profondeur non positive dans le domaine.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Refus;
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+struct C {
+    re: f64,
+    im: f64,
+}
+
+impl C {
+    fn new(re: f64, im: f64) -> C {
+        C { re, im }
+    }
+    fn add(self, o: C) -> C {
+        C::new(self.re + o.re, self.im + o.im)
+    }
+    fn sub(self, o: C) -> C {
+        C::new(self.re - o.re, self.im - o.im)
+    }
+    fn mul(self, o: C) -> C {
+        C::new(self.re * o.re - self.im * o.im, self.re * o.im + self.im * o.re)
+    }
+    fn scale(self, s: f64) -> C {
+        C::new(self.re * s, self.im * s)
+    }
+    fn div(self, o: C) -> C {
+        let d = o.re * o.re + o.im * o.im;
+        C::new((self.re * o.re + self.im * o.im) / d, (self.im * o.re - self.re * o.im) / d)
+    }
+    fn abs(self) -> f64 {
+        self.re.hypot(self.im)
+    }
+}
+
+/// Le nombre d'onde de `ω² = g·k·tanh(k·h)`, par Newton depuis l'eau profonde.
+pub fn nombre_d_onde(omega: f64, h: f64, g: f64) -> f64 {
+    let mut k = omega * omega / g;
+    for _ in 0..60 {
+        let t = (k * h).tanh();
+        let f = g * k * t - omega * omega;
+        let df = g * t + g * k * h * (1. - t * t);
+        let dk = f / df;
+        k -= dk;
+        if dk.abs() <= 1e-15 * k {
+            break;
+        }
+    }
+    k
+}
+
+/// `p = C·C_g` et `k` à la profondeur `h`.
+fn p_et_k(omega: f64, h: f64, g: f64) -> (f64, f64) {
+    let k = nombre_d_onde(omega, h, g);
+    let c = omega / k;
+    let cg = 0.5 * c * (1. + 2. * k * h / (2. * k * h).sinh());
+    (c * cg, k)
+}
+
+/// **Le champ calculé** : l'amplitude complexe `A` sur `nx × ny` points (`x` de `x0` par `dx`, `y` de `y0` par `dy`), rapportée à
+/// l'amplitude incidente (`A` = 1 à `x0`).
+pub struct Champ {
+    pub nx: usize,
+    pub ny: usize,
+    pub x0: f64,
+    pub dx: f64,
+    pub y0: f64,
+    pub dy: f64,
+    a: Vec<C>,
+}
+
+impl Champ {
+    /// Le rapport d'amplitude `|A|` au point `(x, y)`, interpolé (bilinéaire) ; `None` hors du domaine.
+    pub fn amplitude(&self, x: f64, y: f64) -> Option<f64> {
+        let (sx, sy) = ((x - self.x0) / self.dx, (y - self.y0) / self.dy);
+        if !(0. ..=(self.nx - 1) as f64).contains(&sx) || !(0. ..=(self.ny - 1) as f64).contains(&sy) {
+            return None;
+        }
+        let (i, j) = ((sx.floor() as usize).min(self.nx - 2), (sy.floor() as usize).min(self.ny - 2));
+        let (fx, fy) = (sx - i as f64, sy - j as f64);
+        let m = |i: usize, j: usize| self.a[i * self.ny + j].abs();
+        Some((1. - fx) * ((1. - fy) * m(i, j) + fy * m(i, j + 1)) + fx * ((1. - fy) * m(i + 1, j) + fy * m(i + 1, j + 1)))
+    }
+}
+
+/// **La marche** : une houle de période `periode` (s), d'incidence normale (`A` = 1 sur toute la largeur à `x0`), sur la profondeur
+/// `h(x, y)` (m, positive), de `x0` à `x1` par `dx`, sur `y ∈ [y0 ; y1]` par `dy`.
+#[allow(clippy::too_many_arguments)]
+pub fn propager(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64) -> Result<Champ, Refus> {
+    let ok = |v: f64| v > 0. && v.is_finite();
+    if !ok(periode) || !ok(g) || !ok(dx) || !ok(dy) || !(x1 > x0) || !(y1 > y0) || !x0.is_finite() || !y0.is_finite() {
+        return Err(Refus);
+    }
+    let (nx, ny) = (((x1 - x0) / dx).round() as usize + 1, ((y1 - y0) / dy).round() as usize + 1);
+    if ny < 3 || nx < 2 {
+        return Err(Refus);
+    }
+    let omega = 2. * std::f64::consts::PI / periode;
+    // Les coefficients d'une rangée : `p` et `k` par point, `k̄` la moyenne.
+    let rangee = |x: f64| -> Result<(Vec<f64>, Vec<f64>, f64), Refus> {
+        let (mut p, mut k) = (vec![0.; ny], vec![0.; ny]);
+        for j in 0..ny {
+            let hj = h(x, y0 + j as f64 * dy);
+            if !ok(hj) {
+                return Err(Refus);
+            }
+            (p[j], k[j]) = p_et_k(omega, hj, g);
+        }
+        let kb = k.iter().sum::<f64>() / ny as f64;
+        Ok((p, k, kb))
+    };
+    let mut a = vec![C::default(); nx * ny];
+    for j in 0..ny {
+        a[j] = C::new(1., 0.);
+    }
+    let i_ = C::new(0., 1.);
+    // `L·A` à une rangée : `i/(2p·k̄)·[(p·A_y)_y + p(k² − k̄²)·A]` (le terme de levée est traité à part, au demi-pas).
+    let (mut p0, mut k0, mut kb0) = rangee(x0)?;
+    let (mut sub, mut diag, mut sup, mut rhs) = (vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny]);
+    let (mut cp, mut dp) = (vec![C::default(); ny], vec![C::default(); ny]);
+    for n in 0..nx - 1 {
+        let x = x0 + (n + 1) as f64 * dx;
+        let (p1, k1, kb1) = rangee(x)?;
+        // Les coefficients tridiagonaux de L (sans le facteur i/(2pk̄)) : (p·A_y)_y ≈ [p_{j+½}(A_{j+1} − A_j) − p_{j−½}(A_j − A_{j−1})]/dy².
+        let coefs = |p: &[f64], k: &[f64], kb: f64, j: usize| -> (C, C, C) {
+            let f = i_.scale(1. / (2. * p[j] * kb));
+            let pm = if j > 0 { 0.5 * (p[j] + p[j - 1]) } else { 0. };
+            let pp = if j + 1 < ny { 0.5 * (p[j] + p[j + 1]) } else { 0. };
+            let d2 = dy * dy;
+            let l = C::new(pm / d2, 0.);
+            let u = C::new(pp / d2, 0.);
+            let c = C::new(-(pm + pp) / d2 + p[j] * (k[j] * k[j] - kb * kb), 0.);
+            (f.mul(l), f.mul(c), f.mul(u))
+        };
+        let n0 = n * ny;
+        for j in 0..ny {
+            // La levée au demi-pas : `−(p·k̄)_x / (2p·k̄)`, (pk̄) pris aux deux rangées.
+            let (pk0, pk1) = (p0[j] * kb0, p1[j] * kb1);
+            let lev = -(pk1 - pk0) / dx / (pk0 + pk1);
+            let (l0, c0, u0) = coefs(&p0, &k0, kb0, j);
+            let (l1, c1, u1) = coefs(&p1, &k1, kb1, j);
+            let aj = a[n0 + j];
+            let mut r = aj.add(aj.mul(c0.add(C::new(lev, 0.))).scale(0.5 * dx));
+            if j > 0 {
+                r = r.add(a[n0 + j - 1].mul(l0).scale(0.5 * dx));
+            }
+            if j + 1 < ny {
+                r = r.add(a[n0 + j + 1].mul(u0).scale(0.5 * dx));
+            }
+            rhs[j] = r;
+            sub[j] = l1.scale(-0.5 * dx);
+            sup[j] = u1.scale(-0.5 * dx);
+            diag[j] = C::new(1., 0.).sub(c1.add(C::new(lev, 0.)).scale(0.5 * dx));
+        }
+        // Thomas, complexe.
+        cp[0] = sup[0].div(diag[0]);
+        dp[0] = rhs[0].div(diag[0]);
+        for j in 1..ny {
+            let m = diag[j].sub(sub[j].mul(cp[j - 1]));
+            cp[j] = sup[j].div(m);
+            dp[j] = rhs[j].sub(sub[j].mul(dp[j - 1])).div(m);
+        }
+        let n1 = (n + 1) * ny;
+        a[n1 + ny - 1] = dp[ny - 1];
+        for j in (0..ny - 1).rev() {
+            a[n1 + j] = dp[j].sub(cp[j].mul(a[n1 + j + 1]));
+        }
+        (p0, k0, kb0) = (p1, k1, kb1);
+    }
+    Ok(Champ { nx, ny, x0, dx, y0, dy, a })
+}
+
+/// **Le haut-fond de Berkhoff, Booy et Radder (1982)** : la profondeur (m) au point `(x, y)` du bassin — 0,45 m au large, une pente
+/// 1:50 tournée de 20°, le haut-fond elliptique (la géométrie de l'exemple public de Basilisk, `shoal-ml.gpu.c`).
+pub fn berkhoff(x: f64, y: f64) -> f64 {
+    let (c, s) = (20f64.to_radians().cos(), 20f64.to_radians().sin());
+    let (xr, yr) = (x * c - y * s, x * s + y * c);
+    let z0 = if xr >= -5.82 { (5.82 + xr) / 50. } else { 0. };
+    let zs = if (xr / 3.).powi(2) + (yr / 4.).powi(2) <= 1. { -0.3 + 0.5 * (1. - (xr / 3.75).powi(2) - (yr / 5.).powi(2)).sqrt() } else { 0. };
+    0.45 - z0 - zs
+}
+
+#[cfg(test)]
+#[path = "tests_pente_douce.rs"]
+mod tests;

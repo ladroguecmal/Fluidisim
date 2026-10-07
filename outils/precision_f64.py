@@ -31,7 +31,7 @@ RANGES = {
     "deferlement": "S", "glace": "S", "regional_level": "S", "apic3d_poches": "S", "coule": "S",
     "shallow": "P", "saint_venant_2d": "P", "substitutif": "P", "changement_solveur": "P", "grand_evenement": "P",
     "delta3d_levels": "P", "graine": "P", "precalcul": "P", "impact_field": "P",
-    "activite": "S", "body": "S", "goutte": "S", "eponge": "O", "modal_pressure": "R",
+    "activite": "S", "body": "S", "goutte": "S", "eponge": "O", "modal_pressure": "R", "pente_douce": "O",
 }
 
 
