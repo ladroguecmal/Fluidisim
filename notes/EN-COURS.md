@@ -96,7 +96,7 @@ celui du centre (la marge tient). (3) Refus : une composante à plus de 45°, un
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — `Cote2D` et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) au bit ; (2) la phase 2,93° (tenu), le facteur 6,6 % et le bord 15 % (manqués) — démêlés : la normalisation au départ
