@@ -294,7 +294,10 @@ pas recopiée ici (L137).
   colonnes en particules, le pincement d'APIC seul à un pas près ([preuve](validation/BASCULE-S408.md)). **S410**, sur une vague
   qui déferle : la bande naît au front des crêtes avant le pli, mais traîne ou hésite ; son critère doit suivre la crête (§6). La
   subdivision de la maille elle-même est absente.
-- [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
+- [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *partiel* depuis S609 : la bascule d'ADR-001
+  §3.3 (`max|δ| > 0,35·Hs`, ou par nature) ; un domaine 1D propriétaire du champ total, alimenté par B à ses bords (Flather) — B reproduit à
+  0,6 mm sur 60 s, une perturbation sortie à 1,3 % près ([preuve](validation/SUBSTITUTIF-S609.md)). Manquent la graine (`SeedState`,
+  ADR-022 §3), un solveur substitutif non linéaire, le 2D/3D, la bascule d'un domaine δ réel.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
   exacte ; mais **son temps ne converge pas encore** à trois mailles (2,20 → 2,30 → 2,40 `√(D/g)`, S326),
@@ -885,7 +888,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 7 | 0 |
 | 2. Grandes masses (B) | 9 | 0 | 9 | 0 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
-| 4. Volumique (δ) | 21 | 0 | 18 | 3 |
+| 4. Volumique (δ) | 21 | 0 | 19 | 2 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
@@ -895,7 +898,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **100** | **11** |
+| **total** | **121** | **10** | **101** | **10** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S609 — **en cours**. En autonomie (ADR-247) : **4.11 — le régime substitutif quand δ n'est plus petit, restauré depuis graine
+Session : S609 — **terminée**. En autonomie (ADR-247) : **4.11 — le régime substitutif quand δ n'est plus petit, restauré depuis graine
 (I-17)** (absent). ADR-001 §3.3 : la bascule à `max|δ| > 0,35·Hs_local` (ou par nature) ; le domaine devient **propriétaire du champ
 total** dans son emprise, et B+W ne l'alimentent plus que par ses frontières (générateur en entrée, absorbeur en sortie). La restauration
 depuis une graine (ADR-022 §3) est la session suivante.
@@ -87,7 +87,9 @@ perturbatif à `max|δ|` = 0,35·Hs, substitutif au-delà ou par nature ; (4) re
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `substitutif.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 4.11 ; rituel.
+- [x] **P2** — `substitutif.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 4.11 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus ; identique au bit à numpy. Suite : 799 essais listés (mesurée).
+- **P3** — preuve SUBSTITUTIF-S609 ; liste 4.11 (absent → partiel) et décompte ; index ; journal.

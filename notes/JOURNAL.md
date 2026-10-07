@@ -1147,3 +1147,11 @@ la couverture des cellules de la HydroGrid par des blocs non alignés, les cinq 
 rationnels : 36 cellules, 2 pleines, le volume conservé à 10⁻¹⁴ ; niveaux 0/6/33/1/2. **En route** (au plan) : le domaine fin dépassait
 dans la cellule du dessus — deux cellules au niveau détail, non une. Maillons **1** (1.6 : absent → partiel ; la section 1 n'a plus
 d'absent). Suivant : **S609**, un point absent.
+
+## S609 — 2026-10-07 — le régime substitutif : la bascule, le champ total alimenté par B
+
+**Entrée.** En autonomie (ADR-247) ; 4.11 (absent). **Fait** ([preuve](../docs/validation/SUBSTITUTIF-S609.md)) : `substitutif.rs` —
+`mode_requis` (ADR-001 §3.3), `Domaine1D` (le champ total, Flather contre B aux deux bords). **Mesuré**, identique au bit à une
+implémentation numpy : B seul reproduit à 0,63 mm sur 60 s ; une bosse sortie à 1,30 % près. **En route** (au plan) : B pris au pas entier
+laissait 4,3 mm ; centré comme le schéma, 0,63. Maillons **1** (4.11 : absent → partiel). Suivant : **S610**, la graine de 4.11
+(`SeedState`, ADR-022 §3) ou un point absent.
