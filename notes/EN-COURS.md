@@ -82,7 +82,7 @@ jour ; la suite du cœur passe.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — 4.11 ; ADR-260, les amendements, le contrôle ; la liste.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) `mode_requis(max|δ|, seuil, par_nature) -> Result` : aucune constante ; l'essai S609 passe (au seuil, au-delà, par

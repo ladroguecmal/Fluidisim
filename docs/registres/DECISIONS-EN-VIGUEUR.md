@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**259 ADR** — actée : 208, proposée : 49, rétractée en partie : 2.
+**261 ADR** — actée : 210, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -149,9 +149,9 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [136](../adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md) | Borne locale de pente d'ordre deux, à Hessienne signée | actée | S220 | 135 | 137 |
 | [137](../adr/ADR-137-coupure-spectrale-de-la-borne-locale.md) | Coupure spectrale de la borne locale de pente | actée | S221 | 134 135 136 | 142 |
 | [138](../adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md) | Le budget de pente tient compte de la position relative des impacts | actée | S223 | 094 133 134 | 142 |
-| [139](../adr/ADR-139-volume-et-plan-oriente-des-contenants.md) | Le plan orienté se déduit du volume de la géométrie du contenant | actée | S228 | 010 | 140 145 |
+| [139](../adr/ADR-139-volume-et-plan-oriente-des-contenants.md) | Le plan orienté se déduit du volume de la géométrie du contenant | actée | S228 | 010 | 140 145 260 |
 | [140](../adr/ADR-140-restauration-du-graphe-V.md) | Restaurer les écarts de V et ses restes de débit | actée | S229 | 010 022 139 | 199 204 |
-| [141](../adr/ADR-141-surface-linearisee-et-coefficients-temporels.md) | Surface linéarisée et coefficients temporels de δ | actée | S233 | 003 127 | 149 152 164 |
+| [141](../adr/ADR-141-surface-linearisee-et-coefficients-temporels.md) | Surface linéarisée et coefficients temporels de δ | actée | S233 | 003 127 | 149 152 164 260 |
 | [142](../adr/ADR-142-composition-sur-l-union-des-emprises.md) | La composition mixte sert l'union des emprises, sous un plancher certifié | actée | S236 | 077 080 126 128 137 138 |  |
 | [143](../adr/ADR-143-la-pression-f32-converge-a-sa-precision-representable.md) | La pression f32 de δ s'arrête à sa précision représentable | actée | S238 |  | 144 147 150 151 152 153 167 169 175 201 |
 | [144](../adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) | La tolérance physique de la projection est une condition d'acceptation, sur les lignes franches | actée | S239 | 143 | 147 175 201 225 |
@@ -232,7 +232,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 226 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 | 226 |
 | [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |
@@ -269,4 +269,6 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [256](../adr/ADR-256-vingt-neuvieme-revue-de-methode.md) | Vingt-neuvième revue de méthode (S621–S625) | actée | S626 | 222 255 | 257 |
 | [257](../adr/ADR-257-trentieme-revue-de-methode.md) | Trentième revue de méthode (S626–S630) | actée | S631 | 222 256 | 258 |
 | [258](../adr/ADR-258-trente-et-unieme-revue-de-methode.md) | Trente-et-unième revue de méthode (S631–S635) | actée | S636 | 222 257 | 259 |
-| [259](../adr/ADR-259-trente-deuxieme-revue-de-methode.md) | Trente-deuxième revue de méthode (S636–S640) | actée | S641 | 222 258 |  |
+| [259](../adr/ADR-259-trente-deuxieme-revue-de-methode.md) | Trente-deuxième revue de méthode (S636–S640) | actée | S641 | 222 258 | 260 261 |
+| [260](../adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md) | I-08 et I-14 : ce qu'ils gouvernent | actée | S642 | 139 141 222 259 |  |
+| [261](../adr/ADR-261-reponses-du-2026-10-07.md) | Réponses du 2026-10-07 (les arbitrages de l'audit des intentions initiales) | actée | S642 | 259 |  |

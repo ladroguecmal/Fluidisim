@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 131 points** (5.11 hors). **Validés : 10** (7.6 %) — partiels : 108 — absents : 13.
+**Périmètre : 132 points** (5.11 hors). **Validés : 10** (7.6 %) — partiels : 108 — absents : 14.
 
 ## Par campagne
 
@@ -26,7 +26,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K12** La fin de l'eau | 0 | 6 | 1 | ◐2.8 ◐7.1 ◐7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
 | **K13** La validation du système, et l'eau dans le jeu | 0 | 5 | 1 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ◐11.5 |
 
-**Points ouverts hors de toute campagne : 11** — 1.9, 2.10, 3.10, 4.22, 5.13, 5.14, 6.9, 6.10, 7.9, 11.6, 13.5.
+**Points ouverts hors de toute campagne : 12** — 1.9, 2.10, 3.10, 4.22, 5.13, 5.14, 6.9, 6.10, 7.9, 7.10, 11.6, 13.5.
 
 ## Les points ouverts, un par ligne
 
@@ -107,6 +107,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 7.7 | partiel | Danger et traversabilité |
 | 7.8 | absent | Audio de l'eau |
 | 7.9 | absent | La glace qui cède |
+| 7.10 | absent | L'air respirable d'une poche |
 | 8.1 | partiel | Rendu temps réel de la surface sur GPU |
 | 8.2 | partiel | LOD de la géométrie de surface |
 | 8.3 | partiel | LOD par source |
@@ -324,4 +325,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S639 | 2026-10-07 | 10 | 108 | 2 | 120 |
 | S640 | 2026-10-07 | 10 | 108 | 2 | 120 |
 | S641 | 2026-10-07 | 10 | 108 | 13 | 131 |
+| S642 | 2026-10-07 | 10 | 108 | 14 | 132 |
 <!-- fin de l'historique -->

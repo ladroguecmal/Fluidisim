@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 13:11 +02:00
+JETON            : libre
+Battement        : 2026-10-07 13:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S642 — les corrections de l'audit : 4.11, I-08, I-14 ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S641 — la trente-deuxième revue de méthode ; l'audit versé dans la liste ([journal](notes/JOURNAL.md))
-Session suivante : **S642 — les corrections de l'audit** : 4.11 (le critère de bascule à instruire sur un couplage calculé, ou le seuil 0,35·Hs rangé en paramètre non reçu, ADR-112 D1) ; I-08 (les modules en f64 : amender ou rendre conformes) ; I-14 (les lois employées ajoutées à SPEC-001/002, ou un amendement). Puis le rouleau 3D (l'étape 2 sur l'escalier de S639, ou la surface en eau mince).
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S642 — les corrections de l'audit ; les réponses de l'utilisateur ([journal](notes/JOURNAL.md)). Avant : S641 (la trente-deuxième revue de méthode)
+Session suivante : **S643 — la réévaluation des intentions fondatrices** (ADR-261 D3) : chaque intention des documents fondateurs jugée dépassée, à remplacer par une meilleure solution, ou à garder — l'objectif « performance et réalisme insane » ; un registre, les ajouts et retraits qui en découlent. Puis le rouleau 3D (étape 2) et l'étude du découpage de la planète (ADR-261 D2).
+Maillons        : 2
 Registres       : dernier lot S641 (ADR-213 D3) ; le prochain au plus tard en S644
 ```
 
