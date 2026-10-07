@@ -15,12 +15,13 @@
 //! les parois de la marche hors de la côte cuite. Au large (`s ≤ 0`), l'évaluation est celle de B, **au bit**.
 //!
 //! Ne fait pas : la dispersion d'amplitude (elle ne se superpose pas entre composantes), une composante à plus de 45° de la normale (la
-//! limite de Padé), la réflexion, le déferlement, la terre (toute la grille doit être mouillée).
+//! limite de Padé), la réflexion, la terre (toute la grille doit être mouillée). Le déferlement d'une mer : S670,
+//! [`Cote2D::cuire_deferlante`].
 
 use crate::background::{Background, Component};
 use crate::host::{AllocError, HostServices};
 use crate::bathymetrie::transformer;
-use crate::pente_douce::{nombre_d_onde, propager_periodique};
+use crate::pente_douce::{nombre_d_onde, propager_spectre_periodique, Composante, Deferlement};
 use crate::phase::PhaseQ32;
 use crate::types::{SimTime, WaterSample, WorldPos};
 
@@ -75,6 +76,21 @@ impl Cote2D {
     #[allow(clippy::too_many_arguments)]
     pub fn cuire_decime(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64, pas: f64,
         m: usize, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
+        Self::cuire_interne(host, fond, normale, origine, longueur, largeur, pas, m, false, profondeur)
+    }
+
+    /// **S670 — la côte qui déferle** : comme [`Cote2D::cuire_decime`], mais la mer de B déferle (Battjes et Janssen, S669) — toutes ses
+    /// composantes marchent ensemble, amorties au même taux ; `γ` de Battjes et Stive, tiré de `Hrms₀ = 2·√(Σ a²)` et de la période
+    /// moyenne `1/f̄`, `f̄ = Σ a²·f / Σ a²`. La profondeur reste positive : la côte s'arrête avant le jet de rive.
+    #[allow(clippy::too_many_arguments)]
+    pub fn cuire_deferlante(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64,
+        pas: f64, m: usize, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
+        Self::cuire_interne(host, fond, normale, origine, longueur, largeur, pas, m, true, profondeur)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn cuire_interne(host: &mut HostServices, fond: &Background, normale: [f64; 2], origine: f64, longueur: f64, largeur: f64, pas: f64,
+        m: usize, deferlement: bool, profondeur: &dyn Fn(f64, f64) -> f64) -> Result<Cote2D, Cote2DError> {
         if m == 0 {
             return Err(Cote2DError::Geometrie);
         }
@@ -110,6 +126,7 @@ impl Cote2D {
             kv: Vec::with_capacity(nc * ns * nn),
             coth: Vec::with_capacity(nc * ns * nn),
         };
+        let mut ondes = Vec::with_capacity(nc);
         for c in composantes {
             let (k0, omega) = onde(c);
             if ((omega * omega / g) - k0).abs() > 1e-4 * k0 {
@@ -120,15 +137,33 @@ impl Cote2D {
             if !(cos0 >= 45f64.to_radians().cos()) {
                 return Err(Cote2DError::TropOblique);
             }
-            // S665 : la marche à bords périodiques tournés (`A(n + W) = A(n)·e^(i·k_n·W)`, `W = nn·pas`), sans marge ; le départ normalisé par
-            // le facteur WKB du bord du large (la référence de S362) — la levée n'y vaut pas encore 1 si le bord est en deçà de λ₀.
-            let kn = k0 * sin0;
-            let theta0 = sin0.atan2(cos0);
-            // Toute la marche, marge comprise, doit être mouillée : la marche refuse une profondeur non positive.
-            let h = |s: f64, n: f64| profondeur(s, n);
-            let depart = |n: f64| transformer(omega, theta0, 1.0, profondeur(0.0, n), g).map_or(1.0, |e| e.amplitude);
-            let champ = propager_periodique(&h, core::f64::consts::TAU / omega, g, 0.0, (ns_m - 1) as f64 * pas, pas, n0, pas, nn_m,
-                &|n| (depart(n) * (kn * n).cos(), depart(n) * (kn * n).sin()), kn).map_err(|_| Cote2DError::Profondeur)?;
+            ondes.push((k0, omega, cos0, sin0));
+        }
+        // Toute la marche, marge comprise, doit être mouillée : la marche refuse une profondeur non positive.
+        let h = |s: f64, n: f64| profondeur(s, n);
+        // S665 : la marche à bords périodiques tournés (`A(n + W) = A(n)·e^(i·k_n·W)`, `W = nn·pas`), sans marge ; le départ normalisé par
+        // le facteur WKB du bord du large (la référence de S362) — la levée n'y vaut pas encore 1 si le bord est en deçà de λ₀.
+        type Entree<'a> = Box<dyn Fn(f64) -> (f64, f64) + 'a>;
+        let departs: Vec<Entree> = ondes.iter().map(|&(k0, omega, cos0, sin0)| {
+            let (kn, theta0) = (k0 * sin0, sin0.atan2(cos0));
+            Box::new(move |n: f64| {
+                let depart = transformer(omega, theta0, 1.0, profondeur(0.0, n), g).map_or(1.0, |e| e.amplitude);
+                (depart * (kn * n).cos(), depart * (kn * n).sin())
+            }) as Entree
+        }).collect();
+        let spectre: Vec<Composante> = composantes.iter().zip(&ondes).zip(&departs).map(|((c, &(k0, omega, _, sin0)), d)| Composante {
+            periode: core::f64::consts::TAU / omega, amplitude: c.amplitude as f64, incident: &**d, k_n: k0 * sin0 }).collect();
+        // S670 : toutes les composantes marchent ensemble — sans déferlement, au bit des marches séparées (S669).
+        let regle = if deferlement {
+            let somme: f64 = spectre.iter().map(|c| c.amplitude * c.amplitude).sum();
+            let f_moy = spectre.iter().map(|c| c.amplitude * c.amplitude / c.periode).sum::<f64>() / somme.max(f64::MIN_POSITIVE);
+            (somme > 0.).then(|| Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, g))
+        } else {
+            None
+        };
+        let champs = propager_spectre_periodique(&h, g, 0.0, (ns_m - 1) as f64 * pas, pas, n0, pas, nn_m, &spectre, regle)
+            .map_err(|_| Cote2DError::Profondeur)?;
+        for (&(k0, omega, cos0, sin0), champ) in ondes.iter().zip(&champs) {
             // ψ(s), comme la marche : la moyenne de k sur la rangée, aux demi-pas.
             let kb = |s: f64| (0..champ.ny).map(|j| nombre_d_onde(omega, h(s, champ.y0 + j as f64 * champ.dy), g)).sum::<f64>() / champ.ny as f64;
             let mut psi = vec![0.0f64; ns_m];

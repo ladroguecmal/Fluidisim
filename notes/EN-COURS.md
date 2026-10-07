@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S670 — **en cours**. En autonomie vers la v2 ; 2.7. S669 a mis le déferlement d'une mer dans la marche parabolique ; `Cote2D`
+Session : S670 — **terminée**. En autonomie vers la v2 ; 2.7. S669 a mis le déferlement d'une mer dans la marche parabolique ; `Cote2D`
 marche encore chaque composante seule, sans dissipation, et s'arrête à 2 m de fond.
 
 **Ce que la session fait.** **`Cote2D::cuire_deferlante`** : toutes les composantes de B cuites ensemble par `propager_spectre_periodique`,
@@ -90,7 +90,8 @@ bit. (3) Rapportés : `Hrms/h` au rivage ; l'écart de `η` au rivage entre la c
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `cuire_deferlante` ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P2** — `cuire_deferlante` ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) l'empreinte des tables inchangée ; (2) 0,40 % au plus, B au bit au large ; (3) `Hrms` 0,513 m au rivage (1D 0,511), `|Δη|` avec et sans déferlement jusqu'à 1,19 m ; 1,7 s ; 2,0 Mo à `m` = 4.

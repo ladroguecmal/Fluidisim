@@ -1639,3 +1639,11 @@ composante. **Mesuré** : contre l'équilibre d'énergie 1D (RK4, son propre `Q_
 `Hrms/h` 0,51 au rivage ; sans déferlement, 2,43 m au lieu de 0,51. Le calcul du plan avait d'abord une bissection inversée : la sortie
 absurde (`Q_b` nul partout) l'a montrée avant l'essai. Maillons **1** (2.7 avance). Suivant : **S670**, `Cote2D` cuite avec le
 déferlement, jusqu'au rivage ; la revue en S671.
+
+## S670 — 2026-10-07 — La côte 2D qui déferle
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/COTE-2D-DEFERLANTE-S670.md)) :
+`Cote2D::cuire_deferlante`, toutes les composantes de B cuites ensemble et amorties par Battjes et Janssen ; `cuire_decime` par le même
+chemin, au bit (l'empreinte des tables inchangée). **Mesuré** : chaque composante à **0,40 %** de l'équilibre d'énergie 1D jusqu'à 1 m
+de fond ; `Hrms/h` 0,51 au rivage ; sans déferlement, `η` y était faux jusqu'à 1,2 m. Maillons **1** (2.7 avance). Suivant : **S671, la
+trente-huitième revue de méthode** (ADR-269).

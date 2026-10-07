@@ -194,3 +194,74 @@ fn decimated_tables_trade_memory_for_a_known_error_s668() {
     assert!(ecarts[0] < ecarts[1] && ecarts[1] < ecarts[2], "critère 3 : l'écart croît avec m");
 }
 
+/// **S670** — la côte qui déferle : la mer de S667 sur la plage de 80 m à 1 m de fond. (2) Le facteur de chaque composante, à chaque nœud,
+/// à moins de 2 % de l'équilibre d'énergie 1D (S669, parti de l'eau profonde) ; au large, B au bit. (3) Rapportés : `Hrms/h` au rivage,
+/// l'écart de `η` au rivage avec et sans déferlement, la mémoire à `m` = 4.
+#[test]
+fn the_2d_coast_breaks_a_sea_down_to_the_shore_s670() {
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15f32, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let comps: Vec<Component> = (0..8).map(|i| {
+        let mut c = composante(t[i], a[i], th[i].to_radians());
+        c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+        c
+    }).collect();
+    let b = fond(&comps);
+    let (mut alloc, services) = (Hote, Hote);
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    let (l, w, pas) = (3950.0, 192.0, 2.0);
+    let horloge = std::time::Instant::now();
+    let cote = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, &|s, _| plage(s)).unwrap();
+    let duree = horloge.elapsed().as_secs_f64();
+    let sans = Cote2D::cuire_decime(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, &|s, _| plage(s)).unwrap();
+    // La référence : les amplitudes et le `k_n` que B porte (en eau profonde), `γ` comme la cuisson.
+    let comp = b.components();
+    let tb: Vec<f64> = comp.iter().map(|c| 4_294_967_296.0 / c.freq_q32 as f64).collect();
+    let ab: Vec<f64> = comp.iter().map(|c| c.amplitude as f64).collect();
+    let kn: Vec<f64> = comp.iter().map(|c| (c.k_turns_per_m as f64 * core::f64::consts::TAU) * c.dir[0] as f64 * -1.0).collect();
+    let somme: f64 = ab.iter().map(|a| a * a).sum();
+    let f_moy = ab.iter().zip(&tb).map(|(a, t)| a * a / t).sum::<f64>() / somme;
+    let gamma = crate::pente_douce::Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, G).gamma;
+    let reference = crate::pente_douce::tests::equilibre_1d_s669(&plage, l, &tb, &ab, &kn, gamma, true);
+    let (ns, nn, _) = cote.noeuds();
+    assert_eq!(reference.len(), ns);
+    let (mut pire, mut ou) = (0f64, (0usize, 0usize));
+    for c in 0..8 {
+        for i in 0..ns {
+            for j in 0..nn {
+                let f = cote.facteur[(c * ns + i) * nn + j] as f64;
+                let e = (f * ab[c] / reference[i].1[c] - 1.).abs();
+                if e > pire {
+                    (pire, ou) = (e, (c, i));
+                }
+            }
+        }
+    }
+    // Au large, B au bit.
+    for x in [-60.0f32, 0.0, 45.0] {
+        for y in [-300.0f32, -1.0, 0.0] {
+            let p = [x, y, 0.0];
+            assert_eq!(cote.eval_local(&b, p, SimTime(5_300_000)).unwrap().eta.to_bits(), b.eval_local(p, SimTime(5_300_000)).unwrap().eta.to_bits());
+        }
+    }
+    // Au rivage : Hrms/h, et l'écart de η avec et sans déferlement.
+    let i_fin = ns - 1;
+    let h_fin = plage(i_fin as f64 * pas as f64);
+    let hrms_fin = 2. * (0..8).map(|c| (ab[c] * cote.facteur[(c * ns + i_fin) * nn] as f64).powi(2)).sum::<f64>().sqrt();
+    let mut dz = 0f32;
+    for k in 0..20 {
+        let p = [-90.0 + 9.0 * k as f32, 3900.0 + 2.4 * k as f32, 0.0];
+        for tt in [0u64, 5_300_000, 47_100_000] {
+            let (e1, e0) = (cote.eval_local(&b, p, SimTime(tt)).unwrap().eta, sans.eval_local(&b, p, SimTime(tt)).unwrap().eta);
+            dz = dz.max((e1 - e0).abs());
+        }
+    }
+    let quatre = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, 3944.0, w, pas, 4, &|s, _| plage(s)).unwrap();
+    println!("S670 : facteur au plus {:.2} % de l'équilibre 1D (composante {}, s = {} m, h = {:.1} m) ; cuisson {duree:.2} s",
+        100. * pire, ou.0, ou.1 as f64 * pas as f64, plage(ou.1 as f64 * pas as f64));
+    println!("S670 : au rivage ({h_fin} m) Hrms {hrms_fin:.3} m (1D {:.3}), Hrms/h {:.3} ; |Δη| avec et sans déferlement jusqu'à {:.2} m ; m = 4 : {:.2} Mo",
+        reference[i_fin].0, hrms_fin / h_fin, dz, quatre.octets() as f64 / 1e6);
+    assert!(pire < 0.02, "critère 2 : {:.2} %", 100. * pire);
+}
+

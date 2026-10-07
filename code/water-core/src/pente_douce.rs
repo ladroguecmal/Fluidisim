@@ -624,4 +624,4 @@ pub fn berkhoff(x: f64, y: f64) -> f64 {
 
 #[cfg(test)]
 #[path = "tests_pente_douce.rs"]
-mod tests;
+pub(crate) mod tests;

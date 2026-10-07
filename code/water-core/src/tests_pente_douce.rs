@@ -265,8 +265,11 @@ fn periodic_twisted_edges_carry_an_oblique_plane_wave_s665() {
 }
 
 /// S669 — la référence : l'équilibre d'énergie 1D de la même mer sur la même plage (`h(s)`), chaque composante réfractée par Snell,
-/// `dF_c/ds = −(D/E)·E_c`, `F_c = E_c·c_g·cos θ_c`, RK4 au mètre ; `Q_b` résolu à part (bissection sur `ln Q`). `Hrms(s)` tous les 2 m.
-fn equilibre_1d_s669(h: &dyn Fn(f64) -> f64, longueur: f64, t: &[f64], a: &[f64], kn: &[f64], gamma: f64) -> Vec<f64> {
+/// `dF_c/ds = −(D/E)·E_c`, `F_c = E_c·c_g·cos θ_c`, RK4 au mètre ; `Q_b` résolu à part (bissection sur `ln Q`). Tous les 2 m : `Hrms`
+/// et l'amplitude de chaque composante. `a` : les amplitudes à `s` = 0 ; S670, `du_large` : celles de l'eau profonde, portées à `s` = 0
+/// par la conservation du flux (`c_g0 = g/(2ω)`).
+pub(crate) fn equilibre_1d_s669(h: &dyn Fn(f64) -> f64, longueur: f64, t: &[f64], a: &[f64], kn: &[f64], gamma: f64, du_large: bool)
+    -> Vec<(f64, Vec<f64>)> {
     let om: Vec<f64> = t.iter().map(|t| core::f64::consts::TAU / t).collect();
     let somme: f64 = a.iter().map(|a| a * a).sum();
     let f_moy = a.iter().zip(t).map(|(a, t)| a * a / t).sum::<f64>() / somme;
@@ -290,23 +293,30 @@ fn equilibre_1d_s669(h: &dyn Fn(f64) -> f64, longueur: f64, t: &[f64], a: &[f64]
         }
         (0.5 * (lo + hi)).exp()
     };
-    let derive = |s: f64, f: &[f64]| -> (Vec<f64>, f64) {
+    let derive = |s: f64, f: &[f64]| -> (Vec<f64>, f64, Vec<f64>) {
         let hh = h(s);
         let e: Vec<f64> = (0..f.len()).map(|c| f[c] / cg_cos(c, hh)).collect();
         let hrms = (8. * e.iter().sum::<f64>()).sqrt();
         let kb = nombre_d_onde(core::f64::consts::TAU * f_moy, hh, G);
         let hmax = 0.88 / kb * (gamma * kb * hh / 0.88).tanh();
         let delta = 2. * f_moy * qb(hrms / hmax) * (hmax / hrms).powi(2);
-        (e.iter().map(|e| -delta * e).collect(), hrms)
+        (e.iter().map(|e| -delta * e).collect(), hrms, e.iter().map(|e| (2. * e).sqrt()).collect())
     };
-    let mut f: Vec<f64> = (0..t.len()).map(|c| 0.5 * a[c] * a[c] * cg_cos(c, h(0.))).collect();
+    let mut f: Vec<f64> = (0..t.len()).map(|c| {
+        if du_large {
+            let k0 = om[c] * om[c] / G;
+            0.5 * a[c] * a[c] * G / (2. * om[c]) * (1. - (kn[c] / k0).powi(2)).sqrt()
+        } else {
+            0.5 * a[c] * a[c] * cg_cos(c, h(0.))
+        }
+    }).collect();
     let n = longueur.round() as usize;
     let mut sortie = Vec::new();
     for i in 0..n {
         let s = i as f64;
-        let (d1, hrms) = derive(s, &f);
+        let (d1, hrms, amp) = derive(s, &f);
         if i % 2 == 0 {
-            sortie.push(hrms);
+            sortie.push((hrms, amp));
         }
         let pas = |d: &[f64], q: f64| f.iter().zip(d).map(|(f, d)| f + q * d).collect::<Vec<f64>>();
         let d2 = derive(s + 0.5, &pas(&d1, 0.5)).0;
@@ -316,7 +326,8 @@ fn equilibre_1d_s669(h: &dyn Fn(f64) -> f64, longueur: f64, t: &[f64], a: &[f64]
             f[c] += (d1[c] + 2. * d2[c] + 2. * d3[c] + d4[c]) / 6.;
         }
     }
-    sortie.push(derive(n as f64, &f).1);
+    let (_, hrms, amp) = derive(n as f64, &f);
+    sortie.push((hrms, amp));
     sortie
 }
 
@@ -350,7 +361,7 @@ fn a_breaking_sea_follows_the_1d_energy_balance_s669() {
     let f_moy = a.iter().zip(&t).map(|(a, t)| a * a / t).sum::<f64>() / somme;
     let d = Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, G);
     let avec = propager_spectre_periodique(&plage, G, 0.0, l, dx, y0, dy, ny, &comps, Some(d)).unwrap();
-    let reference = equilibre_1d_s669(&|s| plage(s, 0.), l, &t, &a, &kn, d.gamma);
+    let reference: Vec<f64> = equilibre_1d_s669(&|s| plage(s, 0.), l, &t, &a, &kn, d.gamma, false).into_iter().map(|r| r.0).collect();
     let hrms = |champs: &[Champ], i: usize, j: usize| 2. * (0..8).map(|c| (a[c] * champs[c].valeur(i, j).0.hypot(champs[c].valeur(i, j).1)).powi(2)).sum::<f64>().sqrt();
     let nx = avec[0].nx;
     assert_eq!(reference.len(), nx);
