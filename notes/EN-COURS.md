@@ -62,25 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S676 — **terminée**. En autonomie vers la v2. **La trente-neuvième revue de méthode** (ADR-222 D4 : S671–S675).
+Session : S677 — **en cours**. En autonomie vers la v2 ; K3, 3.5 (« manquent… la largeur de la zone »). La polyligne de S588–S633 est
+tirée de McCowan, un seuil sur une houle unique. La côte 2D porte maintenant une mer qui déferle par Battjes et Janssen, avec sa
+fraction de vagues déferlées `Q_b` et sa dissipation `D` en chaque nœud.
+
+**Ce que la session fait.**
+
+- **`Cote2D` garde `Q_b` et `D`** (par `ρ`) à chaque nœud des tables, avec déferlement : 8 octets par nœud, communs aux composantes.
+- **`Cote2D::zone_de_deferlement(seuil)`** rend les polylignes où `Q_b` = `seuil`, dans les axes locaux de B. Les carrés de marche de
+  S630 sont séparés du calcul de l'écart (`deferlement::contours_du_champ`), au bit.
+- **`Cote2D::dissipation_par_metre(ρ)`** rend `∫ D ds`, moyennée le long de la côte, en kW/m.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-269.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+- **témoin** : les essais de S630 (les contours d'une côte quelconque), aux mêmes sorties.
+- **instrument** : l'équilibre d'énergie 1D de S669, sans rétroaction (la côte cuite en une marche), avec son propre `Q_b` (une
+  bissection sur `ln Q`). Ce qui départagerait :
+  - une dissipation juste rend `∫D ds` égal au flux perdu de la référence ;
+  - un `D` sans `g`, ou sans `f̄`, s'en écarte d'un facteur ;
+  - un indice de table décalé déplace la ligne de plusieurs pas.
+- **calcul** (scratchpad `s677_calc.py`, et ce script qui asserte) :
+  - le flux du large vaut 21,7 kW/m ; 20,7 kW/m sont perdus, égaux à `∫D ds` ;
+  - la zone commence à `Q_b` = 1 %, à s = 3 717 m (5,66 m de fond), et mesure 233 m de large ;
+  - le plancher du début : `Hrms` à 0,4 % donne Δs ≈ 1.2 m, d'où la borne de **3 m** ;
+  - l'énergie : le flux au rivage (4,5 % du flux du large) à 0,8 % près, d'où la borne de **2 %**.
+- **ADR** : ADR-196, ADR-268 ; SPEC-006 §6.
+- **pièges** :
+  - `E = ρg·a²/2` : le premier calcul de ce plan comptait `g` deux fois. `Hrms` au rivage, retrouvé à 0,511 m, l'a montré ;
+  - la grille des contours (`x` le plus rapide) : `s` en `x`, `n` en `y` ;
+  - les axes locaux de B : `x = n̂·(s + origine) + t̂·n`.
 
-**Critères, écrits avant.** (1) ADR-270 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Critères, écrits avant.**
+
+1. Le partage de `contours` : au bit (les essais de S630 inchangés).
+2. `∫D ds` de la côte (une marche) à moins de **2 %** du flux perdu de la référence 1D.
+3. À `Q_b` = 1 %, une polyligne ouverte sur toute la largeur, chacun de ses sommets à moins de **3 m** du début 1D.
+4. Rapportés : la largeur de la zone, le flux dissipé en kW/m, la côte au point fixe (S674) comparée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-270.
-- [x] **P3** — rituel.
+- [ ] **P2** — `contours_du_champ` ; `Q_b`, `D` dans `Cote2D` ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-270 : cinq sessions relues ; aucune règle nouvelle ; la prochaine revue S681.
