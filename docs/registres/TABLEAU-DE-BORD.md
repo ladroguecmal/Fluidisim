@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 96 — absents : 14.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 97 — absents : 13.
 
 ## Par campagne
 
@@ -15,7 +15,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K1** Rendu final et banc visuel | 0 | 9 | 0 | ◐8.1 ◐8.2 ◐8.3 ◐8.5 ◐8.6 ◐8.8 ◐8.9 ◐8.7 ◐8.10 |
 | **K2** La surface non graphe | 0 | 9 | 1 | ◐4.16 ◐4.1 ◐4.12 ·4.20 ◐7.4 ◐7.5 ◐7.2 ◐7.3 ◐3.3 ◐3.1 |
 | **K3** Le fond et la côte | 1 | 9 | 1 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ◐3.5 ·4.14 ◐4.15 ✅6.5 ◐2.6 ◐3.9 ◐4.6 |
-| **K4** Les eaux intérieures | 0 | 3 | 1 | ◐2.3 ◐2.4 ◐2.5 ·12.2 |
+| **K4** Les eaux intérieures | 0 | 4 | 0 | ◐2.3 ◐2.4 ◐2.5 ◐12.2 |
 | **K5** δ, le système | 0 | 12 | 2 | ◐4.2 ◐4.3 ◐4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
 | **K7** Les volumes finis | 1 | 8 | 0 | ◐5.2 ✅5.3 ◐5.4 ◐5.6 ◐5.7 ◐5.8 ◐5.9 ◐5.10 ◐5.12 |
@@ -135,7 +135,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 11.4 | partiel | Nombreuses sources simultanées à coût maîtrisé |
 | 11.5 | absent | Matériel cible de livraison et seconde cible |
 | 12.1 | partiel | Cuisson reproductible, empreintes, obsolescence détectée |
-| 12.2 | absent | Éditeur de rivières |
+| 12.2 | partiel | Éditeur de rivières |
 | 12.3 | partiel | Précalcul côtier stocké |
 | 12.4 | absent | Eau en amont du terrain, géoïde dans l'outil de terrain |
 | 12.5 | partiel | Portée d'une modification bornée par partition |
@@ -275,4 +275,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S601 | 2026-10-07 | 10 | 94 | 16 | 120 |
 | S602 | 2026-10-07 | 10 | 95 | 15 | 120 |
 | S603 | 2026-10-07 | 10 | 96 | 14 | 120 |
+| S604 | 2026-10-07 | 10 | 97 | 13 | 120 |
 <!-- fin de l'historique -->

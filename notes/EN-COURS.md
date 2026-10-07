@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S604 — **en cours**. En autonomie (ADR-247) : **12.2 — l'éditeur de rivières : dessin, validation bloquante, gravure**
+Session : S604 — **terminée**. En autonomie (ADR-247) : **12.2 — l'éditeur de rivières : dessin, validation bloquante, gravure**
 (SPEC-005 §5 ; absent). Le cœur de l'éditeur, sans son interface : ce que l'outil affiche en continu, ce qu'il refuse, ce qu'il grave.
 
 **Ce que la session fait.** Un module `riviere.rs` : un réseau de biefs (une ligne d'eau tracée par sommets `(x, y, z)`, une largeur, un
@@ -93,7 +93,9 @@ moins de deux sommets, un nœud hors du réseau.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `riviere.rs` et ses essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 12.2 ; rituel.
+- [x] **P2** — `riviere.rs` et ses essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 12.2 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus du premier essai ; chaque faute un seul défaut ; la faute ÷100 passe (attendu). Suite 795.
+- **P3** — preuve RIVIERE-S604 ; liste 12.2 (absent → partiel) et décompte ; index ; journal.

@@ -1107,3 +1107,11 @@ un traceur numpy indépendant : une bosse sous l'isobathe limite déplace une ar
 9 m, une bosse côtière laisse trois plages sur huit intactes. **En route** : la profondeur minimale du support estimée à la main (107,5 m)
 était fausse (107,14 m) — le script du plan la calcule sur une grille ; un rayon qui franchit une borne de plage de 6 cm ne change rien
 (la garde compte les décalages, non les franchissements). Maillons **1** (12.5 : absent → partiel). Suivant : **S604**, un point absent.
+
+## S604 — 2026-10-07 — l'éditeur de rivières, son cœur
+
+**Entrée.** En autonomie (ADR-247) ; 12.2 (absent). **Fait** ([preuve](../docs/validation/RIVIERE-S604.md)) : `riviere.rs` — le profil de
+Manning, les ressauts, les règles bloquantes de SPEC-005 §5.3 (sauf la cinquième), la gravure. **Mesuré** : chaque faute de saisie isolée
+donne un seul défaut, au bon endroit ; la faute d'unité ×100 est bloquée (3,52 m/s), la faute ÷100 passe (0,18 m/s) — `v ∝ S^0,3`, la
+règle de vitesse n'attrape qu'un sens. **En route** (au plan, avant l'essai) : une chute « ×101 » mal comptée et un terrain qui donnait
+deux conflits au lieu d'un, corrigés par le script du plan. Maillons **1** (12.2 : absent → partiel). Suivant : **S605**, un point absent.

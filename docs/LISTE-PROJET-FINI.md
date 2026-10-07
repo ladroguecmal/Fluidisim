@@ -820,7 +820,11 @@ pas recopiée ici (L137).
 
 - [ ] **12.1 Cuisson reproductible, empreintes, obsolescence détectée** (SPEC-005 §7) — *partiel* :
   spectre cuit et empreintes. Détection d'obsolescence absente.
-- [ ] **12.2 Éditeur de rivières** : dessin, validation bloquante, gravure (SPEC-005 §5) — *absent*.
+- [ ] **12.2 Éditeur de rivières** : dessin, validation bloquante, gravure (SPEC-005 §5) — *partiel* depuis S604 : le cœur de l'éditeur —
+  le profil de Manning par segment (`h`, `v`, `Fr`, les ressauts), les règles bloquantes (la ligne d'eau descend, `ΣQ` aux confluences, `v`
+  plausible, le lac a un exutoire : chaque faute isolée, un seul défaut), la gravure et ses conflits ([preuve](validation/RIVIERE-S604.md)).
+  La règle de vitesse n'attrape qu'un sens de l'erreur d'unité. Manquent l'interface, la spline, `largeur(s)`, `debit(t)`, la cinquième
+  règle, la gravure dans une carte de hauteurs.
 - [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *partiel* depuis S599 : **la bibliothèque d'une plage** — seize états en `f16`
   (1 228 800 octets, la taille de SPEC-005), la polyligne de chacun, la recherche par paramètres (I-09), l'empreinte qui dit l'obsolescence
   ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles.
@@ -881,9 +885,9 @@ pas recopiée ici (L137).
 | 9. Activation et budget | 13 | 1 | 10 | 2 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
-| 12. Outillage | 5 | 0 | 3 | 2 |
+| 12. Outillage | 5 | 0 | 4 | 1 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **96** | **15** |
+| **total** | **121** | **10** | **97** | **14** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
