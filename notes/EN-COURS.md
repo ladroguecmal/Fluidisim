@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S612 — **en cours**. En autonomie (ADR-247) : **4.20 — le changement de solveur pendant une simulation** (ADR-007 ; absent,
+Session : S612 — **terminée**. En autonomie (ADR-247) : **4.20 — le changement de solveur pendant une simulation** (ADR-007 ; absent,
 conçu). ADR-007 §3 : pas de transfert d'état entre solveurs — `transduction δ → W → destruction → création à δ = 0 → nouveau solveur` ;
 l'énergie est partie dans W, B + W est inchangé, et des solveurs voisins ne communiquent que par W.
 
@@ -87,7 +87,9 @@ celui du solveur continué ; (4) le nouveau solveur : l'écart à W égal à la 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `changement_solveur.rs` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 4.20 ; rituel.
+- [x] **P2** — `changement_solveur.rs` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 4.20 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus ; accesseurs `u`, `maille`, `profondeur`, `gravite` ajoutés à `Domaine1D`. Suite : 801 essais listés.
+- **P3** — preuve CHANGEMENT-SOLVEUR-S612 ; liste 4.20 (absent → partiel) et décompte ; index ; journal.

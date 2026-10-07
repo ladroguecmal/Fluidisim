@@ -1170,3 +1170,11 @@ autre a été cherché pour éprouver la réallocation. Maillons **1** (9.6 : ab
 calculé, vue en lisant la sortie et non refusée par le script (S608, S610) — **élargie** : elle s'asserte (ADR-253 D1, L412). Ont tenu :
 la suite mesurée à chaque preuve, les implémentations indépendantes du plan, le seuil fixé sur sa référence en le disant (S609).
 Maillons **1**. Suivant : **S612**, un point absent.
+
+## S612 — 2026-10-07 — le changement de solveur par W
+
+**Entrée.** En autonomie (ADR-247) ; 4.20 (absent, conçu). **Fait** ([preuve](../docs/validation/CHANGEMENT-SOLVEUR-S612.md)) :
+`changement_solveur.rs` — `TrainW1D`, `transduire` (invariants de Riemann), `energie_delta`. **Mesuré** contre numpy : continuité à la
+bascule (assemblage), énergie à −0,125 %, W plus juste que le solveur gardé à 15 s (0,24 contre 0,32 mm), un solveur de maille deux fois
+plus fine né sur W et alimenté par W seul à 34 µm. Maillons **1** (4.20 : absent → partiel ; reste à la section 4 : 4.14). Suivant :
+**S613**, un point absent.

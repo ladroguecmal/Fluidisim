@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Le changement de solveur par W — S612](validation/CHANGEMENT-SOLVEUR-S612.md) : transduction, destruction, un nouveau solveur alimenté par W.
 - [Le précalcul avant l'impact — S610](validation/PRECALCUL-S610.md) : translater, rebâtir, réallouer, libérer ; l'établissement.
 - [Le régime substitutif — S609](validation/SUBSTITUTIF-S609.md) : la bascule ; un domaine propriétaire du champ total, alimenté par B.
 - [Les niveaux d'activité des cellules — S608](validation/ACTIVITE-S608.md) : cinq niveaux ; des domaines non alignés sur la HydroGrid.
