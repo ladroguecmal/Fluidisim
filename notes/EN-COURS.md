@@ -62,34 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S644 — **terminée**. En autonomie ; la campagne du rouleau 3D (acceptée le 2026-10-07). **Étape 2 — une vague non déferlante qui
-monte la pente dans APIC 3D**, sur le fond en escalier de S639 (au rivage, 1,5 cm/s de frémissement ; les faces coupées de S640 y sont pires).
+Session : S645 — **en cours**. En autonomie, vers la v2 (« continue en autonomie jusqu'à la v2 », 2026-10-07). **A333** : le jet de rive
+d'APIC 3D court d'un cinquième (S644).
 
-**Ce que la session fait.** Une onde solitaire posée dans APIC 3D (l'élévation `H·sech²(γ(x − x₁))`, la vitesse `c·η/(d + η)` sur toute
-la colonne), sur un canal de largeur quatre mailles : fond plat à 0.05 m puis pente 1:3 depuis le pied ; la remontée lue comme
-la plus haute marche dont la première maille au-dessus est d'eau (`labels`), la rangée médiane, comme `Plage::cote_mouillee` de S614.
-Jugée contre la loi de Synolakis (1987) et contre Saint-Venant 2D (S613, ordre deux de S620) sur la même plage, à la même maille.
+**L'hypothèse.** Sur l'escalier, les faces des mailles du fond sont mises à zéro (`impose_body`). Le dessus des marches est donc glissant
+pour la vitesse normale, mais l'interpolation de la grille vers les particules (`grid_to_particles`, trilinéaire) mêle à la vitesse
+horizontale d'une particule, dans la moitié basse de la première maille d'eau, la vitesse **nulle** des faces `u`/`v` de la maille solide
+dessous. Une lame d'une ou deux mailles est alors freinée comme contre une paroi non glissante.
 
-**Références, calculées avant** (ce script). `d` = 0.35 m, `H` = 0.07 m (`H/d` = 0.2), pente 1:3 : **R = 0.2295 m** (Synolakis) ;
-`γ` = 1.1066 m⁻¹ ; l'onde à la distance canonique `arccosh(√20)/γ` = 1.968 m du pied, centrée à 2.8 m (pied à 4.768 m) ;
-`c` = 2.030 m/s. **Non déferlante** : `H/d` < 0,818·cot^(−10/9) = 0.241 (asserté). **Bornes** (ADR-257 D1, assertées) : la queue
-de l'onde au mur gauche < 1 % de `H` (5.7e-04) ; la remontée sous le couvercle et dans le domaine (6,6 m × 0,8 m) ; aucune égalité
-entre un centre de maille et le fond, aux deux mailles.
+**Le témoin (ADR-259 D1).** Le fond glissant (`set_seabed_slip(true)`) : les faces `u`/`v` de la maille solide du dessus d'une colonne,
+quand elles séparent deux mailles solides, prennent la vitesse de la face de même position juste au-dessus. Une face de contremarche, qui
+sépare une maille solide d'une maille d'eau, reste nulle (sa vitesse est normale). La face `w` du dessus reste nulle.
 
-**Quantum** : la marche, `dx/3` en hauteur (0,83 cm à 2,5 cm). **Critères, écrits avant.** (1) les particules gardées, aucune sous le fond ;
-(2) **à 2,5 cm, la remontée d'APIC à 20 % de Synolakis**, et à 20 % de Saint-Venant 2D à la même maille ; (3) les deux mailles (5 et
-2,5 cm) rapportées — l'écart attribué seulement après elles (ADR-256 D2) ; un écart à la maille fine qui ne baisse pas se localise par un
-témoin qui supprime une cause (ADR-259 D1) ; (4) le rouleau (étape 3) n'est pas demandé : la vague ne doit pas déferler — vérifié à l'œil
-sur la surface (aucune particule détachée au-dessus du front de plus d'une maille).
+**Critères, écrits avant.** (1) Avec le fond glissant, la remontée de S644 lue par les particules : **A333 levée** si elle est à 10 % de
+Saint-Venant 2D à 2,5 cm (0,240 m) et plus proche à 2,5 qu'à 5 cm ; sinon l'hypothèse est écartée et rapportée telle. (2) Le repos de
+S639 (le témoin plat ≤ 1 cm/s, la pente mesurée) avec le fond glissant ; (3) le fond glissant par défaut seulement si (1) et (2)
+tiennent ; les essais d'APIC 3D passent.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai (5 cm dans la suite, 2,5 cm `#[ignore]`) ; (1)–(4).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [ ] **P2** — le fond glissant ; les mesures ; (1)–(3).
+- [ ] **P3** — preuve ; A333 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) tenu ; **(2) manqué** : par les étiquettes 0,150 m aux deux mailles (le plan se trompait : la marche fait une maille, la
-  lecture ne voit pas le film) ; par les particules 0,188/0,187 m — 82 % de Synolakis, 78 % de Saint-Venant à 2,5 cm ; (3) sans
-  convergence ; (4) tenu. Témoins : la crête intacte au pied ; le fond lisse, 0,190 à 2,5 cm (les contremarches ne sont pas la cause) ;
-  Saint-Venant sur l'escalier, non freiné. A333 ouverte. L'utilisateur : « Continue en autonomie jusqu'à la v2 ou vers v2 » (consigné).

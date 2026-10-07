@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 14:01 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S645 — A333, le jet de rive court : le fond glissant ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S644 — le rouleau 3D, étape 2 : l'onde solitaire qui monte la pente ([journal](notes/JOURNAL.md))
 Session suivante : **S645 — A333, le jet de rive court** : le témoin du fond glissant (la vitesse tangentielle gardée sur les faces du fond, la normale seule annulée) ; s'il lève l'écart, le fond glissant par défaut ; puis l'étape 3 du rouleau 3D (le déferlement, contre la classification de Grilli et al. 1997).
 Maillons        : 1
