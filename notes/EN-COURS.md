@@ -62,51 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S684 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage (ADR-271), l'étape 1 de la conception.
+Session : S685 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 2 de la conception.
 
-**Ce que la session fait.** Le module `relais_rivage.rs` : `RelaisRivage` tient APIC 3D (bord droit ouvert, sa sortie et son entrée)
-et Saint-Venant 2D côte à côte, à la même maille et au même nombre de rangées. À chaque pas :
+**Ce que la session fait.** L'onde solitaire de S644 (`H/d` = 0,2, pente 1:3, non déferlante) part dans APIC 3D. Elle traverse le
+raccord à trois mailles de fond, et monte la plage dans Saint-Venant 2D. Le relais est jugé contre :
 
-1. l'état du bord 3D, le niveau `η` (la plus haute particule de la dernière colonne + `dx/4`) et la vitesse `u` moyenne, nourrit le
-   bord gauche de Saint-Venant (`h_e = η − z` de sa première maille) ;
-2. Saint-Venant fait son pas et rend son flux (S680) ;
-3. APIC reçoit ce flux comme vitesse de son bord droit, et fait entrer le reflux (S683) ;
-4. ce qu'APIC a laissé sortir (S682) contre ce que Saint-Venant a pris est gardé comme une dette par rangée.
+- le tout-Saint-Venant, depuis le même état initial ;
+- Synolakis (0.2295 m).
 
-La masse se compte : Saint-Venant + particules × quantum + réservoir − dette.
+L'état initial, dans les deux montages : l'onde et sa vitesse au large du pied, l'eau au repos au-delà.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-272)
 
-- **témoin** : APIC seul sur les mêmes plages (S678 : de 0,21 à 0,58 m/s).
-- **instrument** : l'eau au repos 2 s, la vitesse maximale des deux côtés, la masse. Ce que rendrait chaque hypothèse :
-  - un raccord juste rend **moins de 1 cm/s partout** et la masse exacte ;
-  - des niveaux mal accordés (`h_e` pris à un autre fond) font couler un flux au raccord, quelques cm/s ;
+- **témoin** : le tout-Saint-Venant, le même état initial, la même lecture de la remontée (la plus haute maille mouillée, `h` > 1 mm,
+  moyennée sur les rangées).
+- **instrument** : la remontée maximale sur 3 s, et la masse. Ce que rendrait chaque hypothèse :
+  - un flux bien transmis rend la remontée du tout-Saint-Venant, à l'écart près de l'onde portée par APIC au large (≈ 4 %, le calcul) ;
+  - un raccord qui réfléchit ou retient l'eau rend une remontée tronquée de plusieurs dizaines de % ;
   - une dette qui grandit trahit un échange mal compté.
-- **calcul** (ce script, qui asserte trois places au moins) :
-  - 1:3, eau 0.4 m, maille 0.05 m : le raccord à 3.03 mailles de fond, la ligne d'eau à 0.10 de maille ;
-  - 1:3, eau 0.4 m, maille 0.025 m : le raccord à 3.07 mailles de fond, la ligne d'eau à 0.20 de maille ;
-  - 1:10, eau 0.3 m, maille 0.05 m : le raccord à 3.01 mailles de fond, la ligne d'eau à 0.10 de maille ;
-  - 1:10, eau 0.3 m, maille 0.025 m : le raccord à 3.02 mailles de fond, la ligne d'eau à 0.20 de maille ;
-  - 1:3, eau 0.31 m, maille 0.05 m : le raccord à 3.23 mailles de fond, la ligne d'eau à 0.70 de maille ;
-  - 1:3, eau 0.31 m, maille 0.025 m : le raccord à 3.13 mailles de fond, la ligne d'eau à 0.40 de maille ;
-- **ADR** : ADR-271, ADR-272 D1.
+- **calcul** (ce script) :
+  - le raccord **à 5,35 m aux deux mailles**, à 16,4 cm de fond (3,3 et 6,6 mailles). À 2,5 cm, la règle des trois mailles le
+    mettrait à 5,575 m, où l'onde levée par Green dépasse McCowan (`H/h` = 1,25, refusé par le script). ADR-271 D1 le veut au-delà du
+    déferlement ;
+  - l'onde y fait ≈ 8,6 cm, `H/h` = 0,55 (asserté sous 0,78) ;
+  - l'écart attendu au tout-Saint-Venant : ≈ 4.2 % (la crête d'APIC au pied, 3 % au-dessus, S644). La borne, **10 %**.
+- **ADR** : ADR-271, ADR-272 (sans objet : une onde, non un repos).
 - **pièges** :
-  - le bord de Saint-Venant prend un seul état extérieur pour toutes les rangées (la moyenne) : exact au repos et sur une côte
-    uniforme, non en général (noté) ;
-  - le pas de temps commun, le plus petit des deux ;
-  - le niveau du bord 3D, sans particule dans la colonne, pris au fond.
+  - l'état initial du relais : Saint-Venant au repos au-delà du raccord, APIC sans l'onde au-delà du pied ; le tout-Saint-Venant, de même ;
+  - le pas commun : la CFL de Saint-Venant (`√(g·h)` + `u`) ;
+  - le bord de Saint-Venant prend la moyenne des rangées (la côte est uniforme).
 
 **Critères, écrits avant.**
 
-1. Sur les six plages, l'eau au repos 2 s : la vitesse maximale sous **1 cm/s**, des deux côtés.
+1. La remontée du relais à moins de **10 %** de celle du tout-Saint-Venant, à 5 et 2,5 cm.
 2. La masse : Saint-Venant + particules × quantum + réservoir − dette, constante à 10⁻¹² près en relatif.
-3. Les essais d'APIC et de Saint-Venant inchangés.
+3. Rapportés : la remontée contre Synolakis, la dette, la crête au raccord.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `relais_rivage.rs` ; l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) au plus 5,0·10⁻⁶ m/s sur les six plages ; (2) 5,4·10⁻¹⁶ ; (3) tenu. Le montage corrigé en route : Saint-Venant partait de 0,31 m, la 3D de 0,30 m (le réseau des particules) — il part maintenant du niveau de la 3D.
