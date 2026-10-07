@@ -5,7 +5,7 @@
 suites datées ; l'état est lu par mots sur la dernière suite qui tranche (voir l'outil). Les entrées plus anciennes, au tableau
 général du registre, ne sont pas lues ici.
 
-**49 entrées lues — 26 ouvertes, 23 closes.** Sévérité : 1 = refonte d'architecture si découvert
+**49 entrées lues — 25 ouvertes, 24 closes.** Sévérité : 1 = refonte d'architecture si découvert
 tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 
 ## Ouvertes
@@ -36,7 +36,6 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A323 | 2 | S409 | Au pas long, la cuve fermée gagne de l'énergie | — |
 | A325 | 2 | S485 | Les parois d'APIC ne sont pas des plans de symétrie pour l'écoulement qui les longe | — |
 | A330 | 2 | S520 | Le sillage de la coque dans δ n'a pas de référence éprouvée | S529 : localisée |
-| A334 | 2 | S652 | Sous le rouleau, la force sur un corps est un choc de deux pas | S655 : la masse ajoutée implicite ramène le corps libre de 4,68 à 1,87 m/s (10 ms), la dépendance au pas de 83 % à 19–24 %, la flottaison amortie quatre fois plus vite |
 | A320 | 3 | S369 | Sous une houle raide, une perturbation de δ croît | S443–S445 : la bascule des défauts (S443) fait du mode relatif la production ; A320 l'y accompagne, plafonnée (ADR-213 D2), sa limite écrite (MER-S369 §9–11) ; rien en … |
 
 ## Closes
@@ -66,3 +65,4 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A331 | 2 | S523 | S524 | W ne dit pas quand un point échantillonné sort du domaine honnête de son chemin |
 | A332 | 2 | S555 | S557 | L'énergie discrète de δ linéaire n'est pas connue |
 | A333 | 2 | S644 | S645 | Le jet de rive d'APIC 3D est court d'un cinquième |
+| A334 | 2 | S652 | S657 | Sous le rouleau, la force sur un corps est un choc de deux pas |

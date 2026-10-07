@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 19:06 +02:00
+JETON            : libre
+Battement        : 2026-10-07 19:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S657 — la vitesse du corps libre contre l'eau autour de lui ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S656 — la trente-cinquième revue : les erreurs relevées, les contrôles du plan ([journal](notes/JOURNAL.md))
-Session suivante : **S657 — la vitesse du corps libre contre l'eau autour de lui** (le comparant corrigé : la vitesse de l'eau dans les mailles qui touchent le corps, au même instant) ; le premier plan avec le bloc « Contrôles du plan » (ADR-266).
-Maillons        : 2
+Session en cours : aucune
+Dernière session : S657 — le corps libre contre l'eau autour de lui ; A334 levée ([journal](notes/JOURNAL.md)). Avant : S656 (la trente-cinquième revue : les erreurs relevées, les contrôles du plan)
+Session suivante : **S658 — la séance visuelle du rouleau** (demande de l'utilisateur) : le montage complet — Saint-Venant au large, APIC 3D sur la plage, le déferlement plongeant, la poche d'air, la sphère libre emportée — enregistré, rendu en animations (vue de côté colorée par la vitesse, vue oblique), envoyé pour un verdict (R40).
+Maillons        : 1
 Registres       : dernier lot S656 (ADR-213 D3) ; le prochain au plus tard en S659
 ```
 

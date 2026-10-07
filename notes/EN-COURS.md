@@ -85,7 +85,7 @@ toute la course, et les vitesses aux deux pas. (3) La masse au bit.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le lecteur et son épreuve ; les deux pas en parallèle ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
+- [x] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) le lecteur 0,466 m/s pour 0,5 ; (2) rapport au pic 0,90 (10 ms), 0,91 (5 ms), au plus 0,98 ; (3) au bit. A334 levée. L'utilisateur
