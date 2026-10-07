@@ -62,14 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S636 — **terminée**. En autonomie, **la trente-et-unième revue de méthode** (ADR-222 D4 ; S631–S635).
+Session : S637 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **5.10 — l'articulation V↔δ** : un manque nommé, « V qui
+déclenche δ » ; et la mécanique d'ADR-025 §3 — l'amorçage au niveau du nœud, la relaxation de la masse de δ vers celle du nœud.
 
-**Ce que la session fait.** Relu : S631 (la revue), S632 (les rayons), S633 (les sommets), S634 (le courant amorti), S635 (le dégel) — tous
-tenus du premier essai. **ADR-258** : aucune règle nouvelle ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** Un module `articulation.rs` : `amorcer(grille, niveau)` — δ (`SaintVenant2D`) né au niveau de V ; `forcer(δ, volume du
+nœud, dt_V, τ)` — la correction `(M_nœud − M_δ)·dt_V/τ`, une couche uniforme sur les mailles mouillées (le relief de la surface intact) ;
+`declenche(nœud, publié, formes, g, seuil)` — le seuil de S564 en hauteur de surface. δ n'écrit jamais dans V (C21 : aucune fonction ne le
+permet). Ne fait pas : un bassin quelconque (ici à fond plat : niveau = volume/aire), la dérive d'un solveur réel, la destruction de δ quand V
+se calme.
+
+**Références, calculées avant** (ce script). La piscine de S564 (50 m², 1 m), un robinet de l'hôte de 2 L par pas de V (10 Hz) : la surface
+monte de **40.0 µm** par pas ; au seuil de 500 µm, V déclenche δ au pas **13**, au niveau **1.000520000 m**. Après, 300 pas :
+le retard de masse `V − M_δ`, de 0.001800000 m³ au premier pas, s'établit à **0.018000000 m³** — `Q·(τ − dt)`, exact en pas discrets ;
+au niveau, 360.0 µm (ADR-025 §3 : sous le perceptible). **Bornes du montage** (ADR-257 D1, assertées) : 300 pas établissent le
+régime (`(1 − dt/τ)³⁰⁰` = 2·10⁻¹⁴) ; la piscine ne déborde pas.
+
+**Quantum** : le ml (V) ; f64 (δ). **Critères, écrits avant.** (1) le déclenchement au pas 13, pas avant ; (2) δ amorcé au niveau du nœud
+à 10⁻¹² m ; (3) à chaque pas, le retard de masse égal à la référence à 10⁻⁹ m³ (la masse de δ ne bouge que par le forçage : murs, aucun
+flux) ; établi à `Q·(τ − dt)` ; (4) la surface de δ reste plate : vitesse sous 10⁻¹² m/s ; (5) V ne reçoit que le robinet : son volume
+exact au ml (assemblage, C21) ; (6) refus : `τ` ou `dt_V` non positifs.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-258, METHODE, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `articulation.rs` et son essai ; (1)–(6).
+- [ ] **P3** — preuve ; liste 5.10 ; rituel.
 
 ### Notes de reprise
