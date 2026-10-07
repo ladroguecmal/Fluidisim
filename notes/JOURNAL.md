@@ -1422,3 +1422,12 @@ le critère devient *indiscernable du réel, au budget* — le budget un plafond
 densité de l'eau en champ ; 134 points). Maillons **3** — justification : une demande de l'utilisateur, la troisième session de cadrage ;
 la suivante revient à la physique. Suivant : **S644, le rouleau 3D, étape 2** (la vague sur la pente, sur l'escalier de S639).
 
+## S644 — 2026-10-07 — le rouleau 3D, étape 2 : l'onde solitaire qui monte la pente
+
+**Entrée.** La campagne du rouleau 3D. **Fait** ([preuve](../docs/validation/REMONTEE-APIC3D-S644.md)) : une onde solitaire (`H/d` = 0,2)
+dans APIC 3D sur la pente 1:3 de S639, jugée contre Synolakis et Saint-Venant 2D. **Mesuré** : la masse gardée ; la crête intacte au pied
+(3 % de Saint-Venant) ; la remontée, **critère manqué** — 0,150 m par les étiquettes (le plan se trompait sur la marche et la lecture),
+0,187 m par les particules (82 % de Synolakis, 78 % de Saint-Venant), sans convergence. Le témoin du fond lisse écarte les contremarches à
+maille fine. **A333** ouverte (le jet de rive court). L'utilisateur : *« Continue en autonomie jusqu'à la v2 ou vers v2 »*. Maillons **1**
+(4.14 avance). Suivant : **S645, A333 — le témoin du fond glissant**, puis l'étape 3 (le déferlement).
+

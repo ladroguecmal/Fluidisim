@@ -1791,3 +1791,123 @@ fn the_weighted_projection_holds_rest_over_a_submerged_slope_s640() {
     assert_eq!(a.particle_count(), n);
     assert!(worst <= 1e-4, "{worst}");
 }
+
+/// **S644 — l'onde solitaire sur la pente** : la remontée d'APIC 3D (fond en escalier de S639) et celle de Saint-Venant 2D (S613, ordre
+/// deux de S620) sur la même plage, à la maille `dx`. Rend (remontée APIC, remontée Saint-Venant, particules posées, gardées, sous le
+/// fond, la plus haute particule au-dessus du front). Références au plan (`s644_plan.py`).
+fn onde_sur_pente_s644(dx: f32) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+    onde_sur_pente_fond_s644(dx, false)
+}
+
+/// `lisse` : le fond lisse de S640 (les faces coupées) au lieu de l'escalier — le témoin qui supprime les contremarches (ADR-259 D1).
+fn onde_sur_pente_fond_s644(dx: f32, lisse: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+    use crate::grand_evenement::{OndeSolitaire, Plage};
+    let (d, h, cot, x1, x_pied, niveau, fond0) = (0.35f64, 0.07f64, 3.0f64, 2.80f64, 4.768f64, 0.40f32, 0.05f32);
+    let (nx, ny, nz) = ((6.6 / dx).round() as usize, 4usize, (0.8 / dx).round() as usize);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let lz = nz as f32 * dx;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| {
+        let x = ((c % nx) as f32 + 0.5) * dx;
+        (fond0 + (x - x_pied as f32).max(0.) / cot as f32).min(lz)
+    }).collect();
+    if lisse {
+        a.set_seabed_smooth(Some(&fond)).unwrap();
+    } else {
+        a.set_seabed(Some(&fond)).unwrap();
+    }
+    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let onde = OndeSolitaire { h, d, x1, g: 9.81 };
+    // Le fond lisse, interpolé entre les centres des colonnes comme `set_seabed_smooth` (le canal ne varie pas en `y`).
+    let (f2, m2): (Vec<f32>, Vec<f32>) = (fond[..nx].to_vec(), marche.clone());
+    let lit = move |p: [f32; 3]| if lisse {
+        let s = (p[0] / dx - 0.5).clamp(0., (nx - 1) as f32);
+        let i = (s.floor() as usize).min(nx - 2);
+        let f = s - i as f32;
+        (1. - f) * f2[i] + f * f2[i + 1]
+    } else {
+        m2[((p[0] / dx) as usize).min(nx - 1)]
+    };
+    let n = a.seed(&|p| p[2] > lit(p) && p[2] < niveau + onde.eta(p[0] as f64) as f32).unwrap();
+    a.set_particle_velocities(&|p| {
+        let u = if (p[0] as f64) < x_pied { onde.u(p[0] as f64) as f32 } else { 0. };
+        ([u, 0., 0.], [[0.; 3]; 3])
+    }).unwrap();
+    let j = ny / 2;
+    let dxs = dx as f64;
+    // Le témoin (ADR-259 D1) : la crête au pied, `max z` des particules d'une maille avant le pied, plus `dx/4` (le réseau).
+    let (mut t, mut front, mut haut, mut crete) = (0u64, f32::NEG_INFINITY, 0f32, 0f32);
+    while t < 3_000_000 {
+        let us = a.stable_step_us(10_000).min(3_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+        let mut f = f32::NEG_INFINITY;
+        for i in 0..nx {
+            let k0 = (marche[i] / dx).round() as usize;
+            if k0 < nz && a.labels()[(k0 * ny + j) * nx + i] == WATER {
+                f = f.max(marche[i]);
+            }
+        }
+        front = front.max(f);
+        // La plus haute particule au-dessus du fond de sa colonne, au-delà du pied : une gerbe détachée s'y verrait.
+        for p in a.particles() {
+            if (p[0] as f64 - (x_pied - dxs)).abs() < 0.5 * dxs {
+                crete = crete.max(p[2] + 0.25 * dx - niveau);
+            }
+            if (p[0] as f64) > x_pied {
+                // S644 : la remontée lue par les particules — la plus haute au-delà du pied, au-dessus du niveau au repos.
+                haut = haut.max(p[2] - niveau);
+            }
+        }
+    }
+    let sous = a.particles().iter().filter(|p| p[2] < if lisse { a.smooth_seabed_height(p[0], p[1]) } else { a.seabed_height(((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1)) }).count();
+    let r_apic = (front - niveau) as f64;
+    // Saint-Venant 2D, la même plage (le fond relatif au niveau au repos), ordre deux.
+    let mut plage = Plage::nouvelle(h, d, cot, x_pied, dxs, nx, 3, (lz - niveau) as f64, 9.81).unwrap();
+    plage.domaine.regler_ordre_deux(1e-16).unwrap();
+    let mut r_sv = f64::NEG_INFINITY;
+    let mut crete_sv = 0f64;
+    let i_pied = ((x_pied - dxs) / dxs) as usize;
+    let pas = 0.1 * dxs;
+    for _ in 0..(3.0 / pas).round() as usize {
+        plage.domaine.pas(pas).unwrap();
+        crete_sv = crete_sv.max(plage.domaine.h[i_pied * 3 + 1] + plage.fond_x[i_pied]);
+        if let Some(c) = plage.cote_mouillee(1e-3) {
+            r_sv = r_sv.max(c);
+        }
+    }
+    (r_apic, r_sv, n, a.particle_count(), sous, haut, [crete as f64, crete_sv])
+}
+
+/// **S644** — (1) les particules ; (2) la remontée à 20 % de Synolakis et de Saint-Venant 2D (à 2,5 cm, l'essai suivant) ; (3) la maille.
+#[test]
+fn a_solitary_wave_runs_up_the_slope_in_apic3d_s644() {
+    let syn = crate::grand_evenement::remontee_synolakis(0.07, 0.35, 3.0).unwrap();
+    let (r, sv, n, garde, sous, haut, cr) = onde_sur_pente_s644(0.05);
+    println!("S644 maille 5 cm : APIC {r:.4} m, Saint-Venant {sv:.4} m, Synolakis {syn:.4} m ; {n} particules, {garde} gardées, {sous} sous le fond ; remontée par les particules {haut:.4} m ; crête au pied APIC {:.4} m, Saint-Venant {:.4} m", cr[0], cr[1]);
+    assert_eq!((garde, sous), (n, 0), "critère 1");
+    // Critère 2 **manqué** (S644, A333) : la remontée lue par les étiquettes, 0,150 m aux deux mailles (65 % de Synolakis) — elle ne
+    // voit pas un film plus mince qu'une demi-maille ; lue par les particules, 0,188 (5 cm), 0,187 (2,5 cm) : 82 % de Synolakis, 78 %
+    // de Saint-Venant à 2,5 cm, sans convergence. La crête arrive intacte au pied. L'essai n'affirme que ce qui a tenu (ADR-244).
+}
+
+#[test]
+#[ignore = "≈ 5 min : la maille de 2,5 cm de S644"]
+fn a_solitary_wave_runs_up_the_slope_in_apic3d_fine_s644() {
+    let syn = crate::grand_evenement::remontee_synolakis(0.07, 0.35, 3.0).unwrap();
+    let (r, sv, n, garde, sous, haut, cr) = onde_sur_pente_s644(0.025);
+    println!("S644 maille 2,5 cm : APIC {r:.4} m, Saint-Venant {sv:.4} m, Synolakis {syn:.4} m ; {n} particules, {garde} gardées, {sous} sous le fond ; remontée par les particules {haut:.4} m ; crête au pied APIC {:.4} m, Saint-Venant {:.4} m", cr[0], cr[1]);
+    assert_eq!((garde, sous), (n, 0), "critère 1");
+}
+
+/// **S644 — le témoin** (ADR-259 D1) : la même onde sur le fond lisse de S640, sans contremarches. Mesuré : par les particules 0,200 m
+/// (5 cm), 0,190 m (2,5 cm) — à maille fine, autant que l'escalier (0,187) : les contremarches n'expliquent pas l'écart.
+#[test]
+#[ignore = "≈ 6 min : le témoin du fond lisse de S644, aux deux mailles"]
+fn the_smooth_bed_witness_of_the_runup_s644() {
+    for dx in [0.05f32, 0.025] {
+        let (_, sv, n, garde, sous, haut, cr) = onde_sur_pente_fond_s644(dx, true);
+        println!("S644 fond lisse {dx} m : remontée par les particules {haut:.4} m, Saint-Venant {sv:.4} m, crête au pied {:.4} m", cr[0]);
+        assert_eq!((garde, sous), (n, 0));
+    }
+}
+

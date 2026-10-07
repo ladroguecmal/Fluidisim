@@ -4655,3 +4655,10 @@ demi-maille ; mesuré conservé à 2,1·10⁻⁵ de E₀ sur 120 s. Le +8,4 % de
 *Note du 2026-10-07, S589, sur A286* ([AU-DESSUS-S589](../validation/AU-DESSUS-S589.md)) : **le remède construit pour B** —
 `Background::vitesse_au_dessus`, `U` constant et `W` fermé par la continuité, incompressible et continu au bit à `z = 0`. Reste ouverte :
 la réception dans le pas couplé mobile contre l'oracle S253, et W au-dessus du plan.
+
+**A333 — S644, 2026-10-07 (sévérité 2, ouverte). Le jet de rive d'APIC 3D est court d'un cinquième.** Une onde solitaire non déferlante
+(`H/d` = 0,2, pente 1:3) monte à 0,187 m (2,5 cm ; 0,188 à 5 cm) quand Saint-Venant 2D monte à 0,240 m et Synolakis à 0,230 m. La crête
+arrive intacte au pied ; sans contremarches (fond lisse), la remontée est la même à maille fine (0,190). Causes candidates, non
+départagées : la vitesse tangentielle nulle sur les faces fermées du fond (une paroi non glissante pour une lame d'une ou deux mailles) ;
+la surface reconstruite en eau mince (S640) ; une différence Euler/eau peu profonde sur pente raide, peu probable à cette ampleur. Le
+témoin suivant : le fond glissant (la vitesse tangentielle gardée sur les faces du fond) ([preuve](../validation/REMONTEE-APIC3D-S644.md)).

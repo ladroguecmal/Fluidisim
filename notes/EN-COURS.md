@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S644 — **en cours**. En autonomie ; la campagne du rouleau 3D (acceptée le 2026-10-07). **Étape 2 — une vague non déferlante qui
+Session : S644 — **terminée**. En autonomie ; la campagne du rouleau 3D (acceptée le 2026-10-07). **Étape 2 — une vague non déferlante qui
 monte la pente dans APIC 3D**, sur le fond en escalier de S639 (au rivage, 1,5 cm/s de frémissement ; les faces coupées de S640 y sont pires).
 
 **Ce que la session fait.** Une onde solitaire posée dans APIC 3D (l'élévation `H·sech²(γ(x − x₁))`, la vitesse `c·η/(d + η)` sur toute
@@ -85,7 +85,11 @@ sur la surface (aucune particule détachée au-dessus du front de plus d'une mai
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai (5 cm dans la suite, 2,5 cm `#[ignore]`) ; (1)–(4).
+- [x] **P2** — l'essai (5 cm dans la suite, 2,5 cm `#[ignore]`) ; (1)–(4).
 - [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) tenu ; **(2) manqué** : par les étiquettes 0,150 m aux deux mailles (le plan se trompait : la marche fait une maille, la
+  lecture ne voit pas le film) ; par les particules 0,188/0,187 m — 82 % de Synolakis, 78 % de Saint-Venant à 2,5 cm ; (3) sans
+  convergence ; (4) tenu. Témoins : la crête intacte au pied ; le fond lisse, 0,190 à 2,5 cm (les contremarches ne sont pas la cause) ;
+  Saint-Venant sur l'escalier, non freiné. A333 ouverte. L'utilisateur : « Continue en autonomie jusqu'à la v2 ou vers v2 » (consigné).
