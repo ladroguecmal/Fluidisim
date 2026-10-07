@@ -62,51 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S678 — **terminée**. En autonomie vers la v2 ; K3, 4.14 (« manquent une surface fiable en eau mince au rivage au repos »).
-Sur le fond lisse (S640), l'eau au repos avec un rivage court à **0,26 m/s**. En deçà de la profondeur du noyau, la surface de Zhu et
-Bridson se trompe de un à deux centimètres dans le film.
-
-**Ce que la session fait.** **La surface du film par sa dernière couche** (`film_smooth`, après l'extension de `φ` sous le fond).
-
-- Dans une colonne dont l'eau est moins profonde que trois mailles, la surface est la plus haute particule plus `dx/4` (la demi-
-  distance entre couches), corrigée de l'écart de lecture du noyau à cette place dans la maille (`lattice_read_error`, une table de
-  64 décalages cuite avec le fond).
-- `φ = z − surface` y est mêlé à `φ` du noyau, avec un poids 1 sous deux mailles de profondeur, 0 au-delà de trois.
-- Une colonne éclaboussée (moins de la moitié des particules qu'elle aurait pleine) garde `φ` du noyau.
-
-Au repos, le film et l'eau profonde lisent ainsi la même surface.
+Session : S679 — **en cours**. En autonomie vers la v2 ; K3, 4.14. S678 a montré que le film du rivage ne se règle pas dans APIC 3D
+(quatre plages sur six). **Une session de conception** : le film confié à Saint-Venant 2D, le relais dans les deux sens.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : la pente immergée de S640 (l'eau partout plus profonde que trois mailles : rien ne change, au bit) ; la même plage sans
-  la correction de lecture (`φ` du film sans l'écart du noyau).
-- **instrument** : l'essai de repos de S640 sur la pente, avec rivage, la vitesse maximale sur 2 s, à 5 cm et 2,5 cm. Ce que
-  rendrait chaque hypothèse :
-  - si la surface du film est la cause et que la correction est juste, **moins de 1 cm/s** aux deux mailles ;
-  - si la correction de lecture manque, **quelques cm/s** (le calcul ci-dessous) ;
-  - si le film n'est pas la cause, ou que la colonne est mal lue, **0,26 m/s** comme avant.
-- **calcul** (scratchpad `s678_calc.py`, ce script qui asserte) : la lecture du noyau varie de −1,18 à +1,73 mm sur une maille de 5 cm ;
-  sans correction, la marche entre film et eau profonde entretient jusqu'à **3.8 cm/s** dans un film de 2 cm (asserté
-  au-dessus du critère).
-- **ADR** : ADR-259 D1 (le témoin), ADR-268 D2 (un remède jugé sous une seule cause), ADR-254 D2.
+- **témoin** : sans objet (une conception).
+- **instrument** : pour chaque étape de la campagne, l'essai qui la jugera et ce qu'il rendrait sous chaque hypothèse, écrits dans la
+  conception ; le premier, le repos des six plages de S678.
+- **calcul** (scratchpad `s679.py`) : le raccord au moins à trois mailles de profondeur (0,15 m à 5 cm) ; l'onde de S647 y aurait
+  `H/h` = 0.70, soit le déferlement lui-même. Le raccord se place donc au-delà de la plongée.
+- **ADR** : ADR-178 (lot 5), ADR-259, ADR-268 D2.
 - **pièges** :
-  - la place de la surface dans la maille, `frac(η/dx − ½)` ;
-  - les gouttes (`is_droplet`), hors du film ;
-  - les mailles sous le fond, qui gardent `SOLID` par `label_smooth` ;
-  - S644 au fond lisse (le témoin de la remontée, ignoré, 6 min) changera : rapporté, non jugé.
+  - la zone des colonnes refuse le fond lisse (S640) ;
+  - le bord ouvert de droite d'APIC (`set_open_boundaries`) n'a jamais servi ;
+  - la masse : un seul flux d'interface, appliqué aux deux côtés.
 
-**Critères, écrits avant.**
-
-1. Au repos sur la pente avec rivage : au plus **1 cm/s** sur 2 s, à 5 cm et à 2,5 cm.
-2. La pente immergée : au bit d'avant (8·10⁻⁶ m/s).
-3. Le témoin sans correction rapporté, au-dessus de 1 cm/s comme le calcul l'annonce.
-4. Les essais de S639 à S658 (le fond en escalier) inchangés.
+**Critères, écrits avant.** (1) La conception écrite : les rôles, l'interface, la masse, les étapes et leurs essais. (2) L'ADR qui
+décide que le film du rivage appartient à Saint-Venant 2D.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `film_smooth` ; les essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [ ] **P2** — la conception ; ADR-271.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) **manqué** : le film seul 0,33 / 0,22 m/s. Trouvé en route (aux notes, ADR-244) : les faces à peine ouvertes, seconde cause ; film + faces extrapolées (< 40 %) : 2,5 / 3,1 mm/s sur la plage du plan, 4 plages sur 6 ; manque sur 1:10 à 5 cm (0,39) et 1:3 à 0,31 m à 2,5 cm (0,15). Éteints par défaut, au bit d'avant. (2) tenu ; (3) 1,66 cm/s ; (4) par construction.
