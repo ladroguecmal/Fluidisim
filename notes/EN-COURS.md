@@ -62,37 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S650 — **terminée**. En autonomie vers la v2 ; le rouleau 3D. **Étape 4 — le relais 2D → 3D** : la 3D seulement là où elle sert.
-Le lot des registres (S648–S650) à la fin.
+Session : S651 — **en cours**. En autonomie vers la v2. **La trente-quatrième revue de méthode** (ADR-222 D4 : S646–S650).
 
-**Ce que la session fait.** Le montage de S647 (onde solitaire `H/d` = 0,3, pente 1:12) coupé en deux à `x_r` = 5.0 m (0,7 m avant le
-pied) :
-
-- **Saint-Venant 2D** (S613, ordre deux de S620) porte l'onde sur toute la plage, depuis le même état initial ;
-- **APIC 3D** ne couvre que `[x_r ; 12,8]` m. Une **zone de colonnes** (S398) borde le large, du bord à 0,6 m ; les **particules**
-  occupent le reste, sur la pente, avec l'air balistique (S645). Son bord gauche est **ouvert** (S446) : il reçoit à chaque pas la
-  vitesse de Saint-Venant à `x_r` (`q/h`, uniforme sur la verticale), et la zone de colonnes compte le débit qui entre. Le bord droit
-  reste un mur ;
-- l'état initial de la 3D est celui de l'onde : `η` des colonnes, la vitesse de la grille ; les particules au repos, comme en S647
-  (à `x_r`, `η` = 0.0262 m).
-
-**Critères, écrits avant** (le comparant : le tout-3D de S647–S648 à 5 cm, retournement à 2,571 s et 9,675 m, air enfermé à 2,872 s et
-10,525 m).
-
-1. **La masse** : le volume de la 3D (colonnes et particules) varie du volume entré par le bord, au millionième du volume total.
-2. **À 5 cm, le relais se retourne avant le rivage**, à 0,15 m et 0,1 s du tout-3D.
-3. **De l'air enfermé apparaît après le retournement, en avant de lui** (S648).
-4. **Rapporté** : le temps de calcul contre le tout-3D, mesuré au même instant, sur la même machine.
-
-L'écart attendu : Saint-Venant, sans dispersion, raidit l'onde sur 1,6 m ; un retournement un peu plus tôt est la signature du relais, non
-une faute. Les deux lecteurs (S647, S648) sont réemployés tels quels.
+**Critères, écrits avant.** (1) ADR-265 relit chaque session S646–S650 ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le relais ; (1)–(4).
-- [x] **P3** — preuve ; liste 4.14 ; le lot ; rituel.
+- [ ] **P2** — ADR-265.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(3) tenus : volume − entré −3,7·10⁻¹⁷ ; retournement 2,575 s, 9,825 m (tout-3D 2,571 s, 9,675 m) ; air enfermé 2,667 s,
-  10,075 m ; (4) 163 s contre 256 s (64 %), chronométrés dans la même exécution.

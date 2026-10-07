@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 16:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S651 — la trente-quatrième revue de méthode (ADR-265) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S650 — le rouleau 3D, étape 4 : le relais 2D → 3D ([journal](notes/JOURNAL.md)). Avant : S649 (le découpage de la planète)
 Session suivante : **S651 — la revue de méthode** (ADR-265, S646–S650) ; puis **l'étape 5 du rouleau 3D** : le rouleau qui agit — la force sur un corps rigide posé dans la bande de déferlement (6.7), jugée par la quantité de mouvement.
 Maillons        : 1
