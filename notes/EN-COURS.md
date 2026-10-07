@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S685 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 2 de la conception.
+Session : S685 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 2 de la conception.
 
 **Ce que la session fait.** L'onde solitaire de S644 (`H/d` = 0,2, pente 1:3, non déferlante) part dans APIC 3D. Elle traverse le
 raccord à trois mailles de fond, et monte la plage dans Saint-Venant 2D. Le relais est jugé contre :
@@ -101,7 +101,8 @@ L'état initial, dans les deux montages : l'onde et sa vitesse au large du pied,
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) **manqué** : −15,2 % et −13,9 % du tout-Saint-Venant. Localisé : le volume transmis égal (+1,6 %), `η` et `u` du bord 3D lus juste ; l'onde portée par APIC diffère de celle de Saint-Venant (dispersion). Le calcul du plan ne regardait que la crête. (2) tenu.

@@ -1761,3 +1761,13 @@ au repos à quelques µm/s des deux côtés, cent mille fois mieux qu'APIC seul 
 Saint-Venant partait d'un niveau plus haut d'un centimètre que la 3D (le réseau des particules). Le plan l'avait annoncé ; le montage est
 corrigé. Maillons **1** (4.14 : « une surface fiable en eau mince au rivage au repos », tenue par le relais). Suivant : **S685**,
 l'étape 2 (l'onde solitaire à travers le raccord) ; la revue en S686.
+
+## S685 — 2026-10-08 — L'onde solitaire à travers le raccord au rivage
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, étape 2. **Fait**
+([preuve](../docs/validation/RELAIS-RIVAGE-ONDE-S685.md)) : l'onde de S644 dans le relais, contre le tout-Saint-Venant. **Mesuré** : la
+masse au bit, mais la remontée 15 % (5 cm) et 14 % (2,5 cm) sous le tout-Saint-Venant, **critère manqué**. Localisé : le raccord
+transmet le volume et le niveau ; c'est l'onde portée par APIC au large qui diffère (plus lente, plus large, sans le front raidi de
+Saint-Venant). Le calcul du plan ne regardait que la crête. Les deux instruments qui départageront sont nommés : le raccord entre deux
+Saint-Venant, et le tout-APIC à air balistique. Maillons **1** (4.14 : la transmission localisée). Suivant : **S686, la quarante et
+unième revue de méthode** ; puis S687, le raccord seul.
