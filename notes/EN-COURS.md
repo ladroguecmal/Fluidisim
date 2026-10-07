@@ -62,28 +62,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S649 — **terminée**. Décision technique déléguée par l'utilisateur (ADR-261 D2 : *« le plus puissant, niveau performance et
-résultat final »*) : **HEALPix (celui de DyingStar) ou la cube-sphère** pour découper la planète.
+Session : S650 — **en cours**. En autonomie vers la v2 ; le rouleau 3D. **Étape 4 — le relais 2D → 3D** : la 3D seulement là où elle sert.
+Le lot des registres (S648–S650) à la fin.
 
-**Déclaré** : la mesure a été faite pendant l'attente du calcul de S648 (le script dans le carnet de la session). Elle est versée ici
-(`calculs/s649_decoupage.py`) et rejouée ; ses nombres ne changent pas ce qui suit, écrit avant la reprise.
+**Ce que la session fait.** Le montage de S647 (onde solitaire `H/d` = 0,3, pente 1:12) coupé en deux à `x_r` = 5.0 m (0,7 m avant le
+pied) :
 
-**Ce qui est découpé.** Pas la grille de calcul (B analytique, W d'événements, δ et V en référentiels locaux, I-08) : les **données
-planétaires** de l'eau — bathymétrie, rivage, précalcul côtier, régions, glace, tuiles publiées, circulation cuite — et leur raccord avec
-le terrain de DyingStar.
+- **Saint-Venant 2D** (S613, ordre deux de S620) porte l'onde sur toute la plage, depuis le même état initial ;
+- **APIC 3D** ne couvre que `[x_r ; 12,8]` m. Une **zone de colonnes** (S398) borde le large, du bord à 0,6 m ; les **particules**
+  occupent le reste, sur la pente, avec l'air balistique (S645). Son bord gauche est **ouvert** (S446) : il reçoit à chaque pas la
+  vitesse de Saint-Venant à `x_r` (`q/h`, uniforme sur la verticale), et la zone de colonnes compte le débit qui entre. Le bord droit
+  reste un mur ;
+- l'état initial de la 3D est celui de l'onde : `η` des colonnes, la vitesse de la grille ; les particules au repos, comme en S647
+  (à `x_r`, `η` = 0.0262 m).
 
-**Critères de décision, écrits avant la reprise.** (1) pour des données par unité de surface, l'égalité des aires prime (écart ≤ 1 %) ;
-(2) la clé commune avec le terrain de DyingStar (aucun rééchantillonnage terrain ↔ eau) ; (3) la forme des cellules ne compte que pour un
-solveur qui calculerait sur elles — si aucun ne le fait, elle ne départage pas ; (4) le script rejoué rend les mêmes nombres, au chiffre
-près ; (5) l'ADR, les points touchés (1.5, 7.7, 11.1, 12.3, 12.4), la note datée dans ADR-002.
+**Critères, écrits avant** (le comparant : le tout-3D de S647–S648 à 5 cm, retournement à 2,571 s et 9,675 m, air enfermé à 2,872 s et
+10,525 m).
+
+1. **La masse** : le volume de la 3D (colonnes et particules) varie du volume entré par le bord, au millionième du volume total.
+2. **À 5 cm, le relais se retourne avant le rivage**, à 0,15 m et 0,1 s du tout-3D.
+3. **De l'air enfermé apparaît après le retournement, en avant de lui** (S648).
+4. **Rapporté** : le temps de calcul contre le tout-3D, mesuré au même instant, sur la même machine.
+
+L'écart attendu : Saint-Venant, sans dispersion, raidit l'onde sur 1,6 m ; un retournement un peu plus tôt est la signature du relais, non
+une faute. Les deux lecteurs (S647, S648) sont réemployés tels quels.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le script ; ADR-264 ; la liste.
-- [x] **P3** — rituel.
+- [ ] **P2** — le relais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 4.14 ; le lot ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (4) rejoué : les mêmes nombres (HEALPix aires 1,002, angle 53° ; cube-sphère équiangulaire 1,402, 61°) ; (1) et (2)
-  désignent HEALPix ; (3) aucun solveur ne calcule sur les tuiles — la forme ne départage pas ; (5) ADR-264, 1.5, 7.7, 11.1, 12.3, 12.4,
-  note dans ADR-002. Le script : `outils/decoupage_planete.py` (`calculs/` n'est pas versionné).

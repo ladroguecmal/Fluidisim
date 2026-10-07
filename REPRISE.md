@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 16:14 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 16:16 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S650 — le rouleau 3D, étape 4 : le relais 2D → 3D ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S649 — le découpage de la planète (ADR-264) ([journal](notes/JOURNAL.md)). Avant : S648 (le rouleau : le jet qui retombe et enferme l'air)
 Session suivante : **S650 — le rouleau 3D, étape 4 : le relais 2D → 3D** — Saint-Venant 2D porte la vague du large jusqu'à la bande de déferlement ; APIC 3D prend la bande, nourri par son bord (comme S622), avec le cycle de vie de S637–S638 ; jugé contre le tout-3D de S647–S648.
 Maillons        : 2
