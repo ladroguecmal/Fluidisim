@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 05:02 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 05:09 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S609 — 4.11, le régime substitutif : la bascule, un domaine alimenté par B à ses frontières ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S608 — le lot ; les niveaux d'activité des cellules ([journal](notes/JOURNAL.md)). Avant : S607 (la grille d'adressage HydroGrid)
 Session suivante : **S609 — un point absent** (ADR-247 ; restent 11). Revue à S611 ; le lot à S611. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 1 — S608 : 1.6 absent → partiel

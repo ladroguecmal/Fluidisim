@@ -62,34 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S608 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S605–S607), puis **1.6 — cellules, domaines et
-solveurs distincts, niveaux d'activité des cellules** (ADR-006 ; absent, conçu). La source (`architecture_globale` §3.3) nomme cinq
-niveaux : inactive, simplifiée, partiellement active, simulation active, niveau de détail supérieur — et dit que le niveau spatial et la
-précision physique ne sont pas équivalents.
+Session : S609 — **en cours**. En autonomie (ADR-247) : **4.11 — le régime substitutif quand δ n'est plus petit, restauré depuis graine
+(I-17)** (absent). ADR-001 §3.3 : la bascule à `max|δ| > 0,35·Hs_local` (ou par nature) ; le domaine devient **propriétaire du champ
+total** dans son emprise, et B+W ne l'alimentent plus que par ses frontières (générateur en entrée, absorbeur en sortie). La restauration
+depuis une graine (ADR-022 §3) est la session suivante.
 
-**Ce que la session fait.** Un module `activite.rs` : `Activite` (les cinq niveaux, ordonnés) ; `DomaineMeta` — ce que le serveur sait
-d'un domaine (référentiel, origine, `dx` parmi les six niveaux d'ADR-006 §3.2, blocs de 8³ mailles) — ; `couverture` — le volume de chaque
-cellule de 64 m de la HydroGrid couvert par les blocs d'un domaine, **non alignés** sur elle ; `niveaux` — par cellule : détail supérieur si
-un domaine de `dx ≤ dx_detail` la touche (la précision, non la subdivision), active si un domaine la couvre entière, partielle s'il la
-touche, simplifiée si W la marque, inactive sinon. Ne fait pas : l'hystérésis des niveaux (celle des domaines existe, ADR-006 §4,
-`scheduler::ON/OFF`), la forme réduite d'une perturbation qui disparaît (§3.4), la publication des niveaux au réseau.
+**Ce que la session fait.** Un module `substitutif.rs` : `Mode`, `mode_requis(max|δ|, Hs, par_nature)` ; `Domaine1D` — l'eau peu profonde
+linéaire du champ **total** sur grille décalée, schéma avant-arrière, et aux deux bords **Flather contre B** (`u = u_B ± √(g/h)·(η − η_B)`, B centré comme le schéma : `u_B` à la face et au demi-pas, `η_B`
+au centre de la maille voisine) :
+B y entre, ce qui sort du domaine en sort. Ne fait pas : un solveur substitutif non linéaire (le rouleau, la cavité — l'APIC 3D en serait
+un), W aux frontières, le 2D/3D, la graine.
 
-**Références, calculées avant** (ce script, en rationnels exacts). Domaine A (`dx` 0,5 m, origine (3,3 ; −1,7 ; −65,7), 40 × 40 × 17
-blocs) : **36 cellules** touchées, **2** pleines ([(1, 0, -1), (1, 1, -1)]), volume 1740800 m³ (= blocs × 4³). Domaine B
-(`dx` 0,05 m, 50 × 50 × 5 blocs posé dans une cellule pleine de A, il dépasse dans celle du dessus) : 2 cellules. W : neuf cellules d'un sillage. Avec `dx_detail` =
-0,10 m, les niveaux (inactive, simplifiée, partielle, active, détail) : **[0, 6, 33, 1, 2]**. Fractions couvertes par A : (0, 0, -2) : 0.025192871093750 ; (1, 0, -1) : 1.000000000000000 ; (2, 2, -1) : 0.261130371093750 ; (1, 0, 0) : 0.035937500000000.
+**Références, calculées avant** (ce script, par une implémentation numpy indépendante). Profondeur 2 m (`c` = 4.429447 m/s), 200 m en 400
+mailles, pas de 0,05 s ; B : une onde longue progressive de 0,1 m et 40 m. **B seul**, le domaine initialisé sur B : après 60 s, l'écart
+au champ de B **6.285449e-04 m** (la dispersion du schéma). **Une bosse** de 5 cm (gaussienne de 5 m au milieu) ajoutée au champ total : à
+10 s, deux moitiés de **0.025003 m** ; à 60 s, une fois sorties, il en reste **3.256827e-04 m** — 1.303 % d'une moitié.
 
-**Quantum** : f64 ; la couverture est un volume en m³, exacte en rationnels, en f64 à l'arrondi (10⁻⁹ relatif). **Critères, écrits
-avant.** (1) le nombre de cellules touchées et pleines de A, et les quatre fractions à 10⁻¹² ; (2) la somme des volumes couverts égale au
-volume des blocs, à 10⁻⁹ relatif — pour A et pour B ; (3) le compte des cinq niveaux [0, 6, 33, 1, 2] ; les 2 cellules de B ([(1, 0, -1), (1, 0, 0)]) au niveau détail, dont
-une que A couvre entière ; (4) refus : un `dx` hors des six niveaux, un domaine d'un autre référentiel ne couvre rien.
+**Quantum** : f64. **Critères, écrits avant.** (1) l'écart à B seul à 60 s, égal à la référence à 10⁻⁹ m près, et sous 1 mm ; (2) la moitié
+à 10 s et le reste à 60 s égaux aux références à 10⁻⁹ m ; le reste sous 2 % d'une moitié (les frontières laissent sortir ; la réflexion de Flather discret, 1,3 %, mesurée au plan
+— une première version, B pris au pas entier et au bord, laissait 4,3 mm d'écart à B seul) ; (3) la bascule :
+perturbatif à `max|δ|` = 0,35·Hs, substitutif au-delà ou par nature ; (4) refus : profondeur, `dx`, pas non positifs, nombre de Courant
+`c·dt/dx` ≥ 1.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `activite.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 1.6 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `substitutif.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 4.11 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai ; les fractions à 10⁻¹⁴ des rationnels. Suite : 798 essais listés (mesurée).
-- **P3** — preuve ACTIVITE-S608 ; liste 1.6 (absent → partiel) et décompte ; index ; journal ; le lot.
