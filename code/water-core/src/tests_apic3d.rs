@@ -2248,6 +2248,8 @@ struct ReleveS652 {
     /// S653 : le corps libre — sa trajectoire `(t, x global, z)` et sa plus grande vitesse.
     trajet: Vec<(f64, f64, f64)>,
     v_corps: f64,
+    /// S657 : à chaque pas où au moins quatre mailles d'eau touchent le corps, `(t, |v_corps|, la vitesse de l'eau autour)`.
+    autour: Vec<(f64, f64, f64)>,
 }
 
 /// **S652 — la force de l'eau sur la sphère** : sur les faces entre une maille du corps (solide, centre dans la sphère) et une maille
@@ -2364,7 +2366,12 @@ fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f
             if let Some(b) = a.body() {
                 releve.trajet.push((ts, x_r + b.center[0] as f64, b.center[2] as f64));
                 let v = b.velocity;
-                releve.v_corps = releve.v_corps.max(((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64).sqrt());
+                let vb = ((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64).sqrt();
+                releve.v_corps = releve.v_corps.max(vb);
+                let (n_eau, ve) = eau_autour_s657(&a);
+                if n_eau >= 4 {
+                    releve.autour.push((ts, vb, ve));
+                }
             }
             if f[0] > releve.fx_max {
                 (releve.fx_max, releve.t_fx) = (f[0], ts);
@@ -2565,5 +2572,83 @@ fn the_added_mass_steadies_the_free_body_5ms_s655() {
     let x0 = r.trajet.first().map_or(0., |p| p.1);
     let xmax = r.trajet.iter().fold(f64::NEG_INFINITY, |m, p| m.max(p.1));
     println!("S655 5 ms : vitesse max du corps {:.3} m/s, colonne {:.3} ; avance {:.3} m ; volume {:+.1e}", r.v_corps, r.u_colonne, xmax - x0, r.ecart);
+}
+
+/// **S657 — la vitesse de l'eau autour du corps** : le plus grand module de la vitesse aux centres des mailles d'eau voisines (six) d'une
+/// maille du corps (solide, centre dans la sphère) ; rend (le nombre de ces mailles d'eau, la vitesse, m/s).
+fn eau_autour_s657(a: &Apic3) -> (usize, f64) {
+    let Domain3 { nx, ny, nz, dx } = a.domain();
+    let Some(b) = a.body() else { return (0, 0.) };
+    let (l, u, v, w) = (a.labels(), a.velocity_u(), a.velocity_v(), a.velocity_w());
+    let dans = |i: usize, j: usize, k: usize| {
+        let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+        let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+        l[(k * ny + j) * nx + i] == SOLID && e[0] * e[0] + e[1] * e[1] + e[2] * e[2] < b.radius * b.radius
+    };
+    let mut vues = std::collections::HashSet::new();
+    let mut vmax = 0f64;
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                if !dans(i, j, k) {
+                    continue;
+                }
+                let voisins = [(i.wrapping_sub(1), j, k), (i + 1, j, k), (i, j.wrapping_sub(1), k), (i, j + 1, k), (i, j, k.wrapping_sub(1)), (i, j, k + 1)];
+                for (a2, b2, c2) in voisins {
+                    if a2 >= nx || b2 >= ny || c2 >= nz || l[(c2 * ny + b2) * nx + a2] != WATER || !vues.insert((a2, b2, c2)) {
+                        continue;
+                    }
+                    let uc = 0.5 * (u[(c2 * ny + b2) * (nx + 1) + a2] + u[(c2 * ny + b2) * (nx + 1) + a2 + 1]);
+                    let vc = 0.5 * (v[(c2 * (ny + 1) + b2) * nx + a2] + v[(c2 * (ny + 1) + b2 + 1) * nx + a2]);
+                    let wc = 0.5 * (w[(c2 * ny + b2) * nx + a2] + w[((c2 + 1) * ny + b2) * nx + a2]);
+                    vmax = vmax.max(((uc * uc + vc * vc + wc * wc) as f64).sqrt());
+                }
+            }
+        }
+    }
+    (vues.len(), vmax)
+}
+
+/// **S657 (1) — le lecteur éprouvé** (ADR-263 D2) : une sphère **imposée** à 0,5 m/s en x dans une eau au repos ; après quelques pas, la
+/// vitesse de l'eau autour d'elle entre 0,3 et 0,7 m/s.
+#[test]
+fn the_water_around_reader_sees_an_imposed_body_s657() {
+    let (nx, ny, nz, dx) = (40usize, 8usize, 20usize, 0.05f32);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let (c, r) = ([0.8f32, 0.2, 0.2], 0.1f32);
+    a.set_body(Some(Sphere3 { center: c, radius: r, velocity: [0.5, 0., 0.] })).unwrap();
+    a.seed(&|p| p[2] < 0.4 && (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) >= r * r).unwrap();
+    for _ in 0..10 {
+        a.step(10_000).unwrap();
+    }
+    let (n, ve) = eau_autour_s657(&a);
+    println!("S657 lecteur : {n} mailles d'eau autour, vitesse {ve:.3} m/s (le corps à 0,5)");
+    assert!(n >= 4 && (0.3..=0.7).contains(&ve), "critère 1 : {n} {ve}");
+}
+
+fn rapport_s657(r: &ReleveS652) -> (f64, f64, f64, f64) {
+    let pic = r.autour.iter().fold((0f64, 0f64, 0f64), |m, &(t, vb, ve)| if vb > m.1 { (t, vb, ve) } else { m });
+    let rmax = r.autour.iter().filter(|h| h.2 > 0.).fold(0f64, |m, h| m.max(h.1 / h.2));
+    (pic.0, pic.1, pic.2, rmax)
+}
+
+#[test]
+#[ignore = "≈ 8 min : S657, le corps libre contre l'eau autour de lui, pas de 10 ms"]
+fn the_free_body_against_the_water_around_10ms_s657() {
+    let r = libre_s655(10_000);
+    let (t, vb, ve, rmax) = rapport_s657(&r);
+    println!("S657 10 ms : le corps au plus vite {vb:.3} m/s à {t:.3} s, l'eau autour {ve:.3} m/s (rapport {:.2}) ; rapport au plus {rmax:.2} ; volume {:+.1e}", vb / ve, r.ecart);
+    assert!(r.ecart.abs() <= 1e-6, "critère 3");
+    assert!(vb <= 1.2 * ve, "critère 2 : {vb} {ve}");
+}
+
+#[test]
+#[ignore = "≈ 18 min : S657, le corps libre contre l'eau autour de lui, pas de 5 ms"]
+fn the_free_body_against_the_water_around_5ms_s657() {
+    let r = libre_s655(5_000);
+    let (t, vb, ve, rmax) = rapport_s657(&r);
+    println!("S657 5 ms : le corps au plus vite {vb:.3} m/s à {t:.3} s, l'eau autour {ve:.3} m/s (rapport {:.2}) ; rapport au plus {rmax:.2} ; volume {:+.1e}", vb / ve, r.ecart);
+    assert!(r.ecart.abs() <= 1e-6, "critère 3");
+    assert!(vb <= 1.2 * ve, "critère 2 : {vb} {ve}");
 }
 

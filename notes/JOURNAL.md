@@ -1531,3 +1531,10 @@ déjà leur protection, non appliquée au moment du plan (L420). **D1** : chaque
 textes) ; **D3** : la mémoire persistante. Maillons **2**. Suivant : **S657, la vitesse du corps contre l'eau autour de lui** — le premier
 plan sous ADR-266.
 
+## S657 — 2026-10-07 — le corps libre contre l'eau autour de lui ; A334 levée
+
+**Entrée.** En autonomie vers la v2 ; le premier plan avec les contrôles d'ADR-266. **Fait** ([preuve](../docs/validation/CORPS-LIBRE-EAU-S657.md)) :
+le lecteur de l'eau autour du corps, éprouvé (0,466 m/s lus pour une sphère imposée à 0,5) ; le corps libre jugé contre lui. **Mesuré** :
+au pic, le corps va à 0,90 (10 ms) et 0,91 (5 ms) fois l'eau qui l'entoure, au plus 0,98 sur toute la course — **A334 levée** : l'excès de
+S655 venait du comparant. **Le rouleau emporte un nageur** (6.7). L'utilisateur : « J'aimerais des sessions visuelles grâce à toutes les
+nouvelles avancées ». Maillons **1** (6.7 avance). Suivant : **S658, la séance visuelle** du rouleau.

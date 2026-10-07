@@ -4686,3 +4686,8 @@ de la lecture de la force. Le remède suivant : la masse ajoutée traitée impli
 *Note du 2026-10-07, S655, sur A334* ([MASSE-AJOUTEE-S655](../validation/MASSE-AJOUTEE-S655.md)) : la masse ajoutée implicite ramène le
 corps libre de 4,68 à 1,87 m/s (10 ms), la dépendance au pas de 83 % à 19–24 %, la flottaison amortie quatre fois plus vite. Reste ouverte :
 la vitesse du corps contre l'eau **autour de lui** (la sonde de S652–S655 restait à sa position de départ — un comparant non éprouvé).
+
+*Note du 2026-10-07, S657, sur A334* ([CORPS-LIBRE-EAU-S657](../validation/CORPS-LIBRE-EAU-S657.md)) : **levée.** Contre l'eau autour du
+corps (lecteur éprouvé), le corps libre va à 0,90 fois la vitesse de l'eau à son pic (10 ms), 0,91 (5 ms), au plus 0,98 sur toute la
+course : l'excès de S655 venait du comparant. La force lissée ne dépend pas du pas (S654) ; seul le pic instantané d'une force sur un corps
+fixe ne se rapporte que lissé.

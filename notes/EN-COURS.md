@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S657 — **en cours**. En autonomie vers la v2 ; 6.7. En S655, le corps libre (la masse ajoutée implicite) dépassait à 5 ms la
+Session : S657 — **terminée**. En autonomie vers la v2 ; 6.7. En S655, le corps libre (la masse ajoutée implicite) dépassait à 5 ms la
 vitesse de la sonde — une sonde restée à sa position de départ.
 
 **Contrôles du plan** (ADR-266)
@@ -84,7 +84,9 @@ toute la course, et les vitesses aux deux pas. (3) La masse au bit.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le lecteur et son épreuve ; les deux pas en parallèle ; (1)–(3).
+- [x] **P2** — le lecteur et son épreuve ; les deux pas en parallèle ; (1)–(3).
 - [ ] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) le lecteur 0,466 m/s pour 0,5 ; (2) rapport au pic 0,90 (10 ms), 0,91 (5 ms), au plus 0,98 ; (3) au bit. A334 levée. L'utilisateur
+  demande des séances visuelles des avancées — S658.

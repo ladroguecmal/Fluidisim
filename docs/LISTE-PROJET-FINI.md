@@ -638,7 +638,8 @@ pas recopiée ici (L137).
   au fond) — il flotte à son tirant, le rouleau l'emporte de 2,03 m en 1,5 s ; sa vitesse (4,68 m/s) dépasse l'eau (1,80)
   ([preuve](validation/CORPS-LIBRE-S653.md)) ; **S654** : à pas moitié, 2,56 m/s, la force lissée inchangée — l'excès vient du couplage
   explicite, non de la force ([preuve](validation/A334-PAS-S654.md)) ; **S655** : la masse ajoutée implicite — 1,87 m/s à
-  10 ms, la flottaison amortie quatre fois plus vite ([preuve](validation/MASSE-AJOUTEE-S655.md)). Manquent la poche d'air qui pousse un acteur, la vitesse du corps juste (A334), la rotation.
+  10 ms, la flottaison amortie quatre fois plus vite ([preuve](validation/MASSE-AJOUTEE-S655.md)) ; **S657 — A334 levée** : le corps va à
+  0,9 fois l'eau qui l'entoure à son pic, jamais au-delà, aux deux pas ([preuve](validation/CORPS-LIBRE-EAU-S657.md)) — **le rouleau emporte un nageur**. Manquent la poche d'air qui pousse un acteur, la rotation du corps.
 - [x] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *validé* (S512) : l'impulsion de masse ajoutée d'ADR-023 §2 à l'instant
   exact où la quille passe sous la surface, corps et eau entraînée d'une même quantité de mouvement ; la même à 2·10⁻¹⁶ près quelle que
   soit la phase du tick (l'échantillonnage au tick : 5,3 % de dispersion) ([preuve](validation/IMPACT-ENTREE-S512.md)).
