@@ -69,6 +69,8 @@ pub mod deferlement;
 pub mod regions;
 /// S595 — la goutte : vitesse terminale et vol (liste 7.2).
 pub mod goutte;
+/// S597 — le nuage de microbulles (liste 7.3).
+pub mod microbulles;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
