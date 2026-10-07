@@ -88,6 +88,21 @@ pub fn niveau(rayon: &Rayon<'_>, tsunami: &Tsunami, s: f64, t: f64) -> Result<f3
     Ok((rayon.amplitude(tsunami.a0_m, s)? * f) as f32)
 }
 
+/// **S584 — le tsunami sur un rayon courbe** (S583) : en un point du rayon tracé, l'instant d'arrivée est celui du point ; l'amplitude,
+/// `A₀·(h₀/h)^(1/4)·K_r` — Green et la réfraction ensemble (le flux `A²·√h·b` conservé dans le tube de rayons). `voisin` : le point de même
+/// instant d'un rayon voisin de la même famille, parti à l'écart `b0` ; `h` : la profondeur au point. Rend `(arrivée, amplitude)`.
+pub fn sur_rayon(a0: f64, h0: f64, point: &crate::refraction::Point, voisin: &crate::refraction::Point, b0: f64, h: f64)
+    -> Result<(f64, f64), Refus> {
+    if !(h0 > 0.0) || !(h > 0.0) || !(b0 > 0.0) || !a0.is_finite() || !h.is_finite() || !h0.is_finite() {
+        return Err(Refus);
+    }
+    let kr = crate::refraction::coefficient(point, voisin, b0);
+    if !kr.is_finite() {
+        return Err(Refus);
+    }
+    Ok((point.t, a0 * (h0 / h).sqrt().sqrt() * kr))
+}
+
 #[cfg(test)]
 #[path = "tests_tsunami.rs"]
 mod tests;
