@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 08:44 +02:00
+JETON            : libre
+Battement        : 2026-10-07 08:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S623 — le lot ; 4.11, la graine d'un domaine substitutif ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S622 — le niveau du large imposé au bord ([journal](notes/JOURNAL.md)). Avant : S621 (la vingt-huitième revue de méthode)
-Session suivante : **S623 — le lot (dû), puis la physique des partiels** (ADR-247). Revue à S626. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S622 : 11.3 avance (le bord forcé)
-Registres       : dernier lot S620 (ADR-213 D3) ; le prochain au plus tard en S623
+Session en cours : aucune
+Dernière session : S623 — le lot ; la graine d'un domaine substitutif ([journal](notes/JOURNAL.md)). Avant : S622 (le niveau du large imposé au bord)
+Session suivante : **S624 — la physique des partiels** (ADR-247). Revue à S626 ; le lot à S626. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S623 : 4.11 avance (la graine)
+Registres       : dernier lot S623 (ADR-213 D3) ; le prochain au plus tard en S626
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

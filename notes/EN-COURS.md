@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S623 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S620–S622), puis
+Session : S623 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S620–S622), puis
 **4.11 — la restauration depuis une graine** (ADR-022 §3, I-17) : la moitié laissée par S609. ADR-013 §4 : un domaine substitutif né faux met
 une minute à s'établir (60,65 s mesurées en S610) — d'où la graine cuite hors ligne.
 
@@ -87,7 +87,10 @@ changé, une autre ; (6) refus : un volume de nœud non positif, des tableaux de
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `graine.rs`, `depuis_etat` et leurs essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 4.11 ; rituel (`--lot`).
+- [x] **P2** — `graine.rs`, `depuis_etat` et leurs essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 4.11 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus du premier essai, au bit de numpy ; fonctionnalité `cuisson` ajoutée au `Cargo.toml` ; construit sans
+  avertissement avec et sans elle. Suite : 810 essais listés.
+- **P3** — preuve GRAINE-S623 ; ligne 4.11 ; index ; journal ; le lot.

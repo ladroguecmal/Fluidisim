@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [La graine d'un domaine substitutif — S623](validation/GRAINE-S623.md) : condense (cuisson seule), restaurer, choisir ; un pas au lieu d'une minute.
 - [Le niveau du large imposé au bord — S622](validation/BORD-FORCE-S622.md) : une frontière caractéristique, fidèle et absorbante.
 - [Saint-Venant 2D d'ordre deux — S620](validation/ORDRE-DEUX-S620.md) : MUSCL, Audusse, Heun ; Thacker ÷ 9 à 22 ; la remontée.
 - [Le défaut I-06 de SaintVenant2D corrigé — S619](validation/PREALLOCATION-S619.md) : les tableaux de travail préalloués, au bit ; ×1,87.

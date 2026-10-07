@@ -296,8 +296,10 @@ pas recopiée ici (L137).
   subdivision de la maille elle-même est absente.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *partiel* depuis S609 : la bascule d'ADR-001
   §3.3 (`max|δ| > 0,35·Hs`, ou par nature) ; un domaine 1D propriétaire du champ total, alimenté par B à ses bords (Flather) — B reproduit à
-  0,6 mm sur 60 s, une perturbation sortie à 1,3 % près ([preuve](validation/SUBSTITUTIF-S609.md)). Manquent la graine (`SeedState`,
-  ADR-022 §3), un solveur substitutif non linéaire, le 2D/3D, la bascule d'un domaine δ réel.
+  0,6 mm sur 60 s, une perturbation sortie à 1,3 % près ([preuve](validation/SUBSTITUTIF-S609.md)) ; **S623** : la graine (`SeedState`,
+  ADR-022 §3) — `condense` réservé à un hôte de cuisson, la tolérance de paramètres, la masse du nœud autoritaire (au ml) ; restauré,
+  le domaine est établi en un pas au lieu de 60,65 s ([preuve](validation/GRAINE-S623.md)). Manquent un solveur substitutif non
+  linéaire, le 2D/3D, la bascule d'un domaine δ réel.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
   exacte ; mais **son temps ne converge pas encore** à trois mailles (2,20 → 2,30 → 2,40 `√(D/g)`, S326),

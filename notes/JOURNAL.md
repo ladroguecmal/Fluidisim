@@ -1257,3 +1257,11 @@ jauge converge avec la maille (2,9 → 1,3 → 0,6 %) ; il reste 10⁻⁹ m apr�
 au-delà de la maille 1 (le limiteur minmod amplifie un ulp, A98). **En route** (au plan) : deux montages qui n'éprouvaient pas le bord
 (une onde solitaire plus large que le bassin ; une amplitude où la propagation non linéaire s'ajoutait). Maillons **1** (11.3 avance).
 Suivant : **S623**, le lot et la physique des partiels.
+
+## S623 — 2026-10-07 — le lot ; la graine d'un domaine substitutif
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; le lot (feuille de route S620–S622), puis la moitié de 4.11 laissée par
+S609. **Fait** ([preuve](../docs/validation/GRAINE-S623.md)) : `graine.rs` — `SeedState`, `condense` (compilé pour un hôte de cuisson
+seulement), `restaurer` (tolérance, masse du nœud autoritaire), `choisir` (jamais de mélange de champs). **Mesuré**, au bit de numpy : le
+volume restauré au ml du nœud ; le domaine restauré à 2,5 mm de B, établi en un pas au lieu de 60,65 s. Maillons **1** (4.11 avance).
+Suivant : **S624**, la physique des partiels.
