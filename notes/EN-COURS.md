@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S639 — **en cours**. En autonomie (ADR-247), sur la demande de l'utilisateur (2026-10-07 : « reprend avec 1 », le plan du **rouleau
+Session : S639 — **terminée**. En autonomie (ADR-247), sur la demande de l'utilisateur (2026-10-07 : « reprend avec 1 », le plan du **rouleau
 3D** en cinq étapes, accepté : « Ok très bien »). **Étape 1 — le fond en pente dans APIC 3D, au repos** (4.14, 4.16).
 
 **Ce que la session fait.** `Apic3::set_seabed(fond)` : une hauteur de fond par colonne, mise en **escalier** (les mailles dont le centre est
@@ -85,7 +85,11 @@ plat, ≤ 1 cm/s ; (4) refus : une longueur fausse, une valeur non finie ou hors
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `set_seabed` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
+- [x] **P2** — `set_seabed` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1), (3), (4) tenus ; **(2) manqué** : 1,51 cm/s au rivage d'une maille. Localisé : sans contremarches 4,7 cm/s ; avec,
+  1,5 ; l'image de coin aggravait (retirée) ; à 2,5 cm, 1,18 — la géométrie en escalier. Remède : les faces coupées (prochaine étape de la
+  campagne). Les 47 essais d'APIC 3D passent. Suite : 823 essais listés.
+- **P3** — preuve FOND-APIC3D-S639 ; lignes 4.14 ; index ; journal.

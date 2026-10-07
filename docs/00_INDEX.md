@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Le rouleau 3D, étape 1 : un fond en pente dans APIC 3D — S639](validation/FOND-APIC3D-S639.md) : l'escalier reflété ; le repos manqué de peu au rivage.
 - [Le cycle de vie de δ attaché à V — S638](validation/VIE-DELTA-S638.md) : naître quand V bouge, mourir quand V se calme.
 - [V qui déclenche δ et le tient par la masse — S637](validation/ARTICULATION-S637.md) : le seuil, l'amorçage, la relaxation d'ADR-025.
 - [Le dégel physique par le bilan d'énergie — S635](validation/DEGEL-S635.md) : le lac fond par quanta, l'énergie fermée.

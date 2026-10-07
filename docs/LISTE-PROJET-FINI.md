@@ -343,8 +343,10 @@ pas recopiée ici (L137).
   le bord monte la pente cycle après cycle — sa remontée à 0,05 % de Keller & Keller ([preuve](validation/HOULE-PLAGE-S625.md)) ;
   **S627** : le ressaut mobile et le front sec — Stoker et Ritter (C04 en 2D) convergent à l'ordre un attendu
   ([preuve](validation/BARRAGES-S627.md)) ; **S628** : le frottement de Manning et le bord droit — l'écoulement uniforme sur pente
-  converge vers la hauteur normale (celle de S604) ([preuve](validation/FROTTEMENT-S628.md)). Manquent le rouleau 3D, le passage d'une
-  houle au ressaut sur une pente, le branchement à δ.
+  converge vers la hauteur normale (celle de S604) ([preuve](validation/FROTTEMENT-S628.md)) ; **S639 — le rouleau 3D, étape 1** : un fond
+  en pente dans APIC 3D (en escalier, reflété, contremarches comprises) ; masse exacte, mais au repos 1,5 cm/s au rivage d'une maille
+  (critère de 1 cm/s manqué : un escalier n'est pas une pente — les faces coupées sont le remède) ([preuve](validation/FOND-APIC3D-S639.md)).
+  Manquent les faces coupées, la vague sur la pente et son déferlement en 3D, le relais 2D → 3D, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

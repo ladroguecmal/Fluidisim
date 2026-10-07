@@ -1370,3 +1370,12 @@ niveau suit sa masse avec le retard exact `Q·(τ − dt)` = 18 L (à 4·10⁻¹
 `articulation::Vie`. **Mesuré** : publications aux pas 13, 26, 39 ; δ naît au pas 13, meurt au pas 69 (3 s de calme), son retard de masse
 à la mort à 10⁻¹⁵ de la référence. **Question de l'utilisateur** : « Que reste-t-il à réaliser ? » — répondue à partir de la liste. Maillons
 **1** (5.10 avance). Suivant : **S639**.
+
+## S639 — 2026-10-07 — le rouleau 3D, étape 1 : un fond en pente dans APIC 3D
+
+**Entrée.** Sur la demande de l'utilisateur (« reprend avec 1 » ; le plan du rouleau 3D en cinq étapes, expliqué puis accepté). **Fait**
+([preuve](../docs/validation/FOND-APIC3D-S639.md)) : `Apic3::set_seabed` — le fond en escalier, parois immobiles, particules reposées,
+réflexion sous le fond et aux contremarches. **Mesuré** : masse exacte, aucune particule dans le sol, le témoin plat à 3·10⁻⁶ m/s ; **la
+pente au repos manque son critère** : 1,51 cm/s au rivage d'une maille (≤ 1 cm/s exigé), localisé et réduit de 4,7 par les contremarches,
+peu sensible à la maille (1,18 à 2,5 cm) : l'escalier. **En route** : un montage à égalités exactes (f32/f64), amendé avant la mesure.
+Maillons **1** (4.14, 4.16 avancent). Suivant : **S640, l'étape 1 bis — les faces coupées** (un fond lisse, pour tenir le repos).
