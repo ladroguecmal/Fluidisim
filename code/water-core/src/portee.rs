@@ -46,6 +46,26 @@ pub fn celerite(h: f64, periode_s: f64, g: f64) -> (f64, f64) {
     (w / k, -w / (k * k) * dkdh)
 }
 
+/// **S632 — un rayon de houle dispersif** : `refraction::tracer` avec la profondeur équivalente `c²/g` (la célérité de phase de la houle de
+/// période `periode_s`), arrêté sous `h_coupe_m` ; rend le nombre de points écrits dans `sortie`.
+#[allow(clippy::too_many_arguments)]
+pub fn tracer_houle(depart: [f64; 2], theta: f64, periode_s: f64, g: f64, fond: Fond<'_>, h_coupe_m: f64, dt: f64, sortie: &mut [Point])
+    -> Result<usize, Refus> {
+    if !(periode_s > 0.0) || !(g > 0.0) || !periode_s.is_finite() {
+        return Err(Refus);
+    }
+    let equivalent = |x: f64, y: f64| {
+        let (h, grad) = fond(x, y);
+        if !(h >= h_coupe_m) {
+            return (-1.0, [0.0, 0.0]);
+        }
+        let (c, dc) = celerite(h, periode_s, g);
+        let f = 2.0 * c / g * dc;
+        (c * c / g, [f * grad[0], f * grad[1]])
+    };
+    refraction::tracer(depart, theta, g, &equivalent, dt, sortie).map_err(|_| Refus)
+}
+
 /// La scène : la houle, le pas du tracé, les isobathes d'arrivée et de coupure, les départs `(position, direction)`, les bornes en `y` des
 /// plages (croissantes : la plage `i` entre `bornes_y[i]` et `bornes_y[i + 1]`), la longueur du tampon d'un rayon.
 pub struct Scene {

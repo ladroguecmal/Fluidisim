@@ -176,6 +176,30 @@ pub fn contours(origine: [f64; 2], pas: f64, nx: usize, ny: usize, profondeur: &
     Ok(sortie)
 }
 
+/// **S632 — le déferlement le long d'un rayon** `a` de houle (pulsation `omega`, hauteur au large `hauteur0`), son voisin `b` parti au même
+/// instant à l'écart perpendiculaire `b0` : `H = H₀·K_s·K_r` (`K_r` = `refraction::coefficient`), le premier passage de `H − 0,78·h` par zéro,
+/// interpolé entre deux points du rayon. `None` si le rayon ne déferle pas avant sa fin.
+pub fn sur_rayons(a: &[crate::refraction::Point], b: &[crate::refraction::Point], b0: f64, omega: f64, hauteur0: f64,
+    fond: &dyn Fn(f64, f64) -> (f64, [f64; 2]), g: f64) -> Result<Option<[f64; 2]>, Refus> {
+    if !(b0 > 0.0) || a.is_empty() || b.is_empty() || !(omega > 0.0) || !(hauteur0 > 0.0) || !(g > 0.0) {
+        return Err(Refus);
+    }
+    let mut avant: Option<(f64, [f64; 2])> = None;
+    for (p, q) in a.iter().zip(b) {
+        let h = fond(p.x, p.y).0;
+        let Some(ks) = crate::bathymetrie::coefficient_de_levee(omega, h, g) else { break };
+        let d = hauteur0 * ks * crate::refraction::coefficient(p, q, b0) - MCCOWAN * h;
+        if let Some((d0, x0)) = avant {
+            if d0 < 0.0 && d >= 0.0 {
+                let f = -d0 / (d - d0);
+                return Ok(Some([x0[0] + f * (p.x - x0[0]), x0[1] + f * (p.y - x0[1])]));
+            }
+        }
+        avant = Some((d, [p.x, p.y]));
+    }
+    Ok(None)
+}
+
 #[cfg(test)]
 #[path = "tests_deferlement.rs"]
 mod tests;

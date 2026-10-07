@@ -90,3 +90,46 @@ fn the_breaking_contour_follows_any_coast_s630() {
     assert_eq!(contours([0.0, 0.0], 0.0, 2, 2, &[1.0; 4], normale, g, &mut [0.0; 4]), Err(Refus), "critère 4 : pas");
     assert_eq!(contours([0.0, 0.0], 5.0, 2, 2, &[1.0; 4], normale, g, &mut [0.0; 3]), Err(Refus), "critère 4 : tampon");
 }
+
+/// **S632** — (1)–(2) la côte droite contre numpy et l'analytique ; (3) l'île en miroir ; (4) refus.
+#[test]
+fn breaking_along_wave_rays_matches_snell_and_bends_around_an_island_s632() {
+    use crate::portee::tracer_houle;
+    use crate::refraction::Point;
+    let (g, periode) = (9.81, 8.0);
+    let omega = 2.0 * core::f64::consts::PI / periode;
+    let droite = |x: f64, _y: f64| (0.02 * x, [0.02, 0.0]);
+    let th = core::f64::consts::PI - 0.3;
+    let xb = 112.5994530931984;
+    let mut errs = Vec::new();
+    for (dt, r) in [(2.0, 112.61847330202292), (1.0, 112.60477253802767), (0.5, 112.6004762350802)] {
+        let (mut a, mut b) = (vec![Point::default(); 20_001], vec![Point::default(); 20_001]);
+        let na = tracer_houle([6000.0, 0.0], th, periode, g, &droite, 0.5, dt, &mut a).unwrap();
+        let nb = tracer_houle([6000.0, 10.0], th, periode, g, &droite, 0.5, dt, &mut b).unwrap();
+        let p = sur_rayons(&a[..na], &b[..nb], 10.0 * th.cos().abs(), omega, 1.5, &droite, g).unwrap().unwrap();
+        println!("S632 : côte droite, pas {dt} s — déferlement en x = {} (analytique {xb}, écart {:e})", p[0], (p[0] - xb).abs());
+        assert!((p[0] - r).abs() < 1e-9, "critère 1 : {dt}");
+        errs.push((p[0] - xb).abs());
+    }
+    assert!(errs[0] > errs[1] && errs[1] > errs[2] && errs[2] < 2e-3, "critère 2");
+
+    let ile = |x: f64, y: f64| {
+        let r = x.hypot(y);
+        if r > 100.0 { (0.02 * (r - 100.0), [0.02 * x / r, 0.02 * y / r]) } else { (-1.0, [0.0, 0.0]) }
+    };
+    let trace = |y0: f64| {
+        let mut v = vec![Point::default(); 20_001];
+        let n = tracer_houle([5200.0, y0], core::f64::consts::PI, periode, g, &ile, 0.5, 1.0, &mut v).unwrap();
+        v.truncate(n);
+        v
+    };
+    for y in [200.0, 300.0] {
+        let haut = sur_rayons(&trace(y), &trace(y + 10.0), 10.0, omega, 1.5, &ile, g).unwrap().unwrap();
+        let bas = sur_rayons(&trace(-y), &trace(-y - 10.0), 10.0, omega, 1.5, &ile, g).unwrap().unwrap();
+        println!("S632 : île, rayon {y} m — déferle en {haut:?} ; miroir {bas:?}");
+        assert!((haut[0] - bas[0]).abs() < 1e-9 && (haut[1] + bas[1]).abs() < 1e-9, "critère 3 : {y}");
+    }
+    let un = [Point::default()];
+    assert_eq!(sur_rayons(&un, &un, 0.0, omega, 1.5, &droite, g), Err(Refus), "critère 4 : b0");
+    assert_eq!(sur_rayons(&[], &un, 10.0, omega, 1.5, &droite, g), Err(Refus), "critère 4 : rayon vide");
+}
