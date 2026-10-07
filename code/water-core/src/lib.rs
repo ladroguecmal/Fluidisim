@@ -99,6 +99,8 @@ pub mod grand_evenement;
 pub mod coherence_clients;
 /// S617 — les profils de qualité (I-16) et le régulateur d'ADR-012 §5 (liste 9.10).
 pub mod qualite;
+/// S623 — la graine d'un domaine substitutif : condense (cuisson seule), restaurer, choisir (liste 4.11 ; ADR-022 §3).
+pub mod graine;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;

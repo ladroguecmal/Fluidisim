@@ -58,6 +58,18 @@ impl Domaine1D {
         Ok(Domaine1D { g, h, dx, dt, pas: 0, eta, u })
     }
 
+    /// **S623** — le domaine repris d'un état (`eta` aux centres, `u` aux faces) : une graine restaurée (ADR-022 §3).
+    pub fn depuis_etat(g: f64, h: f64, dx: f64, dt: f64, eta: Vec<f64>, u: Vec<f64>) -> Result<Domaine1D, Refus> {
+        let n = eta.len();
+        let mut d = Domaine1D::depuis_b(g, h, dx, n.max(1), dt, &|_, _| (0.0, 0.0), &[])?;
+        if n == 0 || u.len() != n + 1 || eta.iter().chain(&u).any(|v| !v.is_finite()) {
+            return Err(Refus);
+        }
+        d.eta = eta;
+        d.u = u;
+        Ok(d)
+    }
+
     /// **S610** — le domaine né au repos (`η = 0`, `u = 0`) : faux sous B, il doit s'établir (ADR-013 §4).
     pub fn au_repos(g: f64, h: f64, dx: f64, n: usize, dt: f64) -> Result<Domaine1D, Refus> {
         let mut d = Domaine1D::depuis_b(g, h, dx, n, dt, &|_, _| (0.0, 0.0), &[])?;

@@ -7,3 +7,7 @@ description = "Systeme d'eau — bibliotheque sans dependance moteur (ADR-020)"
 
 # ADR-020 : aucune dependance. Ni ici, ni jamais.
 [dependencies]
+
+# S623 : `condense` (cuire une graine) n'existe que pour un hote de cuisson (ADR-022 §3.3, L19).
+[features]
+cuisson = []
