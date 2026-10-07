@@ -101,6 +101,8 @@ pub mod coherence_clients;
 pub mod qualite;
 /// S623 — la graine d'un domaine substitutif : condense (cuisson seule), restaurer, choisir (liste 4.11 ; ADR-022 §3).
 pub mod graine;
+/// S637 — l'articulation V↔δ : V déclenche δ, l'amorce et le tient par la masse (liste 5.10 ; ADR-025 §3).
+pub mod articulation;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
