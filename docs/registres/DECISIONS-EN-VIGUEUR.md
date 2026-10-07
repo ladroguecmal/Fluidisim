@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**246 ADR** — actée : 195, proposée : 49, rétractée en partie : 2.
+**247 ADR** — actée : 196, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -200,7 +200,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [187](../adr/ADR-187-methode-refondue-s321.md) | La méthode refondue sur l'analyse de S321 : un rituel en deux parties, une lecture bornée, des protections plutôt que des leçons, des réceptions reproductibles | actée | S321 | 027 127 174 178 184 186 | 190 213 221 |
 | [188](../adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md) | Le lot 3 prend la place du lot 2 dans l'alternance, tant que l'ordre E est bloqué | actée | S324 | 127 174 178 184 186 | 189 |
 | [189](../adr/ADR-189-la-v1-d-abord.md) | La v1 d'abord | actée | S329 | 008 127 174 178 184 188 | 190 |
-| [190](../adr/ADR-190-apres-la-v1-la-liste-entiere.md) | Après la v1, la liste du projet fini entière | actée | S351 | 127 174 178 187 189 | 191 197 218 |
+| [190](../adr/ADR-190-apres-la-v1-la-liste-entiere.md) | Après la v1, la liste du projet fini entière | actée | S351 | 127 174 178 187 189 | 191 197 218 247 |
 | [191](../adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md) | Le rendu réaliste de l'eau : un module du moteur maison, en alternance avec la physique | actée | S355 | 001 124 127 174 178 190 | 192 |
 | [192](../adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md) | Le rendu de l'eau dans Godot 4 | actée | S356 | 001 124 127 130 191 | 194 195 197 |
 | [193](../adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md) | Le domaine δ d'une coque est un domaine linéaire, porté sur la carte | actée | S358 | 008 028 127 175 178 |  |
@@ -228,7 +228,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 222 225 227 229 241 |
 | [216](../adr/ADR-216-le-banc-visuel.md) | Le banc visuel : mesurer plutôt que regarder | actée | S471 | 215 | 217 |
 | [217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md) | Le type d'eau, une option d'édition de la carte ; le ciel qui bouge, à l'atmosphère | actée | S473 | 197 216 |  |
-| [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 222 |
+| [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 222 247 |
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
@@ -257,3 +257,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [244](../adr/ADR-244-dix-huitieme-revue-de-methode.md) | Dix-huitième revue de méthode (S566–S570) | actée | S571 | 222 243 | 245 |
 | [245](../adr/ADR-245-dix-neuvieme-revue-de-methode.md) | Dix-neuvième revue de méthode (S571–S575) | actée | S576 | 222 244 | 246 |
 | [246](../adr/ADR-246-vingtieme-revue-de-methode.md) | Vingtième revue de méthode (S576–S580) | actée | S581 | 222 245 |  |
+| [247](../adr/ADR-247-la-v2-la-liste-a-100.md) | La v2 : la liste à 100 %, la physique d'abord | actée | S585 | 190 218 |  |
