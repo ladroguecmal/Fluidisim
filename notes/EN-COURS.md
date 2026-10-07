@@ -62,31 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S663 — **terminée**. Une séance visuelle (l'utilisateur les a demandées ; R40 reçu) : **la houle sur le haut-fond de Berkhoff**,
-S659–S662. Trois images, envoyées pour un verdict (R41) : la carte de l'amplitude vue de dessus (le modèle non linéaire, le haut-fond, les
-lignes de mesure) ; les quatre sections, les mesures contre les trois modèles ; la surface animée sur une période (les crêtes qui se
-courbent et se concentrent).
+Session : S664 — **en cours**. En autonomie vers la v2 ; 2.7, « les chemins de B » et la bathymétrie 2D qu'ADR-196 §3 laissait au lot 2D.
+R41 reçu (« Je valide, continue »).
+
+**Ce que la session fait.** `Cote2D` (`bathymetrie_cote2d.rs`) : la côte cuite **en 2D** par le modèle de pente douce à grand angle
+(S660), lue par B comme la côte 1D de S364 — chaque composante garde sa pulsation et sa phase temporelle entière, et reçoit, par nœud
+d'une grille (`s` le long de la normale vers la côte, `n` le long de la côte), une **correction de phase** entière (Q32), un **facteur
+d'amplitude** `|A|`, son **vecteur d'onde local** (le gradient de la phase totale) et `coth(kh)`. Au large de la côte cuite (`s ≤ 0`),
+l'évaluation est celle de B, **au bit** (ADR-196 D1). La marche suit la **normale à la côte** pour toutes les composantes (une rangée suit
+une isobathe : `k̄` y est le `k` local) ; une composante oblique entre par `A(0, n) = e^(i·k₀·sin θ·n)` ; la correction vaut
+`ψ(s) + arg A − k₀·(s·cos θ + n·sin θ)`. Linéaire (la dispersion d'amplitude de S662 ne se superpose pas entre composantes).
 
 **Contrôles du plan** (ADR-266, ADR-267)
 
-- **témoin** : sans objet (la séance montre).
-- **instrument** : l'enregistrement relu avant de rendre — l'amplitude écrite aux points des sections égale celle de `Champ::amplitude`
-  (à 10⁻¹²) ; les écarts recalculés par le rendu égaux à ceux de S662 (au millième). Ce qui départagerait : un champ mal écrit ou
-  transposé rendrait des écarts différents.
-- **calcul** : la phase de référence `ψ(x) = ∫k̄ dx` recalculée comme le modèle la marche (la moyenne de `k` sur `y`, aux demi-pas).
-- **ADR** : ADR-216, ADR-262 (un rendu d'atelier), ADR-264.
-- **pièges** : **l'axe `y` inversé des mesures** (tracer les mesures à `−y`) ; l'échelle des couleurs (bornée, dite) ; la surface animée à
-  partir du champ linéarisé (`η = a₀·Re(A·e^(i(ψ − ωt)))`), sans les harmoniques de l'onde non linéaire.
+- **témoin** : sans objet au départ.
+- **instrument** : la côte 1D de S364 (`Cote`, WKB exact sur isobathes droites), sur sa propre plage (1:50, de 80 à 2 m sur 3900 m),
+  une houle de 10 s, 1 m, à 30°. Ce qui départagerait : une `Cote2D` juste rend le facteur à 2 % et la correction à quelques degrés de
+  `Cote` ; une faute de convention de phase rend un décalage dès le bord du large (`s` petit, où la correction doit être nulle) ; une
+  marge trop étroite rend des oscillations latérales (le facteur lu à `n` = ±largeur/2 différent de `n` = 0).
+- **calcul** (ce script) : la marge `L·tan θ` = 2252 m ; la marche 1951 × 2353 (73 Mo, asserté sous 400) ;
+  l'erreur de phase de Padé attendue sur le chemin, ≤ 7.1° (asserté sous 15°).
+- **ADR** : ADR-196 (D1 au bit au large, D3 le bord du large à λ₀ — ici 80 m pour λ₀ = 156 m, soit λ₀/2 : la plage de S364 elle-même),
+  ADR-264 (le calcul en grille locale), ADR-260 (le module rangé).
+- **pièges** : les parois latérales de la marche (la marge) ; `k̄` sur une rangée oblique aux isobathes (la marche le long de la normale) ;
+  la limite de Padé au-delà de 45° (une composante plus oblique est refusée) ; l'interpolation de la phase entière (moins d'un demi-tour
+  entre nœuds, refusé sinon) ; l'eau profonde des composantes (refusée sinon, comme `Cote`).
 
-**Critères, écrits avant.** (1) L'enregistrement relu (les deux contrôles). (2) Trois images envoyées, avec ce qu'elles montrent. (3) Le
-verdict inscrit (R41), reçu ou attendu.
+**Critères, écrits avant.** (1) Au large (`s ≤ 0`), l'évaluation de B **au bit**. (2) Sur la plage de S364, au centre (`n` = 0), le long
+du profil : le facteur à **2 %** de `Cote`, la correction de phase à **15°** ; et au bord de la largeur (`n` = ±100 m), le facteur à 1 % de
+celui du centre (la marge tient). (3) Refus : une composante à plus de 45°, une profondeur non positive, une géométrie invalide.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'enregistrement ; le rendu ; l'envoi.
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — `Cote2D` et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) les écarts recalculés égaux ; l'amplitude relue à 9·10⁻⁸ — la borne de 10⁻¹² du plan ignorait l'écriture en `f32` ; (2)
-  trois images envoyées (les accents corrigés avant l'envoi) ; (3) R41 en attente (la boussole).

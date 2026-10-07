@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 20:59 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 21:04 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S664 — 2.7 : la côte 2D cuite dans B par le modèle de pente douce ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S663 — la séance visuelle du haut-fond de Berkhoff (R41) ([journal](notes/JOURNAL.md)). Avant : S662 (la non-linéarité sur le haut-fond de Berkhoff)
 Session suivante : **S664** — selon R41 ; sinon 2.7 : le champ côtier cuit lu par B (la houle réfractée et diffractée par la bathymétrie, servie à la mer de la scène), ou le point du front 0 que la liste attend le plus.
 Maillons        : 2
