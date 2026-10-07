@@ -154,3 +154,7 @@ dépendance qui, découverte tard, coûte un trimestre.
 
    Effet réel et spectaculaire dans les embouchures. Formule de décalage Doppler
    `ω_apparent = ω + k·U` disponible ; à activer si le rendu le justifie.
+
+## Note datée du 2026-10-07 (S642)
+
+§3.1 : le sens s'inverse — le relief d'abord, les rivières placées procéduralement ensuite, le relief recalculé à leur proximité, l'édition manuelle par ajout ([ADR-261](ADR-261-reponses-du-2026-10-07.md) D1).

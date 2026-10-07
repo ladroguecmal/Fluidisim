@@ -75,6 +75,11 @@ l'état reste entier ; ses intermédiaires locaux de géométrie, projection et 
 `f64`, afin de ne pas réduire la précision des volumes entiers à celle de f32. Cette exception
 ne change ni le domaine local ni I-03 et ne s'étend pas aux autres couches.*
 
+*Amendement S642 ([ADR-260](adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md) D1–D2) : I-08 gouverne les **champs de production** de
+B, W et δ (leur état et leurs mises à jour par pas, CPU et GPU). `f64` reste permis pour V (ADR-139), les références et instruments,
+les outils hors ligne et les cuissons, et les calculs scalaires arrondis en `f32` avant d'entrer dans un champ ; une référence de
+champ en `f64` doit sa production `f32` avant que son point soit validé. L'inventaire est contrôlé par `outils/precision_f64.py`.*
+
 *Précision S233 ([ADR-141](adr/ADR-141-surface-linearisee-et-coefficients-temporels.md)) :
 le pas local δ à durée entière peut construire en f64 ses coefficients temporels dimensionnés
 (ρ/dt, dt/ρ, dt/dx), arrondis en f32 avant les calculs de champs. Aucune durée ni horloge
@@ -131,6 +136,10 @@ classe se nomme `WaterSystem` (SPEC-004 §3). Ce qu'I-13 protège est le tableau
 **I-14 — Toute valeur numérique est ou bien dérivée d'une formule citée dans SPEC-001 ou SPEC-002,
 ou bien marquée « à calibrer » avec le benchmark qui la fixera.** Aucun nombre magique sans
 provenance.
+
+*Amendement S642 ([ADR-260](adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md) D3) : la formule peut aussi être citée dans la preuve
+de `docs/validation` qui a reçu la loi, avec sa référence publiée. Un seuil sans provenance n'est pas une règle (le `0,35·Hs`
+d'ADR-001 §3.3, paramètre de l'appelant depuis S642).*
 
 **I-15 — Une grandeur dérivée est autoritaire si et seulement si tous les participants peuvent la
 calculer à l'identique à partir de données répliquées.** I-04 en est le corollaire : δ n'est jamais

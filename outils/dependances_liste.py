@@ -110,6 +110,7 @@ D = {
  "7.7": ("H", "la publication par tuiles depuis B, W et V (ADR-018)", [], None),
  "7.8": ("H", "les événements et paramètres publiés (ADR-016)", [], "la fin du projet, par Wwise, l'audio du jeu (ADR-197 D5, ADR-219)"),
  "7.9": ("H", "la rupture de la glace sous charge", ["7.6"], None),
+ "7.10": ("B", "—", ["7.4", "7.5"], None),
  "8.1": ("H", "le cœur branché dans Godot, moteur du jeu entier (GDExtension ; ADR-197 D2)", [], None),
  "8.2": ("H", "le LOD du maillage ; déplacement ou normales selon la vue", [], None),
  "8.3": ("H", "le filtre des impacts ; le LOD temporel", [], None),

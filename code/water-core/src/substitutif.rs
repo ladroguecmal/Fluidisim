@@ -2,8 +2,10 @@
 //!
 //! Quand `|δ|` n'est plus petit devant `|B + W|` — rouleau, coque qui émerge, cavité traversante —, additionner une houle analytique à
 //! un champ où il n'y a plus d'eau produit une aberration. Le domaine bascule alors : il devient **propriétaire du champ total** dans son
-//! emprise, et B ne l'alimente plus que par ses frontières — elle y entre, ce qui sort du domaine en sort. Critère d'ADR-001 :
-//! `max|δ| > 0,35·Hs_local`, ou substitutif par nature (volume fini, intérieur, zone de déferlement).
+//! emprise, et B ne l'alimente plus que par ses frontières — elle y entre, ce qui sort du domaine en sort. Le domaine bascule s'il
+//! est substitutif par nature (volume fini, intérieur, zone de déferlement), ou si `max|δ|` dépasse un **seuil que l'appelant
+//! fournit** : le `0,35·Hs` d'ADR-001 §3.3 est une « proposition historique non reçue » (ADR-112 D1, qui ne lui donne aucun
+//! remplaçant) ; le critère reste à instruire sur un couplage calculé. S609 l'avait pris pour règle ; corrigé en S642 (ADR-259 D2).
 //!
 //! [`Domaine1D`] : l'eau peu profonde linéaire du champ total, `η` aux centres et `u` aux faces, schéma avant-arrière (`u` vit aux
 //! demi-pas) ; aux deux faces de bord, **Flather contre B** — `u = u_B ± √(g/h)·(η − η_B)`, `u_B` à la face et au demi-pas, `η_B` au
@@ -23,12 +25,13 @@ pub enum Mode {
     Substitutif,
 }
 
-/// La part de `Hs_local` au-delà de laquelle `δ` n'est plus petit (ADR-001 §3.3, « à calibrer » : banc B4).
-pub const SEUIL_BASCULE: f64 = 0.35;
-
-/// **Le mode requis** : substitutif par nature, ou si `max|δ| > 0,35·Hs_local`.
-pub fn mode_requis(max_abs_delta: f64, hs_local: f64, par_nature: bool) -> Mode {
-    if par_nature || max_abs_delta > SEUIL_BASCULE * hs_local { Mode::Substitutif } else { Mode::Perturbatif }
+/// **Le mode requis** : substitutif par nature, ou si `max|δ| > seuil` (m), le seuil fourni par l'appelant — aucun n'est reçu
+/// (ADR-112 D1). Refus : un seuil négatif ou non fini.
+pub fn mode_requis(max_abs_delta: f64, seuil: f64, par_nature: bool) -> Result<Mode, Refus> {
+    if !(seuil >= 0.0 && seuil.is_finite()) {
+        return Err(Refus);
+    }
+    Ok(if par_nature || max_abs_delta > seuil { Mode::Substitutif } else { Mode::Perturbatif })
 }
 
 /// L'état extérieur que B impose aux bords : `(η, u)` en `(x, t)`.

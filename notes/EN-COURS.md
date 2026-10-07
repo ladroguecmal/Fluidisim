@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S642 — **en cours**. En autonomie (ADR-247). **Les corrections de l'audit** ([AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)
+Session : S642 — **terminée**. En autonomie (ADR-247). **Les corrections de l'audit** ([AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)
 §2.1, ADR-259) qu'une session tranche seule (ADR-222 : une décision technique que la mesure contredit se remplace).
 
 **Ce que la session fait.** (a) **4.11** : `substitutif::mode_requis` ne prescrit plus `0,35·Hs` — ADR-112 D1 (« proposition historique
@@ -81,7 +81,14 @@ jour ; la suite du cœur passe.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — 4.11 ; ADR-260, les amendements, le contrôle ; la liste.
+- [x] **P2** — 4.11 ; ADR-260, les amendements, le contrôle ; la liste.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) `mode_requis(max|δ|, seuil, par_nature) -> Result` : aucune constante ; l'essai S609 passe (au seuil, au-delà, par
+  nature, refus) ; (2) ADR-260 et les deux amendements ; (3) `outils/precision_f64.py` : 43 modules rangés (V 3, R 9, O 7, S 15, P 9),
+  contrôle à zéro, échoue sur un module retiré (essayé), branché dans `etat_projet.py --check` ; (4) 4.11, 1.8 à jour.
+- **Réponses de l'utilisateur pendant la session** (les huit questions de l'audit) : ADR-261 — l'eau placée après le relief, le découpage
+  le plus puissant (étude), toutes les anciennes intentions rejugées (campagne), glace sans limite, air respirable (7.10, 133 points), un
+  seul travailleur sur un seul PC (jury, intégration à plusieurs machines, écran partagé retirés ; B3 requalifié). Notes datées dans
+  ADR-001, 002, 011, 027 ; 12.2, 12.3, 12.4, 7.6, 10.3, 11.1, 13.1, 13.3 à jour ; boussole et décisions de l'utilisateur.

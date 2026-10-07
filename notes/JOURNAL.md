@@ -1401,3 +1401,14 @@ la gerbe vers W, la glace qui cède, le ressort d'affichage, l'horloge du client
 corrigés. Les huit arbitrages de l'audit posés à l'utilisateur (boussole). Maillons **1**. Suivant : **S642, les corrections** (4.11,
 I-08, I-14).
 
+## S642 — 2026-10-07 — les corrections de l'audit ; les réponses de l'utilisateur
+
+**Entrée.** En autonomie ; les corrections d'ADR-259. **Fait** : **4.11** — `substitutif::mode_requis` ne prescrit plus `0,35·Hs` (ADR-112
+D1) : le seuil vient de l'appelant. **[ADR-260](../docs/adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md)** — I-08 gouverne les champs
+de production ; 43 modules où `f64` domine rangés et contrôlés (`outils/precision_f64.py`, dans `etat_projet --check`), dont neuf
+références de champ qui doivent leur production `f32` ; I-14 : la provenance s'étend à la preuve (les douze lois y sont citées). **Les
+réponses de l'utilisateur** aux huit questions : **[ADR-261](../docs/adr/ADR-261-reponses-du-2026-10-07.md)** — l'eau placée après le
+relief avec recalcul de proximité ; le découpage le plus puissant, par étude ; toutes les anciennes intentions rejugées, l'objectif
+« performance et réalisme insane » ; glace sans limite ; air respirable (7.10) ; un seul travailleur, un seul PC. Maillons **2**. Suivant :
+**S643, la réévaluation des intentions fondatrices** (ADR-261 D3).
+

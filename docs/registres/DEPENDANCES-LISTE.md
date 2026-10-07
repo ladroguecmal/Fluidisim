@@ -53,7 +53,7 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **0** | 47 | 1.7, 1.8, 2.6, 2.7, 3.2, 3.8, 3.9, 4.2, 4.4, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 5.10, 6.10, 7.1, 7.6, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.1, 9.2, 9.3, 9.7, 9.8, 9.10, 9.13, 10.1, 10.2, 10.3, 10.8, 10.9, 11.2, 12.1, 12.4, 13.1 |
 | **1** | 33 | 1.1, 1.3, 1.5, 1.9, 2.1, 2.3, 2.4, 2.9, 3.6, 3.7, 4.1, 4.6, 4.13, 4.17, 4.20, 5.8, 5.12, 6.2, 7.2, 7.4, 7.9, 8.6, 9.4, 9.6, 9.11, 10.4, 10.5, 11.1, 11.4, 11.5, 11.6, 12.5, 13.5 |
 | **2** | 13 | 1.6, 2.5, 2.10, 3.3, 3.4, 3.5, 4.9, 4.12, 5.14, 6.7, 7.5, 10.6, 12.2 |
-| **3** | 6 | 3.1, 4.3, 4.14, 4.22, 5.9, 7.3 |
+| **3** | 7 | 3.1, 4.3, 4.14, 4.22, 5.9, 7.3, 7.10 |
 | **4** | 6 | 4.10, 6.6, 6.9, 8.4, 13.2, 13.3 |
 | **5** | 2 | 11.3, 13.4 |
 | **E** | 15 | 1.4, 2.2, 2.8, 3.10, 4.5, 4.11, 5.5, 5.11, 5.13, 7.8, 8.7, 8.10, 9.9, 9.12, 12.3 |
@@ -174,12 +174,13 @@ points ouverts (dont 5.11, hors du périmètre) : 46 au front 0, 32 au front 1, 
 | **7.1** Écume et moutons | A | sources de W, δ, vent ; demi-vies et transfert (B9) | — | 8.4, 13.2, 13.3 | **0** |
 | **7.2** Spray, embruns, gouttelettes | B | — | 4.16 | 8.4, 9.9 | **1** |
 | **7.3** Microbulles visuelles | B | — | 4.12 | 6.9, 8.4 | **3** |
-| **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 8.4, 13.2 | **1** |
-| **7.5** Air comprimé, vide, eau dans le vide | B | la poche comprimée d'un corps faite (S539) ; l'adiabatique, la poche qui s'échappe, le vide | 7.4 | 5.9 | **2** |
+| **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 7.10, 8.4, 13.2 | **1** |
+| **7.5** Air comprimé, vide, eau dans le vide | B | la poche comprimée d'un corps faite (S539) ; l'adiabatique, la poche qui s'échappe, le vide | 7.4 | 5.9, 7.10 | **2** |
 | **7.6** Glace et vapeur | H | — | — | 7.9, 13.2 | **0** |
 | **7.7** Danger et traversabilité | H | la publication par tuiles depuis B, W et V (ADR-018) | — | — | **0** |
 | **7.8** Audio de l'eau | H | les événements et paramètres publiés (ADR-016) | — | — | **E** — la fin du projet, par Wwise, l'audio du jeu (ADR-197 D5, ADR-219) |
 | **7.9** La glace qui cède | H | la rupture de la glace sous charge | 7.6 | — | **1** |
+| **7.10** L'air respirable d'une poche | B | — | 7.4, 7.5 | — | **3** |
 
 ### 8. Rendu et niveaux de détail visuels
 

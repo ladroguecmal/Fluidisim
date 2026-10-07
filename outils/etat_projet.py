@@ -16,6 +16,7 @@ import sys
 from urllib.parse import unquote
 
 import dependances_liste  # S352 : le registre des dépendances suit la liste (ADR-190 D3)
+import precision_f64  # S642 : les modules où f64 domine sont rangés (ADR-260 D2)
 import anomalies  # S480 : les registres générés suivent leurs sources
 import decisions
 import tableau_de_bord
@@ -340,7 +341,8 @@ def inspect(since: int | None) -> dict:
                 + tableau_de_bord.ecarts(texts["docs/LISTE-PROJET-FINI.md"], texts[tableau_de_bord.PLAN],
                                          texts.get(tableau_de_bord.TABLEAU, ""))
                 + decisions.ecarts(decisions.lire_adrs(), texts.get(decisions.REGISTRE, ""))  # le disque : un ADR pas encore suivi compte
-                + anomalies.ecarts(texts[anomalies.SOURCE], texts.get(anomalies.REGISTRE, "")))
+                + anomalies.ecarts(texts[anomalies.SOURCE], texts.get(anomalies.REGISTRE, ""))
+                + precision_f64.ecarts())
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "
                      "Ajouts Git sans renommages ; ni temps, ni productivité, ni capacités. "

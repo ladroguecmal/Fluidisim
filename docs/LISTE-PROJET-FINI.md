@@ -96,7 +96,8 @@ pas recopiée ici (L137).
   (processeur et carte graphique, Vulkan et DirectX 12, compilations, simple et double précision).
 - [ ] **1.8 Référentiels, précision f32 locale, `g_eff` injectée** (ADR-002, I-07, I-08) — *partiel* :
   positions monde et ancres locales, `g_eff` par volume. Manquent les référentiels mobiles et la
-  planète sphérique.
+  planète sphérique. **S642 ([ADR-260](adr/ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md))** : I-08 gouverne les champs de production ; les modules
+  où `f64` domine sont rangés et contrôlés (`outils/precision_f64.py`) — neuf références de champ (P) doivent leur production `f32`.
 - [ ] **1.9 Horloge du client synchronisée, identité du fond contrôlée** (ADR-003 §2.1, §2.4 ; ajouté en S641) — *absent* : la
   correction douce de l'horloge du client (±0,1 %), sa resynchronisation après une coupure de 5 s, l'empreinte de la mer comparée entre
   client et serveur à 1 Hz. Rien n'existe ; 1.7 et 10.3 ne les nomment pas ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.9).
@@ -319,7 +320,8 @@ pas recopiée ici (L137).
   ADR-022 §3) — `condense` réservé à un hôte de cuisson, la tolérance de paramètres, la masse du nœud autoritaire (au ml) ; restauré,
   le domaine est établi en un pas au lieu de 60,65 s ([preuve](validation/GRAINE-S623.md)). **Audit S640** : le seuil `0,35·Hs` n'est
   pas une règle reçue — ADR-112 D1 le dit « proposition historique non reçue », le critère « reste à instruire sur un couplage
-  effectivement calculé » ; S609 l'a pris dans ADR-001 §3.3 sans lire les ADR qui le nomment (ADR-259 D2). Manquent le critère de
+  effectivement calculé » ; S609 l'a pris dans ADR-001 §3.3 sans lire les ADR qui le nomment (ADR-259 D2). **S642** : le seuil devient
+  un paramètre de l'appelant, sans défaut ni constante (`mode_requis`, refus d'un seuil non fini ou négatif). Manquent le critère de
   bascule instruit, un solveur substitutif non linéaire, le 2D/3D, la bascule d'un domaine δ réel.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
@@ -658,7 +660,8 @@ pas recopiée ici (L137).
   glace d'un lac comme couche de V, gelée par quanta exacts, la masse à l'entier sur un cycle gel/dégel ([preuve](validation/C15-GLACE-S575.md)).
   **S635 : le dégel physique** — le bilan d'énergie de surface ; le lac de S575 fond en 12 jours sous 180 W/m², la masse à l'entier,
   l'énergie fermée à un quantum près ([preuve](validation/DEGEL-S635.md)). Manquent la vapeur, l'infrarouge et le regel nocturne, la
-  glace dans B et δ, le gel borné aux plans d'eau gelables (ADR-027 §3),
+  glace dans B et δ, la glace partout où la physique la forme — banquise, mer, rivières, côtes ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D4 lève la borne
+  d'ADR-027 §3),
   le rendu. Décidé : l'évaporation et le gel des contenants passent par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *partiel* depuis S570 : **l'échantillon** (le produit
@@ -677,6 +680,9 @@ pas recopiée ici (L137).
 - [ ] **7.9 La glace qui cède** (ADR-017 §4, §7.3, §7.5 ; ADR-018 §5 ; ajouté en S641) — *absent* : la rupture en plaques
   flottantes, l'événement émis, la masse rendue à V, la surface qui s'effondre sous qui y marchait ; la neige sur la glace, le
   brise-glace. 7.6 et 7.7 couvrent la croissance et la charge admissible ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md) 1.7).
+- [ ] **7.10 L'air respirable d'une poche** (ADR-015 §3, §6.4 ; [ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D5 ; ajouté en S642) — *absent* : une poche d'air enfermée
+  respirable selon sa physique réelle — son volume, sa pression, l'oxygène consommé, le gaz carbonique accumulé ; ce que l'IA et le
+  joueur en lisent.
 
 ## 8. Rendu et niveaux de détail visuels
 
@@ -858,7 +864,7 @@ pas recopiée ici (L137).
   du jeu (Horizon) en local.
 - [ ] **10.3 Déterminisme bit à bit entre plateformes pour B, W répliqué et V** (I-03, A98) —
   *partiel* : répétabilité locale. Aucune seconde cible. **Depuis S476** (un seul PC, ADR-219 D2) : entre les chemins
-  d'exécution de ce PC, comme 1.7.
+  d'exécution de ce PC, comme 1.7. L'intention reste le déterminisme entre plateformes (un MMO) ; la preuve, aujourd'hui, entre les chemins de ce PC ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D8).
 - [ ] **10.4 δ sans autorité de jeu, aucun chemin d'énergie du client vers le monde, grandeurs
   dérivées autoritaires** (I-04, I-11, I-15) — *partiel* : tenu par construction du cœur, et
   **éprouvé pour un corps** : trajectoire de jeu identique au bit avec ou sans δ (S332 ; S333, 800 pas
@@ -881,7 +887,7 @@ pas recopiée ici (L137).
 ## 11. Grande échelle et très grands événements
 
 - [ ] **11.1 Monde planétaire** : planète sphérique, coordonnées lointaines, référentiels multiples
-  (ADR-002) — *partiel* : positions monde entières et ancres. Pas de sphère.
+  (ADR-002) — *partiel* : positions monde entières et ancres. Pas de sphère. Le découpage de la planète, HEALPix ou cube-sphère, se tranche par une étude mesurée — performance et résultat ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D2).
 - [ ] **11.2 Nombreuses régions de mer décrites par descripteur**, transitions par paramètres (I-09) — *partiel* depuis S594 : le
   **descripteur** (Hs, niveau moyen), les poids en partition de l'unité, la mer de B mise à l'échelle du paramètre local — la hauteur gardée
   dans la transition (2,0009 m pour 2), quand le mélange des champs la perd (21 % en moyenne sur 800 couples, 32 % pour un couple)
@@ -915,15 +921,19 @@ pas recopiée ici (L137).
   le profil de Manning par segment (`h`, `v`, `Fr`, les ressauts), les règles bloquantes (la ligne d'eau descend, `ΣQ` aux confluences, `v`
   plausible, le lac a un exutoire : chaque faute isolée, un seul défaut), la gravure et ses conflits ([preuve](validation/RIVIERE-S604.md)).
   La règle de vitesse n'attrape qu'un sens de l'erreur d'unité. Manquent l'interface, la spline, `largeur(s)`, `debit(t)`, la cinquième
-  règle, la gravure dans une carte de hauteurs.
+  règle, la gravure dans une carte de hauteurs. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D1** : les rivières sont placées procéduralement après le relief, le relief recalculé à leur proximité ;
+  l'édition manuelle vient par ajout — l'éditeur devient l'outil d'ajout et de retouche. Manquent le placement procédural, le recalcul de
+  proximité.
 - [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *partiel* depuis S599 : **la bibliothèque d'une plage** — seize états en `f16`
   (1 228 800 octets, la taille de SPEC-005), la polyligne de chacun, la recherche par paramètres (I-09), l'empreinte qui dit l'obsolescence
-  ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles.
+  ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D3** : le précalcul partout où il y a un rivage, procédural ou à la demande — non une cinquantaine de plages
+  placées à la main.
 - [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *partiel* depuis S605 : le géoïde dans l'outil (le plan tangent d'une ancre ↔ l'altitude, sans
   perte au rayon de la planète ; la table de SPEC-005 §4), le terrain gravé pour le squelette — l'étape 2 de l'ordre imposé, les biefs
   jamais modifiés ; un lit à 30 km placé à 10⁻¹⁴ m, là où un outil à plan tangent le mettrait 70,7 m trop haut
   ([preuve](validation/GEOIDE-S605.md)). Manquent l'anomalie et la marée du niveau moyen, la côte du squelette, l'étape 3. **Depuis S476**
-  (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite.
+  (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D1** : l'ordre s'inverse — le relief d'abord, l'eau placée ensuite (mers, océans, rivières), le relief recalculé
+  à sa proximité ; l'outil d'édition de planète complet viendra plus tard.
 - [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *partiel* depuis S603 : **la bathymétrie** — l'isobathe
   limite `h = λ` (ADR-196 D3), le faisceau de rayons de houle (dispersion complète), les plages à recuire : aucune sous l'isobathe limite
   (une bosse sous 107 m : 6 cm d'arrivée), trois plages sur huit intactes pour une bosse côtière ; la règle `λ/2` aurait manqué une bosse
@@ -934,7 +944,8 @@ pas recopiée ici (L137).
 
 - [ ] **13.1 Harnais de validation** (SPEC-003) — *partiel* : étages H1 et H3, scénarios C02 et C18. **S471–S473** : le banc
   visuel ([ADR-216](adr/ADR-216-le-banc-visuel.md)) — six vidéos de référence mesurées, nos scènes contre elles, à traitement égal
-  ([REFERENCES-VIDEO-S471](validation/REFERENCES-VIDEO-S471.md), [MIROIRS-S472](validation/MIROIRS-S472.md)).
+  ([REFERENCES-VIDEO-S471](validation/REFERENCES-VIDEO-S471.md), [MIROIRS-S472](validation/MIROIRS-S472.md)). **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D7** : un seul travailleur sur un seul PC — le jury de huit et l'intégration à plusieurs machines sont remplacés par
+  les verdicts de l'utilisateur, le banc visuel (ADR-216) et le banc de non-régression local.
 - [ ] **13.2 Les 23 cas canoniques passent sur le système** — *partiel* : sur le système, C02 (B),
   C12 (V), la branche V de C19 et **C10 depuis S331** — tirant à 0,02 %, période à 2·10⁻⁶, rapport
   avec masse ajoutée 1,408 pour 1,414 ± 15 %, par le corps rigide du cœur
@@ -957,7 +968,7 @@ pas recopiée ici (L137).
   archétypes et trois états de mer ([porte D](validation/PORTE-D-S333.md) §9) — ; **B10** partiel
   depuis S320 — la cavité sur le banc 2D d'APIC, dont le temps de pincement ne converge pas à trois
   mailles, couronne et jet de maille ([B10](validation/B10-APIC-S320.md)). Les autres attendent leurs
-  composants, dont B8, que la porte A nomme.
+  composants, dont B8, que la porte A nomme. **[ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D7** : B3 n'est plus un banc de choix — il valide le solveur retenu.
 - [ ] **13.4 L'eau dans le jeu** ([ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D7, ajouté en S476) — *absent* : le système
   intégré à une copie locale de **DyingStar** (Godot 4.7 depuis 2026 — 4.5 en S476 —, double précision, C#, Jolt, serveur Horizon ; copie et moteur téléchargés en S482), sur une planète du jeu, sans
   régression du jeu — une surprise pour son équipe : rien ne se publie.
@@ -977,16 +988,16 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 22 | 0 | 21 | 1 |
 | 5. Volumes finis (V) | 14 | 2 | 9 | 3 |
 | 6. Solides | 10 | 5 | 3 | 2 |
-| 7. Secondaires | 9 | 0 | 7 | 2 |
+| 7. Secondaires | 10 | 0 | 7 | 3 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 12 | 0 |
 | 10. Multijoueur | 9 | 1 | 8 | 0 |
 | 11. Grande échelle | 6 | 0 | 5 | 1 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 5 | 0 | 3 | 2 |
-| **total** | **132** | **10** | **108** | **14** |
+| **total** | **133** | **10** | **108** | **15** |
 
-*S641, 2026-10-07* : **onze points ajoutés**, absents — les intentions des documents fondateurs qu'aucun point ne portait
+*S642* : **7.10** ajouté, absent — l'air respirable ([ADR-261](adr/ADR-261-reponses-du-2026-10-07.md) D5) ; 132 → 133. *S641, 2026-10-07* : **onze points ajoutés**, absents — les intentions des documents fondateurs qu'aucun point ne portait
 ([audit](registres/AUDIT-INTENTIONS-INITIALES-S640.md), demandé par l'utilisateur) ; 121 → 132.
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce

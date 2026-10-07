@@ -42,9 +42,12 @@ fn a_substitutive_domain_owns_the_total_field_and_lets_disturbances_out_s609() {
     assert!((moitie - 0.02500255353597207).abs() < 1e-9, "critère 2 : la moitié");
     assert!((reste - 3.256827165280529e-4).abs() < 1e-9 && reste < 0.02 * 0.025, "critère 2 : le reste");
 
-    assert_eq!(mode_requis(0.35, 1.0, false), Mode::Perturbatif, "critère 3 : au seuil");
-    assert_eq!(mode_requis(0.3500001, 1.0, false), Mode::Substitutif, "critère 3 : au-delà");
-    assert_eq!(mode_requis(0.0, 1.0, true), Mode::Substitutif, "critère 3 : par nature");
+    // S642 : le seuil est celui de l'appelant (ADR-112 D1 : `0,35·Hs` n'est pas une règle reçue).
+    assert_eq!(mode_requis(0.35, 0.35, false), Ok(Mode::Perturbatif), "critère 3 : au seuil");
+    assert_eq!(mode_requis(0.3500001, 0.35, false), Ok(Mode::Substitutif), "critère 3 : au-delà");
+    assert_eq!(mode_requis(0.0, 0.35, true), Ok(Mode::Substitutif), "critère 3 : par nature");
+    assert_eq!(mode_requis(0.1, -1.0, false), Err(Refus), "S642 : seuil négatif");
+    assert_eq!(mode_requis(0.1, f64::NAN, false), Err(Refus), "S642 : seuil non fini");
 
     assert!(Domaine1D::depuis_b(G, 0.0, DX, N, DT, &b, &[]).is_err(), "critère 4 : profondeur");
     assert!(Domaine1D::depuis_b(G, H, 0.0, N, DT, &b, &[]).is_err(), "critère 4 : dx");

@@ -199,3 +199,7 @@ S161 compare des évolutions indépendantes, alors que SPEC-004 §6.1 prévoit u
 au fond, avec termes croisés et source. Les mesures S161 sont conservées ; elles ne suffisent
 pas à recevoir ce couplage ni à choisir sa bascule. Aucun seuil n'est rétabli ou gelé.
 Voir [ADR-112](ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
+
+## Note datée du 2026-10-07 (S642)
+
+§3.3 : le seuil `0,35·Hs` n'est pas une règle reçue (ADR-112 D1) ; S609 l'avait implémenté comme tel — depuis S642, un paramètre de l'appelant ([ADR-260](ADR-260-i-08-et-i-14-ce-qu-ils-gouvernent.md) D3, [ADR-259](ADR-259-trente-deuxieme-revue-de-methode.md) D2).

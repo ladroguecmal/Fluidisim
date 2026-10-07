@@ -294,3 +294,7 @@ remplace la règle par une consigne de revue. C'est le dernier recours, jamais l
    région. À trancher en écrivant l'outil.
 5. **Les seuils d'acceptation eux-mêmes** restent tous « à calibrer » (§6). La décision dit qui les
    possède, pas ce qu'ils valent — ils sortent des bancs.
+
+## Note datée du 2026-10-07 (S642)
+
+§3 : la borne de la glace aux lacs et aux baies abritées est levée par l'utilisateur — « pas de limites sur le réalisme » ([ADR-261](ADR-261-reponses-du-2026-10-07.md) D4).

@@ -144,3 +144,7 @@ ancre et un plan tangent.
    calcul, `|x_local| < 4096 m` ; c'est une ancre de repère, et il faut le dire pour que « 32 km »
    ne se lise pas comme une contrainte de précision.
 3. Seuil de masse relative déclenchant la rétroaction ballottement → navire.
+
+## Note datée du 2026-10-07 (S642)
+
+§2.4 : la cube-sphère n'est plus retenue d'avance — HEALPix (celui de DyingStar) ou cube-sphère se tranche par une étude mesurée, performance et résultat ([ADR-261](ADR-261-reponses-du-2026-10-07.md) D2).
