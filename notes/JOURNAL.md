@@ -1336,3 +1336,10 @@ exact, plus au large qu'en incidence normale (233 m contre 214). Bornes du monta
 **Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 3.5. **Fait** ([preuve](../docs/validation/SOMMETS-RAYONS-S633.md)) :
 `deferlement::sommets_sur_rayons` — position, flux dissipé, direction de crête, dans l'ordre du faisceau. **Mesuré** : sur une côte droite,
 le flux à 2·10⁻⁵ et la direction à 6·10⁻⁷ de l'analytique, au bit de numpy. Maillons **1** (3.5 avance). Suivant : **S634**.
+
+## S634 — 2026-10-07 — le frottement et Coriolis dans le courant de marée
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 2.2. **Fait** ([preuve](../docs/validation/COURANT-AMORTI-S634.md)) :
+`CarteCotidale::courant_amorti` — la solution harmonique établie avec `f` et `r`. **Mesuré** : S580 retrouvé à `f = r = 0` ; une intégration
+RK4 indépendante rejointe à 2,3·10⁻⁷ m/s ; l'atténuation `ω/√(ω² + r²)` et l'ellipse `f/ω` à 10⁻⁶. Maillons **1** (2.2 avance). Suivant :
+**S635**, le lot et la physique des partiels.

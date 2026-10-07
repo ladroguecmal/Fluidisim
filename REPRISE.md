@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 11:00 +02:00
+JETON            : libre
+Battement        : 2026-10-07 11:06 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S634 — 2.2, le frottement et Coriolis dans le courant de marée ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S633 — les sommets de déferlement le long d'un faisceau ([journal](notes/JOURNAL.md)). Avant : S632 (le lot)
-Session suivante : **S634 — la physique des partiels** (ADR-247). Revue à S636 ; le lot à S635. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
-Maillons        : 1 — S633 : 3.5 avance (les sommets)
+Session en cours : aucune
+Dernière session : S634 — le frottement et Coriolis dans le courant de marée ([journal](notes/JOURNAL.md)). Avant : S633 (les sommets de déferlement le long d'un faisceau)
+Session suivante : **S635 — le lot (dû), puis la physique des partiels** (ADR-247). Revue à S636. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
+Maillons        : 1 — S634 : 2.2 avance (frottement, Coriolis)
 Registres       : dernier lot S632 (ADR-213 D3) ; le prochain au plus tard en S635
 ```
 

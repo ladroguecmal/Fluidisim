@@ -116,7 +116,9 @@ pas recopiée ici (L137).
   complexe interpolée, déterministe ; une onde progressive à 2·10⁻⁵ m ; [preuve](validation/CARTE-COTIDALE-S578.md)) ; **S579 : la marée
   dans la surface de B** (`η`, `∂η/∂t`, `w` de l'échantillon, à 1 ulp ; la composition B + W exacte ;
   [preuve](validation/MAREE-DANS-B-S579.md)) ; **S580 : le courant de marée** (`−g·∇η`, sans la profondeur ; une onde progressive à
-  2·10⁻⁶ m/s ; [preuve](validation/COURANT-MAREE-S580.md)). Manquent le frottement et Coriolis dans le courant, le choix de la marée d'une
+  2·10⁻⁶ m/s ; [preuve](validation/COURANT-MAREE-S580.md)) ; **S634 : le frottement et Coriolis dans le courant** (la solution
+  harmonique établie, à 2·10⁻⁷ m/s d'une intégration pas à pas ; l'ellipse `f/ω` ; [preuve](validation/COURANT-AMORTI-S634.md)).
+  Manquent le frottement quadratique, le choix de la marée d'une
   région par l'hôte (l'adoption par défaut), les corrections nodales, le niveau moyen variable par la météo, des houles issues d'une
   météo.
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *partiel* depuis S590 : **le niveau moyen par le bilan d'eau** dans V —

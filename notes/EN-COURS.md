@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S634 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **2.2 — le frottement et Coriolis dans le courant de
+Session : S634 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **2.2 — le frottement et Coriolis dans le courant de
 marée** (un manque de S580 : `∂u/∂t = −g·∇η` seul).
 
 **Ce que la session fait.** `CarteCotidale::courant_amorti(x, y, t, g, f, r)` : pour chaque composante, la solution harmonique établie de
@@ -83,7 +83,9 @@ de 0.814749 ; (4) l'ellipse, rapport des maxima de `v` et `u`, à 10⁻⁴ de 0.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `courant_amorti` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 2.2 ; rituel.
+- [x] **P2** — `courant_amorti` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 2.2 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus du premier essai. Suite : 819 essais listés.
+- **P3** — preuve COURANT-AMORTI-S634 ; ligne 2.2 ; index ; journal.
