@@ -982,3 +982,9 @@ un point partiel ; revue à S586.
 réponses : la v2 est **la liste à 100 %**, et **la physique d'abord**. Écrit en ADR-247 ; la boussole porte la v2 et suspend l'alternance
 d'ADR-191 jusqu'à l'intégration. Maillons **1**. Suivant : **S586, la vingt et unième revue de méthode**, puis les points absents.
 
+## S586 — 2026-10-07 — la vingt et unième revue de méthode (ADR-248)
+
+**Entrée.** En autonomie ; revue due. **Frictions** : une paire de rayons hors famille (S583) — **élargie** : une paire de trajectoires
+comparée appartient à la famille de la référence (ADR-248 D1, L406) ; un critère vrai par construction (S584) — **élargie** : il ne juge
+rien (D2, L407). Ont tenu : un seuil sous quantum relevé avant la mesure (S582), une portée demandée plutôt que supposée (S585). Maillons
+**1**. Suivant : **S587**, le lot (dû) et un point absent (ADR-247).

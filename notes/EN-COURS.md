@@ -62,16 +62,15 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S585 — **terminée**. **Décision de l'utilisateur, 2026-10-07** : « L'objectif est de réaliser une v2 » ; la v2 = **la liste à
-100 %** ; **la physique d'abord** (l'intégration et les revues visuelles ensuite). Écrite en **ADR-247** ; BOUSSOLE (la v2 ; l'alternance
-d'ADR-191 suspendue) ; index ; la mémoire.
+Session : S586 — **terminée**. En autonomie, **la vingt et unième revue de méthode** (ADR-222 D4 ; S581–S585).
 
-**Ce que la session fait.** ADR-247 et ses renvois. Puis le choix des sessions suivantes selon D2 : les points absents d'abord, par
-campagne (au 2026-10-07 : 30 absents).
+**Ce que la session fait.** Relu : S581 (la revue), S582 (le tsunami ; un seuil sous quantum relevé avant), S583 (la réfraction ; une paire
+hors famille), S584 (le rayon courbe ; un critère par construction), S585 (la v2, ADR-247). **ADR-248** : D1, D2 ; L406, L407 ; METHODE ;
+BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; ADR-247, BOUSSOLE, index, mémoire.
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; la revue (ADR-248, METHODE, L406, L407, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise

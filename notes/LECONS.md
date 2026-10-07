@@ -6665,3 +6665,14 @@ cumulé (l'état exact) le tient à 9 µm. V le faisait depuis ADR-010 §4 pour 
 **S573 — un seuil, deux arrondis.** La praticabilité d'un bateau calculait `d − tirant − marge > 0`, sa prévision comparait `d` à
 `tirant + marge` ; en f32, 1,1 − 0,9 − 0,2 = 4,5·10⁻⁸ : à la borne, l'une disait « navigable », l'autre non. Une seule fonction de seuil,
 lue par les deux (ADR-245 D2).
+
+## L406
+
+**S583 — la paire hors famille.** Le coefficient de réfraction se mesure entre deux rayons voisins ; le second partait à 30°, comme le
+premier, mais 50 m plus au large : un autre invariant de Snell, et 10 m d'écart cumulé sur 115. Un tracé indépendant a redonné l'erreur —
+le module était juste. La formule de référence vaut pour une famille de rayons (ADR-248 D1).
+
+## L407
+
+**S584 — le critère qui ne pouvait pas échouer.** « Le flux `A²·√h·b` constant » : la formule implémentée calcule `A` précisément pour
+qu'il le soit. Le critère vérifiait l'assemblage ; la physique se jugeait ailleurs, contre la forme fermée (ADR-248 D2).
