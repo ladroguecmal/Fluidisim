@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 14:43 +02:00
+JETON            : libre
+Battement        : 2026-10-07 15:21 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S647 — le rouleau 3D, étape 3 : le déferlement sur la pente ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S646 — la trente-troisième revue de méthode (ADR-263) ([journal](notes/JOURNAL.md)). Avant : S645 (A333 levée : le jet de rive par l'air balistique)
-Session suivante : **S647 — le rouleau 3D, étape 3 : le déferlement sur la pente** dans APIC 3D (l'air balistique actif) — une onde solitaire plus haute, déferlante sur une pente douce ; le point de déferlement contre McCowan et S630–S633, le type contre Grilli et al. (1997) ; le lecteur du point et du type éprouvé d'abord sur un cas connu (ADR-263 D2).
-Maillons        : 2
-Registres       : dernier lot S644 (ADR-213 D3) ; le prochain au plus tard en S647
+Session en cours : aucune
+Dernière session : S647 — le rouleau 3D, étape 3 : l'onde qui plonge sur la pente ([journal](notes/JOURNAL.md))
+Session suivante : **S648 — le rouleau : sa forme et sa vie** — le jet qui retombe et la poche d'air enfermée sous lui (détectée, comptée : volume, durée), sur l'onde de S647 ; le lecteur éprouvé d'abord (ADR-263 D2).
+Maillons        : 1
+Registres       : dernier lot S647 (ADR-213 D3) ; le prochain au plus tard en S650
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

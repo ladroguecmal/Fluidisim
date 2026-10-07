@@ -89,7 +89,7 @@ déferlement, `h_b`, `H_b/h_b`, la maille de 5 cm.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le lecteur et son épreuve ; le déferlement ; (1)–(5).
-- [ ] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
+- [x] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1)–(4) tenus : le lecteur (plat : rien ; lèvre : `i` = 27, écart 1) ; masse exacte ; 1:12 plonge (2,5 cm : 2,64 s, 9,99 m,
