@@ -91,7 +91,7 @@ une faute. Les deux lecteurs (S647, S648) sont réemployés tels quels.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le relais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 4.14 ; le lot ; rituel.
+- [x] **P3** — preuve ; liste 4.14 ; le lot ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1)–(3) tenus : volume − entré −3,7·10⁻¹⁷ ; retournement 2,575 s, 9,825 m (tout-3D 2,571 s, 9,675 m) ; air enfermé 2,667 s,
