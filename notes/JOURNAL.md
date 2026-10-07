@@ -1085,3 +1085,9 @@ partiel). Suivant : **S600**, un point absent ; revue à S601.
 **Entrée.** En autonomie (ADR-247) ; 9.13 (absent ; ADR-012 §6). **Fait** ([preuve](../docs/validation/RESERVE-EVENEMENT-S600.md)) :
 `ReserveEvenement`. **Mesuré** : les ticks renforcés comptés par le script, exactement — 165 sur 1 800 sous une crise continue, 15 et 15
 pour deux événements. Maillons **1** (9.13 : absent → partiel). Suivant : **S601, la vingt-quatrième revue de méthode**.
+
+## S601 — 2026-10-07 — la vingt-quatrième revue de méthode (ADR-251)
+
+**Entrée.** En autonomie ; revue due. **Friction** : un nombre promis au plan sans être calculé (S598), une attente d'essai que le plan
+n'avait pas (S599) — **élargie** : le plan se relit contre ses critères avant l'essai (ADR-251 D1, L410). Ont tenu : les tailles d'ensemble,
+les comptes exacts, les formules indépendantes. Maillons **1**. Suivant : **S602**, le lot (dû) et un point absent.

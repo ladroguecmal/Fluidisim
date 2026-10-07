@@ -62,32 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S600 — **terminée**. En autonomie (ADR-247), **9.13 — le dépassement critique temporaire sans retard global perceptible**
-(absent) : ADR-012 §6 — « une réserve d'événement : +50 % pendant 0,5 s au plus, un rechargement de 5 s, pour le seul domaine dont
-`W_gameplay` est maximal ; sans rechargement, la réserve devient le budget nominal ».
+Session : S601 — **terminée**. En autonomie, **la vingt-quatrième revue de méthode** (ADR-222 D4 ; S596–S600).
 
-**Ce que la session fait.** `ReserveEvenement` (dans l'ordonnanceur) : par tick de simulation (30 Hz, ADR-012 §7), `budget(nominal_ms,
-critique, demande)` rend le budget accordé — le nominal ×1,5 si le domaine est **critique** (son `W_gameplay` est le maximum) et
-**demande** la réserve, tant qu'il reste des ticks de réserve ; épuisée, la réserve est **verrouillée** 150 ticks (5 s) puis pleine ; un domaine
-non critique ne la touche jamais. Le dépassement le plus fort d'une image est donc borné à +50 % du budget de l'eau, et sa durée à 0,5 s.
-Ne fait pas : la recharge partielle d'une réserve entamée sans être épuisée (elle reste entamée jusqu'à épuisement — le choix le plus
-prudent), le branchement à `Scheduler::allocate`, la mesure sur le banc B7.
-
-**Références, calculées avant par ce script** (sa propre machine d'état). Une demande critique continue pendant 60 s : **165 ticks
-renforcés sur 1 800** (9.17 %), soit un dépassement moyen de **4.58 %** du budget. Un événement de 2 s, 10 s
-de calme, un second de 2 s : **15** puis **15** ticks renforcés (la réserve rechargée entre les deux).
-
-**Quantum** : le tick (des comptes entiers, exacts). **Critères, écrits avant.** (1) le compte sous demande continue, exact ; (2) les deux
-événements, exacts ; (3) un domaine non critique : aucun tick renforcé ; jamais plus de 15 ticks consécutifs renforcés ; le budget accordé
-jamais au-dessus de 1,5 × le nominal ; (4) refus : un nominal non positif.
+**Ce que la session fait.** Relu : S596 (la revue), S597 (les microbulles), S598 (un compte promis), S599 (une attente hors du plan), S600
+(la réserve). **ADR-251** : D1 ; L410 ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `ReserveEvenement` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 9.13 ; rituel.
+- [x] **P1** — jeton ; la revue (ADR-251, METHODE, L410, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — 165 ; 15 et 15 ; les bornes ; refus ; un avertissement de compilation (une constante empruntée en mutable) corrigé. Suite 776.
-- **P3** — preuve RESERVE-EVENEMENT-S600 ; liste 9.13 (absent → partiel) et décompte ; index ; journal.
-
