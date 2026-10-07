@@ -93,6 +93,8 @@ pub mod precalcul;
 pub mod changement_solveur;
 /// S613 — Saint-Venant 2D, le mouillage et le séchage (liste 4.14 ; C04 en 2D, Thacker).
 pub mod saint_venant_2d;
+/// S614 — un très grand événement du large à la plage : Green, l'onde solitaire, la remontée (liste 11.3).
+pub mod grand_evenement;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;

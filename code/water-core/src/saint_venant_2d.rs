@@ -3,7 +3,8 @@
 //! Volumes finis d'ordre un sur une grille carrée, **reconstruction hydrostatique** d'Audusse (2004) : à chaque face, le fond pris au plus
 //! haut des deux, les hauteurs reconstruites `max(0, h + z − z*)` — positive (aucune hauteur négative sous Courant ½) et **équilibrée** (un
 //! lac au repos, bords secs compris, ne bouge pas) ; flux de Rusanov ; le terme de fond porté entièrement par la correction hydrostatique
-//! des faces. Murs aux bords du domaine. La vitesse est **désingularisée** (Kurganov–Petrova) : `u = √2·h·q/√(h⁴ + max(h⁴, ε))`, `ε` = (1 mm)⁴ —
+//! des faces. Murs aux bords du domaine : la paroi exerce sa pression, le flux `(0, ½·g·h², 0)` sur la face extérieure (S614 — absente
+//! en S613, où les bords étaient secs). La vitesse est **désingularisée** (Kurganov–Petrova) : `u = √2·h·q/√(h⁴ + max(h⁴, ε))`, `ε` = (1 mm)⁴ —
 //! une maille presque sèche ne porte pas de vitesse parasite, et le rivage avance et recule sans singularité.
 //!
 //! Ne fait pas : le rouleau 3D, l'ordre deux, le frottement, la houle incidente sur une plage réelle, le branchement à δ.
@@ -109,6 +110,17 @@ impl SaintVenant2D {
             dh[r] += f[0];
             dqy[r] += f[1] + f[4];
             dqx[r] += f[2];
+        }
+        // Les murs : la pression de la paroi sur les faces extérieures (S614).
+        for j in 0..ny {
+            let (a, b) = (j, (nx - 1) * ny + j);
+            dqx[a] += 0.5 * g * (self.h[a] * self.h[a]);
+            dqx[b] -= 0.5 * g * (self.h[b] * self.h[b]);
+        }
+        for i in 0..nx {
+            let (a, b) = (i * ny, i * ny + ny - 1);
+            dqy[a] += 0.5 * g * (self.h[a] * self.h[a]);
+            dqy[b] -= 0.5 * g * (self.h[b] * self.h[b]);
         }
         let k = dt / self.dx;
         for i in 0..n {
