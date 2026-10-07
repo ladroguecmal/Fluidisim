@@ -62,33 +62,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S642 — **terminée**. En autonomie (ADR-247). **Les corrections de l'audit** ([AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)
-§2.1, ADR-259) qu'une session tranche seule (ADR-222 : une décision technique que la mesure contredit se remplace).
+Session : S643 — **en cours**. Sur la demande de l'utilisateur ([ADR-261](../docs/adr/ADR-261-reponses-du-2026-10-07.md) D3 : *« toutes
+les anciennes intentions doivent être jugées dépassées ou non, de meilleure solution […] l'objectif reste le même d'une performance et
+réalisme insane »*). **La réévaluation des intentions fondatrices** : chaque section des deux documents sources
+(`systeme_eau_architecture_globale`, §1–§20 ; `zones_ouvertes`, §2–§32) jugée — **gardée**, **dépassée**, ou **remplacée par une meilleure
+solution** —, avec la trace actuelle et la conséquence.
 
-**Ce que la session fait.** (a) **4.11** : `substitutif::mode_requis` ne prescrit plus `0,35·Hs` — ADR-112 D1 (« proposition historique
-non reçue », « aucun nombre de remplacement ») ; le seuil devient un paramètre de l'appelant, sans défaut. (b) **I-08** : ce qu'il gouverne,
-précisé par ADR (les champs de production de B, W, δ) ; l'inventaire des modules où `f64` domine, chacun rangé (V, référence ou instrument,
-outil hors ligne, calcul scalaire arrondi avant d'entrer dans un champ, **référence de champ qui doit sa version de production f32**) ; un
-contrôle dans `etat_projet.py --check` fait échouer un module nouveau non rangé. (c) **I-14** : la provenance étendue à la preuve qui a
-reçu la loi, avec sa référence publiée — les douze lois que l'audit nomme y sont citées (vérifié avant : Green, Brooks–Corey, Tomiyama,
-Schiller–Naumann, Willis, Rayleigh, Marshall–Palmer, Synolakis, Keller, Thacker, Davies–Taylor, Minnaert).
-
-**Critères, écrits avant.** (1) `mode_requis(max|δ|, seuil, par_nature)` : aucune constante de bascule dans le code ; essais : au seuil
-perturbatif, au-delà substitutif, par nature substitutif, un seuil non fini ou négatif refusé ; (2) ADR-260 et les deux amendements dans
-`01_INVARIANTS.md` ; (3) le contrôle des modules `f64` : à zéro sur le dépôt, et il échoue sur un module non rangé (essayé) ; (4) 4.11, 1.8 à
-jour ; la suite du cœur passe.
+**Critères, écrits avant.** (1) Le registre `REEVALUATION-INTENTIONS-S643` couvre chaque section des deux sources (aucune omise : compté) ;
+(2) chaque verdict « dépassée » ou « meilleure solution » nomme ce qui remplace et où cela vit (point, ADR) ; (3) ce qui en découle est
+versé : points ajoutés ou reformulés, `etat_projet --check` à zéro ; (4) ce qui change un critère de jugement du projet passe par un ADR.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — 4.11 ; ADR-260, les amendements, le contrôle ; la liste.
-- [x] **P3** — rituel.
+- [x] **P1** — jeton ; plan ; les deux sources relues en entier.
+- [ ] **P2** — le registre ; l'ADR ; la liste.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) `mode_requis(max|δ|, seuil, par_nature) -> Result` : aucune constante ; l'essai S609 passe (au seuil, au-delà, par
-  nature, refus) ; (2) ADR-260 et les deux amendements ; (3) `outils/precision_f64.py` : 43 modules rangés (V 3, R 9, O 7, S 15, P 9),
-  contrôle à zéro, échoue sur un module retiré (essayé), branché dans `etat_projet.py --check` ; (4) 4.11, 1.8 à jour.
-- **Réponses de l'utilisateur pendant la session** (les huit questions de l'audit) : ADR-261 — l'eau placée après le relief, le découpage
-  le plus puissant (étude), toutes les anciennes intentions rejugées (campagne), glace sans limite, air respirable (7.10, 133 points), un
-  seul travailleur sur un seul PC (jury, intégration à plusieurs machines, écran partagé retirés ; B3 requalifié). Notes datées dans
-  ADR-001, 002, 011, 027 ; 12.2, 12.3, 12.4, 7.6, 10.3, 11.1, 13.1, 13.3 à jour ; boussole et décisions de l'utilisateur.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 13:20 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 13:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S643 — la réévaluation des intentions fondatrices (ADR-261 D3) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S642 — les corrections de l'audit ; les réponses de l'utilisateur ([journal](notes/JOURNAL.md)). Avant : S641 (la trente-deuxième revue de méthode)
 Session suivante : **S643 — la réévaluation des intentions fondatrices** (ADR-261 D3) : chaque intention des documents fondateurs jugée dépassée, à remplacer par une meilleure solution, ou à garder — l'objectif « performance et réalisme insane » ; un registre, les ajouts et retraits qui en découlent. Puis le rouleau 3D (étape 2) et l'étude du découpage de la planète (ADR-261 D2).
 Maillons        : 2
