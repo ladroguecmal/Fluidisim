@@ -65,6 +65,8 @@ pub mod refraction;
 pub mod explosion;
 /// S588 — la polyligne de déferlement (liste 3.5 ; SPEC-006 §6).
 pub mod deferlement;
+/// S594 — les régions de mer par descripteur (liste 11.2 ; I-09).
+pub mod regions;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
