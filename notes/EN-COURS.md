@@ -83,7 +83,7 @@ tiennent ; les essais d'APIC 3D passent.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le fond glissant ; les mesures ; (1)–(3).
-- [ ] **P3** — preuve ; A333 ; rituel.
+- [x] **P3** — preuve ; A333 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — le fond glissant : sans effet (0,186 m aux deux mailles), écarté ; la durée : sans effet ; **l'air balistique** (la seconde
