@@ -62,35 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S622 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **11.3** — un manque nommé en S614 : *le niveau du large
-imposé au bord* du domaine local (en S614, l'onde était posée en condition initiale).
+Session : S623 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S620–S622), puis
+**4.11 — la restauration depuis une graine** (ADR-022 §3, I-17) : la moitié laissée par S609. ADR-013 §4 : un domaine substitutif né faux met
+une minute à s'établir (60,65 s mesurées en S610) — d'où la graine cuite hors ligne.
 
-**Ce que la session fait.** `SaintVenant2D::pas_avec_bord(dt, t, extérieur)` : la face gauche devient une **frontière caractéristique** —
-l'invariant entrant de l'extérieur `w⁺ = u_e + 2√(g·h_e)`, le sortant de la maille de bord `w⁻ = u₀ − 2√(g·h₀)`, l'état fantôme
-`c = (w⁺ − w⁻)/4`, `h = c²/g`, `u = (w⁺ + w⁻)/2`, `v = v₀` ; le flux de Rusanov entre le fantôme et la maille de bord remplace la pression de
-paroi. Ordre un et ordre deux (Heun : l'extérieur à `t`, puis à `t + dt`). Ne fait pas : les trois autres faces, une frontière oblique,
-l'extérieur lu dans W en 2D.
+**Ce que la session fait.** Un module `graine.rs` : `SeedState` (genre, paramètres de cuisson `hs`, `tp`, `θ`, phase de marée, liquide ; la
+grille ; la hauteur totale et la vitesse en f16 ; l'identifiant = l'empreinte du contenu) ; `condense` — **réservé à un hôte de cuisson** :
+compilé seulement sous `cfg(test)` ou la fonctionnalité `cuisson` (L19 : l'interdit inexprimable — un hôte de jeu n'a pas la fonction) ;
+`restaurer(paramètres, tolérance, volume du nœud en ml)` — refusé au-delà de la tolérance de paramètres, la forme renormalisée sur la masse du
+nœud V (autoritaire) ; `choisir` — la graine la plus proche dans la tolérance, jamais une interpolation de champs (I-09) ;
+`Domaine1D::depuis_etat`. Ne fait pas : le 2D, la graine côtière de 12.3 branchée, la mesure de la tolérance (banc B4).
 
-**Références, calculées avant** (`s622_ref.py`, numpy). Une impulsion d'onde longue (2 mm, `σ` = 20 m) sur 10 m de fond ; un bassin plat de
-400 m fermé à droite ; ordre deux. **Forcé** (le domaine commence au bord, l'impulsion entre par lui) contre **étendu** (le domaine commence
-900 m plus tôt, l'impulsion posée dedans) : l'écart à la jauge (200 m) jusqu'à 120 s, rapporté à la crête — maille 1, ½, ¼ m :
-**0.029137, 0.013123, 0.005931** — il converge avec la maille (l'étendu porte 150 m de diffusion numérique en plus : une première
-mesure de 2 cm à l'onde solitaire, plus large que le bassin, et une seconde à 2 cm, où la propagation non linéaire s'ajoutait, l'ont montré
-au plan). **L'absorption** : après la sortie de l'onde réfléchie par le mur, il reste dans le domaine forcé
-**1.218e-08, 1.577e-09, 1.038e-09 m** — moins de 10⁻⁵ de l'amplitude.
+**Références, calculées avant** (`s623_ref.py`, numpy). Le domaine de S609/S610 né au repos sous B, avancé 120 s ; sa graine (2 + η et u en
+f16) ; le nœud tient **399998810 ml** par mètre de largeur ; la graine en porte 400.0048828125 m³ ; restaurée et renormalisée :
+**399.9988100000 m³**. Restauré avec B décalé de 120 s : écart initial à B **0.002478421581 m** (sous 5 mm) — **établi en 0.05 s**, un
+pas, contre 60,65 s depuis le repos (S610).
 
-**Quantum** : f64. **Critères, écrits avant.** (1) aux trois mailles, l'écart et le reste égaux aux références à 10⁻¹² m ; (2) l'écart relatif
-divisé par au moins 2 à chaque raffinement, sous 1 % à ¼ m ; (3) le reste sous 10⁻⁵ de l'amplitude ; (4) un bord forcé par un extérieur au
-repos garde le bassin au repos (vitesse sous 10⁻¹⁴ m/s, 500 pas : assemblage) ; (5) les essais de S613–S620 inchangés.
+**Quantum** : le ml (10⁻⁶ m³) ; le f16 (2·10⁻³ m à 2 m). **Critères, écrits avant.** (1) le volume restauré à moins d'1 ml de celui du nœud ;
+(2) l'écart initial à B égal à la référence à 10⁻⁹ m, sous 5 mm, et l'établissement en un pas ; (3) la tolérance : `hs` à ±10 %, `tp` à
+±0,5 s, `θ` à ±0,1 rad, la même phase — dedans, restauré ; dehors (chacun à son tour), refusé ; (4) `choisir` : `hs` = 0,21 m parmi des
+graines à 0,1, 0,2, 0,4, 0,8 m → celle de 0,2 ; `hs` = 0,3 m → aucune ; (5) l'identifiant : le même contenu, la même empreinte ; un seul f16
+changé, une autre ; (6) refus : un volume de nœud non positif, des tableaux de taille fausse.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `pas_avec_bord` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; liste 11.3 ; rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `graine.rs`, `depuis_etat` et leurs essais ; (1)–(6).
+- [ ] **P3** — preuve ; liste 4.11 ; rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (2)–(5) tenus ; **(1) manqué au-delà de la maille 1** : la crête à ½ (6·10⁻¹¹ m), l'écart et le reste à ¼ (10⁻⁸, 10⁻⁹ m)
-  s'écartent de numpy — les pentes minmod des zones presque plates changent de branche au bruit d'arrondi (A98). Pour la revue de S626 :
-  la tolérance d'accord avec une référence doit tenir compte de la sensibilité du limiteur. Suite : 809 essais listés.
-- **P3** — preuve BORD-FORCE-S622 ; ligne 11.3 ; index ; journal.

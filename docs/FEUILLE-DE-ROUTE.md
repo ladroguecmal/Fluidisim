@@ -442,6 +442,8 @@ solveur par W) ; **4.14 ouvert** (le mouillage et le séchage en 2D, jugés sur 
 **10.5 ouvert** (les grandes formes cohérentes entre clients) ; la vingt-septième revue (ADR-254).
 **S617–S619** : **9.10 ouvert** (le régulateur de qualité, les capacités dérivées) ; **11.5 ouvert** (le banc B7 des modules de la v2) ;
 le défaut I-06 de `SaintVenant2D` corrigé (×1,87) — il ne reste d'absents que 7.8, 13.4 (différés) et 5.11 (hors périmètre).
+**S620–S622** : Saint-Venant 2D d'ordre deux (Thacker ÷ 9 à 22) ; la vingt-huitième revue (ADR-255 : un paramètre de régularisation porte
+son échelle) ; le niveau du large imposé au bord (une frontière caractéristique fidèle et absorbante).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
