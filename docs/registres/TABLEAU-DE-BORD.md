@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 82 — absents : 28.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 83 — absents : 27.
 
 ## Par campagne
 
@@ -14,7 +14,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 |---|---:|---:|---:|---|
 | **K1** Rendu final et banc visuel | 0 | 9 | 0 | ◐8.1 ◐8.2 ◐8.3 ◐8.5 ◐8.6 ◐8.8 ◐8.9 ◐8.7 ◐8.10 |
 | **K2** La surface non graphe | 0 | 7 | 3 | ◐4.16 ◐4.1 ◐4.12 ·4.20 ◐7.4 ◐7.5 ·7.2 ·7.3 ◐3.3 ◐3.1 |
-| **K3** Le fond et la côte | 1 | 7 | 3 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ·3.5 ·4.14 ◐4.15 ✅6.5 ◐2.6 ·3.9 ◐4.6 |
+| **K3** Le fond et la côte | 1 | 8 | 2 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ◐3.5 ·4.14 ◐4.15 ✅6.5 ◐2.6 ·3.9 ◐4.6 |
 | **K4** Les eaux intérieures | 0 | 0 | 4 | ·2.3 ·2.4 ·2.5 ·12.2 |
 | **K5** δ, le système | 0 | 11 | 3 | ◐4.2 ◐4.3 ·4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
@@ -52,7 +52,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 3.2 | partiel | Sillages de bateaux |
 | 3.3 | partiel | Explosions de surface et sous-marines |
 | 3.4 | partiel | Tsunamis |
-| 3.5 | absent | Déferlement |
+| 3.5 | partiel | Déferlement |
 | 3.6 | partiel | Réfraction bathymétrique des ondes |
 | 3.7 | partiel | Événements horodatés, journaux, instantanés et restauration avec perte connue |
 | 3.8 | partiel | Composition B+W sans refus sur toute scène |
@@ -259,4 +259,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S585 | 2026-10-07 | 10 | 81 | 29 | 120 |
 | S586 | 2026-10-07 | 10 | 81 | 29 | 120 |
 | S587 | 2026-10-07 | 10 | 82 | 28 | 120 |
+| S588 | 2026-10-07 | 10 | 83 | 27 | 120 |
 <!-- fin de l'historique -->

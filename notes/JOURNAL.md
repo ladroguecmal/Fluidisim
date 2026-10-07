@@ -995,3 +995,10 @@ rien (D2, L407). Ont tenu : un seuil sous quantum relevé avant la mesure (S582)
 par une intégration indépendante de l'équation de la cavité. **Fait** ([preuve](../docs/validation/EXPLOSION-BULLE-S587.md)) :
 `explosion.rs`. **Mesuré** : le rayon et la période d'une charge de 1 kg à 20 m à 10⁻⁹ ; les lois de Willis à 10⁻¹². Maillons **1** (3.3 :
 absent → partiel). Suivant : **S588**, un point absent.
+
+## S588 — 2026-10-07 — la polyligne de déferlement
+
+**Entrée.** En autonomie (ADR-247) ; 3.5 (absent). **Les références recalculées par le script avec ses propres formules** (dispersion,
+levée, réfraction), indépendantes de `bathymetrie.rs`. **Fait** ([preuve](../docs/validation/DEFERLEMENT-S588.md)) : `deferlement.rs`.
+**Mesuré** : la ligne de déferlement d'une plage droite au millimètre de l'algorithme, le flux dissipé à 3·10⁻⁷, la crête à 0,0002°.
+Maillons **1** (3.5 : absent → partiel). Suivant : **S589**, un point absent.

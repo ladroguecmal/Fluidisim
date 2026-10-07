@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S588 — **en cours**. En autonomie (ADR-247 : la physique d'abord), **3.5 — le déferlement** (absent ; « polyligne de SPEC-006
+Session : S588 — **terminée**. En autonomie (ADR-247 : la physique d'abord), **3.5 — le déferlement** (absent ; « polyligne de SPEC-006
 §6 »). Une donnée **cuite** : dérivée hors ligne de la bathymétrie et de l'état de mer, republiée par phase de marée.
 
 **Ce que la session fait.** `deferlement.rs` : sur une grille de profondeurs (la côte orientée le long de `y`, le large vers `+x`), la
@@ -85,7 +85,10 @@ profondeur de la grille… ou une ligne toute à terre) : aucun sommet ; (4) ref
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `deferlement.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.5 ; rituel.
+- [x] **P2** — `deferlement.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — 8 sommets à 142,1033 m ; flux 29,799763 kW/m ; crête 8,0634° ; une houle de 1 cm sans sommet ; refus. Suite 763.
+- **P3** — preuve DEFERLEMENT-S588 ; liste 3.5 (absent → partiel) et décompte ; index ; journal.
+

@@ -165,7 +165,10 @@ pas recopiée ici (L137).
   à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)) ; **S584 : sur un rayon courbe** (le traceur de 3.6 : Green et la
   réfraction ensemble, l'amplitude à 8·10⁻⁶ ; [preuve](validation/TSUNAMI-RAYON-COURBE-S584.md)). Manquent l'étalement d'une source
   ponctuelle, les caustiques, la dispersion des sources courtes, le déferlement et le raffinement à la côte, l'événement de W qui le porte.
-- [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.
+- [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *partiel* depuis S588 : **la polyligne d'une côte droite** — McCowan sur la houle
+  levée et réfractée, le flux dissipé en kW/m, la direction de crête, contre des formules indépendantes
+  ([preuve](validation/DEFERLEMENT-S588.md)). Manquent une côte quelconque (marching squares, îles), la largeur de la zone, une polyligne
+  par phase de marée, la publication.
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
   (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).
   Manquent les caustiques, la diffraction, les ondes courtes (dispersives), le branchement au tsunami (3.4) et l'entrée dans W.
@@ -833,7 +836,7 @@ pas recopiée ici (L137).
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
-| 3. Ondes (W) | 9 | 0 | 7 | 2 |
+| 3. Ondes (W) | 9 | 0 | 8 | 1 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
@@ -844,7 +847,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **82** | **29** |
+| **total** | **121** | **10** | **83** | **28** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
