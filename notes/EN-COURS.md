@@ -62,47 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S672 — **terminée**. En autonomie vers la v2 ; 2.7 et 12.3 (« manquent le courant de dérive littorale »). `Cote2D` déferle
-(S670), mais la mer qui déferle pousse aussi l'eau : elle relève le niveau moyen au rivage et entraîne un courant le long de la côte.
+Session : S673 — **en cours**. En autonomie vers la v2 ; 2.7 et 12.3. `houle_moyenne.rs` (S672) calcule le niveau moyen et le courant de
+dérive d'une côte droite ; `Cote2D` (S670) cuit la mer qui déferle. Ils ne se parlent pas encore.
 
-**Ce que la session fait.** Le module `houle_moyenne.rs` (catégorie O) traite une côte uniforme le long de ses bords, rangée par rangée.
+**Ce que la session fait.**
 
-- **La contrainte de radiation** (Longuet-Higgins et Stewart 1964) : `S_ss = Σ E·(n·k_s²/k² + n − ½)` et `S_sn = Σ E·n·k_s·k_n/k²`.
-- **Le niveau moyen** : `dη̄/ds = −(dS_ss/ds)/(g·(h + η̄))`, implicite en `η̄`. `S_ss` peut dépendre de `η̄` (le déferlement saturé).
-- **Le courant de dérive** : `c_f·⟨|u|·u_n⟩ = −dS_sn/ds`. La moyenne est prise sur le temps des vitesses au fond de toutes les ondes,
-  sans linéariser le frottement ; `V` est trouvé par bissection.
-
-La côte 2D les recevra en S673.
+- **`Cote2D::cuire_deferlante` reçoit `c_f`.** Par rangée de la marche, l'énergie de chaque composante est moyennée le long de la
+  côte ; son vecteur d'onde vient de Snell (`k_n = k₀·sin θ₀`). La rangée donne `S_ss` et `S_sn`, puis `η̄(s)` et `V(s)`, stockés
+  par rangée des tables (8 octets par rangée).
+- **`eval`** ajoute `η̄` à `η` et `V·t̂` à `u_total`. Sans déferlement, rien ne change (au bit).
+- **`houle_moyenne`** : les vitesses au fond sont échantillonnées une fois par rangée, avant la bissection (le coût, ce script).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet (un module nouveau).
-- **instrument** : trois solutions analytiques. Ce qui départagerait : un `S_ss` faux (le `n − ½` oublié, un `cos²` de trop) s'écarte du
-  creux de (1) de dizaines de % ; une intégration fausse s'écarte de la pente de (2) ; une dérive au mauvais signe ou un frottement mal
-  moyenné s'écarte de (3).
-  - (1) le creux hors du déferlement (Longuet-Higgins et Stewart 1962) : `η̄ = −H²k/(8·sinh 2kh)`, une houle de 1 m et 10 s de face
-    sur la plage 1:50, de 80 m à 5 m ;
-  - (2) la remontée saturée (Bowen, Inman et Simmons 1968), `H = γ·(h + η̄)` : `dη̄/ds = K·|dh/ds|`, `K = 1/(1 + 8/(3γ²))`, `γ` = 0,78,
-    une houle de 30 s (l'eau peu profonde des formules), de 3 m à 0,3 m ;
-  - (3) le courant de Longuet-Higgins (1970), sans mélange, le frottement linéarisé faible :
-    `V = (5π/16)·(γ/c_f)·tan β·√(gh)·sin θ`, `c_f` = 0,01, 30 s, 1° à 2 m, de 1,5 m à 0,5 m.
-- **calcul** (scratchpad `s672_calc.py`, le même équilibre intégré en Python ; ce script asserte les bornes au double du plancher au
-  moins) : (1) 0,10 % → borne **0,5 %** ; (2) 0,73 % (`n` < 1 au large de la bande) → **2 %** ; (3) 1,0 % à 1° → **3 %**. À 5°, l'écart
-  est de 10,9 % : `V/u_m` vaut 0,26 et le frottement n'est plus linéaire. C'est l'effet que la moyenne exacte porte et que la formule
-  ignore : il est rapporté, pas jugé.
-- **ADR** : ADR-196, ADR-262 (le réalisme), ADR-268.
-- **pièges** : le signe de la dérive (`s` croît vers la côte : `−dS_sn/ds` > 0 dans la bande, le courant va dans le sens de `k_n`) ;
-  `E = g·a²/2` par `ρ` ; `n` au `k` de la profondeur totale ; l'échantillonnage du temps (une suite équirépartie, pas une période
-  commensurable).
+- **témoin** : `cuire_decime`, sans déferlement, au bit (l'empreinte de S670, `40c657593a299c83`) ; les essais S672 aux mêmes valeurs.
+- **instrument** : l'équilibre d'énergie 1D de S669, donnant les amplitudes par composante, passé par `houle_moyenne` : `η̄_ref(s)`,
+  `V_ref(s)`. Ce qui départagerait :
+  - une moyenne le long de la côte juste suit la référence au plancher ;
+  - un signe d'axe faux (`t̂` retourné) inverse le courant ;
+  - un indice de rangée décalé déplace le pic de `V` de la bande.
+- **calcul** (ce script) : le plancher — 0,8 % sur `S` (0,40 % par composante, S670) ; d'où **3 %** du pic pour `η̄` et **5 %** du pic
+  pour `V` ; le coût, ≈ 0,8·10⁹ opérations pour 1 976 rangées.
+- **ADR** : ADR-196, ADR-268.
+- **pièges** : `t̂ = (−n_y, n_x)`, le même que `coordonnees` ; `η̄(0)` = 0, rapporté au bord du large (le creux y est de 10⁻⁵ m) ; `V` hors
+  de la bande, où `dS_sn/ds` n'est que bruit numérique.
 
-**Critères, écrits avant.** (1) Le creux à **0,5 %** de Longuet-Higgins et Stewart, à chaque rangée. (2) La pente de la remontée saturée
-à **2 %** de `K`, à chaque rangée. (3) La dérive à **3 %** de Longuet-Higgins 1970, de 1,5 m à 0,5 m, à 1° ; l'écart à 5° rapporté.
+**Critères, écrits avant.** (1) Sans déferlement, au bit ; S672 aux mêmes valeurs. (2) `η̄` des tables à **3 %** du pic de `η̄_ref`, `V` à
+**5 %** du pic de `V_ref`, à chaque rangée. (3) `eval` : `η` relevé de `η̄(s)` interpolé (à 10⁻⁵ m), `u_total` de `V·t̂` ; le courant
+dans le sens de `S_sn` au large. (4) Rapportés : la remontée au rivage, le creux le plus bas, le pic de `V`, le coût de la cuisson.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `houle_moyenne.rs` ; les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7, 12.3 ; rituel.
+- [ ] **P2** — `Cote2D` ; `houle_moyenne` échantillonné ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; listes 2.7, 12.3 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) 0,10 % ; (2) 0,73 % ; (3) 0,99 % à 1°, 10,9 % à 5° (le frottement non linéaire). Les valeurs du calcul du plan, retrouvées.
