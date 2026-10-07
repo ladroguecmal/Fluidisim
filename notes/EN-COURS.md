@@ -70,6 +70,6 @@ imprimé et non lu), S590 (le lac ; un paramètre entier). **ADR-249** : D1, D2 
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-249, METHODE, L408, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
