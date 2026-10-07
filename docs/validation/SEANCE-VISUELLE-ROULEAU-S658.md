@@ -46,5 +46,6 @@ Les images vues, aux instants clés :
 
 ## Le verdict
 
-**R40, envoyé le 2026-10-07, en attente.** Les deux animations ont été envoyées à l'utilisateur, avec ce qu'elles montrent et les instants
-à regarder.
+**R40, envoyé le 2026-10-07 — reçu le même jour** : *« tout parait crédible »*. Le déferlement plongeant, le jet, la sphère emportée et le
+relais 2D → 3D sont jugés crédibles à l'œil, sur le rendu d'atelier. Ce verdict porte sur la physique montrée, non sur le rendu final de
+Godot.

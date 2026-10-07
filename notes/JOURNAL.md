@@ -1546,3 +1546,6 @@ l'enregistrement du montage complet (S650–S657 : Saint-Venant au large, APIC 3
 d'atelier `outils/rendu_rouleau.py` (numpy, PIL) ; contrôlé (100 images, les particules du calcul, la sphère à 0,05 mm) ; vu avant l'envoi
 et refait (la zone des colonnes manquait). **Envoyé** : deux animations — **R40**, le verdict attendu. Maillons **2**. Suivant : **S659**,
 la suite des partiels de la physique, ou R40 s'il arrive.
+
+*Après S658, 2026-10-07* : **R40 reçu** — *« tout parait crédible »* (la séance visuelle du rouleau). Inscrit dans la preuve, la liste (8.10)
+et les décisions de l'utilisateur.
