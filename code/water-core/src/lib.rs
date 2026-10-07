@@ -57,6 +57,8 @@ pub mod traversabilite;
 pub mod glace;
 /// S577 — la marée harmonique à phases entières (liste 2.2).
 pub mod maree;
+/// S582 — le tsunami, sa propagation macroscopique (liste 3.4).
+pub mod tsunami;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
