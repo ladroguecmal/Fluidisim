@@ -19,7 +19,7 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A310 | 1 | S318 | Le SPH du banc du lot 5 garde une erreur que je n'ai pas isolée | — |
 | A283 | 2 | S250 | Le premier raccordement B/W réel au MAC refuse le démarrage à perturbation et hauteur imposée nulles, à seulement 16×8 et 32×16 | — |
 | A284 | 2 | S251 | Le démarrage plat reçu coûte | — |
-| A286 | 2 | S253 | Le pas couplé mobile (ADR-152) exige un fond prolongé au-dessus du plan moyen | — |
+| A286 | 2 | S253 | Le pas couplé mobile (ADR-152) exige un fond prolongé au-dessus du plan moyen | S589 : le remède construit pour B — Background::vitesse_au_dessus, U constant et W fermé par la continuité, incompressible et continu au bit à z = 0 |
 | A287 | 2 | S256 | La rugosité de B est incomplète, et ses directions sont liées à la fréquence | — |
 | A288 | 2 | S260 | Sous `--vagues`, la surface rendue n'est pas celle que le jeu interroge | — |
 | A290 | 2 | S283 | Rétrécir un domaine perturbatif n'est pas gratuit à un instant arbitraire | — |

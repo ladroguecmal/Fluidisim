@@ -178,7 +178,10 @@ pas recopiée ici (L137).
 - [ ] **3.8 Composition B+W sans refus sur toute scène** (budget de pente sur pente réelle, I-18) — *partiel* : scène
   représentative admise aux 161 instants (ADR-142, S236). Manquent le choix du mode par l'hôte
   autoritaire (A271) et la saturation par la pression seule (A261).
-- [ ] **3.9 Couches W fournies au-dessus du plan moyen pour δ** — *absent* (A286).
+- [ ] **3.9 Couches W fournies au-dessus du plan moyen pour δ** — *partiel* depuis S589 (A286) : **la vitesse de B au-dessus du plan**
+  — `U` constant, `W` fermé par la continuité : incompressible (divergence 10⁻⁶ contre 10⁻² pour Taylor), continu au bit à `z = 0`
+  ([preuve](validation/AU-DESSUS-S589.md)). Manquent W (les anneaux) au-dessus du plan et la réception dans le pas couplé mobile contre
+  l'oracle S253.
 
 ## 4. Simulation volumique locale (δ)
 
@@ -836,7 +839,7 @@ pas recopiée ici (L137).
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
-| 3. Ondes (W) | 9 | 0 | 8 | 1 |
+| 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
@@ -847,7 +850,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **83** | **28** |
+| **total** | **121** | **10** | **84** | **27** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

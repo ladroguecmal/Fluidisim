@@ -1002,3 +1002,10 @@ absent → partiel). Suivant : **S588**, un point absent.
 levée, réfraction), indépendantes de `bathymetrie.rs`. **Fait** ([preuve](../docs/validation/DEFERLEMENT-S588.md)) : `deferlement.rs`.
 **Mesuré** : la ligne de déferlement d'une plage droite au millimètre de l'algorithme, le flux dissipé à 3·10⁻⁷, la crête à 0,0002°.
 Maillons **1** (3.5 : absent → partiel). Suivant : **S589**, un point absent.
+
+## S589 — 2026-10-07 — la vitesse de B au-dessus du plan moyen (A286)
+
+**Entrée.** En autonomie (ADR-247) ; 3.9 (absent). **Fait** ([preuve](../docs/validation/AU-DESSUS-S589.md)) :
+`Background::vitesse_au_dessus` — `U` constant, `W` fermé par la continuité. **Mesuré** : incompressible (10⁻⁶ s⁻¹ contre 10⁻² pour
+Taylor), le mode d'Airy à 6·10⁻⁸ m/s, continu au bit. **Avant la mesure**, un critère sous son bruit relevé (la procédure corrigée, le seuil
+gardé). La section 3 n'a plus d'absent. Maillons **1** (3.9 : absent → partiel). Suivant : **S590**, le lot (dû) et un point absent.

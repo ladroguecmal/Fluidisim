@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S589 — **en cours**. En autonomie (ADR-247), **3.9 — les couches fournies au-dessus du plan moyen pour δ** (absent ; A286) :
+Session : S589 — **terminée**. En autonomie (ADR-247), **3.9 — les couches fournies au-dessus du plan moyen pour δ** (absent ; A286) :
 le pas couplé mobile exige un champ prolongé au-dessus de `z = 0` **de façon incompressible** ; B refuse `z > 0` (ADR-113) ; Taylor d'ordre
 un n'est pas incompressible (`div = z·U_xz`), l'exponentielle `e^{kz}` amplifie les ondes courtes sous les crêtes des longues.
 
@@ -83,8 +83,8 @@ d'`eval_local` (la continuité) ; (4) refus : `z < 0` ou non fini.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `vitesse_au_dessus` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.9 ; A286 ; rituel.
+- [x] **P2** — `vitesse_au_dessus` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.9 ; A286 ; rituel.
 
 ### Notes de reprise
 - **Avant la mesure, une faute du plan relevée** (ADR-236 D1) : le script avait imprimé, pour le critère (1), un rapport au bruit de « 1 »
@@ -92,4 +92,6 @@ d'`eval_local` (la continuité) ; (4) refus : `z < 0` ou non fini.
   disqualifié. Procédure corrigée, seuil inchangé : différences centrées au pas de 0,5 m et 0,25 m, combinées par Richardson (troncature
   en `h⁴` ≈ 7.2e-08, bruit ≈ 2.4e-07 s⁻¹ ; rapport au seuil ≈ 36). Le témoin Taylor passe par la même
   procédure.
+- **P2 fini** — divergence 9,9·10⁻⁷ (témoin 1,3·10⁻²) ; w à 5,8·10⁻⁸ ; l'exponentielle à sa borne ; au bit à z = 0 ; refus. Suite 764.
+- **P3** — preuve AU-DESSUS-S589 ; liste 3.9 (absent → partiel) et décompte ; note A286 ; index ; journal.
 

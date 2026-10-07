@@ -4651,3 +4651,7 @@ demi-maille ; mesuré conservé à 2,1·10⁻⁵ de E₀ sur 120 s. Le +8,4 % de
 *Note du 2026-10-06, S559, sur A17* ([ADR-241](../adr/ADR-241-les-liquides-de-v.md), [LIQUIDES-COUCHES-S559](../validation/LIQUIDES-COUCHES-S559.md)) :
 **traitée en partie.** V porte plusieurs liquides non miscibles par nœud, en couches ; la pression d'un nœud stratifié est construite et
 éprouvée. Le débit par couches reste à faire (liste 5.7).
+
+*Note du 2026-10-07, S589, sur A286* ([AU-DESSUS-S589](../validation/AU-DESSUS-S589.md)) : **le remède construit pour B** —
+`Background::vitesse_au_dessus`, `U` constant et `W` fermé par la continuité, incompressible et continu au bit à `z = 0`. Reste ouverte :
+la réception dans le pas couplé mobile contre l'oracle S253, et W au-dessus du plan.
