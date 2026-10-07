@@ -1672,3 +1672,11 @@ courant de sa mer.
 fois et cherche par Illinois. **Mesuré** : `η̄` à 0,21 % et `V` à 0,64 % de l'équilibre 1D ; 13 cm de remontée au rivage, 11 cm/s de
 courant ; sans déferlement, au bit. La cuisson coûtait 8,3 s, ramenée à 5,3 s. Maillons **1** (2.7, 12.3). Suivant : **S674**, la
 rétroaction du niveau sur le déferlement (13 % de profondeur au rivage), ou `Cote2D` dans Godot.
+
+## S674 — 2026-10-07 — Le niveau moyen rétroagit sur le déferlement
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/RETROACTION-NIVEAU-S674.md)) : le point fixe du niveau
+dans `cuire_deferlante` (la marche sur `h + η̄`, jusqu'à 1 mm) ; S670 et S673 restent à une marche, inchangés. **Mesuré** contre le
+même point fixe en 1D : 0,43 % par composante, `η̄` 0,21 %, `V` 0,65 % ; trois marches ; au rivage, `Hrms` +8 % (0,553 m), `η̄`
+12,57 cm, comme le calcul du plan. Maillons **1** (2.7). Suivant : **S675**, `Cote2D` dans Godot (l'intégration de 2.7), ou la marée
+du niveau moyen. **Lot** S672–S674.

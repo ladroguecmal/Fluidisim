@@ -479,6 +479,8 @@ bords périodiques tournés, le départ normalisé, la levée par le flux obliqu
 sa mémoire divisée par seize (les tables à 8 m, la marche à 2 m : 10 Mo/km² pour 32 composantes) (2.7).
 **S669–S671** : la dissipation au déferlement d'une mer entière dans la pente douce (Battjes et Janssen, à 0,3 % de l'équilibre
 d'énergie) ; `Cote2D` déferle jusqu'au rivage (chaque composante à 0,4 %) ; la trente-huitième revue (ADR-269, aucune règle) (2.7).
+**S672–S674** : l'effet moyen de la houle — la contrainte de radiation, le niveau au rivage et le courant de dérive (à 1 % de trois
+solutions analytiques), portés par `Cote2D` (13 cm au rivage), le niveau rétroagissant sur le déferlement (point fixe) (2.7, 12.3).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

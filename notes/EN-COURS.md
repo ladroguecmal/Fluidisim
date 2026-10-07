@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S674 — **en cours**. En autonomie vers la v2 ; 2.7. `Cote2D` (S673) relève le niveau de 13 cm au rivage, mais sa mer déferle
+Session : S674 — **terminée**. En autonomie vers la v2 ; 2.7. `Cote2D` (S673) relève le niveau de 13 cm au rivage, mais sa mer déferle
 encore sur la profondeur au repos : 13 % de profondeur manque au rivage.
 
 **Ce que la session fait.** **Le point fixe du niveau.** `cuire_deferlante` marche sur `h + η̄(s)`, recalcule `η̄`, et recommence
@@ -90,7 +90,8 @@ Rapportés : `Hrms` et `η̄` au rivage avant et après, le coût.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le point fixe dans `cuire_interne` ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P2** — le point fixe dans `cuire_interne` ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) au bit, S670 et S673 inchangés (une marche) ; (2) 0,43 %, 0,21 %, 0,65 % ; (3) trois marches ; (4) `Hrms` 0,513 → 0,553 m, `η̄` 12,96 → 12,57 cm, comme le calcul du plan ; 7,3 s.

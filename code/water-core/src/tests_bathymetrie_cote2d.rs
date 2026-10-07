@@ -212,7 +212,8 @@ fn the_2d_coast_breaks_a_sea_down_to_the_shore_s670() {
     let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
     let (l, w, pas) = (3950.0, 192.0, 2.0);
     let horloge = std::time::Instant::now();
-    let cote = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, 0.01, &|s, _| plage(s)).unwrap();
+    // S674 : une seule marche — le déferlement sans la rétroaction du niveau, comme S670 l'a écrit.
+    let cote = Cote2D::cuire_interne(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, Some(0.01), 1, &|s, _| plage(s)).unwrap();
     let duree = horloge.elapsed().as_secs_f64();
     let sans = Cote2D::cuire_decime(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, &|s, _| plage(s)).unwrap();
     // La référence : les amplitudes et le `k_n` que B porte (en eau profonde), `γ` comme la cuisson.
@@ -257,7 +258,7 @@ fn the_2d_coast_breaks_a_sea_down_to_the_shore_s670() {
             dz = dz.max((e1 - e0).abs());
         }
     }
-    let quatre = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, 3944.0, w, pas, 4, 0.01, &|s, _| plage(s)).unwrap();
+    let quatre = Cote2D::cuire_interne(&mut host, &b, [0.0, 1.0], 0.0, 3944.0, w, pas, 4, Some(0.01), 1, &|s, _| plage(s)).unwrap();
     println!("S670 : facteur au plus {:.2} % de l'équilibre 1D (composante {}, s = {} m, h = {:.1} m) ; cuisson {duree:.2} s",
         100. * pire, ou.0, ou.1 as f64 * pas as f64, plage(ou.1 as f64 * pas as f64));
     println!("S670 : au rivage ({h_fin} m) Hrms {hrms_fin:.3} m (1D {:.3}), Hrms/h {:.3} ; |Δη| avec et sans déferlement jusqu'à {:.2} m ; m = 4 : {:.2} Mo",
@@ -284,7 +285,8 @@ fn the_2d_coast_carries_the_wave_setup_and_the_longshore_current_s673() {
     let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
     let (l, w, pas, cf) = (3950.0, 192.0, 2.0, 0.01);
     let horloge = std::time::Instant::now();
-    let cote = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, cf, &|s, _| plage(s)).unwrap();
+    // S674 : une seule marche — le niveau sans rétroaction, comme S673 l'a écrit.
+    let cote = Cote2D::cuire_interne(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, Some(cf), 1, &|s, _| plage(s)).unwrap();
     let duree = horloge.elapsed().as_secs_f64();
     // La référence : les amplitudes de l'équilibre 1D, par `houle_moyenne`.
     let comp = b.components();
@@ -316,7 +318,7 @@ fn the_2d_coast_carries_the_wave_setup_and_the_longshore_current_s673() {
         dv = dv.max((cote.derive[i] as f64 - v_ref[i]).abs() / pic_v);
     }
     // (3) eval : la même côte sans niveau ni dérive.
-    let mut nue = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, cf, &|s, _| plage(s)).unwrap();
+    let mut nue = Cote2D::cuire_interne(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, Some(cf), 1, &|s, _| plage(s)).unwrap();
     nue.niveau.clear();
     nue.derive.clear();
     let mut pire_eval = 0f32;
@@ -342,5 +344,99 @@ fn the_2d_coast_carries_the_wave_setup_and_the_longshore_current_s673() {
     assert!(dv < 0.05, "critère 2 (V)");
     assert!(pire_eval < 1e-5, "critère 3 (eval)");
     assert!(cote.derive[i_pic] as f64 * ssn[0] > 0., "critère 3 : le sens du courant");
+}
+
+/// **S674** — le niveau moyen rétroagit sur le déferlement : `Cote2D` marche sur `h + η̄` jusqu'au point fixe. Contre le même point fixe
+/// en 1D (l'équilibre de S669 sur `h + η̄_ref`, `η̄_ref` par `houle_moyenne`) : (2) le facteur de chaque composante à 2 %, `η̄` à 3 % du
+/// pic, `V` à 5 % du pic ; (3) sous 1 mm en au plus 4 marches ; (4) rapportés.
+#[test]
+fn the_wave_setup_feeds_back_on_the_breaking_s674() {
+    use crate::houle_moyenne::{contrainte, derive_aux_rangees, niveau_moyen, vitesse_au_fond, Onde};
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15f32, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let comps: Vec<Component> = (0..8).map(|i| {
+        let mut c = composante(t[i], a[i], th[i].to_radians());
+        c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+        c
+    }).collect();
+    let b = fond(&comps);
+    let (mut alloc, services) = (Hote, Hote);
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    let (l, w, pas, cf) = (3950.0, 192.0, 2.0, 0.01);
+    let horloge = std::time::Instant::now();
+    let cote = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, cf, &|s, _| plage(s)).unwrap();
+    let duree = horloge.elapsed().as_secs_f64();
+    let une = Cote2D::cuire_interne(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, Some(cf), 1, &|s, _| plage(s)).unwrap();
+    // Le point fixe 1D.
+    let comp = b.components();
+    let tb: Vec<f64> = comp.iter().map(|c| 4_294_967_296.0 / c.freq_q32 as f64).collect();
+    let ab: Vec<f64> = comp.iter().map(|c| c.amplitude as f64).collect();
+    let kn: Vec<f64> = comp.iter().map(|c| (c.k_turns_per_m as f64 * core::f64::consts::TAU) * -(c.dir[0] as f64)).collect();
+    let somme: f64 = ab.iter().map(|a| a * a).sum();
+    let f_moy = ab.iter().zip(&tb).map(|(a, t)| a * a / t).sum::<f64>() / somme;
+    let gamma = crate::pente_douce::Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, G).gamma;
+    let ns = (l / pas).round() as usize + 1;
+    let s: Vec<f64> = (0..ns).map(|i| i as f64 * pas).collect();
+    let h: Vec<f64> = s.iter().map(|&s| plage(s)).collect();
+    let releve = |eta: &[f64], x: f64| {
+        let u = (x / pas).max(0.);
+        let i = (u as usize).min(eta.len() - 2);
+        let f = (u - i as f64).min(1.);
+        eta[i] + f * (eta[i + 1] - eta[i])
+    };
+    let mut eta_ref = vec![0.0f64; ns];
+    let mut ecarts_ref = Vec::new();
+    let (mut reference, mut ssn, mut vit) = (Vec::new(), Vec::new(), Vec::new());
+    for _ in 0..8 {
+        let e = eta_ref.clone();
+        reference = crate::pente_douce::tests::equilibre_1d_s669(&|x| plage(x) + releve(&e, x), l, &tb, &ab, &kn, gamma, true);
+        let h_tot: Vec<f64> = (0..ns).map(|i| h[i] + e[i]).collect();
+        let rangees: Vec<Vec<Onde>> = (0..ns).map(|i| (0..8).map(|c| {
+            let omega = core::f64::consts::TAU / tb[c];
+            let k = crate::pente_douce::nombre_d_onde(omega, h_tot[i], G);
+            Onde { amplitude: reference[i].1[c], omega, k: [(k * k - kn[c] * kn[c]).sqrt(), kn[c]] }
+        }).collect()).collect();
+        let (sss, sn): (Vec<f64>, Vec<f64>) = rangees.iter().zip(&h_tot).map(|(o, &hh)| contrainte(o, hh, G)).unzip();
+        ssn = sn;
+        vit = rangees.iter().zip(&h_tot).map(|(o, &hh)| o.iter().map(|w| vitesse_au_fond(w, hh)).collect::<Vec<_>>()).collect::<Vec<_>>();
+        let neuf = niveau_moyen(&s, &h, &|i, _| sss[i], 0.0, G).unwrap();
+        let d = neuf.iter().zip(&eta_ref).map(|(x, y)| (x - y).abs()).fold(0., f64::max);
+        ecarts_ref.push(d);
+        eta_ref = neuf;
+        if d < 1e-3 {
+            break;
+        }
+    }
+    let v_ref = derive_aux_rangees(&s, &ssn, &vit, cf, 1).unwrap();
+    let (nst, nn, _) = cote.noeuds();
+    assert_eq!(nst, ns);
+    let mut df = 0f64;
+    for c in 0..8 {
+        for i in 0..ns {
+            for j in 0..nn {
+                df = df.max((cote.facteur[(c * ns + i) * nn + j] as f64 * ab[c] / reference[i].1[c] - 1.).abs());
+            }
+        }
+    }
+    let pic_eta = eta_ref.iter().fold(0f64, |m, e| m.max(e.abs()));
+    let pic_v = v_ref.iter().fold(0f64, |m, v| m.max(v.abs()));
+    let (mut de, mut dv) = (0f64, 0f64);
+    for i in 0..ns {
+        de = de.max((cote.niveau[i] as f64 - eta_ref[i]).abs() / pic_eta);
+        dv = dv.max((cote.derive[i] as f64 - v_ref[i]).abs() / pic_v);
+    }
+    let hrms = |c2: &Cote2D, i: usize| 2. * (0..8).map(|c| (ab[c] * c2.facteur[(c * ns + i) * nn] as f64).powi(2)).sum::<f64>().sqrt();
+    let marches = cote.ecarts_du_niveau();
+    println!("S674 : facteur à {:.2} %, η̄ à {:.2} % du pic, V à {:.2} % du pic ; {} marches, |Δη̄| {:?} mm (1D {:?} mm) ; cuisson {duree:.2} s",
+        100. * df, 100. * de, 100. * dv, marches.len(), marches.iter().map(|e| (e * 1e4).round() / 10.).collect::<Vec<_>>(),
+        ecarts_ref.iter().map(|e| (e * 1e4).round() / 10.).collect::<Vec<_>>());
+    println!("S674 : au rivage, Hrms {:.3} m sans rétroaction, {:.3} m avec (1D {:.3}) ; η̄ {:.2} cm sans, {:.2} cm avec (1D {:.2}) ; V au plus {:.3} m/s",
+        hrms(&une, ns - 1), hrms(&cote, ns - 1), reference[ns - 1].0, 100. * une.niveau[ns - 1], 100. * cote.niveau[ns - 1], 100. * eta_ref[ns - 1],
+        cote.derive.iter().fold(0f32, |m, v| m.max(v.abs())));
+    assert!(df < 0.02, "critère 2 (facteur)");
+    assert!(de < 0.03, "critère 2 (η̄)");
+    assert!(dv < 0.05, "critère 2 (V)");
+    assert!(*marches.last().unwrap() < 1e-3 && marches.len() <= 4, "critère 3");
 }
 
