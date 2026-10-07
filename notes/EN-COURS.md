@@ -86,7 +86,7 @@ voie de réduction qu'ADR-196 §3 nomme (des transformations partagées entre co
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) 180/180 sous la borne (rapport 0,78), `|Δη|` 0,5 cm ; (2) 1,5 s pour 8 composantes ; 160 Mo/km² pour 32 composantes au pas de 2 m.
