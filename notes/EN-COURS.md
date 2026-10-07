@@ -71,7 +71,7 @@ friction qui a coûté ; (3) la prochaine revue nommée.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-263.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — ADR-263 : D1, un compte écrit est calculé ; D2, un instrument de mesure s'éprouve avant de juger. Prochaine revue S651.
