@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 17:36 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 17:37 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S653 — le corps libre que le rouleau emporte ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S652 — le rouleau 3D, étape 5 : la force du rouleau sur un corps ([journal](notes/JOURNAL.md)). Avant : S651 (la trente-quatrième revue de méthode)
 Session suivante : **S653 — la suite des partiels de la physique** (ADR-247) : A334 (le choc sous le rouleau, à une autre maille et un autre pas), ou le corps libre emporté par le rouleau (le couplage deux sens de la sphère d'APIC) — choisir par ce que la liste attend le plus.
 Maillons        : 1
