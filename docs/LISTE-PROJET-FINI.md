@@ -82,7 +82,10 @@ pas recopiée ici (L137).
   l'emprise (§7). Manquent le point d'entrée `WaterSystem` lui-même, les rangs 2 à 7, la position des
   domaines décidée par l'ordonnanceur, l'oubli et l'estimateur de coût dans le cœur.
 - [ ] **1.5 Grille 3D de référence stable** : adressage, zones actives, échanges client/serveur —
-  *absent*, conçu (ADR-006).
+  *partiel* depuis S607 : la `HydroGrid` d'ADR-006 §2 — Morton 3D hiérarchique (64 / 512 / 4 096 m, le dernier niveau aligné sur le
+  rebasage), parents, enfants, voisins ; les zones actives d'intérêts mobiles ; l'échange par écart, encodé, que le client rejoue au bit
+  ([preuve](validation/HYDROGRID-S607.md)). Manquent la subdivision de publication par type (R07), le routage de W, l'index de V, la
+  pertinence réseau.
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *absent*,
   conçu (ADR-006).
 - [ ] **1.7 Horloge de simulation entière et phases déterministes** (ADR-003) — *partiel* : temps
@@ -877,7 +880,7 @@ pas recopiée ici (L137).
 
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
-| 1. Socle | 8 | 1 | 5 | 2 |
+| 1. Socle | 8 | 1 | 6 | 1 |
 | 2. Grandes masses (B) | 9 | 0 | 9 | 0 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 18 | 3 |
@@ -890,7 +893,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **98** | **13** |
+| **total** | **121** | **10** | **99** | **12** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

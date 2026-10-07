@@ -1130,3 +1130,11 @@ un outil à plan tangent l'aurait mis 70,66 m trop haut. **En route** : la table
 listés, 17 ignorés) — **élargie** : un nombre de la preuve se mesure par une commande nommée (ADR-252 D1, L411). Ont tenu : les assertions
 du script du plan, qui ont arrêté trois nombres faux en S603–S604 avant toute mesure ; le rappel du lot par le rituel. Maillons **1**.
 Suivant : **S607**, un point absent.
+
+## S607 — 2026-10-07 — la grille d'adressage HydroGrid
+
+**Entrée.** En autonomie (ADR-247) ; 1.5 (absent, conçu). **Fait** ([preuve](../docs/validation/HYDROGRID-S607.md)) : `hydro_grid.rs` —
+`CellId` (Morton 3D, trois niveaux), parents, enfants, voisins, zones actives, l'échange par écart. **Mesuré** contre une implémentation
+Python indépendante : cinq clés au bit, 10⁵ points en aller-retour, dix pas de trois intérêts mobiles rejoués par le client au bit
+(3 668 octets puis 176–308 par pas) ; le niveau 2 vérifié contre le refus de `WorldPos::to_local` à 4 096 m. Maillons **1** (1.5 : absent →
+partiel). Suivant : **S608**, le lot et un point absent.

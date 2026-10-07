@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 04:48 +02:00
+JETON            : libre
+Battement        : 2026-10-07 04:54 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S607 — 1.5, la grille d'adressage HydroGrid ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S606 — la vingt-cinquième revue de méthode (ADR-252) ([journal](notes/JOURNAL.md)). Avant : S605 (le géoïde dans l'outil de terrain)
-Session suivante : **S607 — un point absent** (ADR-247 ; restent 13). Revue à S611 ; le lot à S608. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S606 : la revue
+Session en cours : aucune
+Dernière session : S607 — la grille d'adressage HydroGrid ([journal](notes/JOURNAL.md)). Avant : S606 (la vingt-cinquième revue de méthode)
+Session suivante : **S608 — le lot (dû), puis un point absent** (ADR-247 ; restent 12). Revue à S611. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S607 : 1.5 absent → partiel
 Registres       : dernier lot S605 (ADR-213 D3) ; le prochain au plus tard en S608
 ```
 

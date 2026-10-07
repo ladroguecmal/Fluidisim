@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S607 — **en cours**. En autonomie (ADR-247) : **1.5 — la grille 3D de référence stable : adressage, zones actives, échanges
+Session : S607 — **terminée**. En autonomie (ADR-247) : **1.5 — la grille 3D de référence stable : adressage, zones actives, échanges
 client/serveur** (ADR-006 §2 ; absent, conçu). La seule structure que serveur et clients partagent ; elle ne contient aucune eau.
 
 **Ce que la session fait.** Un module `hydro_grid.rs` : `CellId { frame: u32, niveau: u8, morton: u64 }` — cellule de base 64 m, trois
@@ -87,7 +87,9 @@ client égal à celui du serveur, au bit ; les comptes de parents 14 et 8 ; (5) 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `hydro_grid.rs` et ses essais ; (1)–(6).
-- [ ] **P3** — preuve ; liste 1.5 ; rituel.
+- [x] **P2** — `hydro_grid.rs` et ses essais ; (1)–(6).
+- [x] **P3** — preuve ; liste 1.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus du premier essai ; dix messages rejoués au bit. Suite : 797 essais listés (mesurée).
+- **P3** — preuve HYDROGRID-S607 ; liste 1.5 (absent → partiel) et décompte ; index ; journal.
