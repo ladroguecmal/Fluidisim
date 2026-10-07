@@ -133,6 +133,8 @@ pub mod pressure_journal;
 /// S278, ADR-012 : l'**ordonnanceur** — ce qui decide qu'une zone est simulee, analytique ou
 /// en transition. Concu depuis S01, ecrit a partir de S278.
 pub mod scheduler;
+/// S600 — la réserve d'événement : le dépassement critique temporaire (liste 9.13 ; ADR-012 §6).
+pub mod reserve_evenement;
 /// S396 : les domaines comme ensembles de blocs — fusion et séparation (ADR-006 §3–4).
 pub mod domain_blocks;
 /// S405 : la prédiction d'un objet balistique — point, vitesse, orientation, rotation, région utile ; paliers d'ADR-013 §2.
