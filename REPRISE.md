@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 00:07 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 00:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S681 — la quarantième revue de méthode (S676–S680) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S680 — Le relais au rivage, brique 1 : le flux des bords de Saint-Venant ([journal](notes/JOURNAL.md))
 Session suivante : S681 — la quarantième revue de méthode (S676–S680) ; puis la brique 2 du relais au rivage
 Maillons        : 1 (4.14 : le flux des bords de Saint-Venant)

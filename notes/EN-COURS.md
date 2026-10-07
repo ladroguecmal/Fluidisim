@@ -62,43 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S680 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage
-([conception](../docs/registres/RELAIS-RIVAGE-S679.md), ADR-271).
-
-**L'interface, précisée.** La conception prévoyait un flux HLL calculé à part et imposé aux deux côtés. Plus simple et aussi exact :
-
-- Saint-Venant 2D garde son bord caractéristique (S622, S628), nourri par l'état de la dernière colonne 3D ;
-- il **rend le flux de masse qu'il a réellement fait passer** pendant le pas, par rangée : la moyenne de ses deux étages de Heun,
-  exactement ce qui change son volume ;
-- APIC retire ou pose des particules pour ce même volume, et un réservoir garde le reste d'un quantum de particule.
-
-**Ce que la session fait.** La première brique : `SaintVenant2D` garde, à chaque pas forcé, le flux de masse de ses bords gauche et
-droit par rangée (`flux_des_bords`).
+Session : S681 — **en cours**. En autonomie vers la v2. **La quarantième revue de méthode** (ADR-222 D4 : S676–S680).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : les essais de S613–S628, aux mêmes sorties (le relevé ne touche pas l'arithmétique).
-- **instrument** : le bilan de volume. Ce qui départagerait : un flux relevé juste rend
-  `ΔV = dt·dx·Σ_j flux_j`, pas après pas, à l'arrondi près (10⁻¹² en relatif du volume) ; un étage de Heun oublié, ou le flux d'un seul
-  étage, s'en écarte de l'ordre de la variation du flux pendant le pas.
-- **calcul** : aucun nombre nouveau ; le plancher, l'arrondi `f64` d'une somme de quelques milliers de mailles (≈ 10⁻¹³ en relatif).
-- **ADR** : ADR-271.
-- **pièges** :
-  - Heun : `U ← U + ½·k·(L(U) + L(U¹))`, donc le flux du pas est la demi-somme des deux étages ;
-  - le signe : entrant positif à gauche, sortant positif à droite ;
-  - le frottement après le pas ne change pas le volume.
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-256 D2, ADR-270.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-**Critères, écrits avant.**
-
-1. Une houle entrée par le bord gauche (S622) et un bord droit forcé : à chaque pas, `ΔV` égal à `dt·dx·Σ(flux gauche − flux droit)` à
-   10⁻¹² près en relatif.
-2. Les essais de S613–S628 aux mêmes sorties.
+**Critères, écrits avant.** (1) ADR-272 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ou aurait coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `flux_des_bords` ; l'essai ; (1)–(2).
-- [x] **P3** — preuve ; la conception, note ; rituel.
+- [ ] **P2** — ADR-272 ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) 4,6·10⁻¹⁵ ; nul sur un mur ; (2) identiques.
