@@ -1064,3 +1064,10 @@ ADR-249 D1. Le lot : feuille de route S593–S596. Maillons **1**. Suivant : **S
 ([preuve](../docs/validation/MICROBULLES-S597.md)) : `microbulles.rs` — la remontée par classes, l'épaisseur optique, l'opacité. **Mesuré** :
 la fraction restante de trois classes à 2·10⁻⁴ de 30 000 bulles intégrées une à une. Maillons **1** (7.3 : absent → partiel). Suivant :
 **S598**, un point absent.
+
+## S598 — 2026-10-07 — la descente d'un objet qui coule et l'enveloppe de son domaine
+
+**Entrée.** En autonomie (ADR-247) ; 4.4 (absent). **Fait** ([preuve](../docs/validation/COULE-S598.md)) : `coule.rs` — la descente prévue
+(masse ajoutée, Newton), l'enveloppe verticale du domaine. **Mesuré** : la vitesse terminale et la descente au script, l'enveloppe qui garde
+l'objet, 64 agrandissements comptés à l'avance. **En route** : un compte promis au plan et non fait, comblé aux notes avant l'essai ; un
+constat — trop d'agrandissements pour δ. Maillons **1** (4.4 : absent → partiel). Suivant : **S599**, le lot (dû) et un point absent.

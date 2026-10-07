@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 90 — absents : 20.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 91 — absents : 19.
 
 ## Par campagne
 
@@ -16,7 +16,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K2** La surface non graphe | 0 | 9 | 1 | ◐4.16 ◐4.1 ◐4.12 ·4.20 ◐7.4 ◐7.5 ◐7.2 ◐7.3 ◐3.3 ◐3.1 |
 | **K3** Le fond et la côte | 1 | 9 | 1 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ◐3.5 ·4.14 ◐4.15 ✅6.5 ◐2.6 ◐3.9 ◐4.6 |
 | **K4** Les eaux intérieures | 0 | 3 | 1 | ◐2.3 ◐2.4 ◐2.5 ·12.2 |
-| **K5** δ, le système | 0 | 11 | 3 | ◐4.2 ◐4.3 ·4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
+| **K5** δ, le système | 0 | 12 | 2 | ◐4.2 ◐4.3 ◐4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
 | **K7** Les volumes finis | 1 | 8 | 0 | ◐5.2 ✅5.3 ◐5.4 ◐5.6 ◐5.7 ◐5.8 ◐5.9 ◐5.10 ◐5.12 |
 | **K8** Activation, prédiction, budget | 1 | 12 | 4 | ◐9.1 ◐9.2 ◐9.3 ·9.4 ✅9.5 ·9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ·9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
@@ -60,7 +60,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 4.1 | partiel | Solveur volumique 3D à surface libre |
 | 4.2 | partiel | Plusieurs domaines actifs simultanés |
 | 4.3 | partiel | Subdivision adaptative anisotrope, blocs épars |
-| 4.4 | absent | Profondeur adaptative |
+| 4.4 | partiel | Profondeur adaptative |
 | 4.5 | partiel | Création, croissance, réduction et disparition visuellement gratuites |
 | 4.6 | partiel | Entrée des vagues de B/W dans le domaine |
 | 4.7 | partiel | Frontière sans réflexion ni rupture visible |
@@ -269,4 +269,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S595 | 2026-10-07 | 10 | 89 | 21 | 120 |
 | S596 | 2026-10-07 | 10 | 89 | 21 | 120 |
 | S597 | 2026-10-07 | 10 | 90 | 20 | 120 |
+| S598 | 2026-10-07 | 10 | 91 | 19 | 120 |
 <!-- fin de l'historique -->

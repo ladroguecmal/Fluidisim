@@ -218,7 +218,10 @@ pas recopiée ici (L137).
   sous l'ensemble, en mer — un rectangle à un ulp de son dense sous la houle, l'épars qui suit à 0,14 mm du domaine entier
   ([preuve](validation/MER-EPARS-S404.md)). Manquent le stockage compact (pool de blocs), le fond coupé sous l'ensemble, la carte
   (C3, C8).
-- [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
+- [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *partiel* depuis S598 : **le plan** — la descente prévue
+  d'un objet (masse ajoutée, Newton) et l'enveloppe verticale de son domaine (anticipation, marge, quantum, jamais remontée), contre un code
+  indépendant ([preuve](validation/COULE-S598.md)). Manquent l'exécution dans δ, la politique de paliers (64 agrandissements en 10 s : trop),
+  un objet qui remonte, les objets non sphériques.
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
   repart de δ = 0 (S344), et **ce qui entre dans un domaine qui se déplace naît au repos**, au bit
@@ -857,7 +860,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 8 | 1 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
-| 4. Volumique (δ) | 21 | 0 | 17 | 4 |
+| 4. Volumique (δ) | 21 | 0 | 18 | 3 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
@@ -867,7 +870,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **90** | **21** |
+| **total** | **121** | **10** | **91** | **20** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

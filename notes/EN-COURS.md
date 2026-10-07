@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S598 — **en cours**. En autonomie (ADR-247), **4.4 — la profondeur adaptative, un domaine qui suit un objet qui coule** (absent).
+Session : S598 — **terminée**. En autonomie (ADR-247), **4.4 — la profondeur adaptative, un domaine qui suit un objet qui coule** (absent).
 Première pièce : **le plan**, pas encore l'exécution dans δ.
 
 **Ce que la session fait.** `coule.rs` : (a) **la descente prévue** d'une sphère plus dense que l'eau — la masse ajoutée `½ρ_w·V`, la
@@ -84,11 +84,13 @@ centre ± son rayon) dedans avec au moins la marge, le bas jamais remonté, mult
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `coule.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 4.4 ; rituel.
+- [x] **P2** — `coule.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 4.4 ; rituel.
 
 ### Notes de reprise
 - **Avant l'essai, un manque du plan comblé** (ADR-244 D1) : le plan annonçait le nombre d'agrandissements « compté par le script », sans
   l'avoir compté. Compté maintenant avec la descente du script (RK4 à 10⁻⁴ s) : l'enveloppe mise à jour toutes les 0,1 s de 0 à 10 s, le bas
   `⌈(z(t + 2 s) + r + 0,5)/1⌉·1` s'il descend, depuis 2 m : **64 agrandissements**, le bas final à **73 m**.
+- **P2 fini** — terminale, descente, enveloppe (64, 73 m) tenues ; refus. Constat : 64 agrandissements en 10 s, trop pour δ. Suite 773.
+- **P3** — preuve COULE-S598 ; liste 4.4 (absent → partiel) et décompte ; index ; journal.
 
