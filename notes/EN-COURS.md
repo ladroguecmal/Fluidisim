@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S688 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. S687 : le schéma de raccord est juste.
+Session : S688 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage. S687 : le schéma de raccord est juste.
 ADR-273 D1 demande encore la référence du côté d'APIC. La lecture de la remontée avait un quantum (S687).
 
 **Ce que la session fait.**
@@ -96,7 +96,8 @@ ADR-273 D1 demande encore la référence du côté d'APIC. La lecture de la remo
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les essais ; (1)–(3).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — les essais ; (1)–(3).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) tenu : 5,2 % et 1,3 % ; (2) manqué à 5 et 2,5 cm (−3,46 %, −1,14 %), tenu à 1,25 cm (−0,64 %), convergent — la borne de 1 % n'était pas calculée ; (3) le relais à 87 % et 91 % de Synolakis ; le tout-Saint-Venant, non convergé, dépasse Synolakis.

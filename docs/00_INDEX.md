@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [Le relais au rivage jugé du côté d'APIC — S688](validation/RELAIS-COTE-APIC-S688.md) : le raccord ne trouble pas la 3D.
 - [Le raccord seul, entre deux Saint-Venant — S687](validation/RACCORD-SEUL-S687.md) : le schéma juste.
 - [L'onde solitaire à travers le raccord au rivage — S685](validation/RELAIS-RIVAGE-ONDE-S685.md) : critère manqué, localisé.
 - [Le raccord au rivage au repos : APIC 3D et Saint-Venant 2D — S684](validation/RELAIS-RIVAGE-REPOS-S684.md) : six plages à quelques µm/s.

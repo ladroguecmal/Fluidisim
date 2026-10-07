@@ -1786,3 +1786,11 @@ de Saint-Venant à flux imposé ; le raccord seul, le schéma du relais entre de
 Saint-Venant redonné au dix-millième, la masse au bit. À 5 cm, l'écart (−7,6 %) est une marche de la lecture de la remontée : la borne
 du plan était sous ce quantum, ADR-268 D1 non appliquée à la lecture. Le schéma est juste ; le déficit de S685 vient de l'onde portée
 par APIC. Maillons **1** (4.14). Suivant : **S688**, le relais contre le tout-APIC à air balistique (S645).
+
+## S688 — 2026-10-08 — Le relais au rivage jugé du côté d'APIC ; la remontée sous la maille
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; ADR-273 D1. **Fait** ([preuve](../docs/validation/RELAIS-COTE-APIC-S688.md)) : le niveau
+au raccord contre le tout-APIC ; la remontée lue sous la maille. **Mesuré** : le raccord ne trouble pas la 3D (1,3 % de la crête à
+2,5 cm) ; le raccord seul converge vers le domaine entier (−3,5 %, −1,1 %, −0,6 %), critère (2) manqué à 5 et 2,5 cm par une borne non
+calculée ; le relais remonte à 91 % de Synolakis à 2,5 cm. Le tout-Saint-Venant n'est pas une référence convergée de la remontée.
+Maillons **1** (4.14). Suivant : **S689**, le reflux (l'étape 3).

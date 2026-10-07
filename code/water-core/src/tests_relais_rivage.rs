@@ -69,9 +69,24 @@ fn remontee_s685(sv: &SaintVenant2D, niveau: f64) -> f64 {
         .sum::<f64>() / sv.ny as f64
 }
 
+/// **S688 — la remontée sous la maille** : par rangée, le niveau de l'eau (`h + z`) à la plus haute maille mouillée (`h` > 1 mm),
+/// au-dessus du niveau au repos ; la moyenne des rangées. Sans la marche de `dx/3` de la lecture par le fond (S687).
+fn remontee_niveau_s688(sv: &SaintVenant2D, niveau: f64) -> f64 {
+    (0..sv.ny).map(|j| (0..sv.nx).rev().find(|&i| sv.h[i * sv.ny + j] > 1e-3).map_or(f64::MIN, |i| sv.h[i * sv.ny + j] + sv.z[i * sv.ny + j]) - niveau)
+        .sum::<f64>() / sv.ny as f64
+}
+
 /// **S685** — l'onde solitaire de S644 (`H/d` = 0,2, pente 1:3) à travers le raccord à 5,35 m. Rend (la remontée du relais, celle du
 /// tout-Saint-Venant, le pire écart de masse relatif, la dette, la crête au raccord).
 fn onde_relais_s685(dx: f32) -> (f64, f64, f64, f64, f64) {
+    let r = onde_relais_lu_s688(dx);
+    (r.0, r.1, r.2, r.3, r.4)
+}
+
+/// S688 — l'onde de S685 dans le relais, lue aussi sous la maille, avec la série du niveau au raccord `(t, η)`. Rend (remontée du relais,
+/// du tout-Saint-Venant, l'écart de masse, la dette, la crête au raccord, les deux remontées sous la maille, la série).
+#[allow(clippy::type_complexity)]
+fn onde_relais_lu_s688(dx: f32) -> (f64, f64, f64, f64, f64, f64, f64, Vec<(f64, f64)>) {
     use crate::grand_evenement::OndeSolitaire;
     let (d, niveau, cot, x_pied, fond0, l) = (dx as f64, 0.40f64, 3.0f64, 4.768f64, 0.05f64, 6.6f64);
     let onde = OndeSolitaire { h: 0.07, d: 0.35, x1: 2.80, g: 9.81 };
@@ -105,17 +120,95 @@ fn onde_relais_s685(dx: f32) -> (f64, f64, f64, f64, f64) {
     let v0 = rel.volume();
     let dt_sv = (0.4 * d / (0.5 + (9.81 * 0.45f64).sqrt()) * 1e6) as u64;
     let (mut t, mut r_rel, mut r_sv, mut pire, mut crete) = (0u64, f64::MIN, f64::MIN, 0f64, 0f64);
+    let (mut n_rel, mut n_sv, mut serie) = (f64::MIN, f64::MIN, Vec::new());
     while t < 3_000_000 {
         let us = rel.apic.stable_step_us(10_000).min(dt_sv).min(3_000_000 - t);
         rel.pas(us).unwrap();
         tout.pas(us as f64 * 1e-6).unwrap();
         r_rel = r_rel.max(remontee_s685(&rel.sv, niveau));
         r_sv = r_sv.max(remontee_s685(&tout, niveau));
+        n_rel = n_rel.max(remontee_niveau_s688(&rel.sv, niveau));
+        n_sv = n_sv.max(remontee_niveau_s688(&tout, niveau));
         pire = pire.max((rel.volume() - v0).abs() / v0);
-        crete = crete.max(rel.bord_3d().iter().map(|b| b.0).sum::<f64>() / ny as f64 - niveau);
+        let e = rel.bord_3d().iter().map(|b| b.0).sum::<f64>() / ny as f64 - niveau;
+        crete = crete.max(e);
         t += us;
+        serie.push((t as f64 * 1e-6, e));
     }
-    (r_rel, r_sv, pire, rel.dette.iter().sum(), crete)
+    (r_rel, r_sv, pire, rel.dette.iter().sum(), crete, n_rel, n_sv, serie)
+}
+
+/// S688 — le tout-APIC sur le même fond lisse, la même onde, jusqu'à 1,6 s : la série du niveau `(t, η)` de la colonne qui borde le raccord
+/// du relais (la plus haute particule + `dx/4`, moyennée sur les rangées).
+fn tout_apic_s688(dx: f32) -> Vec<(f64, f64)> {
+    use crate::grand_evenement::OndeSolitaire;
+    let (d, niveau, cot, x_pied, fond0) = (dx as f64, 0.40f64, 3.0f64, 4.768f64, 0.05f64);
+    let onde = OndeSolitaire { h: 0.07, d: 0.35, x1: 2.80, g: 9.81 };
+    let fond = move |x: f64| fond0 + (x - x_pied).max(0.) / cot;
+    let eta = move |x: f64| if x < x_pied { onde.eta(x) } else { 0. };
+    let vit = move |x: f64| if x < x_pied { onde.u(x) } else { 0. };
+    let (nx, ny, nz) = ((6.6 / d).round() as usize, 4usize, (0.8 / d).round() as usize);
+    let i_r = (5.35 / d).round() as usize - 1;
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let hauteurs: Vec<f32> = (0..nx * ny).map(|c| fond(((c % nx) as f64 + 0.5) * d) as f32).collect();
+    a.set_seabed_smooth(Some(&hauteurs)).unwrap();
+    let zb: Vec<f32> = (0..nx * 2).map(|s| a.smooth_seabed_height((s as f32 + 0.5) * dx / 2., 0.1)).collect();
+    a.seed(&|p| p[2] > zb[((p[0] / (dx / 2.)) as usize).min(nx * 2 - 1)] && (p[2] as f64) < niveau + eta(p[0] as f64)).unwrap();
+    a.set_particle_velocities(&|p| ([vit(p[0] as f64) as f32, 0., 0.], [[0.; 3]; 3])).unwrap();
+    let (x0, x1) = (i_r as f32 * dx, (i_r + 1) as f32 * dx);
+    let (mut t, mut serie) = (0u64, Vec::new());
+    while t < 1_600_000 {
+        let us = a.stable_step_us(10_000).min(1_600_000 - t);
+        a.step(us).unwrap();
+        t += us;
+        let mut haut = vec![f32::MIN; ny];
+        for p in a.particles() {
+            if p[0] >= x0 && p[0] < x1 {
+                let j = ((p[1] / dx) as usize).min(ny - 1);
+                haut[j] = haut[j].max(p[2]);
+            }
+        }
+        let e = haut.iter().map(|&h| h as f64 + d / 4.).sum::<f64>() / ny as f64 - niveau;
+        serie.push((t as f64 * 1e-6, e));
+    }
+    serie
+}
+
+/// **S688** — (1) le niveau au raccord du relais à 10 % de la crête du tout-APIC, jusqu'à 1,6 s, à 5 et 2,5 cm (tenu) ; (2) le raccord seul à
+/// 1 % du tout-Saint-Venant, lu sous la maille, aux trois mailles — **manqué à 5 et 2,5 cm** (−3,5 %, −1,1 %), tenu à 1,25 cm (−0,6 %) :
+/// l'écart converge avec la maille, la borne n'était pas calculée (la preuve) ; (3) rapportés. N'affirme que ce qui a tenu (ADR-244) :
+/// (1), (2) à 1,25 cm, et la convergence.
+#[test]
+#[ignore = "≈ 25 min : le relais, le tout-APIC et le raccord seul, plusieurs mailles"]
+fn the_shore_relay_judged_from_the_apic_side_s688() {
+    let mut echecs = Vec::new();
+    let mut ecarts = Vec::new();
+    for dx in [0.05f64, 0.025, 0.0125] {
+        let (_, _, _, n, nt) = raccord_seul_s687(dx);
+        println!("S688 raccord seul {dx} m, sous la maille : {n:.4} m, tout-Saint-Venant {nt:.4} m ({:+.2} %)", 100. * (n / nt - 1.));
+        ecarts.push((n / nt - 1.).abs());
+    }
+    if !(ecarts[2] < 0.01 && ecarts[1] < ecarts[0] && ecarts[2] < ecarts[1]) {
+        echecs.push(format!("critère 2 à 1,25 cm, ou la convergence : {ecarts:?}"));
+    }
+    let syn = crate::grand_evenement::remontee_synolakis(0.07, 0.35, 3.0).unwrap();
+    for dx in [0.05f32, 0.025] {
+        let (_, _, _, _, crete, n_rel, n_sv, serie) = onde_relais_lu_s688(dx);
+        let apic_seul = tout_apic_s688(dx);
+        let au = |t: f64| {
+            let k = apic_seul.partition_point(|p| p.0 < t).clamp(1, apic_seul.len() - 1);
+            let (a, b) = (apic_seul[k - 1], apic_seul[k]);
+            a.1 + (b.1 - a.1) * ((t - a.0) / (b.0 - a.0)).clamp(0., 1.)
+        };
+        let crete_apic = apic_seul.iter().fold(f64::MIN, |m, p| m.max(p.1));
+        let pire = serie.iter().filter(|p| p.0 <= 1.6 && p.0 >= apic_seul[0].0).fold(0f64, |m, p| m.max((p.1 - au(p.0)).abs()));
+        println!("S688 relais {dx} m : au raccord, l'écart au tout-APIC au plus {:.2} cm ({:.1} % de sa crête {:.2} cm ; la crête du relais {:.2} cm) ; sous la maille, remontée {n_rel:.4} m, tout-Saint-Venant {n_sv:.4} m ({:+.1} %), Synolakis {syn:.4} m ({:+.1} %)",
+            pire * 100., 100. * pire / crete_apic, crete_apic * 100., crete * 100., 100. * (n_rel / n_sv - 1.), 100. * (n_rel / syn - 1.));
+        if pire >= 0.10 * crete_apic {
+            echecs.push(format!("critère 1 : {dx}"));
+        }
+    }
+    assert!(echecs.is_empty(), "{echecs:?}");
 }
 
 /// **S685 — l'onde solitaire à travers le raccord** : (1) la remontée du relais à 10 % du tout-Saint-Venant, à 5 et 2,5 cm — **manqué**
@@ -135,8 +228,9 @@ fn a_solitary_wave_crosses_the_shore_relay_s685() {
 
 /// **S687 — le raccord seul** (ADR-273 D1) : Saint-Venant des deux côtés, raccordés par le schéma de `RelaisRivage` — l'état du bord du
 /// large (niveau, vitesse, moyennés sur les rangées) nourrit le bord caractéristique du rivage ; le flux rendu quitte le large par son bord
-/// droit à flux imposé. Rend (la remontée du raccord seul, celle du tout-Saint-Venant, le pire écart de masse relatif).
-fn raccord_seul_s687(dx: f64) -> (f64, f64, f64) {
+/// droit à flux imposé. Rend (la remontée du raccord seul, celle du tout-Saint-Venant, le pire écart de masse relatif ; S688, les deux
+/// remontées sous la maille).
+fn raccord_seul_s687(dx: f64) -> (f64, f64, f64, f64, f64) {
     use crate::grand_evenement::OndeSolitaire;
     let (niveau, cot, x_pied, fond0, l, ny) = (0.40f64, 3.0f64, 4.768f64, 0.05f64, 6.6f64, 4usize);
     let onde = OndeSolitaire { h: 0.07, d: 0.35, x1: 2.80, g: 9.81 };
@@ -159,6 +253,7 @@ fn raccord_seul_s687(dx: f64) -> (f64, f64, f64) {
     let v0 = large.volume() + rivage.volume();
     let dt = 0.4 * dx / (0.5 + (9.81 * 0.45f64).sqrt());
     let (mut t, mut r_rac, mut r_tout, mut pire) = (0f64, f64::MIN, f64::MIN, 0f64);
+    let (mut n_rac, mut n_tout) = (f64::MIN, f64::MIN);
     while t < 3.0 {
         // L'état du bord du large, avant les pas (comme le relais).
         let (mut e, mut u) = (0f64, 0f64);
@@ -176,10 +271,12 @@ fn raccord_seul_s687(dx: f64) -> (f64, f64, f64) {
         tout.pas(dt).unwrap();
         r_rac = r_rac.max(remontee_s685(&rivage, niveau));
         r_tout = r_tout.max(remontee_s685(&tout, niveau));
+        n_rac = n_rac.max(remontee_niveau_s688(&rivage, niveau));
+        n_tout = n_tout.max(remontee_niveau_s688(&tout, niveau));
         pire = pire.max(((large.volume() + rivage.volume()) - v0).abs() / v0);
         t += dt;
     }
-    (r_rac, r_tout, pire)
+    (r_rac, r_tout, pire, n_rac, n_tout)
 }
 
 /// **S687** — (2) la remontée du raccord seul à 6 % du tout-Saint-Venant, à 5 et 2,5 cm — tenu à 2,5 cm (et 1,25 cm, en route) ; à 5 cm,
@@ -187,7 +284,7 @@ fn raccord_seul_s687(dx: f64) -> (f64, f64, f64) {
 #[test]
 fn the_shore_relay_scheme_alone_between_two_saint_venant_s687() {
     let mesures: Vec<(f64, f64, f64, f64)> = [0.05f64, 0.025, 0.0125].iter().map(|&dx| {
-        let (r, rt, pire) = raccord_seul_s687(dx);
+        let (r, rt, pire, _, _) = raccord_seul_s687(dx);
         println!("S687 {dx} m : remontée du raccord seul {r:.4} m, tout-Saint-Venant {rt:.4} m ({:+.2} %) ; masse {pire:.1e}", 100. * (r / rt - 1.));
         (dx, r, rt, pire)
     }).collect();
