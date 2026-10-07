@@ -62,37 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S617 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S614–S616), puis **9.10 — les profils de qualité,
-l'adaptation au matériel et à la charge** (I-16 ; absent). I-16 : un profil ne déclare que des allocations ; une capacité se calcule depuis
-des coûts mesurés. ADR-012 §5 : un régulateur PI sur `q ∈ [0, 1]` — **non écrit** (note de S351).
+Session : S618 — **en cours**. En autonomie (ADR-247) : **11.5 — le matériel cible de livraison et la seconde cible** (B7 complet, A98 ;
+absent). ADR-219 D2 : ce PC est la cible ; la seconde cible est le bridage de 9.10. Cette session mesure, sur ce PC, le coût des modules
+construits pour la v2 et en dérive les capacités (I-16, `qualite::Capacites`), pour la cible et pour la seconde cible.
 
-**Ce que la session fait.** Un module `qualite.rs` : `Capacites::depuis(profil, coûts)` — les capacités dérivées (paquets W, blocs δ) ;
-`Regulateur` — le PI d'ADR-012 §5 : le consommé filtré (`τ` = 0,5 s), la descente en une image sur le consommé brut (coupe proportionnelle
-de `q`), la remontée rampée (≤ 1 par seconde), la décision engagée 30 images, l'intégrale plafonnée à `q` pendant l'engagement
-(anti-emballement). **Gains choisis au plan** (ADR-012 §8 : les valeurs se mesurent) : `kp` 0,5, `ki` 2,0 pompaient (12 inversions en 12 s) ;
-`kp` 0,3, `ki` 1,0 avec le plafonnement : 3. Ne fait pas : la mesure du coût réel sur ce PC bridé (WARP), le branchement à l'ordonnanceur
-(`scheduler::set_profile`), les profils nommés.
+**Ce que la session fait.** Un exemple `b7_cible.rs` : le coût, en ns, d'un pas de maille de `SaintVenant2D` (200²), d'un pas de maille de
+`Domaine1D` (400), d'un échantillon de `TrainW1D`, d'un échantillon de `tsunami::niveau`, d'une image du `Regulateur` ; chaque coût est la
+**médiane de cinq répétitions** d'au moins 0,2 s, avec leur étalement (max/min) ; puis les capacités par tick — mailles de δ, échantillons de
+W — pour un budget de **2.0 ms** (ADR-012 : `cpu_sim_ms`) et pour la seconde cible bridée (÷ 3 : **0.6667 ms**), et le
+côté du domaine 2D carré qui tient dans chacun. Ne fait pas : A98 (le sinus déterministe : `phase.rs` le traite ; sa conformité entre
+plateformes demande une seconde plateforme), le GPU bridé (WARP), la scène représentative entière.
 
-**Références, calculées avant** (`s617_ref.py`, Python indépendant). Installation simulée `consommé = charge·(0,4 + 1,6·q)` ms, budget 1,6 ms,
-30 images/s. **Trace** (12 s : charge 1, 1,8 de 2 à 5 s, puis 1) : `q` 0.750024 → **0.416670** dès la première image de
-l'événement (le consommé 1.9200 ms à la suivante), **0.305555556** à 5 s (l'équilibre 0.305555556), **0.750000000** à 12 s
-(0,75) ; retour à 99 % en **3.60 s** ; **3 inversions** notables (> 10⁻³). **Matériel faible** (coûts × 3) : `q` → **0.083333333**
-(l'équilibre 1/12), 0 inversion. **Capacités** : 2,0 ms / (109/4096) ms par impact → **75 paquets W** ; matériel faible
-**25** ; 384 Mio / (8³ × 16 o) → **49152 blocs**.
-
-**Quantum** : f64 ; des entiers pour les capacités. **Critères, écrits avant.** (1) les trois `q` d'équilibre (trace, faible) à 10⁻⁶ et la
-trajectoire égale à la référence à 10⁻¹² image par image ; (2) la descente à la première image de l'événement ; (3) au plus 3 inversions
-notables sur la trace, aucune sur le matériel faible ; le retour à 99 % au moins 1 s (rampé) ; (4) la remontée jamais plus vite que 1 par
-seconde, aucune remontée dans les 30 images d'une descente (assemblage : par construction) ; (5) les capacités 75, 25,
-49152 ; (6) refus : `τ`, pas, budget non positifs ; un coût non positif.
+**Quantum** : la nanoseconde ; la mesure est bruitée. **Critères, écrits avant.** (1) le banc rend les cinq coûts, finis et positifs ; un
+étalement au-delà de 1,5 marque la mesure « instable » sans l'écarter ; (2) les capacités suivent I-16 — `⌊budget / coût⌋` — et celles de la
+seconde cible sont celles d'un budget divisé par 3 ; (3) le rapport inscrit, pour chaque module, les deux capacités ; aucun seuil de
+performance n'est posé avant la mesure (ADR-012 §8 : les valeurs se mesurent sur la cible).
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `qualite.rs` et ses essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 9.10 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `b7_cible.rs`, sa mesure ; (1)–(3).
+- [ ] **P3** — preuve ; liste 11.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus ; la trajectoire identique au bit à la référence (fichier de données `tests_qualite_reference.txt`). Suite :
-  805 essais listés.
-- **P3** — preuve QUALITE-S617 ; liste 9.10 (absent → partiel) et décompte ; index ; journal ; le lot.
