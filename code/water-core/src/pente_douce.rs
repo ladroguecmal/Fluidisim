@@ -198,6 +198,49 @@ pub fn propager(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: 
 #[allow(clippy::too_many_arguments)]
 pub fn propager_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
     incident: &dyn Fn(f64) -> (f64, f64)) -> Result<Champ, Refus> {
+    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, None)
+}
+
+/// **S662 — le nombre d'onde d'une onde d'amplitude `a`** (m) : la forme composite de Kirby et Dalrymple (1986),
+/// `ω² = g·k·(1 + f₁·ε²·D)·tanh(k·h + f₂·ε)`, `ε = k·a`, `f₁ = tanh⁵(kh)`, `f₂ = (kh/sinh kh)⁴`,
+/// `D = (cosh 4kh + 8 − 2·tanh² kh)/(8·sinh⁴ kh)` — bornée en eau peu profonde, où la seule correction de Stokes diverge. Point fixe
+/// amorti depuis le `k` linéaire.
+pub fn nombre_d_onde_non_lineaire(omega: f64, h: f64, a: f64, g: f64) -> f64 {
+    let mut k = nombre_d_onde(omega, h, g);
+    if a <= 0. {
+        return k;
+    }
+    for _ in 0..200 {
+        let kh = k * h;
+        let eps = k * a;
+        let (t, sh) = (kh.tanh(), kh.sinh());
+        let (f1, f2) = (t.powi(5), (kh / sh).powi(4));
+        let d = ((4. * kh).cosh() + 8. - 2. * t * t) / (8. * sh.powi(4));
+        let k_neuf = omega * omega / (g * (1. + f1 * eps * eps * d) * (kh + f2 * eps).tanh());
+        let k_suivant = 0.5 * (k + k_neuf);
+        if (k_suivant - k).abs() <= 1e-14 * k {
+            return k_suivant;
+        }
+        k = k_suivant;
+    }
+    k
+}
+
+/// **S662 — le grand angle avec la dispersion d'amplitude** : comme [`propager_grand_angle`], mais le `k` de chaque point est celui de son
+/// amplitude physique `a₀·|A|` à la rangée précédente ([`nombre_d_onde_non_lineaire`] ; `p` et `k̄` restent linéaires). `a0` : l'amplitude
+/// incidente, m.
+#[allow(clippy::too_many_arguments)]
+pub fn propager_non_lineaire(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
+    incident: &dyn Fn(f64) -> (f64, f64), a0: f64) -> Result<Champ, Refus> {
+    if !(a0 >= 0. && a0.is_finite()) {
+        return Err(Refus);
+    }
+    marche_grand_angle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, Some(a0))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
+    incident: &dyn Fn(f64) -> (f64, f64), a0: Option<f64>) -> Result<Champ, Refus> {
     let ok = |v: f64| v > 0. && v.is_finite();
     if !ok(periode) || !ok(g) || !ok(dx) || !ok(dy) || !(x1 > x0) || !(y1 > y0) || !x0.is_finite() || !y0.is_finite() {
         return Err(Refus);
@@ -230,9 +273,16 @@ pub fn propager_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x
     let d2 = dy * dy;
     for n in 0..nx - 1 {
         let x = x0 + (n + 1) as f64 * dx;
-        let (p1, k1, kb1) = rangee(x)?;
-        let kb = 0.5 * (kb0 + kb1);
+        let (p1, mut k1, kb1) = rangee(x)?;
         let n0 = n * ny;
+        // S662 : la dispersion d'amplitude — le k de la nouvelle rangée, à l'amplitude de la rangée courante (retardée d'un pas).
+        if let Some(a0) = a0 {
+            for j in 0..ny {
+                let hj = h(x, y0 + j as f64 * dy);
+                k1[j] = nombre_d_onde_non_lineaire(omega, hj, a0 * a[n0 + j].abs(), g);
+            }
+        }
+        let kb = 0.5 * (kb0 + kb1);
         for j in 0..ny {
             // X au demi-pas : (X·A)_j = x_l·A_{j−1} + x_c·A_j + x_u·A_{j+1}.
             let pj = 0.5 * (p0[j] + p1[j]);

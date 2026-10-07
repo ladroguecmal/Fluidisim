@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S662 — **en cours**. En autonomie vers la v2 ; 2.7. Après le grand angle (S660), les sections 5 (0,342) et 7 (0,233) de
+Session : S662 — **terminée**. En autonomie vers la v2 ; 2.7. Après le grand angle (S660), les sections 5 (0,342) et 7 (0,233) de
 Berkhoff restent au-dessus de 0,20 ; la cause encore nommée : la non-linéarité de l'expérience.
 
 **Le témoin : la dispersion d'amplitude**, la forme composite de Kirby et Dalrymple (1986), bornée en eau peu profonde :
@@ -89,7 +89,10 @@ Au plan (ce script), l'onde raide va plus vite : au sommet du haut-fond, `a = 2,
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la dispersion d'amplitude ; les essais ; (1)–(3).
+- [x] **P2** — la dispersion d'amplitude ; les essais ; (1)–(3).
 - [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) à moitié : `k` au point exact ; la limite à 10⁻⁹ manquée (9,76·10⁻⁸ — le terme d'ordre `ε` de la forme composite, que
+  le plan prenait pour `ε²`), proportionnelle à `a₀` (asserté) ; (2) sections 5 et 7 : −73 %, −57 % — la non-linéarité ; (3) tenu : 0,090 ;
+  0,106 ; 0,091 ; 0,101, le pic à 7 %.

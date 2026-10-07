@@ -159,7 +159,8 @@ pas recopiée ici (L137).
   (réfraction, diffraction, frottement, déferlement). **S659** : **le modèle parabolique de pente douce** (`pente_douce.rs`) —
   réfraction et diffraction sur une bathymétrie 2D ; exact sur l'onde plane et la levée ; sur le haut-fond de Berkhoff (1982), le pic
   de focalisation à 11 % des mesures, les écarts de 0,2 à 0,4 ailleurs (critère manqué ; l'angle, S660) ([preuve](validation/PENTE-DOUCE-S659.md)). **S660** : le grand angle (Padé [1,1]) — juste à 0,1 % à 30°, chaque section
-  rapprochée d'un cinquième ; les sections 2 et 3 sous 0,20, la 5 et la 7 encore loin (la non-linéarité) ([preuve](validation/GRAND-ANGLE-S660.md)).
+  rapprochée d'un cinquième ; les sections 2 et 3 sous 0,20, la 5 et la 7 encore loin (la non-linéarité) ([preuve](validation/GRAND-ANGLE-S660.md)). **S662** : la dispersion d'amplitude (Kirby et Dalrymple 1986) — **les quatre
+  sections de Berkhoff à un dixième des mesures** (0,090 ; 0,106 ; 0,091 ; 0,101), le pic à 7 % ([preuve](validation/NON-LINEAIRE-BERKHOFF-S662.md)).
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *partiel* depuis S599 pour le côtier (la bibliothèque de 12.3 ;
   [preuve](validation/COTIER-S599.md)) ; la météo **à la fin** (ADR-197 D5), un système
   complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).

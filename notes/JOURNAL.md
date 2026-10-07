@@ -1573,3 +1573,11 @@ avance). Suivant : **S661, la revue de méthode** (ADR-267), puis la non-linéar
 inversé nommé puis vérifié) ; D1, la ligne « instrument » écrit ce que le lecteur rendrait sous chaque hypothèse (S660 : un `|A|` qui ne
 départageait rien, vu par chance) ; D2, un script de plus de vingt lignes en fichier (deux heredocs rejetés). Maillons **2**. Suivant :
 **S662, la non-linéarité** sur le haut-fond de Berkhoff.
+
+## S662 — 2026-10-07 — la non-linéarité sur le haut-fond de Berkhoff
+
+**Entrée.** En autonomie vers la v2 ; 2.7. **Fait** ([preuve](../docs/validation/NON-LINEAIRE-BERKHOFF-S662.md)) : la dispersion
+d'amplitude de Kirby et Dalrymple (1986) dans le grand angle. **Mesuré** : **les quatre sections de Berkhoff sous 0,20** (0,090 ; 0,106 ;
+0,091 ; 0,101), le pic à 7 % — le critère de S659 tenu ; le témoin : la non-linéarité portait l'essentiel de l'écart (−73 %, −57 %). La
+limite linéaire manquée telle qu'écrite (un terme d'ordre `ε` que le plan prenait pour `ε²`), vérifiée proportionnelle. Maillons **1**
+(2.7 avance). Suivant : **S663**, le modèle côtier vers B ou une séance visuelle de Berkhoff.

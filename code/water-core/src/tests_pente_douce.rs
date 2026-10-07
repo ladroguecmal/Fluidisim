@@ -138,3 +138,47 @@ fn the_wide_angle_model_meets_berkhoff_s_shoal_s660() {
     }
 }
 
+/// **S662 (1) — l'instrument** : `k` non linéaire contre le script du plan (h = 0,1336 m, a = 2,2 × 0,0232 m : 5,37400) ; avec
+/// `a₀` = 10⁻⁹ m, le modèle non linéaire rend celui de S660 à 10⁻⁹ près.
+#[test]
+fn the_nonlinear_model_reduces_to_the_linear_one_s662() {
+    let k = nombre_d_onde_non_lineaire(2. * std::f64::consts::PI, 0.1336, 2.2 * 0.0232, G);
+    println!("S662 k non linéaire au sommet : {k:.5} (script 5,37400)");
+    assert!((k - 5.37400).abs() <= 1e-5, "critère 1 : {k}");
+    // La limite linéaire : le plan exigeait 10⁻⁹ à `a₀` = 10⁻⁹ m — **manqué** (9,76·10⁻⁸) : la forme composite a un terme d'ordre `ε`
+    // (`tanh(kh + f₂·ε)`), non `ε²` ; l'écart est **proportionnel à `a₀`** (×100 de 10⁻¹¹ à 10⁻⁹ m, à 10⁻⁴ près) — ce qui est asserté.
+    let lin = propager_grand_angle(&berkhoff, 1.0, G, -10., 12., 0.05, -10., 10., 0.05, &|_| (1., 0.)).unwrap();
+    let ecart_a = |a0: f64| {
+        let nl = propager_non_lineaire(&berkhoff, 1.0, G, -10., 12., 0.05, -10., 10., 0.05, &|_| (1., 0.), a0).unwrap();
+        (0..=44).flat_map(|i| (0..=40).map(move |j| (i, j))).map(|(i, j)| {
+            let (x, y) = (-10. + i as f64 * 0.5, -10. + j as f64 * 0.5);
+            (nl.amplitude(x, y).unwrap() - lin.amplitude(x, y).unwrap()).abs()
+        }).fold(0., f64::max)
+    };
+    let (e9, e11) = (ecart_a(1e-9), ecart_a(1e-11));
+    println!("S662 la limite linéaire : {e9:e} (a₀ = 10⁻⁹), {e11:e} (10⁻¹¹), rapport {:.4}", e9 / e11);
+    assert!((e9 / e11 / 100. - 1.).abs() <= 1e-3, "critère 1 : proportionnel à a₀");
+    assert_eq!(propager_non_lineaire(&berkhoff, 1.0, G, -10., 12., 0.05, -10., 10., 0.05, &|_| (1., 0.), -1.).err(), Some(Refus));
+}
+
+/// **S662 (2), (3)** — la dispersion d'amplitude sur le haut-fond de Berkhoff (`a₀` = 0,0232 m), à deux mailles.
+#[test]
+fn the_nonlinear_model_meets_berkhoff_s_shoal_s662() {
+    for d in [0.05f64, 0.025] {
+        let champ = propager_non_lineaire(&berkhoff, 1.0, G, -10., 12., d, -10., 10., d, &|_| (1., 0.), 0.0232).unwrap();
+        let mut rapport = String::new();
+        for (nom, section, x) in [("2 (x = 3)", &SECTION_2[..], Some(3.)), ("3 (x = 5)", &SECTION_3[..], Some(5.)), ("5 (x = 9)", &SECTION_5[..], Some(9.)), ("7 (y = 0)", &SECTION_7[..], None)] {
+            let (e, pm, pc) = ecart(&champ, section, x);
+            rapport += &format!(" ; section {nom} : écart {e:.3}, pic mesuré {pm:.3}, modèle {pc:.3}");
+        }
+        println!("S662 Berkhoff non linéaire, maille {d} m{rapport}");
+        // Critère 3 (celui de S659) : **tenu** — chaque section sous 0,20, le pic de la section 3 à 15 %.
+        let e = |s: &[(f64, f64)], x| ecart(&champ, s, x);
+        for (sec, x) in [(&SECTION_2[..], Some(3.)), (&SECTION_3[..], Some(5.)), (&SECTION_5[..], Some(9.)), (&SECTION_7[..], None)] {
+            assert!(e(sec, x).0 <= 0.20, "critère 3");
+        }
+        let (_, pm, pc) = e(&SECTION_3, Some(5.));
+        assert!((pc / pm - 1.).abs() <= 0.15, "critère 3 : le pic");
+    }
+}
+
