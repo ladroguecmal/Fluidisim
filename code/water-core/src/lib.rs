@@ -63,6 +63,8 @@ pub mod tsunami;
 pub mod refraction;
 /// S587 — les explosions sous-marines : la bulle (liste 3.3).
 pub mod explosion;
+/// S588 — la polyligne de déferlement (liste 3.5 ; SPEC-006 §6).
+pub mod deferlement;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
