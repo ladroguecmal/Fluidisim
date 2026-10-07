@@ -62,14 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S631 — **terminée**. En autonomie, **la trentième revue de méthode** (ADR-222 D4 ; S626–S630).
+Session : S632 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S629–S631), puis **3.5 — la
+hauteur réfractée par une côte courbe** (un manque de S630 : `transformer` suppose des isobathes parallèles).
 
-**Ce que la session fait.** Relu : S626 (la revue), S627 (Stoker, Ritter), S628 (le frottement), S629 (le couplage au tsunami ; une
-exploration abandonnée : un montage hors de ses bornes), S630 (les contours). **ADR-257** : D1 ; L418 ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** `portee::tracer_houle` (le rayon de houle dispersif de S603, rendu public) ; `deferlement::sur_rayons(a, b, b₀, …)`
+— le long du rayon `a`, `H = H₀·K_s·K_r` (la levée de `bathymetrie`, la réfraction `√(b₀/b)` contre le rayon voisin `b` au même indice,
+`refraction::coefficient`), le déferlement au premier passage de `H − 0,78·h` par zéro, interpolé. Ne fait pas : les caustiques (`b → 0`),
+la diffraction, le chaînage de ces points en polyligne (S630 le ferait), le flux dissipé.
+
+**Références, calculées avant** (`s632_ref.py`, numpy). Côte droite `h = 0,02·x`, houle de 8 s et 1,5 m, rayons partis de 6 km (120 m, en eau
+profonde) à θ₀ = 0,3 rad, espacés de 10 m : l'analytique (Snell, levée, `K_r = √(cos θ₀/cos θ)`) **x_b = 112.599453093 m** ; le long des rayons, pas de
+2, 1, ½ s : **112.618473302, 112.604772538, 112.600476235 m** — écarts 1.90e-02, 5.32e-03, 1.02e-03 m. **Bornes du montage**
+(ADR-257 D1, assertées) : le départ en eau profonde (120 m ≥ λ), la coupure (0,5 m) sous la profondeur de déferlement. Une île conique
+(rivage à 100 m, pente 0,02), des rayons en incidence normale partis de 5,2 km par paires miroir (y = ±200, ±210 m) : un cas où le gradient
+du fond tourne.
+
+**Quantum** : f64. **Critères, écrits avant.** (1) côte droite : les trois positions égales aux références à 10⁻⁹ m ; (2) l'écart à l'analytique
+décroissant avec le pas, sous 2 mm à ½ s ; (3) l'île : les deux rayons de chaque paire déferlent, en points miroir (`y ↔ −y`) à 10⁻⁹ m ; (4)
+refus : `b₀` non positif, un rayon vide.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-257, METHODE, L418, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `tracer_houle`, `sur_rayons` et leurs essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.5 ; rituel (`--lot`).
 
 ### Notes de reprise

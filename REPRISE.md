@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 10:44 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 10:47 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S632 — le lot ; 3.5, le déferlement le long des rayons de houle ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S631 — la trentième revue de méthode (ADR-257) ([journal](notes/JOURNAL.md)). Avant : S630 (le déferlement sur une côte quelconque)
 Session suivante : **S632 — le lot (dû), puis la physique des partiels** (ADR-247). Revue à S636. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
 Maillons        : 1 — S631 : la revue

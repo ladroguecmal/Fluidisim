@@ -448,6 +448,8 @@ son échelle) ; le niveau du large imposé au bord (une frontière caractéristi
 une houle périodique sur une plage (4.14 : la remontée de Keller & Keller à 0,05 %).
 **S626–S628** : la vingt-neuvième revue (ADR-256 : la tolérance au-dessus de la sensibilité, un écart attribué par deux variations) ;
 le ressaut mobile et le front sec (Stoker, Ritter : C04 en 2D) ; le frottement de Manning et le bord droit.
+**S629–S631** : le domaine local nourri par `tsunami::niveau` lui-même (3.4) ; le déferlement sur une côte quelconque (3.5 : marching
+squares, chaînage) ; la trentième revue (ADR-257 : un montage porte ses bornes, assertées).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
