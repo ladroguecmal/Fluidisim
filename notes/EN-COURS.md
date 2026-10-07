@@ -62,32 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S587 — **terminée**. En autonomie (ADR-247 : la physique d'abord, les absents) : **le lot** (dû ; feuille de route S584–S586),
-puis **3.3 — les explosions de surface et sous-marines** (absent ; ADR-001 : les ondes d'explosion sont de W). Première pièce : **la bulle
-d'une explosion sous-marine**.
+Session : S588 — **en cours**. En autonomie (ADR-247 : la physique d'abord), **3.5 — le déferlement** (absent ; « polyligne de SPEC-006
+§6 »). Une donnée **cuite** : dérivée hors ligne de la bathymétrie et de l'état de mer, republiée par phase de marée.
 
-**Ce que la session fait.** `explosion.rs` : l'énergie de la bulle (une fraction de l'énergie de la charge — un paramètre d'auteur, 0,4
-pour le TNT à 4,184 MJ/kg), le rayon maximal à l'équilibre d'énergie `E_b = (4/3)·π·R³·p` (`p = p_atm + ρ·g·d`), la période du premier
-battement `T = 2·t_c`, `t_c = 0,914681·R·√(ρ/p)` (l'effondrement de Rayleigh d'une cavité vide). Les lois d'échelle en découlent :
-`R ∝ (W/p)^(1/3)`, `T ∝ W^(1/3)·p^(−5/6)` (la forme de Willis). Ne fait pas : les battements suivants (les pertes), la migration de la
-bulle vers la surface, l'onde de choc, les ondes de surface et la gerbe (la suite de 3.3), l'entrée dans W.
+**Ce que la session fait.** `deferlement.rs` : sur une grille de profondeurs (la côte orientée le long de `y`, le large vers `+x`), la
+hauteur de la houle en chaque nœud — levée et réfraction de la référence de B (`bathymetrie::transformer`, S362) —, l'écart
+`H − 0,78·h` (McCowan), et, ligne par ligne depuis le large, le premier passage par zéro, interpolé linéairement entre deux nœuds : un
+sommet de la polyligne. Chaque sommet porte le **flux d'énergie dissipé** `ρ·g·H²/8·c_g` (kW/m, SPEC-006 §6) et la **direction de crête**.
+Ne fait pas : une côte quelconque (les marching squares et le chaînage des segments), la largeur de la zone de déferlement, plusieurs
+phases de marée, la publication (le chemin poussé).
 
-**Références, calculées avant** (ce script les écrit). La constante de Rayleigh par une intégration RK4 indépendante de `R·R̈ + 1,5·Ṙ² =
-−Δp/ρ` : **0.914780** (pas 10⁻⁵) et **0.914730** (pas 5·10⁻⁶) ; la forme fermée `√(3π/2)·Γ(5/6)/Γ(1/3)` = **0.914681**. Une charge
-de 1 kg à 20 m : **`R_max` = 1.09727 m, `T` = 0.116859 s** ; 8 kg : `T` ×**2.000000** ; à 60 m : `T` ×**0.494176** (= `(p₆₀/p₂₀)^(−5/6)`
-= 0.494176).
+**Références, calculées avant par ce script, avec ses propres formules** (dispersion par Newton, `K_s = √(c_g0/c_g)`, Snell,
+`K_r = √(cos θ₀/cos θ)`) : une plage `h = 0,02·x`, une houle de 2 m, 8 s, à 20° : **`h_b` = 2.841963 m**, **`x_b` = 142.0982 m**, `H_b` =
+2.216731 m, la crête à **8.0632°**, le flux dissipé **29.799753 kW/m**. Sur la grille de 5 m, l'interpolation linéaire place
+le croisement à **142.1033 m** (+0.0052 m de la racine : la courbure de l'écart entre deux nœuds).
 
-**Quantum** (ADR-236 D1) : f64 ; la constante gardée à 10⁻⁶ (sa forme fermée). **Critères, écrits avant.** (1) `R_max` et `T` à 10⁻⁹
-relatif de ces valeurs ; (2) les lois d'échelle à 10⁻¹² relatif (indépendantes de la constante) ; (3) refus : masse, profondeur ou
-fraction non positives.
+**Quantum** (ADR-236 D1) : l'interpolation, 5.2 mm ; f64 ailleurs. **Critères, écrits avant.** (1) chaque sommet de la
+polyligne (une par ligne de la grille) à 1 mm de 142.1033 m (l'algorithme) et à 0.010 m de la racine ; (2) le
+flux à 10⁻³ relatif de 29.799753 kW/m, la direction à 0,01° ; (3) une ligne sans déferlement (une houle trop petite pour la plus grande
+profondeur de la grille… ou une ligne toute à terre) : aucun sommet ; (4) refus : grille de moins de 2 × 2, tampon trop court.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `explosion.rs` et ses essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 3.3 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `deferlement.rs` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — R_max 1,097268 m, T 0,11685897 s ; ×2 et ×0,494175617660 ; refus. Suite 762.
-- **P3** — preuve EXPLOSION-BULLE-S587 ; liste 3.3 (absent → partiel) et décompte ; index ; journal ; le lot.
-
