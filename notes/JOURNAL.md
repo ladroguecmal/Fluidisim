@@ -1265,3 +1265,10 @@ S609. **Fait** ([preuve](../docs/validation/GRAINE-S623.md)) : `graine.rs` — `
 seulement), `restaurer` (tolérance, masse du nœud autoritaire), `choisir` (jamais de mélange de champs). **Mesuré**, au bit de numpy : le
 volume restauré au ml du nœud ; le domaine restauré à 2,5 mm de B, établi en un pas au lieu de 60,65 s. Maillons **1** (4.11 avance).
 Suivant : **S624**, la physique des partiels.
+
+## S624 — 2026-10-07 — la chaîne entière : le tsunami entre par le bord et remonte
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 11.3. **Fait** ([preuve](../docs/validation/CHAINE-TSUNAMI-S624.md)) : un essai
+qui assemble l'ordre deux, le bord forcé et l'onde solitaire. **Mesuré** au bit de numpy : la remontée forcée 0,806 → 0,869 → 0,901 m ;
+l'écart à l'étendu, 5,04 cm aux trois mailles — le raidissement non dispersif de l'étendu, non le bord. **En route** (au plan) : à 130 s,
+l'onde n'avait pas fini sa course. Maillons **1** (11.3 avance). Suivant : **S625**, la physique des partiels.

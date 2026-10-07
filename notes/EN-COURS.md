@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S624 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **11.3 — la chaîne entière** : le tsunami de S614
+Session : S624 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **11.3 — la chaîne entière** : le tsunami de S614
 (`H/d` = 0,0185, d'amplitude finie) entre par le bord caractéristique de S622 et remonte la plage — S622 n'avait éprouvé le bord qu'à 2 mm.
 
 **Ce que la session fait.** Aucun code nouveau dans le cœur : un essai qui assemble `SaintVenant2D` d'ordre deux (S620), `pas_avec_bord`
@@ -83,7 +83,9 @@ les deux étendues à 1 et ½ m égales aux références (au bit : des cotes de 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 11.3 ; rituel.
+- [x] **P2** — l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 11.3 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai, au bit. Suite : 811 essais listés.
+- **P3** — preuve CHAINE-TSUNAMI-S624 ; ligne 11.3 ; index ; journal.
