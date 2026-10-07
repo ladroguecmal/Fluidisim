@@ -62,34 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S639 — **terminée**. En autonomie (ADR-247), sur la demande de l'utilisateur (2026-10-07 : « reprend avec 1 », le plan du **rouleau
-3D** en cinq étapes, accepté : « Ok très bien »). **Étape 1 — le fond en pente dans APIC 3D, au repos** (4.14, 4.16).
+Session : S640 — **en cours**. En autonomie, la campagne du rouleau 3D (accepté par l'utilisateur le 2026-10-07). **Étape 1 bis — les faces
+coupées dans APIC 3D** : en S639, le fond en escalier manquait le repos (1,51 cm/s au rivage d'une maille ; à 2,5 cm, 1,18 : la géométrie).
 
-**Ce que la session fait.** `Apic3::set_seabed(fond)` : une hauteur de fond par colonne, mise en **escalier** (les mailles dont le centre est
-sous le fond deviennent solides : `SOLID`, comme la sphère de S393) ; à chaque pas, les faces qui touchent le fond sont des parois immobiles,
-les particules qui y entrent sont repoussées au-dessus (sans vitesse descendante), et la reconstruction de la surface **reflète** les
-particules sous le fond, comme les parois (S389) et la sphère (S393). Le réglage alloue, le pas non. Ne fait pas : les faces coupées (un
-fond lisse), la vague (étape 2).
+**Ce que la session fait.** `Apic3::set_seabed_lisse(fond)` : le fond **lisse** — linéaire entre les centres des colonnes — et, pour chaque
+face, la **fraction ouverte à l'eau** (Batty, Bertails et Bridson 2007, la projection variationnelle) : une face verticale, la part de sa
+hauteur au-dessus du fond (exacte en hauteur, seize échantillons le long de la face) ; une face horizontale, la part de son aire au-dessus
+du fond (seize par seize échantillons). La projection pondère par ces fractions la divergence et le laplacien ; une face fermée garde une
+vitesse nulle. Une maille dont les six faces sont fermées est solide. Les particules sont reposées au-dessus du fond lisse ; la
+reconstruction reflète sous ce fond (l'image `2·z_b(x, y) − z`). Au repos hydrostatique, la projection rend une vitesse nulle quelles que
+soient les fractions. Ne fait pas : les poches d'air et la zone des colonnes avec les faces coupées (refusées ensemble), un fond sous la
+forme d'une distance signée générale.
 
-**Références, calculées avant** (ce script). Un canal de 48 × 4 × 16 mailles de 5 cm (2,4 × 0,2 × 0,8 m) ; fond plat à 5 cm jusqu'à 0,805 m puis
-pente 1:3 ; eau au repos à 0,4 m — le rivage à **1.855 m**. **852 mailles solides** ; **6048 particules** posées (au-dessus de
-l'escalier, sous le niveau). **Amendement, avant toute mesure de repos** : la pente partait de 0,8 m, où `(k + ½)·dx = fond(x)`
-exactement pour `i = 3k + 14` — f32 et f64 tranchaient ces égalités différemment (6 016 particules contre 5 984) ; à 0,805 m, aucune
-égalité (asserté, ADR-257 D1). Le témoin : le même canal à fond plat (5 cm), 10752 particules. **Bornes du montage** (ADR-257 D1, assertées) :
-le rivage dans le domaine, le fond sous le couvercle.
+**Références, calculées avant** (ce script). Le canal de S639 (48 × 4 × 16 mailles de 5 cm ; fond plat à 5 cm puis pente 1:3 depuis 0,805 m ;
+eau à 0,4 m), le fond lisse : **5992 particules** posées entre le fond et le niveau (aucune à moins de 0.0017 m du fond : pas
+d'égalité, asserté) ; le rivage à 1.855 m.
 
-**Quantum** : la maille (5 cm) ; la vitesse en f32. **Critères, écrits avant** — ceux du repos de S388 et S393. (1) 852 mailles solides,
-6048 particules, aucune perdue en 2 s, aucune sous le fond de sa colonne ; (2) la vitesse parasite ≤ 1 cm/s sur 2 s ; (3) le témoin à fond
-plat, ≤ 1 cm/s ; (4) refus : une longueur fausse, une valeur non finie ou hors de [0, hauteur du domaine].
+**Quantum** : la maille ; la vitesse en f32. **Critères, écrits avant** — le repos de S388, S393. (1) 5992 particules, aucune perdue en 2 s,
+aucune sous le fond lisse ; (2) **la vitesse parasite ≤ 1 cm/s sur 2 s** — ce que l'escalier manquait ; (3) les essais d'APIC 3D (S388–S639)
+inchangés ; (4) refus : longueur fausse, valeur non finie ou hors du domaine ; les faces coupées avec les poches ou les colonnes.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `set_seabed` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
+- [ ] **P2** — les faces coupées et leurs essais ; (1)–(4).
+- [ ] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1), (3), (4) tenus ; **(2) manqué** : 1,51 cm/s au rivage d'une maille. Localisé : sans contremarches 4,7 cm/s ; avec,
-  1,5 ; l'image de coin aggravait (retirée) ; à 2,5 cm, 1,18 — la géométrie en escalier. Remède : les faces coupées (prochaine étape de la
-  campagne). Les 47 essais d'APIC 3D passent. Suite : 823 essais listés.
-- **P3** — preuve FOND-APIC3D-S639 ; lignes 4.14 ; index ; journal.
