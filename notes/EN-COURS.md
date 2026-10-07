@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S655 — **en cours**. En autonomie vers la v2. Le corps libre de S653 est lancé plus vite que l'eau par son couplage explicite
+Session : S655 — **terminée**. En autonomie vers la v2. Le corps libre de S653 est lancé plus vite que l'eau par son couplage explicite
 (S654 : 4,68 m/s à 10 ms, 2,56 à 5 ms, la force lissée inchangée).
 
 **Le remède.** La masse ajoutée traitée implicitement : `(m + m_a)·aₙ₊₁ = F + m·g + m_a·aₙ`. À l'équilibre (`aₙ₊₁ = aₙ`), c'est
@@ -76,7 +76,11 @@ S653 tient toujours (le centre à 2 cm du niveau ; aucune croissance). (3) Les e
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la masse ajoutée ; les deux pas en parallèle ; (1)–(3).
+- [x] **P2** — la masse ajoutée ; les deux pas en parallèle ; (1)–(3).
 - [ ] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) à moitié : 1,87 (10 ms) contre 2,32 (5 ms), 19–24 % ; à 5 ms au-dessus de la sonde (1,50) — manqué ; la sonde restait
+  à la position de départ du corps (un comparant non éprouvé) ; (2) tenu, la flottaison sous 1 cm/s (le critère de S653 tenu en entier) ;
+  (3) tenu. L'utilisateur : « Les erreurs que tu réalises viennent d'où ? », puis « Corrige et apprend de tes erreurs » — la mémoire
+  persistante écrite ; l'ADR en S656.

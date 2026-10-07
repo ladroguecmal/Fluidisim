@@ -4682,3 +4682,7 @@ deux fois plus court.
 réattribuée pour le corps libre.** À pas moitié, la force lissée ne change pas (−2 %), le pic baisse de 16 %, l'impulsion sur 4 s bouge de
 41 % ; la vitesse du corps libre, elle, passe de 4,68 à 2,56 m/s : l'excès vient du **couplage explicite** (l'effet de masse ajoutée), non
 de la lecture de la force. Le remède suivant : la masse ajoutée traitée implicitement.
+
+*Note du 2026-10-07, S655, sur A334* ([MASSE-AJOUTEE-S655](../validation/MASSE-AJOUTEE-S655.md)) : la masse ajoutée implicite ramène le
+corps libre de 4,68 à 1,87 m/s (10 ms), la dépendance au pas de 83 % à 19–24 %, la flottaison amortie quatre fois plus vite. Reste ouverte :
+la vitesse du corps contre l'eau **autour de lui** (la sonde de S652–S655 restait à sa position de départ — un comparant non éprouvé).

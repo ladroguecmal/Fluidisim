@@ -1512,3 +1512,12 @@ non départagé selon les critères écrits ; la vitesse du corps libre 4,68 →
 force. L'utilisateur demande « Finis quand ? » — répondu : 134 points, 10 validés ; de l'ordre de 400 à 700 sessions, une à deux semaines
 de travail continu au mieux, plus lentes sur le coût, Godot/DyingStar et les verdicts. Maillons **2**. Suivant : **S655, la masse ajoutée
 implicite** du corps libre.
+
+## S655 — 2026-10-07 — la masse ajoutée implicite du corps libre
+
+**Entrée.** En autonomie vers la v2 ; A334. **Fait** ([preuve](../docs/validation/MASSE-AJOUTEE-S655.md)) : `(m + m_a)·aₙ₊₁ = F + m·g +
+m_a·aₙ`, `m_a` = ½ρ·V immergé lu sur φ. **Mesuré** : la flottaison sous 1 cm/s (le critère de S653 tenu en entier) ; sous le rouleau,
+1,87 m/s à 10 ms (4,68 avant), 2,32 à 5 ms — la dépendance au pas de 83 % à 19–24 % ; le critère manqué à 5 ms contre une sonde restée à
+la position de départ du corps (un comparant non éprouvé). **L'utilisateur** : « Les erreurs que tu réalises viennent d'où ? » — six
+familles relevées ; « Corrige et apprend de tes erreurs » — la mémoire persistante écrite, l'ADR en S656. Maillons **1** (6.7 avance).
+Suivant : **S656, la revue de méthode** (ADR-266 : les contrôles du plan, vérifiés par le rituel).

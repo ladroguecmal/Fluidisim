@@ -131,6 +131,8 @@ pub struct Apic3 {
     pub(crate) ballistic_air: bool,
     /// **S653 — le corps libre** (`set_body_mass`) : la masse de la sphère, kg ; `None`, le défaut : la sphère imposée (S393), au bit.
     pub(crate) body_mass: Option<f32>,
+    /// **S655** — l'accélération du corps libre au pas précédent (la masse ajoutée implicite).
+    pub(crate) body_accel: [f32; 3],
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -213,6 +215,7 @@ impl Apic3 {
             seabed_slip: false,
             ballistic_air: false,
             body_mass: None,
+            body_accel: [0.; 3],
             columns: None,
             background: [None; 2],
             background_time_s: 0.,
@@ -449,6 +452,7 @@ impl Apic3 {
             }
         }
         self.body_mass = mass;
+        self.body_accel = [0.; 3];
         Ok(())
     }
 
@@ -497,6 +501,27 @@ impl Apic3 {
             }
         }
         f
+    }
+
+    /// **S655** — le volume immergé de la sphère, m³ : ses mailles (solides, centre dans la sphère) où `φ < 0` — la reconstruction
+    /// reflète l'eau à travers le corps (S393).
+    pub fn immersed_body_volume(&self) -> f32 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(b) = self.body else { return 0. };
+        let mut n = 0usize;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+                    let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+                    let c = (k * ny + j) * nx + i;
+                    if self.label[c] == SOLID && e[0] * e[0] + e[1] * e[1] + e[2] * e[2] < b.radius * b.radius && self.phi[c] < 0. {
+                        n += 1;
+                    }
+                }
+            }
+        }
+        n as f32 * dx * dx * dx
     }
 
     pub fn body(&self) -> Option<Sphere3> {
@@ -1311,13 +1336,18 @@ impl Apic3 {
         self.impose_body();
         let (iterations, residual) = if self.poches.is_some() { self.project_with_pockets(dt) } else { self.project(dt) };
         mark("projection");
-        // S653 : le corps libre — la force de pression et le poids changent sa vitesse (explicite).
+        // S653 : le corps libre — la force de pression et le poids changent sa vitesse. S655 : la masse ajoutée implicite,
+        // `(m + m_a)·aₙ₊₁ = F + m·g + m_a·aₙ` — le couplage explicite lançait le corps plus vite que l'eau (S654).
         if let (Some(m), Some(mut b)) = (self.body_mass, self.body) {
             let f = self.body_force();
+            let ma = 0.5 * self.rho * self.immersed_body_volume();
+            let mut acc = [0f32; 3];
             for a in 0..3 {
-                b.velocity[a] += dt * f[a] as f32 / m;
+                let poids = if a == 2 { -m * self.g_eff } else { 0. };
+                acc[a] = (f[a] as f32 + poids + ma * self.body_accel[a]) / (m + ma);
+                b.velocity[a] += dt * acc[a];
             }
-            b.velocity[2] -= dt * self.g_eff;
+            self.body_accel = acc;
             self.body = Some(b);
         }
         let divergence = self.divergence_metric();

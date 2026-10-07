@@ -2489,10 +2489,9 @@ fn a_free_sphere_floats_at_its_draft_s653() {
     }
     let z = zs.iter().sum::<f32>() / zs.len() as f32;
     println!("S653 flottaison : centre moyen {z:.4} m (niveau {niveau}), vitesse verticale max entre 3 et 4 s {vmax:.4} m/s");
-    // Critère 1 : le centre à 2 cm du niveau — tenu ; la vitesse sous 2 cm/s entre 3 et 4 s — **manqué** (4,1 cm/s) : l'oscillation
-    // décroît (0,23 ; 0,13 ; 0,07 ; 0,04 ; 0,02 m/s, seconde après seconde), le ballottement du bassin fermé la relance vers 6 s
-    // (0,057), puis elle redécroît — stable, sans croissance. L'essai n'affirme que ce qui a tenu (ADR-244).
-    assert!((z - niveau).abs() <= 0.02 && vmax < 0.1, "critère 1 : {z} {vmax}");
+    // Critère 1 de S653 : en S653 (couplage explicite), la vitesse manquait (4,1 cm/s) ; **depuis S655** (la masse ajoutée
+    // implicite), 1,0 cm/s — tenu en entier.
+    assert!((z - niveau).abs() <= 0.02 && vmax <= 0.02, "critère 1 : {z} {vmax}");
 }
 
 /// **S653 (2)** — la même sphère libre posée à x = 10,4 m dans le relais de S652 : emportée.
@@ -2542,5 +2541,29 @@ fn the_roller_force_at_half_the_step_free_s654() {
     let xmax = r.trajet.iter().fold(f64::NEG_INFINITY, |m, p| m.max(p.1));
     println!("S654 libre, 5 ms : retournement {:?} ; vitesse max du corps {:.3} m/s, colonne {:.3} ; avance {:.3} m ; volume {:+.1e}",
         r.premier, r.v_corps, r.u_colonne, xmax - x0, r.ecart);
+}
+
+/// **S655** — la masse ajoutée implicite : le corps libre de S653 sous le rouleau, au pas de `pas_us`. Rapporté.
+fn libre_s655(pas_us: u64) -> ReleveS652 {
+    let m = (500. * 4. / 3. * std::f64::consts::PI * 0.001) as f32;
+    relais_libre_s653(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)), Some(m), pas_us)
+}
+
+#[test]
+#[ignore = "≈ 8 min : le corps libre de S655, pas de 10 ms"]
+fn the_added_mass_steadies_the_free_body_10ms_s655() {
+    let r = libre_s655(10_000);
+    let x0 = r.trajet.first().map_or(0., |p| p.1);
+    let xmax = r.trajet.iter().fold(f64::NEG_INFINITY, |m, p| m.max(p.1));
+    println!("S655 10 ms : vitesse max du corps {:.3} m/s, colonne {:.3} ; avance {:.3} m ; volume {:+.1e}", r.v_corps, r.u_colonne, xmax - x0, r.ecart);
+}
+
+#[test]
+#[ignore = "≈ 18 min : le corps libre de S655, pas de 5 ms"]
+fn the_added_mass_steadies_the_free_body_5ms_s655() {
+    let r = libre_s655(5_000);
+    let x0 = r.trajet.first().map_or(0., |p| p.1);
+    let xmax = r.trajet.iter().fold(f64::NEG_INFINITY, |m, p| m.max(p.1));
+    println!("S655 5 ms : vitesse max du corps {:.3} m/s, colonne {:.3} ; avance {:.3} m ; volume {:+.1e}", r.v_corps, r.u_colonne, xmax - x0, r.ecart);
 }
 
