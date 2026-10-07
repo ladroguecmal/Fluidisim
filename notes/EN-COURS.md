@@ -62,36 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S660 — **terminée**. En autonomie vers la v2 ; 2.7. En S659, le modèle parabolique aux petits angles s'écarte des mesures de
-Berkhoff de 0,2 à 0,4 sur trois sections ; la maille et l'axe des mesures sont écartés.
-
-**Le témoin : le grand angle** (Booij 1981, Kirby 1986). De `∂_xφ = i·k̄·√(1 + X)·φ`, `X = [(k² − k̄²) + (1/p)·∂_y(p·∂_y)]/k̄²`, la racine
-approchée par Padé [1,1], `(1 + ¾X)/(1 + ¼X)`, au lieu de `1 + ½X` : `(1 + X/4)·(A_x − lev·A) = (i·k̄/2)·X·A` (dérivé au plan ; à
-`X` petit, l'équation de S659 ; à `X` = 0, la levée). Crank–Nicolson, les coefficients au demi-pas, tridiagonal. `propager_grand_angle`, à
-côté de `propager` (S659 reste reproductible).
+Session : S661 — **en cours**. En autonomie vers la v2. **La trente-sixième revue de méthode** (ADR-222 D4 : S656–S660), la première
+depuis les contrôles du plan (ADR-266).
 
 **Contrôles du plan** (ADR-266)
 
-- **témoin** : deux causes nommées en S659 — l'angle, la non-linéarité. Le grand angle supprime (une grande part de) la première ; si
-  l'écart des sections 2 et 5 baisse d'au moins 30 % chacune, c'était l'angle ; sinon, c'est la non-linéarité ou autre chose.
-- **instrument** : le même lecteur et les mêmes mesures qu'en S659 ; le nouveau modèle éprouvé d'abord sur les deux cas analytiques
-  (le plat à 10⁻⁶, la levée à 0,5 %), et sur un cas où le grand angle doit gagner : une onde plane **oblique** à 30° sur fond plat, dont
-  `|A|` doit rester 1 (les petits angles la déforment) — rapporté pour les deux modèles.
-- **calcul** : aucun nombre nouveau hors l'onde oblique (`A = e^(i·k·sin30°·y)` posé au bord, `|A|` = 1 attendu).
-- **ADR** : ADR-259 D1, ADR-263 D2, ADR-266 ; S659 inchangé.
-- **pièges** : l'approximation de Padé à grand angle n'est pas exacte au-delà de ~45° ; les parois latérales réfléchissent l'onde
-  oblique (lire loin des parois) ; l'ordre des opérateurs (le terme de levée traité en diagonale).
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles.
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-266, ADR-265, ADR-263, ADR-245 D3.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle (chercher dans METHODE avant d'ajouter).
 
-**Critères, écrits avant.** (1) Le grand angle : le plat à 10⁻⁶, la levée à 0,5 %. (2) Le verdict du témoin : la baisse des écarts des
-sections 2 et 5 (≥ 30 % chacune : l'angle). (3) Le critère de S659 rejugé (≤ 0,20 sur chaque section, le pic de la section 3 à 15 %).
+**Critères, écrits avant.** (1) ADR-267 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `propager_grand_angle` ; les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — ADR-267.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) tenu (plat, levée ; l'oblique +0,091 % contre +1,036 %, lu sur la phase — le `|A|` du plan ne départageait pas, vu avant
-  la mesure) ; (2) les sections 2 et 5 baissent de 26 et 18 % : l'angle n'est qu'une part ; (3) les sections 2 et 3 sous 0,20, la 5 et la 7
-  manquées. Le shell a encore rejeté un heredoc long : le script en fichier (ADR-245 D3).

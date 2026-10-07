@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 20:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S661 — la trente-sixième revue de méthode (ADR-267) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S660 — le témoin du grand angle sur le haut-fond de Berkhoff ([journal](notes/JOURNAL.md)). Avant : S659 (2.7 : le modèle parabolique de pente douce)
 Session suivante : **S661 — la trente-sixième revue de méthode** (ADR-267, S656–S660) ; puis la non-linéarité sur le haut-fond de Berkhoff (la dispersion d'amplitude de Kirby et Dalrymple 1984 dans le grand angle).
 Maillons        : 1
