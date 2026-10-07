@@ -62,29 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S618 — **terminée**. En autonomie (ADR-247) : **11.5 — le matériel cible de livraison et la seconde cible** (B7 complet, A98 ;
-absent). ADR-219 D2 : ce PC est la cible ; la seconde cible est le bridage de 9.10. Cette session mesure, sur ce PC, le coût des modules
-construits pour la v2 et en dérive les capacités (I-16, `qualite::Capacites`), pour la cible et pour la seconde cible.
+Session : S619 — **en cours**. En autonomie (ADR-247 : la physique des partiels, après les absents). D'abord **le défaut relevé en S618** :
+`SaintVenant2D::pas` alloue ses tableaux de travail à chaque pas (sept `Vec`), contraire à **I-06** (aucune allocation à l'exécution).
 
-**Ce que la session fait.** Un exemple `b7_cible.rs` : le coût, en ns, d'un pas de maille de `SaintVenant2D` (200²), d'un pas de maille de
-`Domaine1D` (400), d'un échantillon de `TrainW1D`, d'un échantillon de `tsunami::niveau`, d'une image du `Regulateur` ; chaque coût est la
-**médiane de cinq répétitions** d'au moins 0,2 s, avec leur étalement (max/min) ; puis les capacités par tick — mailles de δ, échantillons de
-W — pour un budget de **2.0 ms** (ADR-012 : `cpu_sim_ms`) et pour la seconde cible bridée (÷ 3 : **0.6667 ms**), et le
-côté du domaine 2D carré qui tient dans chacun. Ne fait pas : A98 (le sinus déterministe : `phase.rs` le traite ; sa conformité entre
-plateformes demande une seconde plateforme), le GPU bridé (WARP), la scène représentative entière.
+**Ce que la session fait.** Les tableaux de travail (`u`, `v`, `dh`, `dqx`, `dqy`, les flux des faces en `x` et en `y`) deviennent des
+champs du domaine, alloués une fois à la construction ; `pas` les réutilise. L'arithmétique et l'ordre des opérations ne changent pas.
+Ne fait pas : l'ordre deux, le parallélisme, le passage par l'allocateur de l'hôte (`HostServices`, I-06 au sens strict : la réserve
+déclarée avant `seal()`) — noté.
 
-**Quantum** : la nanoseconde ; la mesure est bruitée. **Critères, écrits avant.** (1) le banc rend les cinq coûts, finis et positifs ; un
-étalement au-delà de 1,5 marque la mesure « instable » sans l'écarter ; (2) les capacités suivent I-16 — `⌊budget / coût⌋` — et celles de la
-seconde cible sont celles d'un budget divisé par 3 ; (3) le rapport inscrit, pour chaque module, les deux capacités ; aucun seuil de
-performance n'est posé avant la mesure (ADR-012 §8 : les valeurs se mesurent sur la cible).
+**Quantum** : le bit. **Critères, écrits avant.** (1) les essais de S613 et S614 passent sans changer une référence (l'arithmétique au bit) ;
+(2) sur 100 pas d'un domaine de 50², les adresses et capacités des tableaux de travail ne changent pas (aucune réallocation) — et les
+résultats d'un domaine sont identiques au bit à ceux d'un clone qui a fait les mêmes pas ; (3) le banc B7 re-mesuré : le coût par
+maille-pas de `SaintVenant2D`, inscrit à côté de celui de S618 (78,55 ns), sans seuil posé avant la mesure.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `b7_cible.rs`, sa mesure ; (1)–(3).
-- [x] **P3** — preuve ; liste 11.5 ; rituel.
+- [ ] **P2** — les tableaux de travail préalloués ; (1)–(3).
+- [ ] **P3** — preuve ; liste ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — cinq coûts, étalements 1,05–1,24 ; capacités inscrites. **Défaut relevé** : `SaintVenant2D::pas` alloue à chaque pas
-  (I-06) — point de file : préallouer ses tableaux de travail, re-mesurer.
-- **P3** — preuve B7-CIBLE-S618 ; liste 11.5 (absent → partiel) et décompte ; index ; journal.

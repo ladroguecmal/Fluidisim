@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 07:39 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 07:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S619 — le défaut I-06 de SaintVenant2D : préallouer ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S618 — le banc B7 des modules de la v2 ([journal](notes/JOURNAL.md)). Avant : S617 (le lot)
 Session suivante : **S619 — la physique des partiels, d'abord le défaut I-06 de SaintVenant2D** (préallouer, re-mesurer). Restent 3 absents (7.8 à la fin, 13.4 après la physique, 5.11 hors périmètre). Revue à S621 ; le lot à S620. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
 Maillons        : 1 — S618 : 11.5 absent → partiel
