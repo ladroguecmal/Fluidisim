@@ -87,3 +87,9 @@ d'`eval_local` (la continuité) ; (4) refus : `z < 0` ou non fini.
 - [ ] **P3** — preuve ; liste 3.9 ; A286 ; rituel.
 
 ### Notes de reprise
+- **Avant la mesure, une faute du plan relevée** (ADR-236 D1) : le script avait imprimé, pour le critère (1), un rapport au bruit de « 1 »
+  (des différences finies f32 au pas de 1 cm : bruit ≈ 1,3·10⁻⁵ s⁻¹ contre un seuil de 8.8e-06) — le seuil, ainsi appliqué, est
+  disqualifié. Procédure corrigée, seuil inchangé : différences centrées au pas de 0,5 m et 0,25 m, combinées par Richardson (troncature
+  en `h⁴` ≈ 7.2e-08, bruit ≈ 2.4e-07 s⁻¹ ; rapport au seuil ≈ 36). Le témoin Taylor passe par la même
+  procédure.
+
