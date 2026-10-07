@@ -1037,3 +1037,11 @@ exact, l'onde diffusive continue, la ligne complète ; et le pas de temps choisi
 ([preuve](../docs/validation/RIVIERE-REMOUS-S593.md)) : une rivière de vingt biefs derrière un seuil. **Mesuré** : la ligne d'eau à 0,014 mm du
 découpage exact, la vitesse de chaque bief, le bilan ; l'inertie absente de V publiée (4 cm). Maillons **1** (2.4 : absent → partiel).
 Suivant : **S594**, un point absent.
+
+## S594 — 2026-10-07 — les régions de mer par descripteur (I-09)
+
+**Entrée.** En autonomie (ADR-247) ; 11.2 (absent). **Fait** ([preuve](../docs/validation/REGIONS-S594.md)) : `regions.rs` — descripteurs,
+poids en partition de l'unité, la mer de B à l'échelle du paramètre local. **Mesuré** : la hauteur gardée dans la transition (2,0009 m pour 2).
+**Le témoin d'un couple manqué** (1,3619 pour 1,5811) : la formule relue d'abord était juste — c'est l'indépendance de deux réalisations aux
+mêmes composantes qui ne l'était pas (ρ = −0,43) ; l'ensemble sur 800 couples, ajouté par les notes, retrouve 2,5038 pour 2,5. Maillons **1**
+(11.2 : absent → partiel). Suivant : **S595**, un point absent ; revue à S596.

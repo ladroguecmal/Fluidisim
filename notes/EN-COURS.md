@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S594 — **en cours**. En autonomie (ADR-247), **11.2 — de nombreuses régions de mer décrites par descripteur, transitions par
+Session : S594 — **terminée**. En autonomie (ADR-247), **11.2 — de nombreuses régions de mer décrites par descripteur, transitions par
 paramètres** (absent ; I-09 : « on interpole des paramètres, jamais des réalisations »).
 
 **Ce que la session fait.** `regions.rs` : un **descripteur** de région (Hs, niveau moyen) sur un rectangle ; `parametres_en(x, y)` : les
@@ -86,8 +86,8 @@ bande non positive, un point hors de toute région.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `regions.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 11.2 ; rituel.
+- [x] **P2** — `regions.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 11.2 ; rituel.
 
 ### Notes de reprise
 - **Première mesure : (1), (3), (4) et (2) pour les paramètres tenus (Hs 2,0009 m) ; (2) pour le témoin manqué — 1,3619 m pour 1,5811.**
@@ -99,4 +99,7 @@ bande non positive, un point hors de toute région.
 - **Vérification ajoutée en route** (ADR-244 D1, avant l'essai) : l'**ensemble** — la moyenne de Hs² du témoin sur 800 couples de graines
   (un point, 2 h au pas de 2 s) ; attendu `(1 + 9)/4` = 2,5 (Hs 1,5811) ; l'écart-type de la moyenne ≈ 6·0,3/(4·√800) = 0,016 sur Hs² ; un
   seuil de 0,25 sur Hs² (≈ 5 % sur Hs) lui laisse un rapport ≈ 16 (ADR-236).
+- **P2 fini** — (1), (3), (4) tenus ; (2) paramètres 2,0009 m tenu ; (2) témoin d'un couple 1,3619 m manqué (ρ = −0,43) ; l'ensemble sur
+  800 couples 2,5038 pour 2,5. Suite 770.
+- **P3** — preuve REGIONS-S594 ; liste 11.2 (absent → partiel) et décompte ; index ; journal.
 

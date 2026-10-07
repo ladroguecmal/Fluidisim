@@ -789,7 +789,11 @@ pas recopiée ici (L137).
 
 - [ ] **11.1 Monde planétaire** : planète sphérique, coordonnées lointaines, référentiels multiples
   (ADR-002) — *partiel* : positions monde entières et ancres. Pas de sphère.
-- [ ] **11.2 Nombreuses régions de mer décrites par descripteur**, transitions par paramètres (I-09) — *absent*.
+- [ ] **11.2 Nombreuses régions de mer décrites par descripteur**, transitions par paramètres (I-09) — *partiel* depuis S594 : le
+  **descripteur** (Hs, niveau moyen), les poids en partition de l'unité, la mer de B mise à l'échelle du paramètre local — la hauteur gardée
+  dans la transition (2,0009 m pour 2), quand le mélange des champs la perd (21 % en moyenne sur 800 couples, 32 % pour un couple)
+  ([preuve](validation/REGIONS-S594.md)). Manquent la période et la direction par région, la marée de chaque région, de nombreuses régions
+  à coût borné, le placement sur la planète.
 - [ ] **11.3 Très grands événements** (tsunami, crash, très grand navire) : macroscopique au large,
   3D locale à l'interaction — *absent*.
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
@@ -856,10 +860,10 @@ pas recopiée ici (L137).
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
-| 11. Grande échelle | 5 | 0 | 2 | 3 |
+| 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **87** | **24** |
+| **total** | **121** | **10** | **88** | **23** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
