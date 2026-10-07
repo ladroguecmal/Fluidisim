@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 22:06 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 22:07 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S670 — Cote2D cuite avec le déferlement, jusqu'au rivage ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S669 — Le déferlement d'une mer dans la pente douce ([journal](notes/JOURNAL.md)). Avant : S668 (La mémoire de Cote2D réduite : la marche fine, les tables décimées)
 Session suivante : S670 — Cote2D cuite avec le déferlement (Battjes et Janssen), jusqu'au rivage ; revue en S671
 Maillons        : 1 (2.7 avance : la dissipation au déferlement)
