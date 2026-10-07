@@ -77,7 +77,7 @@ S653 tient toujours (le centre à 2 cm du niveau ; aucune croissance). (3) Les e
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — la masse ajoutée ; les deux pas en parallèle ; (1)–(3).
-- [ ] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
+- [x] **P3** — preuve ; liste 6.7 ; A334 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) à moitié : 1,87 (10 ms) contre 2,32 (5 ms), 19–24 % ; à 5 ms au-dessus de la sonde (1,50) — manqué ; la sonde restait
