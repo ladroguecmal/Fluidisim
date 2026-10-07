@@ -737,7 +737,10 @@ pas recopiée ici (L137).
   même effet au bit, rejet et correction en fondu (1,6 et 2,3 % de saut d'image au plus), aucun retour du temps
   ([preuve](validation/CONSOMMATEUR-S510.md)). Le transport réseau des causes est 10.1.
 - [ ] **9.6 Précalcul avant l'impact** : domaines, allocations, collisions, état initial, avance
-  plus rapide que le temps réel — *absent*.
+  plus rapide que le temps réel — *partiel* depuis S610 : le domaine préparé en T2 (des blocs, δ = 0) et ses révisions sans seuil physique —
+  translater (au bit de la préparation directe), rebâtir, réallouer, rebâtir au `dx`, libérer ; l'établissement d'un domaine substitutif né
+  au repos mesuré à 60,65 s, dans la borne d'ADR-013 §4 ([preuve](validation/PRECALCUL-S610.md)). Manquent les collisions, l'avance d'un
+  domaine 3D contre le temps réel, le branchement à la prévision balistique.
 - [ ] **9.7 Hors caméra : quatre niveaux** (normal, réduit, condensé, supprimé) et persistance
   perceptuelle — *partiel* : W retiré hors champ et restitué au bit au retour (S235). Manque la
   condensation.
@@ -893,12 +896,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 1 | 10 | 2 |
+| 9. Activation et budget | 13 | 1 | 11 | 1 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **101** | **10** |
+| **total** | **121** | **10** | **102** | **9** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

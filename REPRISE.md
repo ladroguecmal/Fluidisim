@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 05:16 +02:00
+JETON            : libre
+Battement        : 2026-10-07 05:21 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S610 — 9.6, le précalcul avant l'impact ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S609 — le régime substitutif : la bascule, le champ total alimenté par B ([journal](notes/JOURNAL.md)). Avant : S608 (le lot)
-Session suivante : **S610 — un point absent** (ADR-247 ; restent 10), ou la graine de 4.11 (`SeedState`, ADR-022 §3). Revue et lot à S611. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S609 : 4.11 absent → partiel
+Session en cours : aucune
+Dernière session : S610 — le précalcul avant l'impact ([journal](notes/JOURNAL.md)). Avant : S609 (le régime substitutif : la bascule, le champ total alimenté par B)
+Session suivante : **S611 — la vingt-sixième revue de méthode et le lot** (ADR-222 D4 ; S606–S610), puis un point absent (ADR-247 ; restent 9). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S610 : 9.6 absent → partiel
 Registres       : dernier lot S608 (ADR-213 D3) ; le prochain au plus tard en S611
 ```
 

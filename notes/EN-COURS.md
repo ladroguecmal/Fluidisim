@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S610 — **en cours**. En autonomie (ADR-247) : **9.6 — le précalcul avant l'impact : domaines, allocations, collisions, état
+Session : S610 — **terminée**. En autonomie (ADR-247) : **9.6 — le précalcul avant l'impact : domaines, allocations, collisions, état
 initial, avance plus rapide que le temps réel** (absent). ADR-013 §3 : en T2, δ vaut 0 — un domaine préparé ne porte que des blocs ; un
 déplacement de l'impact prévu se corrige en translatant l'ensemble, sans erreur ; les seuls seuils sont réallouer, rebâtir, libérer. §4 :
 l'avance temporelle n'est légitime que pour un domaine substitutif, qui naît faux et doit s'établir.
@@ -89,7 +89,10 @@ ou `dx` non positifs, une capacité sous l'ensemble initial.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `precalcul.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 9.6 ; rituel.
+- [x] **P2** — `precalcul.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 9.6 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai ; `Domaine1D::au_repos` et `temps_pas` ajoutés à `substitutif.rs`. Suite : 800 essais
+  listés (mesurée).
+- **P3** — preuve PRECALCUL-S610 ; liste 9.6 (absent → partiel) et décompte ; index ; journal.

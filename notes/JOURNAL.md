@@ -1155,3 +1155,11 @@ d'absent). Suivant : **S609**, un point absent.
 implémentation numpy : B seul reproduit à 0,63 mm sur 60 s ; une bosse sortie à 1,30 % près. **En route** (au plan) : B pris au pas entier
 laissait 4,3 mm ; centré comme le schéma, 0,63. Maillons **1** (4.11 : absent → partiel). Suivant : **S610**, la graine de 4.11
 (`SeedState`, ADR-022 §3) ou un point absent.
+
+## S610 — 2026-10-07 — le précalcul avant l'impact
+
+**Entrée.** En autonomie (ADR-247) ; 9.6 (absent). **Fait** ([preuve](../docs/validation/PRECALCUL-S610.md)) : `precalcul.rs` — la
+préparation T2 (blocs, δ = 0), ses cinq décisions sans seuil physique, `etablissement`. **Mesuré** : la translation entière au bit de la
+préparation directe ; un déplacement de 0,3 m fait passer de 86 à 89 blocs (réallouer sous 86) ; un domaine substitutif né au repos
+s'établit en 60,65 s, dans la borne d'ADR-013 §4. **En route** (au plan) : le premier déplacement hors réseau gardait 86 blocs — un
+autre a été cherché pour éprouver la réallocation. Maillons **1** (9.6 : absent → partiel). Suivant : **S611**, la revue et le lot.
