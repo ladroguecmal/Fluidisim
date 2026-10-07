@@ -62,37 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S662 — **terminée**. En autonomie vers la v2 ; 2.7. Après le grand angle (S660), les sections 5 (0,342) et 7 (0,233) de
-Berkhoff restent au-dessus de 0,20 ; la cause encore nommée : la non-linéarité de l'expérience.
-
-**Le témoin : la dispersion d'amplitude**, la forme composite de Kirby et Dalrymple (1986), bornée en eau peu profonde :
-`ω² = g·k·(1 + f₁·ε²·D)·tanh(k·h + f₂·ε)`, `ε = k·a`, `f₁ = tanh⁵(kh)`, `f₂ = (kh/sinh kh)⁴`,
-`D = (cosh 4kh + 8 − 2·tanh² kh)/(8·sinh⁴ kh)`. Dans le modèle à grand angle, `k` de chaque point est celui de son amplitude physique
-`a = a₀·|A|` à la rangée précédente (retardé d'un pas). `a₀` = 0,0232 m, l'amplitude incidente de l'expérience (`H` = 0,0464 m).
-Au plan (ce script), l'onde raide va plus vite : au sommet du haut-fond, `a = 2,2·a₀`, `k` baisse de 10.9 % (asserté entre 0 et 15 % ; une première borne de 10 %, posée de tête, a été franchie : l eau mince rend la dispersion d amplitude forte, `ε = k·a` ≈ 0,31).
+Session : S663 — **en cours**. Une séance visuelle (l'utilisateur les a demandées ; R40 reçu) : **la houle sur le haut-fond de Berkhoff**,
+S659–S662. Trois images, envoyées pour un verdict (R41) : la carte de l'amplitude vue de dessus (le modèle non linéaire, le haut-fond, les
+lignes de mesure) ; les quatre sections, les mesures contre les trois modèles ; la surface animée sur une période (les crêtes qui se
+courbent et se concentrent).
 
 **Contrôles du plan** (ADR-266, ADR-267)
 
-- **témoin** : la non-linéarité seule est ajoutée au modèle de S660 ; tout le reste est identique.
-- **instrument** : le même lecteur, les mêmes mesures. Ce qu'il rendrait : **si la non-linéarité est la cause**, les écarts des sections 5
-  et 7 baissent nettement (au moins 30 %) ; **si elle ne l'est pas**, ils bougent peu (moins de 10 %) ; entre les deux, une part. Éprouvé
-  d'abord : avec `a₀` → 10⁻⁹ m, le modèle non linéaire rend le modèle linéaire de S660 à 10⁻⁹ près ; la relation composite contre ce
-  script au point (à 10⁻⁹).
-- **calcul** : `k` non linéaire par point fixe ; sa baisse au sommet du haut-fond, assertée.
-- **ADR** : ADR-259 D1, ADR-263 D2, ADR-266, ADR-267 D1.
-- **pièges** : la relation de Stokes seule diverge en eau peu profonde (`D` → ∞) — d'où la forme composite ; le retard d'un pas (`dx`
-  petit) ; `a₀` de l'expérience (0,0232 m) et non la normalisation de Basilisk.
+- **témoin** : sans objet (la séance montre).
+- **instrument** : l'enregistrement relu avant de rendre — l'amplitude écrite aux points des sections égale celle de `Champ::amplitude`
+  (à 10⁻¹²) ; les écarts recalculés par le rendu égaux à ceux de S662 (au millième). Ce qui départagerait : un champ mal écrit ou
+  transposé rendrait des écarts différents.
+- **calcul** : la phase de référence `ψ(x) = ∫k̄ dx` recalculée comme le modèle la marche (la moyenne de `k` sur `y`, aux demi-pas).
+- **ADR** : ADR-216, ADR-262 (un rendu d'atelier), ADR-264.
+- **pièges** : **l'axe `y` inversé des mesures** (tracer les mesures à `−y`) ; l'échelle des couleurs (bornée, dite) ; la surface animée à
+  partir du champ linéarisé (`η = a₀·Re(A·e^(i(ψ − ωt)))`), sans les harmoniques de l'onde non linéaire.
 
-**Critères, écrits avant.** (1) L'instrument : la limite linéaire à 10⁻⁹ ; `k` au point contre ce script. (2) Le verdict du témoin
-(sections 5 et 7). (3) Le critère de S659 rejugé (≤ 0,20 sur chaque section, le pic de la section 3 à 15 %).
+**Critères, écrits avant.** (1) L'enregistrement relu (les deux contrôles). (2) Trois images envoyées, avec ce qu'elles montrent. (3) Le
+verdict inscrit (R41), reçu ou attendu.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la dispersion d'amplitude ; les essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — l'enregistrement ; le rendu ; l'envoi.
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) à moitié : `k` au point exact ; la limite à 10⁻⁹ manquée (9,76·10⁻⁸ — le terme d'ordre `ε` de la forme composite, que
-  le plan prenait pour `ε²`), proportionnelle à `a₀` (asserté) ; (2) sections 5 et 7 : −73 %, −57 % — la non-linéarité ; (3) tenu : 0,090 ;
-  0,106 ; 0,091 ; 0,101, le pic à 7 %.

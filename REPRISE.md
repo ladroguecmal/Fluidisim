@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 20:52 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S663 — la séance visuelle de Berkhoff (R41) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S662 — la non-linéarité sur le haut-fond de Berkhoff ([journal](notes/JOURNAL.md))
 Session suivante : **S663 — une séance visuelle de Berkhoff** (la houle qui se focalise derrière le haut-fond : la carte d'amplitude des trois modèles, contre les mesures) ; puis le modèle côtier lu par B.
 Maillons        : 1
