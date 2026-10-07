@@ -62,40 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S599 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S597–S598), puis **12.3 — le précalcul côtier
-stocké** (absent ; SPEC-005 §6) et, avec lui, la part côtière de **2.8** (absent ; la météo à la fin).
+Session : S600 — **en cours**. En autonomie (ADR-247), **9.13 — le dépassement critique temporaire sans retard global perceptible**
+(absent) : ADR-012 §6 — « une réserve d'événement : +50 % pendant 0,5 s au plus, un rechargement de 5 s, pour le seul domaine dont
+`W_gameplay` est maximal ; sans rechargement, la réserve devient le budget nominal ».
 
-**Ce que la session fait.** `cotier.rs` : la **cuisson** d'une plage — pour 4 états de mer × 4 phases de marée, un `CoastalState` :
-un champ 2D au demi-mètre (hauteur de houle, `u`, `v`, intensité du rouleau) en **`f16`** et la polyligne de déferlement (S588) ; la
-hauteur hors de la zone de déferlement par la référence de B (levée), dedans saturée à `0,78·h` ; le rouleau, la dissipation
-`−d(E·c_g)/dx` ; `u`, `v` **nuls** tant que le courant de dérive littorale n'est pas calculé (écrit tel quel). **L'empreinte** (FNV-1a) des
-entrées : bathymétrie, états, phases — une plage dont le fond change est **obsolète**. **La recherche par paramètres** (I-09) : l'état le
-plus proche en `(Hs, phase)`, la phase repliée sur un tour — jamais un mélange de champs.
+**Ce que la session fait.** `ReserveEvenement` (dans l'ordonnanceur) : par tick de simulation (30 Hz, ADR-012 §7), `budget(nominal_ms,
+critique, demande)` rend le budget accordé — le nominal ×1,5 si le domaine est **critique** (son `W_gameplay` est le maximum) et
+**demande** la réserve, tant qu'il reste des ticks de réserve ; épuisée, la réserve est **verrouillée** 150 ticks (5 s) puis pleine ; un domaine
+non critique ne la touche jamais. Le dépassement le plus fort d'une image est donc borné à +50 % du budget de l'eau, et sa durée à 0,5 s.
+Ne fait pas : la recharge partielle d'une réserve entamée sans être épuisée (elle reste entamée jusqu'à épuisement — le choix le plus
+prudent), le branchement à `Scheduler::allocate`, la mesure sur le banc B7.
 
-**Références, calculées avant** (ce script les écrit). Une plage de pente 0,04 (120 × 20 m, la grille de SPEC-005 : 240 × 40 texels), une
-houle de 8 s en incidence normale, Hs ∈ {0,5 ; 1 ; 1,5 ; 2} m, une marée de 1 m (η = 0 ; +1 ; 0 ; −1 m aux phases 0, ¼, ½, ¾). La profondeur
-de déferlement, par la levée de mes formules : **`h_b`** = 0.9343, 1.6414, 2.2892, 2.9043 m ; la ligne de déferlement à
-`x_b = (h_b − η)/0,04` — à Hs = 2 m, **47.6081 m** à marée haute et **97.6081 m** à marée basse (le déplacement
-`2 m/0,04` = 50 m). La taille : **76800 octets** par état (240 × 40 × 4 × 2), **1228800 octets** pour les seize (SPEC-005 : « 77 Ko »,
-« 1,2 Mo »).
+**Références, calculées avant par ce script** (sa propre machine d'état). Une demande critique continue pendant 60 s : **165 ticks
+renforcés sur 1 800** (9.17 %), soit un dépassement moyen de **4.58 %** du budget. Un événement de 2 s, 10 s
+de calme, un second de 2 s : **15** puis **15** ticks renforcés (la réserve rechargée entre les deux).
 
-**Quantum** (ADR-236, ADR-249) : la ligne interpolée sur 0,5 m (de l'ordre de 0,1 mm, S588 au pas de 5 m : 5 mm) ; le `f16`, 2⁻¹¹ relatif.
-**Critères, écrits avant.** (1) la taille exacte ; (2) la ligne de déferlement de chaque état à 1 cm de `x_b`, son déplacement avec la marée ;
-(3) les hauteurs relues du `f16` à 2⁻¹⁰ relatif de leur valeur cuite, la hauteur saturée dans la zone de déferlement, le rouleau nul au
-large et positif dedans ; (4) la recherche : `(1,1 m ; 0,97)` → l'état `(1 m ; 0)` (la phase repliée), `(1,8 m ; 0,6)` → `(2 m ; ½)` ;
-(5) l'empreinte : deux cuissons identiques, la même ; un centimètre de fond changé en un nœud, une autre.
+**Quantum** : le tick (des comptes entiers, exacts). **Critères, écrits avant.** (1) le compte sous demande continue, exact ; (2) les deux
+événements, exacts ; (3) un domaine non critique : aucun tick renforcé ; jamais plus de 15 ticks consécutifs renforcés ; le budget accordé
+jamais au-dessus de 1,5 × le nominal ; (4) refus : un nominal non positif.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `cotier.rs` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; listes 12.3, 2.8 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `ReserveEvenement` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 9.13 ; rituel.
 
 ### Notes de reprise
-- **En route** (ADR-244 D1, avant de corriger l'essai) : l'essai exigeait une ligne par rangée pour **tous** les états — une attente hors du
-  plan. La référence du plan elle-même place la ligne de l'état `(0,5 m ; ¼)` à `x_b = (0,9343 − 1)/0,04` = −1,64 m, **hors de la grille**
-  (qui commence à 0,25 m) : à marée haute, la petite houle atteint le bord sans déferler. États hors de la grille (calculés) : [(0.5, 1.0)]. L'essai
-  attend aucun sommet pour eux ; le critère (2), 1 cm, inchangé pour les autres.
-- **P2 fini** — 1 228 800 octets ; les lignes à 0,22 mm ; 50,0000 m ; le champ ; la recherche ; l'empreinte. Suite 775.
-- **P3** — preuve COTIER-S599 ; listes 12.3 et 2.8 (absent → partiel) et décompte ; index ; journal ; le lot.
-
