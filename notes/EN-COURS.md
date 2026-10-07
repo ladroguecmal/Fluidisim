@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S637 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **5.10 — l'articulation V↔δ** : un manque nommé, « V qui
+Session : S637 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **5.10 — l'articulation V↔δ** : un manque nommé, « V qui
 déclenche δ » ; et la mécanique d'ADR-025 §3 — l'amorçage au niveau du nœud, la relaxation de la masse de δ vers celle du nœud.
 
 **Ce que la session fait.** Un module `articulation.rs` : `amorcer(grille, niveau)` — δ (`SaintVenant2D`) né au niveau de V ; `forcer(δ, volume du
@@ -85,7 +85,9 @@ exact au ml (assemblage, C21) ; (6) refus : `τ` ou `dt_V` non positifs.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `articulation.rs` et son essai ; (1)–(6).
-- [ ] **P3** — preuve ; liste 5.10 ; rituel.
+- [x] **P2** — `articulation.rs` et son essai ; (1)–(6).
+- [x] **P3** — preuve ; liste 5.10 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(6) tenus du premier essai. Suite : 821 essais listés.
+- **P3** — preuve ARTICULATION-S637 ; ligne 5.10 ; index ; journal.

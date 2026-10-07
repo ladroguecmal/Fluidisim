@@ -1356,3 +1356,10 @@ chaleur latente à un quantum près à chaque heure. Maillons **1** (7.6 avance)
 **Entrée.** En autonomie ; revue due. **Aucune friction** sur S631–S635 : cinq sessions tenues du premier essai, les bornes de montage
 assertées dès leur première application (S632). **Décision** : aucune règle nouvelle (ADR-258). Maillons **1**. Suivant : **S637**, la
 physique des partiels.
+
+## S637 — 2026-10-07 — V qui déclenche δ et le tient par la masse
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 5.10. **Fait** ([preuve](../docs/validation/ARTICULATION-S637.md)) :
+`articulation.rs` — `declenche`, `amorcer`, `forcer`. **Mesuré** : sous un robinet de 20 L/s, V déclenche δ au pas 13 (500 µm) ; δ né à son
+niveau suit sa masse avec le retard exact `Q·(τ − dt)` = 18 L (à 4·10⁻¹³ m³ de la récurrence) ; sa surface reste plate. Maillons **1**
+(5.10 avance). Suivant : **S638**, le lot et la physique des partiels.
