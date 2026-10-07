@@ -440,3 +440,93 @@ fn the_wave_setup_feeds_back_on_the_breaking_s674() {
     assert!(*marches.last().unwrap() < 1e-3 && marches.len() <= 4, "critère 3");
 }
 
+/// **S675 — la séance visuelle de la côte qui déferle** (R42) : la mer de S667 sur la plage, avec et sans déferlement. Écrit
+/// `calculs/s675_cote.bin` (petit-boutiste) :
+///
+/// - `ns` (u32), `pas` (f64) ; cinq profils de `ns` f64 — la profondeur, `Hrms` avec et sans déferlement, `η̄`, `V` ;
+/// - `images` (u32), `dt` (f64, s) ; `nsd`, `nnd` (u32), `s0`, `n0`, `d` (f64) ; puis, par image, `η` avec et sans (`nsd × nnd` f32, `s`
+///   le plus lent) ;
+/// - `nc` (u32), `sc0` (f64) ; puis, par image, la coupe à `n` = 0, avec et sans (`nc` f32 chacune, au pas `d`).
+///
+/// Et `calculs/s675_controle.csv` : `Hrms` et `η̄` au rivage, le pic de `|V|`, que le rendu recalcule.
+#[test]
+#[ignore]
+fn record_the_breaking_coast_for_the_visual_session_s675() {
+    use std::io::Write;
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15f32, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let comps: Vec<Component> = (0..8).map(|i| {
+        let mut c = composante(t[i], a[i], th[i].to_radians());
+        c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+        c
+    }).collect();
+    let b = fond(&comps);
+    let (mut alloc, services) = (Hote, Hote);
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    let (l, w, pas) = (3950.0, 192.0, 2.0);
+    let avec = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, 0.01, &|s, _| plage(s)).unwrap();
+    let sans = Cote2D::cuire_decime(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, &|s, _| plage(s)).unwrap();
+    let (ns, nn, _) = avec.noeuds();
+    let ab: Vec<f64> = b.components().iter().map(|c| c.amplitude as f64).collect();
+    let hrms = |c2: &Cote2D, i: usize| 2. * (0..8).map(|c| (ab[c] * c2.facteur[(c * ns + i) * nn] as f64).powi(2)).sum::<f64>().sqrt();
+    let mut f = std::io::BufWriter::new(std::fs::File::create("../../calculs/s675_cote.bin").unwrap());
+    let ecrire_f64 = |f: &mut std::io::BufWriter<std::fs::File>, v: f64| f.write_all(&v.to_le_bytes()).unwrap();
+    let ecrire_u32 = |f: &mut std::io::BufWriter<std::fs::File>, v: u32| f.write_all(&v.to_le_bytes()).unwrap();
+    ecrire_u32(&mut f, ns as u32);
+    ecrire_f64(&mut f, pas as f64);
+    for i in 0..ns {
+        ecrire_f64(&mut f, plage(i as f64 * pas as f64));
+    }
+    for i in 0..ns {
+        ecrire_f64(&mut f, hrms(&avec, i));
+    }
+    for i in 0..ns {
+        ecrire_f64(&mut f, hrms(&sans, i));
+    }
+    for i in 0..ns {
+        ecrire_f64(&mut f, avec.niveau[i] as f64);
+    }
+    for i in 0..ns {
+        ecrire_f64(&mut f, avec.derive[i] as f64);
+    }
+    let (images, dt) = (48usize, 0.5f64);
+    let (nsd, nnd, s0, n0, d) = (375usize, 96usize, 3200.0f64, -96.0f64, 2.0f64);
+    let (nc, sc0) = (475usize, 3000.0f64);
+    ecrire_u32(&mut f, images as u32);
+    ecrire_f64(&mut f, dt);
+    ecrire_u32(&mut f, nsd as u32);
+    ecrire_u32(&mut f, nnd as u32);
+    ecrire_f64(&mut f, s0);
+    ecrire_f64(&mut f, n0);
+    ecrire_f64(&mut f, d);
+    let temps = |k: usize| SimTime((100_000_000.0 + k as f64 * dt * 1e6) as u64);
+    // n = t̂·x = −x (la normale (0, 1)) : le point local de (s, n) est (−n, s).
+    let eta = |c2: &Cote2D, s: f64, n: f64, k: usize| c2.eval_local(&b, [-n as f32, s as f32, 0.0], temps(k)).unwrap().eta;
+    for k in 0..images {
+        for c2 in [&avec, &sans] {
+            for i in 0..nsd {
+                for j in 0..nnd {
+                    f.write_all(&eta(c2, s0 + i as f64 * d, n0 + j as f64 * d, k).to_le_bytes()).unwrap();
+                }
+            }
+        }
+    }
+    ecrire_u32(&mut f, nc as u32);
+    ecrire_f64(&mut f, sc0);
+    for k in 0..images {
+        for c2 in [&avec, &sans] {
+            for i in 0..nc {
+                f.write_all(&eta(c2, sc0 + i as f64 * d, 0.0, k).to_le_bytes()).unwrap();
+            }
+        }
+    }
+    f.flush().unwrap();
+    let v_pic = avec.derive.iter().fold(0f64, |m, v| m.max(v.abs() as f64));
+    let mut c = std::fs::File::create("../../calculs/s675_controle.csv").unwrap();
+    writeln!(c, "hrms_rivage,eta_rivage,v_pic").unwrap();
+    writeln!(c, "{:.9e},{:.9e},{:.9e}", hrms(&avec, ns - 1), avec.niveau[ns - 1] as f64, v_pic).unwrap();
+    println!("S675 : Hrms au rivage {:.3} m (sans déferlement {:.3}), η̄ {:.2} cm, |V| au plus {v_pic:.3} m/s", hrms(&avec, ns - 1), hrms(&sans, ns - 1),
+        100. * avec.niveau[ns - 1]);
+}
+

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S675 — **en cours**. En autonomie vers la v2 ; une séance visuelle, comme l'utilisateur les a demandées (R41 reçu en S663).
+Session : S675 — **terminée**. En autonomie vers la v2 ; une séance visuelle, comme l'utilisateur les a demandées (R41 reçu en S663).
 Depuis S664, la côte 2D de B déferle, porte le niveau moyen et le courant de dérive : rien n'en a encore été montré.
 
 **Ce que la session fait.** L'essai ignoré `record_the_breaking_coast_for_the_visual_session_s675` écrit `calculs/s675_cote.bin`
@@ -100,7 +100,8 @@ posé à l'utilisateur, les fichiers envoyés.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'enregistrement ; le rendu ; (1)–(2).
-- [ ] **P3** — preuve ; R42 ; rituel.
+- [x] **P2** — l'enregistrement ; le rendu ; (1)–(2).
+- [x] **P3** — preuve ; R42 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) les trois images rendues, regardées, corrigées (textes coupés, coupe élargie, graduations) ; (2) le contrôle à 2,7·10⁻¹⁰ ; R42 posé.

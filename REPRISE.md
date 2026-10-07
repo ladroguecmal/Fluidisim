@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 22:54 +02:00
+JETON            : libre
+Battement        : 2026-10-07 23:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S675 — la séance visuelle de la côte qui déferle (R42) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S674 — Le niveau moyen rétroagit sur le déferlement ([journal](notes/JOURNAL.md)). Avant : S673 (La côte 2D porte le niveau moyen et le courant de dérive)
-Session suivante : S675 — Cote2D dans Godot (l'intégration de 2.7), ou la marée du niveau moyen
-Maillons        : 1 (2.7 : le niveau rétroagit sur le déferlement)
+Session en cours : aucune
+Dernière session : S675 — La séance visuelle de la côte qui déferle (R42) ([journal](notes/JOURNAL.md)). Avant : S674 (Le niveau moyen rétroagit sur le déferlement)
+Session suivante : S676 — la trente-neuvième revue de méthode (S671–S675)
+Maillons        : 0 (une séance visuelle ; R42 posé)
 Registres       : dernier lot S674 (ADR-213 D3) ; le prochain au plus tard en S677
 ```
 

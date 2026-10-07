@@ -1680,3 +1680,10 @@ dans `cuire_deferlante` (la marche sur `h + η̄`, jusqu'à 1 mm) ; S670 et S673
 même point fixe en 1D : 0,43 % par composante, `η̄` 0,21 %, `V` 0,65 % ; trois marches ; au rivage, `Hrms` +8 % (0,553 m), `η̄`
 12,57 cm, comme le calcul du plan. Maillons **1** (2.7). Suivant : **S675**, `Cote2D` dans Godot (l'intégration de 2.7), ou la marée
 du niveau moyen. **Lot** S672–S674.
+
+## S675 — 2026-10-07 — La séance visuelle de la côte qui déferle (R42)
+
+**Entrée.** Une séance visuelle (R41 reçu en S663). **Fait** ([preuve](../docs/validation/SEANCE-VISUELLE-COTE-S675.md)) : l'essai
+ignoré qui enregistre la côte avec et sans déferlement ; `outils/rendu_cote.py` (la vue de dessus et la coupe animées, les profils). Le
+contrôle est relu à 2,7·10⁻¹⁰. Avant l'envoi, trois défauts de mise en page ont été vus et corrigés. **R42 posé.** Maillons **0** (une
+séance). Suivant : **S676, la trente-neuvième revue de méthode**.
