@@ -450,6 +450,8 @@ une houle périodique sur une plage (4.14 : la remontée de Keller & Keller à 0
 le ressaut mobile et le front sec (Stoker, Ritter : C04 en 2D) ; le frottement de Manning et le bord droit.
 **S629–S631** : le domaine local nourri par `tsunami::niveau` lui-même (3.4) ; le déferlement sur une côte quelconque (3.5 : marching
 squares, chaînage) ; la trentième revue (ADR-257 : un montage porte ses bornes, assertées).
+**S632–S634** : le déferlement le long des rayons de houle et ses sommets (3.5 : la hauteur réfractée par une côte courbe) ; le
+frottement et Coriolis dans le courant de marée (2.2).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
