@@ -62,32 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S602 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S599–S601), puis **9.4 — les objets contrôlables :
-paliers de confiance ; confiance réduite par le jeu** (absent). Les paliers d'ADR-013 §2 existent (`ballistic::tier`, S405, pour 9.3) ;
-manque ce qui est propre aux objets contrôlables.
+Session : S603 — **en cours**. En autonomie (ADR-247) : **12.5 — la portée d'une modification bornée par partition** (SPEC-005 §8 ; absent).
+La ligne qu'on sous-estime : **la bathymétrie**, dont la portée va jusqu'à l'isobathe où la plus longue houle cesse de sentir le fond —
+`h = λ` depuis ADR-196 D3 (et non `λ/2`).
 
-**Ce que la session fait.** Dans `ballistic.rs` : `Confiance { facteur_jeu }` — le jeu réduit la confiance en multipliant la capacité de
-manœuvre (`a_max` effectif = `a_max·facteur`, `facteur ≥ 1` : un pilote erratique, une perte de contrôle annoncée) ; `horizon_utile(a_max, R,
-confiance)` = `√(2R/a_max_effectif)` ; `palier_controlable(t, a_max, R, confiance)` — le palier d'ADR-013 sous la confiance réduite ;
-`reevaluation_s(palier)` — T4 réévalué à 2 Hz (0,5 s), les autres à chaque tick. Ne fait pas : la source des facteurs (le jeu), la table des
-`a_max` par archétype (ADR-013 §8.2 : l'équipe véhicules), l'hystérésis entre paliers.
+**Ce que la session fait.** Un module `portee.rs` : `isobathe_limite_m(T, g)` = `λ` à `h = λ` (`L₀·tanh 2π`) ; `celerite(h, T, g)` — la
+célérité de phase de la houle et sa dérivée en `h` (dispersion complète, Newton) ; le tracé d'un faisceau de rayons de houle par
+`refraction::tracer` (une profondeur équivalente `c²/g`) jusqu'à l'isobathe d'arrivée ; `portee_bathymetrie(scène, ancien, nouveau,
+support)` — **les plages à recuire** : aucune si le support reste plus profond que l'isobathe limite ; sinon les plages des rayons qui
+passent sur le support, avant et après. Ne fait pas : les quatre autres lignes de la table (contenant, nœud, tronçon, trait de côte), un
+trait de côte quelconque (ici une côte droite et des plages en intervalles de `y`), le branchement à `cotier::Bibliotheque`.
 
-**Références, calculées avant** (ce script les écrit et vérifie la table d'ADR-013 au dixième). Horizons : avion de chasse **1.414214 s**
-(1,4), avion en perte de contrôle **3.651484 s** (3,7), vaisseau lourd **4.898979 s** (4,9). Le vaisseau lourd à 4 s de
-l'impact : l'enveloppe 40 m ≤ 60 m → **T2** ; le jeu divise la confiance par deux (facteur 2) : 80 m > 60 m → **T3**, l'horizon
-tombé à **3.464102 s**.
+**Scène, et références calculées avant** (ce script les calcule par un traceur indépendant, numpy vectorisé). Houle de 8 s, plateau à
+1:200, 363 rayons partis à 24 km (121 départs tous les 200 m, trois directions : π, π ± 0,35), arrivée à l'isobathe 5 m, pas de 2 s, huit
+plages de 2 km. L'isobathe limite : **99.923142536 m** (à 20 km du rivage ; `K_s − 1` y vaut −4,0·10⁻⁵, ADR-196). Trois bosses (cos², rayon
+1,5 km) : **profonde** (centre (23 km, 1 km), 7 m ; le support, ancien et nouveau fond, ≥ **107.14 m**) — décalage max d'une arrivée **0.0568 m**, portée **∅** ; **entre λ/2 et λ** (centre (14 km, 1 km), 7 m ; ≥
+**62.14 m**) — décalage **8.958 m**, portée [1, 2, 3, 4, 5, 6, 7] (la règle `λ/2` l'aurait manquée) ; **côtière** (centre (6 km, 1 km), 12 m ; ≥ **17.51 m**) — décalage **788.0 m**,
+portée [2, 3, 4, 5, 6] : trois plages sur huit hors de cause.
 
-**Quantum** : f64 ; des paliers (des valeurs discrètes). **Critères, écrits avant.** (1) les trois horizons à 10⁻¹² ; (2) les deux paliers ;
-un facteur 1 rend le palier de `tier` au bit, sur une grille de 200 cas ; (3) la réévaluation : 0,5 s en T4, le tick ailleurs ; (4) refus :
-un facteur sous 1 ou non fini.
+**Quantum** : f64 ; la tolérance d'un rayon est un demi-texel de la bibliothèque côtière (S599) : **0.25 m** ; l'accord entre traceurs
+**0.001 m** (rapport 250, asserté). **Critères, écrits avant.** (1) l'isobathe limite à 10⁻⁹ près ; `dc/dh` contre une
+différence centrée à 10⁻⁶ relatif, à 5, 30 et 90 m ; (2) sans bosse, les 363 rayons arrivent ; neuf arrivées rejoignent le traceur du plan à 0.001 m — départs à y = −4, 0, 4 km, directions
+π − 0,35, π, π + 0,35 : 4017.6787, -4000.0000, -12017.6787, 8017.6787, 0.0000, -8017.6787, 12017.6787, 4000.0000, -4017.6787 m ;
+(3) la bosse profonde : portée vide, et aucune arrivée décalée de plus de 0.25 m (le fond n'est plus senti) ; (4) la bosse entre λ/2 et λ :
+une arrivée décalée de plus de 10 × 0.25 m, portée non vide ; (5) la bosse côtière : la portée [2, 3, 4, 5, 6], et toute plage dont une arrivée
+change de plus de 0.25 m y est (les deux plages de ce rayon, avant et après) ; (6) refus : période, gravité ou pas non positifs, bornes non croissantes.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — `Confiance` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 9.4 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `portee.rs` et ses essais ; (1)–(6).
+- [ ] **P3** — preuve ; liste 12.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — les horizons ; T2 → T3 ; 200 cas au bit ; la réévaluation ; refus. Suite 777.
-- **P3** — preuve CONFIANCE-S602 ; liste 9.4 (absent → partiel) et décompte ; index ; journal ; le lot.
-
