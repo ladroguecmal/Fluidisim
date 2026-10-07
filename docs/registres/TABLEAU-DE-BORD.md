@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 99 — absents : 11.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 100 — absents : 10.
 
 ## Par campagne
 
@@ -16,7 +16,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K2** La surface non graphe | 0 | 9 | 1 | ◐4.16 ◐4.1 ◐4.12 ·4.20 ◐7.4 ◐7.5 ◐7.2 ◐7.3 ◐3.3 ◐3.1 |
 | **K3** Le fond et la côte | 1 | 9 | 1 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ◐3.5 ·4.14 ◐4.15 ✅6.5 ◐2.6 ◐3.9 ◐4.6 |
 | **K4** Les eaux intérieures | 0 | 4 | 0 | ◐2.3 ◐2.4 ◐2.5 ◐12.2 |
-| **K5** δ, le système | 0 | 12 | 2 | ◐4.2 ◐4.3 ◐4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
+| **K5** δ, le système | 0 | 13 | 1 | ◐4.2 ◐4.3 ◐4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ◐1.6 |
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
 | **K7** Les volumes finis | 1 | 8 | 0 | ◐5.2 ✅5.3 ◐5.4 ◐5.6 ◐5.7 ◐5.8 ◐5.9 ◐5.10 ◐5.12 |
 | **K8** Activation, prédiction, budget | 1 | 14 | 2 | ◐9.1 ◐9.2 ◐9.3 ◐9.4 ✅9.5 ·9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ◐9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
@@ -36,7 +36,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 1.3 | partiel | Interfaces de SPEC-004 |
 | 1.4 | partiel | Point d'entrée unique, orchestrateur des régimes |
 | 1.5 | partiel | Grille 3D de référence stable |
-| 1.6 | absent | Cellules, domaines et solveurs distincts, niveaux d'activité des cellules |
+| 1.6 | partiel | Cellules, domaines et solveurs distincts, niveaux d'activité des cellules |
 | 1.7 | partiel | Horloge de simulation entière et phases déterministes |
 | 1.8 | partiel | Référentiels, précision f32 locale, `g_eff` injectée |
 | 2.1 | partiel | Mer et océan : état de mer spectral déterministe, sans état par cellule |
@@ -279,4 +279,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S605 | 2026-10-07 | 10 | 98 | 12 | 120 |
 | S606 | 2026-10-07 | 10 | 98 | 12 | 120 |
 | S607 | 2026-10-07 | 10 | 99 | 11 | 120 |
+| S608 | 2026-10-07 | 10 | 100 | 10 | 120 |
 <!-- fin de l'historique -->

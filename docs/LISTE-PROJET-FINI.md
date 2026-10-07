@@ -86,8 +86,10 @@ pas recopiée ici (L137).
   rebasage), parents, enfants, voisins ; les zones actives d'intérêts mobiles ; l'échange par écart, encodé, que le client rejoue au bit
   ([preuve](validation/HYDROGRID-S607.md)). Manquent la subdivision de publication par type (R07), le routage de W, l'index de V, la
   pertinence réseau.
-- [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *absent*,
-  conçu (ADR-006).
+- [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *partiel* depuis S608 : les cinq niveaux de la
+  source (inactive, simplifiée, partielle, active, détail) lus sur la HydroGrid ; un domaine non aligné couvre chaque cellule d'un volume
+  exact, conservé à travers le découpage ; le détail dit la précision du solveur, non la subdivision ([preuve](validation/ACTIVITE-S608.md)).
+  Manquent l'hystérésis des niveaux, la forme réduite d'une perturbation qui disparaît, la publication, les domaines réels branchés.
 - [ ] **1.7 Horloge de simulation entière et phases déterministes** (ADR-003) — *partiel* : temps
   entier en µs, phases en virgule fixe ; déterminisme reçu localement, pas entre plateformes. **Depuis S476** (un seul PC,
   [ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D2) : « entre plateformes » se lit entre les chemins d'exécution de ce PC
@@ -880,7 +882,7 @@ pas recopiée ici (L137).
 
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
-| 1. Socle | 8 | 1 | 6 | 1 |
+| 1. Socle | 8 | 1 | 7 | 0 |
 | 2. Grandes masses (B) | 9 | 0 | 9 | 0 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 18 | 3 |
@@ -893,7 +895,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **99** | **12** |
+| **total** | **121** | **10** | **100** | **11** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

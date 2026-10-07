@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S608 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S605–S607), puis **1.6 — cellules, domaines et
+Session : S608 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S605–S607), puis **1.6 — cellules, domaines et
 solveurs distincts, niveaux d'activité des cellules** (ADR-006 ; absent, conçu). La source (`architecture_globale` §3.3) nomme cinq
 niveaux : inactive, simplifiée, partiellement active, simulation active, niveau de détail supérieur — et dit que le niveau spatial et la
 précision physique ne sont pas équivalents.
@@ -87,7 +87,9 @@ une que A couvre entière ; (4) refus : un `dx` hors des six niveaux, un domaine
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `activite.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 1.6 ; rituel (`--lot`).
+- [x] **P2** — `activite.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 1.6 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai ; les fractions à 10⁻¹⁴ des rationnels. Suite : 798 essais listés (mesurée).
+- **P3** — preuve ACTIVITE-S608 ; liste 1.6 (absent → partiel) et décompte ; index ; journal ; le lot.

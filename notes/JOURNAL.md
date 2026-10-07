@@ -1138,3 +1138,12 @@ Suivant : **S607**, un point absent.
 Python indépendante : cinq clés au bit, 10⁵ points en aller-retour, dix pas de trois intérêts mobiles rejoués par le client au bit
 (3 668 octets puis 176–308 par pas) ; le niveau 2 vérifié contre le refus de `WorldPos::to_local` à 4 096 m. Maillons **1** (1.5 : absent →
 partiel). Suivant : **S608**, le lot et un point absent.
+
+## S608 — 2026-10-07 — le lot ; les niveaux d'activité des cellules
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S605–S607), puis 1.6 (absent, conçu). La définition des niveaux trouvée
+dans la source (`architecture_globale` §3.3 : cinq niveaux). **Fait** ([preuve](../docs/validation/ACTIVITE-S608.md)) : `activite.rs` —
+la couverture des cellules de la HydroGrid par des blocs non alignés, les cinq niveaux. **Mesuré** contre des couvertures exactes en
+rationnels : 36 cellules, 2 pleines, le volume conservé à 10⁻¹⁴ ; niveaux 0/6/33/1/2. **En route** (au plan) : le domaine fin dépassait
+dans la cellule du dessus — deux cellules au niveau détail, non une. Maillons **1** (1.6 : absent → partiel ; la section 1 n'a plus
+d'absent). Suivant : **S609**, un point absent.
