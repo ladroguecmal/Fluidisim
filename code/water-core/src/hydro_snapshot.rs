@@ -57,6 +57,7 @@ fn valid_edge(e: &Opening, nodes: usize) -> bool {
         Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { super::law_size(&e.flow) },
         Flow::Drainage { .. } => super::law_size(&e.flow),
         Flow::Evaporation { .. } | Flow::Vent { .. } => if e.to.is_some() { -1 } else { super::law_size(&e.flow) },
+        Flow::Manning { .. } => super::law_size(&e.flow),
     };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
@@ -155,6 +156,14 @@ impl<'a> Baseline<'a> {
                 Flow::Vent { area_mm2 } => {
                     h.write_u8(10);
                     h.write_u64(area_mm2 as u64);
+                }
+                // S592 : le bief de canal.
+                Flow::Manning { width_mm, length_mm, roughness_e6, outlet_slope_e6 } => {
+                    h.write_u8(11);
+                    h.write_u64(width_mm as u64);
+                    h.write_u64(length_mm as u64);
+                    h.write_u64(roughness_e6 as u64);
+                    h.write_u64(outlet_slope_e6 as u64);
                 }
             }
             for x in e.position_um { h.write_u64(x as u64); }

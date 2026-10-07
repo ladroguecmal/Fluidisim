@@ -162,6 +162,12 @@ pub enum Flow {
     /// passe. Sous `step_air`, l'air d'une poche scellée en sort à `Q_a = C_d·A·√(2Δp/ρ_a)` (`C_d` : `discharge` ; `ρ_a = 1,2·p/p_atm`,
     /// isotherme), et le produit `p·V_air` de la poche baisse de `p·Q_a·dt`. Ailleurs (`step`, nœud ouvert), sans effet.
     Vent { area_mm2: i64 },
+    /// **S592 — un bief de canal** (liste 2.5) : un écoulement à surface libre avec frottement, Manning,
+    /// `Q = (1/n)·A·R^(2/3)·√S_f`, `A = b·ȳ`, `R = A/(b + 2ȳ)` — `b` la largeur (`width_mm`), `n` la rugosité (`roughness_e6` = `n·10⁶`,
+    /// s/m^(1/3)), `L` la longueur du bief (`length_mm`). `ȳ` : la moyenne des profondeurs au seuil (la position de l'arête) des deux
+    /// côtés ; `S_f = Δh/L` entre les deux surfaces. Vers dehors (`to` vaut `None`), la sortie en régime uniforme : `S_f` = la pente du
+    /// lit `outlet_slope_e6`/10⁶, `ȳ` la profondeur amont. Rien ne remonte : un bief ne débite que vers l'aval.
+    Manning { width_mm: i64, length_mm: i64, roughness_e6: i64, outlet_slope_e6: i64 },
 }
 
 /// **La météo du pas** (ADR-204 D4) : une entrée, fournie à l'identique à tous les participants (I-03) ; qui la calcule
@@ -474,6 +480,7 @@ fn step_inner(
             Flow::Infiltration { .. } => if e.to.is_none() { -1 } else { law_size(&e.flow) },
             Flow::Drainage { .. } => law_size(&e.flow),
             Flow::Evaporation { .. } | Flow::Vent { .. } => if e.to.is_some() { -1 } else { law_size(&e.flow) },
+            Flow::Manning { .. } => law_size(&e.flow),
             // La pluie tombe sur le nœud que `from` et `to` désignent tous deux.
             Flow::Rain { catchment_mm2 } => {
                 if e.to != Some(e.from) { -1 } else { catchment_mm2 }
@@ -552,6 +559,36 @@ fn step_inner(
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
         // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
         let sill = along(sub(e.position_um, src.origin_um), up);
+        if let Flow::Manning { width_mm, length_mm, roughness_e6, outlet_slope_e6 } = e.flow {
+            // S592 : un bief de canal. La profondeur amont au seuil, l'aval (sa surface ramenée au repère amont), la pente de frottement.
+            let y_amont = (h_up - sill) * 1e-6;
+            if !(y_amont > 0.0) || e.control_pm == 0 {
+                continue;
+            }
+            let longueur = length_mm as f64 * 1e-3;
+            let (y_moyen, pente) = match e.to {
+                Some(t) => {
+                    let dn = nodes[t as usize];
+                    let h_dn = along(sub(dn.origin_um, src.origin_um), up) + shapes.surface_up(&dn, up)?.offset_um + charge(t as usize);
+                    if h_up <= h_dn {
+                        continue;
+                    }
+                    (0.5 * (y_amont + ((h_dn - sill) * 1e-6).max(0.0)), (h_up - h_dn) * 1e-6 / longueur)
+                }
+                None => (y_amont, outlet_slope_e6 as f64 * 1e-6),
+            };
+            let b = width_mm as f64 * 1e-3;
+            let aire = b * y_moyen;
+            let rayon = aire / (b + 2.0 * y_moyen);
+            let q_m3s = aire * rayon.powf(2.0 / 3.0) * pente.sqrt() / (roughness_e6 as f64 * 1e-6)
+                * (e.control_pm as f64 / CONTROL_FULL as f64);
+            let nl = q_m3s * dt_s * 1e12;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
         if let Flow::Infiltration { area_mm2, conductivity_nm_s, suction_um, deficit_pm } = e.flow {
             // S530 : à sec (la surface de la flaque sous celle du sol) ou fermée, rien ne passe.
             if h_up <= sill || e.control_pm == 0 {
@@ -654,7 +691,7 @@ fn step_inner(
                 e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt() * valve_fraction(&curve_pm, e.control_pm)
             }
             Flow::Pump { .. } | Flow::PumpLine { .. } | Flow::Rain { .. } | Flow::Spill | Flow::Infiltration { .. } | Flow::Drainage { .. }
-            | Flow::Evaporation { .. } | Flow::Vent { .. } => {
+            | Flow::Evaporation { .. } | Flow::Vent { .. } | Flow::Manning { .. } => {
                 unreachable!("pompes, pluie, débordement et infiltration ont leur propre calcul")
             }
         };
@@ -810,6 +847,10 @@ mod tests_charge;
 #[path = "tests_lac.rs"]
 mod tests_lac;
 
+#[cfg(test)]
+#[path = "tests_canal.rs"]
+mod tests_canal;
+
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
 pub(crate) fn law_size(flow: &Flow) -> i64 {
@@ -831,6 +872,10 @@ pub(crate) fn law_size(flow: &Flow) -> i64 {
         Flow::Evaporation { area_mm2, rate_nm_s } => if area_mm2 <= 0 || rate_nm_s < 0 { -1 } else { area_mm2 },
         // S547 : l'évent (vers dehors, vérifié par l'appelant).
         Flow::Vent { area_mm2 } => if area_mm2 <= 0 { -1 } else { area_mm2 },
+        // S592 : le bief — largeur, longueur, rugosité positives, pente de sortie positive ou nulle.
+        Flow::Manning { width_mm, length_mm, roughness_e6, outlet_slope_e6 } => {
+            if width_mm <= 0 || length_mm <= 0 || roughness_e6 <= 0 || outlet_slope_e6 < 0 { -1 } else { width_mm }
+        }
         _ => 0,
     }
 }
