@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 20:32 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 20:33 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S660 — le témoin du grand angle sur le haut-fond de Berkhoff ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S659 — 2.7 : le modèle parabolique de pente douce ([journal](notes/JOURNAL.md))
 Session suivante : **S660 — le témoin du grand angle** sur le haut-fond de Berkhoff : l'approximation parabolique à grand angle (Kirby 1986, Padé [1,1] ou minimax) dans pente_douce.rs ; si les écarts des sections 2 et 5 tombent, c'était l'angle.
 Maillons        : 1

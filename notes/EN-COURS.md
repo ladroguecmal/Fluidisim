@@ -62,43 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S659 — **terminée**. En autonomie vers la v2. **2.7, la bathymétrie 2D** (le point qui en débloque six) : il manque la
-bathymétrie 2D et la **diffraction des hauts-fonds isolés**, où les rayons de S583 font des caustiques. Le meilleur chemin au réalisme
-visé (S643) : un modèle de houle côtière cuit par rivage. Première pièce : **le modèle parabolique de pente douce** (Radder 1979) —
-réfraction et diffraction ensemble, une marche en `x`, Crank–Nicolson, tridiagonal en `y`.
+Session : S660 — **en cours**. En autonomie vers la v2 ; 2.7. En S659, le modèle parabolique aux petits angles s'écarte des mesures de
+Berkhoff de 0,2 à 0,4 sur trois sections ; la maille et l'axe des mesures sont écartés.
 
-**L'équation** (dérivée au plan, de `∇·(p∇φ) + k²pφ = 0`, `p = C·C_g`, `φ = A·e^(i∫k̄dx)`, `A_xx` négligé) :
-`A_x = −(p·k̄)_x/(2p·k̄)·A + i/(2p·k̄)·[(p·A_y)_y + p·(k² − k̄²)·A]`, `k̄(x)` la moyenne de `k` sur `y`. À une dimension, elle redonne
-`A ∝ (p·k)^(−½) ∝ C_g^(−½)` : la levée par le flux d'énergie.
-
-**La référence : les mesures de Berkhoff, Booy et Radder (1982)**, le haut-fond elliptique, lues dans l'exemple public de Basilisk
-(`basilisk.fr/src/examples/section-2, -3, -5, -7`, le rapport d'amplitude mesuré) : section 2 à x = 3 m, section 3 à x = 5 m, section 5 à
-x = 9 m (profils en `y`), section 7 sur `y` = 0 (profil en `x`). La géométrie (vérifiée dans le même exemple) : `h₀` = 0,45 m ; pente
-1:50 tournée de 20° (`x′ = x·cos 20° − y·sin 20°`, `y′ = x·sin 20° + y·cos 20°`, montée `(5,82 + x′)/50` pour `x′ ≥ −5,82`) ; le haut-fond
-`(x′/3)² + (y′/4)² ≤ 1`, épaisseur `−0,3 + 0,5·√(1 − (x′/3,75)² − (y′/5)²)` ; T = 1 s.
+**Le témoin : le grand angle** (Booij 1981, Kirby 1986). De `∂_xφ = i·k̄·√(1 + X)·φ`, `X = [(k² − k̄²) + (1/p)·∂_y(p·∂_y)]/k̄²`, la racine
+approchée par Padé [1,1], `(1 + ¾X)/(1 + ¼X)`, au lieu de `1 + ½X` : `(1 + X/4)·(A_x − lev·A) = (i·k̄/2)·X·A` (dérivé au plan ; à
+`X` petit, l'équation de S659 ; à `X` = 0, la levée). Crank–Nicolson, les coefficients au demi-pas, tridiagonal. `propager_grand_angle`, à
+côté de `propager` (S659 reste reproductible).
 
 **Contrôles du plan** (ADR-266)
 
-- **témoin** : sans objet au départ ; un écart aux mesures se localise ensuite par les deux cas analytiques (le plat, la levée) et le
-  pas de maille.
-- **instrument** : le lecteur est `|A|` ; éprouvé sur deux cas de réponse connue — l'onde plane sur fond plat (`|A|` = 1) et la levée à
-  incidence normale sur une pente 1:50 de 0,45 à 0,15 m (0.990551, `√(C_g0/C_g)`, ce script).
-- **calcul** : `k(h)` par Newton, la levée de référence, la profondeur minimale (0.1336 m > 0, asserté), par ce script.
-- **ADR** : ADR-264 (le calcul en grilles locales), ADR-260 (un module `f64` rangé : O, un outil de cuisson), ADR-262, ADR-263 D2.
-- **pièges** : **l'axe `y` des mesures est inversé** (Basilisk trace `-$1`) ; la normalisation (les mesures sont des rapports à
-  l'amplitude incidente) ; l'erreur de l'approximation parabolique aux angles obliques (la pente est tournée de 20°) ; les parois
-  latérales (réfléchissantes, `A_y` = 0) ; la non-linéarité de l'expérience, que le modèle linéaire ne rend pas.
+- **témoin** : deux causes nommées en S659 — l'angle, la non-linéarité. Le grand angle supprime (une grande part de) la première ; si
+  l'écart des sections 2 et 5 baisse d'au moins 30 % chacune, c'était l'angle ; sinon, c'est la non-linéarité ou autre chose.
+- **instrument** : le même lecteur et les mêmes mesures qu'en S659 ; le nouveau modèle éprouvé d'abord sur les deux cas analytiques
+  (le plat à 10⁻⁶, la levée à 0,5 %), et sur un cas où le grand angle doit gagner : une onde plane **oblique** à 30° sur fond plat, dont
+  `|A|` doit rester 1 (les petits angles la déforment) — rapporté pour les deux modèles.
+- **calcul** : aucun nombre nouveau hors l'onde oblique (`A = e^(i·k·sin30°·y)` posé au bord, `|A|` = 1 attendu).
+- **ADR** : ADR-259 D1, ADR-263 D2, ADR-266 ; S659 inchangé.
+- **pièges** : l'approximation de Padé à grand angle n'est pas exacte au-delà de ~45° ; les parois latérales réfléchissent l'onde
+  oblique (lire loin des parois) ; l'ordre des opérateurs (le terme de levée traité en diagonale).
 
-**Critères, écrits avant.** (1) Le plat : `|A|` = 1 à 10⁻⁶ sur 20 m. (2) La levée à incidence normale : à 0,5 % de 0.9906. (3) Berkhoff,
-à la maille fine : l'écart quadratique moyen du rapport d'amplitude aux mesures **≤ 0,20 sur chacune des quatre sections**, et le pic de la
-section 3 (2,21 mesuré) à 15 % ; deux mailles rapportées.
+**Critères, écrits avant.** (1) Le grand angle : le plat à 10⁻⁶, la levée à 0,5 %. (2) Le verdict du témoin : la baisse des écarts des
+sections 2 et 5 (≥ 30 % chacune : l'angle). (3) Le critère de S659 rejugé (≤ 0,20 sur chaque section, le pic de la section 3 à 15 %).
 
 ### Plan
 
-- [x] **P1** — jeton ; plan ; les mesures récupérées.
-- [x] **P2** — `pente_douce.rs` et ses essais ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7, 3.6 ; rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `propager_grand_angle` ; les essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) 2·10⁻¹⁴ ; (2) 0,990551 exact ; (3) manqué : écarts 0,231 ; 0,197 ; 0,419 ; 0,288, le pic de la section 3 à 11 %. Le
-  témoin de l'axe : l'inversion juste. Nommées : les petits angles, la non-linéarité. R40 reçu avant la session (« tout parait crédible »).
