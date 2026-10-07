@@ -200,6 +200,43 @@ pub fn sur_rayons(a: &[crate::refraction::Point], b: &[crate::refraction::Point]
     Ok(None)
 }
 
+/// **S633 — les sommets le long d'un faisceau** de rayons ordonné : pour chaque rayon (son voisin : le suivant, ou le précédent pour le
+/// dernier), le point de déferlement de [`sur_rayons`], le flux dissipé `ρ·g·H²/8·c_g` en kW/m (`H` = 0,78·h au point) et la direction de
+/// crête (θ du rayon, interpolé). Dans l'ordre du faisceau : la polyligne chaînée ; `None` pour un rayon qui ne déferle pas.
+#[allow(clippy::too_many_arguments)]
+pub fn sommets_sur_rayons(rayons: &[&[crate::refraction::Point]], b0: f64, omega: f64, hauteur0: f64,
+    fond: &dyn Fn(f64, f64) -> (f64, [f64; 2]), g: f64, rho: f64) -> Result<Vec<Option<Sommet>>, Refus> {
+    if rayons.len() < 2 || !(b0 > 0.0) || !(omega > 0.0) || !(hauteur0 > 0.0) || !(g > 0.0) || !(rho > 0.0) {
+        return Err(Refus);
+    }
+    let mut sortie = Vec::with_capacity(rayons.len());
+    for i in 0..rayons.len() {
+        let (a, b) = (rayons[i], rayons[if i + 1 < rayons.len() { i + 1 } else { i - 1 }]);
+        let mut avant: Option<(f64, &crate::refraction::Point)> = None;
+        let mut trouve = None;
+        for (p, q) in a.iter().zip(b) {
+            let h = fond(p.x, p.y).0;
+            let Some(ks) = crate::bathymetrie::coefficient_de_levee(omega, h, g) else { break };
+            let d = hauteur0 * ks * crate::refraction::coefficient(p, q, b0) - MCCOWAN * h;
+            if let Some((d0, p0)) = avant {
+                if d0 < 0.0 && d >= 0.0 {
+                    let f = -d0 / (d - d0);
+                    let pos = [p0.x + f * (p.x - p0.x), p0.y + f * (p.y - p0.y)];
+                    let th = p0.theta + f * (p.theta - p0.theta);
+                    let hb = fond(pos[0], pos[1]).0;
+                    let cg = crate::bathymetrie::vitesse_de_groupe(omega, hb, g).ok_or(Refus)?;
+                    let hauteur = MCCOWAN * hb;
+                    trouve = Some(Sommet { pos, dissipe_kw_par_m: rho * g * hauteur * hauteur / 8.0 * cg / 1000.0, direction_crete: [th.cos(), th.sin()] });
+                    break;
+                }
+            }
+            avant = Some((d, p));
+        }
+        sortie.push(trouve);
+    }
+    Ok(sortie)
+}
+
 #[cfg(test)]
 #[path = "tests_deferlement.rs"]
 mod tests;

@@ -133,3 +133,34 @@ fn breaking_along_wave_rays_matches_snell_and_bends_around_an_island_s632() {
     assert_eq!(sur_rayons(&un, &un, 0.0, omega, 1.5, &droite, g), Err(Refus), "critère 4 : b0");
     assert_eq!(sur_rayons(&[], &un, 10.0, omega, 1.5, &droite, g), Err(Refus), "critère 4 : rayon vide");
 }
+
+/// **S633** — (1) cinq sommets dans l'ordre, le premier contre numpy ; (2) contre l'analytique ; (3) refus.
+#[test]
+fn vertices_along_a_ray_bundle_carry_flux_and_crest_direction_s633() {
+    use crate::portee::tracer_houle;
+    use crate::refraction::Point;
+    let (g, periode) = (9.81, 8.0);
+    let omega = 2.0 * core::f64::consts::PI / periode;
+    let droite = |x: f64, _y: f64| (0.02 * x, [0.02, 0.0]);
+    let th = core::f64::consts::PI - 0.3;
+    let rayons: Vec<Vec<Point>> = (0..5).map(|i| {
+        let mut v = vec![Point::default(); 20_001];
+        let n = tracer_houle([6000.0, 10.0 * i as f64], th, periode, g, &droite, 0.5, 0.5, &mut v).unwrap();
+        v.truncate(n);
+        v
+    }).collect();
+    let refs: Vec<&[Point]> = rayons.iter().map(|v| v.as_slice()).collect();
+    let s = sommets_sur_rayons(&refs, 10.0 * th.cos().abs(), omega, 1.5, &droite, g, 1025.0).unwrap();
+    assert!(s.len() == 5 && s.iter().all(|v| v.is_some()), "critère 1 : cinq sommets");
+    let s: Vec<Sommet> = s.into_iter().map(|v| v.unwrap()).collect();
+    println!("S633 : premier sommet {:?}", s[0]);
+    assert!((s[0].pos[0] - 112.6004762350802).abs() < 1e-9 && (s[0].dissipe_kw_par_m - 16.973662175104796).abs() < 1e-9
+        && (s[0].direction_crete[0] + 0.9940882843963825).abs() < 1e-9 && (s[0].direction_crete[1] - 0.1085747798793847).abs() < 1e-9,
+        "critère 1 : le premier sommet");
+    assert!(s.windows(2).all(|w| w[0].pos[1] < w[1].pos[1]), "critère 1 : dans l'ordre");
+    assert!((s[0].dissipe_kw_par_m / 16.973287676322084 - 1.0).abs() < 1e-4, "critère 2 : le flux");
+    assert!((s[0].direction_crete[0] + 0.994088221713009).abs() < 1e-5 && (s[0].direction_crete[1] - 0.10857535379388544).abs() < 1e-5,
+        "critère 2 : la direction");
+    assert!(s.iter().all(|v| (v.pos[0] - s[0].pos[0]).abs() < 1e-9), "critère 2 : la côte droite");
+    assert_eq!(sommets_sur_rayons(&refs[..1], 10.0, omega, 1.5, &droite, g, 1025.0), Err(Refus), "critère 3");
+}
