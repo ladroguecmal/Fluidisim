@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 09:46 +02:00
+JETON            : libre
+Battement        : 2026-10-07 09:48 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S626 — le lot ; la vingt-neuvième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S625 — une houle périodique sur une plage (Keller & Keller) ([journal](notes/JOURNAL.md)). Avant : S624 (la chaîne entière : le tsunami entre par le bord et remonte)
-Session suivante : **S626 — la vingt-neuvième revue de méthode et le lot** (ADR-222 D4 ; S621–S625), puis la physique des partiels. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
-Maillons        : 1 — S625 : 4.14 avance (Keller & Keller)
-Registres       : dernier lot S623 (ADR-213 D3) ; le prochain au plus tard en S626
+Session en cours : aucune
+Dernière session : S626 — le lot ; la vingt-neuvième revue de méthode (ADR-256) ([journal](notes/JOURNAL.md)). Avant : S625 (une houle périodique sur une plage)
+Session suivante : **S627 — la physique des partiels** (ADR-247). Revue à S631 ; le lot à S629. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
+Maillons        : 1 — S626 : la revue, le lot
+Registres       : dernier lot S626 (ADR-213 D3) ; le prochain au plus tard en S629
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

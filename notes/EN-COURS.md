@@ -72,6 +72,6 @@ BOUSSOLE ; index ; feuille de route.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; la revue (ADR-256, METHODE, L416–L417, BOUSSOLE, index).
-- [ ] **P2** — rituel (`--lot`).
+- [x] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
