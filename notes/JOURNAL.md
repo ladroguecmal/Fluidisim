@@ -1163,3 +1163,10 @@ préparation T2 (blocs, δ = 0), ses cinq décisions sans seuil physique, `etabl
 préparation directe ; un déplacement de 0,3 m fait passer de 86 à 89 blocs (réallouer sous 86) ; un domaine substitutif né au repos
 s'établit en 60,65 s, dans la borne d'ADR-013 §4. **En route** (au plan) : le premier déplacement hors réseau gardait 86 blocs — un
 autre a été cherché pour éprouver la réallocation. Maillons **1** (9.6 : absent → partiel). Suivant : **S611**, la revue et le lot.
+
+## S611 — 2026-10-07 — le lot ; la vingt-sixième revue de méthode (ADR-253)
+
+**Entrée.** En autonomie ; revue et lot dus (feuille de route S608–S610). **Friction** : une phrase du plan qui dépendait d'un nombre
+calculé, vue en lisant la sortie et non refusée par le script (S608, S610) — **élargie** : elle s'asserte (ADR-253 D1, L412). Ont tenu :
+la suite mesurée à chaque preuve, les implémentations indépendantes du plan, le seuil fixé sur sa référence en le disant (S609).
+Maillons **1**. Suivant : **S612**, un point absent.

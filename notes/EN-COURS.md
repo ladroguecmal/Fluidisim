@@ -62,37 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S610 — **terminée**. En autonomie (ADR-247) : **9.6 — le précalcul avant l'impact : domaines, allocations, collisions, état
-initial, avance plus rapide que le temps réel** (absent). ADR-013 §3 : en T2, δ vaut 0 — un domaine préparé ne porte que des blocs ; un
-déplacement de l'impact prévu se corrige en translatant l'ensemble, sans erreur ; les seuls seuils sont réallouer, rebâtir, libérer. §4 :
-l'avance temporelle n'est légitime que pour un domaine substitutif, qui naît faux et doit s'établir.
+Session : S611 — **terminée**. En autonomie : **le lot** (feuille de route S608–S610) et **la vingt-sixième revue de méthode** (ADR-222 D4 ;
+S606–S610).
 
-**Ce que la session fait.** Un module `precalcul.rs` : `Preparation` — les blocs (colonnes) d'un domaine préparé autour d'un impact prévu,
-sur le réseau de blocs du référentiel, sa capacité réservée, son `dx`, δ = 0 ; `reviser(nouvelle prévision)` → `Decision` : **translater**
-(un déplacement d'un nombre entier de blocs : ré-indexer, exact), **rebâtir l'ensemble** dans la capacité (un déplacement hors réseau),
-**réallouer** (au-delà de la capacité), **rebâtir au nouveau `dx`**, **libérer** (l'événement n'aura pas lieu) ; `etablissement` — le temps
-qu'un domaine substitutif né au repos met à rejoindre B (S609), mesuré, contre la borne d'ADR-013 §4 (`L/c_g` à `L/c_g + 2T`). Ne fait pas :
-les collisions et proxys, l'avance mesurée en temps réel d'un domaine 3D, la graine qui remplace l'établissement (4.11, 12.3).
-
-**Références, calculées avant** (ce script). **L'établissement** (le domaine de S609 né au repos, B de 0,1 m et 40 m : `T` = 9.030473 s,
-`L/c` = 45.152364 s) : l'écart à B passe définitivement sous 5 % de l'amplitude à **60.65 s**, dans la borne
-[45.152 ; 63.213] s ; l'écart à 120 s : 1.913472e-03 m. **La préparation** (blocs de 2 m, rayon 9 m, impact prévu en
-(100,3 ; 50,7)) : **86 blocs** ; déplacé de (6 ; −4) m — trois blocs, moins deux — l'ensemble translaté est celui qu'on aurait
-préparé là (asserté) ; déplacé de (0,3 ; 0,3) m, l'ensemble rebâti compte **89 blocs**.
-
-**Quantum** : le pas de temps (0,05 s) ; des blocs entiers. **Critères, écrits avant.** (1) l'établissement à un pas près de la référence,
-dans la borne d'ADR-013 §4 ; (2) la préparation : 86 blocs, δ = 0 au bit ; translatée de (6 ; −4) m, identique au bit à la préparation
-directe, décision « translater » ; (3) déplacée de (0,3 ; 0,3) m : 89 blocs — « rebâtir » avec une capacité de 90, « réallouer » avec une
-capacité de 86 ; un autre `dx` : « rebâtir au `dx` » ; l'événement annulé : « libérer » ; (4) refus : rayon
-ou `dx` non positifs, une capacité sous l'ensemble initial.
+**Ce que la session fait.** Relu : S606 (la revue), S607 (1.5), S608 (1.6 : une phrase du plan contredite par son script), S609 (4.11 :
+un seuil refusé par le script, un bord mal centré trouvé), S610 (9.6 : une réallocation promise que le cas ne provoquait pas).
+**ADR-253** : D1 ; L412 ; METHODE ; BOUSSOLE ; index ; feuille de route.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — `precalcul.rs` et ses essais ; (1)–(4).
-- [x] **P3** — preuve ; liste 9.6 ; rituel.
+- [x] **P1** — jeton ; le lot ; la revue (ADR-253, METHODE, L412, BOUSSOLE, index).
+- [ ] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai ; `Domaine1D::au_repos` et `temps_pas` ajoutés à `substitutif.rs`. Suite : 800 essais
-  listés (mesurée).
-- **P3** — preuve PRECALCUL-S610 ; liste 9.6 (absent → partiel) et décompte ; index ; journal.

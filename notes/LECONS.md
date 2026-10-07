@@ -6700,3 +6700,9 @@ avant de juger (ADR-244 D1) ; une relecture du plan contre ses critères avant l
 **S589–S602 — la taille de la suite par incrément.** Chaque preuve écrivait « suite du cœur : N » comme la précédente plus les essais
 ajoutés. S603 l'a mesurée : 793 essais listés en S602, dont 17 ignorés — la preuve disait 777. Deux bases mêlées et une dérive d'un ; un
 nombre de preuve se mesure (ADR-252 D1).
+
+## L412
+
+**S608, S610 — la phrase non assertée.** Le plan de S608 disait « la cellule de B » quand son script en comptait deux ; celui de S610
+promettait une réallocation que le déplacement choisi ne provoquait pas (86 blocs avant et après). Les deux vues en lisant la sortie,
+avant le commit ; une assertion dans le script les aurait refusées seule (ADR-253 D1).
