@@ -454,6 +454,9 @@ squares, chaînage) ; la trentième revue (ADR-257 : un montage porte ses bornes
 frottement et Coriolis dans le courant de marée (2.2).
 **S635–S637** : le dégel par le bilan d'énergie (7.6) ; la trente-et-unième revue (ADR-258 : rien à changer) ; V qui déclenche δ et le
 tient par la masse (5.10, ADR-025 §3).
+**S638–S640** : le cycle de vie de δ attaché à V (5.10) ; le rouleau 3D, étapes 1 et 1 bis (4.14) — le fond en pente puis les faces
+coupées dans APIC 3D, exactes sous l'eau, le rivage en eau mince manqué (L419) ; l'audit des intentions initiales (demande de
+l'utilisateur).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

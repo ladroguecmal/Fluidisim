@@ -62,38 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S640 — **terminée**. En autonomie, la campagne du rouleau 3D (accepté par l'utilisateur le 2026-10-07). **Étape 1 bis — les faces
-coupées dans APIC 3D** : en S639, le fond en escalier manquait le repos (1,51 cm/s au rivage d'une maille ; à 2,5 cm, 1,18 : la géométrie).
+Session : S641 — **en cours**. En autonomie (ADR-247). **La trente-deuxième revue de méthode** (ADR-222 D4 : S636–S640), **le lot**
+(feuille de route S638–S640), et **l'audit des intentions initiales** demandé par l'utilisateur (2026-10-07,
+[AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md)) versé là où une session peut le verser seule
+(ADR-218 D2) : les intentions fondatrices absentes deviennent des points de la liste ; les dérives non décidées sont inscrites à leurs
+points ; ce qui relève de l'utilisateur lui est soumis, rien n'est tranché à sa place.
 
-**Ce que la session fait.** `Apic3::set_seabed_lisse(fond)` : le fond **lisse** — linéaire entre les centres des colonnes — et, pour chaque
-face, la **fraction ouverte à l'eau** (Batty, Bertails et Bridson 2007, la projection variationnelle) : une face verticale, la part de sa
-hauteur au-dessus du fond (exacte en hauteur, seize échantillons le long de la face) ; une face horizontale, la part de son aire au-dessus
-du fond (seize par seize échantillons). La projection pondère par ces fractions la divergence et le laplacien ; une face fermée garde une
-vitesse nulle. Une maille dont les six faces sont fermées est solide. Les particules sont reposées au-dessus du fond lisse ; la
-reconstruction reflète sous ce fond (l'image `2·z_b(x, y) − z`). Au repos hydrostatique, la projection rend une vitesse nulle quelles que
-soient les fractions. Ne fait pas : les poches d'air et la zone des colonnes avec les faces coupées (refusées ensemble), un fond sous la
-forme d'une distance signée générale.
-
-**Références, calculées avant** (ce script). Le canal de S639 (48 × 4 × 16 mailles de 5 cm ; fond plat à 5 cm puis pente 1:3 depuis 0,805 m ;
-eau à 0,4 m), le fond lisse : **5992 particules** posées entre le fond et le niveau (aucune à moins de 0.0017 m du fond : pas
-d'égalité, asserté) ; le rivage à 1.855 m.
-
-**Quantum** : la maille ; la vitesse en f32. **Critères, écrits avant** — le repos de S388, S393. (1) 5992 particules, aucune perdue en 2 s,
-aucune sous le fond lisse ; (2) **la vitesse parasite ≤ 1 cm/s sur 2 s** — ce que l'escalier manquait ; (3) les essais d'APIC 3D (S388–S639)
-inchangés ; (4) refus : longueur fausse, valeur non finie ou hors du domaine ; les faces coupées avec les poches ou les colonnes.
+**Critères, écrits avant.** (1) ADR-259 relit chaque session S636–S640 et décide ; (2) la ligne S638–S640 de la feuille de route ; (3) les
+intentions 1.1–1.11 de l'audit deviennent onze points (*absents*, « ajouté en S641 »), le décompte et les dépendances suivent,
+`etat_projet.py --check` à zéro ; (4) 4.11 dit que son seuil n'est pas une règle reçue (ADR-112 D1) ; 13.2 ne dit plus C11 non exécuté ;
+7.8 porte le détail d'ADR-016 ; les mineurs de l'audit (1.15) vont aux « manquent » de leurs points ; (5) les questions de l'utilisateur
+au registre des questions ouvertes.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — les faces coupées et leurs essais ; (1)–(4).
-- [x] **P3** — preuve ; listes 4.14, 4.16 ; rituel.
+- [x] **P1** — jeton ; plan ; le lot.
+- [ ] **P2** — ADR-259 ; la liste, ses dépendances ; les questions.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1), (3), (4) tenus ; **(2) manqué** : 0,26 m/s au rivage (0,28 à maille moitié). Localisé : la pente immergée tient à
-  8·10⁻⁶ m/s (la propriété annoncée, assertée) — la projection est exacte ; le film plus mince que le noyau fausse la surface. Six
-  reconstructions essayées (0,22 à 4,4 m/s) ; l'escalier de S639 reste meilleur au rivage. L'attribution de S639 corrigée (L419).
-  49 essais d'APIC 3D ; suite : 825 listés.
-- **P3** — preuve FACES-COUPEES-APIC3D-S640 ; ligne 4.14 ; index ; leçon L419 ; journal.
-- **En parallèle** (demande de l'utilisateur, 2026-10-07) : relecture des documents fondateurs — intentions oubliées, changées, caduques. Fait : [AUDIT-INTENTIONS-INITIALES-S640](../docs/registres/AUDIT-INTENTIONS-INITIALES-S640.md) — 15 intentions
-  absentes de la liste, 9 changements non décidés (dont le seuil 0,35·Hs rétabli en S609 contre ADR-111/112, I-08 et I-14 non tenus),
-  10 caduques. Les ajouts et corrections techniques à S641 ; les arbitrages soumis à l'utilisateur.
