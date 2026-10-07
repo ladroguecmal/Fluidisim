@@ -1687,3 +1687,10 @@ du niveau moyen. **Lot** S672–S674.
 ignoré qui enregistre la côte avec et sans déferlement ; `outils/rendu_cote.py` (la vue de dessus et la coupe animées, les profils). Le
 contrôle est relu à 2,7·10⁻¹⁰. Avant l'envoi, trois défauts de mise en page ont été vus et corrigés. **R42 posé.** Maillons **0** (une
 séance). Suivant : **S676, la trente-neuvième revue de méthode**.
+
+## S676 — 2026-10-07 — la trente-neuvième revue de méthode (ADR-270)
+
+**Entrée.** La revue (S671–S675). **Fait** : [ADR-270](../docs/adr/ADR-270-trente-neuvieme-revue-de-methode.md). Aucune règle
+nouvelle. Deux frictions ont coûté une relance chacune : la cuisson de S673, au double du coût compté ; l'essai de S670, qui encodait le
+déferlement sans rétroaction. Les règles en place les ont rattrapées. Maillons **0** (méthode). Suivant : **S677**, 2.7 — `Cote2D` par
+niveau de marée, ou la non-linéarité peu profonde (A234) ; la prochaine revue en S681.
