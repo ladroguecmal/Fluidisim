@@ -62,29 +62,16 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S625 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **4.14 — « une houle sur une plage réelle »** (un manque
-de S613) : une houle longue périodique entre par le bord caractéristique (S622) et monte et descend une pente, cycle après cycle.
+Session : S626 — **terminée**. En autonomie : **le lot** (feuille de route S623–S625) et **la vingt-neuvième revue de méthode** (ADR-222
+D4 ; S621–S625).
 
-**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai — `SaintVenant2D` d'ordre deux (S620), `pas_avec_bord` (S622) nourri
-d'une houle `η = A·sin ωt`, `u = √(g/d)·η` ; une pente 1:19,85 précédée de 300 m de fond plat à 10 m ; huit périodes ; la remontée d'un cycle
-établi — le maximum, sur les deux dernières, de la surface `z + h` de la maille mouillée la plus haute (continue, non quantifiée). La
-référence analytique : **Keller & Keller (1964)**, `R = 2A/√(J₀(2kL)² + J₁(2kL)²)`, que Carrier & Greenspan (1958) montrent exacte aussi
-pour la remontée non linéaire d'une houle non déferlante. Ne fait pas : la houle déferlante, la dispersion, la houle oblique.
-
-**Références, calculées avant** (`s625_ref.py`, numpy ; `J₀`, `J₁` par leurs séries). `A` = 5 cm, `T` = 60 s (λ = 594 m) : `2kL` =
-4.197441, **R = 0.249190301 m** (`R/A` = 4.9838) ; non déferlante (`R·ω²/(g·tan²β)` = 0.1098 < 1). Remontée
-mesurée, maille 1, ½, ¼ m : **0.250237555, 0.249060917, 0.249310645 m** — +0.420 %, -0.052 %, +0.048 %.
-
-**Quantum** : f64 ; l'accord avec numpy est demandé à **10⁻⁶ m**, non au bit — S622 a mesuré que le limiteur minmod amplifie un ulp jusqu'à
-10⁻⁸ m dans les zones presque plates. **Critères, écrits avant.** (1) les trois remontées égales aux références à 10⁻⁶ m ; (2) à moins de 1 %
-de Keller & Keller aux trois mailles, de 0,1 % à ½ et ¼ m ; (3) `h ≥ 0`.
+**Ce que la session fait.** Relu : S621 (la revue), S622 (11.3 : un critère manqué, des montages qui n'isolaient pas le bord), S623 (la
+graine), S624 (la chaîne : une durée trop courte), S625 (Keller & Keller). **ADR-256** : D1, D2 ; L416, L417 ; METHODE (trente-six règles) ;
+BOUSSOLE ; index ; feuille de route.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P1** — jeton ; le lot ; la revue (ADR-256, METHODE, L416–L417, BOUSSOLE, index).
+- [ ] **P2** — rituel (`--lot`).
 
 ### Notes de reprise
-- **P2 fini** — (1)–(3) tenus du premier essai ; l'accord avec numpy à 10⁻¹³ m (la tolérance de 10⁻⁶ n'a pas servi). Suite : 812 essais.
-- **P3** — preuve HOULE-PLAGE-S625 ; ligne 4.14 ; index ; journal.

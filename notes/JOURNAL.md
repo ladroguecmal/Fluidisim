@@ -1279,3 +1279,10 @@ l'onde n'avait pas fini sa course. Maillons **1** (11.3 avance). Suivant : **S62
 un essai — l'ordre deux, le bord caractéristique nourri d'une houle de 5 cm et 60 s, une pente 1:19,85. **Mesuré** : la remontée d'un cycle
 établi, 0,2502 → 0,2491 → 0,2493 m, pour 0,2492 selon Keller & Keller (à 0,05 % dès ½ m) ; à 10⁻¹³ m de numpy. **Fait en route** : l'éveil
 relancé à 9 h 25 pour 14 h (jusqu'à 23 h 25). Maillons **1** (4.14 avance). Suivant : **S626**, la revue de méthode et le lot.
+
+## S626 — 2026-10-07 — le lot ; la vingt-neuvième revue de méthode (ADR-256)
+
+**Entrée.** En autonomie ; revue et lot dus (feuille de route S623–S625). **Frictions** : une tolérance d'accord qui ignorait la sensibilité
+du limiteur (S622, critère manqué) — **élargie** (ADR-256 D1, L416) ; des montages qui n'isolaient pas la propriété (S622) — **ajoutée** (D2,
+L417). Ont tenu : la tolérance de S625 posée en connaissance de cause, la graine, la chaîne. Maillons **1**. Suivant : **S627**, la physique
+des partiels.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 09:45 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 09:46 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S626 — le lot ; la vingt-neuvième revue de méthode ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S625 — une houle périodique sur une plage (Keller & Keller) ([journal](notes/JOURNAL.md)). Avant : S624 (la chaîne entière : le tsunami entre par le bord et remonte)
 Session suivante : **S626 — la vingt-neuvième revue de méthode et le lot** (ADR-222 D4 ; S621–S625), puis la physique des partiels. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 9 h 25 pour 14 h, soit jusqu'à 23 h 25).
 Maillons        : 1 — S625 : 4.14 avance (Keller & Keller)

@@ -6723,3 +6723,15 @@ n'exerçaient aucune pression. S614, à bord mouillé, a divergé. Une propriét
 **S613–S620 — l'`ε` hors de son échelle.** La vitesse désingularisée de S613 prenait `ε` = (1 mm)⁴ pour tenir Courant au front ; réemployé
 à l'ordre deux en S620, il amortissait les couches du rivage de Thacker, plus minces, et figeait l'écart à 0,030 dès 100². La mesure de
 convergence du plan l'a montré ; à (0,1 mm)⁴, l'ordre deux converge. Un paramètre de régularisation porte son échelle (ADR-255 D1).
+
+## L416
+
+**S622 — la tolérance qui ignorait le limiteur.** L'accord avec numpy était demandé à 10⁻¹² m ; au-delà de la maille 1, un ulp (les
+exponentielles des deux bibliothèques, A98) change de branche dans les pentes minmod des zones presque plates et devient 10⁻⁸ m. Le critère
+a été manqué et consigné ; S625, avec une tolérance posée en connaissance de cause, a tenu. La sensibilité se mesure avant (ADR-256 D1).
+
+## L417
+
+**S622 — les montages qui n'isolaient pas le bord.** Une onde solitaire plus large que le bassin, puis une amplitude où la propagation non
+linéaire au large s'ajoutait : deux fois l'écart semblait venir du bord. Faire varier l'amplitude (il plafonnait) puis la maille (il
+convergeait) l'a rendu au numérique. Deux variations avant d'attribuer (ADR-256 D2).

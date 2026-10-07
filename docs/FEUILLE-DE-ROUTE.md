@@ -444,6 +444,8 @@ solveur par W) ; **4.14 ouvert** (le mouillage et le séchage en 2D, jugés sur 
 le défaut I-06 de `SaintVenant2D` corrigé (×1,87) — il ne reste d'absents que 7.8, 13.4 (différés) et 5.11 (hors périmètre).
 **S620–S622** : Saint-Venant 2D d'ordre deux (Thacker ÷ 9 à 22) ; la vingt-huitième revue (ADR-255 : un paramètre de régularisation porte
 son échelle) ; le niveau du large imposé au bord (une frontière caractéristique fidèle et absorbante).
+**S623–S625** : la graine d'un domaine substitutif (4.11 : un pas au lieu d'une minute) ; la chaîne du tsunami entré par le bord (11.3) ;
+une houle périodique sur une plage (4.14 : la remontée de Keller & Keller à 0,05 %).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
