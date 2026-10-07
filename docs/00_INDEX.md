@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [Le rouleau 3D, étape 3 : l'onde qui plonge sur la pente — S647](validation/DEFERLEMENT-APIC3D-S647.md) : la classification de Grilli tenue, aux deux mailles.
 - [A333 levée : le jet de rive par l'air balistique — S645](validation/JET-DE-RIVE-S645.md) : la remontée à 98 % de Synolakis.
 - [Le rouleau 3D, étape 2 : l'onde solitaire qui monte la pente — S644](validation/REMONTEE-APIC3D-S644.md) : la crête juste, le jet de rive court d'un cinquième (A333).
 - [Le rouleau 3D, étape 1 bis : les faces coupées dans APIC 3D — S640](validation/FACES-COUPEES-APIC3D-S640.md) : exactes sous l'eau ; le rivage en eau mince, manqué.

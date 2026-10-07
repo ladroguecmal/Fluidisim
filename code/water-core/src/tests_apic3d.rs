@@ -1948,3 +1948,131 @@ fn the_slip_bed_witness_s645() {
     }
 }
 
+
+/// **S647 — le lecteur du retournement** : dans la rangée `j`, la colonne la plus avancée où, en montant depuis la marche, l'eau, puis au
+/// moins une maille d'air, puis de l'eau se suivent (`labels`) — la surface n'est plus un graphe. Rend `(i, l'écart d'air en mailles)`.
+fn retournement_s647(a: &Apic3, j: usize, marche: &[f32]) -> Option<(usize, usize)> {
+    let Domain3 { nx, ny, nz, dx } = a.domain();
+    let l = a.labels();
+    let mut out = None;
+    for (i, &zb) in marche.iter().enumerate().take(nx) {
+        let k0 = (zb / dx).round() as usize;
+        let (mut eau, mut trou, mut ecart) = (false, 0usize, 0usize);
+        for k in k0..nz {
+            match l[(k * ny + j) * nx + i] {
+                WATER if eau && trou > 0 => {
+                    ecart = ecart.max(trou);
+                    break;
+                }
+                WATER => eau = true,
+                AIR if eau => trou += 1,
+                _ => {}
+            }
+        }
+        if ecart > 0 {
+            out = Some((i, ecart));
+        }
+    }
+    out
+}
+
+/// **S647 (1) — le lecteur éprouvé** (ADR-263 D2) : une couche plate, aucun retournement ; la même avec une lèvre d'eau au-dessus d'un vide
+/// d'air (x ∈ [1,0 ; 1,4] m, z ∈ [0,45 ; 0,60] m, la couche sous 0,30 m), le retournement trouvé dans la lèvre.
+#[test]
+fn the_overturn_reader_finds_a_posed_lip_and_nothing_on_flat_water_s647() {
+    let (nx, ny, nz, dx) = (40usize, 4usize, 20usize, 0.05f32);
+    let marche = vec![0f32; nx];
+    for levre in [false, true] {
+        let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        a.seed(&|p| p[2] < 0.3 || (levre && (1.0..1.4).contains(&p[0]) && (0.45..0.6).contains(&p[2]))).unwrap();
+        a.step_upto(1, ApicStage::Reconstruct).unwrap();
+        let r = retournement_s647(&a, ny / 2, &marche);
+        println!("S647 lecteur, lèvre {levre} : {r:?}");
+        if levre {
+            let (i, ecart) = r.expect("critère 1 : la lèvre");
+            assert!((20..28).contains(&i) && ecart >= 1, "critère 1 : {i} {ecart}");
+        } else {
+            assert_eq!(r, None, "critère 1 : la couche plate");
+        }
+    }
+}
+
+/// **S647 — l'onde sur la pente, jusqu'au premier retournement** : `(d, H, cot, x₁, x_pied, niveau, longueur, hauteur, durée max)`,
+/// fond en escalier, l'air balistique actif. Rend (le premier retournement : instant, abscisse, écart ; la profondeur au repos sous
+/// lui ; la crête la plus haute à ±5 mailles, au-dessus du niveau ; particules posées, gardées, sous le fond).
+#[allow(clippy::type_complexity)]
+fn deferlement_s647(dx: f32, cas: [f64; 9]) -> (Option<(f64, f64, usize)>, f64, f64, usize, usize, usize) {
+    use crate::grand_evenement::OndeSolitaire;
+    let [d, h, cot, x1, x_pied, niveau, l, lz, duree] = cas;
+    let (niveau, fond0) = (niveau as f32, (niveau - d) as f32);
+    let (nx, ny, nz) = ((l / dx as f64).round() as usize, 4usize, (lz / dx as f64).round() as usize);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let lzf = nz as f32 * dx;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| (fond0 + (((c % nx) as f32 + 0.5) * dx - x_pied as f32).max(0.) / cot as f32).min(lzf)).collect();
+    a.set_seabed(Some(&fond)).unwrap();
+    a.set_ballistic_air(true);
+    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let onde = OndeSolitaire { h, d, x1, g: 9.81 };
+    let m2 = marche.clone();
+    let n = a.seed(&|p| p[2] > m2[((p[0] / dx) as usize).min(nx - 1)] && p[2] < niveau + onde.eta(p[0] as f64) as f32).unwrap();
+    a.set_particle_velocities(&|p| ([if (p[0] as f64) < x_pied { onde.u(p[0] as f64) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])).unwrap();
+    let (mut t, mut premier, mut hb, mut crete) = (0u64, None, 0f64, 0f64);
+    let fin = (duree * 1e6) as u64;
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        a.step(us).unwrap();
+        t += us;
+        if premier.is_none() {
+            if let Some((i, ecart)) = retournement_s647(&a, ny / 2, &marche) {
+                let x = (i as f64 + 0.5) * dx as f64;
+                premier = Some((t as f64 * 1e-6, x, ecart));
+                hb = (niveau - marche[i].min(niveau)) as f64;
+                let (lo, hi) = ((x - 5. * dx as f64) as f32, (x + 5. * dx as f64) as f32);
+                crete = a.particles().iter().filter(|p| (lo..hi).contains(&p[0])).fold(0f32, |m, p| m.max(p[2] - niveau)) as f64;
+                // Un peu au-delà du premier retournement, puis l'arrêt : le rouleau n'est pas mesuré ici.
+                let reste = (fin - t).min(300_000);
+                let fin2 = t + reste;
+                while t < fin2 {
+                    let us = a.stable_step_us(10_000).min(fin2 - t);
+                    a.step(us).unwrap();
+                    t += us;
+                }
+                break;
+            }
+        }
+    }
+    let sous = a.particles().iter().filter(|p| p[2] < a.seabed_height(((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1))).count();
+    (premier, hb, crete, n, a.particle_count(), sous)
+}
+
+const CAS_S647: [f64; 9] = [0.5, 0.15, 12.0, 3.4, 5.696, 0.55, 12.8, 1.0, 6.0];
+const CAS_S644: [f64; 9] = [0.35, 0.07, 3.0, 2.80, 4.768, 0.40, 6.6, 0.8, 3.0];
+
+/// **S647** — (4) l'onde de S644 (`S₀` = 1,13) ne déferle pas ; (3), (5) l'onde de pente 1:12 (`S₀` = 0,231), à 5 cm.
+#[test]
+#[ignore = "≈ 4 min : la maille de 5 cm de S647 (la suite reste courte, ADR-213)"]
+fn a_solitary_wave_plunges_on_a_mild_slope_and_not_on_a_steep_one_s647() {
+    let (r, _, _, n, garde, sous) = deferlement_s647(0.05, CAS_S644);
+    println!("S647 pente 1:3 (S644), 5 cm : retournement {r:?} ; {n}/{garde}/{sous}");
+    assert_eq!((garde, sous), (n, 0), "critère 2");
+    assert_eq!(r, None, "critère 4 : S₀ > 0,37, pas de déferlement");
+    let (r, hb, crete, n, garde, sous) = deferlement_s647(0.05, CAS_S647);
+    println!("S647 pente 1:12, 5 cm : retournement {r:?} ; h_b {hb:.3} m, crête {crete:.3} m, H_b/h_b {:.2} ; {n}/{garde}/{sous}", crete / hb);
+    assert_eq!((garde, sous), (n, 0), "critère 2");
+    let (_, x, ecart) = r.expect("critère 3 : le retournement");
+    assert!(x < 11.696 && ecart >= 1, "critère 3 : avant le rivage au repos, une maille d'air au moins ({x}, {ecart})");
+}
+
+#[test]
+#[ignore = "≈ 30 min : la maille de 2,5 cm de S647"]
+fn a_solitary_wave_plunges_on_a_mild_slope_and_not_on_a_steep_one_fine_s647() {
+    let (r, _, _, n, garde, sous) = deferlement_s647(0.025, CAS_S644);
+    println!("S647 pente 1:3 (S644), 2,5 cm : retournement {r:?} ; {n}/{garde}/{sous}");
+    assert_eq!((garde, sous), (n, 0), "critère 2");
+    assert_eq!(r, None, "critère 4 : S₀ > 0,37, pas de déferlement");
+    let (r, hb, crete, n, garde, sous) = deferlement_s647(0.025, CAS_S647);
+    println!("S647 pente 1:12, 2,5 cm : retournement {r:?} ; h_b {hb:.3} m, crête {crete:.3} m, H_b/h_b {:.2} ; {n}/{garde}/{sous}", crete / hb);
+    assert_eq!((garde, sous), (n, 0), "critère 2");
+    let (_, x, ecart) = r.expect("critère 3 : le retournement");
+    assert!(x < 11.696 && ecart >= 1, "critère 3 : avant le rivage au repos, une maille d'air au moins ({x}, {ecart})");
+}

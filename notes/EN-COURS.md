@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S647 — **en cours**. En autonomie vers la v2 ; la campagne du rouleau 3D. **Étape 3 — une onde qui déferle sur la pente**, dans
+Session : S647 — **terminée**. En autonomie vers la v2 ; la campagne du rouleau 3D. **Étape 3 — une onde qui déferle sur la pente**, dans
 APIC 3D, fond en escalier, l'air balistique actif (S645).
 
 **Le jugement : la classification de Grilli, Svendsen et Subramanya (1997)**, vérifiée en ligne : le paramètre de pente
@@ -88,7 +88,10 @@ déferlement, `h_b`, `H_b/h_b`, la maille de 5 cm.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le lecteur et son épreuve ; le déferlement ; (1)–(5).
+- [x] **P2** — le lecteur et son épreuve ; le déferlement ; (1)–(5).
 - [ ] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus : le lecteur (plat : rien ; lèvre : `i` = 27, écart 1) ; masse exacte ; 1:12 plonge (2,5 cm : 2,64 s, 9,99 m,
+  écart 2, avant le rivage à 11,70 m) ; 1:3 ne déferle pas. (5) : `H_b/h_b` 1,33 (5 cm), 1,46 (2,5 cm). Les essais d'onde `#[ignore]`
+  (4 et 23 min) ; le lecteur dans la suite.

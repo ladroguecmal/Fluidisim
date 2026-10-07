@@ -372,8 +372,10 @@ pas recopiée ici (L137).
   solitaire non déferlante monte la pente 1:3 dans APIC 3D — la crête intacte au pied, la remontée à 82 % de Synolakis et 78 % de
   Saint-Venant 2D, sans convergence (critère manqué ; le jet de rive court, A333) ([preuve](validation/REMONTEE-APIC3D-S644.md)) ;
   **S645 — A333 levée** : l'air balistique (le film étiqueté d'air garde sa vitesse) — la remontée à 6 % de Saint-Venant 2D et 98 % de
-  Synolakis à 2,5 cm, convergente ([preuve](validation/JET-DE-RIVE-S645.md)). Manquent une surface fiable en eau mince au rivage au repos,
-  l'air balistique avec la zone des colonnes, le déferlement en 3D, le relais 2D → 3D, le branchement à δ.
+  Synolakis à 2,5 cm, convergente ([preuve](validation/JET-DE-RIVE-S645.md)) ; **S647 — étape 3** : l'onde **plonge** sur une pente 1:12
+  (`S₀` = 0,231) et ne déferle pas sur 1:3 (`S₀` = 1,13), comme la classification de Grilli et al. (1997), aux deux mailles ; le lecteur
+  du retournement éprouvé d'abord ([preuve](validation/DEFERLEMENT-APIC3D-S647.md)). Manquent une surface fiable en eau mince au rivage au
+  repos, l'air balistique avec la zone des colonnes, la forme et la vie du rouleau (jet, poche, retombée), le relais 2D → 3D, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
@@ -410,7 +412,8 @@ pas recopiée ici (L137).
   pas même d'APIC seul ; sur la vague de Chen, ÷ 6 et deux fois plus vite, R35 posée ([§5](validation/BANDE-ETROITE-S413.md)).
   **S415** : le fond qui suit l'écoulement (C6c-3, l'idée de l'utilisateur) — sur un tourbillon enfoui, la vitesse rend l'énergie
   d'APIC seul avec 2,4 à 3 fois moins de particules ; sous une houle, la vitesse relative à B reste à faire ([§6](validation/BANDE-ETROITE-S413.md)).
-  Restent les éclaboussures détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
+  Restent les éclaboussures détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2. **S647** : une vague de plage se retourne dans APIC 3D, là où Grilli et al. (1997) l'annoncent — la première surface non graphe
+  d'une vague de plage dans le cœur ([preuve](validation/DEFERLEMENT-APIC3D-S647.md)).
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *partiel* depuis S542 : la composante horizontale de
   `g_eff` dans le pas linéaire de δ — la surface au repos à 0,003° de la normale à `g_eff`, la période du ballottement à 0,11 % de sa
   formule ; **S543 : la rotation** — la surface cylindrique d'une station tournante à 1,5 % de `1/R` (C16 exécuté :

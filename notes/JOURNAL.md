@@ -1447,3 +1447,10 @@ un document est calculé (S642, S643 : deux comptes de tête faux, rattrapés pa
 connu avant de juger (S644 : la remontée lue par les étiquettes ne voyait pas le film). ADR-259 D1 a servi en S645 (A333 levée).
 Maillons **2**. Suivant : **S647, l'étape 3 du rouleau 3D** (le déferlement sur la pente).
 
+## S647 — 2026-10-07 — le rouleau 3D, étape 3 : l'onde qui plonge sur la pente
+
+**Entrée.** En autonomie vers la v2. **Fait** ([preuve](../docs/validation/DEFERLEMENT-APIC3D-S647.md)) : le lecteur du retournement,
+éprouvé d'abord sur deux cas posés (ADR-263 D2) ; une onde solitaire (`H/d` = 0,3) sur une pente 1:12 dans APIC 3D, l'air balistique
+actif. **Mesuré** : elle **se retourne** avant le rivage (2,64 s, 9,99 m à 2,5 cm ; `S₀` = 0,231, plongeant selon Grilli et al. 1997) ;
+l'onde de S644 (`S₀` = 1,13) ne déferle pas — aux deux mailles ; masse exacte. Maillons **1** (4.14, 4.16 avancent). Suivant : **S648,
+le rouleau : la forme et la vie** (le jet qui retombe, la poche d'air enfermée).
