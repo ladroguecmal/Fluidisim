@@ -81,6 +81,8 @@ pub mod portee;
 pub mod riviere;
 /// S605 — le géoïde dans l'outil de terrain ; le terrain gravé pour le squelette (liste 12.4 ; SPEC-005 §3–4).
 pub mod geoide;
+/// S607 — la grille d'adressage HydroGrid : Morton hiérarchique, zones actives, échanges (liste 1.5 ; ADR-006 §2).
+pub mod hydro_grid;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
