@@ -1322,3 +1322,11 @@ avance). Suivant : **S631**, la revue de méthode.
 **Entrée.** En autonomie ; revue due. **Friction** : un montage employé hors de ses bornes, trois fois (S622, S624, S629) — **élargie** :
 ses bornes s'assertent, d'abord quand il est réemployé (ADR-257 D1, L418). Ont tenu : la tolérance posée sur la sensibilité, l'attribution
 par deux variations. Maillons **1**. Suivant : **S632**, le lot et la physique des partiels.
+
+## S632 — 2026-10-07 — le lot ; le déferlement le long des rayons de houle
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; le lot (feuille de route S629–S631), puis 3.5, la hauteur réfractée par une
+côte courbe. **Fait** ([preuve](../docs/validation/RAYONS-DEFERLEMENT-S632.md)) : `portee::tracer_houle`, `deferlement::sur_rayons`. **Mesuré** :
+sur une côte droite, le déferlement à 1,9 cm → 1,0 mm de l'analytique quand le pas des rayons passe de 2 à ½ s ; autour d'une île, en miroir
+exact, plus au large qu'en incidence normale (233 m contre 214). Bornes du montage assertées (ADR-257 D1, première application). Maillons
+**1** (3.5 avance). Suivant : **S633**.

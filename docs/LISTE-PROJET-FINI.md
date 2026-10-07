@@ -187,8 +187,10 @@ pas recopiée ici (L137).
   levée et réfractée, le flux dissipé en kW/m, la direction de crête, contre des formules indépendantes
   ([preuve](validation/DEFERLEMENT-S588.md)) ; **S630 : une côte quelconque** — marching squares et chaînage ; la côte droite redonne S588,
   une île se referme sur le cercle exact à 1 cm près (maille de 5 m), deux îles donnent deux lignes ([preuve](validation/CONTOURS-S630.md)).
-  Manquent la hauteur réfractée par une côte courbe, le flux et la direction sur le contour, la largeur de la zone, une polyligne par
-  phase de marée, la publication.
+  **S632 : la hauteur réfractée par une côte courbe** — le déferlement le long des rayons de houle dispersifs, à 1 mm de l'analytique sur
+  une côte droite, plus au large autour d'une île ([preuve](validation/RAYONS-DEFERLEMENT-S632.md)). Manquent les caustiques, le
+  chaînage des points de rayons, le flux et la direction sur le contour, la largeur de la zone, une polyligne par phase de marée, la
+  publication.
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
   (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).
   Manquent les caustiques, la diffraction, les ondes courtes (dispersives), le branchement au tsunami (3.4) et l'entrée dans W.

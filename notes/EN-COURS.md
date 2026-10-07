@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S632 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S629–S631), puis **3.5 — la
+Session : S632 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S629–S631), puis **3.5 — la
 hauteur réfractée par une côte courbe** (un manque de S630 : `transformer` suppose des isobathes parallèles).
 
 **Ce que la session fait.** `portee::tracer_houle` (le rayon de houle dispersif de S603, rendu public) ; `deferlement::sur_rayons(a, b, b₀, …)`
@@ -84,7 +84,9 @@ refus : `b₀` non positif, un rayon vide.
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `tracer_houle`, `sur_rayons` et leurs essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.5 ; rituel (`--lot`).
+- [x] **P2** — `tracer_houle`, `sur_rayons` et leurs essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.5 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai. Suite : 817 essais listés.
+- **P3** — preuve RAYONS-DEFERLEMENT-S632 ; ligne 3.5 ; index ; journal ; le lot.
