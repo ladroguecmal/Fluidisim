@@ -2218,6 +2218,104 @@ fn the_plunging_jet_encloses_air_fine_s648() {
 /// gardées, sous le fond, le temps de calcul, s).
 #[allow(clippy::type_complexity)]
 fn relais_s650(dx: f32, x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, f64, usize, usize, usize, f64) {
+    let r = relais_s652(dx, x_r, 4, None);
+    (r.premier, r.apparu, r.ecart, r.entre, r.entre_sv, r.n, r.garde, r.sous, r.temps)
+}
+
+/// **S652 — le relevé du relais** : celui de S650, et la force de l'eau sur le corps.
+#[derive(Debug, Default)]
+struct ReleveS652 {
+    premier: Option<(f64, f64)>,
+    apparu: Option<(f64, f64)>,
+    ecart: f64,
+    entre: f64,
+    entre_sv: f64,
+    n: usize,
+    garde: usize,
+    sous: usize,
+    temps: f64,
+    /// Le pic de `F_x` (N), son instant (s), l'impulsion `∫F_x dt` (N·s).
+    fx_max: f64,
+    t_fx: f64,
+    impulsion: f64,
+    /// La plus grande vitesse horizontale de la sonde (trois mailles avant le corps, à mi-hauteur d'eau au repos), m/s ; le plus grand
+    /// produit `h·u` au corps (m²/s), `h` la colonne d'eau au-dessus de la marche du corps lue sur les étiquettes.
+    u_max: f64,
+    hu_max: f64,
+}
+
+/// **S652 — la force de l'eau sur la sphère** : sur les faces entre une maille du corps (solide, centre dans la sphère) et une maille
+/// d'eau, la pression à la face (extrapolée des deux mailles d'eau) fois `dx²`, dirigée vers le corps. N.
+fn force_corps_s652(a: &Apic3) -> [f64; 3] {
+    let Domain3 { nx, ny, nz, dx } = a.domain();
+    let Some(b) = a.body() else { return [0.; 3] };
+    let (l, p) = (a.labels(), a.pressure());
+    let mut f = [0f64; 3];
+    let surf = (dx * dx) as f64;
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+                let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+                let c = (k * ny + j) * nx + i;
+                if l[c] != SOLID || e[0] * e[0] + e[1] * e[1] + e[2] * e[2] >= b.radius * b.radius {
+                    continue;
+                }
+                // `(voisine existe, voisine, la suivante existe, la suivante, axe, signe)`.
+                let pas = [1isize, nx as isize, (nx * ny) as isize];
+                let pos = [i, j, k];
+                let dims = [nx, ny, nz];
+                for axe in 0..3 {
+                    for (d, signe) in [(-1isize, 1f64), (1, -1.)] {
+                        let (n1, n2) = (pos[axe] as isize + d, pos[axe] as isize + 2 * d);
+                        if n1 < 0 || n1 >= dims[axe] as isize {
+                            continue;
+                        }
+                        let v = (c as isize + d * pas[axe]) as usize;
+                        if l[v] != WATER {
+                            continue;
+                        }
+                        // S652 : la pression **à la face**, extrapolée linéairement des deux mailles d'eau le long de la normale
+                        // (lue au centre de la voisine, elle est une demi-maille trop loin : 1,38 fois Archimède au repos).
+                        let v2 = (c as isize + 2 * d * pas[axe]) as usize;
+                        let pf = if n2 >= 0 && n2 < dims[axe] as isize && l[v2] == WATER {
+                            1.5 * p[v] as f64 - 0.5 * p[v2] as f64
+                        } else {
+                            p[v] as f64
+                        };
+                        f[axe] += signe * pf * surf;
+                    }
+                }
+            }
+        }
+    }
+    f
+}
+
+/// **S652 (1) — l'instrument éprouvé** (ADR-263 D2) : au repos, une sphère immergée reçoit la poussée d'Archimède de ses 32 mailles
+/// (`ρgV` = 39,24 N).
+#[test]
+fn the_body_force_reads_archimedes_at_rest_s652() {
+    let (nx, ny, nz, dx) = (40usize, 8usize, 20usize, 0.05f32);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let (c, r) = ([1.0f32, 0.2, 0.15], 0.1f32);
+    a.set_body(Some(Sphere3 { center: c, radius: r, velocity: [0.; 3] })).unwrap();
+    a.seed(&|p| p[2] < 0.3 && (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) >= r * r).unwrap();
+    let mut f = [0.; 3];
+    for _ in 0..10 {
+        a.step(10_000).unwrap();
+        f = force_corps_s652(&a);
+    }
+    let cellules = a.labels().iter().filter(|l| **l == SOLID).count();
+    let archimede = 1000. * 9.81 * cellules as f64 * (dx as f64).powi(3);
+    println!("S652 instrument : F = ({:.3}, {:.3}, {:.3}) N ; {cellules} mailles, ρgV = {archimede:.3} N ; F_z/ρgV = {:.4}", f[0], f[1], f[2], f[2] / archimede);
+    assert_eq!(cellules, 32, "le corps posé");
+    assert!((f[2] / archimede - 1.).abs() <= 0.15, "critère 1 : F_z");
+    assert!(f[0].abs() <= 0.01 * f[2] && f[1].abs() <= 0.01 * f[2], "critère 1 : F_x, F_y");
+}
+
+/// **S650–S652 — le relais**, et, avec `corps` (centre global en x, y, z ; rayon), une sphère fixe dont la force est relevée.
+fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) -> ReleveS652 {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let horloge = std::time::Instant::now();
     let (d, h, cot, x_pied, niveau, l, lz, duree) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64, 4.0f64);
@@ -2228,7 +2326,7 @@ fn relais_s650(dx: f32, x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f6
     sv.domaine.regler_ordre_deux(1e-16).unwrap();
     let i_r = (x_r / dxs).round() as usize;
     // APIC 3D sur [x_r ; l].
-    let (nx, ny, nz) = (((l - x_r) / dxs).round() as usize, 4usize, (lz / dxs).round() as usize);
+    let (nx, ny, nz) = (((l - x_r) / dxs).round() as usize, ny_in, (lz / dxs).round() as usize);
     let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
     let xg = |i: f64| x_r + (i + 0.5) * dxs;
     let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - x_pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
@@ -2249,10 +2347,16 @@ fn relais_s650(dx: f32, x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f6
     a.set_grid_velocities(&u, &v, &w).unwrap();
     let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
     let m2 = marche.clone();
+    let corps_local = corps.map(|(c, r)| ([c[0] - x_r as f32, c[1], c[2]], r));
+    if let Some((c, r)) = corps_local {
+        a.set_body(Some(Sphere3 { center: c, radius: r, velocity: [0.; 3] })).unwrap();
+    }
+    let hors_corps = move |p: [f32; 3]| corps_local.is_none_or(|(c, r)| (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) >= r * r);
     let n = a.seed(&|p| {
         let i = ((p[0] / dx) as usize).min(nx - 1);
-        i >= n_col && p[2] > m2[i] && p[2] < niveau + onde.eta(x_r + p[0] as f64) as f32
+        i >= n_col && p[2] > m2[i] && p[2] < niveau + onde.eta(x_r + p[0] as f64) as f32 && hors_corps(p)
     }).unwrap();
+    let mut releve = ReleveS652::default();
     a.set_particle_velocities(&|p| {
         let x = x_r + p[0] as f64;
         ([if x < x_pied { onde.u(x) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])
@@ -2282,6 +2386,25 @@ fn relais_s650(dx: f32, x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f6
         let col = a.columns.as_ref().unwrap();
         entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
         let ts = t as f64 * 1e-6;
+        if let Some((c, r)) = corps_local {
+            let f = force_corps_s652(&a);
+            releve.impulsion += f[0] * us as f64 * 1e-6;
+            if f[0] > releve.fx_max {
+                (releve.fx_max, releve.t_fx) = (f[0], ts);
+            }
+            // La sonde : trois mailles avant le corps, à mi-hauteur d'eau au repos, la rangée du centre du corps.
+            let ib = ((c[0] - r) / dx) as usize;
+            let is = ib.saturating_sub(3);
+            let js = ((c[1] / dx) as usize).min(ny - 1);
+            let zs = 0.5 * (marche[is] + niveau);
+            let ks = ((zs / dx) as usize).min(nz - 1);
+            let uf = a.velocity_u()[(ks * ny + js) * (nx + 1) + is] as f64;
+            releve.u_max = releve.u_max.max(uf.abs());
+            // `h·u` au corps : la colonne d'eau au-dessus de la marche, lue sur les étiquettes, à la sonde.
+            let k0 = (marche[is] / dx).round() as usize;
+            let hcol = (k0..nz).take_while(|&k| a.labels()[(k * ny + js) * nx + is] == WATER).count() as f64 * dxs;
+            releve.hu_max = releve.hu_max.max(hcol * uf.abs());
+        }
         if premier.is_none() {
             if let Some((i, _)) = retournement_s647(&a, ny / 2, &marche) {
                 if i >= n_col {
@@ -2298,7 +2421,25 @@ fn relais_s650(dx: f32, x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f6
     }
     let ecart = (a.total_volume() - v0 - entre) / v0;
     let sous = a.particles().iter().filter(|p| p[2] < a.seabed_height(((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1))).count();
-    (premier, apparu, ecart, entre, entre_sv, n, a.particle_count(), sous, horloge.elapsed().as_secs_f64())
+    ReleveS652 { premier, apparu, ecart, entre, entre_sv, n, garde: a.particle_count(), sous, temps: horloge.elapsed().as_secs_f64(), ..releve }
+}
+
+/// **S652** — (2)–(4) : le relais de S650 élargi à 8 mailles, une sphère `r` = 0,1 m fixe à x = 10,4 m, centre à z = 0,5 m (posée sur sa
+/// marche de 0,40 m, à demi immergée au repos).
+#[test]
+#[ignore = "≈ 6 min : le rouleau sur un corps de S652 à 5 cm"]
+fn the_plunging_roller_pushes_a_body_s652() {
+    let r = relais_s652(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)));
+    let a = std::f64::consts::PI * 0.1 * 0.1;
+    let cd = r.fx_max / (0.5 * 1000. * a * r.u_max * r.u_max);
+    println!("S652 : retournement {:?}, air {:?} ; F_x max {:.2} N à {:.3} s, impulsion {:.3} N·s ; sonde u_max {:.3} m/s ; C_d effectif {cd:.2} ; h·u max {:.4} m²/s ; volume {:+.1e} ; {}/{}/{} ; {:.0} s",
+        r.premier, r.apparu, r.fx_max, r.t_fx, r.impulsion, r.u_max, r.hu_max, r.ecart, r.n, r.garde, r.sous, r.temps);
+    println!("S652 nature ×20 (Froude) : F_x max {:.0} N ({:.0} kgf), h·u {:.2} m²/s (ADR-018 : 1 m²/s emporte un adulte)",
+        r.fx_max * 8000., r.fx_max * 8000. / 9.81, r.hu_max * 20f64.powf(1.5));
+    assert!(r.ecart.abs() <= 1e-6, "critère 3");
+    let (t0, _) = r.premier.expect("le retournement");
+    assert!(r.t_fx > t0 && r.t_fx - t0 <= 1.0, "critère 2 : le pic après le retournement");
+    assert!((0.5..=3.0).contains(&cd), "critère 2 : C_d {cd}");
 }
 
 /// **S650** — (1)–(4) à 5 cm, contre le tout-3D de S647–S648 (retournement 2,571 s, 9,675 m ; air enfermé 2,872 s, 10,525 m).

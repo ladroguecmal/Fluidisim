@@ -87,3 +87,7 @@ forces ×8 000), la force, et le produit `h·u` au corps contre la règle d'ADR-
 - [ ] **P3** — preuve ; liste 6.7, 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 en cours (interrompu : limite d'usage)** — l'instrument de force construit ; son épreuve (critère 1) a d'abord lu 1,38 × Archimède
+  (la pression au centre de la voisine, une demi-maille hors de la face) ; corrigé avant toute mesure du rouleau (la pression extrapolée à
+  la face) : **1,1285 × Archimède, `F_x`, `F_y` nuls — critère 1 tenu** (≤ 15 %). Reste : lancer `the_plunging_roller_pushes_a_body_s652`
+  (`--ignored`, ≈ 6 min, sur une copie du binaire, ADR-265 D1), puis la preuve, 6.7, le rituel.
