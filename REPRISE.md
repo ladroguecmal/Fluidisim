@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 13:27 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 13:29 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S644 — le rouleau 3D, étape 2 : la vague qui monte la pente dans APIC 3D ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S643 — la réévaluation des intentions fondatrices ([journal](notes/JOURNAL.md)). Avant : S642 (les corrections de l'audit)
 Session suivante : **S644 — le rouleau 3D, étape 2** : une vague non déferlante qui monte la pente dans APIC 3D (le fond en escalier de S639, 1,5 cm/s de frémissement au rivage), jugée contre Synolakis et Saint-Venant 2D ; puis l'étude du découpage de la planète (ADR-261 D2).
 Maillons        : 3

@@ -62,23 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S643 — **terminée**. Sur la demande de l'utilisateur ([ADR-261](../docs/adr/ADR-261-reponses-du-2026-10-07.md) D3 : *« toutes
-les anciennes intentions doivent être jugées dépassées ou non, de meilleure solution […] l'objectif reste le même d'une performance et
-réalisme insane »*). **La réévaluation des intentions fondatrices** : chaque section des deux documents sources
-(`systeme_eau_architecture_globale`, §1–§20 ; `zones_ouvertes`, §2–§32) jugée — **gardée**, **dépassée**, ou **remplacée par une meilleure
-solution** —, avec la trace actuelle et la conséquence.
+Session : S644 — **en cours**. En autonomie ; la campagne du rouleau 3D (acceptée le 2026-10-07). **Étape 2 — une vague non déferlante qui
+monte la pente dans APIC 3D**, sur le fond en escalier de S639 (au rivage, 1,5 cm/s de frémissement ; les faces coupées de S640 y sont pires).
 
-**Critères, écrits avant.** (1) Le registre `REEVALUATION-INTENTIONS-S643` couvre chaque section des deux sources (aucune omise : compté) ;
-(2) chaque verdict « dépassée » ou « meilleure solution » nomme ce qui remplace et où cela vit (point, ADR) ; (3) ce qui en découle est
-versé : points ajoutés ou reformulés, `etat_projet --check` à zéro ; (4) ce qui change un critère de jugement du projet passe par un ADR.
+**Ce que la session fait.** Une onde solitaire posée dans APIC 3D (l'élévation `H·sech²(γ(x − x₁))`, la vitesse `c·η/(d + η)` sur toute
+la colonne), sur un canal de largeur quatre mailles : fond plat à 0.05 m puis pente 1:3 depuis le pied ; la remontée lue comme
+la plus haute marche dont la première maille au-dessus est d'eau (`labels`), la rangée médiane, comme `Plage::cote_mouillee` de S614.
+Jugée contre la loi de Synolakis (1987) et contre Saint-Venant 2D (S613, ordre deux de S620) sur la même plage, à la même maille.
+
+**Références, calculées avant** (ce script). `d` = 0.35 m, `H` = 0.07 m (`H/d` = 0.2), pente 1:3 : **R = 0.2295 m** (Synolakis) ;
+`γ` = 1.1066 m⁻¹ ; l'onde à la distance canonique `arccosh(√20)/γ` = 1.968 m du pied, centrée à 2.8 m (pied à 4.768 m) ;
+`c` = 2.030 m/s. **Non déferlante** : `H/d` < 0,818·cot^(−10/9) = 0.241 (asserté). **Bornes** (ADR-257 D1, assertées) : la queue
+de l'onde au mur gauche < 1 % de `H` (5.7e-04) ; la remontée sous le couvercle et dans le domaine (6,6 m × 0,8 m) ; aucune égalité
+entre un centre de maille et le fond, aux deux mailles.
+
+**Quantum** : la marche, `dx/3` en hauteur (0,83 cm à 2,5 cm). **Critères, écrits avant.** (1) les particules gardées, aucune sous le fond ;
+(2) **à 2,5 cm, la remontée d'APIC à 20 % de Synolakis**, et à 20 % de Saint-Venant 2D à la même maille ; (3) les deux mailles (5 et
+2,5 cm) rapportées — l'écart attribué seulement après elles (ADR-256 D2) ; un écart à la maille fine qui ne baisse pas se localise par un
+témoin qui supprime une cause (ADR-259 D1) ; (4) le rouleau (étape 3) n'est pas demandé : la vague ne doit pas déferler — vérifié à l'œil
+sur la surface (aucune particule détachée au-dessus du front de plus d'une maille).
 
 ### Plan
 
-- [x] **P1** — jeton ; plan ; les deux sources relues en entier.
-- [x] **P2** — le registre ; l'ADR ; la liste.
-- [x] **P3** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — l'essai (5 cm dans la suite, 2,5 cm `#[ignore]`) ; (1)–(4).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) le registre couvre les 20 + 32 sections (34 + 31 lignes, recomptées par script) : garder 28 + 23, meilleure solution
-  6 + 4, dépassée 0 + 4 ; (2) chaque remplacement nommé ; (3) 2.11 ajouté (134 points), 1.5, 2.6, 2.7, 4.4, 9.1, 9.11 précisés ; (4)
-  ADR-262 — indiscernable du réel, au budget ; le budget, un plafond ; l'activation sur l'erreur visible ; aucun plafond arbitraire.
