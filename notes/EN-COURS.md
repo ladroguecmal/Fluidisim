@@ -62,15 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S586 — **terminée**. En autonomie, **la vingt et unième revue de méthode** (ADR-222 D4 ; S581–S585).
+Session : S587 — **en cours**. En autonomie (ADR-247 : la physique d'abord, les absents) : **le lot** (dû ; feuille de route S584–S586),
+puis **3.3 — les explosions de surface et sous-marines** (absent ; ADR-001 : les ondes d'explosion sont de W). Première pièce : **la bulle
+d'une explosion sous-marine**.
 
-**Ce que la session fait.** Relu : S581 (la revue), S582 (le tsunami ; un seuil sous quantum relevé avant), S583 (la réfraction ; une paire
-hors famille), S584 (le rayon courbe ; un critère par construction), S585 (la v2, ADR-247). **ADR-248** : D1, D2 ; L406, L407 ; METHODE ;
-BOUSSOLE ; index.
+**Ce que la session fait.** `explosion.rs` : l'énergie de la bulle (une fraction de l'énergie de la charge — un paramètre d'auteur, 0,4
+pour le TNT à 4,184 MJ/kg), le rayon maximal à l'équilibre d'énergie `E_b = (4/3)·π·R³·p` (`p = p_atm + ρ·g·d`), la période du premier
+battement `T = 2·t_c`, `t_c = 0,914681·R·√(ρ/p)` (l'effondrement de Rayleigh d'une cavité vide). Les lois d'échelle en découlent :
+`R ∝ (W/p)^(1/3)`, `T ∝ W^(1/3)·p^(−5/6)` (la forme de Willis). Ne fait pas : les battements suivants (les pertes), la migration de la
+bulle vers la surface, l'onde de choc, les ondes de surface et la gerbe (la suite de 3.3), l'entrée dans W.
+
+**Références, calculées avant** (ce script les écrit). La constante de Rayleigh par une intégration RK4 indépendante de `R·R̈ + 1,5·Ṙ² =
+−Δp/ρ` : **0.914780** (pas 10⁻⁵) et **0.914730** (pas 5·10⁻⁶) ; la forme fermée `√(3π/2)·Γ(5/6)/Γ(1/3)` = **0.914681**. Une charge
+de 1 kg à 20 m : **`R_max` = 1.09727 m, `T` = 0.116859 s** ; 8 kg : `T` ×**2.000000** ; à 60 m : `T` ×**0.494176** (= `(p₆₀/p₂₀)^(−5/6)`
+= 0.494176).
+
+**Quantum** (ADR-236 D1) : f64 ; la constante gardée à 10⁻⁶ (sa forme fermée). **Critères, écrits avant.** (1) `R_max` et `T` à 10⁻⁹
+relatif de ces valeurs ; (2) les lois d'échelle à 10⁻¹² relatif (indépendantes de la constante) ; (3) refus : masse, profondeur ou
+fraction non positives.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-248, METHODE, L406, L407, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; le lot ; plan.
+- [ ] **P2** — `explosion.rs` et ses essais ; (1)–(3).
+- [ ] **P3** — preuve ; liste 3.3 ; rituel (`--lot`).
 
 ### Notes de reprise
