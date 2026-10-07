@@ -62,16 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S626 — **terminée**. En autonomie : **le lot** (feuille de route S623–S625) et **la vingt-neuvième revue de méthode** (ADR-222
-D4 ; S621–S625).
+Session : S627 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **4.14, côté déferlement** : en eau peu profonde, une vague
+brisée est un ressaut mobile ; Saint-Venant le porte comme un choc. Cette session juge la capture des chocs de l'ordre deux (S620) sur deux
+ruptures de barrage analytiques — **Stoker** (fond mouillé, un ressaut) et **Ritter** (fond sec : C04, jusqu'ici en 1D seulement, porté en
+2D).
 
-**Ce que la session fait.** Relu : S621 (la revue), S622 (11.3 : un critère manqué, des montages qui n'isolaient pas le bord), S623 (la
-graine), S624 (la chaîne : une durée trop courte), S625 (Keller & Keller). **ADR-256** : D1, D2 ; L416, L417 ; METHODE (trente-six règles) ;
-BOUSSOLE ; index ; feuille de route.
+**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai, une bande de trois mailles, 100 m, le barrage à 50 m, 1 m d'eau à
+gauche, 0,5 m (Stoker) ou rien (Ritter) à droite ; t = 6 s ; l'écart L1 de `h` aux solutions exactes, mailles 0,5 / 0,25 / 0,125 m. Ne fait
+pas : le déferlement d'une houle sur une pente (le passage du front lisse au ressaut), le rouleau 3D.
+
+**Références, calculées avant** (`s627_ref.py`, numpy). Stoker : l'état intermédiaire `h_m` = 0.726920446 m, `u_m` = 0.923363902 m/s, le
+ressaut à **2.957918120 m/s**. Écart L1 — Stoker : **3.672946492e-03, 1.734845787e-03, 8.606719835e-04** (rapports 2.117, 2.016) ;
+Ritter : **6.745603398e-03, 3.375485355e-03, 1.693812017e-03** (1.998, 1.993) — l'ordre un, attendu aux chocs et au front sec. Le
+front de Ritter au millimètre : 79.75, 81.625, 83.0625 m pour **85.802285 m** exact — il s'en approche lentement (6.052, 4.177,
+2.740 m). Masse exacte, `h ≥ 0`. **Sensibilité** (ADR-256 D1 : `h` gauche perturbée d'un ulp) : au plus 8.8e-17 sur l'écart L1.
+
+**Quantum** : f64 ; la tolérance d'accord avec numpy, **10⁻¹²**, au moins dix fois la sensibilité mesurée (asserté). **Critères, écrits avant.**
+(1) les six écarts L1 égaux aux références à 10⁻¹², les trois fronts égaux ; (2) chaque raffinement divise l'écart L1 par au moins 1,9 ; (3) le
+front sec s'approche de sa position exacte, la distance divisée par au moins 1,3 à chaque raffinement ; (4) masse à 10⁻¹³, `h ≥ 0`.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; la revue (ADR-256, METHODE, L416–L417, BOUSSOLE, index).
-- [x] **P2** — rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
