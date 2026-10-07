@@ -466,6 +466,9 @@ calculé, un instrument s'éprouve avant de juger) ; le rouleau 3D, étape 3 —
 grilles locales pour le calcul) ; le relais 2D → 3D (Saint-Venant au large, APIC 3D sur la pente, la masse au bit).
 **S651–S653** : la trente-quatrième revue (ADR-265 : les longs calculs sur une copie du binaire) ; la force du rouleau sur un corps (A334 :
 un choc de deux pas) ; le corps libre que le rouleau emporte (6.7 ; trop vite, A334).
+**S654–S656** : A334 réattribuée (le couplage explicite, non la force) ; la masse ajoutée implicite du corps libre (la flottaison amortie, la
+vitesse ramenée) ; la trente-cinquième revue — les erreurs relevées à la demande de l'utilisateur, les contrôles du plan exigés par le
+rituel (ADR-266).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
