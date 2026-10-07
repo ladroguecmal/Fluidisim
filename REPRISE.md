@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 03:01 +02:00
+JETON            : libre
+Battement        : 2026-10-07 03:09 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S592 — 2.5, les canaux : la loi de Manning dans V ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S591 — la vingt-deuxième revue de méthode (ADR-249) ([journal](notes/JOURNAL.md)). Avant : S590 (le lot)
-Session suivante : **S592 — un point absent** (ADR-247 ; restent 26). Le script du plan refuse un seuil sous son quantum (ADR-249 D1). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S591 : la vingt-deuxième revue (ADR-249)
+Session en cours : aucune
+Dernière session : S592 — un canal dans V : la loi de Manning ([journal](notes/JOURNAL.md)). Avant : S591 (la vingt-deuxième revue de méthode)
+Session suivante : **S593 — le lot** (dû en S593) **et un point absent** (2.4, les rivières, sur la loi de Manning : un lit en pente variable, la ligne d'eau). Revue à S596. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S592 : 2.5 absent → partiel
 Registres       : dernier lot S590 (ADR-213 D3) ; le prochain au plus tard en S593
 ```
 

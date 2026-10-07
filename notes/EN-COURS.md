@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S592 — **en cours**. En autonomie (ADR-247), **2.5 — les canaux** (absent) ; la base de 2.4 (les rivières).
+Session : S592 — **terminée**. En autonomie (ADR-247), **2.5 — les canaux** (absent) ; la base de 2.4 (les rivières).
 
 **Ce que la session fait.** Une loi d'arête de V : **`Flow::Manning { width_mm, length_mm, roughness_e6, outlet_slope_e6 }`** — un bief de
 canal rectangulaire entre deux nœuds : `Q = (1/n)·A·R^(2/3)·√S_f`, `A = b·ȳ`, `R = A/(b + 2ȳ)`, la profondeur moyenne `ȳ` des deux côtés au
@@ -86,7 +86,10 @@ entière inchangée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la loi, l'instantané, l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 2.5 ; rituel.
+- [x] **P2** — la loi, l'instantané, l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 2.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — dix biefs à 0,70611 m (y_n 0,706106) ; 5,00000 m³/s ; bilan exact ; instantané au bit ; suite 766.
+- **P3** — preuve CANAL-MANNING-S592 ; liste 2.5 (absent → partiel) et décompte ; index ; journal.
+

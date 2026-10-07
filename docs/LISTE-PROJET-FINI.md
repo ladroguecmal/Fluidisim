@@ -119,7 +119,9 @@ pas recopiée ici (L137).
   ([preuve](validation/LAC-BILAN-S590.md)). Manquent la surface du lac dans B (ses vagues de vent), les courants faibles, les apports par
   une rivière, les seiches.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
-- [ ] **2.5 Canaux** — *absent*.
+- [ ] **2.5 Canaux** — *partiel* depuis S592 : **la loi de Manning dans V** (`Flow::Manning`) — un canal de dix biefs trouve sa hauteur
+  normale (0,70611 m pour 0,706106), le débit à 5,00000 m³/s, le bilan au millilitre, l'instantané au bit
+  ([preuve](validation/CANAL-MANNING-S592.md)). Manquent les ouvrages (écluses), le remous, le régime torrentiel et le ressaut, le rendu.
 - [ ] **2.6 Courants macroscopiques à niveau de détail propre**, du vecteur au champ 3D — *partiel* depuis S513 (conçu par ADR-011) : les
   niveaux **C0** (le vecteur de surface) et **C2** (le profil vertical) derrière la requête de l'eau (`CurrentWater`) — les vagues advectées
   (la période de rencontre exacte, `λ/(c + U)`), le profil exact, un corps traîné qui dérive à 0,4 % de l'analytique
@@ -841,7 +843,7 @@ pas recopiée ici (L137).
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
-| 2. Grandes masses (B) | 9 | 0 | 6 | 3 |
+| 2. Grandes masses (B) | 9 | 0 | 7 | 2 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
@@ -853,7 +855,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **85** | **26** |
+| **total** | **121** | **10** | **86** | **25** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

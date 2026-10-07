@@ -1022,3 +1022,10 @@ Suivant : **S591, la vingt-deuxième revue de méthode**.
 **Entrée.** En autonomie ; revue due. **Friction** : un seuil sous son quantum imprimé par le script du plan et non lu (S582, S589) —
 **rendu exécutoire** : le script refuse un rapport sous 10 avant d'écrire (ADR-249 D1, L408) ; un paramètre décimal pour une loi entière
 (S590) — **élargie** (D2). Ont tenu : les formules indépendantes des plans. Maillons **1**. Suivant : **S592**, un point absent.
+
+## S592 — 2026-10-07 — un canal dans V : la loi de Manning
+
+**Entrée.** En autonomie (ADR-247) ; 2.5 (absent). **Fait** ([preuve](../docs/validation/CANAL-MANNING-S592.md)) : `Flow::Manning`, un bief
+de canal (validation, instantané, empreinte). **Mesuré** : un canal de dix biefs trouve sa hauteur normale au dixième de millimètre, le
+débit partout à 5,00000 m³/s, le bilan au millilitre, l'instantané au bit. Le script du plan a vérifié ses rapports seuil/quantum (ADR-249
+D1). Maillons **1** (2.5 : absent → partiel). Suivant : **S593**, le lot (dû) et un point absent (2.4, les rivières, sur cette loi).
