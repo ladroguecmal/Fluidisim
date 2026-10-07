@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 03:34 +02:00
+JETON            : libre
+Battement        : 2026-10-07 03:39 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S597 — 7.3, le nuage de microbulles ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S596 — la vingt-troisième revue de méthode (ADR-250) ; le lot ([journal](notes/JOURNAL.md)). Avant : S595 (le vol d'une goutte)
-Session suivante : **S597 — un point absent** (ADR-247 ; restent 22). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S596 : la vingt-troisième revue (ADR-250)
+Session en cours : aucune
+Dernière session : S597 — le nuage de microbulles ([journal](notes/JOURNAL.md)). Avant : S596 (la vingt-troisième revue de méthode)
+Session suivante : **S598 — un point absent** (ADR-247 ; restent 21). Revue à S601. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S597 : 7.3 absent → partiel
 Registres       : dernier lot S596 (ADR-213 D3) ; le prochain au plus tard en S599
 ```
 

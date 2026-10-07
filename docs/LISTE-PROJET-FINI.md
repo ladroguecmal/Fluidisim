@@ -568,7 +568,9 @@ pas recopiée ici (L137).
 - [ ] **7.2 Spray, embruns, gouttelettes** — *partiel* depuis S595 : **la goutte** — la traînée de Schiller–Naumann, la vitesse terminale
   (10 µm : 1,2 cm/s ; 1 mm : 6,96 m/s), le vol et la chute, contre un code indépendant ([preuve](validation/GOUTTE-S595.md)). Manquent
   l'émission (le déferlement, les gerbes), le vent, l'évaporation, la déformation des grosses gouttes, le rendu.
-- [ ] **7.3 Microbulles visuelles** — *absent*.
+- [ ] **7.3 Microbulles visuelles** — *partiel* depuis S597 : **le nuage de microbulles** — la remontée par classes (Tomiyama),
+  l'épaisseur optique et l'opacité, contre 30 000 bulles intégrées une à une (2·10⁻⁴ ; [preuve](validation/MICROBULLES-S597.md)). Manquent
+  la dissolution, l'émission par le déferlement et les impacts, la turbulence, le rendu.
 - [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *partiel* depuis S479 (**S540 : C13 passe** — les petites
   bulles de 0,1 à 5 mm à −6 à −9 % de SPEC-002 §2, selon `−g_eff` ; [preuve](validation/C13-BULLES-S540.md)) : l'air enfermé en poches
   adiabatiques dans la référence APIC 3D, inconnues de la projection ; une bulle oscille à la fréquence de Minnaert (× 1,02) et
@@ -858,14 +860,14 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
-| 7. Secondaires | 8 | 0 | 6 | 2 |
+| 7. Secondaires | 8 | 0 | 7 | 1 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **89** | **22** |
+| **total** | **121** | **10** | **90** | **21** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

@@ -1057,3 +1057,10 @@ Maillons **1** (7.2 : absent → partiel). Suivant : **S596, la vingt-troisième
 **Entrée.** En autonomie ; revue et lot dus. **Friction** : une propriété d'ensemble jugée sur un seul tirage (S594) — **élargie** : un
 ensemble dont la taille est calculée au plan (ADR-250 D1, L409). Un essai de 65 s (S593) : rien à changer sous le plafond. A tenu :
 ADR-249 D1. Le lot : feuille de route S593–S596. Maillons **1**. Suivant : **S597**, un point absent.
+
+## S597 — 2026-10-07 — le nuage de microbulles
+
+**Entrée.** En autonomie (ADR-247) ; 7.3 (absent). **La taille d'ensemble calculée au plan** (ADR-250 D1). **Fait**
+([preuve](../docs/validation/MICROBULLES-S597.md)) : `microbulles.rs` — la remontée par classes, l'épaisseur optique, l'opacité. **Mesuré** :
+la fraction restante de trois classes à 2·10⁻⁴ de 30 000 bulles intégrées une à une. Maillons **1** (7.3 : absent → partiel). Suivant :
+**S598**, un point absent.

@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Le nuage de microbulles — S597](validation/MICROBULLES-S597.md) : la remontée par classes, l'épaisseur optique, l'opacité.
 - [Le vol d'une goutte — S595](validation/GOUTTE-S595.md) : Schiller–Naumann, la vitesse terminale, la chute.
 - [Les régions de mer par descripteur — S594](validation/REGIONS-S594.md) : les paramètres mélangés gardent la mer, les champs mélangés la calment (I-09).
 - [La ligne d'eau d'une rivière et son remous — S593](validation/RIVIERE-REMOUS-S593.md) : le remous derrière un seuil à 0,014 mm ; la vitesse de chaque bief.

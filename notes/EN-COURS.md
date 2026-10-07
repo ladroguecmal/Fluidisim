@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S597 — **en cours**. En autonomie (ADR-247), **7.3 — les microbulles visuelles** (absent).
+Session : S597 — **terminée**. En autonomie (ADR-247), **7.3 — les microbulles visuelles** (absent).
 
 **Ce que la session fait.** `microbulles.rs` : un **nuage** laissé par un déferlement — des classes de diamètre, `N` bulles par m² chacune,
 réparties uniformément sur une profondeur `D` ; chaque classe remonte à sa vitesse terminale (`bulle::vitesse_terminale`, Tomiyama, S540) ;
@@ -82,7 +82,10 @@ une à une par `Bulle::pas` (le transitoire et la traînée implicite) ; l'écar
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `microbulles.rs` et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 7.3 ; rituel.
+- [x] **P2** — `microbulles.rs` et ses essais ; (1)–(3).
+- [x] **P3** — preuve ; liste 7.3 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — 12 fractions à 2·10⁻⁴ ; τ(0) ; l'opacité décroissante ; refus. Suite 772.
+- **P3** — preuve MICROBULLES-S597 ; liste 7.3 (absent → partiel) et décompte ; index ; journal.
+
