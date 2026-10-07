@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S627 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **4.14, côté déferlement** : en eau peu profonde, une vague
+Session : S627 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **4.14, côté déferlement** : en eau peu profonde, une vague
 brisée est un ressaut mobile ; Saint-Venant le porte comme un choc. Cette session juge la capture des chocs de l'ordre deux (S620) sur deux
 ruptures de barrage analytiques — **Stoker** (fond mouillé, un ressaut) et **Ritter** (fond sec : C04, jusqu'ici en 1D seulement, porté en
 2D).
@@ -84,7 +84,9 @@ front sec s'approche de sa position exacte, la distance divisée par au moins 1,
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P2** — l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(4) tenus du premier essai, à 10⁻¹⁷ de numpy. Suite : 813 essais listés.
+- **P3** — preuve BARRAGES-S627 ; ligne 4.14 ; index ; journal.

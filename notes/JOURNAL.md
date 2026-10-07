@@ -1286,3 +1286,10 @@ relancé à 9 h 25 pour 14 h (jusqu'à 23 h 25). Maillons **1** (4.14 avance). S
 du limiteur (S622, critère manqué) — **élargie** (ADR-256 D1, L416) ; des montages qui n'isolaient pas la propriété (S622) — **ajoutée** (D2,
 L417). Ont tenu : la tolérance de S625 posée en connaissance de cause, la graine, la chaîne. Maillons **1**. Suivant : **S627**, la physique
 des partiels.
+
+## S627 — 2026-10-07 — le ressaut mobile et le front sec : Stoker et Ritter en 2D
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; 4.14, côté déferlement. **Fait** ([preuve](../docs/validation/BARRAGES-S627.md)) :
+un essai de deux ruptures de barrage analytiques sur l'ordre deux. **Mesuré** : Stoker et Ritter convergent à l'ordre un attendu aux chocs
+(3,7·10⁻³ → 8,6·10⁻⁴ ; 6,7·10⁻³ → 1,7·10⁻³), le front sec s'approche de sa position exacte ; la tolérance d'accord avec numpy posée sur la
+sensibilité mesurée (ADR-256 D1, première application). Maillons **1** (4.14 avance ; C04 en 2D). Suivant : **S628**.
