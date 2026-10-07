@@ -806,6 +806,10 @@ mod tests_seuil;
 #[path = "tests_charge.rs"]
 mod tests_charge;
 
+#[cfg(test)]
+#[path = "tests_lac.rs"]
+mod tests_lac;
+
 
 /// **S515 — la taille d'une loi de S515** pour la validation (négative : refusée) — partagée par le pas et l'instantané (L137).
 pub(crate) fn law_size(flow: &Flow) -> i64 {
