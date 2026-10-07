@@ -828,7 +828,10 @@ pas recopiée ici (L137).
 - [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *partiel* depuis S599 : **la bibliothèque d'une plage** — seize états en `f16`
   (1 228 800 octets, la taille de SPEC-005), la polyligne de chacun, la recherche par paramètres (I-09), l'empreinte qui dit l'obsolescence
   ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles.
-- [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *absent*. **Depuis S476**
+- [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *partiel* depuis S605 : le géoïde dans l'outil (le plan tangent d'une ancre ↔ l'altitude, sans
+  perte au rayon de la planète ; la table de SPEC-005 §4), le terrain gravé pour le squelette — l'étape 2 de l'ordre imposé, les biefs
+  jamais modifiés ; un lit à 30 km placé à 10⁻¹⁴ m, là où un outil à plan tangent le mettrait 70,7 m trop haut
+  ([preuve](validation/GEOIDE-S605.md)). Manquent l'anomalie et la marée du niveau moyen, la côte du squelette, l'étape 3. **Depuis S476**
   (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite.
 - [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *partiel* depuis S603 : **la bathymétrie** — l'isobathe
   limite `h = λ` (ADR-196 D3), le faisceau de rayons de houle (dispersion complète), les plages à recuire : aucune sous l'isobathe limite
@@ -885,9 +888,9 @@ pas recopiée ici (L137).
 | 9. Activation et budget | 13 | 1 | 10 | 2 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
-| 12. Outillage | 5 | 0 | 4 | 1 |
+| 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **97** | **14** |
+| **total** | **121** | **10** | **98** | **13** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

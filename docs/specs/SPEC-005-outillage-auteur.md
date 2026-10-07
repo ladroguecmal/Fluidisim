@@ -99,6 +99,9 @@ Un artiste qui place une plage à 30 km de l'ancre de sa région dans un outil �
 place **70 mètres au-dessus ou au-dessous** du niveau de la mer. À 10 km, l'erreur dépasse déjà la
 hauteur d'un immeuble ; à 3 km, elle dépasse le marnage.
 
+> **Note du 2026-10-07 (S605).** Pour `R` = 6 371 km, l'écart à 30 km vaut **70,63 m** (70,7 dans la table : un arrondi) ; la
+> conclusion ne change pas. Calculé par `geoide::Geoide::ecart_plan_tangent` ([preuve](../validation/GEOIDE-S605.md)).
+
 **Décision.** L'outil de terrain affiche et applique le géoïde. Le « zéro » d'une scène n'est pas
 une altitude mais une **distance au centre de la planète**. C'est une modification du référentiel
 de l'outil, pas un réglage — d'où l'urgence de la porter à l'équipe terrain avant qu'un mètre carré

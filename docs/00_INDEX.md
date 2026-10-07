@@ -160,6 +160,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le courant derrière la requête de l'eau — S513](validation/COURANT-S513.md) : C0 et C2 d'ADR-011, les vagues advectées, un corps qui dérive ; listes 2.6 (partiel) et 6.2.
 - [L'acteur poussé, renversé ou déplacé par l'eau — S514](validation/ACTEUR-S514.md) : ADR-018 (profondeur, emportement), le nageur commandé d'ADR-023 §3 ; liste 6.7 (partiel).
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
+- [Le géoïde dans l'outil de terrain — S605](validation/GEOIDE-S605.md) : le plan tangent ↔ l'altitude ; le terrain gravé pour le squelette.
 - [L'éditeur de rivières, son cœur — S604](validation/RIVIERE-S604.md) : le profil de Manning, la validation bloquante, la gravure.
 - [La portée d'une modification de bathymétrie — S603](validation/PORTEE-S603.md) : l'isobathe h = λ ; les plages à recuire.
 - [Les paliers de confiance des objets contrôlables — S602](validation/CONFIANCE-S602.md) : la confiance réduite par le jeu ; l'horizon d'ADR-013.

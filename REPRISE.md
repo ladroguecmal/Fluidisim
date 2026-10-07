@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 04:36 +02:00
+JETON            : libre
+Battement        : 2026-10-07 04:43 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S605 — 12.4, l'eau en amont du terrain, le géoïde dans l'outil ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S604 — l'éditeur de rivières, son cœur ([journal](notes/JOURNAL.md)). Avant : S603 (la portée d'une modification de bathymétrie)
-Session suivante : **S605 — un point absent** (ADR-247 ; restent 14). Revue à S606. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S604 : 12.2 absent → partiel
-Registres       : dernier lot S602 (ADR-213 D3) ; le prochain au plus tard en S605
+Session en cours : aucune
+Dernière session : S605 — le géoïde dans l'outil de terrain ([journal](notes/JOURNAL.md))
+Session suivante : **S606 — la vingt-cinquième revue de méthode** (ADR-222 D4 ; S601–S605), puis un point absent (ADR-247 ; restent 13). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S605 : 12.4 absent → partiel
+Registres       : dernier lot S605 (ADR-213 D3) ; le prochain au plus tard en S608
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S605 — **en cours**. En autonomie (ADR-247) : **12.4 — l'eau en amont du terrain, le géoïde dans l'outil de terrain**
+Session : S605 — **terminée**. En autonomie (ADR-247) : **12.4 — l'eau en amont du terrain, le géoïde dans l'outil de terrain**
 (SPEC-005 §3–4 ; absent). Le « zéro » d'une scène est une distance au centre de la planète ; le squelette hydrographique est une entrée du
 terrain, jamais une sortie.
 
@@ -89,7 +89,9 @@ du fond au centre du couloir à 10⁻⁶ m ; (5) refus : rayon non positif, gril
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `geoide.rs` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 12.4 ; rituel.
+- [x] **P2** — `geoide.rs` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 12.4 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus ; l'aller-retour à 4·10⁻¹⁴ m (les formes sans soustraction de rayons) ; 400 cellules à leur fond. Suite 796.
+- **P3** — preuve GEOIDE-S605 ; liste 12.4 (absent → partiel) et décompte ; note datée à SPEC-005 §4 ; index ; journal.
