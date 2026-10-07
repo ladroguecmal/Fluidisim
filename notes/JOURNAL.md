@@ -960,3 +960,11 @@ coupure de session reprise sans perte, un critère sous le quantum écarté au p
 **Mesuré** : l'arrivée à la côte au µs, la hauteur à 10⁻⁹, le pic à l'heure prédite. **Avant la mesure**, un seuil du plan sous son quantum
 relevé et écrit aux notes (l'amplitude mesurée à l'instant exact, seuil inchangé). Maillons **1** (3.4 : absent → partiel). Suivant :
 **S583**, un point partiel.
+
+## S583 — 2026-10-07 — la réfraction par tracé de rayons
+
+**Entrée.** En autonomie ; 3.6 (absent). **Fait** ([preuve](../docs/validation/REFRACTION-S583.md)) : `refraction.rs` — le tracé d'un rayon
+d'onde longue (RK4 déterministe), le coefficient de réfraction. **Mesuré** : Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms de Simpson, `K_r` à 10⁻⁵.
+**En route** : `K_r` manqué à la première mesure — un tracé indépendant a montré le module juste et le montage faux (le rayon voisin d'une
+autre famille de Snell) ; corrigé, critère inchangé. Maillons **1** (3.6 : absent → partiel). Suivant : **S584**, le lot (dû) et un point
+partiel.

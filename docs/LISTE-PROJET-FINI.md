@@ -162,7 +162,9 @@ pas recopiée ici (L137).
   à la côte retrouvées ([preuve](validation/TSUNAMI-S582.md)). Manquent l'étalement d'une source ponctuelle, les rayons qui se courbent
   (3.6), la dispersion des sources courtes, le déferlement et le raffinement à la côte, l'événement de W qui le porte.
 - [ ] **3.5 Déferlement** (polyligne de SPEC-006 §6) — *absent*.
-- [ ] **3.6 Réfraction bathymétrique des ondes** — *absent*.
+- [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
+  (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).
+  Manquent les caustiques, la diffraction, les ondes courtes (dispersives), le branchement au tsunami (3.4) et l'entrée dans W.
 - [ ] **3.7 Événements horodatés, journaux, instantanés et restauration avec perte connue** —
   *partiel* : impacts et pression versionnés, restaurés (ADR-055 à 068, 076). Manque le transport
   réseau.
@@ -827,7 +829,7 @@ pas recopiée ici (L137).
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 5 | 4 |
-| 3. Ondes (W) | 9 | 0 | 5 | 4 |
+| 3. Ondes (W) | 9 | 0 | 6 | 3 |
 | 4. Volumique (δ) | 21 | 0 | 17 | 4 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
@@ -838,7 +840,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **80** | **31** |
+| **total** | **121** | **10** | **81** | **30** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

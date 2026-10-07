@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S583 — **en cours**. En autonomie, **3.6 — la réfraction bathymétrique des ondes** (absent) ; elle sert 3.4 (les rayons d'un
+Session : S583 — **terminée**. En autonomie, **3.6 — la réfraction bathymétrique des ondes** (absent) ; elle sert 3.4 (les rayons d'un
 tsunami se courbent). La référence de B (S362) ne traite que des isobathes droites et parallèles ; ici, un fond quelconque.
 
 **Ce que la session fait.** `refraction.rs` : le **tracé d'un rayon** d'onde longue (`c = √(g·h)`) sur un fond `h(x, y)` fourni avec son
@@ -85,7 +85,16 @@ pas non positif, tampon trop court.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `refraction.rs` et ses essais ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.6 ; rituel.
+- [x] **P2** — `refraction.rs` et ses essais ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.6 ; rituel.
 
 ### Notes de reprise
+- **Première mesure : (1) et (2) tenus, (3) manqué — `K_r` 0,981 pour 0,935.** Relu d'abord (ADR-239 D1) par un tracé indépendant en Python :
+  il redonne 0,981 — le module est juste. **Le montage était faux** : le rayon voisin partait à 30° d'un point situé 50 m plus au large,
+  donc avec un autre invariant de Snell (`sin θ/c` plus petit de 1,2·10⁻⁴) ; l'écart d'angle se cumule sur 190 km (10 m sur 115). La
+  formule `K_r = √(cos θ₀/cos θ)` vaut pour deux rayons **de la même famille** (même invariant). Correction : le rayon voisin part avec
+  l'angle que Snell lui donne à son abscisse, `sin θ_b = sin θ₀·c(x_b)/c(0)`. Critère inchangé.
+- **P2 fini** — Snell 3,1·10⁻¹¹ ; arrivée 1 604,6229 s ; y 72 949,930 m ; `K_r` 0,934931 après correction du montage ; fond plat au bit ;
+  refus. Pour la revue de S586 : deux trajectoires comparées doivent appartenir à la même famille (le même invariant). Suite 760.
+- **P3** — preuve REFRACTION-S583 ; liste 3.6 (absent → partiel) et décompte ; index ; journal.
+

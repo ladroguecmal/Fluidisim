@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 02:08 +02:00
+JETON            : libre
+Battement        : 2026-10-07 02:14 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S583 — 3.6, la réfraction par tracé de rayons ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S582 — la propagation macroscopique d'un tsunami ([journal](notes/JOURNAL.md)). Avant : S581 (la vingtième revue de méthode)
-Session suivante : **S583 — un point partiel** (3.4 ou 3.6 : l'étalement d'une source et les rayons qui se courbent ; ou un autre). Revue à S586. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S582 : 3.4 absent → partiel
+Session en cours : aucune
+Dernière session : S583 — la réfraction par tracé de rayons ([journal](notes/JOURNAL.md)). Avant : S582 (la propagation macroscopique d'un tsunami)
+Session suivante : **S584 — le lot** (dû en S584) **et un point partiel** (3.4 : le tsunami sur un rayon courbe, branché au traceur de S583 ; ou un autre). Revue à S586. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S583 : 3.6 absent → partiel
 Registres       : dernier lot S581 (ADR-213 D3) ; le prochain au plus tard en S584
 ```
 
