@@ -62,36 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S674 — **terminée**. En autonomie vers la v2 ; 2.7. `Cote2D` (S673) relève le niveau de 13 cm au rivage, mais sa mer déferle
-encore sur la profondeur au repos : 13 % de profondeur manque au rivage.
+Session : S675 — **en cours**. En autonomie vers la v2 ; une séance visuelle, comme l'utilisateur les a demandées (R41 reçu en S663).
+Depuis S664, la côte 2D de B déferle, porte le niveau moyen et le courant de dérive : rien n'en a encore été montré.
 
-**Ce que la session fait.** **Le point fixe du niveau.** `cuire_deferlante` marche sur `h + η̄(s)`, recalcule `η̄`, et recommence
-jusqu'à `|Δη̄|` < 1 mm (au plus 8 marches ; le nombre est gardé). Les tables (`k`, `coth`) sont cuites sur la profondeur totale. Le
-courant n'est calculé qu'à la dernière marche.
+**Ce que la session fait.** L'essai ignoré `record_the_breaking_coast_for_the_visual_session_s675` écrit `calculs/s675_cote.bin`
+et `calculs/s675_controle.csv`. La mer de S667 est cuite sur la plage de S364, avec et sans déferlement.
+
+L'enregistrement contient :
+
+- **les profils** le long de `s` : la profondeur, `Hrms` avec et sans déferlement, `η̄`, `V` ;
+- **la surface vue de dessus** sur les 750 derniers mètres, 48 images à 0,5 s, les deux côtes ;
+- **une coupe** à `n` = 0 sur les 950 derniers mètres.
+
+`outils/rendu_cote.py` (numpy, PIL) en tire trois images :
+
+- `s675_dessus.gif`, la surface vue de dessus, avec et sans déferlement ;
+- `s675_coupe.gif`, la coupe sur le fond, avec le niveau moyen ;
+- `s675_profils.png`, les profils.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : l'itération 0 est S673 (12,94 cm au calcul, 13,0 cm mesurés) ; sans déferlement, au bit (aucune itération).
-- **instrument** : le même point fixe en 1D dans l'essai — l'équilibre d'énergie de S669 sur `h + η̄_ref`, `η̄_ref` par
-  `houle_moyenne`. Ce qui départagerait :
-  - une rétroaction juste suit la référence au plancher de S673 ;
-  - une profondeur totale oubliée dans les tables, ou dans le déferlement, laisse `Hrms` au rivage à 0,512 m au lieu de 0,552 m (8 %) ;
-  - une itération mal raccordée ne converge pas en trois marches.
-- **calcul** (scratchpad `s674_calc.py`, et ce script qui asserte) : au rivage, `Hrms` 0,512 → **0,552 m** (+7,8 %), `η̄` 12,94 → **12,56
-  cm** ; `|Δη̄|` 129 mm, 4,0 mm, 0,14 mm, **trois marches**. Les bornes de S673 : 3 % du pic pour `η̄`, 5 % pour `V`, 2 % par composante.
-- **ADR** : ADR-196, ADR-268.
-- **pièges** : la profondeur des tables (`coth`, `k̄` de `ψ`) prise sur la même `h + η̄` que la marche ; le départ (`η̄(0)` = 0) inchangé ;
-  la dernière marche faite avec l'avant-dernier `η̄` (l'écart, sous 1 mm).
+- **témoin** : la côte sans déferlement, à côté. La même mer arrive au rivage avec `Hrms` 2,4 m sur 1 m de fond.
+- **instrument** : le rendu recalcule depuis le binaire `Hrms` au rivage, `η̄` au rivage et le pic de `V`, et les compare à
+  `s675_controle.csv`, que l'essai écrit. Ce qui départagerait : une lecture juste les retrouve au plancher `f32` (10⁻⁶ en relatif) ; un
+  décalage d'octets ou un axe permuté les manque de plusieurs ordres.
+- **calcul** (ce script) : l'enregistrement fait ≈ 14.1 Mo (asserté sous 20 Mo).
+- **ADR** : ADR-216 (le banc visuel), ADR-266.
+- **pièges** :
+  - la grille de la côte (`n` < 96 m, `s` < 3 950 m : `eval` rend `None` au-delà) ;
+  - `SimTime` en microsecondes ;
+  - la police (Segoe UI, pour les accents, S663) ;
+  - la côte sans déferlement est hors de son domaine près du rivage : le montrer comme témoin, sans le juger.
 
-**Critères, écrits avant.** (1) Sans déferlement, au bit ; l'itération 0 au bit de S673. (2) Contre le point fixe 1D : le facteur de
-chaque composante à **2 %**, `η̄` à **3 %** du pic, `V` à **5 %** du pic. (3) Convergence sous 1 mm en **au plus 4** marches. (4)
-Rapportés : `Hrms` et `η̄` au rivage avant et après, le coût.
+**Critères, écrits avant.** (1) Les trois images produites et regardées avant l'envoi. (2) Le contrôle relu à 10⁻⁶ en relatif. (3) R42
+posé à l'utilisateur, les fichiers envoyés.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le point fixe dans `cuire_interne` ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — l'enregistrement ; le rendu ; (1)–(2).
+- [ ] **P3** — preuve ; R42 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) au bit, S670 et S673 inchangés (une marche) ; (2) 0,43 %, 0,21 %, 0,65 % ; (3) trois marches ; (4) `Hrms` 0,513 → 0,553 m, `η̄` 12,96 → 12,57 cm, comme le calcul du plan ; 7,3 s.
