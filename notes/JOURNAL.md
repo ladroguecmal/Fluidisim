@@ -1607,3 +1607,10 @@ tournée (Sherman–Morrison ; une onde oblique exacte à 10⁻¹³, des franges
 le témoin — l'écart restant suivait **`K_r` exactement** ; le remède, la levée par le flux oblique `p·k_x`, `k_x` lu par l'opérateur du
 modèle. **Mesuré** : `Cote2D` à **0,56 %** de la côte 1D, la phase à 3,65°, le bord à 0 ; Berkhoff toujours à un dixième (0,101 ; 0,099 ;
 0,094 ; 0,125), le pic à 2 %. Maillons **1** (2.7 avance). Suivant : **S666, la revue de méthode** (ADR-268).
+
+## S666 — 2026-10-07 — la trente-septième revue de méthode (ADR-268)
+
+**Entrée.** La revue (S661–S665). **Fait** : [ADR-268](../docs/adr/ADR-268-trente-septieme-revue-de-methode.md) — D1, une borne du plan est
+calculée avec le plancher de son instrument (S662 : l'ordre `ε` pris pour `ε²` ; S663 : 10⁻¹² exigé d'un champ `f32`) ; D2, un remède
+essayé sous une autre cause nommée encore active est suspendu, non rejeté (S664 : la correction de `K_r`, juste, écartée sous les parois
+puis reprise en S665). Maillons **2**. Suivant : **S667, Cote2D à plusieurs composantes** et sa mémoire sur une vraie côte.

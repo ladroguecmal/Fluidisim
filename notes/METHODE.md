@@ -14,7 +14,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 
 | moment | protection | leçons | contrôle |
 |---|---|---|---|
-| **en écrivant le plan** | **Le bloc « Contrôles du plan »** : le témoin, l'instrument, le calcul, les ADR qui nomment, les pièges du domaine — cinq lignes, « sans objet » se dit (ADR-266, à la demande de l'utilisateur) ; **la ligne « instrument » écrit ce que le lecteur rendrait sous chaque hypothèse — un lecteur qui rend la même chose sous toutes ne juge rien** (ADR-267 D1) | L419, L420 | `rituel.py fin` refuse sans le bloc, à partir de S657 |
+| **en écrivant le plan** | **Le bloc « Contrôles du plan »** : le témoin, l'instrument, le calcul, les ADR qui nomment, les pièges du domaine — cinq lignes, « sans objet » se dit (ADR-266, à la demande de l'utilisateur) ; **la ligne « instrument » écrit ce que le lecteur rendrait sous chaque hypothèse — un lecteur qui rend la même chose sous toutes ne juge rien** (ADR-267 D1) ; **chaque borne du plan est calculée, avec le plancher de son instrument (`f32`, l'ordre de la formule) ; un remède essayé quand une autre cause nommée est encore active est suspendu, non rejeté** (ADR-268) | L419, L420 | `rituel.py fin` refuse sans le bloc, à partir de S657 |
 | **avant de conclure** | Une grandeur conservée — masse, hash, invariant — ne prouve ni précision, ni volume, ni résolution : mesurer la grandeur d'usage elle-même | L277, L366, L370 | — |
 | | Attribuer un effet demande un témoin qui en est privé ; éteindre un à un les termes absents du témoin | L136, L354 | — |
 | | Une convergence se lit sur trois points au moins, et juge un ordre, pas un déplacement | L274, L361 | — |
