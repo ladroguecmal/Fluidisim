@@ -62,36 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S670 — **terminée**. En autonomie vers la v2 ; 2.7. S669 a mis le déferlement d'une mer dans la marche parabolique ; `Cote2D`
-marche encore chaque composante seule, sans dissipation, et s'arrête à 2 m de fond.
-
-**Ce que la session fait.** **`Cote2D::cuire_deferlante`** : toutes les composantes de B cuites ensemble par `propager_spectre_periodique`,
-avec Battjes et Janssen (`γ` de Battjes et Stive, `Hrms₀` et `f̄` tirés de B), jusqu'à 1 m de fond. `cuire_decime` la rappelle sans
-déferlement, au bit.
+Session : S671 — **en cours**. En autonomie vers la v2. **La trente-huitième revue de méthode** (ADR-222 D4 : S666–S670) ; le lot
+S669–S671.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : les essais S664–S668, sans déferlement, au bit (la marche spectrale sans dissipation est au bit des marches séparées, S669).
-- **instrument** : l'équilibre d'énergie 1D de S669, rendu par composante (`a_c(s) = √(2·E_c)`), parti de l'eau profonde par la
-  conservation du flux (`c_g0 = g/(2ω)`), indépendant de `transformer`. Ce qui départagerait : une cuisson juste rend le facteur de
-  chaque composante à la précision de la marche ; un départ mal normalisé (le facteur WKB oublié dans `Hrms`) déplace le déferlement et
-  s'écarte de plusieurs %, dès 6 m de fond.
-- **calcul** (ce script) : le plancher de l'instrument — 0,56 % par composante sans déferlement (S665), plus 0,28 % avec (S669) — d'où
-  la borne de **2 %** ; au rivage, la correction avance de 1.71 rad par nœud des tables à 8 m (tenu), de 3.41 rad à 16 m
-  (refusé, `PasTropGrand`).
-- **ADR** : ADR-196, ADR-268.
-- **pièges** : `Hrms` en amplitudes physiques (`a_c·|A_c|`, le départ WKB compris) ; `Hrms₀` tiré des amplitudes de B (en eau
-  profonde) ; la décimation `m` = 8 refusée au rivage.
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-253 D1, ADR-268.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-**Critères, écrits avant.** (1) Sans déferlement, `cuire_decime` au bit d'avant (les essais S664–S668). (2) La mer de S667 sur la plage
-de 80 m à 1 m : le facteur de chaque composante à moins de **2 %** de l'équilibre 1D, aux nœuds de la côte ; au large (`s ≤ 0`), B au
-bit. (3) Rapportés : `Hrms/h` au rivage ; l'écart de `η` au rivage entre la côte avec et sans déferlement ; la mémoire à `m` = 4.
+**Critères, écrits avant.** (1) ADR-269 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `cuire_deferlante` ; l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — ADR-269.
+- [ ] **P3** — lot ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) l'empreinte des tables inchangée ; (2) 0,40 % au plus, B au bit au large ; (3) `Hrms` 0,513 m au rivage (1D 0,511), `|Δη|` avec et sans déferlement jusqu'à 1,19 m ; 1,7 s ; 2,0 Mo à `m` = 4.
