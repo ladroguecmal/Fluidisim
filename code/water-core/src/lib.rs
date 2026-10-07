@@ -79,6 +79,8 @@ pub mod cotier;
 pub mod portee;
 /// S604 — l'éditeur de rivières : profil, validation bloquante, gravure (liste 12.2 ; SPEC-005 §5).
 pub mod riviere;
+/// S605 — le géoïde dans l'outil de terrain ; le terrain gravé pour le squelette (liste 12.4 ; SPEC-005 §3–4).
+pub mod geoide;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
