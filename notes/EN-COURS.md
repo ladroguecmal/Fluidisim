@@ -62,30 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S635 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S632–S634), puis **7.6 — un
-dégel physique (le bilan d'énergie)** : le dégel de S575 était une rampe posée à la main.
+Session : S636 — **terminée**. En autonomie, **la trente-et-unième revue de méthode** (ADR-222 D4 ; S631–S635).
 
-**Ce que la session fait.** Dans `glace.rs` : `flux_de_fonte(T_air, α, albédo, S)` — `q = α·T_air + (1 − albédo)·S` (W/m², nul s'il est
-négatif : alors c'est Stefan qui gèle) ; `epaisseur_fondue(h₀, q, t)` = `max(0, h₀ − q·t/(ρ_glace·L))` ; `duree_de_fonte(h₀, q)`. Le lac de S575
-fond heure par heure par `ajuster_glace` — l'état exact est le temps de fonte cumulé (ADR-245), non la glace quantifiée. Ne fait pas : le
-rayonnement infrarouge, le flux de l'eau sous la glace, la neige, le regel nocturne.
-
-**Références, calculées avant** (ce script). `α` = 20 W/m²/K, `T_air` = +5 °C, albédo 0,6, `S` = 200 W/m² : **q = 180.0 W/m²**. La glace de S575
-après 30 jours : 61021 quanta, **h₀ = 0.61021 m** ; la fonte dure **1038299.435444 s** (12.0174 jours) : la glace s'annule à
-l'heure **289**. L'énergie d'un quantum de glace : 306278 J. **Borne du montage** (ADR-257 D1, assertée) : la fonte tient dans la
-fenêtre de 20 jours.
-
-**Quantum** : 1 000 ml de glace (917 g), soit 306278 J. **Critères, écrits avant.** (1) le flux 180 W/m² ; la durée de fonte égale à la
-référence à 10⁻⁶ s ; (2) le lac : la masse à l'entier à chaque heure, la glace nulle à l'heure 289 et pas avant ; (3) le bilan d'énergie :
-à chaque heure, l'énergie reçue `q·A·t` et la chaleur latente de la glace fondue diffèrent de moins d'un quantum (306278 J) ; (4) refus :
-`α` ou `S` négatifs, albédo hors de [0, 1], une valeur non finie.
+**Ce que la session fait.** Relu : S631 (la revue), S632 (les rayons), S633 (les sommets), S634 (le courant amorti), S635 (le dégel) — tous
+tenus du premier essai. **ADR-258** : aucune règle nouvelle ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — le dégel et son essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 7.6 ; rituel (`--lot`).
+- [x] **P1** — jeton ; la revue (ADR-258, METHODE, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai. Suite : 820 essais listés.
-- **P3** — preuve DEGEL-S635 ; ligne 7.6 ; index ; journal ; le lot.

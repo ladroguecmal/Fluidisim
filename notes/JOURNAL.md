@@ -1350,3 +1350,9 @@ RK4 indépendante rejointe à 2,3·10⁻⁷ m/s ; l'atténuation `ω/√(ω² + 
 ([preuve](../docs/validation/DEGEL-S635.md)) : `flux_de_fonte`, `epaisseur_fondue`, `duree_de_fonte`. **Mesuré** : la glace de S575 (0,61 m)
 fond en 12,02 jours sous 180 W/m² ; le lac la rend par quanta, la masse à l'entier, la glace nulle à l'heure 289 ; l'énergie reçue et la
 chaleur latente à un quantum près à chaque heure. Maillons **1** (7.6 avance). Suivant : **S636**, la revue de méthode.
+
+## S636 — 2026-10-07 — la trente-et-unième revue de méthode (ADR-258)
+
+**Entrée.** En autonomie ; revue due. **Aucune friction** sur S631–S635 : cinq sessions tenues du premier essai, les bornes de montage
+assertées dès leur première application (S632). **Décision** : aucune règle nouvelle (ADR-258). Maillons **1**. Suivant : **S637**, la
+physique des partiels.
