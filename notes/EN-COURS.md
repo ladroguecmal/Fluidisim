@@ -62,15 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S606 — **terminée**. En autonomie, **la vingt-cinquième revue de méthode** (ADR-222 D4 ; S601–S605).
+Session : S607 — **en cours**. En autonomie (ADR-247) : **1.5 — la grille 3D de référence stable : adressage, zones actives, échanges
+client/serveur** (ADR-006 §2 ; absent, conçu). La seule structure que serveur et clients partagent ; elle ne contient aucune eau.
 
-**Ce que la session fait.** Relu : S601 (la revue), S602 (9.4), S603 (12.5 : trois nombres arrêtés par le script du plan), S604 (12.2 :
-un script d'édition échoué suivi d'un autre), S605 (12.4 : le lot rappelé par le rituel). Mesuré : la suite du cœur, **796 essais
-listés, 17 ignorés**. **ADR-252** : D1 ; L411 ; METHODE ; BOUSSOLE ; index.
+**Ce que la session fait.** Un module `hydro_grid.rs` : `CellId { frame: u32, niveau: u8, morton: u64 }` — cellule de base 64 m, trois
+niveaux (64 / 512 / 4 096 m : le troisième est la région de rebasage d'ADR-002 §2.3, asserté), Morton 3D à 20 bits par axe (±33 554 km
+au niveau 0) ; `cellule(frame, niveau, position)`, `coordonnees`, `parent` (`morton >> 9`), `enfants` (une plage contiguë de 512 clés),
+`voisins` (26) ; `ZonesActives` — les cellules de niveau 0 qu'une boule d'intérêt touche, et leurs ancêtres ; `Echange` — l'écart entre
+deux états (ajouts, retraits, triés), encodé en octets (8 + 12 par cellule) et décodé : le client reconstruit l'état du serveur. Ne fait pas :
+la subdivision de publication par type de donnée (R07), le routage d'un événement W, l'index des volumes V, le transport réseau (10.1).
+
+**Références, calculées avant** (ce script, par une implémentation Python indépendante). Clés : 0xe00000000000000, 0xa92492492492493, 0x624924924905a, 0x2a492492693, 0x5b6db6db6db6db6 (les
+points [(0, (0.0, 0.0, 0.0)), (0, (100.0, -50.0, 7.0)), (1, (-5000.0, 2000.0, 0.0)), (2, (40000.0, -300.0, 5.0)), (0, (-33554432.0, 33554431.0, -1.0))]). Trois intérêts mobiles sur dix pas (une barque de 100 m de rayon à 30 m par pas ; un point fixe de 200 m ; un nageur de
+64 m à 25 m par pas) : tailles [305, 309, 308, 307, 306, 308, 305, 308, 306, 308] ; ajouts [305, 10, 11, 7, 7, 13, 8, 14, 6, 11] ; retraits [0, 6, 12, 8, 8, 11, 11, 11, 8, 9] ; octets par message [3668, 200, 284, 188, 188, 296, 236, 308, 176, 248] (total
+**5792**) ; au dernier pas, **14** parents de niveau 1 et **8** de niveau 2.
+
+**Quantum** : des entiers (des clés). **Critères, écrits avant.** (1) les cinq clés au bit ; l'aller-retour `cellule` ↔ `coordonnees` sur
+10⁵ points pseudo-aléatoires ; (2) le parent de la cellule d'un point est la cellule du point au niveau supérieur (les mêmes 10⁵ points,
+niveaux 0 → 1 → 2) ; les 512 enfants d'une cellule de niveau 1 forment la plage `[p·512, (p+1)·512)` et ont ce parent ; (3) 26 voisins à
+Chebyshev 1, tous distincts ; (4) les tailles, ajouts, retraits et octets des dix pas, égaux à la référence ; après chaque message, l'état du
+client égal à celui du serveur, au bit ; les comptes de parents 14 et 8 ; (5) le niveau 2 vaut 4 096 m, le seuil de rebasage ;
+(6) refus : niveau > 2, position hors de portée ou non finie, message tronqué.
 
 ### Plan
 
-- [x] **P1** — jeton ; la revue (ADR-252, METHODE, L411, BOUSSOLE, index).
-- [x] **P2** — rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `hydro_grid.rs` et ses essais ; (1)–(6).
+- [ ] **P3** — preuve ; liste 1.5 ; rituel.
 
 ### Notes de reprise
