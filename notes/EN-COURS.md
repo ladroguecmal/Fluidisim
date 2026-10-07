@@ -62,36 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S629 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **Le lot** (dû ; feuille de route S626–S628), puis **3.4 —
-« le raffinement à la côte »** : S622–S624 nourrissaient le domaine local d'une onde solitaire ; ici, de l'objet macroscopique lui-même,
-`tsunami::niveau` (S582).
+Session : S630 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **3.5 — le déferlement sur une côte quelconque** : S588
+ne savait qu'une côte droite (un sommet par ligne) ; son manque nommé : « les marching squares et le chaînage des segments ».
 
-**Ce que la session fait.** Aucun code nouveau dans le cœur : un essai. Un rayon de 4 000 m à 10 m sur 50 km, prolongé de 2 km de fond plat
-— le domaine local, d'ordre deux ; ses deux bords caractéristiques (S622, S628) reçoivent `tsunami::niveau` (f32) et `u = √(g/h)·η` ; une
-impulsion de demi-durée 60 s. À la jauge (1 km dans le domaine), l'écart maximal du niveau local au niveau macroscopique, rapporté à la crête.
-Ne fait pas : le domaine local sur la pente (S624 le fait avec une onde solitaire), la dispersion.
+**Ce que la session fait.** `deferlement::contours(…)` : l'écart `H − 0,78·h` aux nœuds (la convention de S588 : la terre à +∞) ; sur chaque
+maille, les arêtes où l'écart change de signe, le point de passage interpolé depuis le nœud qui déferle (`t = f_p/(f_p − f_q)`, 0 si `f_p`
+est infini, comme S588) ; les segments d'une maille, le cas selle tranché par la moyenne du centre (non éprouvé) ; le chaînage par les
+arêtes partagées — les polylignes ouvertes d'abord, puis les fermées (premier point répété). Donnée cuite (SPEC-006 §6) : la fonction alloue
+sa sortie, hors exécution. Ne fait pas : la hauteur réfractée par une côte courbe (la houle de `transformer` suppose des isobathes
+parallèles : l'île est prise en incidence normale), le flux dissipé et la direction de crête sur les sommets du contour.
 
-**En route, avant ce plan** : un balayage de la remontée d'une houle en amplitude (vers le déferlement) a été abandonné sans commit — la
-remontée dépassait Keller & Keller de 1,5 %, 3,3 %, 20 %, l'incidence linéaire au bord et le raidissement sur le fond plat mêlés au
-déferlement (ADR-256 D2).
+**Références, calculées avant** (`s630_ref.py`, Python indépendant : la levée par bissection sur `k`). Une île conique (pente 0,02, rivage à
+100 m), houle de 8 s et 1,5 m, maille de 5 m sur 1 km : la profondeur de déferlement **2.289178940 m**, le cercle **r_b = 214.458946980 m** ;
+**340 points** de passage, à au plus **0.012357134 m** du cercle. Deux îles disjointes (centres à −200 et 250 m) :
+**680** points. La côte droite : la grille de pente 0,02, houle oblique de 0,2 rad.
 
-**Références, calculées avant** (`s629_ref.py`, numpy). Crête à la jauge 5 mm (`A₀` = 1,118 mm) : écart relatif, maille 4 / 2 / 1 m,
-**3.128833e-03, 1.279170e-03, 1.242549e-03** ; crête 20 mm : 5.052937e-03, 4.970474e-03,
-4.951854e-03. À maille fine, l'écart est **proportionnel à l'amplitude** (rapport 3.985 pour 4) : la non-linéarité du domaine
-local, absente du modèle macroscopique linéaire ; la part numérique converge (D2). Après le passage : 3.122e-07 m (5 mm),
-4.992e-06 m (20 mm). **Sensibilité** à un ulp (D1) : 2.1e-12 sur l'écart relatif, 2.5e-14 m sur le reste.
-
-**Quantum** : f64 ; les tolérances d'accord avec numpy, **10⁻¹⁰** (écart relatif) et **10⁻¹² m** (reste), au moins dix fois la sensibilité
-(asserté). **Critères, écrits avant.** (1) les six écarts relatifs et les six restes égaux aux références à ces tolérances ; (2) à 5 mm,
-l'écart décroît avec la maille et passe sous 0,2 % à 1 m ; (3) à 1 m, le rapport des écarts 20 mm / 5 mm entre 3,5 et 4,5 (la
-non-linéarité) ; (4) à 5 mm, le reste après passage sous 10⁻⁴ de la crête.
+**Quantum** : f64. **Critères, écrits avant.** (1) la côte droite : une polyligne ouverte, ses sommets ceux de `polyligne` (S588) à 10⁻¹² m ;
+(2) l'île : une polyligne fermée de 340 sommets distincts, l'écart radial maximal égal à la référence à 10⁻⁹ m ; (3) les deux îles :
+deux polylignes fermées, 680 sommets ; (4) refus : grille de moins de 2 × 2, pas non positif, tampon trop court.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — l'essai ; (1)–(4).
-- [x] **P3** — preuve ; liste 3.4 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `contours` et ses essais ; (1)–(4).
+- [ ] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(4) tenus du premier essai, à 6·10⁻¹² au plus de numpy. Suite : 815 essais listés.
-- **P3** — preuve COUPLAGE-TSUNAMI-S629 ; ligne 3.4 ; index ; journal ; le lot.
