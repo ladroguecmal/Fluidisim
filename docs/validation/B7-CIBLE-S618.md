@@ -37,3 +37,7 @@ l'exécution) ; son coût mesuré l'inclut. À corriger avant tout branchement (
 
 Manquent : A98 (la conformité du sinus déterministe entre plateformes demande une seconde plateforme), le GPU bridé (WARP), la scène
 représentative entière et ses coûts conjoints, les domaines δ 3D (leurs coûts sont mesurés ailleurs : C7e, C10).
+
+> **Note du 2026-10-07 (S619).** Le défaut I-06 est corrigé : les tableaux de travail sont préalloués, au bit des essais de S613–S614 ;
+> `SaintVenant2D` coûte désormais **42,01 ns** par maille-pas — 218² mailles par tick sur la cible, 125² bridé
+> ([preuve](PREALLOCATION-S619.md)).

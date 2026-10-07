@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S619 — **en cours**. En autonomie (ADR-247 : la physique des partiels, après les absents). D'abord **le défaut relevé en S618** :
+Session : S619 — **terminée**. En autonomie (ADR-247 : la physique des partiels, après les absents). D'abord **le défaut relevé en S618** :
 `SaintVenant2D::pas` alloue ses tableaux de travail à chaque pas (sept `Vec`), contraire à **I-06** (aucune allocation à l'exécution).
 
 **Ce que la session fait.** Les tableaux de travail (`u`, `v`, `dh`, `dqx`, `dqy`, les flux des faces en `x` et en `y`) deviennent des
@@ -78,7 +78,9 @@ maille-pas de `SaintVenant2D`, inscrit à côté de celui de S618 (78,55 ns), sa
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les tableaux de travail préalloués ; (1)–(3).
-- [ ] **P3** — preuve ; liste ; rituel.
+- [x] **P2** — les tableaux de travail préalloués ; (1)–(3).
+- [x] **P3** — preuve ; liste ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — S613, S614 au bit ; aucune réallocation en 100 pas ; 78,55 → 42,01 ns par maille-pas. Suite : 806 essais listés.
+- **P3** — preuve PREALLOCATION-S619 ; note datée à B7-CIBLE-S618 ; ligne 11.5 ; index ; journal.

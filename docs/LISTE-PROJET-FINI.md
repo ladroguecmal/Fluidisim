@@ -841,7 +841,8 @@ pas recopiée ici (L137).
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.
 - [ ] **11.5 Matériel cible de livraison et seconde cible** (B7 complet, A98) — *partiel* depuis S618 : le banc B7 des modules de la v2
   sur ce PC et sur la seconde cible bridée (budget ÷ 3) — coûts médians et capacités dérivées (I-16) ; un domaine 2D de 159² mailles par
-  tick, 92² bridé ([preuve](validation/B7-CIBLE-S618.md)). Un défaut relevé : `SaintVenant2D::pas` alloue (I-06). Manquent A98 (une
+  tick, 92² bridé ([preuve](validation/B7-CIBLE-S618.md)) ; **S619** : le défaut I-06 relevé (`SaintVenant2D::pas` allouait) corrigé —
+  42 ns par maille-pas, 218² par tick ([preuve](validation/PREALLOCATION-S619.md)). Manquent A98 (une
   seconde plateforme), le GPU bridé, la scène entière. **Depuis S476** (ADR-219 D2) :
   ce PC est la cible de livraison ; la seconde cible devient le bridage de 9.10.
 

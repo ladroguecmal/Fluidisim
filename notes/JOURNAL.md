@@ -1226,3 +1226,10 @@ coût médian de cinq modules de la v2 sur ce PC et leurs capacités pour un bud
 Saint-Venant 2D 78,6 ns par maille-pas (159² mailles par tick ; 92² bridé), domaine 1D 1,1 ns, trains W 22 ns, tsunami 30 ns. **Défaut
 relevé** : `SaintVenant2D::pas` alloue à chaque pas (I-06) — à préallouer. Maillons **1** (11.5 : absent → partiel ; restent 3 absents :
 7.8 à la fin, 13.4 après la physique, 5.11 hors périmètre). Suivant : **S619**, la physique des partiels — d'abord le défaut I-06.
+
+## S619 — 2026-10-07 — le défaut I-06 de SaintVenant2D corrigé
+
+**Entrée.** En autonomie (ADR-247 : la physique des partiels) ; le défaut relevé en S618. **Fait** ([preuve](../docs/validation/PREALLOCATION-S619.md)) :
+les tableaux de travail de `SaintVenant2D::pas` préalloués. **Mesuré** : S613 et S614 au bit, aucune réallocation en 100 pas, le coût
+78,55 → 42,01 ns par maille-pas (218² mailles par tick). Maillons **1** (le défaut levé ; aucun point ne change d'état). Suivant : **S620**,
+le lot et la physique des partiels.
