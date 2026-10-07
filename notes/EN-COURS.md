@@ -79,7 +79,7 @@ contre une mesure publiée (aucune n'a pu être relue).
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le lecteur et son épreuve ; le rouleau ; (1)–(5).
-- [ ] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
+- [x] **P3** — preuve ; liste 4.14, 4.16 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1)–(5) tenus : le lecteur (48 mailles posées, 48 lues) ; à 2,5 cm l'air enfermé 0,18 s après le retournement, 0,39 m en
