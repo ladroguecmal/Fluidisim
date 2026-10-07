@@ -88,6 +88,41 @@ pub fn tier(time_to_impact: f64, a_max: f64, r_domain: f64) -> Tier {
     }
 }
 
+/// **S602 — la confiance d'un objet contrôlable** (liste 9.4) : le jeu la **réduit** en multipliant la capacité de manœuvre — un pilote
+/// erratique, une perte de contrôle annoncée — : `a_max` effectif = `a_max·facteur_jeu`, `facteur_jeu ≥ 1`. Un facteur 1 : la confiance pleine.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Confiance {
+    pub facteur_jeu: f64,
+}
+
+impl Confiance {
+    pub const PLEINE: Confiance = Confiance { facteur_jeu: 1.0 };
+
+    fn valide(&self) -> bool {
+        self.facteur_jeu >= 1.0 && self.facteur_jeu.is_finite()
+    }
+}
+
+/// **L'horizon utile** d'ADR-013 §2 sous la confiance donnée : `√(2·R/(a_max·facteur))` (infini pour un objet balistique). `None` si le
+/// facteur est sous 1 ou non fini.
+pub fn horizon_utile(a_max: f64, r_domain: f64, confiance: Confiance) -> Option<f64> {
+    if !confiance.valide() {
+        return None;
+    }
+    let a = a_max.max(0.0) * confiance.facteur_jeu;
+    Some(if a > 0.0 { (2.0 * r_domain / a).sqrt() } else { f64::INFINITY })
+}
+
+/// **Le palier d'un objet contrôlable** sous la confiance donnée : celui de [`tier`] avec la capacité de manœuvre effective.
+pub fn palier_controlable(time_to_impact: f64, a_max: f64, r_domain: f64, confiance: Confiance) -> Option<Tier> {
+    confiance.valide().then(|| tier(time_to_impact, a_max.max(0.0) * confiance.facteur_jeu, r_domain))
+}
+
+/// **La période de réévaluation** d'un palier (ADR-013 §2) : T4 à 2 Hz, les autres à chaque tick (`tick_s`).
+pub fn reevaluation_s(palier: Tier, tick_s: f64) -> f64 {
+    if palier == Tier::Watch { 0.5 } else { tick_s }
+}
+
 /// L'état intégré : position, vitesse, orientation, vitesse angulaire.
 #[derive(Clone, Copy)]
 struct State {

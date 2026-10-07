@@ -165,3 +165,27 @@ fn a_tumbling_plank_touches_by_its_lowest_corner_s537() {
     );
     assert!((imp.time - lo).abs() <= 1e-9, "critère 2");
 }
+
+/// **S602 — 9.4, les paliers de confiance des objets contrôlables.** Références écrites au plan par son script (la table d'ADR-013 au dixième).
+#[test]
+fn controllable_objects_lose_tiers_when_the_game_lowers_confidence_s602() {
+    let pleine = Confiance::PLEINE;
+    let h = [horizon_utile(20.0, 20.0, pleine).unwrap(), horizon_utile(3.0, 20.0, pleine).unwrap(), horizon_utile(5.0, 60.0, pleine).unwrap()];
+    println!("S602 : horizons {h:?} (1,4142 ; 3,6515 ; 4,8990 — ADR-013 : 1,4 ; 3,7 ; 4,9)");
+    for (m, r) in h.iter().zip([1.4142135623730951, 3.6514837167011076, 4.898979485566356]) {
+        assert!((m - r).abs() < 1e-12, "critère 1");
+    }
+    let reduite = Confiance { facteur_jeu: 2.0 };
+    assert_eq!(palier_controlable(4.0, 5.0, 60.0, pleine), Some(Tier::Build), "critère 2 : T2 en pleine confiance");
+    assert_eq!(palier_controlable(4.0, 5.0, 60.0, reduite), Some(Tier::Reserve), "critère 2 : T3 quand le jeu la divise par deux");
+    assert!((horizon_utile(5.0, 60.0, reduite).unwrap() - 3.4641016151377544).abs() < 1e-12, "critère 2 : l'horizon réduit");
+    for i in 0..20 {
+        for j in 0..10 {
+            let (t, a) = (0.05 + 0.5 * i as f64, 2.0 * j as f64);
+            assert_eq!(palier_controlable(t, a, 30.0, pleine), Some(tier(t, a, 30.0)), "critère 2 : facteur 1, le palier de tier");
+        }
+    }
+    assert_eq!((reevaluation_s(Tier::Watch, 1.0 / 30.0), reevaluation_s(Tier::Build, 1.0 / 30.0)), (0.5, 1.0 / 30.0), "critère 3");
+    assert_eq!(palier_controlable(4.0, 5.0, 60.0, Confiance { facteur_jeu: 0.5 }), None, "critère 4");
+    assert_eq!(horizon_utile(5.0, 60.0, Confiance { facteur_jeu: f64::NAN }), None, "critère 4");
+}
