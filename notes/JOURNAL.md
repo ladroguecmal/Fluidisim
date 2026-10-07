@@ -1629,3 +1629,13 @@ marche reste à 2 m, les tables gardent un nœud sur `m`. **Mesuré** : `m` = 1 
 pleine et **10 Mo/km²** pour 32 composantes (seize fois moins) ; à 16 m, 4,3 mm. La borne du plan, une somme au pire, restait au-dessus.
 **Lot** S666–S668. Maillons **1** (2.7 avance). Suivant : **S669**, le pas adapté au gradient de `k` (grossier au large) ou Cote2D dans
 Godot ; la revue en S671.
+
+## S669 — 2026-10-07 — Le déferlement d'une mer dans la pente douce
+
+**Entrée.** En autonomie vers la v2 ; 2.7 (« manquent… la dissipation au déferlement »). **Fait**
+([preuve](../docs/validation/DEFERLEMENT-PENTE-DOUCE-S669.md)) : la marche devient un état par rangée, au bit (l'empreinte inchangée) ;
+`propager_spectre_periodique` fait marcher une mer entière avec la dissipation de Battjes et Janssen, au même taux pour chaque
+composante. **Mesuré** : contre l'équilibre d'énergie 1D (RK4, son propre `Q_b`), **0,28 % au plus** jusqu'à 1 m de fond ;
+`Hrms/h` 0,51 au rivage ; sans déferlement, 2,43 m au lieu de 0,51. Le calcul du plan avait d'abord une bissection inversée : la sortie
+absurde (`Q_b` nul partout) l'a montrée avant l'essai. Maillons **1** (2.7 avance). Suivant : **S670**, `Cote2D` cuite avec le
+déferlement, jusqu'au rivage ; la revue en S671.

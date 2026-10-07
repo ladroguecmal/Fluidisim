@@ -264,3 +264,113 @@ fn periodic_twisted_edges_carry_an_oblique_plane_wave_s665() {
     assert!(pire_a <= 1e-6 && pire_k <= 1e-6, "critère 1");
 }
 
+/// S669 — la référence : l'équilibre d'énergie 1D de la même mer sur la même plage (`h(s)`), chaque composante réfractée par Snell,
+/// `dF_c/ds = −(D/E)·E_c`, `F_c = E_c·c_g·cos θ_c`, RK4 au mètre ; `Q_b` résolu à part (bissection sur `ln Q`). `Hrms(s)` tous les 2 m.
+fn equilibre_1d_s669(h: &dyn Fn(f64) -> f64, longueur: f64, t: &[f64], a: &[f64], kn: &[f64], gamma: f64) -> Vec<f64> {
+    let om: Vec<f64> = t.iter().map(|t| core::f64::consts::TAU / t).collect();
+    let somme: f64 = a.iter().map(|a| a * a).sum();
+    let f_moy = a.iter().zip(t).map(|(a, t)| a * a / t).sum::<f64>() / somme;
+    let cg_cos = |c: usize, hh: f64| {
+        let k = nombre_d_onde(om[c], hh, G);
+        let cg = 0.5 * om[c] / k * (1. + 2. * k * hh / (2. * k * hh).sinh());
+        let sn = kn[c] / k;
+        cg * (1. - sn * sn).sqrt()
+    };
+    let qb = |b: f64| -> f64 {
+        if b >= 1. {
+            return 1.;
+        }
+        if b < 0.2 {
+            return 0.;
+        }
+        let (mut lo, mut hi) = (-200f64, -1e-15f64);
+        for _ in 0..200 {
+            let u = 0.5 * (lo + hi);
+            if (1. - u.exp()) / u + b * b > 0. { lo = u } else { hi = u }
+        }
+        (0.5 * (lo + hi)).exp()
+    };
+    let derive = |s: f64, f: &[f64]| -> (Vec<f64>, f64) {
+        let hh = h(s);
+        let e: Vec<f64> = (0..f.len()).map(|c| f[c] / cg_cos(c, hh)).collect();
+        let hrms = (8. * e.iter().sum::<f64>()).sqrt();
+        let kb = nombre_d_onde(core::f64::consts::TAU * f_moy, hh, G);
+        let hmax = 0.88 / kb * (gamma * kb * hh / 0.88).tanh();
+        let delta = 2. * f_moy * qb(hrms / hmax) * (hmax / hrms).powi(2);
+        (e.iter().map(|e| -delta * e).collect(), hrms)
+    };
+    let mut f: Vec<f64> = (0..t.len()).map(|c| 0.5 * a[c] * a[c] * cg_cos(c, h(0.))).collect();
+    let n = longueur.round() as usize;
+    let mut sortie = Vec::new();
+    for i in 0..n {
+        let s = i as f64;
+        let (d1, hrms) = derive(s, &f);
+        if i % 2 == 0 {
+            sortie.push(hrms);
+        }
+        let pas = |d: &[f64], q: f64| f.iter().zip(d).map(|(f, d)| f + q * d).collect::<Vec<f64>>();
+        let d2 = derive(s + 0.5, &pas(&d1, 0.5)).0;
+        let d3 = derive(s + 0.5, &pas(&d2, 0.5)).0;
+        let d4 = derive(s + 1., &pas(&d3, 1.)).0;
+        for c in 0..f.len() {
+            f[c] += (d1[c] + 2. * d2[c] + 2. * d3[c] + d4[c]) / 6.;
+        }
+    }
+    sortie.push(derive(n as f64, &f).1);
+    sortie
+}
+
+/// **S669** — une mer qui déferle (Battjes et Janssen) : (1) sans déferlement, la marche spectrale au bit des marches séparées ;
+/// (2) avec, `Hrms(s)` à moins de 3 % de l'équilibre d'énergie 1D à chaque rangée ; (3) rapportés : l'écart sans déferlement au rivage,
+/// `Hrms/h` au rivage.
+#[test]
+fn a_breaking_sea_follows_the_1d_energy_balance_s669() {
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let plage = |x: f64, _y: f64| 80.0 - x / 50.0;
+    let (l, dx, y0, dy, ny) = (3950.0, 2.0, -50.0, 2.0, 50);
+    let kn: Vec<f64> = (0..8).map(|c| nombre_d_onde(core::f64::consts::TAU / t[c], 80.0, G) * th[c].to_radians().sin()).collect();
+    let incidents: Vec<Box<dyn Fn(f64) -> (f64, f64)>> =
+        kn.iter().map(|&k| Box::new(move |y: f64| ((k * y).cos(), (k * y).sin())) as Box<dyn Fn(f64) -> (f64, f64)>).collect();
+    let comps: Vec<Composante> = (0..8).map(|c| Composante { periode: t[c], amplitude: a[c], incident: &*incidents[c], k_n: kn[c] }).collect();
+    // (1) Sans déferlement : au bit des marches séparées.
+    let sans = propager_spectre_periodique(&plage, G, 0.0, l, dx, y0, dy, ny, &comps, None).unwrap();
+    for c in 0..8 {
+        let seul = propager_periodique(&plage, t[c], G, 0.0, l, dx, y0, dy, ny, &*incidents[c], kn[c]).unwrap();
+        for i in 0..seul.nx {
+            for j in 0..ny {
+                let (u, v) = (seul.valeur(i, j), sans[c].valeur(i, j));
+                assert!(u.0.to_bits() == v.0.to_bits() && u.1.to_bits() == v.1.to_bits(), "critère 1 : composante {c}, ({i}, {j})");
+            }
+        }
+    }
+    // (2) Avec : contre l'équilibre 1D.
+    let somme: f64 = a.iter().map(|a| a * a).sum();
+    let f_moy = a.iter().zip(&t).map(|(a, t)| a * a / t).sum::<f64>() / somme;
+    let d = Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, G);
+    let avec = propager_spectre_periodique(&plage, G, 0.0, l, dx, y0, dy, ny, &comps, Some(d)).unwrap();
+    let reference = equilibre_1d_s669(&|s| plage(s, 0.), l, &t, &a, &kn, d.gamma);
+    let hrms = |champs: &[Champ], i: usize, j: usize| 2. * (0..8).map(|c| (a[c] * champs[c].valeur(i, j).0.hypot(champs[c].valeur(i, j).1)).powi(2)).sum::<f64>().sqrt();
+    let nx = avec[0].nx;
+    assert_eq!(reference.len(), nx);
+    let (mut pire, mut ou) = (0f64, 0usize);
+    for i in 0..nx {
+        for j in 0..ny {
+            let e = (hrms(&avec, i, j) / reference[i] - 1.).abs();
+            if e > pire {
+                (pire, ou) = (e, i);
+            }
+        }
+    }
+    let i_fin = nx - 1;
+    let h_fin = plage(i_fin as f64 * dx, 0.);
+    let (h_marche, h_sans) = (hrms(&avec, i_fin, 0), hrms(&sans, i_fin, 0));
+    let i6 = ((80.0 - 6.0) * 50.0 / dx) as usize;
+    println!("S669 : γ = {:.3}, f̄ = {f_moy:.4} Hz ; Hrms à 6 m : marche {:.3} m, 1D {:.3} m ; au rivage ({h_fin} m) : marche {h_marche:.3} m, 1D {:.3} m, sans déferlement {h_sans:.3} m",
+        d.gamma, hrms(&avec, i6, 0), reference[i6], reference[i_fin]);
+    println!("S669 : écart au plus {:.2} % (à s = {} m, h = {:.1} m) ; Hrms/h au rivage {:.3} ; sans déferlement {:.3}",
+        100. * pire, ou as f64 * dx, plage(ou as f64 * dx, 0.), h_marche / h_fin, h_sans / h_fin);
+    assert!(pire < 0.03, "critère 2 : {:.2} %", 100. * pire);
+}
+

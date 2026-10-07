@@ -10,8 +10,8 @@
 //! Crank–Nicolson (`(p·k̄)_x` aux demi-pas), tridiagonal complexe en `y` (Thomas), parois latérales réfléchissantes (`A_y` = 0).
 //!
 //! Un outil de cuisson (ADR-260 : O) : il prépare hors du jeu le champ d'une houle sur un rivage ; il ne tourne pas dans le pas. Ne fait pas :
-//! la réflexion (l'approximation parabolique la néglige), les grands angles (l'erreur croît avec l'obliquité), le déferlement, la
-//! non-linéarité, le courant.
+//! la réflexion (l'approximation parabolique la néglige), le courant. Les grands angles (S660), la dispersion d'amplitude (S662), les
+//! bords périodiques (S665) et le déferlement d'une mer (S669, Battjes et Janssen) sont venus ensuite.
 
 /// Une entrée refusée : période, pas ou étendue non positifs ou non finis, une profondeur non positive dans le domaine.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -275,50 +275,107 @@ pub fn propager_non_lineaire(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, 
 #[allow(clippy::too_many_arguments)]
 fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
     incident: &dyn Fn(f64) -> (f64, f64), a0: Option<f64>, torsion: Option<f64>) -> Result<Champ, Refus> {
-    let ok = |v: f64| v > 0. && v.is_finite();
-    if !ok(periode) || !ok(g) || !ok(dx) || !ok(dy) || !(x1 > x0) || !(y1 > y0) || !x0.is_finite() || !y0.is_finite() {
-        return Err(Refus);
+    let mut m = Marche::nouvelle(h, periode, g, x0, x1, dx, y0, y1, dy, incident, a0, torsion)?;
+    while m.n + 1 < m.nx {
+        m.avancer(None)?;
     }
-    let (nx, ny) = (((x1 - x0) / dx).round() as usize + 1, ((y1 - y0) / dy).round() as usize + 1);
-    if ny < 3 || nx < 2 {
-        return Err(Refus);
-    }
-    let omega = 2. * std::f64::consts::PI / periode;
-    let rangee = |x: f64| -> Result<(Vec<f64>, Vec<f64>, f64), Refus> {
-        let (mut p, mut k) = (vec![0.; ny], vec![0.; ny]);
+    Ok(m.champ())
+}
+
+/// S669 — la marche d'une composante, **rangée par rangée** : l'état de [`marche_grand_angle`], son arithmétique inchangée, pour que
+/// plusieurs composantes avancent ensemble ([`propager_spectre_periodique`]).
+struct Marche<'h> {
+    h: &'h dyn Fn(f64, f64) -> f64,
+    omega: f64,
+    g: f64,
+    x0: f64,
+    dx: f64,
+    y0: f64,
+    dy: f64,
+    nx: usize,
+    ny: usize,
+    a0: Option<f64>,
+    torsion: Option<f64>,
+    /// La dernière rangée calculée.
+    n: usize,
+    a: Vec<C>,
+    p0: Vec<f64>,
+    k0: Vec<f64>,
+    kb0: f64,
+    k0_lin: Vec<f64>,
+    sub: Vec<C>,
+    diag: Vec<C>,
+    sup: Vec<C>,
+    rhs: Vec<C>,
+    cp: Vec<C>,
+    dp: Vec<C>,
+}
+
+impl<'h> Marche<'h> {
+    #[allow(clippy::too_many_arguments)]
+    fn nouvelle(h: &'h dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, y1: f64, dy: f64,
+        incident: &dyn Fn(f64) -> (f64, f64), a0: Option<f64>, torsion: Option<f64>) -> Result<Marche<'h>, Refus> {
+        let ok = |v: f64| v > 0. && v.is_finite();
+        if !ok(periode) || !ok(g) || !ok(dx) || !ok(dy) || !(x1 > x0) || !(y1 > y0) || !x0.is_finite() || !y0.is_finite() {
+            return Err(Refus);
+        }
+        let (nx, ny) = (((x1 - x0) / dx).round() as usize + 1, ((y1 - y0) / dy).round() as usize + 1);
+        if ny < 3 || nx < 2 {
+            return Err(Refus);
+        }
+        let omega = 2. * std::f64::consts::PI / periode;
+        let z = vec![C::default(); ny];
+        let mut m = Marche { h, omega, g, x0, dx, y0, dy, nx, ny, a0, torsion, n: 0, a: vec![C::default(); nx * ny], p0: Vec::new(),
+            k0: Vec::new(), kb0: 0., k0_lin: Vec::new(), sub: z.clone(), diag: z.clone(), sup: z.clone(), rhs: z.clone(), cp: z.clone(), dp: z };
         for j in 0..ny {
-            let hj = h(x, y0 + j as f64 * dy);
+            let (re, im) = incident(y0 + j as f64 * dy);
+            m.a[j] = C::new(re, im);
+        }
+        let (p0, k0, kb0) = m.rangee(x0)?;
+        m.k0_lin = k0.clone();
+        (m.p0, m.k0, m.kb0) = (p0, k0, kb0);
+        Ok(m)
+    }
+
+    fn rangee(&self, x: f64) -> Result<(Vec<f64>, Vec<f64>, f64), Refus> {
+        let ok = |v: f64| v > 0. && v.is_finite();
+        let (mut p, mut k) = (vec![0.; self.ny], vec![0.; self.ny]);
+        for j in 0..self.ny {
+            let hj = (self.h)(x, self.y0 + j as f64 * self.dy);
             if !ok(hj) {
                 return Err(Refus);
             }
-            (p[j], k[j]) = p_et_k(omega, hj, g);
+            (p[j], k[j]) = p_et_k(self.omega, hj, self.g);
         }
-        let kb = k.iter().sum::<f64>() / ny as f64;
+        let kb = k.iter().sum::<f64>() / self.ny as f64;
         Ok((p, k, kb))
-    };
-    let mut a = vec![C::default(); nx * ny];
-    for j in 0..ny {
-        let (re, im) = incident(y0 + j as f64 * dy);
-        a[j] = C::new(re, im);
     }
-    let (mut p0, mut k0, mut kb0) = rangee(x0)?;
-    let mut k0_lin = k0.clone();
-    let (mut sub, mut diag, mut sup, mut rhs) = (vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny], vec![C::default(); ny]);
-    let (mut cp, mut dp) = (vec![C::default(); ny], vec![C::default(); ny]);
-    let d2 = dy * dy;
-    for n in 0..nx - 1 {
-        let x = x0 + (n + 1) as f64 * dx;
-        let (p1, mut k1, kb1) = rangee(x)?;
+
+    /// `|A|` au nœud `j` de la dernière rangée calculée.
+    fn module(&self, j: usize) -> f64 {
+        self.a[self.n * self.ny + j].abs()
+    }
+
+    /// Une rangée de plus. `taux` (S669) : le taux de dissipation d'énergie `D/E` (1/s) de chaque nœud de la rangée courante — `A_x`
+    /// reçoit `−(w/2)·A`, `w = (D/E)·ω/(p·k_x)` (le flux normal `c_g·k_x/k = p·k_x/ω`).
+    fn avancer(&mut self, taux: Option<&[f64]>) -> Result<(), Refus> {
+        let (n, ny, dx, dy, omega) = (self.n, self.ny, self.dx, self.dy, self.omega);
+        let d2 = dy * dy;
+        let x = self.x0 + (n + 1) as f64 * dx;
+        let (p1, mut k1, kb1) = self.rangee(x)?;
         // S665 : le flux d'énergie se compte avec le `k` linéaire (la dispersion d'amplitude ne touche que la phase, Kirby et Dalrymple).
         let k1_lin = k1.clone();
         let n0 = n * ny;
         // S662 : la dispersion d'amplitude — le k de la nouvelle rangée, à l'amplitude de la rangée courante (retardée d'un pas).
-        if let Some(a0) = a0 {
+        if let Some(a0) = self.a0 {
             for j in 0..ny {
-                let hj = h(x, y0 + j as f64 * dy);
-                k1[j] = nombre_d_onde_non_lineaire(omega, hj, a0 * a[n0 + j].abs(), g);
+                let hj = (self.h)(x, self.y0 + j as f64 * dy);
+                k1[j] = nombre_d_onde_non_lineaire(omega, hj, a0 * self.a[n0 + j].abs(), self.g);
             }
         }
+        let (p0, k0, kb0, k0_lin) = (&self.p0, &self.k0, self.kb0, &self.k0_lin);
+        let a = &self.a;
+        let torsion = self.torsion;
         let kb = 0.5 * (kb0 + kb1);
         for j in 0..ny {
             // X au demi-pas : (X·A)_j = x_l·A_{j−1} + x_c·A_j + x_u·A_{j+1}.
@@ -369,10 +426,16 @@ fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64
                 let f = chi.div(C::new(1., 0.).add(chi.scale(0.25)));
                 (kbr * (1. + 0.5 * f.re)).clamp(0.3 * kbr, 1.5 * kbr)
             };
-            let kx0 = kx_rangee(&p0, &k0_lin, kb0);
+            let kx0 = kx_rangee(p0, k0_lin, kb0);
             let kx1 = kx_rangee(&p1, &k1_lin, kb1);
             let (pk0, pk1) = (p0[j] * kx0, p1[j] * kx1);
-            let lev = -(pk1 - pk0) / dx / (pk0 + pk1);
+            let mut lev = -(pk1 - pk0) / dx / (pk0 + pk1);
+            // S669 : la dissipation au déferlement, `A_x = … − (w/2)·A`, au demi-pas.
+            if let Some(t) = taux {
+                if t[j] > 0. {
+                    lev -= 0.5 * t[j] * omega / (pj * 0.5 * (kx0 + kx1));
+                }
+            }
             // (1 + X/4)(A1 − A0)/dx − lev·(A1 + A0)/2 = (i·k̄/2)·X·(A1 + A0)/2 :
             // à gauche (1 + X/4)/dx − lev/2 − (i·k̄/4)·X, à droite (1 + X/4)/dx + lev/2 + (i·k̄/4)·X.
             let ik4 = C::new(0., kb / 4.);
@@ -399,50 +462,154 @@ fn marche_grand_angle(h: &dyn Fn(f64, f64) -> f64, periode: f64, g: f64, x0: f64
                     r = r.add(a[n0].mul(tau).mul(du));
                 }
             }
-            rhs[j] = r;
-            (sub[j], diag[j], sup[j]) = (gl, gc, gu);
+            self.rhs[j] = r;
+            (self.sub[j], self.diag[j], self.sup[j]) = (gl, gc, gu);
         }
         let n1 = (n + 1) * ny;
         match torsion {
             None => {
                 let mut x = vec![C::default(); 0];
                 x.resize(ny, C::default());
-                thomas(&sub, &diag, &sup, &rhs, &mut x, &mut cp, &mut dp);
-                a[n1..n1 + ny].copy_from_slice(&x);
+                thomas(&self.sub, &self.diag, &self.sup, &self.rhs, &mut x, &mut self.cp, &mut self.dp);
+                self.a[n1..n1 + ny].copy_from_slice(&x);
             }
             Some(kn) => {
                 // Sherman–Morrison (Numerical Recipes, `cyclic`) : β = A[0][ny−1] = sub[0]·e^(−i·k_n·W), α = A[ny−1][0] = sup[ny−1]·e^(i·k_n·W).
                 let w = ny as f64 * dy;
                 let (tau, tau_inv) = (C::new((kn * w).cos(), (kn * w).sin()), C::new((kn * w).cos(), -(kn * w).sin()));
-                let beta = sub[0].mul(tau_inv);
-                let alpha = sup[ny - 1].mul(tau);
-                let gamma = C::new(0., 0.).sub(diag[0]);
-                let mut bb = diag.clone();
-                bb[0] = diag[0].sub(gamma);
-                bb[ny - 1] = diag[ny - 1].sub(alpha.mul(beta).div(gamma));
-                let mut sub0 = sub.clone();
+                let beta = self.sub[0].mul(tau_inv);
+                let alpha = self.sup[ny - 1].mul(tau);
+                let gamma = C::new(0., 0.).sub(self.diag[0]);
+                let mut bb = self.diag.clone();
+                bb[0] = self.diag[0].sub(gamma);
+                bb[ny - 1] = self.diag[ny - 1].sub(alpha.mul(beta).div(gamma));
+                let mut sub0 = self.sub.clone();
                 sub0[0] = C::default();
-                let mut sup0 = sup.clone();
+                let mut sup0 = self.sup.clone();
                 sup0[ny - 1] = C::default();
                 let mut x = vec![C::default(); ny];
-                thomas(&sub0, &bb, &sup0, &rhs, &mut x, &mut cp, &mut dp);
+                thomas(&sub0, &bb, &sup0, &self.rhs, &mut x, &mut self.cp, &mut self.dp);
                 let mut u = vec![C::default(); ny];
                 u[0] = gamma;
                 u[ny - 1] = alpha;
                 let mut z = vec![C::default(); ny];
-                thomas(&sub0, &bb, &sup0, &u, &mut z, &mut cp, &mut dp);
+                thomas(&sub0, &bb, &sup0, &u, &mut z, &mut self.cp, &mut self.dp);
                 let num = x[0].add(beta.mul(x[ny - 1]).div(gamma));
                 let den = C::new(1., 0.).add(z[0]).add(beta.mul(z[ny - 1]).div(gamma));
                 let fact = num.div(den);
                 for j in 0..ny {
-                    a[n1 + j] = x[j].sub(fact.mul(z[j]));
+                    self.a[n1 + j] = x[j].sub(fact.mul(z[j]));
                 }
             }
         }
-        (p0, k0, kb0) = (p1, k1, kb1);
-        k0_lin = k1_lin;
+        (self.p0, self.k0, self.kb0) = (p1, k1, kb1);
+        self.k0_lin = k1_lin;
+        self.n += 1;
+        Ok(())
     }
-    Ok(Champ { nx, ny, x0, dx, y0, dy, a })
+
+    fn champ(self) -> Champ {
+        Champ { nx: self.nx, ny: self.ny, x0: self.x0, dx: self.dx, y0: self.y0, dy: self.dy, a: self.a }
+    }
+}
+
+/// S669 — une composante d'une mer : sa période (s), son amplitude incidente (m), son entrée `A(x0, y)` et son `k_n` (les bords tournés).
+pub struct Composante<'a> {
+    pub periode: f64,
+    pub amplitude: f64,
+    pub incident: &'a dyn Fn(f64) -> (f64, f64),
+    pub k_n: f64,
+}
+
+/// S669 — **le déferlement de Battjes et Janssen (1978)** : `D = (α/4)·ρg·f̄·Q_b·H_max²`, `H_max = 0,88/k̄·tanh(γ·k̄·h/0,88)` (`k̄` à
+/// la fréquence moyenne `f̄`).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Deferlement {
+    pub alpha: f64,
+    pub gamma: f64,
+}
+
+impl Deferlement {
+    /// Battjes et Stive (1985) : `γ = 0,5 + 0,4·tanh(33·s₀)`, `s₀ = Hrms₀/L₀` la cambrure du large à la période moyenne ; `α` = 1.
+    pub fn battjes_stive(hrms0: f64, periode_moyenne: f64, g: f64) -> Deferlement {
+        let l0 = g * periode_moyenne * periode_moyenne / (2. * std::f64::consts::PI);
+        Deferlement { alpha: 1., gamma: 0.5 + 0.4 * (33. * hrms0 / l0).tanh() }
+    }
+}
+
+/// S669 — la fraction de vagues déferlées de Battjes et Janssen : `Q` de `(1 − Q)/ln Q = −b²`, `b = Hrms/H_max` ; 1 dès `b` ≥ 1, 0 sous
+/// `b` = 0,2 (`Q` < 10⁻¹⁰). Bissection : `(1 − Q)/ln Q` va de 0⁻ (`Q` → 0) à −1 (`Q` → 1).
+pub fn fraction_deferlee(b: f64) -> f64 {
+    if !(b >= 0.2) {
+        return 0.;
+    }
+    if b >= 1. {
+        return 1.;
+    }
+    let (mut lo, mut hi) = (0f64, 1f64);
+    for _ in 0..100 {
+        let q = 0.5 * (lo + hi);
+        if q <= 0. || q >= 1. {
+            break;
+        }
+        if (1. - q) / q.ln() + b * b > 0. {
+            lo = q;
+        } else {
+            hi = q;
+        }
+    }
+    0.5 * (lo + hi)
+}
+
+/// **S669 — une mer qui déferle** : les composantes marchent ensemble, rangée par rangée, comme [`propager_periodique`] chacune. Avec
+/// `deferlement`, la mer entière donne en chaque nœud `Hrms = 2·√(Σ (a_c·|A_c|)²)` et le taux `D/E = 2α·f̄·Q_b·(H_max/Hrms)²`, le même pour
+/// toutes les composantes (Chawla, Özkan-Haller et Kirby 1998) ; `f̄ = Σ a²/T / Σ a²`. Sans, chaque champ est celui de
+/// [`propager_periodique`], au bit. Les champs, rapportés à l'amplitude incidente de chaque composante.
+#[allow(clippy::too_many_arguments)]
+pub fn propager_spectre_periodique(h: &dyn Fn(f64, f64) -> f64, g: f64, x0: f64, x1: f64, dx: f64, y0: f64, dy: f64, ny: usize,
+    composantes: &[Composante], deferlement: Option<Deferlement>) -> Result<Vec<Champ>, Refus> {
+    if ny < 3 || !(dy > 0.) || composantes.is_empty() {
+        return Err(Refus);
+    }
+    let y1 = y0 + (ny - 1) as f64 * dy;
+    let mut marches = Vec::with_capacity(composantes.len());
+    for c in composantes {
+        if !c.k_n.is_finite() || !(c.amplitude >= 0. && c.amplitude.is_finite()) {
+            return Err(Refus);
+        }
+        marches.push(Marche::nouvelle(h, c.periode, g, x0, x1, dx, y0, y1, dy, c.incident, None, Some(c.k_n))?);
+    }
+    let somme_a2: f64 = composantes.iter().map(|c| c.amplitude * c.amplitude).sum();
+    let f_moy = if somme_a2 > 0. {
+        composantes.iter().map(|c| c.amplitude * c.amplitude / c.periode).sum::<f64>() / somme_a2
+    } else {
+        1. / composantes[0].periode
+    };
+    let omega_moy = 2. * std::f64::consts::PI * f_moy;
+    let mut taux = vec![0.; ny];
+    let nx = marches[0].nx;
+    for n in 0..nx - 1 {
+        let t = match deferlement {
+            None => None,
+            Some(d) => {
+                let x = x0 + n as f64 * dx;
+                for (j, tj) in taux.iter_mut().enumerate() {
+                    let e: f64 = composantes.iter().zip(&marches).map(|(c, m)| (c.amplitude * m.module(j)).powi(2)).sum();
+                    let hrms = 2. * e.sqrt();
+                    let hj = h(x, y0 + j as f64 * dy);
+                    let kb = nombre_d_onde(omega_moy, hj, g);
+                    let hmax = 0.88 / kb * (d.gamma * kb * hj / 0.88).tanh();
+                    let q = fraction_deferlee(hrms / hmax);
+                    *tj = if hrms > 0. { 2. * d.alpha * f_moy * q * (hmax / hrms).powi(2) } else { 0. };
+                }
+                Some(&taux[..])
+            }
+        };
+        for m in &mut marches {
+            m.avancer(t)?;
+        }
+    }
+    Ok(marches.into_iter().map(Marche::champ).collect())
 }
 
 /// **Le haut-fond de Berkhoff, Booy et Radder (1982)** : la profondeur (m) au point `(x, y)` du bassin — 0,45 m au large, une pente

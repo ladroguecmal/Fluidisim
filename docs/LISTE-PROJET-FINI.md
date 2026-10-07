@@ -165,7 +165,9 @@ pas recopiée ici (L137).
   tournés, le départ normalisé, la levée par le flux oblique (`K_r`) — **le facteur à 0,56 % de la côte 1D**, la phase à 4°, Berkhoff toujours à un
   dixième ([preuve](validation/COTE-2D-JUSTE-S665.md)). **S667** : huit composantes composées sans diaphonie (`η` à 0,5 cm de la côte 1D, `Hs` 2,2 m) ;
   la mémoire, 160 Mo/km² pour 32 composantes au pas de 2 m — à réduire ([preuve](validation/COTE-2D-SPECTRE-S667.md)). **S668** : la marche
-  fine, les tables décimées à 8 m — **10 Mo/km²**, `η` à 0,7 mm de la côte pleine ([preuve](validation/COTE-2D-MEMOIRE-S668.md)).
+  fine, les tables décimées à 8 m — **10 Mo/km²**, `η` à 0,7 mm de la côte pleine ([preuve](validation/COTE-2D-MEMOIRE-S668.md)). **S669** :
+  **la dissipation au déferlement** d'une mer entière dans la marche parabolique (Battjes et Janssen 1978) — `Hrms` à 0,3 % de
+  l'équilibre d'énergie 1D jusqu'à 1 m de fond, `Hrms/h` 0,51 au rivage ([preuve](validation/DEFERLEMENT-PENTE-DOUCE-S669.md)).
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *partiel* depuis S599 pour le côtier (la bibliothèque de 12.3 ;
   [preuve](validation/COTIER-S599.md)) ; la météo **à la fin** (ADR-197 D5), un système
   complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).

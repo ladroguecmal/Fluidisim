@@ -162,6 +162,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La vanne selon son ouverture, les pertes et l'énergie de la pompe — S515](validation/VANNE-POMPE-S515.md) : `Flow::Valve`, `Flow::PumpLine`, `pump_operating_point` ; liste 5.4 (ne manque que 5.8).
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
+- [Le déferlement d'une mer dans la pente douce : Battjes et Janssen — S669](validation/DEFERLEMENT-PENTE-DOUCE-S669.md) : Hrms à 0,3 % de l'équilibre 1D.
 - [La mémoire de Cote2D réduite : les tables décimées — S668](validation/COTE-2D-MEMOIRE-S668.md) : 10 Mo/km², η à 0,7 mm.
 - [Cote2D à huit composantes : la composition, la mémoire — S667](validation/COTE-2D-SPECTRE-S667.md) : η à 0,5 cm ; 160 Mo/km².
 - [La côte 2D juste : bords périodiques, normalisation, `K_r` — S665](validation/COTE-2D-JUSTE-S665.md) : le facteur à 0,56 %.

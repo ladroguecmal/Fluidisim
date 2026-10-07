@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S669 — **en cours**. En autonomie vers la v2 ; 2.7 (« manquent… la dissipation au déferlement »). `Cote2D` s'arrête à 2 m de
+Session : S669 — **terminée**. En autonomie vers la v2 ; 2.7 (« manquent… la dissipation au déferlement »). `Cote2D` s'arrête à 2 m de
 fond, avant que la mer de S667 ne déferle : sans dissipation, la levée croît sans borne vers le rivage.
 
 **Ce que la session fait.** **Le déferlement d'une mer dans la marche parabolique** : toutes les composantes marchent ensemble, rangée
@@ -96,7 +96,8 @@ champ de Thornton et Guza (1982), ≈ 0,42, cité de mémoire : un repère de vr
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la marche par rangée ; `propager_spectre_periodique` ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7 ; rituel.
+- [x] **P2** — la marche par rangée ; `propager_spectre_periodique` ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) l'empreinte inchangée, la marche spectrale au bit des marches séparées ; (2) 0,28 % au plus ; (3) au rivage 0,513 m (1D 0,511), sans déferlement 2,43 m ; `Hrms/h` 0,51.
