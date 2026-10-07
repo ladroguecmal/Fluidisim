@@ -75,6 +75,8 @@ pub mod microbulles;
 pub mod coule;
 /// S599 — la bibliothèque côtière (listes 12.3, 2.8 ; SPEC-005 §6).
 pub mod cotier;
+/// S603 — la portée d'une modification de bathymétrie (liste 12.5 ; SPEC-005 §8).
+pub mod portee;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
