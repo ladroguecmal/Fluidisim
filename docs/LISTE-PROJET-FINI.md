@@ -377,8 +377,10 @@ pas recopiée ici (L137).
   (`S₀` = 0,231) et ne déferle pas sur 1:3 (`S₀` = 1,13), comme la classification de Grilli et al. (1997), aux deux mailles ; le lecteur
   du retournement éprouvé d'abord ([preuve](validation/DEFERLEMENT-APIC3D-S647.md)) ; **S648** : le jet retombe et **enferme de l'air**
   0,18 s après le retournement, en avant de lui — 3,3 L sur 10 cm de large, vivant 1,2 s, à 2,5 cm ; rien sur 1:3
-  ([preuve](validation/ROULEAU-AIR-S648.md)). Manquent une surface fiable en eau mince au rivage au repos, l'air balistique avec la zone des
-  colonnes, la quantité d'air jugée, les poches de K2 sous le rouleau, le relais 2D → 3D, le branchement à δ.
+  ([preuve](validation/ROULEAU-AIR-S648.md)) ; **S650 — étape 4, le relais 2D → 3D** : Saint-Venant 2D au large, APIC 3D sur la pente,
+  raccordés par la zone de colonnes à un bord ouvert — le retournement à 0,004 s et 0,15 m du tout-3D, la masse exacte au débit compté, 64 %
+  du temps ([preuve](validation/RELAIS-2D-3D-S650.md)). Manquent une surface fiable en eau mince au rivage au repos, la quantité d'air jugée,
+  les poches de K2 sous le rouleau, le relais dans les deux sens et la bande qui vit avec la vague, le relais 2D → 3D, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

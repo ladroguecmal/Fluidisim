@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S650 — **en cours**. En autonomie vers la v2 ; le rouleau 3D. **Étape 4 — le relais 2D → 3D** : la 3D seulement là où elle sert.
+Session : S650 — **terminée**. En autonomie vers la v2 ; le rouleau 3D. **Étape 4 — le relais 2D → 3D** : la 3D seulement là où elle sert.
 Le lot des registres (S648–S650) à la fin.
 
 **Ce que la session fait.** Le montage de S647 (onde solitaire `H/d` = 0,3, pente 1:12) coupé en deux à `x_r` = 5.0 m (0,7 m avant le
@@ -90,7 +90,9 @@ une faute. Les deux lecteurs (S647, S648) sont réemployés tels quels.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le relais ; (1)–(4).
+- [x] **P2** — le relais ; (1)–(4).
 - [ ] **P3** — preuve ; liste 4.14 ; le lot ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(3) tenus : volume − entré −3,7·10⁻¹⁷ ; retournement 2,575 s, 9,825 m (tout-3D 2,571 s, 9,675 m) ; air enfermé 2,667 s,
+  10,075 m ; (4) 163 s contre 256 s (64 %), chronométrés dans la même exécution.

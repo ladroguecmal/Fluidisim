@@ -1471,3 +1471,11 @@ masse exacte. Non jugé : la quantité d'air (rien de publié relu ; +50 % de 5 
 découpe et indexe les données planétaires de l'eau, tuile pour tuile avec le terrain de DyingStar ; le calcul reste en grilles locales ;
 un modèle global hors ligne peut calculer en cube-sphère et cuire en HEALPix. Déclaré : la mesure faite pendant S648, rejouée. Maillons
 **2**. Suivant : **S650, le rouleau, étape 4 — le relais 2D → 3D**.
+
+## S650 — 2026-10-07 — le rouleau 3D, étape 4 : le relais 2D → 3D
+
+**Entrée.** En autonomie vers la v2. **Fait** ([preuve](../docs/validation/RELAIS-2D-3D-S650.md)) : Saint-Venant 2D porte l'onde de S647
+sur la plage ; APIC 3D ne couvre que la pente, une zone de colonnes au large reçoit la vitesse de Saint-Venant par un bord ouvert, des
+particules (l'air balistique) sur la pente. **Mesuré** à 5 cm : le retournement à 0,004 s et 0,15 m du tout-3D, l'air enfermé après lui ;
+la masse exacte au débit compté (−3,7·10⁻¹⁷), le débit compté à 0,2 % de Saint-Venant ; 64 % du temps du tout-3D. Le lot (S648–S650).
+Maillons **1** (4.14 avance). Suivant : **S651, la revue de méthode** (ADR-265), puis l'étape 5 (le rouleau qui agit sur un corps).

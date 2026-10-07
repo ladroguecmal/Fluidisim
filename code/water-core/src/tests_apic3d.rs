@@ -2210,3 +2210,113 @@ fn the_plunging_jet_encloses_air_fine_s648() {
     }
 }
 
+
+/// **S650 — le relais 2D → 3D** : Saint-Venant 2D porte l'onde de S647 sur toute la plage ; APIC 3D ne couvre que `[x_r ; 12,8]` m, une
+/// zone de colonnes au large (0,6 m), des particules sur la pente (l'air balistique), son bord gauche ouvert à la vitesse de Saint-Venant.
+/// Le fond plat à z = 0 dans la 3D (aucune maille solide sous les colonnes). Rend (le premier retournement `(t, x)`, le premier air
+/// enfermé `(t, x)`, l'écart de volume au débit compté par le bord, le volume entré compté, celui de Saint-Venant, particules posées,
+/// gardées, sous le fond, le temps de calcul, s).
+#[allow(clippy::type_complexity)]
+fn relais_s650(dx: f32, x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, f64, usize, usize, usize, f64) {
+    use crate::grand_evenement::{OndeSolitaire, Plage};
+    let horloge = std::time::Instant::now();
+    let (d, h, cot, x_pied, niveau, l, lz, duree) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64, 4.0f64);
+    let dxs = dx as f64;
+    // Saint-Venant 2D, toute la plage, le même état initial que S647.
+    let nx_sv = (l / dxs).round() as usize;
+    let mut sv = Plage::nouvelle(h, d, cot, x_pied, dxs, nx_sv, 3, lz - niveau as f64, 9.81).unwrap();
+    sv.domaine.regler_ordre_deux(1e-16).unwrap();
+    let i_r = (x_r / dxs).round() as usize;
+    // APIC 3D sur [x_r ; l].
+    let (nx, ny, nz) = (((l - x_r) / dxs).round() as usize, 4usize, (lz / dxs).round() as usize);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let xg = |i: f64| x_r + (i + 0.5) * dxs;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - x_pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
+    a.set_seabed(Some(&fond)).unwrap();
+    a.set_ballistic_air(true);
+    let n_col = (0.6 / dxs).round() as usize;
+    let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx < n_col) as u8).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    let onde = OndeSolitaire { h, d, x1: x_pied - 20f64.sqrt().acosh() / OndeSolitaire { h, d, x1: 0., g: 9.81 }.gamma(), g: 9.81 };
+    let eta: Vec<f32> = (0..nx * ny).map(|c| niveau + onde.eta(xg((c % nx) as f64)) as f32).collect();
+    a.set_columns_surface(&eta).unwrap();
+    let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| {
+        let x = x_r + (f % (nx + 1)) as f64 * dxs;
+        if x < x_pied { onde.u(x) as f32 } else { 0. }
+    }).collect();
+    let (v, w) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+    a.set_grid_velocities(&u, &v, &w).unwrap();
+    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let m2 = marche.clone();
+    let n = a.seed(&|p| {
+        let i = ((p[0] / dx) as usize).min(nx - 1);
+        i >= n_col && p[2] > m2[i] && p[2] < niveau + onde.eta(x_r + p[0] as f64) as f32
+    }).unwrap();
+    a.set_particle_velocities(&|p| {
+        let x = x_r + p[0] as f64;
+        ([if x < x_pied { onde.u(x) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])
+    }).unwrap();
+    let v0 = a.total_volume();
+    let (mut t, mut t_sv, mut entre, mut entre_sv) = (0u64, 0f64, 0f64, 0f64);
+    let (mut premier, mut apparu) = (None, None);
+    let fin = (duree * 1e6) as u64;
+    let pas_sv = 0.1 * dxs;
+    let largeur = ny as f64 * dxs;
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        let t1 = (t + us) as f64 * 1e-6;
+        while t_sv < t1 - 1e-12 {
+            let p = pas_sv.min(t1 - t_sv);
+            sv.domaine.pas(p).unwrap();
+            t_sv += p;
+            let c = (i_r - 1) * 3 + 1;
+            entre_sv += 0.5 * (sv.domaine.qx[c] + sv.domaine.qx[c + 3]) * p * largeur;
+        }
+        let c = (i_r - 1) * 3 + 1;
+        let (q, hh) = (sv.domaine.qx[c] + sv.domaine.qx[c + 3], sv.domaine.h[c] + sv.domaine.h[c + 3]);
+        let ub = if hh > 0. { (q / hh) as f32 } else { 0. };
+        a.set_open_boundaries(&vec![ub; ny * nz], &vec![0.; ny * nz]).unwrap();
+        a.step(us).unwrap();
+        t += us;
+        let col = a.columns.as_ref().unwrap();
+        entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
+        let ts = t as f64 * 1e-6;
+        if premier.is_none() {
+            if let Some((i, _)) = retournement_s647(&a, ny / 2, &marche) {
+                if i >= n_col {
+                    premier = Some((ts, xg(i as f64)));
+                }
+            }
+        }
+        if premier.is_some() && apparu.is_none() {
+            let (k, x) = air_enferme_s648(&a);
+            if k > 0 {
+                apparu = Some((ts, x_r + x));
+            }
+        }
+    }
+    let ecart = (a.total_volume() - v0 - entre) / v0;
+    let sous = a.particles().iter().filter(|p| p[2] < a.seabed_height(((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1))).count();
+    (premier, apparu, ecart, entre, entre_sv, n, a.particle_count(), sous, horloge.elapsed().as_secs_f64())
+}
+
+/// **S650** — (1)–(4) à 5 cm, contre le tout-3D de S647–S648 (retournement 2,571 s, 9,675 m ; air enfermé 2,872 s, 10,525 m).
+#[test]
+#[ignore = "≈ 3 min : le relais de S650 à 5 cm"]
+fn the_2d_to_3d_relay_breaks_like_the_all_3d_s650() {
+    let r = relais_s650(0.05, 5.0);
+    println!("S650 relais 5 cm : retournement {:?}, air enfermé {:?} ; volume − entré {:+.2e} (entré compté {:.5} m³, Saint-Venant {:.5}) ; {}/{}/{} ; {:.0} s de calcul", r.0, r.1, r.2, r.3, r.4, r.5, r.6, r.7, r.8);
+    // (4) le tout-3D, chronométré dans la même exécution.
+    let horloge = std::time::Instant::now();
+    let mut cas = CAS_S647;
+    cas[8] = 4.0;
+    let tout = rouleau_s648(0.05, cas);
+    let t_tout = horloge.elapsed().as_secs_f64();
+    println!("S650 tout-3D 5 cm : retournement {:?}, air enfermé {:?} ; {t_tout:.0} s de calcul ; le relais en prend {:.0} %", tout.0, tout.1, 100. * r.8 / t_tout);
+    assert!(r.2.abs() <= 1e-6, "critère 1 : {}", r.2);
+    let ((t0, x0), (ta, xa)) = (r.0.expect("critère 2"), r.1.expect("critère 3"));
+    assert!(x0 < 11.696 && (t0 - 2.571277).abs() <= 0.1 && (x0 - 9.675).abs() <= 0.15 + 1e-6, "critère 2 : {t0} {x0}");
+    assert!(ta > t0 && xa > x0, "critère 3 : {ta} {xa}");
+    assert_eq!(r.7, 0, "les particules hors du fond");
+}

@@ -462,6 +462,8 @@ ADR-260) ; les réponses de l'utilisateur (ADR-261) ; la réévaluation des inte
 budget) ; le rouleau 3D, étape 2 — la vague qui monte la pente, la crête juste, le jet de rive court (A333).
 **S645–S647** : A333 levée (l'air balistique : le jet de rive à 98 % de Synolakis) ; la trente-troisième revue (ADR-263 : un compte écrit est
 calculé, un instrument s'éprouve avant de juger) ; le rouleau 3D, étape 3 — l'onde qui plonge sur 1:12 et pas sur 1:3 (Grilli et al. 1997).
+**S648–S650** : le rouleau — le jet qui retombe et enferme l'air ; le découpage de la planète (ADR-264 : HEALPix pour les données, des
+grilles locales pour le calcul) ; le relais 2D → 3D (Saint-Venant au large, APIC 3D sur la pente, la masse au bit).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
