@@ -6676,3 +6676,9 @@ le module était juste. La formule de référence vaut pour une famille de rayon
 
 **S584 — le critère qui ne pouvait pas échouer.** « Le flux `A²·√h·b` constant » : la formule implémentée calcule `A` précisément pour
 qu'il le soit. Le critère vérifiait l'assemblage ; la physique se jugeait ailleurs, contre la forme fermée (ADR-248 D2).
+
+## L408
+
+**S582, S589 — le rapport imprimé, non lu.** Le script du plan de S589 écrivait lui-même « rapport au bruit : 1 » à côté d'un seuil ; le
+plan est parti ainsi, et la faute ne s'est vue qu'en codant l'essai. ADR-236 D1 disqualifie un tel seuil ; il fallait que le script le
+refuse au lieu de l'imprimer (ADR-249 D1).

@@ -1016,3 +1016,9 @@ gardé). La section 3 n'a plus d'absent. Maillons **1** (3.9 : absent → partie
 ([preuve](../docs/validation/LAC-BILAN-S590.md)) : un lac dans V — la pluie de son bassin versant, l'évaporation, son déversoir. **Mesuré** :
 le niveau d'équilibre à 58 µm, le temps de montée calculé tenu, le bilan exact au millilitre. Maillons **1** (2.3 : absent → partiel).
 Suivant : **S591, la vingt-deuxième revue de méthode**.
+
+## S591 — 2026-10-07 — la vingt-deuxième revue de méthode (ADR-249)
+
+**Entrée.** En autonomie ; revue due. **Friction** : un seuil sous son quantum imprimé par le script du plan et non lu (S582, S589) —
+**rendu exécutoire** : le script refuse un rapport sous 10 avant d'écrire (ADR-249 D1, L408) ; un paramètre décimal pour une loi entière
+(S590) — **élargie** (D2). Ont tenu : les formules indépendantes des plans. Maillons **1**. Suivant : **S592**, un point absent.

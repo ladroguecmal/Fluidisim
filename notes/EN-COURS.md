@@ -62,31 +62,14 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S590 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S587–S589), puis **2.3 — les lacs** (absent ;
-« niveau moyen, apports, courants faibles »). Première pièce : **le niveau moyen d'un lac par son bilan d'eau**, dans V — un lac est un
-contenant (ADR-010) : ses apports (la pluie sur son bassin versant, ADR-204), son évaporation, son exutoire (un déversoir).
+Session : S591 — **terminée**. En autonomie, **la vingt-deuxième revue de méthode** (ADR-222 D4 ; S586–S590).
 
-**Ce que la session fait.** Un essai de V, sans code neuf de loi : un lac de 1 000 × 1 000 m (forme volumique, 12 m de haut), plein
-jusqu'à la crête de son exutoire (10 m) ; la pluie de 10 mm/h sur un bassin versant de 3,6 km² ; une évaporation de 5 mm/jour ; un
-déversoir de 20 m (`C_d` = 0,62) vers dehors. Au pas de 10 s.
-
-**Références, calculées avant** (ce script les écrit). Apports **10.0000 m³/s**, évaporation 0.05787 m³/s ; l'équilibre du déversoir
-`Q = (2/3)·C_d·b·√(2g)·H^(3/2)` : **H = 0.419308 m** au-dessus de la crête ; la constante de temps près de l'équilibre
-`τ = A/(dQ/dH)` = **28117 s** (7.8 h, ADR-240 D2) ; le temps pour arriver à 1 mm de l'équilibre (RK4 fin) :
-**179210 s** (49.8 h). L'essai dure 72 h.
-
-**Quantum** (ADR-236 D1) : 1 ml sur 10⁶ m² — 10⁻⁹ m ; le millimètre de surface est le quantum utile (5.6). **Critères, écrits avant.** (1) le
-niveau final à 1 mm de `10 + H` ; (2) le bilan exact au millilitre : le volume final moins l'initial égale la pluie reçue moins le
-déversé moins l'évaporé (les transferts de chaque pas) ; (3) le niveau à 49.8 h à 2 mm de l'équilibre (la référence RK4 au même pas).
+**Ce que la session fait.** Relu : S586 (la revue), S587 (la bulle), S588 (le déferlement), S589 (au-dessus du plan ; un rapport au bruit
+imprimé et non lu), S590 (le lac ; un paramètre entier). **ADR-249** : D1, D2 ; L408 ; METHODE ; BOUSSOLE ; index.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.3 ; rituel (`--lot`).
+- [x] **P1** — jeton ; la revue (ADR-249, METHODE, L408, BOUSSOLE, index).
+- [ ] **P2** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — 0,419246 m pour 0,419304 ; 0,418305 m à 49,8 h ; le bilan exact. L'évaporation entière (58 nm/s, le plan 57,87) : référence
-  recalculée dans l'essai. Suite 765.
-- **P3** — preuve LAC-BILAN-S590 ; liste 2.3 (absent → partiel) et décompte ; index ; journal ; le lot.
-
