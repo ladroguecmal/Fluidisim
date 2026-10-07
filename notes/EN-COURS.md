@@ -62,38 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S665 — **terminée**. En autonomie vers la v2 ; 2.7. En S664, le facteur de `Cote2D` manquait (6,6 % au centre, 15 % au bord) ;
-trois causes nommées : la normalisation au départ, les parois de la marche, `K_r`.
-
-**Ce que la session fait.** (a) **Les bords périodiques à phase tournée** dans la marche à grand angle : `A(n + W) = A(n)·e^(i·k_n·W)`,
-`W = ny·dy`, `k_n = k₀·sin θ` — exacts pour une côte droite, sans parois ; le système tridiagonal devient cyclique (Sherman–Morrison).
-`propager_periodique`, à côté de `propager_grand_angle` (S660, S662 inchangés). (b) **La normalisation au départ** : l'amplitude incidente
-multipliée par le facteur WKB du bord du large (`transformer`, la référence de S362). `Cote2D` les emploie, sans marge.
+Session : S666 — **en cours**. En autonomie vers la v2. **La trente-septième revue de méthode** (ADR-222 D4 : S661–S665).
 
 **Contrôles du plan** (ADR-266, ADR-267)
 
-- **témoin** : les parois et la normalisation supprimées, `K_r` reste seul. Ce que le facteur rendrait : **à 2 % de la côte 1D** si le
-  modèle de S660 porte déjà la réfraction de l'amplitude ; **un écart qui suit `K_r`** (≈ 3 % à mi-profondeur, ≈ 6 % au rivage) s'il lui
-  manque ; **un écart qui varie avec `n`** si les bords périodiques sont faux.
-- **instrument** : les bords éprouvés d'abord — une onde plane oblique à 30° sur fond plat, en périodique : `|A|` = 1 partout à 10⁻⁶ (avec
-  des parois, des franges) ; la même onde, la phase transverse `∂_n arg A` = `k₀·sin θ` à 10⁻⁶ ; le solveur cyclique contre un produit
-  matrice-vecteur (le résidu à 10⁻¹²).
-- **calcul** : aucun nombre nouveau ; la plage et la houle de S364 et S664.
-- **ADR** : ADR-196 (D3, le bord du large), ADR-259 D1, ADR-266, ADR-267.
-- **pièges** : la torsion de phase au raccord (le signe : `A_{−1} = A_{ny−1}·e^(−i·k_n·W)`) ; les coefficients `p` au raccord (périodiques
-  aussi) ; le périodique ne vaut que pour une côte uniforme le long de ses bords.
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-236 D1, ADR-253 D1, ADR-259 D1, ADR-266, ADR-267.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle.
 
-**Critères, écrits avant.** (1) L'onde oblique sur fond plat : `|A|` = 1 et `∂_n arg A` = `k₀·sin θ` à 10⁻⁶ ; le résidu du solveur à
-10⁻¹². (2) `Cote2D` contre la côte 1D (la plage de S364, 10 s, 1 m, 30°) : **le facteur à 2 %, la phase à 15°, le bord (n = ±100 m) à 1 % du
-centre** — et le verdict du témoin. (3) Les essais de S659–S664 passent.
+**Critères, écrits avant.** (1) ADR-268 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les bords périodiques, la normalisation ; (1)–(3).
-- [x] **P3** — preuve ; liste 2.7 ; rituel.
+- [ ] **P2** — ADR-268.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) 2·10⁻¹³ ; (2) le témoin : l'écart suivait `K_r` exactement — le remède, la levée par le flux oblique lue par l'opérateur
-  (k linéaire dans le flux) : le facteur 0,56 %, la phase 3,65°, le bord 0 ; (3) passent ; Berkhoff non linéaire 0,101 ; 0,099 ; 0,094 ;
-  0,125. Deux versions divergentes essayées et rejetées (le retard, le k non linéaire dans le flux).
