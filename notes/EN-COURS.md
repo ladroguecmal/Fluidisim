@@ -70,6 +70,6 @@ les murs de S613, jamais mouillés), S615 (10.5). **ADR-254** : D1, D2 ; L413, L
 ### Plan
 
 - [x] **P1** — jeton ; la revue (ADR-254, METHODE, L413–L414, BOUSSOLE, index).
-- [ ] **P2** — rituel.
+- [x] **P2** — rituel.
 
 ### Notes de reprise
