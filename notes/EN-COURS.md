@@ -62,35 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S614 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S611–S613), puis **11.3 — les très grands
-événements : macroscopiques au large, locaux à l'interaction** (absent). Le tsunami : le modèle macroscopique (S582, levée de Green) donne la
-hauteur au bord d'un domaine local ; le domaine local (Saint-Venant 2D de S613, une bande) calcule la remontée sur la plage.
+Session : S615 — **en cours**. En autonomie (ADR-247) : **10.5 — les grandes formes cohérentes entre clients, les détails locaux libres**
+(absent). δ n'est jamais le même d'un client à l'autre (SPEC-003 : jamais D1 ; une autre maille, d'autres détails semés localement). La
+grande forme passe à W, répliqué, au-delà d'une coupure `λ_cut` (B2, ADR-001) ; le reste demeure local et libre.
 
-**Ce que la session fait.** Un module `grand_evenement.rs` : `hauteur_au_bord(rayon, A₀, s)` (la levée de Green du rayon de S582) ;
-`OndeSolitaire` (`η = H·sech²(γ(x − x₁))`, `γ = √(3H/4d³)`, `u = c·η/(d + η)`) ; `remontee_synolakis(H, d, cot β)` = `2,831·d·√cot β·(H/d)^(5/4)`
-(Synolakis 1987, onde non déferlante) ; `Plage` — une bande de trois mailles, fond plat à `d` puis pente `1/cot β`, l'onde posée à la distance
-canonique `arccosh(√20)/γ` du pied ; `remontee` — la plus haute cote mouillée (`h > 1 mm`). **En route, avant ce plan** : les murs de S613
-n'exerçaient aucune pression — sans effet à bords secs (Thacker, le lac : S613 inchangé, vérifié), faux à bord mouillé (la maille du bord
-accélérait) ; le flux de paroi `(0, ½gh², 0)` est ajouté (référence et code). Ne fait pas : l'entrée du niveau macroscopique au bord comme
-condition aux limites (ici, une onde solitaire de la hauteur donnée), le déferlement, le 3D local, le crash et le très grand navire.
+**Ce que la session fait.** Un module `coherence_clients.rs` : `filtre_gaussien(profil, dx, σ)` — la coupure passe-bas (noyau tronqué à 4σ,
+normalisé) ; `transduire_coupe(domaine, σ)` — la transduction de S612 sur la seule part passe-bas de δ (`η` et `ū` filtrés), le reste
+laissé au client. Ne fait pas : le 2D/3D, le choix de `λ_cut` par la physique (ici `σ` = 1 m), l'autorité de l'émission de W (qui émet
+l'événement répliqué : 10.1), le transport.
 
-**Références, calculées avant** (`s614_ref.py`, numpy). Un tsunami de 4,14 cm à 4 000 m de fond, levé jusqu'à 10 m : **H = 0.185146429 m**
-(`H/d` = 0.018515, sous le déferlement de Synolakis, 0,044). Plage 1:19,85 ; Synolakis : **R = 0.861418706 m**. Le domaine local, maille de
-1, ½, ¼ m (pas 0,04/k s) : **R = 0.705289673, 0.793450882, 0.850125945 m** — la remontée converge vers la loi (-1.31 % au plus
-fin) ; masse exacte, `h ≥ 0`, Courant ≤ 0.4071.
+**Références, calculées avant** (`s615_ref.py`, numpy). La même cause — une bosse de 5 cm — chez deux clients : **A** (maille 0,5 m, pas de
+détail) et **B** (maille 0,25 m, des rides locales de 1 mm à 1 m de longueur d'onde sur 40 m, semées par le client). À 5 s, la coupure
+(`σ` = 1 m) puis la transduction. À **15 s**, les W des deux clients diffèrent de **1.116420231e-04 m** pour une crête de 0.024016 m
+(0.465 %) ; leurs restes locaux à 5 s diffèrent de **4.328374884e-04 m** — les détails sont libres ; les rides
+fuient dans W de **2.734537962e-05 m** (2.73 % de leur amplitude, par les bords de la zone ridée) ; **sans coupure**, les
+deux W diffèrent de **4.335598843e-04 m** (3.9 fois plus).
 
-**Quantum** : la remontée se lit à la cote d'une maille — `dx/cot β`, 0.012594 m au plus fin ; le seuil de l'écart à Synolakis, dix quanta,
-**0.125945 m** (asserté). **Critères, écrits avant.** (1) `H` de la levée égal à la référence à 10⁻¹² ; (2) les trois remontées égales aux
-références au bit (des cotes de mailles) ; (3) croissantes, et la plus fine à moins de 0.1259 m de Synolakis ; (4) masse à 10⁻¹³, `h ≥ 0`,
-aux trois mailles ; (5) un bord mouillé au repos (un bassin plat à 10 m, murs) ne bouge pas : vitesse sous 10⁻¹² m/s après 500 pas — le
-défaut des murs ; (6) refus : `H`, `d` ou `cot β` non positifs.
+**Quantum** : f64. **Critères, écrits avant.** (1) l'écart des W à 15 s égal à la référence à 10⁻⁹ m, sous 1 % de la crête ; (2) l'écart des
+restes égal à la référence à 10⁻⁹ m, au-dessus de 0,25 mm ; (3) la fuite des rides égale à la référence à 10⁻⁹ m, sous 5 % de leur amplitude ;
+(4) sans coupure, l'écart des W égal à la référence à 10⁻⁹ m, plus de trois fois celui avec coupure ; (5) refus : `σ` ou `dx` non positifs.
 
 ### Plan
 
-- [x] **P1** — jeton ; le lot ; plan.
-- [x] **P2** — les murs de `saint_venant_2d.rs`, `grand_evenement.rs` et leurs essais ; (1)–(6).
-- [x] **P3** — preuve ; liste 11.3 ; rituel (`--lot`).
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `coherence_clients.rs` et ses essais ; (1)–(5).
+- [ ] **P3** — preuve ; liste 10.5 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(6) tenus du premier essai ; S613 inchangé avec les murs corrigés. Suite : 803 essais listés.
-- **P3** — preuve GRAND-EVENEMENT-S614 ; note datée à THACKER-S613 ; liste 11.3 (absent → partiel) et décompte ; index ; journal ; le lot.
