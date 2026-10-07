@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S599 — **en cours**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S597–S598), puis **12.3 — le précalcul côtier
+Session : S599 — **terminée**. En autonomie (ADR-247) : **le lot** (dû ; feuille de route S597–S598), puis **12.3 — le précalcul côtier
 stocké** (absent ; SPEC-005 §6) et, avec lui, la part côtière de **2.8** (absent ; la météo à la fin).
 
 **Ce que la session fait.** `cotier.rs` : la **cuisson** d'une plage — pour 4 états de mer × 4 phases de marée, un `CoastalState` :
@@ -88,7 +88,14 @@ large et positif dedans ; (4) la recherche : `(1,1 m ; 0,97)` → l'état `(1 m 
 ### Plan
 
 - [x] **P1** — jeton ; le lot ; plan.
-- [ ] **P2** — `cotier.rs` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; listes 12.3, 2.8 ; rituel (`--lot`).
+- [x] **P2** — `cotier.rs` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; listes 12.3, 2.8 ; rituel (`--lot`).
 
 ### Notes de reprise
+- **En route** (ADR-244 D1, avant de corriger l'essai) : l'essai exigeait une ligne par rangée pour **tous** les états — une attente hors du
+  plan. La référence du plan elle-même place la ligne de l'état `(0,5 m ; ¼)` à `x_b = (0,9343 − 1)/0,04` = −1,64 m, **hors de la grille**
+  (qui commence à 0,25 m) : à marée haute, la petite houle atteint le bord sans déferler. États hors de la grille (calculés) : [(0.5, 1.0)]. L'essai
+  attend aucun sommet pour eux ; le critère (2), 1 cm, inchangé pour les autres.
+- **P2 fini** — 1 228 800 octets ; les lignes à 0,22 mm ; 50,0000 m ; le champ ; la recherche ; l'empreinte. Suite 775.
+- **P3** — preuve COTIER-S599 ; listes 12.3 et 2.8 (absent → partiel) et décompte ; index ; journal ; le lot.
+

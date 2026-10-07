@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 03:48 +02:00
+JETON            : libre
+Battement        : 2026-10-07 03:55 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S599 — le lot ; 12.3, la bibliothèque côtière ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S598 — la descente d'un objet qui coule et l'enveloppe de son domaine ([journal](notes/JOURNAL.md)). Avant : S597 (le nuage de microbulles)
-Session suivante : **S599 — le lot** (dû en S599) **et un point absent** (ADR-247 ; restent 20). Revue à S601 (noter : un compte promis au plan sans être fait, S598). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S598 : 4.4 absent → partiel
-Registres       : dernier lot S596 (ADR-213 D3) ; le prochain au plus tard en S599
+Session en cours : aucune
+Dernière session : S599 — le lot ; la bibliothèque côtière ([journal](notes/JOURNAL.md)). Avant : S598 (la descente d'un objet qui coule et l'enveloppe de son domaine)
+Session suivante : **S600 — un point absent** (ADR-247 ; restent 18). Revue à S601 (noter : des attentes d'essai hors du plan, deux fois — S598 un compte, S599 une ligne par état). **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 2 — S599 : 12.3 et 2.8 absent → partiel
+Registres       : dernier lot S599 (ADR-213 D3) ; le prochain au plus tard en S602
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

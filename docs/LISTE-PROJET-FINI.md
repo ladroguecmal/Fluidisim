@@ -142,7 +142,8 @@ pas recopiée ici (L137).
   par 5 m de fond (121 % de la profonde) ([preuve](validation/W-PROFONDEUR-S522.md)). Manquent la bathymétrie 2D (et sous W) et la
   diffraction des hauts-fonds isolés, la marée, la dissipation au déferlement, la non-linéarité peu profonde (A234), et
   les autres chemins de B jusqu'à la scène de Godot.
-- [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent* ; la météo **à la fin** (ADR-197 D5), un système
+- [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *partiel* depuis S599 pour le côtier (la bibliothèque de 12.3 ;
+  [preuve](validation/COTIER-S599.md)) ; la météo **à la fin** (ADR-197 D5), un système
   complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).
 - [ ] **2.9 Dérivées du fond pour les couches volumiques**, sous et au-dessus du plan moyen —
   *partiel* : B reçu en eau profonde uniforme (ADR-113, S177 ; ADR-154, S254). Manquent la
@@ -814,7 +815,9 @@ pas recopiée ici (L137).
 - [ ] **12.1 Cuisson reproductible, empreintes, obsolescence détectée** (SPEC-005 §7) — *partiel* :
   spectre cuit et empreintes. Détection d'obsolescence absente.
 - [ ] **12.2 Éditeur de rivières** : dessin, validation bloquante, gravure (SPEC-005 §5) — *absent*.
-- [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *absent*.
+- [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *partiel* depuis S599 : **la bibliothèque d'une plage** — seize états en `f16`
+  (1 228 800 octets, la taille de SPEC-005), la polyligne de chacun, la recherche par paramètres (I-09), l'empreinte qui dit l'obsolescence
+  ([preuve](validation/COTIER-S599.md)). Manquent le courant de dérive littorale, le stockage sur disque, les plages réelles.
 - [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *absent*. **Depuis S476**
   (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite.
 - [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *absent*.
@@ -858,7 +861,7 @@ pas recopiée ici (L137).
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 5 | 2 |
-| 2. Grandes masses (B) | 9 | 0 | 8 | 1 |
+| 2. Grandes masses (B) | 9 | 0 | 9 | 0 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
 | 4. Volumique (δ) | 21 | 0 | 18 | 3 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
@@ -868,9 +871,9 @@ pas recopiée ici (L137).
 | 9. Activation et budget | 13 | 1 | 8 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
-| 12. Outillage | 5 | 0 | 1 | 4 |
+| 12. Outillage | 5 | 0 | 2 | 3 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **91** | **20** |
+| **total** | **121** | **10** | **93** | **18** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

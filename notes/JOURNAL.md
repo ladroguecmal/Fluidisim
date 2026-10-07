@@ -1071,3 +1071,11 @@ la fraction restante de trois classes à 2·10⁻⁴ de 30 000 bulles intégrée
 (masse ajoutée, Newton), l'enveloppe verticale du domaine. **Mesuré** : la vitesse terminale et la descente au script, l'enveloppe qui garde
 l'objet, 64 agrandissements comptés à l'avance. **En route** : un compte promis au plan et non fait, comblé aux notes avant l'essai ; un
 constat — trop d'agrandissements pour δ. Maillons **1** (4.4 : absent → partiel). Suivant : **S599**, le lot (dû) et un point absent.
+
+## S599 — 2026-10-07 — le lot ; la bibliothèque côtière
+
+**Entrée.** En autonomie (ADR-247) ; le lot (feuille de route S597–S598), puis 12.3 et 2.8 (absents). **Fait**
+([preuve](../docs/validation/COTIER-S599.md)) : `cotier.rs` — seize états en `f16`, la polyligne, la recherche par paramètres, l'empreinte.
+**Mesuré** : la taille de SPEC-005 à l'octet, les lignes à 0,22 mm, la marée qui les déplace de 50 m. **En route** : une attente de l'essai hors
+du plan (une ligne pour chaque état) que la référence du plan contredisait — notée, puis corrigée. Maillons **2** (12.3, 2.8 : absent →
+partiel). Suivant : **S600**, un point absent ; revue à S601.
