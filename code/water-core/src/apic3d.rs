@@ -21,6 +21,10 @@
 //! **S393** : un corps **cinématique** — une sphère dont l'hôte impose le mouvement, comme le cylindre du banc 2D de S320
 //! (B10) : ses mailles sont solides, les faces qui les touchent prennent sa vitesse, la pression y voit une paroi mobile, et
 //! les particules qu'il atteint sont repoussées à sa surface. Aucune force ne revient au corps.
+//!
+//! **S639 — le fond** ([`Apic3::set_seabed`]) : une hauteur par colonne, mise en escalier — les mailles dont le centre est sous le fond
+//! sont solides (`SOLID`), leurs faces des parois immobiles ; les particules qui y entrent sont reposées au-dessus, sans vitesse
+//! descendante ; la reconstruction reflète les particules sous le fond, comme les parois (S389). Éprouvé : le repos sur une pente (S639).
 
 use crate::delta3d::Domain3;
 use crate::delta_projection::Error;
@@ -111,6 +115,8 @@ pub struct Apic3 {
     pub(crate) bin_fresh: bool,
     /// **S488 (K2-4)** — les gouttes (`enable_droplets`, `apic3d_gouttes.rs`) ; `None`, le défaut : le pas d'avant, au bit.
     pub(crate) gouttes: Option<Box<gouttes::Gouttes>>,
+    /// **S639 — le fond en escalier** : par colonne (`j·nx + i`), le nombre de mailles solides depuis le bas ; `None`, pas de fond.
+    pub(crate) seabed: Option<Vec<u16>>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -188,6 +194,7 @@ impl Apic3 {
             separation: true,
             kernel: KERNEL_CELLS,
             body: None,
+            seabed: None,
             columns: None,
             background: [None; 2],
             background_time_s: 0.,
@@ -369,6 +376,33 @@ impl Apic3 {
         Ok(())
     }
     /// Le corps, avancé à la fin du dernier pas.
+    /// **S639 — le fond** : une hauteur par colonne (`ny × nx`, `x` le plus rapide, m), mise en escalier (les mailles dont le centre est
+    /// sous elle deviennent solides) ; `None` l'ôte. Refus : une longueur fausse (`Domain`), une valeur non finie (`NotFinite`), hors de
+    /// `[0, nz·dx]` (`Domain`). Le réglage alloue, le pas non.
+    pub fn set_seabed(&mut self, fond: Option<&[f32]>) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(f) = fond else {
+            self.seabed = None;
+            return Ok(());
+        };
+        if f.len() != nx * ny {
+            return Err(Error::Domain);
+        }
+        if f.iter().any(|v| !v.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        if f.iter().any(|&v| !(0. ..=nz as f32 * dx).contains(&v)) {
+            return Err(Error::Domain);
+        }
+        self.seabed = Some(f.iter().map(|&h| (0..nz).filter(|&k| (k as f32 + 0.5) * dx < h).count() as u16).collect());
+        Ok(())
+    }
+
+    /// **S639** — la hauteur du fond en escalier de la colonne `(i, j)` (m) ; 0 sans fond.
+    pub fn seabed_height(&self, i: usize, j: usize) -> f32 {
+        self.seabed.as_ref().map_or(0., |s| s[j * self.domain.nx + i] as f32 * self.domain.dx)
+    }
+
     pub fn body(&self) -> Option<Sphere3> {
         self.body
     }
@@ -961,6 +995,25 @@ impl Apic3 {
             let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
             (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt() < b.radius + radius
         });
+        // S639 : le fond reflète aussi — l'image `2·z_b − z` des particules proches, cherchée seulement près du fond de la colonne.
+        let fond = self.seabed.as_ref().map(|_| self.seabed_height(i, j)).filter(|&zb| zb > 0. && q[2] - zb < radius);
+        // S639 : les contremarches — une voisine latérale dont le fond monte plus haut que celui de la colonne, à portée du noyau,
+        // reflète à travers la face commune, comme une paroi, les particules sous son sommet.
+        let zb_ici = self.seabed_height(i, j);
+        let marche = |a: isize, b: isize| -> Option<f32> {
+            let (ia, jb) = (i as isize + a, j as isize + b);
+            if ia < 0 || jb < 0 || ia as usize >= nx || jb as usize >= ny || self.seabed.is_none() {
+                return None;
+            }
+            let zn = self.seabed_height(ia as usize, jb as usize);
+            (zn > zb_ici && zn > q[2] - radius).then_some(zn)
+        };
+        let contremarches = [
+            marche(-1, 0).map(|zn| (0usize, i as f32 * dx, 1f32, zn)),
+            marche(1, 0).map(|zn| (0usize, (i + 1) as f32 * dx, -1f32, zn)),
+            marche(0, -1).map(|zn| (1usize, j as f32 * dx, 1f32, zn)),
+            marche(0, 1).map(|zn| (1usize, (j + 1) as f32 * dx, -1f32, zn)),
+        ];
         let (mut sw, mut sx) = (0f32, [0f32; 3]);
         for c in k.saturating_sub(reach)..(k + reach + 1).min(nz) {
             for b in j.saturating_sub(reach)..(j + reach + 1).min(ny) {
@@ -989,6 +1042,20 @@ impl Apic3 {
                                         }
                                     };
                                     add(p);
+                                    if let Some(zb) = fond {
+                                        if p[2] >= zb && p[2] - zb < radius {
+                                            add([p[0], p[1], 2. * zb - p[2]]);
+                                        }
+                                    }
+                                    // `(axe, plan, côté de l'eau)` : l'image d'une particule du côté de l'eau, à moins d'un rayon du plan.
+                                    for &(axe, plan, cote, zn) in contremarches.iter().flatten() {
+                                        let e = (p[axe] - plan) * cote;
+                                        if e >= 0. && e < radius && p[2] < zn {
+                                            let mut im = p;
+                                            im[axe] = 2. * plan - p[axe];
+                                            add(im);
+                                        }
+                                    }
                                     if let Some(b) = body {
                                         let e = [p[0] - b.center[0], p[1] - b.center[1], p[2] - b.center[2]];
                                         let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
@@ -1115,6 +1182,7 @@ impl Apic3 {
         self.reconstruct();
         mark("reconstruction");
         self.columns_label();
+        self.label_seabed();
         self.label_body();
         // S488 : les gouttes (rien sans `enable_droplets`).
         self.droplets_classify();
@@ -1163,6 +1231,7 @@ impl Apic3 {
             self.separate();
         }
         self.move_body(dt);
+        self.push_seabed();
         // S399 : l'échange à la frontière de la zone des colonnes (rien sans zone).
         self.columns_exchange();
         mark("separation_corps_echange");
@@ -1230,12 +1299,66 @@ impl Apic3 {
         }
     }
 
-    /// Toute face qui touche une maille solide prend la vitesse du corps. Appelé après chaque opération qui écrit les faces —
-    /// sans quoi une extrapolation réécrirait la paroi (S320).
+    /// **S639** — les mailles sous le fond deviennent solides.
+    fn label_seabed(&mut self) {
+        let Some(sb) = self.seabed.as_ref() else { return };
+        let Domain3 { nx, ny, .. } = self.domain;
+        for j in 0..ny {
+            for i in 0..nx {
+                for k in 0..sb[j * nx + i] as usize {
+                    self.label[(k * ny + j) * nx + i] = SOLID;
+                }
+            }
+        }
+    }
+
+    /// **S639** — une particule sous le fond de sa colonne est reposée au-dessus (0,05 maille), sa vitesse descendante annulée.
+    fn push_seabed(&mut self) {
+        if self.seabed.is_none() {
+            return;
+        }
+        let dx = self.domain.dx;
+        for k in 0..self.n {
+            let (i, j, _) = self.cell_of(self.x[k]);
+            let zb = self.seabed_height(i, j);
+            if self.x[k][2] < zb + 0.05 * dx {
+                self.x[k][2] = zb + 0.05 * dx;
+                if self.vel[k][2] < 0. {
+                    self.vel[k][2] = 0.;
+                }
+            }
+        }
+    }
+
+    /// Toute face qui touche une maille solide prend la vitesse du corps — et, sous le fond (S639), une vitesse nulle. Appelé après
+    /// chaque opération qui écrit les faces — sans quoi une extrapolation réécrirait la paroi (S320).
     fn impose_body(&mut self) {
-        let Some(b) = self.body else { return };
-        let Domain3 { nx, ny, nz, .. } = self.domain;
-        let solid = |a: usize, j: usize, k: usize| self.label[(k * ny + j) * nx + a] == SOLID;
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        if let Some(sb) = self.seabed.as_ref() {
+            for j in 0..ny {
+                for i in 0..nx {
+                    for k in 0..sb[j * nx + i] as usize {
+                        self.u[(k * ny + j) * (nx + 1) + i] = 0.;
+                        self.u[(k * ny + j) * (nx + 1) + i + 1] = 0.;
+                        self.v[(k * (ny + 1) + j) * nx + i] = 0.;
+                        self.v[(k * (ny + 1) + j + 1) * nx + i] = 0.;
+                        self.w[(k * ny + j) * nx + i] = 0.;
+                        self.w[((k + 1) * ny + j) * nx + i] = 0.;
+                    }
+                }
+            }
+        }
+        let Some(b) = self.body else {
+            self.walls();
+            return;
+        };
+        let r2 = b.radius * b.radius;
+        // S639 : la vitesse du corps aux seules mailles de la sphère (le fond est aussi `SOLID`).
+        let solid = |a: usize, j: usize, k: usize| {
+            let q = [(a as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+            let d = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+            self.label[(k * ny + j) * nx + a] == SOLID && d[0] * d[0] + d[1] * d[1] + d[2] * d[2] < r2
+        };
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..nx {

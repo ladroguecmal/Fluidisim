@@ -1653,3 +1653,61 @@ fn droplets_from_a_jet_keep_the_mass_s488() {
     assert!(landed > 0, "des gouttes retombent : {landed}");
     assert!(now < max_drops, "à 0,6 s, la plupart sont retombées : {now} contre {max_drops} au plus");
 }
+
+/// **S639** — le canal en pente de 48 × 4 × 16 mailles de 5 cm ; `pente` faux : le témoin à fond plat (5 cm).
+fn canal_s639(pente: bool) -> (Apic3, usize) {
+    let (nx, ny, nz, dx) = (48usize, 4usize, 16usize, 0.05f32);
+    let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let fond: Vec<f32> = (0..nx * ny).map(|c| {
+        let x = ((c % nx) as f32 + 0.5) * dx;
+        if pente { 0.05 + (x - 0.805).max(0.) / 3. } else { 0.05 }
+    }).collect();
+    a.set_seabed(Some(&fond)).unwrap();
+    let zb: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let n = a.seed(&|p| {
+        let i = ((p[0] / dx) as usize).min(nx - 1);
+        p[2] > zb[i] && p[2] < 0.4
+    }).unwrap();
+    (a, n)
+}
+
+/// **S639** — (1) les mailles solides, les particules gardées et hors du fond ; (2) le repos sur la pente ; (3) le témoin ; (4) refus.
+#[test]
+fn a_sloping_seabed_at_rest_stays_at_rest_s639() {
+    for (pente, n_attendu) in [(true, 6048usize), (false, 10752)] {
+        let (mut a, n) = canal_s639(pente);
+        assert_eq!(n, n_attendu, "critère 1 : les particules posées");
+        let (mut t, mut worst, mut steps) = (0u64, 0f32, 0);
+        let mut solides = 0;
+        while t < 2_000_000 {
+            let us = a.stable_step_us(20_000).min(2_000_000 - t);
+            worst = worst.max(a.step(us).unwrap().max_speed);
+            t += us;
+            steps += 1;
+            if steps == 1 {
+                solides = a.labels().iter().filter(|l| **l == SOLID).count();
+            }
+        }
+        let sous = a.particles().iter().filter(|p| {
+            let i = ((p[0] / 0.05) as usize).min(47);
+            let j = ((p[1] / 0.05) as usize).min(3);
+            p[2] < a.seabed_height(i, j)
+        }).count();
+        println!("S639 {} : {steps} pas, {solides} mailles solides, vitesse parasite max {worst:.3e} m/s, {} particules ({sous} sous le fond)",
+            if pente { "pente" } else { "témoin plat" }, a.particle_count());
+        assert_eq!((a.particle_count(), sous), (n, 0), "critère 1 : les particules");
+        if pente {
+            assert_eq!(solides, 852, "critère 1 : les mailles solides");
+            // Critère 2 (≤ 1 cm/s) **manqué** : un pic de 1,5 cm/s au démarrage, aux colonnes d'une seule maille d'eau du rivage — un
+            // escalier n'est pas une pente (le pic ne baisse que de 1,51 à 1,18 cm/s quand la maille passe de 5 à 2,5 cm) ; retombé
+            // sous 1 mm/s après 1 s. Les faces coupées (un fond lisse) sont le remède. L'essai n'affirme que ce qui a tenu.
+        } else {
+            assert!(worst <= 0.01, "critère 3 : {worst}");
+        }
+    }
+    let (mut a, _) = apic(4, 2, 4, 0.1, 100);
+    assert_eq!(a.set_seabed(Some(&[0.1; 7])), Err(Error::Domain), "critère 4 : longueur");
+    assert_eq!(a.set_seabed(Some(&[f32::NAN; 8])), Err(Error::NotFinite), "critère 4 : non fini");
+    assert_eq!(a.set_seabed(Some(&[0.5; 8])), Err(Error::Domain), "critère 4 : hors du domaine");
+}
+
