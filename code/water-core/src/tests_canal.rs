@@ -75,3 +75,45 @@ fn a_canal_of_ten_reaches_finds_its_normal_depth_s592() {
     }
     assert_eq!(a, b, "critère 4 : la suite au bit");
 }
+
+// --- S593 — la ligne d'eau d'une rivière et son remous. Références écrites au plan par son script.
+
+/// Les profondeurs de l'état stationnaire exact du découpage (référence 1 du plan), de l'amont à l'aval.
+const Y_DISC: [f64; 20] = [0.76181, 0.78607, 0.81805, 0.85849, 0.9075, 0.96464, 1.02908, 1.09975, 1.17562, 1.25572, 1.33922, 1.42547,
+    1.51393, 1.60415, 1.69582, 1.78867, 1.88248, 1.97708, 2.07236, 2.16819];
+
+/// (1) La ligne d'eau à 1 mm du découpage exact (référence arrondie au 10⁻⁵ m) ; (2) à 1,5 mm de l'onde diffusive (l'écart du découpage,
+/// 0,75 mm, calculé au plan) ; (3) la vitesse moyenne de chaque bief, le bilan.
+#[test]
+fn a_river_backs_up_behind_its_weir_s593() {
+    let cells = box_cells([0, 0, 0], [100_000_000, 5_000_000, 4_000_000]);
+    let formes = [VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&formes).unwrap();
+    let mut nodes: [HydroNode; 20] = std::array::from_fn(|k| HydroNode {
+        volume_ml: 0, capacity_ml: 2_000_000_000, origin_um: [k as i64 * 100_000_000, 0, -(k as i64) * 100_000], shape: 0 });
+    let mut edges: [Opening; 21] = std::array::from_fn(|k| Opening {
+        from: k as u16, to: Some(k as u16 + 1), flow: BIEF,
+        position_um: [(k as i64 + 1) * 100_000_000, 2_500_000, -(k as i64 + 1) * 100_000 + 50_000], ..Default::default() });
+    // Le seuil aval : un déversoir de 5 m, sa crête à 1,5 m au-dessus du fond du dernier bief.
+    edges[19] = Opening { from: 19, to: None, flow: Flow::Weir { width_mm: 5_000 }, position_um: [2_000_000_000, 2_500_000, -1_900_000 + 1_500_000],
+        discharge: 0.62, ..Default::default() };
+    edges[20] = Opening { from: 0, to: Some(0), flow: Flow::Rain { catchment_mm2: 1_800_000_000_000 }, ..Default::default() };
+    let mut scratch = [0i64; 21];
+    let meteo = Meteo { pluie_mm_h: 10.0 };
+    let (mut recu, mut sorti) = (0i64, 0i64);
+    for _ in 0..216_000 {
+        step_meteo(&mut nodes, &mut edges, &shapes, [0.0, 0.0, -9.81], meteo, SimTime(50_000), &mut scratch).unwrap();
+        recu += scratch[20];
+        sorti += scratch[19];
+    }
+    let y: Vec<f64> = nodes.iter().map(|n| n.volume_ml as f64 * 1e-6 / 500.0).collect();
+    let pire = y.iter().zip(&Y_DISC).map(|(a, b)| (a - b).abs()).fold(0f64, f64::max);
+    let vitesses: Vec<f64> = y.iter().map(|y| 5.0 / (5.0 * y)).collect();
+    println!("S593 rivière : profondeurs {y:.5?} ; au pire {:.3} mm du découpage exact ; vitesses {vitesses:.4?} m/s", pire * 1e3);
+    assert!(pire < 1e-3, "critère 1");
+    assert!(pire < 1e-3 + 0.75e-3, "critère 2 : la ligne diffusive (l'écart du découpage, 0,75 mm, plus le critère 1)");
+    for (v, yr) in vitesses.iter().zip(&Y_DISC) {
+        assert!((v / (1.0 / yr) - 1.0).abs() < 1e-3, "critère 3 : la vitesse moyenne");
+    }
+    assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), recu - sorti, "critère 3 : le bilan");
+}
