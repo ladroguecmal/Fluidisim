@@ -382,3 +382,67 @@ fn the_moving_bore_and_the_dry_front_converge_to_stoker_and_ritter_s627() {
     assert!(st[0] / st[1] >= 1.9 && st[1] / st[2] >= 1.9 && ri[0] / ri[1] >= 1.9 && ri[1] / ri[2] >= 1.9, "critère 2");
     assert!(fr[0] > fr[1] && fr[1] > fr[2] && fr[2] > 0.0 && fr[0] / fr[1] >= 1.3 && fr[1] / fr[2] >= 1.3, "critère 3");
 }
+
+/// **S628** — (A) un écoulement uniforme freiné entre murs : la vitesse au milieu à 20 s.
+fn freine(dt: f64) -> f64 {
+    let (nx, ny) = (1000usize, 3usize);
+    let n = nx * ny;
+    let mut d = SaintVenant2D::nouveau(nx, ny, 1.0, G, vec![0.0; n], vec![1.0; n], vec![1.0; n], vec![0.0; n]).unwrap();
+    d.regler_ordre_deux(1e-16).unwrap();
+    d.regler_frottement(0.03).unwrap();
+    for _ in 0..(20.0 / dt).round() as usize {
+        d.pas(dt).unwrap();
+    }
+    let k = (nx / 2) * ny + 1;
+    d.qx[k] / d.h[k]
+}
+
+/// **S628** — (B) un écoulement uniforme sur pente tenu entre deux bords nourris de l'état normal : la hauteur au milieu, l'écart maximal.
+fn uniforme(dx: f64) -> (f64, f64) {
+    let (s, nm, q, ny) = (5e-4f64, 0.035f64, 1.5f64, 3usize);
+    let hn = (q * nm / s.sqrt()).powf(0.6);
+    let un = q / hn;
+    let nx = (2000.0 / dx).round() as usize;
+    let z: Vec<f64> = (0..nx).flat_map(|i| [-s * (i as f64 + 0.5) * dx; 3]).collect();
+    let mut d = SaintVenant2D::nouveau(nx, ny, dx, G, z, vec![hn; nx * ny], vec![hn * un; nx * ny], vec![0.0; nx * ny]).unwrap();
+    d.regler_ordre_deux(1e-16).unwrap();
+    d.regler_frottement(nm).unwrap();
+    let dt = 0.3 * dx / (un + (G * hn).sqrt());
+    let ext = move |_: f64| (hn, un);
+    for i in 0..(600.0 / dt).round() as usize {
+        d.pas_avec_bords(dt, i as f64 * dt, Some(&ext), Some(&ext)).unwrap();
+    }
+    let emax = (0..nx).map(|i| (d.h[i * ny + 1] - hn).abs()).fold(0.0, f64::max);
+    (d.h[(nx / 2) * ny + 1], emax)
+}
+
+/// **S628** — (1) le freinage ; (2) l'écoulement uniforme ; (3) la hauteur normale de S604 ; (5) refus.
+#[test]
+fn manning_friction_holds_the_normal_depth_on_a_slope_s628() {
+    let exact = 1.0 / (1.0 / 1.0 + G * 0.03 * 0.03 * 20.0);
+    for (dt, r) in [(0.04, 0.8499209573509663), (0.02, 0.8499209573509652), (0.01, 0.8499209573509671)] {
+        let u = freine(dt);
+        println!("S628 : freinage, pas {dt} s — u {u} (exact {exact})");
+        assert!((u - exact).abs() < 1e-12 && (u - r).abs() < 1e-12, "critère 1 : {dt}");
+    }
+    let hn = (1.5f64 * 0.035 / 5e-4f64.sqrt()).powf(0.6);
+    let refs = [(4.0, 1.6685002189979388, 0.0006363387015753119), (2.0, 1.6686493326850356, 0.00032095501754692),
+        (1.0, 1.6687248891394353, 0.00016121277427272318)];
+    let mut rel = Vec::new();
+    for (dx, hr, er) in refs {
+        let (h, e) = uniforme(dx);
+        println!("S628 : uniforme, maille {dx} m — h milieu {h} (normale {hn}, {:.3e}), écart max {e:e}", (h - hn) / hn);
+        assert!((h - hr).abs() < 1e-12 && (e - er).abs() < 1e-12, "critère 2 : {dx}");
+        rel.push(((h - hn) / hn).abs());
+    }
+    assert!(rel[0] / rel[1] >= 1.8 && rel[1] / rel[2] >= 1.8 && rel[2] < 1e-4, "critère 2 : la convergence");
+    let h_rect = crate::riviere::hauteur_normale(1.5 * 1e6, 1e6, 0.035, 5e-4);
+    println!("S628 : riviere::hauteur_normale (10⁶ m) {h_rect}");
+    assert!(((h_rect - hn) / hn).abs() < 1e-5, "critère 3");
+    let n = 12;
+    let mut un_ordre = SaintVenant2D::nouveau(4, 3, 1.0, G, vec![0.0; n], vec![1.0; n], vec![0.0; n], vec![0.0; n]).unwrap();
+    assert_eq!(un_ordre.regler_frottement(-0.01), Err(Refus), "critère 5 : n négatif");
+    assert_eq!(un_ordre.regler_frottement(f64::NAN), Err(Refus), "critère 5 : n non fini");
+    let ext = |_: f64| (1.0, 0.0);
+    assert_eq!(un_ordre.pas_avec_bords(0.01, 0.0, None, Some(&ext)), Err(Refus), "critère 5 : l'ordre un");
+}

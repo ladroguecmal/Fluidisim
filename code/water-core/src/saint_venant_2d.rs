@@ -18,7 +18,11 @@
 //! fantôme `c = (w⁺ − w⁻)/4`, `h = c²/g`, `u = (w⁺ + w⁻)/2`, `v = v₀` ; le flux de Rusanov fantôme–maille remplace la pression de paroi.
 //! Éprouvés : la fidélité (contre un domaine étendu) et l'absorption (S622).
 //!
-//! Ne fait pas : le rouleau 3D, le frottement, les trois autres faces forcées, la houle incidente sur une plage réelle, le branchement à δ.
+//! **S628 — le frottement de Manning** ([`SaintVenant2D::regler_frottement`]), semi-implicite après le pas : `q ← q/(1 + dt·g·n²·|u|/h^(4/3))`
+//! ; et **le bord droit caractéristique** ([`SaintVenant2D::pas_avec_bords`]), miroir du gauche. Éprouvés : la décroissance d'un écoulement
+//! freiné, l'écoulement uniforme sur pente contre la hauteur normale (S628).
+//!
+//! Ne fait pas : le rouleau 3D, les faces haute et basse forcées, la houle incidente sur une plage réelle, le branchement à δ.
 
 /// Une entrée refusée : moins de deux mailles par côté, `dx` ou `dt` non positifs, des tableaux de taille fausse, un pas au-delà de
 /// Courant ½.
@@ -40,6 +44,7 @@ pub struct SaintVenant2D {
     pub qx: Vec<f64>,
     pub qy: Vec<f64>,
     eps4: f64,
+    frottement_n: f64,
     travail: Travail,
     ordre2: Option<Ordre2>,
 }
@@ -102,6 +107,23 @@ fn corriger_bord(ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64]
         t.dh[j] += f[0];
         t.dqx[j] += f[1];
         t.dqy[j] += f[2];
+    }
+}
+
+/// **S628** — la face droite forcée par l'extérieur `(h_e, u_e)` : la pression de paroi rendue, le flux maille–fantôme retiré.
+#[allow(clippy::too_many_arguments)]
+fn corriger_bord_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, he: f64, ue: f64) {
+    for j in 0..ny {
+        let k = (nx - 1) * ny + j;
+        let hn = h[k];
+        let (un, vn) = (vitesse(hn, qx[k], eps4), vitesse(hn, qy[k], eps4));
+        let (wp, wm) = (un + 2.0 * (g * hn).sqrt(), ue - 2.0 * (g * he).sqrt());
+        let cg = (wp - wm) / 4.0;
+        let f = rusanov(g, hn, un, vn, cg * cg / g, (wp + wm) / 2.0, vn);
+        t.dqx[k] += 0.5 * g * (hn * hn);
+        t.dh[k] -= f[0];
+        t.dqx[k] -= f[1];
+        t.dqy[k] -= f[2];
     }
 }
 
@@ -209,7 +231,7 @@ impl SaintVenant2D {
         }
         let travail = Travail { u: vec![0.0; n], v: vec![0.0; n], dh: vec![0.0; n], dqx: vec![0.0; n], dqy: vec![0.0; n],
             fx: vec![[0.0; 5]; (nx - 1) * ny], fy: vec![[0.0; 5]; nx * (ny - 1)] };
-        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, travail, ordre2: None })
+        Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, frottement_n: 0.0, travail, ordre2: None })
     }
 
     /// **S620 — passer à l'ordre deux**, avec le `ε` de la vitesse désingularisée (m⁴) ; alloue ses tableaux ici, jamais au pas.
@@ -221,6 +243,15 @@ impl SaintVenant2D {
         self.eps4 = eps4;
         self.ordre2 = Some(Ordre2 { e: vec![0.0; n], sh: vec![0.0; n], se: vec![0.0; n], su: vec![0.0; n], sv: vec![0.0; n], h0: vec![0.0; n],
             qx0: vec![0.0; n], qy0: vec![0.0; n] });
+        Ok(())
+    }
+
+    /// **S628 — le frottement de Manning** de coefficient `n` (s/m^(1/3)) ; 0 : aucun.
+    pub fn regler_frottement(&mut self, n: f64) -> Result<(), Refus> {
+        if !(n >= 0.0) || !n.is_finite() {
+            return Err(Refus);
+        }
+        self.frottement_n = n;
         Ok(())
     }
 
@@ -242,13 +273,21 @@ impl SaintVenant2D {
     /// **S622 — un pas, la face gauche forcée** par l'extérieur `exterieur(t) = (h_e, u_e)` (hauteur d'eau et vitesse du large au bord) ; `t`
     /// l'instant du début du pas. Ordre deux seulement (l'extérieur à `t`, puis à `t + dt`) ; refusé à l'ordre un.
     pub fn pas_avec_bord(&mut self, dt: f64, t: f64, exterieur: &dyn Fn(f64) -> (f64, f64)) -> Result<(), Refus> {
+        self.pas_avec_bords(dt, t, Some(exterieur), None)
+    }
+
+    /// **S628 — un pas, les faces gauche et/ou droite forcées** par leurs extérieurs `(h_e, u_e)` ; ordre deux seulement.
+    pub fn pas_avec_bords(&mut self, dt: f64, t: f64, gauche: Option<&dyn Fn(f64) -> (f64, f64)>, droite: Option<&dyn Fn(f64) -> (f64, f64)>)
+        -> Result<(), Refus> {
         if self.ordre2.is_none() || !t.is_finite() {
             return Err(Refus);
         }
-        self.pas_interne(dt, Some((t, exterieur)))
+        self.pas_interne(dt, Some((t, gauche, droite)))
     }
 
-    fn pas_interne(&mut self, dt: f64, bord: Option<(f64, &dyn Fn(f64) -> (f64, f64))>) -> Result<(), Refus> {
+    #[allow(clippy::type_complexity)]
+    fn pas_interne(&mut self, dt: f64, bord: Option<(f64, Option<&dyn Fn(f64) -> (f64, f64)>, Option<&dyn Fn(f64) -> (f64, f64)>)>)
+        -> Result<(), Refus> {
         let (nx, ny, g, eps4) = (self.nx, self.ny, self.g, self.eps4);
         let Travail { u, v, dh, dqx, dqy, fx, fy } = &mut self.travail;
         for k in 0..nx * ny {
@@ -267,9 +306,15 @@ impl SaintVenant2D {
             o.qx0.copy_from_slice(&self.qx);
             o.qy0.copy_from_slice(&self.qy);
             operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o);
-            if let Some((t, ext)) = bord {
-                let (he, ue) = ext(t);
-                corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+            if let Some((t, gauche, droite)) = bord {
+                if let Some(ext) = gauche {
+                    let (he, ue) = ext(t);
+                    corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                }
+                if let Some(ext) = droite {
+                    let (he, ue) = ext(t);
+                    corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                }
             }
             for i in 0..n {
                 self.h[i] += k * self.travail.dh[i];
@@ -277,9 +322,15 @@ impl SaintVenant2D {
                 self.qy[i] += k * self.travail.dqy[i];
             }
             operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o);
-            if let Some((t, ext)) = bord {
-                let (he, ue) = ext(t + dt);
-                corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+            if let Some((t, gauche, droite)) = bord {
+                if let Some(ext) = gauche {
+                    let (he, ue) = ext(t + dt);
+                    corriger_bord(ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                }
+                if let Some(ext) = droite {
+                    let (he, ue) = ext(t + dt);
+                    corriger_bord_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, he, ue);
+                }
             }
             for i in 0..n {
                 let (h2, x2, y2) = (self.h[i] + k * self.travail.dh[i], self.qx[i] + k * self.travail.dqx[i], self.qy[i] + k * self.travail.dqy[i]);
@@ -287,6 +338,7 @@ impl SaintVenant2D {
                 self.qx[i] = 0.5 * (o.qx0[i] + x2);
                 self.qy[i] = 0.5 * (o.qy0[i] + y2);
             }
+            self.frotter(dt);
             return Ok(());
         }
         dh.fill(0.0);
@@ -342,7 +394,23 @@ impl SaintVenant2D {
             self.qx[i] += k * dqx[i];
             self.qy[i] += k * dqy[i];
         }
+        self.frotter(dt);
         Ok(())
+    }
+
+    /// **S628** — le frottement semi-implicite après le pas.
+    fn frotter(&mut self, dt: f64) {
+        let n = self.frottement_n;
+        if n == 0.0 {
+            return;
+        }
+        for i in 0..self.nx * self.ny {
+            let (u, v) = (vitesse(self.h[i], self.qx[i], self.eps4), vitesse(self.h[i], self.qy[i], self.eps4));
+            let hm = if self.h[i] > 1e-6 { self.h[i] } else { 1e-6 };
+            let f = 1.0 + dt * self.g * n * n * (u * u + v * v).sqrt() / hm.powf(4.0 / 3.0);
+            self.qx[i] /= f;
+            self.qy[i] /= f;
+        }
     }
 
     /// **S619** — l'adresse et la capacité de chaque tableau de travail (pour vérifier qu'aucun pas ne réalloue).
