@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 20:24 +02:00
+JETON            : libre
+Battement        : 2026-10-07 20:32 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S659 — 2.7, la bathymétrie 2D : le modèle parabolique de pente douce, jugé sur le haut-fond de Berkhoff ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S658 — la séance visuelle du rouleau (R40) ([journal](notes/JOURNAL.md)). Avant : S657 (le corps libre contre l'eau autour de lui)
-Session suivante : **S659** — selon R40 : si l'utilisateur répond, son verdict d'abord ; sinon la suite des partiels de la physique (ADR-247) — le choix par la liste (dépendances, front 0).
-Maillons        : 2
-Registres       : dernier lot S656 (ADR-213 D3) ; le prochain au plus tard en S659
+Session en cours : aucune
+Dernière session : S659 — 2.7 : le modèle parabolique de pente douce ([journal](notes/JOURNAL.md))
+Session suivante : **S660 — le témoin du grand angle** sur le haut-fond de Berkhoff : l'approximation parabolique à grand angle (Kirby 1986, Padé [1,1] ou minimax) dans pente_douce.rs ; si les écarts des sections 2 et 5 tombent, c'était l'angle.
+Maillons        : 1
+Registres       : dernier lot S659 (ADR-213 D3) ; le prochain au plus tard en S662
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

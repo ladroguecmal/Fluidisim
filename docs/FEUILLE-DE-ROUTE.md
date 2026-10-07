@@ -469,6 +469,8 @@ un choc de deux pas) ; le corps libre que le rouleau emporte (6.7 ; trop vite, A
 **S654–S656** : A334 réattribuée (le couplage explicite, non la force) ; la masse ajoutée implicite du corps libre (la flottaison amortie, la
 vitesse ramenée) ; la trente-cinquième revue — les erreurs relevées à la demande de l'utilisateur, les contrôles du plan exigés par le
 rituel (ADR-266).
+**S657–S659** : A334 levée (le corps libre à 0,9 fois l'eau qui l'entoure — le rouleau emporte un nageur) ; la séance visuelle du rouleau,
+**R40 reçu** : « tout parait crédible » ; 2.7, le modèle parabolique de pente douce (Berkhoff 1982 : le pic tenu, les sections loin).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

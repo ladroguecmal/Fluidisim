@@ -97,7 +97,7 @@ section 3 (2,21 mesuré) à 15 % ; deux mailles rapportées.
 
 - [x] **P1** — jeton ; plan ; les mesures récupérées.
 - [x] **P2** — `pente_douce.rs` et ses essais ; (1)–(3).
-- [ ] **P3** — preuve ; liste 2.7, 3.6 ; rituel.
+- [x] **P3** — preuve ; liste 2.7, 3.6 ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — (1) 2·10⁻¹⁴ ; (2) 0,990551 exact ; (3) manqué : écarts 0,231 ; 0,197 ; 0,419 ; 0,288, le pic de la section 3 à 11 %. Le
