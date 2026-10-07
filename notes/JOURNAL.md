@@ -1727,3 +1727,11 @@ plages de S678.
 ([preuve](../docs/validation/RELAIS-RIVAGE-FLUX-S680.md)) : l'interface précisée (le bord caractéristique de Saint-Venant nourri par la
 3D, son flux rendu, un réservoir de particules côté APIC) ; `flux_des_bords`. **Mesuré** : le bilan de volume à 4,6·10⁻¹⁵ sur 2 000
 pas ; S613–S628 identiques. Maillons **1** (4.14). Suivant : **S681, la quarantième revue de méthode** ; puis la brique 2.
+
+## S681 — 2026-10-08 — la quarantième revue de méthode (ADR-272)
+
+**Entrée.** La revue (S676–S680). **Fait** : [ADR-272](../docs/adr/ADR-272-quarantieme-revue-de-methode.md). D1 : un remède à un
+défaut qui dépend de la place d'une interface dans la maille se juge sur trois places au moins (S678 : le remède combiné passait le
+montage du plan aux deux mailles et manquait ailleurs). Le `g` compté deux fois de S677 est couvert par ADR-239 D1. Maillons **0**
+(méthode). Suivant : **S682**, la brique 2 du relais au rivage (le bord droit d'APIC qui retire et pose des particules) ; la revue en
+S686.
