@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 12:59 +02:00
+JETON            : libre
+Battement        : 2026-10-07 13:05 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S641 — la revue de méthode (ADR-259) et le lot ; l'audit des intentions initiales versé dans la liste ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S640 — le rouleau 3D, étape 1 bis : les faces coupées dans APIC 3D ([journal](notes/JOURNAL.md)). Avant : S639 (le rouleau 3D, étape 1 : un fond en pente dans APIC 3D)
-Session suivante : **S641 — revue de méthode (ADR-259, S636–S640) et lot** ; y joindre l'audit des intentions initiales : ajouter à la liste les intentions absentes, corriger 4.11 (le seuil 0,35·Hs contre ADR-111/112), I-08 et I-14 par ADR ou conformité ; puis le choix de l'étape 2 du rouleau 3D (l'escalier de S639 au rivage, ou une surface fiable en eau mince).
+Session en cours : aucune
+Dernière session : S641 — la trente-deuxième revue de méthode ; l'audit versé dans la liste ([journal](notes/JOURNAL.md))
+Session suivante : **S642 — les corrections de l'audit** : 4.11 (le critère de bascule à instruire sur un couplage calculé, ou le seuil 0,35·Hs rangé en paramètre non reçu, ADR-112 D1) ; I-08 (les modules en f64 : amender ou rendre conformes) ; I-14 (les lois employées ajoutées à SPEC-001/002, ou un amendement). Puis le rouleau 3D (l'étape 2 sur l'escalier de S639, ou la surface en eau mince).
 Maillons        : 1
-Registres       : dernier lot S638 (ADR-213 D3) ; le prochain au plus tard en S641
+Registres       : dernier lot S641 (ADR-213 D3) ; le prochain au plus tard en S644
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

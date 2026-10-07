@@ -78,7 +78,7 @@ au registre des questions ouvertes.
 
 - [x] **P1** — jeton ; plan ; le lot.
 - [x] **P2** — ADR-259 ; la liste, ses dépendances ; les questions.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2 fini** — ADR-259 (D1 : un témoin qui supprime une cause avant de nommer un remède ; D2 : une valeur tirée d'un ADR se cite avec ceux

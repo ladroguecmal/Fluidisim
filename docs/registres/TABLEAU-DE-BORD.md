@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 108 — absents : 2.
+**Périmètre : 131 points** (5.11 hors). **Validés : 10** (7.6 %) — partiels : 108 — absents : 13.
 
 ## Par campagne
 
@@ -26,7 +26,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | **K12** La fin de l'eau | 0 | 6 | 1 | ◐2.8 ◐7.1 ◐7.6 ◐7.7 ·7.8 ◐5.5 ◐8.4 |
 | **K13** La validation du système, et l'eau dans le jeu | 0 | 5 | 1 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ◐11.5 |
 
-**Points ouverts hors de toute campagne : 0**.
+**Points ouverts hors de toute campagne : 11** — 1.9, 2.10, 3.10, 4.22, 5.13, 5.14, 6.9, 6.10, 7.9, 11.6, 13.5.
 
 ## Les points ouverts, un par ligne
 
@@ -39,6 +39,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 1.6 | partiel | Cellules, domaines et solveurs distincts, niveaux d'activité des cellules |
 | 1.7 | partiel | Horloge de simulation entière et phases déterministes |
 | 1.8 | partiel | Référentiels, précision f32 locale, `g_eff` injectée |
+| 1.9 | absent | Horloge du client synchronisée, identité du fond contrôlée |
 | 2.1 | partiel | Mer et océan : état de mer spectral déterministe, sans état par cellule |
 | 2.2 | partiel | Houles longues, mers croisées, marée, niveau moyen variable |
 | 2.3 | partiel | Lacs |
@@ -48,6 +49,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 2.7 | partiel | Bathymétrie |
 | 2.8 | partiel | Précalcul côtier et météo |
 | 2.9 | partiel | Dérivées du fond pour les couches volumiques |
+| 2.10 | absent | Vagues de vent bornées par le fetch |
 | 3.1 | partiel | Anneaux d'impact dispersifs |
 | 3.2 | partiel | Sillages de bateaux |
 | 3.3 | partiel | Explosions de surface et sous-marines |
@@ -57,6 +59,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 3.7 | partiel | Événements horodatés, journaux, instantanés et restauration avec perte connue |
 | 3.8 | partiel | Composition B+W sans refus sur toute scène |
 | 3.9 | partiel | Couches W fournies au-dessus du plan moyen pour δ |
+| 3.10 | absent | Rochers où la houle brise en permanence |
 | 4.1 | partiel | Solveur volumique 3D à surface libre |
 | 4.2 | partiel | Plusieurs domaines actifs simultanés |
 | 4.3 | partiel | Subdivision adaptative anisotrope, blocs épars |
@@ -78,6 +81,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 4.19 | partiel | Coût de δ compatible avec le budget |
 | 4.20 | partiel | Changement de solveur pendant une simulation |
 | 4.21 | partiel | Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine |
+| 4.22 | absent | Retour d'une gerbe vers W |
 | 5.2 | partiel | Géométrie réelle des contenants |
 | 5.4 | partiel | Vannes et pompes |
 | 5.5 | partiel | Pluie selon l'exposition au ciel, absorption par le sol |
@@ -87,9 +91,13 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 5.9 | partiel | Compartiments, brèches, inondation de navire, limitée par l'air |
 | 5.10 | partiel | Articulation V↔δ |
 | 5.12 | partiel | Capture et restauration de V |
+| 5.13 | absent | Naissance et mort des flaques |
+| 5.14 | absent | V rend son eau à la rivière, à la mer, au caniveau |
 | 6.2 | partiel | Forces de l'eau sur les objets |
 | 6.6 | partiel | Grands navires |
 | 6.7 | partiel | Acteur poussé, renversé ou déplacé par l'eau |
+| 6.9 | absent | L'eau aérée porte moins |
+| 6.10 | absent | L'affichage des corps animé par δ |
 | 7.1 | partiel | Écume et moutons |
 | 7.2 | partiel | Spray, embruns, gouttelettes |
 | 7.3 | partiel | Microbulles visuelles |
@@ -98,6 +106,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 7.6 | partiel | Glace et vapeur |
 | 7.7 | partiel | Danger et traversabilité |
 | 7.8 | absent | Audio de l'eau |
+| 7.9 | absent | La glace qui cède |
 | 8.1 | partiel | Rendu temps réel de la surface sur GPU |
 | 8.2 | partiel | LOD de la géométrie de surface |
 | 8.3 | partiel | LOD par source |
@@ -134,6 +143,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 11.3 | partiel | Très grands événements |
 | 11.4 | partiel | Nombreuses sources simultanées à coût maîtrisé |
 | 11.5 | partiel | Matériel cible de livraison et seconde cible |
+| 11.6 | absent | Verser d'un référentiel à un autre |
 | 12.1 | partiel | Cuisson reproductible, empreintes, obsolescence détectée |
 | 12.2 | partiel | Éditeur de rivières |
 | 12.3 | partiel | Précalcul côtier stocké |
@@ -143,6 +153,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 13.2 | partiel | Les 23 cas canoniques passent sur le système |
 | 13.3 | partiel | Les onze bancs rendent leur verdict |
 | 13.4 | absent | L'eau dans le jeu |
+| 13.5 | absent | Rejeu, saturation, dérive des coûts |
 
 ## Historique du décompte
 
@@ -312,4 +323,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S638 | 2026-10-07 | 10 | 108 | 2 | 120 |
 | S639 | 2026-10-07 | 10 | 108 | 2 | 120 |
 | S640 | 2026-10-07 | 10 | 108 | 2 | 120 |
+| S641 | 2026-10-07 | 10 | 108 | 13 | 131 |
 <!-- fin de l'historique -->
