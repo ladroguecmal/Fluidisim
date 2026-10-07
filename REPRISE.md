@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-07 21:38 +02:00
+JETON            : occupé
+Battement        : 2026-10-07 21:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S667 — Cote2D à plusieurs composantes ; mémoire et coût mesurés ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S666 — la trente-septième revue de méthode (ADR-268) ([journal](notes/JOURNAL.md)). Avant : S665 (les bords périodiques, la normalisation, `K_r` : la côte 2D juste)
 Session suivante : **S667 — Cote2D à plusieurs composantes** (un spectre de B) : la mémoire et le coût de cuisson mesurés sur une côte réelle d'échelle, l'interpolation entre composantes voisines (ADR-196 §3).
 Maillons        : 2

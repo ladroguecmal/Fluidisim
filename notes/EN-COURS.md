@@ -62,25 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S666 — **terminée**. En autonomie vers la v2. **La trente-septième revue de méthode** (ADR-222 D4 : S661–S665).
+Session : S667 — **en cours**. En autonomie vers la v2 ; 2.7. `Cote2D` (S664–S665) n'a été jugée que sur une composante. **Une mer de huit
+composantes** (périodes 7 à 12 s, directions −20° à +20°, `Hs` = 2.19 m) sur la plage de S364 : la composition jugée contre la côte 1D,
+la mémoire et le temps de cuisson mesurés, extrapolés à une vraie côte.
 
-**Contrôles du plan** (ADR-266, ADR-267)
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-236 D1, ADR-253 D1, ADR-259 D1, ADR-266, ADR-267.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle.
+- **témoin** : sans objet au départ.
+- **instrument** : la côte 1D de S364 (`Cote::eval`), la même mer. Ce qui départagerait : **une composition juste** rend un écart de `η`
+  sous la borne calculée par point depuis les écarts de chaque composante (`Σ a_c·f_c·(|Δφ_c| + |Δf_c|/f_c)`) ; **une diaphonie** entre
+  composantes (un indice de table décalé, une direction mal tournée) la dépasse.
+- **calcul** : la borne par point, calculée par l'essai (son ordre, ce script : ≈ 19.1 cm — le plancher de l'instrument,
+  ADR-268 D1) ; `Hs` < 2,5 m (asserté : au large du déferlement à 2 m).
+- **ADR** : ADR-196 (§3 : la mémoire d'une bathymétrie 2D, ses voies), ADR-264, ADR-268.
+- **pièges** : une composante qui s'éloigne de la côte ou à plus de 45° (refusée) ; la mémoire (`ns·nn·20` octets par composante) ; le
+  temps de cuisson qui croît avec la marge… absente désormais (les bords périodiques).
 
-**Critères, écrits avant.** (1) ADR-268 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Critères, écrits avant.** (1) À 60 points × 3 instants, sur la plage, `|η₂D − η₁D|` sous la borne de composition **en chaque point**.
+(2) Rapportés : la mémoire et le temps de cuisson par composante ; leur extrapolation à 1 km² et 32 composantes au pas de 2 m — et la
+voie de réduction qu'ADR-196 §3 nomme (des transformations partagées entre composantes voisines), à mesurer ensuite.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-268.
-- [x] **P3** — rituel.
+- [ ] **P2** — l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; liste 2.7 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-268 : D1, une borne calculée avec le plancher de son instrument ; D2, un remède essayé sous une autre cause active est suspendu. Prochaine revue S671.
