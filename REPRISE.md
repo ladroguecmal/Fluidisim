@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-07 17:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S654 — A334, le choc sous le rouleau : le témoin du pas de temps ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S653 — le corps libre que le rouleau emporte ([journal](notes/JOURNAL.md))
 Session suivante : **S654 — A334** : le rouleau de S653 (corps libre) à pas deux fois plus court (stable_step plafonné à 5 ms) — un choc physique garde son impulsion, un artefact dépend du pas ; selon le verdict, lisser la force ou corriger la pression au basculement des mailles.
 Maillons        : 1

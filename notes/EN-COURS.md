@@ -62,31 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S653 — **terminée**. En autonomie vers la v2 (ADR-247) ; 6.7 : « le corps libre que le rouleau emporte ».
+Session : S654 — **en cours**. En autonomie vers la v2. **A334** : sous le rouleau, la force sur un corps est un choc de deux pas (S652 :
+165,6 N brut, 47 N lissé sur 0,1 s) ; libre, le corps est lancé plus vite que l'eau (S653 : 4,68 contre 1,80 m/s).
 
-**Ce que la session fait.** La sphère d'APIC devient **libre** (`Apic3::set_body_mass`) : à chaque pas, après la projection, la force de
-pression sur elle — l'instrument de S652 passé dans le cœur (`Apic3::body_force`) — et son poids (`g_eff`) changent sa vitesse
-(`v += dt·(F/m + g)`) ; le pas suivant impose cette vitesse à l'eau. Le couplage est **explicite** : il est connu pour être instable pour
-un corps plus léger que sa masse ajoutée (½ρV pour une sphère) ; le corps essayé (densité 500) pèse le double de sa masse ajoutée. Un
-**contact** simple : le corps ne descend pas sous le fond de sa colonne ni ne sort du domaine (vitesse normale annulée). Sans masse, le
-corps est imposé comme avant — au bit.
+**Le témoin (ADR-259 D1).** Le même rouleau, le pas plafonné à **5 ms** au lieu de 10 (`stable_step_us`), la sphère fixe (S652) puis
+libre (S653). Un choc physique garde son impulsion et son pic (la pression d'impact ne dépend pas du pas) ; un artefact de basculement
+entre eau et air donne un pic par pas : sa force double quand le pas est divisé par deux, son impulsion reste.
 
-**Références, calculées avant** (ce script). La sphère `r` = 0,1 m, densité 500 : `V` = 0.004189 m³, `m` = 2.0944 kg. À l'équilibre,
-Archimède la met à mi-immersion (centre au niveau) ; l'instrument lit 1,13 × Archimède (S652) : le corps doit flotter environ 0.9
-cm trop haut.
-
-**Critères, écrits avant.** (1) **La flottaison** : la sphère lâchée 3 cm sous son équilibre, en eau au repos (40 × 8 × 20 mailles de 5 cm,
-eau à 0,4 m), oscille et se pose — entre 3 et 4 s, l'amplitude de sa vitesse verticale sous 2 cm/s, son centre à 2 cm du niveau ; aucune
-vitesse non finie. (2) **Le rouleau l'emporte** : la même sphère libre, posée à x = 10,4 m dans le relais de S652 (sur sa marche, à
-mi-immersion), avance vers la plage de plus de 0,5 m dans les 1,5 s qui suivent le retournement ; sa vitesse au plus celle de la colonne
-de la sonde ; la masse de l'eau exacte. (3) Refus : une masse nulle, négative ou non finie. (4) Sans masse, les essais d'APIC 3D inchangés.
+**Critères de verdict, écrits avant.** Sphère fixe, de 10 à 5 ms : (a) **artefact** si le pic brut croît de plus de 50 % et que
+l'impulsion varie de moins de 20 % ; (b) **choc physique** si le pic et l'impulsion varient tous deux de moins de 20 % ; (c) sinon,
+non départagé, rapporté. Sphère libre : la vitesse du corps à 5 ms, rapportée contre 4,68 m/s (10 ms) et la vitesse de la colonne.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le corps libre dans le cœur ; (1)–(4).
-- [x] **P3** — preuve ; liste 6.7, 6.4 ; rituel.
+- [ ] **P2** — le pas plafonné en paramètre ; les deux essais (copies du binaire, en parallèle) ; le verdict.
+- [ ] **P3** — preuve ; A334 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) à moitié : le centre à 1,3 cm du niveau, la vitesse 4,1 cm/s entre 3 et 4 s (borne 2, manqué ; décroissante, stable) ;
-  (2) à moitié : emporté de 2,03 m, la masse au bit, **la vitesse 4,68 m/s contre 1,80 — manqué** (A334) ; (3), (4) tenus.

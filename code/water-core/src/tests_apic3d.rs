@@ -2281,11 +2281,11 @@ fn the_body_force_reads_archimedes_at_rest_s652() {
 
 /// **S650–S652 — le relais**, et, avec `corps` (centre global en x, y, z ; rayon), une sphère fixe dont la force est relevée.
 fn relais_s652(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>) -> ReleveS652 {
-    relais_libre_s653(dx, x_r, ny_in, corps, None)
+    relais_libre_s653(dx, x_r, ny_in, corps, None, 10_000)
 }
 
 /// **S653** — le relais, et, avec `masse` (kg), la sphère **libre**.
-fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>, masse: Option<f32>) -> ReleveS652 {
+fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f32)>, masse: Option<f32>, pas_max_us: u64) -> ReleveS652 {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let horloge = std::time::Instant::now();
     let (d, h, cot, x_pied, niveau, l, lz, duree) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64, 4.0f64);
@@ -2339,7 +2339,7 @@ fn relais_libre_s653(dx: f32, x_r: f64, ny_in: usize, corps: Option<([f32; 3], f
     let pas_sv = 0.1 * dxs;
     let largeur = ny as f64 * dxs;
     while t < fin {
-        let us = a.stable_step_us(10_000).min(fin - t);
+        let us = a.stable_step_us(pas_max_us).min(fin - t);
         let t1 = (t + us) as f64 * 1e-6;
         while t_sv < t1 - 1e-12 {
             let p = pas_sv.min(t1 - t_sv);
@@ -2500,7 +2500,7 @@ fn a_free_sphere_floats_at_its_draft_s653() {
 #[ignore = "≈ 6 min : le corps libre sous le rouleau de S653"]
 fn the_plunging_roller_carries_a_free_body_s653() {
     let m = (500. * 4. / 3. * std::f64::consts::PI * 0.001) as f32;
-    let r = relais_libre_s653(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)), Some(m));
+    let r = relais_libre_s653(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)), Some(m), 10_000);
     let (t0, _) = r.premier.expect("le retournement");
     let x0 = r.trajet.first().map_or(0., |p| p.1);
     let avance = r.trajet.iter().filter(|p| p.0 <= t0 + 1.5).fold(f64::NEG_INFINITY, |m, p| m.max(p.1)) - x0;
@@ -2513,5 +2513,34 @@ fn the_plunging_roller_carries_a_free_body_s653() {
     // d'A334 frappent un corps de 2 kg. L'essai n'affirme que ce qui a tenu (ADR-244).
 }
 
+/// **S654 — le témoin d'A334** : le rouleau de S652 (sphère fixe) puis de S653 (libre), le pas plafonné à 5 ms. Rapporté.
+#[test]
+#[ignore = "≈ 15 min : le témoin d'A334, sphère fixe, pas de 5 ms"]
+fn the_roller_force_at_half_the_step_fixed_s654() {
+    let r = relais_libre_s653(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)), None, 5_000);
+    let mut lisse = 0f64;
+    for (i, &(t0, _, _)) in r.histoire.iter().enumerate() {
+        let (mut s, mut d) = (0f64, 0f64);
+        for &(t, f, dt) in &r.histoire[i..] {
+            if t - t0 > 0.1 { break; }
+            s += f * dt;
+            d += dt;
+        }
+        if d > 0.09 { lisse = lisse.max(s / d); }
+    }
+    let n_pics = r.histoire.iter().filter(|h| h.1 > 0.5 * r.fx_max).count();
+    println!("S654 fixe, 5 ms : retournement {:?} ; F_x max {:.2} N à {:.3} s ({n_pics} pas au-dessus de la moitié) ; lissée {lisse:.2} N ; impulsion {:.3} N·s ; volume {:+.1e}",
+        r.premier, r.fx_max, r.t_fx, r.impulsion, r.ecart);
+}
 
+#[test]
+#[ignore = "≈ 18 min : le témoin d'A334, sphère libre, pas de 5 ms"]
+fn the_roller_force_at_half_the_step_free_s654() {
+    let m = (500. * 4. / 3. * std::f64::consts::PI * 0.001) as f32;
+    let r = relais_libre_s653(0.05, 5.0, 8, Some(([10.4, 0.2, 0.5], 0.1)), Some(m), 5_000);
+    let x0 = r.trajet.first().map_or(0., |p| p.1);
+    let xmax = r.trajet.iter().fold(f64::NEG_INFINITY, |m, p| m.max(p.1));
+    println!("S654 libre, 5 ms : retournement {:?} ; vitesse max du corps {:.3} m/s, colonne {:.3} ; avance {:.3} m ; volume {:+.1e}",
+        r.premier, r.v_corps, r.u_colonne, xmax - x0, r.ecart);
+}
 
