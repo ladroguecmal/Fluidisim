@@ -62,27 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S633 — **terminée**. En autonomie (ADR-247 : la physique des partiels). **3.5** — achever les rayons de S632 : les sommets de SPEC-006
-§6 (position, flux dissipé, direction de crête) le long d'un faisceau ordonné — la polyligne chaînée d'une côte quelconque.
+Session : S634 — **en cours**. En autonomie (ADR-247 : la physique des partiels). **2.2 — le frottement et Coriolis dans le courant de
+marée** (un manque de S580 : `∂u/∂t = −g·∇η` seul).
 
-**Ce que la session fait.** `deferlement::sommets_sur_rayons(rayons, b₀, …)` : pour chaque rayon du faisceau (son voisin : le suivant, ou le
-précédent pour le dernier), le point de déferlement de S632, le flux `ρ·g·H²/8·c_g` en kW/m (`H` = 0,78·h au point), la direction de crête (θ
-du rayon, interpolé) ; les sommets dans l'ordre du faisceau. Ne fait pas : les caustiques, un faisceau qui se replie, la publication.
+**Ce que la session fait.** `CarteCotidale::courant_amorti(x, y, t, g, f, r)` : pour chaque composante, la solution harmonique établie de
+`∂u/∂t + r·u − f·v = −g·∂η/∂x`, `∂v/∂t + r·v + f·u = −g·∂η/∂y` — avec `a = iω + r`, `U = −g(a·Gx + f·Gy)/(a² + f²)`, `V = −g(a·Gy −
+f·Gx)/(a² + f²)`, `G` le gradient complexe de l'interpolation de S580 ; `u = Re U·cos ωt − Im U·sin ωt`. En f32, des opérations de base :
+déterministe. Ne fait pas : le frottement quadratique (`r` linéarisé), le transitoire (la solution établie seulement), `f` variable.
 
-**Références, calculées avant** (`s633_ref.py`, numpy ; le montage de S632, ses bornes assertées alors). Côte droite, l'analytique : flux
-**16.973287676 kW/m**, direction (-0.994088221713 ; 0.108575353794). Le long des rayons, pas de ½ s : x = 112.600476235 m, flux
-**16.973662175 kW/m** (à 2.2e-05 de l'analytique), direction (-0.994088284396 ; 0.108574779879) (à 5.7e-07).
+**Références, calculées avant** (ce script). Une carte M2 (onde progressive selon `x`, 400 km, 1 m), `f` = `r` = 10⁻⁴ s⁻¹. L'atténuation par
+le frottement seul, `ω/√(ω² + r²)` = **0.814748670** ; le rapport des axes de l'ellipse par Coriolis seul (onde selon `x`), `f/ω` =
+**0.711648028**. **Bornes du montage** (ADR-257 D1, assertées) : le transitoire décroît en `e^(−r·t)`, `e^(−86)` après les 10 jours
+d'intégration ; `f < ω` (pas de résonance inertielle).
 
-**Quantum** : f64. **Critères, écrits avant.** (1) un faisceau de cinq rayons (y = 0, 10, 20, 30, 40 m) : cinq sommets, dans l'ordre ; le premier
-égal à la référence à 10⁻⁹ (position, flux, direction) ; (2) le flux à 10⁻⁴ relatif de l'analytique, la direction à 10⁻⁵ ; les cinq positions
-`x` à 10⁻⁹ m l'une de l'autre (la côte droite) ; (3) refus : moins de deux rayons.
+**Quantum** : f32 (10⁻⁷ relatif). **Critères, écrits avant.** (1) `f` = `r` = 0 : égal à `courant` (S580) à 10⁻⁶ m/s ; (2) contre une
+intégration RK4 indépendante de l'équation du mouvement (pas de 60 s, 10 jours, l'écart `w = u − u₀` au courant sans frottement de S580
+intégré), à 10⁻⁶ m/s sur la dernière période ; (3) l'atténuation, rapport des maxima sur une période échantillonnée en 1 000 points, à 10⁻⁴
+de 0.814749 ; (4) l'ellipse, rapport des maxima de `v` et `u`, à 10⁻⁴ de 0.711648 ; (5) refus : `r` négatif, `g` non positif.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `sommets_sur_rayons` et son essai ; (1)–(3).
-- [x] **P3** — preuve ; liste 3.5 ; rituel.
+- [ ] **P2** — `courant_amorti` et ses essais ; (1)–(5).
+- [ ] **P3** — preuve ; liste 2.2 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(3) tenus du premier essai. Suite : 818 essais listés.
-- **P3** — preuve SOMMETS-RAYONS-S633 ; ligne 3.5 ; index ; journal.
