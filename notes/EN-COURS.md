@@ -62,34 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S612 — **terminée**. En autonomie (ADR-247) : **4.20 — le changement de solveur pendant une simulation** (ADR-007 ; absent,
-conçu). ADR-007 §3 : pas de transfert d'état entre solveurs — `transduction δ → W → destruction → création à δ = 0 → nouveau solveur` ;
-l'énergie est partie dans W, B + W est inchangé, et des solveurs voisins ne communiquent que par W.
+Session : S613 — **en cours**. En autonomie (ADR-247) : **4.14 — la plage : rouleau 3D, mouillage et séchage (C04)** (absent : C04 ne
+tournait que sur un véhicule 1D, la rupture de barrage sur lit sec). Cette session fait **le mouillage et le séchage en 2D**, jugés sur la
+solution analytique de Thacker (une nappe plane qui tourne dans une cuvette paraboloïde ; le rivage se déplace).
 
-**Ce que la session fait.** Un module `changement_solveur.rs` : `TrainW1D` — deux trains d'ondes longues analytiques qui voyagent à
-`±c` (d'Alembert), `eta(x, t)`, `u(x, t)`, `energie` ; `transduire(domaine)` — les invariants de Riemann aux centres, `R = (η + √(h/g)·ū)/2`,
-`L = (η − √(h/g)·ū)/2` (`ū` la moyenne des faces), le domaine ensuite détruit ; `energie_delta(domaine)`. Le nouveau solveur : un
-`Domaine1D` (S609) d'une autre maille, né sur le champ de W et alimenté par W à ses bords. Ne fait pas : la transduction 2D/3D (celle de
-S312–S316 existe sur la référence, en exemple), un solveur d'une autre famille, W non linéaire, la décision de changer (l'ordonnanceur).
+**Ce que la session fait.** Un module `saint_venant_2d.rs` : Saint-Venant 2D en volumes finis d'ordre un, **reconstruction hydrostatique**
+d'Audusse (positive, équilibrée), flux de Rusanov, murs aux bords, vitesse nulle sous `h ≤ 10⁻⁶ m` ; `pas(dt)` refuse un nombre de Courant
+au-delà de ½. Ne fait pas : le rouleau 3D, l'ordre deux, le frottement, la houle incidente sur une plage réelle, le branchement à δ.
 
-**Références, calculées avant** (`s612_ref.py`, numpy indépendant). Le domaine de S609 en perturbatif (l'extérieur nul), une bosse de 5 cm
-(5 m) lâchée au repos au milieu ; la bascule à **5 s**. Continuité à la bascule : **3.5e-18 m** (par construction, `R + L = η` :
-assemblage, ADR-248). Énergie : δ **76.881476004 J/m**, W **76.785520448 J/m** — **-0.1248 %** (`u` au demi-pas). À **15 s**,
-contre la solution exacte (deux demi-bosses à `±c`) : le solveur continué **3.150019308e-04 m**, W **2.382494298e-04 m** — la bascule n'ajoute
-rien. **Le nouveau solveur** (0,25 m, 0,025 s, sur [150 ; 250] m, né sur W à 5 s, alimenté par W seul) : à 15 s, le train de droite y est
-(crête 0.024930 m), écart à W **3.429847911e-05 m**.
+**Références, calculées avant** (`s613_ref.py`, numpy indépendant). Thacker (SWASHES) : `a` = 1 m, `h₀` = 0,1 m, domaine de 4 m, `η` = 0,5 ;
+période `T` = 4,485701 s ; `10·N` pas par période. Écart L1 de `h` après une période : **0.431424651** (50²), **0.245620430** (100²),
+**0.128686360** (200²) — rapports 1.7565 et 1.9087 : **l'ordre un, qui converge**. Masse : variation sous 10⁻¹³ aux trois ; `h` jamais
+négatif. Le centre de masse à 100² : T·250/1000 : (2.016625851, 2.476355709) ; T·500/1000 : (1.549315348, 2.060239372) ; T·1000/1000 : (2.397602500, 1.896863730) (l'exact : (2 ; 2,5), (1,5 ; 2), (2,5 ; 2) — l'oscillation amortie par la diffusion de l'ordre
+un). **Le lac au repos** (cote −0,05 m, bords secs), 500 pas : vitesse max **1.852e-16 m/s**.
 
-**Quantum** : f64. **Critères, écrits avant.** (1) la continuité sous 10⁻¹⁵ m (assemblage) ; (2) l'énergie de W à -0.1248 % de celle
-de δ, à 10⁻⁹ relatif de la référence, et sous 0,5 % ; (3) à 15 s, les deux écarts à l'exact égaux aux références à 10⁻⁹ m, celui de W au plus
-celui du solveur continué ; (4) le nouveau solveur : l'écart à W égal à la référence à 10⁻⁹ m et sous 1 % de la demi-bosse (2,5·10⁻⁴ m) ;
-(5) refus : un train évalué hors de son domaine de définition rend 0 (comme l'interpolation de la référence).
+**Quantum** : f64. **Critères, écrits avant.** (1) à 100², l'écart L1 et les trois centres de masse égaux aux références à 10⁻⁹ ; (2) les écarts
+L1 à 50² et 200² à 10⁻⁹ ; le rapport 100 → 200 au moins 1,8 ; (3) la masse à 10⁻¹³ relatif, `h ≥ 0` à chaque pas, aux trois résolutions ;
+(4) le lac au repos immobile sous 10⁻¹⁴ m/s ; (5) refus : moins de deux mailles, `dx` ou `dt` non positifs, un pas au-delà de Courant ½.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `changement_solveur.rs` et ses essais ; (1)–(5).
-- [x] **P3** — preuve ; liste 4.20 ; rituel.
+- [ ] **P2** — `saint_venant_2d.rs` et ses essais ; (1)–(5).
+- [ ] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1)–(5) tenus ; accesseurs `u`, `maille`, `profondeur`, `gravite` ajoutés à `Domaine1D`. Suite : 801 essais listés.
-- **P3** — preuve CHANGEMENT-SOLVEUR-S612 ; liste 4.20 (absent → partiel) et décompte ; index ; journal.
