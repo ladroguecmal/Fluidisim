@@ -4,7 +4,7 @@
 chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
 ([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
 
-**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 103 — absents : 7.
+**Périmètre : 120 points** (5.11 hors). **Validés : 10** (8.3 %) — partiels : 104 — absents : 6.
 
 ## Par campagne
 
@@ -14,7 +14,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 |---|---:|---:|---:|---|
 | **K1** Rendu final et banc visuel | 0 | 9 | 0 | ◐8.1 ◐8.2 ◐8.3 ◐8.5 ◐8.6 ◐8.8 ◐8.9 ◐8.7 ◐8.10 |
 | **K2** La surface non graphe | 0 | 10 | 0 | ◐4.16 ◐4.1 ◐4.12 ◐4.20 ◐7.4 ◐7.5 ◐7.2 ◐7.3 ◐3.3 ◐3.1 |
-| **K3** Le fond et la côte | 1 | 9 | 1 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ◐3.5 ·4.14 ◐4.15 ✅6.5 ◐2.6 ◐3.9 ◐4.6 |
+| **K3** Le fond et la côte | 1 | 10 | 0 | ◐2.7 ◐2.9 ◐3.6 ◐3.2 ◐3.5 ◐4.14 ◐4.15 ✅6.5 ◐2.6 ◐3.9 ◐4.6 |
 | **K4** Les eaux intérieures | 0 | 4 | 0 | ◐2.3 ◐2.4 ◐2.5 ◐12.2 |
 | **K5** δ, le système | 0 | 14 | 0 | ◐4.2 ◐4.3 ◐4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ◐4.11 ◐4.17 ◐4.18 ◐4.19 ◐4.21 ◐1.6 |
 | **K6** Les solides | 4 | 5 | 0 | ✅6.1 ◐6.2 ✅6.3 ✅6.4 ◐6.7 ✅6.8 ◐6.6 ◐4.13 ◐1.3 |
@@ -70,7 +70,7 @@ Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de co
 | 4.11 | partiel | Régime substitutif |
 | 4.12 | partiel | Cavité et gerbe d'impact |
 | 4.13 | partiel | Proche-coque et gerbe d'étrave |
-| 4.14 | absent | Plage |
+| 4.14 | partiel | Plage |
 | 4.15 | partiel | Rochers et obstacles immergés |
 | 4.16 | partiel | Surface non graphe |
 | 4.17 | partiel | Référentiel accéléré et invariance galiléenne |
@@ -284,4 +284,5 @@ Une ligne par session qui a écrit le tableau avec `--session`.
 | S610 | 2026-10-07 | 10 | 102 | 8 | 120 |
 | S611 | 2026-10-07 | 10 | 102 | 8 | 120 |
 | S612 | 2026-10-07 | 10 | 103 | 7 | 120 |
+| S613 | 2026-10-07 | 10 | 104 | 6 | 120 |
 <!-- fin de l'historique -->

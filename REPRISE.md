@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 07:00 +02:00
+JETON            : libre
+Battement        : 2026-10-07 07:05 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S613 — 4.14, la plage : le mouillage et le séchage en 2D (Thacker) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S612 — le changement de solveur par W ([journal](notes/JOURNAL.md)). Avant : S611 (le lot)
-Session suivante : **S613 — un point absent** (ADR-247 ; restent 8). Revue à S616 ; le lot à S614. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
-Maillons        : 1 — S612 : 4.20 absent → partiel
+Session en cours : aucune
+Dernière session : S613 — le mouillage et le séchage en 2D (Thacker) ([journal](notes/JOURNAL.md)). Avant : S612 (le changement de solveur par W)
+Session suivante : **S614 — le lot (dû), puis un point absent** (ADR-247 ; restent 7). Revue à S616. **Sans attendre de « Continue »** ; vérifier l'éveil d'abord (relancé à 20 h 21 pour 14 h, soit jusqu'à 10 h 21).
+Maillons        : 1 — S613 : 4.14 absent → partiel
 Registres       : dernier lot S611 (ADR-213 D3) ; le prochain au plus tard en S614
 ```
 

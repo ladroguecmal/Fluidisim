@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S613 — **en cours**. En autonomie (ADR-247) : **4.14 — la plage : rouleau 3D, mouillage et séchage (C04)** (absent : C04 ne
+Session : S613 — **terminée**. En autonomie (ADR-247) : **4.14 — la plage : rouleau 3D, mouillage et séchage (C04)** (absent : C04 ne
 tournait que sur un véhicule 1D, la rupture de barrage sur lit sec). Cette session fait **le mouillage et le séchage en 2D**, jugés sur la
 solution analytique de Thacker (une nappe plane qui tourne dans une cuvette paraboloïde ; le rivage se déplace).
 
@@ -87,7 +87,9 @@ L1 à 50² et 200² à 10⁻⁹ ; le rapport 100 → 200 au moins 1,8 ; (3) la m
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `saint_venant_2d.rs` et ses essais ; (1)–(5).
-- [ ] **P3** — preuve ; liste 4.14 ; rituel.
+- [x] **P2** — `saint_venant_2d.rs` et ses essais ; (1)–(5).
+- [x] **P3** — preuve ; liste 4.14 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1)–(5) tenus, à 10⁻¹⁵ de numpy, après l'amendement (vitesse désingularisée). Suite : 802 essais listés.
+- **P3** — preuve THACKER-S613 ; liste 4.14 (absent → partiel) et décompte ; index ; journal.

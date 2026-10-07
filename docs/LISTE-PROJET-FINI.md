@@ -323,8 +323,10 @@ pas recopiée ici (L137).
   l'amplitude du sillage de δ stable en maille (l'écart revient au modèle de référence), le pic d'étrave divergent au coin vif
   ([preuve](validation/A330-CONVERGENCE-S529.md)). Manquent la gerbe (surface non graphe, 4.16), la résolution près de la coque
   (± 43–49 % à 25 cm), le sillage mesuré (le recoupage dans un grand domaine : 2,2 ms depuis S518, A329 levée).
-- [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *absent* : C04 exécuté sur un
-  véhicule d'essai 1D seulement.
+- [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *partiel* depuis S613 : **le mouillage et le séchage en 2D** —
+  Saint-Venant 2D, reconstruction hydrostatique, vitesse désingularisée ; jugés sur Thacker (le rivage tourne dans une cuvette) : l'ordre
+  un converge (0,43 → 0,24 → 0,13), masse exacte, aucune hauteur négative, le lac au repos à bords secs immobile
+  ([preuve](validation/THACKER-S613.md)). Manquent le rouleau 3D, l'ordre deux, une houle sur une plage réelle, le branchement à δ.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
@@ -894,7 +896,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 7 | 0 |
 | 2. Grandes masses (B) | 9 | 0 | 9 | 0 |
 | 3. Ondes (W) | 9 | 0 | 9 | 0 |
-| 4. Volumique (δ) | 21 | 0 | 20 | 1 |
+| 4. Volumique (δ) | 21 | 0 | 21 | 0 |
 | 5. Volumes finis (V) | 12 | 2 | 9 | 1 |
 | 6. Solides | 8 | 5 | 3 | 0 |
 | 7. Secondaires | 8 | 0 | 7 | 1 |
@@ -904,7 +906,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 3 | 2 |
 | 12. Outillage | 5 | 0 | 5 | 0 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **10** | **103** | **8** |
+| **total** | **121** | **10** | **104** | **7** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
