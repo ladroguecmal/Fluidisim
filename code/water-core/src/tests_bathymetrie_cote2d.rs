@@ -530,3 +530,84 @@ fn record_the_breaking_coast_for_the_visual_session_s675() {
         100. * avec.niveau[ns - 1]);
 }
 
+/// **S677** — la zone de déferlement tirée de la côte 2D (3.5) : (2) `∫D ds` de la côte (une marche) contre le flux perdu de l'équilibre
+/// d'énergie 1D, à 2 % ; (3) à `Q_b` = 1 %, une polyligne ouverte sur toute la largeur, chaque sommet à 3 m du début 1D ; (4) rapportés.
+#[test]
+fn the_2d_coast_draws_its_surf_zone_s677() {
+    let t = [7.0, 8.0, 9.0, 10.0, 10.0, 11.0, 12.0, 8.5];
+    let th = [-20.0f64, -10.0, 0.0, 10.0, 20.0, -5.0, 5.0, 15.0];
+    let a = [0.15f32, 0.25, 0.35, 0.40, 0.30, 0.25, 0.20, 0.20];
+    let comps: Vec<Component> = (0..8).map(|i| {
+        let mut c = composante(t[i], a[i], th[i].to_radians());
+        c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+        c
+    }).collect();
+    let b = fond(&comps);
+    let (mut alloc, services) = (Hote, Hote);
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    let (l, w, pas, rho) = (3950.0, 192.0, 2.0, 1000.0);
+    let une = Cote2D::cuire_interne(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, Some(0.01), 1, &|s, _| plage(s)).unwrap();
+    // La référence 1D : les amplitudes, le flux, son propre `Q_b` (une bissection sur ln Q).
+    let comp = b.components();
+    let tb: Vec<f64> = comp.iter().map(|c| 4_294_967_296.0 / c.freq_q32 as f64).collect();
+    let ab: Vec<f64> = comp.iter().map(|c| c.amplitude as f64).collect();
+    let kn: Vec<f64> = comp.iter().map(|c| (c.k_turns_per_m as f64 * core::f64::consts::TAU) * -(c.dir[0] as f64)).collect();
+    let somme: f64 = ab.iter().map(|a| a * a).sum();
+    let f_moy = ab.iter().zip(&tb).map(|(a, t)| a * a / t).sum::<f64>() / somme;
+    let gamma = crate::pente_douce::Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, G).gamma;
+    let reference = crate::pente_douce::tests::equilibre_1d_s669(&plage, l, &tb, &ab, &kn, gamma, true);
+    let ns = reference.len();
+    let flux = |i: usize| -> f64 {
+        let h = plage(i as f64 * pas as f64);
+        (0..8).map(|c| {
+            let omega = core::f64::consts::TAU / tb[c];
+            let k = crate::pente_douce::nombre_d_onde(omega, h, G);
+            let cg = 0.5 * omega / k * (1. + 2. * k * h / (2. * k * h).sinh());
+            0.5 * G * reference[i].1[c].powi(2) * cg * (1. - (kn[c] / k).powi(2)).sqrt()
+        }).sum()
+    };
+    let perdu = rho * (flux(0) - flux(ns - 1)) / 1000.;
+    let qb = |b: f64| -> f64 {
+        if b >= 1. {
+            return 1.;
+        }
+        if b < 0.2 {
+            return 0.;
+        }
+        let (mut lo, mut hi) = (-200f64, -1e-15f64);
+        for _ in 0..200 {
+            let u = 0.5 * (lo + hi);
+            if (1. - u.exp()) / u + b * b > 0. { lo = u } else { hi = u }
+        }
+        (0.5 * (lo + hi)).exp()
+    };
+    let qb_ref: Vec<f64> = (0..ns).map(|i| {
+        let h = plage(i as f64 * pas as f64);
+        let kb = crate::pente_douce::nombre_d_onde(core::f64::consts::TAU * f_moy, h, G);
+        let hmax = 0.88 / kb * (gamma * kb * h / 0.88).tanh();
+        qb(reference[i].0 / hmax)
+    }).collect();
+    let i1 = (1..ns).find(|&i| qb_ref[i] >= 0.01).unwrap();
+    let debut = (i1 as f64 - 1. + (0.01 - qb_ref[i1 - 1]) / (qb_ref[i1] - qb_ref[i1 - 1])) * pas as f64;
+    // (2) L'énergie.
+    let dissipe = une.dissipation_par_metre(rho);
+    let ecart_e = (dissipe / perdu - 1.).abs();
+    // (3) La ligne.
+    let lignes = une.zone_de_deferlement(0.01);
+    let ligne = &lignes[0];
+    let pire_s = ligne.iter().fold(0f64, |m, p| m.max((p[1] as f64 - debut).abs()));
+    let (xmin, xmax) = ligne.iter().fold((f32::MAX, f32::MIN), |(lo, hi), p| (lo.min(p[0]), hi.max(p[0])));
+    // (4) Au point fixe (S674).
+    let fixe = Cote2D::cuire_deferlante(&mut host, &b, [0.0, 1.0], 0.0, l, w, pas, 1, 0.01, &|s, _| plage(s)).unwrap();
+    let lf = fixe.zone_de_deferlement(0.01);
+    let debut_fixe = lf[0].iter().map(|p| p[1] as f64).sum::<f64>() / lf[0].len() as f64;
+    println!("S677 : ∫D ds {dissipe:.2} kW/m, perdu 1D {perdu:.2} kW/m ({:.2} %) ; flux du large {:.2} kW/m", 100. * ecart_e, rho * flux(0) / 1000.);
+    println!("S677 : {} polyligne(s), {} sommets, x de {xmin:.0} à {xmax:.0} m ; début 1D s = {debut:.1} m (h = {:.2} m), sommets à {pire_s:.2} m au plus ; largeur {:.0} m",
+        lignes.len(), ligne.len(), plage(debut), l - debut);
+    println!("S677 : au point fixe, début s = {debut_fixe:.1} m, {:.2} kW/m dissipés", fixe.dissipation_par_metre(rho));
+    assert!(ecart_e < 0.02, "critère 2");
+    assert_eq!(lignes.len(), 1, "critère 3 : une polyligne");
+    assert!(xmin <= -94.0 && xmax >= 94.0, "critère 3 : toute la largeur");
+    assert!(pire_s < 3.0, "critère 3 : le début");
+}
+

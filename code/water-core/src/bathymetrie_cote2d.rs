@@ -22,7 +22,7 @@ use crate::background::{Background, Component};
 use crate::host::{AllocError, HostServices};
 use crate::bathymetrie::transformer;
 use crate::houle_moyenne::{contrainte, derive_aux_rangees, niveau_moyen, vitesse_au_fond, Onde};
-use crate::pente_douce::{nombre_d_onde, propager_spectre_periodique, Composante, Deferlement};
+use crate::pente_douce::{fraction_deferlee, nombre_d_onde, propager_spectre_periodique, Composante, Deferlement};
 use crate::phase::PhaseQ32;
 use crate::types::{SimTime, WaterSample, WorldPos};
 
@@ -63,6 +63,10 @@ pub struct Cote2D {
     derive: Vec<f32>,
     /// S674 — `max |Δη̄|` (m) de chaque marche du point fixe du niveau ; vide sans déferlement.
     ecarts: Vec<f32>,
+    /// S677 — la fraction de vagues déferlées `Q_b` et la dissipation `D/ρ` (m³/s³) de Battjes et Janssen, à chaque nœud des tables
+    /// (`i·nn + j`) ; vides sans déferlement.
+    qb: Vec<f32>,
+    dissipation: Vec<f32>,
 }
 
 fn onde(c: &Component) -> (f64, f64) {
@@ -145,6 +149,8 @@ impl Cote2D {
             niveau: Vec::new(),
             derive: Vec::new(),
             ecarts: Vec::new(),
+            qb: Vec::new(),
+            dissipation: Vec::new(),
         };
         let mut ondes = Vec::with_capacity(nc);
         for c in composantes {
@@ -172,13 +178,9 @@ impl Cote2D {
         let spectre: Vec<Composante> = composantes.iter().zip(&ondes).zip(&departs).map(|((c, &(k0, omega, _, sin0)), d)| Composante {
             periode: core::f64::consts::TAU / omega, amplitude: c.amplitude as f64, incident: &**d, k_n: k0 * sin0 }).collect();
         // S670 : toutes les composantes marchent ensemble — sans déferlement, au bit des marches séparées (S669).
-        let regle = if frottement.is_some() {
-            let somme: f64 = spectre.iter().map(|c| c.amplitude * c.amplitude).sum();
-            let f_moy = spectre.iter().map(|c| c.amplitude * c.amplitude / c.periode).sum::<f64>() / somme.max(f64::MIN_POSITIVE);
-            (somme > 0.).then(|| Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, g))
-        } else {
-            None
-        };
+        let somme: f64 = spectre.iter().map(|c| c.amplitude * c.amplitude).sum();
+        let f_moy = spectre.iter().map(|c| c.amplitude * c.amplitude / c.periode).sum::<f64>() / somme.max(f64::MIN_POSITIVE);
+        let regle = if frottement.is_some() && somme > 0. { Some(Deferlement::battjes_stive(2. * somme.sqrt(), 1. / f_moy, g)) } else { None };
         // S674 : la marche sur la profondeur totale `h + η̄(s)` — le niveau moyen de la mer qui déferle rétroagit sur elle ; point fixe
         // jusqu'à `|Δη̄|` < 1 mm, au plus `iterations_max` marches. Toute la marche doit être mouillée : elle refuse une profondeur non positive.
         let releve = |eta: &[f64], s: f64| -> f64 {
@@ -235,6 +237,27 @@ impl Cote2D {
         }
         // Les tables, sur la profondeur de la dernière marche.
         let h = |s: f64, n: f64| if eta_marche.is_empty() { profondeur(s, n) } else { profondeur(s, n) + releve(&eta_marche, s) };
+        // S677 : `Q_b` et `D/ρ = (α/4)·g·f̄·Q_b·H_max²` aux nœuds des tables, de la mer entière de la dernière marche (ce que la marche a
+        // dissipé, au retard d'une rangée près).
+        if let Some(d) = regle {
+            let omega_moy = core::f64::consts::TAU * f_moy;
+            for it in 0..ns {
+                for j in 0..nn {
+                    let (i, jm) = (it * m, j * m);
+                    let e: f64 = spectre.iter().zip(&champs).map(|(c, champ)| {
+                        let (re, im) = champ.valeur(i, jm);
+                        c.amplitude * c.amplitude * (re * re + im * im)
+                    }).sum();
+                    let hrms = 2. * e.sqrt();
+                    let hj = h(i as f64 * pas, n0 + jm as f64 * pas);
+                    let kb = nombre_d_onde(omega_moy, hj, g);
+                    let hmax = 0.88 / kb * (d.gamma * kb * hj / 0.88).tanh();
+                    let q = fraction_deferlee(hrms / hmax);
+                    cote.qb.push(q as f32);
+                    cote.dissipation.push((0.25 * d.alpha * g * f_moy * q * hmax * hmax) as f32);
+                }
+            }
+        }
         for (&(k0, omega, cos0, sin0), champ) in ondes.iter().zip(&champs) {
             // ψ(s), comme la marche : la moyenne de k sur la rangée, aux demi-pas.
             let kb = |s: f64| (0..champ.ny).map(|j| nombre_d_onde(omega, h(s, champ.y0 + j as f64 * champ.dy), g)).sum::<f64>() / champ.ny as f64;
@@ -307,7 +330,44 @@ impl Cote2D {
 
     /// Octets des tables.
     pub fn octets(&self) -> usize {
-        4 * (self.phase.len() + self.facteur.len() + self.coth.len() + self.niveau.len() + self.derive.len()) + 8 * self.kv.len()
+        4 * (self.phase.len() + self.facteur.len() + self.coth.len() + self.niveau.len() + self.derive.len() + self.qb.len()
+            + self.dissipation.len()) + 8 * self.kv.len()
+    }
+
+    /// **S677 — la zone de déferlement** : les polylignes où la fraction de vagues déferlées `Q_b` vaut `seuil`, dans les axes locaux de
+    /// B (les carrés de marche de S630, [`crate::deferlement::contours_du_champ`]) ; vide sans déferlement. Le dedans : `Q_b ≥ seuil`.
+    pub fn zone_de_deferlement(&self, seuil: f32) -> Vec<Vec<[f32; 2]>> {
+        if self.qb.is_empty() {
+            return Vec::new();
+        }
+        // La grille des contours : `s` le plus rapide (`x`), `n` en `y`.
+        let mut ecart = vec![0f64; self.ns * self.nn];
+        for i in 0..self.ns {
+            for j in 0..self.nn {
+                ecart[j * self.ns + i] = (self.qb[i * self.nn + j] - seuil) as f64;
+            }
+        }
+        let tv = [-self.normale[1], self.normale[0]];
+        let lignes = crate::deferlement::contours_du_champ([0.0, self.n0 as f64], self.pas as f64, self.ns, self.nn, &ecart)
+            .unwrap_or_default();
+        lignes.into_iter().map(|l| l.into_iter().map(|[s, n]| {
+            let (s, n) = (s as f32 + self.origine, n as f32);
+            [self.normale[0] * s + tv[0] * n, self.normale[1] * s + tv[1] * n]
+        }).collect()).collect()
+    }
+
+    /// **S677 — le flux dissipé au déferlement** par mètre de côte (kW/m) : `ρ·∫ D ds`, `D` moyennée le long de la côte, par trapèzes
+    /// sur les rangées des tables ; 0 sans déferlement.
+    pub fn dissipation_par_metre(&self, rho: f64) -> f64 {
+        if self.dissipation.is_empty() {
+            return 0.;
+        }
+        let rangee = |i: usize| self.dissipation[i * self.nn..(i + 1) * self.nn].iter().map(|&d| d as f64).sum::<f64>() / self.nn as f64;
+        let mut somme = 0.;
+        for i in 1..self.ns {
+            somme += 0.5 * (rangee(i - 1) + rangee(i)) * self.pas as f64;
+        }
+        rho * somme / 1000.
     }
 
     /// Les coordonnées de la côte `(s, n)` d'un point local de B, m.

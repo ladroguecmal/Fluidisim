@@ -79,7 +79,6 @@ pub fn polyligne(origine: [f64; 2], pas: f64, nx: usize, ny: usize, profondeur: 
 #[allow(clippy::too_many_arguments)]
 pub fn contours(origine: [f64; 2], pas: f64, nx: usize, ny: usize, profondeur: &[f64], houle: Houle, g: f64, ecart: &mut [f64])
     -> Result<Vec<Vec<[f64; 2]>>, Refus> {
-    use std::collections::{BTreeMap, BTreeSet};
     if nx < 2 || ny < 2 || !(pas > 0.0) || profondeur.len() != nx * ny || ecart.len() < nx * ny || !(houle.omega > 0.0)
         || !(houle.hauteur0 > 0.0) || !(houle.theta0.abs() < core::f64::consts::FRAC_PI_2) || !(g > 0.0) {
         return Err(Refus);
@@ -87,6 +86,17 @@ pub fn contours(origine: [f64; 2], pas: f64, nx: usize, ny: usize, profondeur: &
     let etat = |h: f64| transformer(houle.omega, houle.theta0, 0.5 * houle.hauteur0, h, g);
     for (e, h) in ecart.iter_mut().zip(profondeur) {
         *e = if *h > 0.0 { etat(*h).map_or(f64::INFINITY, |s| 2.0 * s.amplitude - MCCOWAN * h) } else { f64::INFINITY };
+    }
+    contours_du_champ(origine, pas, nx, ny, ecart)
+}
+
+/// **S677 — les carrés de marche d'un champ quelconque** (`nx × ny` nœuds, `x` le plus rapide) : les polylignes où `ecart` passe par zéro,
+/// le dedans là où `ecart ≥ 0` — les ouvertes d'abord, puis les fermées (le premier point répété), dans l'ordre des arêtes ; le cas selle
+/// tranché par la moyenne du centre. Le cœur de [`contours`], séparé de son écart.
+pub fn contours_du_champ(origine: [f64; 2], pas: f64, nx: usize, ny: usize, ecart: &[f64]) -> Result<Vec<Vec<[f64; 2]>>, Refus> {
+    use std::collections::{BTreeMap, BTreeSet};
+    if nx < 2 || ny < 2 || !(pas > 0.0) || ecart.len() < nx * ny {
+        return Err(Refus);
     }
     let noeud = |i: usize, j: usize| [origine[0] + i as f64 * pas, origine[1] + j as f64 * pas];
     let dedans = |k: usize| ecart[k] >= 0.0;

@@ -1694,3 +1694,11 @@ séance). Suivant : **S676, la trente-neuvième revue de méthode**.
 nouvelle. Deux frictions ont coûté une relance chacune : la cuisson de S673, au double du coût compté ; l'essai de S670, qui encodait le
 déferlement sans rétroaction. Les règles en place les ont rattrapées. Maillons **0** (méthode). Suivant : **S677**, 2.7 — `Cote2D` par
 niveau de marée, ou la non-linéarité peu profonde (A234) ; la prochaine revue en S681.
+
+## S677 — 2026-10-07 — La zone de déferlement tirée de la côte 2D
+
+**Entrée.** En autonomie vers la v2 ; K3, 3.5 (« manquent… la largeur de la zone »). **Fait**
+([preuve](../docs/validation/ZONE-DEFERLEMENT-S677.md)) : `Cote2D` garde `Q_b` et `D` ; la zone par les carrés de marche de S630
+(séparés au bit) ; le flux dissipé par mètre. **Mesuré** contre l'équilibre 1D : `∫D ds` à 0,94 %, la ligne `Q_b` = 1 % à 0,13 m du
+début ; la zone de 234 m dissipe ≈ 21 kW/m. Le calcul du plan comptait d'abord `g` deux fois ; `Hrms` au rivage, retrouvé, l'a montré
+avant l'écriture du plan. Maillons **1** (3.5). Suivant : **S678**.

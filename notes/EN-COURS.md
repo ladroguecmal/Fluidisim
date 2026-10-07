@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S677 — **en cours**. En autonomie vers la v2 ; K3, 3.5 (« manquent… la largeur de la zone »). La polyligne de S588–S633 est
+Session : S677 — **terminée**. En autonomie vers la v2 ; K3, 3.5 (« manquent… la largeur de la zone »). La polyligne de S588–S633 est
 tirée de McCowan, un seuil sur une houle unique. La côte 2D porte maintenant une mer qui déferle par Battjes et Janssen, avec sa
 fraction de vagues déferlées `Q_b` et sa dissipation `D` en chaque nœud.
 
@@ -102,7 +102,8 @@ fraction de vagues déferlées `Q_b` et sa dissipation `D` en chaque nœud.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `contours_du_champ` ; `Q_b`, `D` dans `Cote2D` ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; liste 3.5 ; rituel.
+- [x] **P2** — `contours_du_champ` ; `Q_b`, `D` dans `Cote2D` ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; liste 3.5 ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) au bit ; (2) 0,94 % ; (3) une ligne, 97 sommets, à 0,13 m ; (4) début 3 716 m (5,7 m), largeur 234 m, ≈ 21 kW/m.

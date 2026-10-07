@@ -225,7 +225,8 @@ pas recopiée ici (L137).
   une côte droite, plus au large autour d'une île ([preuve](validation/RAYONS-DEFERLEMENT-S632.md)) ; **S633** : les sommets complets
   le long d'un faisceau ordonné — position, flux dissipé, direction de crête, à 2·10⁻⁵ de l'analytique
   ([preuve](validation/SOMMETS-RAYONS-S633.md)). Manquent les caustiques, la largeur de la zone, une polyligne par phase de marée, la
-  publication.
+  publication. **S677** : **la zone de déferlement d'une mer entière** tirée de la côte 2D (Battjes et Janssen) — la ligne `Q_b` = 1 %
+  à 0,13 m du début 1D, la largeur (234 m), le flux dissipé à 0,94 % de l'équilibre d'énergie ([preuve](validation/ZONE-DEFERLEMENT-S677.md)).
 - [ ] **3.6 Réfraction bathymétrique des ondes** — *partiel* depuis S583 : **le tracé de rayons d'onde longue** sur un fond quelconque
   (RK4 déterministe) — Snell à 3·10⁻¹¹, l'arrivée à 0,2 ms, le coefficient de réfraction à 10⁻⁵ ([preuve](validation/REFRACTION-S583.md)).
   Manquent les caustiques, la diffraction, les ondes courtes (dispersives), le branchement au tsunami (3.4) et l'entrée dans W.

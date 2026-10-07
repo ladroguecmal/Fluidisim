@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-07 23:06 +02:00
+JETON            : libre
+Battement        : 2026-10-07 23:14 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S677 — la zone de déferlement tirée de la côte 2D (3.5) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S676 — la trente-neuvième revue de méthode (ADR-270) ([journal](notes/JOURNAL.md)). Avant : S675 (La séance visuelle de la côte qui déferle)
-Session suivante : S677 — 2.7 : Cote2D par niveau de marée, ou la non-linéarité peu profonde (A234) ; revue en S681
-Maillons        : 0 (méthode : ADR-270)
+Session en cours : aucune
+Dernière session : S677 — La zone de déferlement tirée de la côte 2D ([journal](notes/JOURNAL.md)). Avant : S676 (la trente-neuvième revue de méthode)
+Session suivante : S678 — K3 : la ligne de déferlement par phase de marée, ou une autre pièce de K3
+Maillons        : 1 (3.5 : la zone de déferlement d'une mer)
 Registres       : dernier lot S674 (ADR-213 D3) ; le prochain au plus tard en S677
 ```
 
