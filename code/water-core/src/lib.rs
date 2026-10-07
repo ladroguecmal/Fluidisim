@@ -83,6 +83,8 @@ pub mod riviere;
 pub mod geoide;
 /// S607 — la grille d'adressage HydroGrid : Morton hiérarchique, zones actives, échanges (liste 1.5 ; ADR-006 §2).
 pub mod hydro_grid;
+/// S608 — les niveaux d'activité des cellules ; cellules et domaines non alignés (liste 1.6 ; ADR-006).
+pub mod activite;
 /// S514 : l'acteur poussé, renversé ou déplacé par l'eau (liste 6.7).
 pub mod actor;
 pub mod delta;
