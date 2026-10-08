@@ -1680,9 +1680,21 @@ fn mesures_synolakis_s712() -> Vec<(f64, Vec<(f64, f64)>)> {
 /// `(x/d, η/d)` par la surface reconstruite (lissée sur 10 cm), le volume `V_φ/V_n`, et les secondes.
 #[allow(clippy::type_complexity)]
 fn plage_synolakis_s712(kappa: Option<f32>) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
+    plage_synolakis_dx(kappa, 0.025, &[15., 20., 25.])
+}
+
+/// S713 — la même, à `dx`, jusqu'aux instants donnés (`t·√(g/d)`).
+#[allow(clippy::type_complexity)]
+fn plage_synolakis_dx(kappa: Option<f32>, dx: f32, jusqua: &[f64]) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
+    plage_synolakis_pas(kappa, dx, jusqua, 10_000)
+}
+
+/// S714 — la même, le pas plafonné à `plafond_us`.
+#[allow(clippy::type_complexity)]
+fn plage_synolakis_pas(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: u64) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
-    let (dx, d, rapport, cot, g) = (0.025f32, 0.5f64, 0.3f64, 19.85f64, 9.81f64);
+    let (d, rapport, cot, g) = (0.5f64, 0.3f64, 19.85f64, 9.81f64);
     let dxs = dx as f64;
     let gamma = (3. * rapport / 4.).sqrt();
     let l = (20f64.sqrt()).acosh() / gamma;
@@ -1725,18 +1737,18 @@ fn plage_synolakis_s712(kappa: Option<f32>) -> (Vec<(f64, Vec<(f64, f64)>, f64)>
     // S712 : jusqu'à t = 25 — la remontée sur la plage sèche (t = 30) fait tomber le pas à 0,3 ms et plus bas ; le déferlement est vers
     // t = 20. Chaque photo est comparée dès qu'elle est prise.
     let mesures = mesures_synolakis_s712();
-    let instants: Vec<u64> = [15., 20., 25.].iter().map(|t: &f64| (t * echelle * 1e6).round() as u64).collect();
+    let instants: Vec<u64> = jusqua.iter().map(|t: &f64| (t * echelle * 1e6).round() as u64).collect();
     let mut photos = Vec::new();
     let (mut t, mut prochain) = (0u64, 0u64);
     let fin = *instants.last().unwrap();
     while t < fin {
         let borne = instants.iter().copied().filter(|&b| b > t).min().unwrap();
-        let us = a.stable_step_us(10_000).min(borne - t);
+        let us = a.stable_step_us(plafond_us).min(borne - t);
         a.step(us).unwrap();
         t += us;
         if instants.contains(&t) {
             let (vphi, h) = volume_surface_s708(&a);
-            let demi = 2usize;
+            let demi = (0.05 / dxs).round() as usize;
             let profil: Vec<(f64, f64)> = (0..nx).map(|i| {
                 let (g0, g1) = (i.saturating_sub(demi), (i + demi).min(nx - 1));
                 let hm = h[g0..=g1].iter().sum::<f64>() / (g1 - g0 + 1) as f64;
@@ -1747,11 +1759,12 @@ fn plage_synolakis_s712(kappa: Option<f32>) -> (Vec<(f64, Vec<(f64, f64)>, f64)>
             let vol = vphi / (a.particle_count() as f64 * quantum);
             if let Some((tm, m)) = mesures.iter().find(|(tm, _)| (tm - ts).abs() < 0.1) {
                 let (ecart, n, cm, cc) = comparer_synolakis_s712(&profil, m);
-                eprintln!("S712 photo (κ = {kappa:?}) t = {ts:.1} (mesure {tm}) : écart quadratique {ecart:.4} d sur {n} points ; crête mesurée {:.4} d en x = {:.2} d, calculée {:.4} d en x = {:.2} d ; V_φ/V_n {vol:.4} ; {:.0} s d'horloge",
+                eprintln!("S712 photo (κ = {kappa:?}, dx = {dx}, plafond {plafond_us} µs) t = {ts:.1} (mesure {tm}) : écart quadratique {ecart:.4} d sur {n} points ; crête mesurée {:.4} d en x = {:.2} d, calculée {:.4} d en x = {:.2} d ; V_φ/V_n {vol:.4} ; {:.0} s d'horloge",
                     cm.1, cm.0, cc.1, cc.0, horloge.elapsed().as_secs_f64());
             }
             // Le profil enregistré pour le graphique (calculs/, hors du dépôt suivi).
-            let nom = format!("{}/../../calculs/synolakis_{}_t{:.0}.csv", env!("CARGO_MANIFEST_DIR"), kappa.map_or("sans".to_string(), |k| format!("k{k}")), ts);
+            let nom = format!("{}/../../calculs/synolakis_{}{}_t{:.0}.csv", env!("CARGO_MANIFEST_DIR"), kappa.map_or("sans".to_string(), |k| format!("k{k}")),
+                if dx < 0.02 { "_fin".to_string() } else if plafond_us < 10_000 { format!("_pas{plafond_us}") } else { String::new() }, ts);
             let lignes: String = profil.iter().filter(|(_, e)| e.is_finite()).map(|(x, e)| format!("{x:.4};{e:.5}
 ")).collect();
             let _ = std::fs::write(nom, lignes);
@@ -1831,5 +1844,23 @@ fn the_synolakis_measurements_are_read_s712() {
     for (t, p) in &m {
         assert!(p.len() > 50, "t = {t} : {} points", p.len());
     }
+}
+
+/// **S713 — la plage de Synolakis à 1,25 cm** (sans projection), jusqu'à t = 20 : la crête et l'écart contre les mesures, contre S712 à
+/// 2,5 cm (t = 15 : 0,433 d, 0,048 d ; t = 20 : 0,277 d, 0,066 d). Rapporte (les photos sont lues dès qu'elles sont prises).
+#[test]
+#[ignore = "la plage de Synolakis à 1,25 cm (≈ 1 h 30)"]
+fn the_judge_against_synolakis_at_half_the_cell_s713() {
+    let (_, duree) = plage_synolakis_dx(None, 0.0125, &[15., 20.]);
+    println!("S713 : {duree:.0} s");
+}
+
+/// **S714 — la plage de Synolakis, le pas plafonné à 2,5 ms** (2,5 cm, sans projection) : `c·dt/dx` ≈ 0,25 au lieu de ≈ 1. Seul le pas
+/// change (contre S712 E1). Rapporte (les photos sont lues dès qu'elles sont prises, marque `S712 photo`).
+#[test]
+#[ignore = "la plage de Synolakis, le pas à 2,5 ms (≈ 45 min)"]
+fn the_judge_against_synolakis_small_step_s714() {
+    let (_, duree) = plage_synolakis_pas(None, 0.025, &[15., 20., 25.], 2_500);
+    println!("S714 : {duree:.0} s");
 }
 
