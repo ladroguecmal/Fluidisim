@@ -1853,3 +1853,10 @@ Saint-Venant ou SGN. **Mesuré** : avec SGN, le retournement à 2,524 s, comme a
 cause. **L'attribution de S693 était fausse** : ses témoins variaient deux causes (ce que Saint-Venant porte, ce qui traverse le raccord).
 Corrigée par une note datée. Le raccord du large lui-même est en cause : la vitesse uniforme sur la verticale, la zone de colonnes
 hydrostatique. Maillons **1** (4.14 : la cause localisée). Suivant : **S696, la revue de méthode** ; puis le raccord du large jugé seul.
+
+## S696 — 2026-10-08 — la quarante-troisième revue de méthode (ADR-276)
+
+**Entrée.** La revue (S691–S695). **Fait** : [ADR-276](../docs/adr/ADR-276-quarante-troisieme-revue-de-methode.md). D1 : un état initial se
+construit depuis une seule fonction, une aide reprise se relit valeur par valeur (S693 : `Plage` cachait une seconde source). D2 : un
+témoin ne fait varier qu'une cause (S693 : le raccord déplacé changeait aussi ce qui le traverse ; l'attribution fausse, corrigée en
+S695). Maillons **0** (méthode). Suivant : **S697**, le raccord du large jugé seul (APIC des deux côtés) ; la revue en S701.
