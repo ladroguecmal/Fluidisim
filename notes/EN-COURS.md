@@ -62,46 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S699 — **terminée**. En autonomie, sans arrêt. S698 : le raccord du large par particules, nourri par SGN, laisse −0,047 s au
-retournement. Non traversé, il fait −0,017 s ; la traversée coûte −0,030 s. Trois causes y restent mêlées : le porteur, le profil, la
-pose sans matrice affine.
+Session : S700 — **en cours**. En autonomie, sans arrêt. S699 : nourri exactement par la 3D, le bord par particules est transparent
+(−0,011 s). L'écart de S698 (−0,047 s) vient donc de l'alimentation par SGN. Ici, ses trois causes, une à la fois (ADR-276 D2).
 
-**Ce que la session fait : le raccord entre deux copies du même solveur** (ADR-273 D1).
+**Ce que la session fait.** Un enregistrement du tout-3D au plan x = 5,0 m (S699), et pendant ce passage, au même plan :
+- le porteur SGN : `h`, `ū` ;
+- la 3D : `h`, la plus haute particule de la tranche ± dx, plus dx/4 ;
+- la 3D : `ū`, la moyenne des vitesses des faces mouillées.
 
-- **L'enregistrement.** Le tout-3D (le montage sans raccord de S697) enregistre au plan x = 5,0 m, à chaque pas :
-  - la vitesse normale de chaque face (rangée × couche) ;
-  - chaque particule qui franchit le plan vers la droite : l'instant, la position, la vitesse, la matrice affine.
-- **Le rejeu.** Le montage raccordé à 5,0 m rejoue l'enregistrement par le bord à particules de S698 :
-  - les vitesses des faces, interpolées dans le temps ;
-  - les particules enregistrées, posées telles quelles.
+Puis deux rejeux, chacun ne changeant qu'une chose par rapport à S699 :
 
-  Ni SGN, ni profil.
+| rejeu | ce qui change seul par rapport au rejeu exact (S699, −0,011 s) |
+|---|---|
+| R2 | les particules posées sans leur matrice affine (`C = 0`) |
+| R3 | la pose par faces de S698 : des quanta posés dans la maille de la face, avec la vitesse de la 3D à cette face, `w = 0`, `C = 0` |
+
+S698 (SGN, profil, pose par faces) diffère de R3 par une seule chose : les vitesses (le porteur et le profil). La comparaison au plan sépare
+ces deux dernières causes :
+- le porteur : l'écart de `h` et de `ū` entre SGN et la 3D, et celui de l'instant de leur crête ;
+- le profil : ce qui reste.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276)
 
-- **témoin** : le tout-3D, par la même fonction ; le même passage qui enregistre (2,637 s attendu, S697).
-- **instrument** : le premier retournement. Ce que rendrait chaque hypothèse :
-  - si le bord est transparent quand on le nourrit exactement, le témoin à 0,02 s près. L'écart de S698 revient alors à l'alimentation
-    par SGN (le porteur, le profil, la pose) ;
-  - si le bord lui-même fausse l'onde (la vitesse imposée à la face, le retrait à gauche), un écart proche de celui de S698.
-- **calcul** : aucun nombre neuf. Le coût : ≈ 13,5 min + ≈ 7 min.
-- **ADR** : ADR-273 D1, ADR-276 D2.
+- **témoin** : le rejeu exact de S699 (−0,011 s) ; le tout-3D (2,637 s) par la même fonction.
+- **instrument** : le premier retournement de chaque rejeu ; au plan, la crête de `h` et de `ū`. Ce que rendrait chaque hypothèse :
+  - l'affine en cause : R2 loin de −0,011 s ;
+  - la pose en cause : R3 loin de R2 ;
+  - les vitesses en cause : R3 près de −0,011 s, S698 à −0,047 s, et la crête de SGN en avance ou plus haute que celle de la 3D.
+- **calcul** : aucun nombre neuf ; ≈ 13 + 2 × 7 min.
+- **ADR** : ADR-273 D1, ADR-276 D1, D2.
 - **pièges** :
-  - les indices des particules bougent quand le rivage en retire une. Une paire avant/après qui saute de plus de 0,1 m est écartée,
-    et les particules ajoutées au rivage sont ignorées ;
-  - le décalage d'instant entre les deux passages : une particule est posée au milieu du pas qui suit son passage ;
-  - la masse comptée par quantum posé.
+  - les drapeaux du montage. Le mode de rejeu est un champ de l'enregistrement. La zone de colonnes ne s'allume ni avec le rejeu ni avec
+    les particules (S699) ;
+  - le `h` de la 3D au plan est lu au quantum (dx/4) ;
+  - SGN tourne dans le passage qui enregistre (`sgn = true`) sans y agir (sans raccord).
 
 **Critères, écrits avant.**
 
-1. Le rejeu à moins de **0,02 s** et **0,15 m** du témoin.
+1. R2 et R3 mesurés, et chaque écart attribué à sa seule cause.
 2. La masse à 10⁻¹², la dette sous un quantum.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'enregistrement, le rejeu ; l'essai ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — les deux rejeux, la comparaison au plan ; l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — un premier rejeu rallumait la zone de colonnes (un drapeau) : corrigé. (1) le rejeu 2,626 s contre 2,637 s (−0,011 s) ; (2) 2,6·10⁻¹⁴, sous un quantum.
