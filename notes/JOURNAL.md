@@ -1902,3 +1902,10 @@ au plan y dit comment il est tenu (S698 nommait ADR-273 et sautait son premier p
 non des booléens (S699 : une combinaison rallumait la zone de colonnes, 34 min). Maillons **0** (méthode). Suivant : **S702**, une pose
 qui reproduise le rejeu exact à partir d'une vitesse donnée (positions tirées dans la maille, `w`, la matrice affine du gradient) ;
 la revue en S706.
+
+## S702 — 2026-10-08 — La pose par la grille
+
+**Entrée.** En autonomie, sans arrêt ; ADR-277. **Fait** ([preuve](../docs/validation/POSE-PAR-LA-GRILLE-S702.md)) : `feed_left_grid`
+(le porteur donne le flux et la vitesse du bord ; la particule prend la vitesse et l'affine du G2P) ; le montage en mode nommé (le
+témoin au bit). **Mesuré** : R4 +0,021 s (la pose par faces +0,074 s) — le critère de 0,02 s manqué d'une milliseconde. Maillons **1**
+(4.14). Suivant : **S703**, la pose par la grille nourrie par SGN, et le volume entré mesuré contre l'enregistrement.

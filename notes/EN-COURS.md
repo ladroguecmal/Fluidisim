@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S702 — **en cours**. En autonomie, sans arrêt. S700 : la pose par faces de S698, même nourrie des vitesses de la 3D, retarde
+Session : S702 — **terminée**. En autonomie, sans arrêt. S700 : la pose par faces de S698, même nourrie des vitesses de la 3D, retarde
 le retournement de 0,085 s. **Une pose qui ne dépend pas du porteur.**
 
 **Ce que la session fait.**
@@ -103,7 +103,8 @@ le retournement de 0,085 s. **Une pose qui ne dépend pas du porteur.**
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le mode nommé ; la pose par la grille ; R4 ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le mode nommé ; la pose par la grille ; R4 ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) **échoue d'une milliseconde** : R4 2,658 s (+0,021 s ; R3 +0,074 s) ; (2) le témoin au bit de S699, 1,2·10⁻¹⁵, sous un quantum.

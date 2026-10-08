@@ -432,6 +432,8 @@ pas recopiée ici (L137).
   transparent, l'écart de S698 vient de l'alimentation par SGN ([preuve](validation/RACCORD-LARGE-REJEU-S699.md)).
   **S700** : l'alimentation par SGN départagée — la matrice affine −0,026 s, la pose par faces +0,085 s, les vitesses de SGN −0,121 s ;
   S698 tenait par compensation ([preuve](validation/ALIMENTATION-SGN-S700.md)).
+  **S702** : la pose par la grille (la vitesse et l'affine du G2P), jugée contre la 3D — +0,021 s, le critère de 0,02 s manqué d'une
+  milliseconde ; le montage en mode nommé ([preuve](validation/POSE-PAR-LA-GRILLE-S702.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

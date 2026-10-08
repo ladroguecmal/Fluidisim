@@ -68,6 +68,72 @@ impl Apic3 {
         self.gauche = Some(g);
     }
 
+    /// **S702 — l'entrée à gauche par la grille** : `volumes` (m³ par face au pas, rangés `k·ny + j`, positifs) au réservoir de la face.
+    /// Chaque quantum entier naît dans la tranche que le flux a balayée, `x ∈ [0, balayage)` (`balayage`, m par face, ≤ dx), à la
+    /// sous-maille (y, z) la moins occupée de la face, décalée par une suite à faible discrépance. Sa vitesse et sa matrice affine sont
+    /// celles que la grille lui donne là (le G2P), comme à toute particule : le porteur ne fournit que le flux et la vitesse du bord.
+    pub fn feed_left_grid(&mut self, volumes: &[f64], balayage: &[f32]) -> Result<(), Error> {
+        let Domain3 { ny, nz, dx, .. } = self.domain;
+        let Some(mut g) = self.gauche.take() else { return Err(Error::Domain) };
+        let bon = volumes.len() == ny * nz && balayage.len() == ny * nz;
+        if !bon || volumes.iter().any(|v| !v.is_finite() || *v < 0.) || balayage.iter().any(|b| !b.is_finite() || *b < 0.) {
+            self.gauche = Some(g);
+            return Err(if bon { Error::Domain } else { Error::Shape });
+        }
+        let quantum = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let h = dx / PER_AXIS as f32;
+        let n2 = PER_AXIS * PER_AXIS;
+        // Une seule passe : l'occupation (y, z) de la première colonne, par face.
+        let mut occupation = vec![0u32; ny * nz * n2];
+        for p in &self.x[..self.n] {
+            if p[0] >= 0. && p[0] < dx {
+                let (j, k) = (((p[1] / dx) as usize).min(ny - 1), ((p[2] / dx) as usize).min(nz - 1));
+                let b = (((p[1] - j as f32 * dx) / h) as usize).min(PER_AXIS - 1);
+                let c = (((p[2] - k as f32 * dx) / h) as usize).min(PER_AXIS - 1);
+                occupation[(k * ny + j) * n2 + c * PER_AXIS + b] += 1;
+            }
+        }
+        for (f, &v) in volumes.iter().enumerate() {
+            g.reservoir[f] += v;
+            g.entre += v;
+            let (k, j) = (f / ny, f % ny);
+            let (y0, z0) = (j as f32 * dx, k as f32 * dx);
+            let zb = if self.lisse.is_some() { self.smooth_seabed_height(0., y0 + 0.5 * dx) } else { self.seabed_height(0, j) };
+            let large = balayage[f].min(dx * 0.999);
+            while g.reservoir[f] >= quantum {
+                let occ = &mut occupation[f * n2..(f + 1) * n2];
+                let mut choix: Option<(u32, usize)> = None;
+                for (i, &o) in occ.iter().enumerate() {
+                    let z = z0 + ((i / PER_AXIS) as f32 + 0.5) * h;
+                    if z > zb + 0.05 * dx && choix.is_none_or(|(o0, _)| o < o0) {
+                        choix = Some((o, i));
+                    }
+                }
+                let Some((_, i)) = choix else { break };
+                if self.n >= self.x.len() {
+                    g.refusees += 1;
+                    break;
+                }
+                // La suite R₂ (Roberts) : trois décalages dans [0, 1), sans hasard ni état autre que le compte des posées.
+                let r = g.posees as f64;
+                let (rx, ry, rz) = ((0.5 + r * 0.819_172_513_396_164_4).fract(), (0.5 + r * 0.671_043_606_703_789_2).fract(),
+                    (0.5 + r * 0.549_700_477_901_970_4).fract());
+                let (b, c) = (i % PER_AXIS, i / PER_AXIS);
+                let m = self.n;
+                self.x[m] = [large * rx as f32, y0 + (b as f32 + ry as f32) * h, z0 + (c as f32 + rz as f32) * h];
+                self.n += 1;
+                let (vk, ck) = self.gather_particle(m);
+                self.vel[m] = vk;
+                self.c[m] = ck;
+                occ[i] += 1;
+                g.reservoir[f] -= quantum;
+                g.posees += 1;
+            }
+        }
+        self.gauche = Some(g);
+        Ok(())
+    }
+
     /// **S699 — une particule posée telle quelle** au bord gauche (le rejeu d'un enregistrement) : sa position (`x` ramené dans
     /// `[0, dx)`), sa vitesse, sa matrice affine ; son volume compté comme reçu.
     pub fn pose_left(&mut self, x: [f32; 3], vel: [f32; 3], c: [[f32; 3]; 3]) -> Result<(), Error> {
