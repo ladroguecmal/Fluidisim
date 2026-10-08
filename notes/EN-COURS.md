@@ -62,26 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S691 — **terminée**. En autonomie vers la v2. **La quarante-deuxième revue de méthode** (ADR-222 D4 : S686–S690) ; le lot
-S690–S692 à venir.
+Session : S692 — **en cours**. En autonomie vers la v2. **La conception du LOD de simulation**, acceptée par l'utilisateur le 2026-10-08
+(*« Ok parfait »*) : l'eau d'après déferlement en 2D, la 3D aux jets et aux contacts, l'activation par la présence, des billes fusionnées ou
+divisées selon l'agitation. Le lot S690–S692.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-274)
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles, et les remarques de l'utilisateur du
-  2026-10-08 ; ce qui départagerait une règle nouvelle d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-265 D1, ADR-268 D1, ADR-273.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+- **témoin** : sans objet (une conception).
+- **instrument** : pour chaque étape, l'essai qui la jugera, ce qu'il rendrait sous chaque hypothèse, et son coût mesuré (ADR-274 D1).
+- **calcul** : les gains attendus, tirés des mesures (S413 : ÷ 5 à 7 ; S690 : 75 % des particules hors du déferlement).
+- **ADR** : ADR-178, ADR-202, ADR-212, ADR-271, ADR-274.
+- **pièges** : les raccords qui manquent (les colonnes avec la sortie à droite, avec le fond lisse) ; la fusion des billes sans grille
+  adaptative.
 
-**Critères, écrits avant.** (1) ADR-274 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Critères, écrits avant.** (1) La conception écrite : l'échelle des représentations, les critères d'activation, les raccords, les étapes
+et leurs essais. (2) ADR-275, qui décide l'échelle et l'ordre. (3) La campagne inscrite à la liste.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-274 ; METHODE.
-- [x] **P3** — rituel.
+- [ ] **P2** — la conception ; ADR-275.
+- [ ] **P3** — lot ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-274 : D1 (un calcul long mesuré, montré, arrêté au double), D2 (la machine employée, l'attente utile), D3 (le quantum d'une lecture), D4 (une hauteur bornée par la célérité) ; la prochaine revue S696.
