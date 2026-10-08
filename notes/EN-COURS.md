@@ -62,44 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S697 — **terminée**. En autonomie, sans arrêt. S695 : le raccord du large fait se retourner la vague trop tôt. Il est jugé seul ici
-(ADR-273 D1, ADR-276 D2 : une seule cause à la fois).
+Session : S698 — **en cours**. En autonomie, sans arrêt. S697 : la zone de colonnes du raccord du large (hydrostatique, vitesse uniforme)
+fait tout l'écart. **Le raccord du large par particules**, sans zone de colonnes.
 
-**Ce que la session fait.** Le même montage que S693–S695 (le repère de S650 : l'eau à 0,5 m, le fond plat à z = 0, l'escalier, l'air
-balistique, le relais au rivage), **sans raccord au large** : APIC 3D depuis 0 m, un mur à gauche (`x_r = 0`). On a ainsi trois
-différences, chacune d'une seule cause :
+**Ce que la session fait.**
 
-| écart | la cause qui seule change |
-|---|---|
-| sans raccord (0 m) − S690 (2,624 s) | le repère (0,5 m et z = 0, contre 0,55 m et 0,05 m) |
-| raccord à 1,0 m (2,582 s) − sans raccord | la zone de colonnes derrière l'onde, que l'onde ne traverse pas |
-| raccord à 5,0 m (2,524 s) − raccord à 1,0 m | la part de l'onde qui traverse le raccord |
+- **Le bord gauche d'APIC par particules** (`apic3d_gauche.rs`), le miroir de S682–S683. Les particules qui sortent par la gauche sont
+  retirées et comptées. Le volume qui entre est posé par quanta, chaque particule avec la vitesse que l'appelant donne à sa hauteur.
+- **Le porteur SGN** (S694) au large. Au raccord, `ū = q/h`, puis `ū_x` et `ū_xx` par différences sur ses mailles. Le profil vertical
+  de SGN sur fond plat (z depuis le fond) donne `u(z) = ū + (h²/6 − z²/2)·ū_xx` et `w(z) = −z·ū_x`. C'est la vitesse du bord ouvert,
+  couche par couche, et celle des particules posées.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276)
 
-- **témoin** : le montage sans raccord, construit par la même fonction (`deux_raccords_porteur`, ADR-276 D1), qui ne change que la
-  présence du raccord.
-- **instrument** : le premier retournement. Ce que rendrait chaque hypothèse :
-  - si le repère est neutre, ≈ 2,624 s (S690), et l'écart de 0,04 s est la zone de colonnes ;
-  - si le repère compte, ≈ 2,58 s, et la zone de colonnes est neutre ;
-  - entre les deux, chacune pour sa part.
-- **calcul** : le coût, ≈ 14 min (≈ 237 000 particules, comme S690 : ADR-274 D1).
-- **ADR** : ADR-273, ADR-276.
+- **témoin** : le montage sans raccord de S697, par la même fonction (2,637 s, 9,988 m). Le raccord est la seule chose qui change
+  (ADR-276 D2).
+- **instrument** : le premier retournement, au raccord à 5,0 m. Ce que rendrait chaque hypothèse :
+  - si la zone de colonnes était la cause, et que le bord par particules avec le profil de SGN transmet l'onde, le témoin à 0,02 s près ;
+  - si le bord par particules garde une faute (le profil, la pose), un écart entre le témoin et 2,524 s.
+- **calcul** : aucun nombre neuf. Le coût est celui de S693, ≈ 10 min ; le profil de SGN est calculé à chaque pas.
+- **ADR** : ADR-271, ADR-273, ADR-275, ADR-276.
 - **pièges** :
-  - sans raccord, ni zone de colonnes, ni bord ouvert à gauche, ni volume entré ;
-  - la même onde (x₁ = 3,4 m) ;
-  - le même `lz` (1,0 m).
+  - la masse : la 3D + le rivage + les réservoirs − la dette − ce qui est entré par la gauche + ce qui en est sorti ;
+  - `ū_xx` par différences centrées sur SGN ;
+  - les couches au-dessus de l'eau : la vitesse du bord y est sans effet (faces d'air).
 
 **Critères, écrits avant.**
 
-1. Les trois écarts mesurés, et chacun attribué à sa seule cause.
-2. La masse à 10⁻¹² près, la dette sous un quantum.
+1. Au raccord à 5,0 m : le retournement à moins de **0,02 s** et **0,15 m** du témoin (2,637 s, 9,988 m).
+2. L'air après lui, en avant ; la masse à 10⁻¹² ; la dette sous un quantum.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le montage sans raccord ; l'essai ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — le bord gauche ; l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) sans raccord : 2,637 s ; le repère +0,013 s, la zone de colonnes −0,055 s, la traversée −0,058 s ; (2) 1,2·10⁻¹⁶, sous un quantum.
