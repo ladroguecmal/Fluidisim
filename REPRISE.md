@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 17:42 +02:00
+JETON            : libre
+Battement        : 2026-10-08 17:54 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S704 — le juge éprouvé : la crête de l'onde sur fond plat, la 3D à deux résolutions et SGN ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S703 — La pose par la grille nourrie par SGN ([journal](notes/JOURNAL.md)). Avant : S702 (La pose par la grille)
-Session suivante : S704 — l'amortissement de l'onde par le tout-3D à 2,5 cm et par SGN, sur le fond plat : le juge éprouvé
+Session en cours : aucune
+Dernière session : S704 — Le juge éprouvé sur fond plat ([journal](notes/JOURNAL.md)). Avant : S703 (La pose par la grille nourrie par SGN)
+Session suivante : S705 — le raccord du large retenu (S703), ses écarts inscrits ; puis le LOD : la bande 3D qui naît et meurt avec la vague
 Maillons        : 1
-Registres       : dernier lot S701 (ADR-213 D3) ; le prochain au plus tard en S704
+Registres       : dernier lot S704 (ADR-213 D3) ; le prochain au plus tard en S707
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

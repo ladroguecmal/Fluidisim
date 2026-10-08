@@ -950,3 +950,79 @@ fn the_grid_pose_fed_by_serre_s703() {
     assert!(tp < t0 - 0.03 && (xp - x0).abs() < 0.2, "acquis : {tp} {xp} contre {t0} {x0}");
 }
 
+/// **S704 — la crête de l'onde de départ sur un fond plat seul** (a = 0,15 m, d = 0,5 m, x₁ = 3,4 m ; 8 m, 0,8 s) : APIC 3D à `dx` sur `ny`
+/// rangées, la plus haute hauteur d'eau à cinq plans, lue par le volume des particules de la tranche `|x − plan| < 5 cm` (une tranche
+/// d'une maille comptait les regroupements passagers des particules, S704) ; et SGN, la
+/// même onde, aux mêmes plans. Rend `(3D, SGN, particules au départ, à la fin, secondes)`.
+fn crete_sur_fond_plat_s704(dx: f32, ny: usize) -> ([f64; 5], [f64; 5], usize, usize, f64) {
+    use crate::grand_evenement::OndeSolitaire;
+    let horloge = std::time::Instant::now();
+    let dxs = dx as f64;
+    let (d, a0, lx, lz) = (0.5f64, 0.15f64, 8.0f64, 0.8f64);
+    let onde = OndeSolitaire { h: a0, d, x1: 3.4, g: 9.81 };
+    let (nx, nz) = ((lx / dxs).round() as usize, (lz / dxs).round() as usize);
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| onde.u((f % (nx + 1)) as f64 * dxs) as f32).collect();
+    let (v, w) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+    a.set_grid_velocities(&u, &v, &w).unwrap();
+    let n0 = a.seed(&|p| (p[2] as f64) < d + onde.eta(p[0] as f64)).unwrap();
+    a.set_particle_velocities(&|p| ([onde.u(p[0] as f64) as f32, 0., 0.], [[0.; 3]; 3])).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let n_sgn = (40. / dxs).round() as usize;
+    let xs = |i: usize| (i as f64 + 0.5) * dxs;
+    let (hs0, qs0): (Vec<f64>, Vec<f64>) = (0..n_sgn).map(|i| {
+        let hh = d + onde.eta(xs(i));
+        (hh, hh * onde.u(xs(i)))
+    }).unzip();
+    let mut serre = crate::serre_1d::Serre1D::nouveau(dxs, 9.81, hs0, qs0, true).unwrap();
+    let plans = [3.4f64, 4.0, 4.5, 5.0, 5.4];
+    let quantum = dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64;
+    let largeur = ny as f64 * dxs;
+    let (mut h3, mut hs) = ([0f64; 5], [0f64; 5]);
+    let (mut t, mut t_sv, mut prochain) = (0u64, 0f64, 0u64);
+    while t < 800_000 {
+        let us = a.stable_step_us(10_000).min(800_000 - t);
+        a.step(us).unwrap();
+        t += us;
+        let t1 = t as f64 * 1e-6;
+        while t_sv < t1 - 1e-12 {
+            let p = serre.pas_stable().min(t1 - t_sv);
+            serre.pas(p).unwrap();
+            t_sv += p;
+        }
+        let mut compte = [0usize; 5];
+        for q in a.particles() {
+            for (n, &xp) in plans.iter().enumerate() {
+                if (q[0] as f64 - xp).abs() < 0.05 {
+                    compte[n] += 1;
+                }
+            }
+        }
+        for n in 0..5 {
+            h3[n] = h3[n].max(compte[n] as f64 * quantum / (0.1 * largeur));
+            let i = (plans[n] / dxs).round() as usize;
+            hs[n] = hs[n].max(0.5 * (serre.h[i - 1] + serre.h[i]));
+        }
+        if t >= prochain {
+            prochain += 200_000;
+            eprintln!("S704 progression (dx = {dx} m) : t = {t1:.2} s, pas {us} µs, {} particules, {:.0} s d'horloge", a.particle_count(), horloge.elapsed().as_secs_f64());
+        }
+    }
+    (h3, hs, n0, a.particle_count(), horloge.elapsed().as_secs_f64())
+}
+
+/// **S704 — le juge éprouvé** : la crête de l'onde de départ sur un fond plat, APIC 3D à 2,5 cm (le juge des raccords, quatre rangées) et
+/// à 1,25 cm (deux rangées), et SGN. Rapporte ; (2) le nombre de particules tenu. **Mesuré** : au plan de 5 m, 0,147 m (2,5 cm), 0,145 m
+/// (1,25 cm ; ≈ 0,143 m sur les quatre plans aval), SGN 0,150 m — le juge n'amortit pas ; SGN est au-dessus de la 3D convergente.
+#[test]
+#[ignore = "l'onde sur fond plat, la 3D à deux résolutions (≈ 15 min)"]
+fn the_judge_on_a_flat_bed_s704() {
+    for (dx, ny) in [(0.025f32, 4usize), (0.0125, 2)] {
+        let (h3, hs, n0, n1, duree) = crete_sur_fond_plat_s704(dx, ny);
+        let f = |h: [f64; 5]| h.iter().map(|x| format!("{:.4}", x - 0.5)).collect::<Vec<_>>().join(" ; ");
+        println!("S704 dx = {dx} m : crête au-dessus du niveau aux plans 3,4 ; 4,0 ; 4,5 ; 5,0 ; 5,4 m — 3D [{}] ; SGN [{}] ; particules {n0} → {n1} ; {duree:.0} s", f(h3), f(hs));
+        assert_eq!(n0, n1, "critère 2");
+    }
+}
+

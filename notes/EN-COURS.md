@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S704 — **en cours**. En autonomie, sans arrêt. S703 : à pose égale, les données de SGN avancent le retournement de 0,089 s. Au
+Session : S704 — **terminée**. En autonomie, sans arrêt. S703 : à pose égale, les données de SGN avancent le retournement de 0,089 s. Au
 plan de 5 m, la crête de la 3D est à 0,139 m au-dessus du niveau, celle de SGN à 0,150 m. **Le juge (le tout-3D à 2,5 cm) est-il juste ?**
 
 **Ce que la session fait.** L'onde de départ (a = 0,15 m, d = 0,5 m, x₁ = 3,4 m), seule, sur un fond plat de 8 m, pendant 0,8 s. On y lit
@@ -99,7 +99,9 @@ résolution est d'un quantum sur `dx × largeur`, 0,8 mm à 2,5 cm.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — l'essai ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **L'instrument corrigé avant toute attribution** : la tranche d'une maille (`|x − plan| < dx/2`) a donné 0,29 m au plan de 5 m à 2,5 cm. C'était le regroupement passager des particules, retenu par le maximum dans le temps ; le pas restait à 10 ms. La tranche passe à 10 cm aux deux résolutions : le lissage de la crête est de `(k·w)²/3` ≈ 7·10⁻⁴, soit 0,1 mm, et la résolution de 0,2 mm.
+- **P2 fini** — (1) le juge n'amortit pas (1,25 cm : 0,143 m ; 2,5 cm : 0,149 m ; SGN 0,150 m) : SGN 5 % au-dessus de la 3D convergente ; (2) les particules tenues.

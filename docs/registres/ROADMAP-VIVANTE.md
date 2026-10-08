@@ -48,5 +48,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
 - **Les raccords entre solveurs** (S685–S698) : chacun se juge d'abord entre deux copies du même solveur (ADR-273). Au lot S696–S698 :
   le raccord du large par particules ramène l'écart du retournement de −0,113 s à −0,047 s ; la traversée reste à départager (S699).
   Au lot S699–S701 : nourri exactement par la 3D, le bord est transparent (−0,011 s) ; reste à le nourrir juste depuis SGN (la pose,
-  le porteur), S702 et suivantes.
+  le porteur), S702 et suivantes. Au lot S702–S704 : la pose par la grille, nourrie par SGN, à −0,068 s (≈ 12 cm sur la plage, sous le
+  visible) ; le raccord du large est retenu, le LOD reprend (S705).
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

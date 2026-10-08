@@ -502,6 +502,8 @@ profil de SGN (l'écart de −0,113 s à −0,047 s) (4.14).
 **S699–S701** : le raccord du large entre deux 3D (le tout-3D enregistré au plan, rejoué : −0,011 s, le bord transparent) ; l'alimentation
 par SGN départagée (l'affine −0,026 s, la pose par faces +0,085 s, les vitesses de SGN −0,121 s : S698 tenait par compensation) ; la
 quarante-quatrième revue (ADR-277 : un ADR nommé dit comment il est tenu ; un montage à variantes prend un mode nommé) (4.14).
+**S702–S704** : la pose par la grille (la vitesse et l'affine du G2P ; +0,021 s nourrie par la 3D, −0,068 s par SGN) ; le juge éprouvé
+sur fond plat (il n'amortit pas ; SGN 5 % au-dessus de la 3D convergente) ; l'écart du raccord, ≈ 12 cm sur la plage, sous le visible (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

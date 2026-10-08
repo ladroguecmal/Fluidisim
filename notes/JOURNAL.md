@@ -1917,3 +1917,11 @@ données de S698, la pose de S702) ; le volume au plan des données de R4 contre
 échoue) ; à pose égale, les données de SGN −0,089 s ; le volume de R4 à 0,986. La crête de la 3D au plan sous l'amplitude de départ : le
 juge lui-même à éprouver. Maillons **1** (4.14). Suivant : **S704**, l'amortissement de l'onde par le tout-3D à 2,5 cm, et par SGN,
 sur le fond plat.
+
+## S704 — 2026-10-08 — Le juge éprouvé sur fond plat
+
+**Entrée.** En autonomie, sans arrêt ; S703. **Fait** ([preuve](../docs/validation/JUGE-FOND-PLAT-S704.md)) : l'onde de départ sur fond
+plat, la 3D à 2,5 et 1,25 cm, SGN ; la crête lue par le volume d'une tranche de 10 cm (la tranche d'une maille, bruitée, corrigée avant
+toute attribution). **Mesuré** : le juge n'amortit pas ; la 3D plus fine est plus basse (0,143 m contre 0,149 m) ; SGN garde 0,150 m,
+5 % au-dessus. L'écart du raccord de S703, ≈ 12 cm sur la plage, est sous le visible. Maillons **1** (4.14). Suivant : **S705**, le
+raccord du large retenu (S703), ses écarts inscrits ; puis le LOD (la bande 3D qui naît et meurt avec la vague).
