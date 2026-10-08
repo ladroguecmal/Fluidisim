@@ -422,7 +422,8 @@ pas recopiée ici (L137).
   ensemble (ADR-275, étape 1) — la 3D réduite à la bande de déferlement (÷ 3 particules), la masse au bit ; le retournement 0,12 s trop
   tôt : Saint-Venant, sans dispersion, raidit l'onde du large (la moitié, mesurée) ([preuve](validation/DEUX-RACCORDS-S693.md)). **S694** :
   le porteur dispersif, Serre–Green–Naghdi 1D — l'onde solitaire exacte gardée à 0,04–0,09 % sur 40 profondeurs, à l'ordre deux
-  (Saint-Venant : 60 %) ([preuve](validation/SERRE-1D-S694.md)).
+  (Saint-Venant : 60 %) ([preuve](validation/SERRE-1D-S694.md)). **S695** : le relais au large nourri par SGN — le même retournement qu'avec
+  Saint-Venant : le porteur n'est pas en cause, le raccord du large l'est (l'attribution de S693 corrigée) ([preuve](validation/RELAIS-LARGE-SGN-S695.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -49,6 +49,11 @@ def main():
     marque = a.marque or (re.search(r"s\d{3}", a.nom).group(0).upper() if re.search(r"s\d{3}", a.nom) else a.nom)
     CALCULS.mkdir(exist_ok=True)
     copie = CALCULS / f"essai_{a.nom}.exe"
+    # S695 (S693 : deux relances chevauchées, un binaire verrouillé) : un seul exemplaire d'un même essai à la fois.
+    vivants = subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {copie.name}", "/NH"], capture_output=True, text=True,
+                             encoding="utf-8", errors="replace").stdout
+    if copie.name.lower() in vivants.lower():
+        sys.exit(f"{copie.name} tourne déjà : l'arrêter (Stop-Process) ou attendre sa fin")
     if not a.sans_compiler:
         shutil.copyfile(binaire_des_essais(), copie)
     journal = CALCULS / f"essai_{a.nom}.log"

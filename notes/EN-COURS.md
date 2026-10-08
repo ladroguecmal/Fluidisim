@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S695 — **en cours**. En autonomie, sans arrêt. Le relais au large de S693, nourri par SGN (S694) au lieu de Saint-Venant.
+Session : S695 — **terminée**. En autonomie, sans arrêt. Le relais au large de S693, nourri par SGN (S694) au lieu de Saint-Venant.
 
 **Ce que la session fait.** `deux_raccords_s693` reçoit le porteur du large : Saint-Venant (S693), ou SGN 1D. SGN est sur fond plat,
 périodique, 40 m, l'onde à 3,4 m ; le large est plat jusqu'au pied (5,696 m), et le raccord est à 5,0 m. Le bord gauche d'APIC reçoit sa
@@ -95,7 +95,8 @@ vitesse moyenne à 5,0 m, comme en S650.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le porteur SGN ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le porteur SGN ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) **manqué** : 2,524 s avec SGN, le même qu'avec Saint-Venant ; le porteur n'est pas en cause, le raccord du large l'est ; l'attribution de S693 corrigée (note datée) ; (2) tenu.

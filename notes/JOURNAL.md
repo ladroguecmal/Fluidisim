@@ -1845,3 +1845,11 @@ dispersive de Bonneton et al. (2011). **Mesuré** : l'onde solitaire exacte gard
 l'ordre deux, la célérité à 0,04 % ; Saint-Venant la déforme de 60 %. La largeur du plan, posée de tête, était fausse (2,08 au lieu
 de 2,40 m). Décision de l'utilisateur : pas de file de nuit. Maillons **1** (4.14 ; A234 a sa référence). Suivant : **S695**, le relais au
 large de S693 nourri par SGN.
+
+## S695 — 2026-10-08 — Le relais au large nourri par Serre–Green–Naghdi
+
+**Entrée.** En autonomie, sans arrêt. **Fait** ([preuve](../docs/validation/RELAIS-LARGE-SGN-S695.md)) : le porteur du large au choix,
+Saint-Venant ou SGN. **Mesuré** : avec SGN, le retournement à 2,524 s, comme avec Saint-Venant, **critère manqué**. Le porteur n'est pas en
+cause. **L'attribution de S693 était fausse** : ses témoins variaient deux causes (ce que Saint-Venant porte, ce qui traverse le raccord).
+Corrigée par une note datée. Le raccord du large lui-même est en cause : la vitesse uniforme sur la verticale, la zone de colonnes
+hydrostatique. Maillons **1** (4.14 : la cause localisée). Suivant : **S696, la revue de méthode** ; puis le raccord du large jugé seul.

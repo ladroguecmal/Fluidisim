@@ -484,6 +484,12 @@ fn a_plunging_wave_breaks_through_the_shore_relay_s690() {
 /// (2) le retournement à 0,02 s et 0,15 m du tout-3D, l'air après lui ; (3) la masse, la dette ; (4) rapportés.
 #[allow(clippy::type_complexity)]
 fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
+    deux_raccords_porteur(x_r, false)
+}
+
+/// S695 — le même montage ; le porteur du large, Saint-Venant (S693) ou, si `sgn`, Serre–Green–Naghdi 1D sur fond plat (S694).
+#[allow(clippy::type_complexity)]
+fn deux_raccords_porteur(x_r: f64, sgn: bool) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
@@ -499,6 +505,14 @@ fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64,
     let ql: Vec<f64> = (0..nl * 3).map(|k| if xc(k) < x_pied { hl[k] * onde0.u(xc(k)) } else { 0. }).collect();
     let mut large = SaintVenant2D::nouveau(nl, 3, dxs, 9.81, zl, hl, ql, vec![0.; nl * 3]).unwrap();
     large.regler_ordre_deux(1e-16).unwrap();
+    // S695 : SGN sur fond plat, périodique, 40 m, la même onde.
+    let n_sgn = (40. / dxs).round() as usize;
+    let xs = |i: usize| (i as f64 + 0.5) * dxs;
+    let (hs0, qs0): (Vec<f64>, Vec<f64>) = (0..n_sgn).map(|i| {
+        let hh = d + onde0.eta(xs(i));
+        (hh, hh * onde0.u(xs(i)))
+    }).unzip();
+    let mut serre = crate::serre_1d::Serre1D::nouveau(dxs, 9.81, hs0, qs0, true).unwrap();
     let i_r = (x_r / dxs).round() as usize;
     let (nx, ny, nz) = (((x_f - x_r) / dxs).round() as usize, 4usize, (lz / dxs).round() as usize);
     let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
@@ -550,13 +564,24 @@ fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64,
         let us = rel.pas_stable_us(10_000).min(4_000_000 - t);
         let t1 = (t + us) as f64 * 1e-6;
         while t_sv < t1 - 1e-12 {
-            let p = pas_large.min(t1 - t_sv);
-            large.pas(p).unwrap();
-            t_sv += p;
+            if sgn {
+                let p = serre.pas_stable().min(t1 - t_sv);
+                serre.pas(p).unwrap();
+                t_sv += p;
+            } else {
+                let p = pas_large.min(t1 - t_sv);
+                large.pas(p).unwrap();
+                t_sv += p;
+            }
         }
-        let c = (i_r - 1) * 3 + 1;
-        let (qq, hs) = (large.qx[c] + large.qx[c + 3], large.h[c] + large.h[c + 3]);
-        let ub = if hs > 0. { (qq / hs) as f32 } else { 0. };
+        let ub = if sgn {
+            let (qq, hs) = (serre.q[i_r - 1] + serre.q[i_r], serre.h[i_r - 1] + serre.h[i_r]);
+            (qq / hs) as f32
+        } else {
+            let c = (i_r - 1) * 3 + 1;
+            let (qq, hs) = (large.qx[c] + large.qx[c + 3], large.h[c] + large.h[c + 3]);
+            if hs > 0. { (qq / hs) as f32 } else { 0. }
+        };
         rel.regler_gauche(&vec![ub; ny * nz]).unwrap();
         rel.pas(us).unwrap();
         t += us;
@@ -607,5 +632,18 @@ fn the_offshore_relay_witness_s693() {
         let (premier, air, masse, _, n0, duree) = deux_raccords_s693(x_r);
         println!("S693 témoin x_r = {x_r} m : {n0} particules ; retournement {premier:?} ; air {air:?} ; masse {masse:.1e} ; {duree:.0} s");
     }
+}
+
+/// **S695 — le relais au large nourri par SGN** : le montage de S693 (le raccord du large à 5,0 m), le porteur SGN. (1) le retournement à
+/// 0,02 s et 0,15 m du témoin de S693 à 1,0 m (2,582 s, 9,888 m) — **manqué** : 2,524 s, le même qu'avec Saint-Venant ; le porteur n'est
+/// pas en cause, le raccord du large l'est (la preuve) ; (2) l'air, la masse, la dette (tenus). N'affirme que ce qui a tenu (ADR-244).
+#[test]
+#[ignore = "le relais au large par SGN (≈ 10 min)"]
+fn the_offshore_relay_fed_by_serre_s695() {
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(5.0, true);
+    println!("S695 : SGN au large ; {n0} particules ; retournement {premier:?} (témoin 2,582 s, 9,888 m ; Saint-Venant 2,524 s ; tout-3D 2,642 s) ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s");
+    let (tp, xp) = premier.expect("un retournement");
+    let (ta, xa) = air.expect("critère 2 : de l'air enfermé");
+    assert!(ta > tp && xa > xp && masse < 1e-12 && dette < 1.0, "critère 2");
 }
 

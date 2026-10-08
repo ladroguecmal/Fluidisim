@@ -53,3 +53,10 @@ pousse la 3D par une zone de colonnes (S650) ; au rivage, il la reprend (S684–
 - **Le raccord au large demande un porteur dispersif.** Pour une vague raide et non linéaire, Saint-Venant ne propage pas l'onde comme
   APIC. Dans le jeu, la houle du large est portée par B (dispersif), qui nourrira la bande 3D (ADR-214). Pour une onde solitaire, il faut
   Serre–Green–Naghdi : la suite (S694), qui servira aussi de référence à la non-linéarité en eau peu profonde (A234).
+
+## Note du 2026-10-08 (S695) — l'attribution corrigée
+
+« Le porteur Saint-Venant fait la moitié de l'écart » est **faux**. Avec SGN, un porteur dispersif, le retournement est le même : 2,524 s
+([S695](RELAIS-LARGE-SGN-S695.md)). Les témoins de cette session variaient deux causes à la fois : ce que Saint-Venant porte, et la part de
+l'onde qui traverse le raccord du large. C'est la seconde. L'écart vient du raccord du large lui-même : un bord ouvert à vitesse uniforme
+sur la verticale, et une zone de colonnes hydrostatique.
