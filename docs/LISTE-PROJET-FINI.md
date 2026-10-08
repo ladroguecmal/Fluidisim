@@ -424,6 +424,8 @@ pas recopiée ici (L137).
   le porteur dispersif, Serre–Green–Naghdi 1D — l'onde solitaire exacte gardée à 0,04–0,09 % sur 40 profondeurs, à l'ordre deux
   (Saint-Venant : 60 %) ([preuve](validation/SERRE-1D-S694.md)). **S695** : le relais au large nourri par SGN — le même retournement qu'avec
   Saint-Venant : le porteur n'est pas en cause, le raccord du large l'est (l'attribution de S693 corrigée) ([preuve](validation/RELAIS-LARGE-SGN-S695.md)).
+  **S697** : le raccord du large jugé seul — sans lui, le retournement à 0,005 s du tout-3D ; la zone de colonnes (−0,055 s) et sa traversée
+  (−0,058 s) font tout l'écart ([preuve](validation/RACCORD-LARGE-SEUL-S697.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -520,15 +520,20 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool) -> (Option<(f64, f64)>, Option<(f6
     let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - x_pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
     a.set_seabed(Some(&fond)).unwrap();
     a.set_ballistic_air(true);
-    let n_col = (0.6 / dxs).round() as usize;
-    let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx < n_col) as u8).collect();
-    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    // S697 : `x_r` = 0, sans raccord au large — ni zone de colonnes, ni bord ouvert à gauche (il reste fermé, nul).
+    let n_col = if x_r > 0. { (0.6 / dxs).round() as usize } else { 0 };
+    if n_col > 0 {
+        let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx < n_col) as u8).collect();
+        a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    }
     a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     // Le même état initial que la référence (S647, S690 : x₁ = 3,4 m ; ADR-273 D2) — S650 prenait la distance canonique, 3,488 m.
     let onde = OndeSolitaire { h: h0, d, x1: 3.4, g: 9.81 };
     let eta: Vec<f32> = (0..nx * ny).map(|c| niveau + onde.eta(xg((c % nx) as f64)) as f32).collect();
-    a.set_columns_surface(&eta).unwrap();
+    if n_col > 0 {
+        a.set_columns_surface(&eta).unwrap();
+    }
     let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| {
         let x = x_r + (f % (nx + 1)) as f64 * dxs;
         if x < x_pied { onde.u(x) as f32 } else { 0. }
@@ -574,7 +579,9 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool) -> (Option<(f64, f64)>, Option<(f6
                 t_sv += p;
             }
         }
-        let ub = if sgn {
+        let ub = if n_col == 0 {
+            0.
+        } else if sgn {
             let (qq, hs) = (serre.q[i_r - 1] + serre.q[i_r], serre.h[i_r - 1] + serre.h[i_r]);
             (qq / hs) as f32
         } else {
@@ -585,8 +592,9 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool) -> (Option<(f64, f64)>, Option<(f6
         rel.regler_gauche(&vec![ub; ny * nz]).unwrap();
         rel.pas(us).unwrap();
         t += us;
-        let col = rel.apic.columns.as_ref().unwrap();
-        entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
+        if let Some(col) = rel.apic.columns.as_ref() {
+            entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
+        }
         let ts = t as f64 * 1e-6;
         if premier.is_none() {
             if let Some((i, _)) = retournement_s647(&rel.apic, ny / 2, &marche) {
@@ -645,5 +653,15 @@ fn the_offshore_relay_fed_by_serre_s695() {
     let (tp, xp) = premier.expect("un retournement");
     let (ta, xa) = air.expect("critère 2 : de l'air enfermé");
     assert!(ta > tp && xa > xp && masse < 1e-12 && dette < 1.0, "critère 2");
+}
+
+/// **S697 — le raccord du large jugé seul** : le montage de S693–S695 sans raccord au large (APIC depuis 0 m, un mur à gauche). Avec S690
+/// (le repère de S647), le raccord à 1,0 m et à 5,0 m (S693), trois écarts d'une seule cause chacun. Rapporte ; (2) la masse, la dette.
+#[test]
+#[ignore = "le montage sans raccord au large (≈ 14 min)"]
+fn the_offshore_relay_judged_alone_s697() {
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(0.0, false);
+    println!("S697 : sans raccord au large, {n0} particules ; retournement {premier:?} ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s (S690 : 2,624 s ; raccord à 1,0 m : 2,582 s ; à 5,0 m : 2,524 s)");
+    assert!(masse < 1e-12 && dette < 1.0, "critère 2");
 }
 

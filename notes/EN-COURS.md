@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S697 — **en cours**. En autonomie, sans arrêt. S695 : le raccord du large fait se retourner la vague trop tôt. Il est jugé seul ici
+Session : S697 — **terminée**. En autonomie, sans arrêt. S695 : le raccord du large fait se retourner la vague trop tôt. Il est jugé seul ici
 (ADR-273 D1, ADR-276 D2 : une seule cause à la fois).
 
 **Ce que la session fait.** Le même montage que S693–S695 (le repère de S650 : l'eau à 0,5 m, le fond plat à z = 0, l'escalier, l'air
@@ -98,7 +98,8 @@ différences, chacune d'une seule cause :
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le montage sans raccord ; l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le montage sans raccord ; l'essai ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) sans raccord : 2,637 s ; le repère +0,013 s, la zone de colonnes −0,055 s, la traversée −0,058 s ; (2) 1,2·10⁻¹⁶, sous un quantum.

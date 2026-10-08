@@ -1860,3 +1860,11 @@ hydrostatique. Maillons **1** (4.14 : la cause localisée). Suivant : **S696, la
 construit depuis une seule fonction, une aide reprise se relit valeur par valeur (S693 : `Plage` cachait une seconde source). D2 : un
 témoin ne fait varier qu'une cause (S693 : le raccord déplacé changeait aussi ce qui le traverse ; l'attribution fausse, corrigée en
 S695). Maillons **0** (méthode). Suivant : **S697**, le raccord du large jugé seul (APIC des deux côtés) ; la revue en S701.
+
+## S697 — 2026-10-08 — Le raccord du large jugé seul
+
+**Entrée.** En autonomie, sans arrêt ; ADR-276. **Fait** ([preuve](../docs/validation/RACCORD-LARGE-SEUL-S697.md)) : le montage sans raccord
+au large, par la même fonction. **Mesuré** : sans raccord, le retournement à 0,005 s du tout-3D. Les trois écarts, une cause chacun : le
+repère +0,013 s, la zone de colonnes non traversée −0,055 s, sa traversée −0,058 s. Le raccord du large à la façon de S650 fait tout
+l'écart. Maillons **1** (4.14). Suivant : **S698**, le raccord du large par particules (sans zone de colonnes), avec le profil vertical
+de SGN.
