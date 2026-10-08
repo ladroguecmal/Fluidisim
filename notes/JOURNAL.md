@@ -1894,3 +1894,11 @@ enregistrement du tout-3D, SGN et la 3D comparés au plan, deux rejeux d'une cau
 (console Windows) : corrigé. **Mesuré** : l'affine −0,026 s ; la pose par faces +0,085 s ; les vitesses de SGN −0,121 s (la crête
 1,1 cm plus haute au plan). S698 tenait par compensation. Maillons **1** (4.14). Suivant : **S701**, la quarante-quatrième revue
 (S696–S700) ; puis une pose qui reproduise le rejeu exact.
+
+## S701 — 2026-10-08 — la quarante-quatrième revue de méthode (ADR-277)
+
+**Entrée.** La revue (S696–S700). **Fait** : [ADR-277](../docs/adr/ADR-277-quarante-quatrieme-revue-de-methode.md). D1 : un ADR nommé
+au plan y dit comment il est tenu (S698 nommait ADR-273 et sautait son premier pas). D2 : un montage à variantes prend un mode nommé,
+non des booléens (S699 : une combinaison rallumait la zone de colonnes, 34 min). Maillons **0** (méthode). Suivant : **S702**, une pose
+qui reproduise le rejeu exact à partir d'une vitesse donnée (positions tirées dans la maille, `w`, la matrice affine du gradient) ;
+la revue en S706.
