@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 17:54 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 17:56 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S705 — le raccord du large retenu (ADR-278) ; la conception de l'étape 2 du LOD ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S704 — Le juge éprouvé sur fond plat ([journal](notes/JOURNAL.md)). Avant : S703 (La pose par la grille nourrie par SGN)
 Session suivante : S705 — le raccord du large retenu (S703), ses écarts inscrits ; puis le LOD : la bande 3D qui naît et meurt avec la vague
 Maillons        : 1

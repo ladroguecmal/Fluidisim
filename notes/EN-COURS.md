@@ -62,46 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S704 — **terminée**. En autonomie, sans arrêt. S703 : à pose égale, les données de SGN avancent le retournement de 0,089 s. Au
-plan de 5 m, la crête de la 3D est à 0,139 m au-dessus du niveau, celle de SGN à 0,150 m. **Le juge (le tout-3D à 2,5 cm) est-il juste ?**
+Session : S705 — **en cours**. En autonomie, sans arrêt. S698–S704 : le raccord du large par particules, nourri par SGN et posé par la
+grille, est à −0,068 s et −0,13 m du tout-3D. Le juge à 2,5 cm n'est pas convergé à ce niveau (S704). **Une décision, puis la suite du LOD.**
 
-**Ce que la session fait.** L'onde de départ (a = 0,15 m, d = 0,5 m, x₁ = 3,4 m), seule, sur un fond plat de 8 m, pendant 0,8 s. On y lit
-la plus haute hauteur d'eau à cinq plans (3,4 ; 4,0 ; 4,5 ; 5,0 ; 5,4 m), dans trois calculs :
-- APIC 3D à 2,5 cm, le juge ;
-- APIC 3D à 1,25 cm, deux rangées ;
-- SGN.
+**Ce que la session fait.**
 
-La hauteur de la 3D est lue **par le volume** des particules de la tranche `|x − plan| < dx/2`, non par la plus haute particule : sa
-résolution est d'un quantum sur `dx × largeur`, 0,8 mm à 2,5 cm.
+- **ADR-278.**
+  - Le raccord du large retenu : le bord à particules, la pose par la grille, les données de SGN.
+  - La tolérance de temps de l'étape (ADR-275 D3), rapportée à la convergence du juge et à l'usage, sans réécrire ADR-275.
+  - La crête de SGN, 5 % haute, reste une question ouverte.
+- **La conception de l'étape 2 du LOD** (ADR-275 D2) : la bande 3D qui naît et meurt avec la vague. Un registre de conception :
+  - le déclencheur, la naissance de la 3D depuis l'état 2D, sa mort vers Saint-Venant ;
+  - la masse au bit à chaque passage ;
+  - les essais qui jugeront chaque pièce.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277)
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-277)
 
-- **témoin** : la même onde, la même fonction, à deux résolutions. Seul `dx` change, et la largeur suit pour garder le coût (ADR-276 D2 :
-  la largeur ne change rien à une onde plane, entre deux murs).
-- **instrument** : la crête aux cinq plans. Ce que rendrait chaque hypothèse :
-  - le juge amortit : à 1,25 cm, la crête au plan de 5 m plus haute qu'à 2,5 cm, au-delà de 3 mm (quatre fois la résolution) ;
-  - SGN s'écarte de la 3D : les deux résolutions d'accord, sous SGN ;
-  - les deux à la fois : entre les deux.
-- **calcul** : la résolution de lecture, `quantum / (dx · largeur)` = (0,025³ / 8) / (0,025 × 0,1) = 0,78 mm ; à 1,25 cm sur deux
-  rangées, (0,0125³ / 8) / (0,0125 × 0,025) = 0,78 mm. Le coût : mesuré au premier pas, montré.
+- **témoin** : sans objet (une décision et une conception).
+- **instrument** : chaque nombre de l'ADR renvoie à une preuve (S693–S704).
+- **calcul** : la tolérance de temps, tirée de nombres mesurés, est écrite avec son calcul.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-276 D1 : l'état initial est construit dans l'essai, depuis une seule fonction, l'onde de S693 (x₁ = 3,4 m) ;
-  - ADR-273 D1 : sans objet, aucun raccord ici.
-- **pièges** :
-  - le mur de droite, à 8 m : l'onde ne l'atteint pas en 0,8 s (≈ 2 m parcourus) ;
-  - SGN périodique sur 40 m, les plans lus à la face, moyenne des deux mailles.
+  - ADR-275 D3 : complété par une note datée et par ADR-278, non réécrit ;
+  - ADR-273 D1 : chaque pièce de l'étape 2 sera jugée d'abord entre deux copies du même solveur, et le registre le dit pièce par pièce.
+- **pièges** : déplacer le but après coup. La tolérance nouvelle se justifie par une mesure du juge (S704), non par l'écart obtenu, et elle
+  vaut pour les étapes suivantes.
 
-**Critères, écrits avant.**
-
-1. Les crêtes aux cinq plans pour les trois calculs, et l'attribution selon l'instrument.
-2. Le volume de la 3D tenu (le nombre de particules constant).
+**Critères, écrits avant.** (1) ADR-278, chaque nombre sourcé ; (2) le registre de l'étape 2, une pièce par session au plus, chacune avec
+son essai ; (3) la note datée sur ADR-275.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — ADR-278 ; le registre de l'étape 2 ; la note sur ADR-275.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **L'instrument corrigé avant toute attribution** : la tranche d'une maille (`|x − plan| < dx/2`) a donné 0,29 m au plan de 5 m à 2,5 cm. C'était le regroupement passager des particules, retenu par le maximum dans le temps ; le pas restait à 10 ms. La tranche passe à 10 cm aux deux résolutions : le lissage de la crête est de `(k·w)²/3` ≈ 7·10⁻⁴, soit 0,1 mm, et la résolution de 0,2 mm.
-- **P2 fini** — (1) le juge n'amortit pas (1,25 cm : 0,143 m ; 2,5 cm : 0,149 m ; SGN 0,150 m) : SGN 5 % au-dessus de la 3D convergente ; (2) les particules tenues.
