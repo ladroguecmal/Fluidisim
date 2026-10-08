@@ -62,39 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S705 — **terminée**. En autonomie, sans arrêt. S698–S704 : le raccord du large par particules, nourri par SGN et posé par la
-grille, est à −0,068 s et −0,13 m du tout-3D. Le juge à 2,5 cm n'est pas convergé à ce niveau (S704). **Une décision, puis la suite du LOD.**
+Session : S706 — **en cours**. En autonomie, sans arrêt. **La quarante-cinquième revue de méthode** (ADR-222 D4 : S701–S705).
 
-**Ce que la session fait.**
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **ADR-278.**
-  - Le raccord du large retenu : le bord à particules, la pose par la grille, les données de SGN.
-  - La tolérance de temps de l'étape (ADR-275 D3), rapportée à la convergence du juge et à l'usage, sans réécrire ADR-275.
-  - La crête de SGN, 5 % haute, reste une question ouverte.
-- **La conception de l'étape 2 du LOD** (ADR-275 D2) : la bande 3D qui naît et meurt avec la vague. Un registre de conception :
-  - le déclencheur, la naissance de la 3D depuis l'état 2D, sa mort vers Saint-Venant ;
-  - la masse au bit à chaque passage ;
-  - les essais qui jugeront chaque pièce.
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles. Une règle nouvelle n'est écrite qu'après
+  l'avoir cherchée dans METHODE : « convergence » n'y donne qu'une règle sur l'ordre d'un schéma, rien sur le juge ; « tube » et
+  « pipefail » n'y donnent rien.
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-277)
-
-- **témoin** : sans objet (une décision et une conception).
-- **instrument** : chaque nombre de l'ADR renvoie à une preuve (S693–S704).
-- **calcul** : la tolérance de temps, tirée de nombres mesurés, est écrite avec son calcul.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-275 D3 : complété par une note datée et par ADR-278, non réécrit ;
-  - ADR-273 D1 : chaque pièce de l'étape 2 sera jugée d'abord entre deux copies du même solveur, et le registre le dit pièce par pièce.
-- **pièges** : déplacer le but après coup. La tolérance nouvelle se justifie par une mesure du juge (S704), non par l'écart obtenu, et elle
-  vaut pour les étapes suivantes.
-
-**Critères, écrits avant.** (1) ADR-278, chaque nombre sourcé ; (2) le registre de l'étape 2, une pièce par session au plus, chacune avec
-son essai ; (3) la note datée sur ADR-275.
+**Critères, écrits avant.** (1) ADR-279 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-278 ; le registre de l'étape 2 ; la note sur ADR-275.
-- [x] **P3** — rituel.
+- [ ] **P2** — ADR-279 ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-278 (D1 le raccord retenu ; D2 la position à 0,15 m, l'instant à 0,1 s ; D3 la crête de SGN ouverte ; D4 l'étape 1 close) ; LOD-ETAPE-2-S705 (N1, N2, M1, D1, E1) ; la note sur ADR-275.
