@@ -1984,3 +1984,11 @@ sur son plancher de bruit en mouvement, et sur la grandeur que voit le solveur (
 pas la surface). D2 : la convergence du juge s'étend à ses options numériques ; une référence extérieure tranche (S709–S710 : le
 déferlement bouge de 0,2 à 0,3 s selon le volume). Maillons **0** (méthode). Suivant : **S712**, la référence extérieure du point de
 déferlement ; la revue en S716.
+
+## S712 — 2026-10-08 — Le juge contre le laboratoire (session longue)
+
+**Entrée.** En autonomie, sans arrêt ; ADR-280 D2. L'utilisateur accorde le téléchargement des mesures de Synolakis (NOAA) ; il demande à
+voir les « photos » : le graphique `captures/s712_synolakis.png` lui est envoyé. **Fait** ([preuve](../docs/validation/JUGE-SYNOLAKIS-S712.md)) :
+la plage canonique en 3D. Le premier passage, figé à t ≈ 26,6 par la remontée sur sable sec, a été arrêté ; les photos sont désormais lues
+dès qu'elles sont prises. **Mesuré** : les deux versions de la 3D se valent contre le laboratoire, et toutes deux font l'onde trop étroite
+et trop haute avant le déferlement (0,43–0,48 d contre 0,31 d). Maillons **1** (4.14, 4.16). Suivant : **S713**, la même plage à 1,25 cm.

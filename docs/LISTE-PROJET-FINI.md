@@ -446,6 +446,8 @@ pas recopiée ici (L137).
   plongeon (sans surface : 0,3 s plus tard) ; éteinte par défaut, la suite une projection faible ([preuve](validation/PROJECTION-DENSITE-S709.md)).
   **S710** : la projection faible (κ = 0,05) — l'onde plate à −0,45 % ; le tout-3D garde son volume et plonge, mais 0,22 s plus tard. Le
   point de déferlement de la 3D dépend de son volume à 0,2–0,3 s : il faut une référence extérieure ([preuve](validation/PROJECTION-DENSITE-FAIBLE-S710.md)).
+  **S712** : le juge contre le laboratoire (Synolakis, H/d = 0,3, 1:19,85) — les deux versions de la 3D se valent ; toutes deux font
+  l'onde trop haute avant le déferlement (0,43–0,48 d contre 0,31 d) ([preuve](validation/JUGE-SYNOLAKIS-S712.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

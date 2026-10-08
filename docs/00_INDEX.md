@@ -164,6 +164,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)](registres/LOD-ETAPE-2-S705.md) : cinq pièces, leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [Le juge contre le laboratoire : la plage canonique de Synolakis — S712](validation/JUGE-SYNOLAKIS-S712.md) : la 3D trop haute avant le déferlement.
 - [La projection de densité faible — S710](validation/PROJECTION-DENSITE-FAIBLE-S710.md) : le volume tenu, le plongeon 0,22 s plus tard.
 - [La projection de densité — S709](validation/PROJECTION-DENSITE-S709.md) : le volume tenu, le plongeon perdu ; éteinte par défaut.
 - [Le volume d'APIC par sa surface, contre le compte — S708](validation/VOLUME-APIC-SURFACE-S708.md) : −1,3 %/s en mouvement.

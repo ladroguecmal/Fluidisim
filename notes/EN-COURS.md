@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S712 — **en cours**. En autonomie, sans arrêt ; session longue. S709–S710 : le déferlement du tout-3D bouge de 0,2 à 0,3 s selon
+Session : S712 — **terminée**. En autonomie, sans arrêt ; session longue. S709–S710 : le déferlement du tout-3D bouge de 0,2 à 0,3 s selon
 que la 3D garde ou non son volume. ADR-280 D2 : **une référence extérieure tranche.**
 
 **La référence.** Les mesures de Synolakis (Caltech), publiées par la NOAA : l'onde solitaire **H/d = 0,3 qui déferle** sur une pente de
@@ -111,8 +111,10 @@ défaut de la projection ; sinon, la dispersion nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan ; la référence téléchargée.
-- [ ] **P2** — le montage ; E1.
-- [ ] **P3** — E2.
-- [ ] **P4** — preuve ; rituel.
+- [x] **P2** — le montage ; E1.
+- [x] **P3** — E2.
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **E1, premier passage arrêté** : à t ≈ 26,6, la remontée sur la plage sèche a fait tomber le pas à 0,34 ms, puis le calcul s'est figé. Les photos n'étaient comparées qu'à la fin : rien n'a été lu. Désormais, chaque photo est comparée dès qu'elle est prise, et le calcul s'arrête à t = 25 (le déferlement est vers t = 20). t = 30, la remontée, relève de la lame mince (S690).
+- **P2–P3 finis** — E1 et E2 se valent contre le laboratoire (écarts 0,048/0,051, 0,066/0,070, 0,038/0,036 d). Toutes deux font l'onde trop haute à t = 15 (0,43–0,48 d contre 0,31). Le graphique est dans captures/s712_synolakis.png. Suite : S713, la même plage à 1,25 cm.

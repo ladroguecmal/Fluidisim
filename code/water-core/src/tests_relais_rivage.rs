@@ -1655,3 +1655,181 @@ fn the_full_3d_with_weak_density_projection_s710() {
     let _ = r0;
 }
 
+/// **S712 — les mesures de Synolakis** (`references/synolakis/feuille_1.csv`) : par instant `t·√(g/d)` (15, 20, 25, 30), les points
+/// `(x/d, η/d)`, `x` compté depuis le rivage, positif vers le large.
+fn mesures_synolakis_s712() -> Vec<(f64, Vec<(f64, f64)>)> {
+    let chemin = concat!(env!("CARGO_MANIFEST_DIR"), "/../../references/synolakis/feuille_1.csv");
+    let texte = std::fs::read_to_string(chemin).expect("les mesures de Synolakis");
+    let mut out: Vec<(f64, Vec<(f64, f64)>)> = [15., 20., 25., 30.].iter().map(|t| (*t, Vec::new())).collect();
+    for ligne in texte.lines().skip(1) {
+        let champs: Vec<&str> = ligne.split(';').collect();
+        for (n, serie) in out.iter_mut().enumerate() {
+            let (a, b) = (champs.get(2 * n).map(|c| c.trim()), champs.get(2 * n + 1).map(|c| c.trim()));
+            if let (Some(a), Some(b)) = (a, b) {
+                if let (Ok(x), Ok(e)) = (a.replace(',', ".").parse::<f64>(), b.replace(',', ".").parse::<f64>()) {
+                    serie.1.push((x, e));
+                }
+            }
+        }
+    }
+    out
+}
+
+/// **S712 — la plage canonique de Synolakis en 3D** : d = 0,5 m, pente 1:19,85, l'onde H/d = 0,3 centrée en `X₁ = X₀ + arccosh(√20)/γ`,
+/// APIC à 2,5 cm sur deux rangées ; `kappa`, la projection de densité faible (`None` : sans). Rend, aux instants 15, 20, 25, 30, le profil
+/// `(x/d, η/d)` par la surface reconstruite (lissée sur 10 cm), le volume `V_φ/V_n`, et les secondes.
+#[allow(clippy::type_complexity)]
+fn plage_synolakis_s712(kappa: Option<f32>) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
+    use crate::grand_evenement::OndeSolitaire;
+    let horloge = std::time::Instant::now();
+    let (dx, d, rapport, cot, g) = (0.025f32, 0.5f64, 0.3f64, 19.85f64, 9.81f64);
+    let dxs = dx as f64;
+    let gamma = (3. * rapport / 4.).sqrt();
+    let l = (20f64.sqrt()).acosh() / gamma;
+    let (x0, x1) = (cot, cot + l);
+    // Le domaine : du mur du large (X₁ + 8 d) à la plage sèche (−8 d) ; x′ depuis le mur, x/d = (x′_rivage − x′)/d.
+    let (large, terre) = (x1 + 8., 8.);
+    let lx = (large + terre) * d;
+    let rivage = large * d;
+    let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, (1.0 / dxs).round() as usize);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let xg = |i: f64| (i + 0.5) * dxs;
+    let pied = rivage - x0 * d;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
+    a.set_seabed(Some(&fond)).unwrap();
+    a.set_ballistic_air(true);
+    if let Some(k) = kappa {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_relaxation(k).unwrap();
+    }
+    let onde = OndeSolitaire { h: rapport * d, d, x1: rivage - x1 * d, g };
+    let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| {
+        let x = (f % (nx + 1)) as f64 * dxs;
+        if x < pied { onde.u(x) as f32 } else { 0. }
+    }).collect();
+    let (v0, w0) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+    a.set_grid_velocities(&u, &v0, &w0).unwrap();
+    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let m2 = marche.clone();
+    a.seed(&|p| {
+        let i = ((p[0] / dx) as usize).min(nx - 1);
+        p[2] > m2[i] && (p[2] as f64) < d + onde.eta(p[0] as f64)
+    }).unwrap();
+    a.set_particle_velocities(&|p| {
+        let x = p[0] as f64;
+        ([if x < pied { onde.u(x) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])
+    }).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let quantum = dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64;
+    let echelle = (d / g).sqrt();
+    // S712 : jusqu'à t = 25 — la remontée sur la plage sèche (t = 30) fait tomber le pas à 0,3 ms et plus bas ; le déferlement est vers
+    // t = 20. Chaque photo est comparée dès qu'elle est prise.
+    let mesures = mesures_synolakis_s712();
+    let instants: Vec<u64> = [15., 20., 25.].iter().map(|t: &f64| (t * echelle * 1e6).round() as u64).collect();
+    let mut photos = Vec::new();
+    let (mut t, mut prochain) = (0u64, 0u64);
+    let fin = *instants.last().unwrap();
+    while t < fin {
+        let borne = instants.iter().copied().filter(|&b| b > t).min().unwrap();
+        let us = a.stable_step_us(10_000).min(borne - t);
+        a.step(us).unwrap();
+        t += us;
+        if instants.contains(&t) {
+            let (vphi, h) = volume_surface_s708(&a);
+            let demi = 2usize;
+            let profil: Vec<(f64, f64)> = (0..nx).map(|i| {
+                let (g0, g1) = (i.saturating_sub(demi), (i + demi).min(nx - 1));
+                let hm = h[g0..=g1].iter().sum::<f64>() / (g1 - g0 + 1) as f64;
+                let zb = marche[i] as f64;
+                ((rivage - xg(i as f64)) / d, if hm > 1e-3 { (zb + hm - d) / d } else { f64::NAN })
+            }).collect();
+            let ts = t as f64 * 1e-6 / echelle;
+            let vol = vphi / (a.particle_count() as f64 * quantum);
+            if let Some((tm, m)) = mesures.iter().find(|(tm, _)| (tm - ts).abs() < 0.1) {
+                let (ecart, n, cm, cc) = comparer_synolakis_s712(&profil, m);
+                eprintln!("S712 photo (κ = {kappa:?}) t = {ts:.1} (mesure {tm}) : écart quadratique {ecart:.4} d sur {n} points ; crête mesurée {:.4} d en x = {:.2} d, calculée {:.4} d en x = {:.2} d ; V_φ/V_n {vol:.4} ; {:.0} s d'horloge",
+                    cm.1, cm.0, cc.1, cc.0, horloge.elapsed().as_secs_f64());
+            }
+            // Le profil enregistré pour le graphique (calculs/, hors du dépôt suivi).
+            let nom = format!("{}/../../calculs/synolakis_{}_t{:.0}.csv", env!("CARGO_MANIFEST_DIR"), kappa.map_or("sans".to_string(), |k| format!("k{k}")), ts);
+            let lignes: String = profil.iter().filter(|(_, e)| e.is_finite()).map(|(x, e)| format!("{x:.4};{e:.5}
+")).collect();
+            let _ = std::fs::write(nom, lignes);
+            photos.push((ts, profil, vol));
+        }
+        if t >= prochain {
+            prochain += 500_000;
+            eprintln!("S712 progression (κ = {kappa:?}) : t = {:.2} s ({:.1} sans dimension), pas {us} µs, {} particules, {:.0} s d'horloge",
+                t as f64 * 1e-6, t as f64 * 1e-6 / echelle, a.particle_count(), horloge.elapsed().as_secs_f64());
+        }
+    }
+    (photos, horloge.elapsed().as_secs_f64())
+}
+
+/// S712 — la comparaison d'un profil calculé `(x/d, η/d)` aux mesures d'un instant : l'écart quadratique moyen aux points mesurés où le
+/// calcul porte de l'eau, la crête mesurée et la calculée (sur la même étendue de `x`). Rend `(écart, points, crête mesurée (x, η),
+/// crête calculée (x, η))`.
+fn comparer_synolakis_s712(profil: &[(f64, f64)], mesures: &[(f64, f64)]) -> (f64, usize, (f64, f64), (f64, f64)) {
+    let interp = |x: f64| -> f64 {
+        // Le profil est rangé du large vers la terre (x/d décroissant).
+        for w in profil.windows(2) {
+            let ((xa, ea), (xb, eb)) = (w[0], w[1]);
+            if (x <= xa && x >= xb) || (x >= xa && x <= xb) {
+                let s = if (xb - xa).abs() > 0. { (x - xa) / (xb - xa) } else { 0. };
+                return ea + s * (eb - ea);
+            }
+        }
+        f64::NAN
+    };
+    let (mut s2, mut n) = (0f64, 0usize);
+    let mut cm = (0f64, f64::MIN);
+    for &(x, e) in mesures {
+        if e > cm.1 {
+            cm = (x, e);
+        }
+        let ec = interp(x);
+        if ec.is_finite() {
+            s2 += (ec - e).powi(2);
+            n += 1;
+        }
+    }
+    let (xmin, xmax) = mesures.iter().fold((f64::MAX, f64::MIN), |(a, b), &(x, _)| (a.min(x), b.max(x)));
+    let cc = profil.iter().filter(|(x, e)| *x >= xmin && *x <= xmax && e.is_finite()).fold((0f64, f64::MIN), |m, &(x, e)| if e > m.1 { (x, e) } else { m });
+    ((s2 / n.max(1) as f64).sqrt(), n, cm, cc)
+}
+
+/// **S712 E1, E2 — le juge contre le laboratoire** (ADR-280 D2) : la plage canonique de Synolakis, H/d = 0,3, sans projection de densité
+/// (E1) puis avec la projection faible κ = 0,05 (E2). Rapporte, à chaque instant mesuré, l'écart quadratique moyen et les crêtes.
+fn juge_synolakis_s712(kappa: Option<f32>) {
+    let mesures = mesures_synolakis_s712();
+    let (photos, duree) = plage_synolakis_s712(kappa);
+    for ((t, profil, vol), (tm, m)) in photos.iter().zip(&mesures) {
+        let (ecart, n, cm, cc) = comparer_synolakis_s712(profil, m);
+        println!("S712 (κ = {kappa:?}) t = {t:.1} (mesure {tm}) : écart quadratique {ecart:.4} d sur {n} points ; crête mesurée {:.4} d en x = {:.2} d, calculée {:.4} d en x = {:.2} d ; V_φ/V_n {vol:.4}",
+            cm.1, cm.0, cc.1, cc.0);
+    }
+    println!("S712 (κ = {kappa:?}) : {duree:.0} s");
+}
+
+#[test]
+#[ignore = "la plage de Synolakis, sans projection (≈ 15 min)"]
+fn the_judge_against_synolakis_without_projection_s712() {
+    juge_synolakis_s712(None);
+}
+
+#[test]
+#[ignore = "la plage de Synolakis, la projection faible (≈ 20 min)"]
+fn the_judge_against_synolakis_weak_projection_s712() {
+    juge_synolakis_s712(Some(0.05));
+}
+
+/// S712 — les mesures lues : quatre instants, des points à chacun.
+#[test]
+fn the_synolakis_measurements_are_read_s712() {
+    let m = mesures_synolakis_s712();
+    assert_eq!(m.len(), 4);
+    for (t, p) in &m {
+        assert!(p.len() > 50, "t = {t} : {} points", p.len());
+    }
+}
+
