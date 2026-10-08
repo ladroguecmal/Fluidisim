@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**277 ADR** — actée : 226, proposée : 49, rétractée en partie : 2.
+**278 ADR** — actée : 227, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -283,8 +283,9 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [270](../adr/ADR-270-trente-neuvieme-revue-de-methode.md) | Trente-neuvième revue de méthode (S671–S675) | actée | S676 | 222 269 | 272 |
 | [271](../adr/ADR-271-le-film-du-rivage-a-saint-venant.md) | Le film du rivage appartient à Saint-Venant 2D | actée | S679 | 215 222 |  |
 | [272](../adr/ADR-272-quarantieme-revue-de-methode.md) | Quarantième revue de méthode (S676–S680) | actée | S681 | 222 270 | 273 |
-| [273](../adr/ADR-273-quarante-et-unieme-revue-de-methode.md) | Quarante et unième revue de méthode (S681–S685) | actée | S686 | 222 272 | 274 |
+| [273](../adr/ADR-273-quarante-et-unieme-revue-de-methode.md) | Quarante et unième revue de méthode (S681–S685) | actée | S686 | 222 272 | 274 278 |
 | [274](../adr/ADR-274-quarante-deuxieme-revue-de-methode.md) | Quarante-deuxième revue de méthode (S686–S690) | actée | S691 | 222 273 | 276 |
-| [275](../adr/ADR-275-le-lod-de-simulation.md) | Le LOD de simulation : l'eau représentée au niveau qu'elle demande | actée | S692 |  |  |
+| [275](../adr/ADR-275-le-lod-de-simulation.md) | Le LOD de simulation : l'eau représentée au niveau qu'elle demande | actée | S692 |  | 278 |
 | [276](../adr/ADR-276-quarante-troisieme-revue-de-methode.md) | Quarante-troisième revue de méthode (S691–S695) | actée | S696 | 222 274 | 277 |
-| [277](../adr/ADR-277-quarante-quatrieme-revue-de-methode.md) | Quarante-quatrième revue de méthode (S696–S700) | actée | S701 | 222 276 |  |
+| [277](../adr/ADR-277-quarante-quatrieme-revue-de-methode.md) | Quarante-quatrième revue de méthode (S696–S700) | actée | S701 | 222 276 | 278 |
+| [278](../adr/ADR-278-le-raccord-du-large-retenu.md) | Le raccord du large retenu, et la tolérance de l'étape rapportée au juge | actée | S705 | 273 275 277 |  |

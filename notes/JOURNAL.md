@@ -1925,3 +1925,11 @@ plat, la 3D à 2,5 et 1,25 cm, SGN ; la crête lue par le volume d'une tranche d
 toute attribution). **Mesuré** : le juge n'amortit pas ; la 3D plus fine est plus basse (0,143 m contre 0,149 m) ; SGN garde 0,150 m,
 5 % au-dessus. L'écart du raccord de S703, ≈ 12 cm sur la plage, est sous le visible. Maillons **1** (4.14). Suivant : **S705**, le
 raccord du large retenu (S703), ses écarts inscrits ; puis le LOD (la bande 3D qui naît et meurt avec la vague).
+
+## S705 — 2026-10-08 — Le raccord du large retenu ; l'étape 2 du LOD conçue
+
+**Entrée.** En autonomie, sans arrêt ; S704. **Fait** : [ADR-278](../docs/adr/ADR-278-le-raccord-du-large-retenu.md). D1 : le raccord du
+large retenu (le bord à particules, la pose par la grille, SGN). D2 : la tolérance de temps de l'étape rapportée à la convergence du
+juge, la position à 0,15 m et l'instant à 0,1 s (fondée sur S704, non sur l'écart obtenu). D3 : la crête de SGN, question ouverte. D4 :
+l'étape 1 du LOD close. Le registre [LOD-ETAPE-2-S705](../docs/registres/LOD-ETAPE-2-S705.md) : cinq pièces (N1, N2, M1, D1, E1). La note
+datée sur ADR-275. Maillons **1** (4.14). Suivant : **S706**, la quarante-cinquième revue (S701–S705) ; puis N1, la naissance au repos.

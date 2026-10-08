@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S705 — **en cours**. En autonomie, sans arrêt. S698–S704 : le raccord du large par particules, nourri par SGN et posé par la
+Session : S705 — **terminée**. En autonomie, sans arrêt. S698–S704 : le raccord du large par particules, nourri par SGN et posé par la
 grille, est à −0,068 s et −0,13 m du tout-3D. Le juge à 2,5 cm n'est pas convergé à ce niveau (S704). **Une décision, puis la suite du LOD.**
 
 **Ce que la session fait.**
@@ -93,7 +93,8 @@ son essai ; (3) la note datée sur ADR-275.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-278 ; le registre de l'étape 2 ; la note sur ADR-275.
-- [ ] **P3** — rituel.
+- [x] **P2** — ADR-278 ; le registre de l'étape 2 ; la note sur ADR-275.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-278 (D1 le raccord retenu ; D2 la position à 0,15 m, l'instant à 0,1 s ; D3 la crête de SGN ouverte ; D4 l'étape 1 close) ; LOD-ETAPE-2-S705 (N1, N2, M1, D1, E1) ; la note sur ADR-275.

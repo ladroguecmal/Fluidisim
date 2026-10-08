@@ -40,3 +40,7 @@ vitesse, la courbure, l'air enfermé) ou le contact d'un corps. Elle descend ave
   (l'activation) et 4.19 (le coût).
 - L'écume n'est pas suspendue : seul son visuel attend validation (2026-10-08). Au niveau 4, elle se tire du ressaut de Saint-Venant
   (la dissipation de Battjes et Janssen, S669–S677).
+
+*Note datée du 2026-10-08 (S705)* : l'étape 1 est close par [ADR-278](ADR-278-le-raccord-du-large-retenu.md) D4. La zone de colonnes du
+large est remplacée par le bord à particules, nourri par SGN et posé par la grille. La tolérance de temps de D3 est rapportée à la
+convergence du juge par ADR-278 D2 : la position à 0,15 m, l'instant à 0,1 s.

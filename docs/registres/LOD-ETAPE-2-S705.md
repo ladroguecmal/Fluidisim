@@ -1,0 +1,37 @@
+# L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)
+
+*Écrit en S705, 2026-10-08* ([ADR-275](../adr/ADR-275-le-lod-de-simulation.md) D2, étape 2 ; [ADR-278](../adr/ADR-278-le-raccord-du-large-retenu.md)).
+
+## Le but
+
+Aujourd'hui, la 3D couvre une bande fixe : [5,0 ; 10,775] m, du raccord du large au relais du rivage. L'étape 2 la fait **naître**
+devant la vague qui va déferler, et **mourir** quand la vague a passé dans Saint-Venant. Entre deux vagues, la 3D est éteinte et rien
+ne coûte que la 2D.
+
+## Les pièces, une par session au plus
+
+Chaque pièce est jugée d'abord entre deux copies du même solveur (ADR-273 D1), puis dans le montage de la vague (ADR-275 D3, ADR-278
+D2 : la position à 0,15 m, l'instant à 0,1 s, l'air, la masse au bit).
+
+| pièce | ce qu'elle fait | son essai |
+|---|---|---|
+| **N1 — la naissance au repos** | une bande de 3D née d'un état 2D au repos : les particules posées sous `h` (la grille des sous-mailles, le fond lisse ou l'escalier), la vitesse et l'affine du G2P sur une grille remplie du profil vertical du porteur | l'eau au repos reste au repos, à la masse au bit ; la naissance ne crée ni vague ni courant (µm/s, comme S684) |
+| **N2 — la naissance dans l'onde** | la même dans une onde en marche, le porteur SGN | l'onde de S704 traverse la naissance ; sa crête en aval contre celle d'une 3D née au départ (le tout-3D sur fond plat), au quantum de lecture |
+| **M1 — la mort vers Saint-Venant** | la bande éteinte : chaque colonne rend son volume (`h`) et sa quantité de mouvement (`h·ū`) à Saint-Venant ; les particules retirées | l'eau au repos ; puis le ressaut après le déferlement : la masse au bit, la quantité de mouvement à 10⁻⁶ ; Saint-Venant reprend sans choc |
+| **D1 — le déclencheur** | le moment et le lieu de la naissance, tirés du porteur : la cambrure, ou le critère de déferlement de Battjes et Janssen (S669), à une distance de la ligne de déferlement prévue | sur la plage de S690 : la naissance avant que le retournement de la 3D ne commence, avec une marge mesurée |
+| **E1 — l'ensemble** | la vague de S690, du large au sable : la 2D seule, la 3D qui naît, déferle, meurt | ADR-278 D2 contre le tout-3D ; le coût mesuré et montré (ADR-274 D1), comparé au tout-3D et à la bande fixe |
+
+## Ce qui est déjà là
+
+- le bord à particules des deux côtés : à gauche (S698, `apic3d_gauche.rs`), à droite (S682–S683) ;
+- la pose par la grille (S702) ;
+- le relais au rivage, qui rend la 3D à Saint-Venant (S680–S690) ;
+- le porteur SGN (S694) et la côte cuite qui prévoit la zone de déferlement (S677).
+
+## Les pièges connus
+
+- **La masse au bit à chaque passage** : un volume rendu par particules est un compte de quanta. La part sous le quantum va à une dette,
+  comme au rivage (S684).
+- **La vitesse d'une particule née** : prise au G2P, sur une grille remplie avant la naissance. Une vitesse posée à la main (le profil
+  seul) a coûté 0,1 s en S700.
+- **La hauteur rendue à la mort** : lue par le volume des particules, non par la plus haute (S700, S704).
