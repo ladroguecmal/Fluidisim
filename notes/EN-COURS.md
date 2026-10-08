@@ -62,39 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S713 — **terminée**. En autonomie, sans arrêt ; session longue. L'utilisateur dort et a dit de ne pas s'arrêter. S712 : contre
-le laboratoire, la 3D à 2,5 cm fait l'onde de Synolakis trop étroite et trop haute avant le déferlement (0,43 d contre 0,31 d à t = 15).
-**La résolution en est-elle la cause ?**
+Session : S714 — **en cours**. En autonomie, sans arrêt ; session longue. S713 : sur la plage de Synolakis, le pas de 2,5 ms rend juste la
+crête du déferlement, que le pas de 10 ms plaçait 0,04 d trop bas et 0,26 d en arrière. **Le juge des raccords (S690–S703), au pas de
+10 ms, en dépend-il ?**
 
-**L'essai.** Le même montage (`plage_synolakis`, une seule fonction, ADR-276 D1), sans projection, à **1,25 cm** sur deux rangées. Les
-photos à t = 15 et 20, lues dès qu'elles sont prises. Seul `dx` change (ADR-276 D2 ; la largeur suit, sans effet sur une onde plane).
+**L'essai.** Le tout-3D de S690 (le montage sans raccord), avec le pas plafonné à **2,5 ms** : `Large::AucunPasCourt`, un mode nommé
+(ADR-277 D2). Seul le plafond change (ADR-276 D2).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-280)
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-278, ADR-280)
 
-- **témoin** : E1 de S712 (2,5 cm) : à t = 15, la crête 0,433 d et l'écart 0,048 d ; à t = 20, 0,277 d et 0,066 d.
-- **instrument** : celui de S712 (la surface φ lissée sur 10 cm, contre les points mesurés). Son plancher est la dispersion des mesures,
-  0,01 à 0,02 d. Ce que rendrait chaque hypothèse :
-  - la résolution est la cause : à 1,25 cm, la crête descend nettement vers 0,31 d (de plus de 0,05 d), et l'écart baisse ;
-  - elle ne l'est pas : la crête reste vers 0,43 d.
-- **calcul** : ≈ 600 000 particules, un pas deux fois plus court, soit ≈ 8 fois le coût de S712 : ≈ 45 min jusqu'à t = 15, autant jusqu'à
-  t = 20. Le coût est mesuré et montré.
+- **témoin** : le juge de S690 au pas de 10 ms, par la même fonction : retournement à 2,637 s et 9,988 m ; air à 2,790 s.
+- **instrument** : le lecteur de retournement de S647, et l'air enfermé. Ce que rendrait chaque hypothèse :
+  - le juge ne dépend pas du pas : le retournement à moins de 0,1 s et 0,15 m (ADR-278 D2) ;
+  - il en dépend : au-delà. Il faudra alors abaisser le plafond des montages de déferlement, et rejuger le raccord retenu (S703) au même
+    plafond.
+- **calcul** : le coût, au plus 4 fois celui de S690 (13 min) ; au déferlement le pas est déjà sous 2,5 ms, d'où ≈ 35 à 45 min. Mesuré et
+  montré.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-279 D1, ADR-280 D2 : la convergence du juge, contre une référence extérieure ;
-  - ADR-276 D2 : seul `dx` change.
-- **pièges** :
-  - les marches de l'escalier deviennent deux fois plus fines, et l'artefact de lecture change de pas ;
-  - la mémoire : ≈ 600 000 particules × 60 octets, sans difficulté.
+  - ADR-280 D2 : le juge sous une option numérique ;
+  - ADR-278 D2 : la tolérance ;
+  - ADR-276 D2 : seul le plafond change.
+- **pièges** : `pas_stable_us` du relais prend le plafond ; le relais de Saint-Venant au rivage en dépend aussi (la même borne).
 
-**Critères.** Les crêtes et les écarts à t = 15 et 20, et l'attribution selon l'instrument.
+**Critères.** Le retournement et l'air mesurés, attribués selon l'instrument.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai à 1,25 cm (arrêté après t = 15).
-- [x] **P2b** — E2 : le pas plafonné à 2,5 ms (2,5 cm).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — l'essai.
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — à 1,25 cm, t = 15 : la crête 0,421 d (2,5 cm : 0,433 ; la mesure : 0,314), l'écart 0,038 d. **La résolution n'est pas la cause** (−0,012 d, sous les 0,05 d attendus). Le calcul a été arrêté après t = 15 : au déferlement, le pas tombait sous 1 ms (≈ 1 h 10 pour t = 15, des heures pour t = 20). Suspect suivant : le pas, `c·dt/dx` ≈ 1 dans les deux calculs (S714).
-- **E2, ajouté à la session (la même question, ADR-279 D3)** : la plage à 2,5 cm, sans projection, le pas plafonné à **2,5 ms** au lieu de 10 ms. `c·dt/dx` passe de ≈ 1 à ≈ 0,25 ; seul le pas change (ADR-276 D2). **Critères, écrits avant** : si le pas est la cause, la crête à t = 15 descend de plus de 0,05 d vers 0,31 d, et l'écart baisse ; sinon, elle reste vers 0,43 d. Le coût : ≈ 4 fois S712 E1, ≈ 45 min jusqu'à t = 25 ; chaque photo est lue dès qu'elle est prise.
-- **P2b fini (E2)** — le pas à 2,5 ms : t = 15, 0,424 d (le pas n'est pas la cause) ; t = 20, 0,316 d en 3,77 d contre 0,318 d en 3,66 d mesurés (le pas compte au déferlement) ; t = 25, 0,218 d en −3,03 d.
