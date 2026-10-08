@@ -62,27 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S692 — **terminée**. En autonomie vers la v2. **La conception du LOD de simulation**, acceptée par l'utilisateur le 2026-10-08
-(*« Ok parfait »*) : l'eau d'après déferlement en 2D, la 3D aux jets et aux contacts, l'activation par la présence, des billes fusionnées ou
-divisées selon l'agitation. Le lot S690–S692.
+Session : S693 — **en cours**. En autonomie vers la v2 ; le LOD de simulation (ADR-275), étape 1 : **les deux raccords ensemble**.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-274)
+**Ce que la session fait.**
 
-- **témoin** : sans objet (une conception).
-- **instrument** : pour chaque étape, l'essai qui la jugera, ce qu'il rendrait sous chaque hypothèse, et son coût mesuré (ADR-274 D1).
-- **calcul** : les gains attendus, tirés des mesures (S413 : ÷ 5 à 7 ; S690 : 75 % des particules hors du déferlement).
-- **ADR** : ADR-178, ADR-202, ADR-212, ADR-271, ADR-274.
-- **pièges** : les raccords qui manquent (les colonnes avec la sortie à droite, avec le fond lisse) ; la fusion des billes sans grille
-  adaptative.
+- **La zone de colonnes et la sortie à droite, permises ensemble.** S682 les refusait pour « leurs tableaux par particule » ; la zone de
+  colonnes n'en a aucun (ses champs sont ceux de la grille) : le refus était trop prudent.
+- **`RelaisRivage`** :
+  - le bord gauche d'APIC réglable par l'appelant (il le remettait à zéro) ;
+  - le volume de la 3D pris par `total_volume` (les particules, l'eau des colonnes, leurs soldes) ; sans colonnes, le même nombre
+    qu'avant, au bit.
+- **La vague de S647, 3D réduite.** APIC 3D sur `[5,0 ; 10,775]` m :
+  - au large, la zone de colonnes de S650 (0,6 m), son bord gauche poussé par Saint-Venant ;
+  - au rivage, le relais de S690.
 
-**Critères, écrits avant.** (1) La conception écrite : l'échelle des représentations, les critères d'activation, les raccords, les étapes
-et leurs essais. (2) ADR-275, qui décide l'échelle et l'ordre. (3) La campagne inscrite à la liste.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-274)
+
+- **témoin** : le relais au rivage seul (S690 : 2,624 s, 9,963 m ; l'air à 2,777 s, 10,325 m) et le tout-3D (2,642 s, 9,988 m) ;
+  S684 inchangé (au bit, sans colonnes).
+- **instrument** : les lecteurs de S647–S648 ; la masse (la 3D + Saint-Venant du rivage + réservoir − dette − le volume entré par la
+  gauche). Ce que rendrait chaque hypothèse :
+  - si les deux raccords coexistent, le même retournement que S690, à 0,02 s et 0,15 m (le relais au large de S650 en était à 0,004 s
+    et 0,15 m à 5 cm) ;
+  - un conflit entre la zone de colonnes et la sortie, une masse qui dérive ou une colonne de bord vidée.
+- **calcul** (ce script) : l'eau de la 3D passe de 4.31 à 1.81 m² par mètre de largeur, ÷ 2.4 particules. Le calcul attendu :
+  ≈ 5.7 min au lieu de 13,6 (mesuré au premier pas, ADR-274 D1).
+- **ADR** : ADR-271, ADR-273 D2 (une seule source : Saint-Venant du rivage part du niveau des particules), ADR-274, ADR-275.
+- **pièges** :
+  - S650 pose le fond plat à z = 0 sous les colonnes (l'eau à 0,5 m, non 0,55 m) : la géométrie est celle de S647 décalée de 5 cm ;
+  - le bord gauche ouvert et le bord droit de sortie au même pas ;
+  - la dette et le réservoir de la sortie, à côté des soldes des colonnes.
+
+**Critères, écrits avant.**
+
+1. Sans colonnes, au bit : S684 inchangé.
+2. Le premier retournement à moins de **0,02 s** et **0,15 m** du tout-3D ; l'air enfermé après lui, en avant.
+3. La masse à 10⁻¹² près en relatif ; la dette sous un quantum.
+4. Rapportés : le temps de calcul contre S690, les particules.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la conception ; ADR-275.
-- [x] **P3** — lot ; rituel.
+- [ ] **P2** — les deux raccords ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — LOD-SIMULATION-S692 (six niveaux, les critères, les raccords, cinq étapes) ; ADR-275.

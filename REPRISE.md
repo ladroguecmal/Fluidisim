@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 11:57 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 12:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S693 — le LOD, étape 1 : les deux raccords ensemble, la 3D réduite à la bande de déferlement ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S692 — La conception du LOD de simulation (ADR-275) ([journal](notes/JOURNAL.md)). Avant : S691 (la quarante-deuxième revue de méthode)
 Session suivante : S693 — le LOD, étape 1 : la zone de colonnes avec la sortie à droite (les deux raccords ensemble)
 Maillons        : 0 (conception : ADR-275)
