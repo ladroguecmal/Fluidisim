@@ -28,6 +28,8 @@ pub enum DensityVariant {
 /// S709 — les tableaux de la projection de densité, réservés à la configuration (I-06).
 pub(crate) struct Densite {
     pub(crate) variante: DensityVariant,
+    /// S710 : la fraction de l'écart corrigée par pas (1, le défaut de S709).
+    pub(crate) relaxation: f32,
     pub(crate) rho: Vec<f32>,
     pub(crate) du: Vec<f32>,
     pub(crate) dv: Vec<f32>,
@@ -54,8 +56,19 @@ impl Apic3 {
         host.alloc.alloc_persistent((2 * cells + fu + fv + fw) * 4).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
-        self.densite = Some(Box::new(Densite { variante, rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
+        self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0. }));
+        Ok(())
+    }
+
+    /// **S710 — la projection faible** : ne corriger qu'une fraction `κ ∈ (0, 1]` de l'écart de densité par pas (S709 : κ = 1 lisse le
+    /// front et empêche le plongeon). Refus sans projection, ou hors de `(0, 1]`.
+    pub fn set_density_relaxation(&mut self, kappa: f32) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        if !(kappa > 0. && kappa <= 1.) {
+            return Err(Error::Domain);
+        }
+        d.relaxation = kappa;
         Ok(())
     }
 
@@ -115,7 +128,7 @@ impl Apic3 {
                     };
                     excess |= e != 0.;
                     // `A·q = −dx²·Δq` : pour `Δq = e`, le second membre est `−dx²·e`.
-                    self.rhs[c] = -dx * dx * e;
+                    self.rhs[c] = -dx * dx * e * dens.relaxation;
                     self.diag[c] = diag;
                 }
             }

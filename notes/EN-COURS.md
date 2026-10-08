@@ -100,8 +100,9 @@ réinscrit, car la scène `--v1` changerait. Elle se prendra en session suivante
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — κ ; E1.
+- [x] **P2** — κ ; E1.
 - [ ] **P3** — E2.
 - [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini (E1)** — **tenu** : κ = 0,05, `V_φ/V_φ(0)` 0,9975 (0,4 s), 0,9954 (1,0 s), 0,9955 (1,6 s) ; un équilibre à −0,45 %, comme le calcul l'attendait (sans projection −1,87 %).

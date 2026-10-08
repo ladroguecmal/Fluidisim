@@ -495,6 +495,8 @@ enum Large {
     Aucun,
     /// S709 : le même, avec la projection de densité d'APIC, dans sa variante.
     AucunDensite(crate::apic3d::DensityVariant),
+    /// S710 : le même, avec la projection de densité faible (`Complete`, κ en millièmes).
+    AucunDensiteFaible(u16),
     /// S693, S695 : la zone de colonnes de S650 (0,6 m), la vitesse uniforme sur la verticale ; le porteur Saint-Venant, ou SGN si `sgn`.
     Colonnes { sgn: bool },
     /// S698 : le bord à particules, la pose par faces, les vitesses du profil vertical de SGN.
@@ -563,7 +565,7 @@ const PLAN_S699: f32 = 5.0;
 fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
     -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
-    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_));
+    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_));
     assert_eq!(sans_raccord, x_r == 0., "{large_:?} et x_r = {x_r}");
     assert_eq!(matches!(large_, Large::Rejeu(_)), rejeu.is_some(), "{large_:?} et l'enregistrement");
     assert!(enreg.is_none() || sans_raccord, "seul le montage sans raccord enregistre");
@@ -610,6 +612,10 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     // S709 : la projection de densité.
     if let Large::AucunDensite(v) = large_ {
         a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
+    }
+    if let Large::AucunDensiteFaible(k) = large_ {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_relaxation(k as f32 * 1e-3).unwrap();
     }
     // S698 : le raccord du large par particules (sans zone de colonnes).
     let par_particules = matches!(large_, Large::ProfilSgn | Large::GrilleSgn | Large::Rejeu(_));
@@ -1137,6 +1143,12 @@ fn onde_renaissance_surface_s708(mode: Renaissance, dx: f32, ny: usize, surface:
 /// S709 — la même, avec ou sans la projection de densité.
 #[allow(clippy::type_complexity)]
 fn onde_plate_s709(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>, densite: bool) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
+    onde_plate_s710(mode, dx, ny, surface, if densite { Some(1.) } else { None })
+}
+
+/// S710 — la même, la projection de densité de relaxation `kappa` (`None` : sans projection).
+#[allow(clippy::type_complexity)]
+fn onde_plate_s710(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>, kappa: Option<f32>) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let dxs = dx as f64;
@@ -1145,8 +1157,9 @@ fn onde_plate_s709(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64
     let (nx, nz) = ((lx / dxs).round() as usize, (lz / dxs).round() as usize);
     let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
     a.set_ballistic_air(true);
-    if densite {
+    if let Some(k) = kappa {
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_relaxation(k).unwrap();
     }
     let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| onde.u((f % (nx + 1)) as f64 * dxs) as f32).collect();
     let (v0, w0) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
@@ -1596,5 +1609,46 @@ fn full_3d_density_s709(variante: crate::apic3d::DensityVariant) {
         assert!((r25 / r_quart - 1.).abs() < 0.003, "acquis E3 : V_φ/V_n entre 0,25 s et 2,5 s ({r_quart} → {r25})");
     }
     let _ = r0;
+}
+
+/// **S710 E1 — l'onde plate avec la projection faible** (κ = 0,05) : `V_φ/V_φ(0)` à 1,6 s à moins de 0,5 %.
+#[test]
+#[ignore = "l'onde sur fond plat (≈ 3 min)"]
+fn the_flat_wave_with_weak_density_projection_s710() {
+    let mut surface = Vec::new();
+    let (_, _, _, _, duree, photos, _) = onde_plate_s710(Renaissance::Aucune, 0.025, 4, &mut surface, Some(0.05));
+    let v0 = surface[0].1;
+    for ((t, vphi, cs, vn), p) in surface.iter().zip(&photos) {
+        println!("S710 E1 : t = {t:.2} s — V_φ/V_φ(0) = {:.4}, V_φ/V_n = {:.4} ; crête par la surface {cs:.4} m, par le compte {:.4} m", vphi / v0, vphi / vn, p.1);
+    }
+    println!("S710 E1 : {duree:.0} s");
+    let (_, vphi, _, _) = *surface.last().unwrap();
+    assert!((vphi / v0 - 1.).abs() < 0.005, "critère E1 : {}", vphi / v0);
+}
+
+/// **S710 E2 — le tout-3D de S690 avec la projection faible** (κ = 0,05) : `V_φ/V_n` à 2,5 s à 0,5 % de sa valeur au départ ; le plongeon
+/// à 0,1 s et 0,15 m du juge sans projection (ADR-278 D2), l'air après lui ; le coût.
+#[test]
+#[ignore = "le tout-3D avec la projection faible (≈ 18 min)"]
+fn the_full_3d_with_weak_density_projection_s710() {
+    let mut e = Enregistrement::default();
+    let (p0, a0, masse, _, _, d0) = deux_raccords_porteur(0.0, Large::AucunDensiteFaible(50), Some(&mut e), None);
+    let (_, vn0, vp0) = e.volumes[0];
+    let r0 = vp0 / vn0;
+    let (mut prochain, mut r25) = (0f64, 0f64);
+    for &(t, vn, vp) in &e.volumes {
+        if t >= prochain {
+            prochain += 0.25;
+            println!("S710 E2 : t = {t:.2} s — V_n/V_n(0) = {:.5}, V_φ/V_φ(0) = {:.5}, V_φ/V_n = {:.4}", vn / vn0, vp / vp0, vp / vn);
+        }
+        if t <= 2.5 {
+            r25 = vp / vn;
+        }
+    }
+    println!("S710 E2 : retournement {p0:?} (sans projection 2,637 s, 9,988 m) ; air {a0:?} ; masse {masse:.1e} ; {d0:.0} s (sans : 777 s)");
+    let (tp, xp) = p0.expect("critère E2 : un retournement");
+    let (ta, _) = a0.expect("critère E2 : de l'air");
+    assert!((r25 / r0 - 1.).abs() < 0.005, "critère E2 : le volume ({r25} contre {r0})");
+    assert!((tp - 2.637).abs() < 0.1 && (xp - 9.988).abs() < 0.15 && ta >= tp, "critère E2 : le plongeon ({tp}, {xp})");
 }
 
