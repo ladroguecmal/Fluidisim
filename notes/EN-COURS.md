@@ -62,59 +62,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S712 — **terminée**. En autonomie, sans arrêt ; session longue. S709–S710 : le déferlement du tout-3D bouge de 0,2 à 0,3 s selon
-que la 3D garde ou non son volume. ADR-280 D2 : **une référence extérieure tranche.**
+Session : S713 — **en cours**. En autonomie, sans arrêt ; session longue. L'utilisateur dort et a dit de ne pas s'arrêter. S712 : contre
+le laboratoire, la 3D à 2,5 cm fait l'onde de Synolakis trop étroite et trop haute avant le déferlement (0,43 d contre 0,31 d à t = 15).
+**La résolution en est-elle la cause ?**
 
-**La référence.** Les mesures de Synolakis (Caltech), publiées par la NOAA : l'onde solitaire **H/d = 0,3 qui déferle** sur une pente de
-1:19,85, aux instants `t·√(g/d)` = 15, 20, 25, 30. Elles sont téléchargées avec l'accord de l'utilisateur, dans
-[references/synolakis](../references/synolakis/LISEZMOI.md). L'article de Grilli (1997) est payant, et sa prépublication est refusée.
+**L'essai.** Le même montage (`plage_synolakis`, une seule fonction, ADR-276 D1), sans projection, à **1,25 cm** sur deux rangées. Les
+photos à t = 15 et 20, lues dès qu'elles sont prises. Seul `dx` change (ADR-276 D2 ; la largeur suit, sans effet sur une onde plane).
 
-**Le montage, construit dans l'essai par une seule fonction (ADR-276 D1).**
-- APIC 3D à 2,5 cm, d = 0,5 m (20 mailles par profondeur, comme le juge), deux rangées (une onde plane : la largeur ne change rien) ;
-- un fond en escalier, pente de 1:19,85, pied à `X₀ = 19,85 d` du rivage au repos ;
-- l'onde `OndeSolitaire` (le profil de Synolakis), centrée en `X₁ = X₀ + arccosh(√20)/γ` ;
-- un mur au large à `X₁ + 8 d`, la plage sèche jusqu'à `x = −8 d` ;
-- le temps de 0 à `30·√(d/g)` = 6,77 s.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-280)
 
-**Les essais.**
-
-| essai | ce qui change seul | la lecture |
-|---|---|---|
-| **E1** | sans projection de densité (le juge de S690–S703) | aux quatre instants, l'élévation par la surface (φ), lissée sur 10 cm, à chaque point mesuré : l'écart quadratique moyen (`η/d`), et la crête mesurée contre la calculée |
-| **E2** | la projection faible, κ = 0,05 (S710) | la même |
-
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-279, ADR-280)
-
-- **témoin** : la mesure elle-même. E1 et E2 ne diffèrent que par la projection.
-- **instrument** : l'élévation par la surface reconstruite. ADR-280 D1 : c'est la grandeur que voit le solveur, étalonnée en S708 E1.
-  Son plancher : la dispersion des mesures elles-mêmes, ≈ 0,01 à 0,02 en `η/d` entre points voisins, à t = 25. Ce que rendrait chaque
-  hypothèse :
-  - la version qui garde son volume est la plus juste : E2 a l'écart le plus faible à t = 20 et 25 (le déferlement) ;
-  - la perte de volume aide par hasard : E1 l'emporte ;
-  - un écart entre E1 et E2 sous la dispersion des mesures ne tranche pas.
-- **calcul** :
-  - `γ = √(3·0,3/4)` = 0,474 ; `L = arccosh(4,472)/γ` = 4,59 ; `X₁` = 24,44 d ;
-  - ≈ 145 000 particules à deux rangées, 6,77 s ;
-  - le coût, mesuré au premier passage ; on attend ≈ 15 min par essai.
+- **témoin** : E1 de S712 (2,5 cm) : à t = 15, la crête 0,433 d et l'écart 0,048 d ; à t = 20, 0,277 d et 0,066 d.
+- **instrument** : celui de S712 (la surface φ lissée sur 10 cm, contre les points mesurés). Son plancher est la dispersion des mesures,
+  0,01 à 0,02 d. Ce que rendrait chaque hypothèse :
+  - la résolution est la cause : à 1,25 cm, la crête descend nettement vers 0,31 d (de plus de 0,05 d), et l'écart baisse ;
+  - elle ne l'est pas : la crête reste vers 0,43 d.
+- **calcul** : ≈ 600 000 particules, un pas deux fois plus court, soit ≈ 8 fois le coût de S712 : ≈ 45 min jusqu'à t = 15, autant jusqu'à
+  t = 20. Le coût est mesuré et montré.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-280 D2 : la référence extérieure ;
-  - ADR-279 D1 : aucune tolérance nouvelle avant cette mesure ;
-  - ADR-276 D1 : le montage, une seule fonction.
+  - ADR-279 D1, ADR-280 D2 : la convergence du juge, contre une référence extérieure ;
+  - ADR-276 D2 : seul `dx` change.
 - **pièges** :
-  - le sens des x : la mesure compte depuis le rivage, positive vers le large ; le domaine, depuis le mur du large ;
-  - η sur la plage sèche n'est pas comparé (aucune mesure là où il n'y a pas d'eau) ;
-  - les instants tombent exactement (pas bornés).
+  - les marches de l'escalier deviennent deux fois plus fines, et l'artefact de lecture change de pas ;
+  - la mémoire : ≈ 600 000 particules × 60 octets, sans difficulté.
 
-**Critères de la session.** E1 et E2 mesurés contre le laboratoire, et le verdict selon l'instrument. S'il tranche, une proposition sur le
-défaut de la projection ; sinon, la dispersion nommée.
+**Critères.** Les crêtes et les écarts à t = 15 et 20, et l'attribution selon l'instrument.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan ; la référence téléchargée.
-- [x] **P2** — le montage ; E1.
-- [x] **P3** — E2.
-- [x] **P4** — preuve ; rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — l'essai à 1,25 cm.
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **E1, premier passage arrêté** : à t ≈ 26,6, la remontée sur la plage sèche a fait tomber le pas à 0,34 ms, puis le calcul s'est figé. Les photos n'étaient comparées qu'à la fin : rien n'a été lu. Désormais, chaque photo est comparée dès qu'elle est prise, et le calcul s'arrête à t = 25 (le déferlement est vers t = 20). t = 30, la remontée, relève de la lame mince (S690).
-- **P2–P3 finis** — E1 et E2 se valent contre le laboratoire (écarts 0,048/0,051, 0,066/0,070, 0,038/0,036 d). Toutes deux font l'onde trop haute à t = 15 (0,43–0,48 d contre 0,31). Le graphique est dans captures/s712_synolakis.png. Suite : S713, la même plage à 1,25 cm.
