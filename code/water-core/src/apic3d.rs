@@ -123,6 +123,8 @@ pub struct Apic3 {
     pub(crate) sortie_droite: Option<Box<SortieDroite>>,
     /// **S698 — le bord gauche par particules** (`enable_left_inlet`, `apic3d_gauche.rs`) ; `None`, le défaut — au bit.
     pub(crate) gauche: Option<Box<gauche::BordGauche>>,
+    /// **S709 — la projection de densité** (`enable_density_projection`, `apic3d_densite.rs`) ; `None`, le défaut — au bit.
+    pub(crate) densite: Option<Box<densite::Densite>>,
     /// **S639 — le fond en escalier** : par colonne (`j·nx + i`), le nombre de mailles solides depuis le bas ; `None`, pas de fond.
     pub(crate) seabed: Option<Vec<u16>>,
     /// **S640 — le fond lisse** (`set_seabed_smooth`, `apic3d_lisse.rs`) : les hauteurs et les fractions ouvertes des faces ;
@@ -231,6 +233,7 @@ impl Apic3 {
             gouttes: None,
             sortie_droite: None,
             gauche: None,
+            densite: None,
         })
     }
 
@@ -1560,6 +1563,8 @@ impl Apic3 {
         if self.separation {
             self.separate();
         }
+        // S709 : la projection de densité (rien sans `enable_density_projection`).
+        self.density_project();
         self.move_body(dt);
         self.push_seabed();
         self.push_smooth();
@@ -1901,41 +1906,8 @@ impl Apic3 {
                 }
             }
         }
-        // Gradient conjugué préconditionné par la diagonale.
-        let cells = self.p.len();
-        let b2 = Self::dot(&self.rhs, &self.rhs);
-        self.r.copy_from_slice(&self.rhs);
-        for c in 0..cells {
-            self.z[c] = if self.diag[c] > 0. { self.r[c] / self.diag[c] } else { 0. };
-        }
-        self.d.copy_from_slice(&self.z);
-        let mut rz = Self::dot(&self.r, &self.z);
-        let mut rr = b2;
-        let mut it = 0u32;
-        while b2 > 0. && rr > PRESSURE_TOLERANCE2 * b2 && it < PRESSURE_MAX_ITERATIONS {
-            let (d, mut q) = (core::mem::take(&mut self.d), core::mem::take(&mut self.q));
-            self.apply(&d, &mut q);
-            let dq = Self::dot(&d, &q);
-            self.d = d;
-            self.q = q;
-            if !(dq > 0.) {
-                break;
-            }
-            let alpha = (rz / dq) as f32;
-            for c in 0..cells {
-                self.p[c] += alpha * self.d[c];
-                self.r[c] -= alpha * self.q[c];
-                self.z[c] = if self.diag[c] > 0. { self.r[c] / self.diag[c] } else { 0. };
-            }
-            let zn = Self::dot(&self.r, &self.z);
-            let beta = (zn / rz) as f32;
-            for c in 0..cells {
-                self.d[c] = self.z[c] + beta * self.d[c];
-            }
-            rz = zn;
-            rr = Self::dot(&self.r, &self.r);
-            it += 1;
-        }
+        // Gradient conjugué préconditionné par la diagonale (S709 : sorti dans `pcg`, au bit).
+        let (it, rr, b2) = self.pcg();
         // Correction des faces qui touchent l'eau ; une paroi n'est jamais corrigée.
         let k1 = dt / (self.rho * dx);
         for k in 0..nz {
@@ -1973,6 +1945,46 @@ impl Apic3 {
             }
         }
         (it, if b2 > 0. { (rr / b2).sqrt() } else { 0. })
+    }
+
+    /// **S709 — le gradient conjugué préconditionné par la diagonale** : `A·p = rhs` sur les mailles d'eau, `diag` donnée ; rend
+    /// `(itérations, ‖r‖², ‖b‖²)`. Sorti de `project` tel quel (la projection de densité le partage).
+    pub(crate) fn pcg(&mut self) -> (u32, f64, f64) {
+        let cells = self.p.len();
+        let b2 = Self::dot(&self.rhs, &self.rhs);
+        self.r.copy_from_slice(&self.rhs);
+        for c in 0..cells {
+            self.z[c] = if self.diag[c] > 0. { self.r[c] / self.diag[c] } else { 0. };
+        }
+        self.d.copy_from_slice(&self.z);
+        let mut rz = Self::dot(&self.r, &self.z);
+        let mut rr = b2;
+        let mut it = 0u32;
+        while b2 > 0. && rr > PRESSURE_TOLERANCE2 * b2 && it < PRESSURE_MAX_ITERATIONS {
+            let (d, mut q) = (core::mem::take(&mut self.d), core::mem::take(&mut self.q));
+            self.apply(&d, &mut q);
+            let dq = Self::dot(&d, &q);
+            self.d = d;
+            self.q = q;
+            if !(dq > 0.) {
+                break;
+            }
+            let alpha = (rz / dq) as f32;
+            for c in 0..cells {
+                self.p[c] += alpha * self.d[c];
+                self.r[c] -= alpha * self.q[c];
+                self.z[c] = if self.diag[c] > 0. { self.r[c] / self.diag[c] } else { 0. };
+            }
+            let zn = Self::dot(&self.r, &self.z);
+            let beta = (zn / rz) as f32;
+            for c in 0..cells {
+                self.d[c] = self.z[c] + beta * self.d[c];
+            }
+            rz = zn;
+            rr = Self::dot(&self.r, &self.r);
+            it += 1;
+        }
+        (it, rr, b2)
     }
 
     /// **S444 — la valeur de `p′` au point de surface** entre la maille d'eau `w` et sa voisine d'air `a` : `−p_B` au point, moins
@@ -2322,6 +2334,8 @@ mod lisse;
 mod gauche;
 #[path = "apic3d_naissance.rs"]
 mod naissance;
+#[path = "apic3d_densite.rs"]
+mod densite;
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};
 

@@ -103,9 +103,10 @@ volume géométrique en mouvement. **Le remède : la projection de densité** (K
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E0, E1.
+- [x] **P2** — E0, E1.
 - [ ] **P3** — E2.
 - [ ] **P4** — E3.
 - [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — E0 : le banc au bit (les empreintes inchangées). E1 : au repos, avec la projection, 1,5·10⁻⁵ m/s (sans 7,0·10⁻⁶), `V_φ/V_n` 0,99967 → 0,99969, déplacement max 2,2 µm. Tenus.

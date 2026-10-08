@@ -493,6 +493,8 @@ fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64,
 enum Large {
     /// S697 : aucun raccord (`x_r` = 0) ; la 3D depuis 0 m, un mur à gauche. Seul mode qui enregistre ; SGN tourne alors à côté, sans agir.
     Aucun,
+    /// S709 : le même, avec la projection de densité d'APIC (`enable_density_projection`).
+    AucunDensite,
     /// S693, S695 : la zone de colonnes de S650 (0,6 m), la vitesse uniforme sur la verticale ; le porteur Saint-Venant, ou SGN si `sgn`.
     Colonnes { sgn: bool },
     /// S698 : le bord à particules, la pose par faces, les vitesses du profil vertical de SGN.
@@ -561,9 +563,10 @@ const PLAN_S699: f32 = 5.0;
 fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
     -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
-    assert_eq!(large_ == Large::Aucun, x_r == 0., "{large_:?} et x_r = {x_r}");
+    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite);
+    assert_eq!(sans_raccord, x_r == 0., "{large_:?} et x_r = {x_r}");
     assert_eq!(matches!(large_, Large::Rejeu(_)), rejeu.is_some(), "{large_:?} et l'enregistrement");
-    assert!(enreg.is_none() || large_ == Large::Aucun, "seul le montage sans raccord enregistre");
+    assert!(enreg.is_none() || sans_raccord, "seul le montage sans raccord enregistre");
     let sgn = matches!(large_, Large::Colonnes { sgn: true } | Large::ProfilSgn | Large::GrilleSgn) || enreg.is_some();
     let mode_rejeu = if let Large::Rejeu(m) = large_ { Some(m) } else { None };
     use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
@@ -604,6 +607,10 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     }
     a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    // S709 : la projection de densité.
+    if large_ == Large::AucunDensite {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    }
     // S698 : le raccord du large par particules (sans zone de colonnes).
     let par_particules = matches!(large_, Large::ProfilSgn | Large::GrilleSgn | Large::Rejeu(_));
     let par_profil = matches!(large_, Large::ProfilSgn | Large::GrilleSgn);
@@ -1124,14 +1131,23 @@ fn onde_renaissance_dx_s707(mode: Renaissance, dx: f32, ny: usize) -> ([f64; 3],
 /// S708 — la même ; `surface` reçoit à chaque photo `(t, V_φ, la crête par la surface lissée sur 40 cm, V_n)`.
 #[allow(clippy::type_complexity)]
 fn onde_renaissance_surface_s708(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
+    onde_plate_s709(mode, dx, ny, surface, false)
+}
+
+/// S709 — la même, avec ou sans la projection de densité.
+#[allow(clippy::type_complexity)]
+fn onde_plate_s709(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>, densite: bool) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let dxs = dx as f64;
     let (d, a0, lx, lz) = (0.5f64, 0.15f64, 10.0f64, 0.8f64);
     let onde = OndeSolitaire { h: a0, d, x1: 3.4, g: 9.81 };
     let (nx, nz) = ((lx / dxs).round() as usize, (lz / dxs).round() as usize);
-    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
     a.set_ballistic_air(true);
+    if densite {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    }
     let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| onde.u((f % (nx + 1)) as f64 * dxs) as f32).collect();
     let (v0, w0) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
     a.set_grid_velocities(&u, &v0, &w0).unwrap();
@@ -1477,5 +1493,81 @@ fn the_full_3d_volume_by_its_surface_s708() {
     }
     let (t, vn, vp) = *e.volumes.last().unwrap();
     println!("S708 E3 : fin t = {t:.2} s — V_n/V_n(0) = {:.5}, V_φ/V_φ(0) = {:.5} ; retournement {p0:?}, air {a0:?} ; {d0:.0} s", vn / vn0, vp / vp0);
+}
+
+/// **S709 E1 — la projection de densité au repos** : la vitesse maximale après 1 s au plus trois fois celle du témoin sans projection, et
+/// `V_φ/V_n` constant à 10⁻³.
+#[test]
+#[ignore = "l'eau au repos, deux fois (≈ 1,5 min)"]
+fn the_density_projection_at_rest_s709() {
+    let mesure = |densite: bool| {
+        let dx = 0.025f32;
+        let dxs = dx as f64;
+        let (nx, ny, nz) = (160usize, 4usize, 32usize);
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        a.set_ballistic_air(true);
+        if densite {
+            a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        }
+        a.seed(&|p| (p[2] as f64) < 0.49).unwrap();
+        a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+        let vn = a.particle_count() as f64 * dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64;
+        a.step(1000).unwrap();
+        let r0 = volume_surface_s708(&a).0 / vn;
+        let (mut t, mut dep) = (1000u64, 0f32);
+        while t < 1_000_000 {
+            let us = a.stable_step_us(10_000).min(1_000_000 - t);
+            a.step(us).unwrap();
+            dep = dep.max(a.density_projection_shift().unwrap_or(0.));
+            t += us;
+        }
+        let r1 = volume_surface_s708(&a).0 / vn;
+        let vmax = a.velocities().iter().fold(0f64, |m, v| m.max(((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64).sqrt()));
+        (vmax, r0, r1, dep)
+    };
+    let (v0, _, _, _) = mesure(false);
+    let (v1, r0, r1, dep) = mesure(true);
+    println!("S709 E1 : au repos — sans projection, vitesse max {v0:.2e} m/s ; avec, {v1:.2e} m/s, V_φ/V_n {r0:.5} → {r1:.5}, déplacement max {dep:.2e} m");
+    assert!(v1 <= 3. * v0.max(1e-7) && (r1 - r0).abs() < 1e-3, "critères E1");
+}
+
+/// **S709 E2 — l'onde plate avec la projection de densité** : `V_φ/V_φ(0)` à 1,6 s à moins de 0,3 % (sans : −1,87 %) ; la crête par la
+/// surface rapportée.
+#[test]
+#[ignore = "l'onde sur fond plat (≈ 3 min)"]
+fn the_flat_wave_with_density_projection_s709() {
+    let mut surface = Vec::new();
+    let (_, _, _, _, duree, photos, _) = onde_plate_s709(Renaissance::Aucune, 0.025, 4, &mut surface, true);
+    let v0 = surface[0].1;
+    for ((t, vphi, cs, vn), p) in surface.iter().zip(&photos) {
+        println!("S709 E2 : t = {t:.2} s — V_φ/V_φ(0) = {:.4}, V_φ/V_n = {:.4} ; crête par la surface {cs:.4} m, par le compte {:.4} m", vphi / v0, vphi / vn, p.1);
+    }
+    println!("S709 E2 : {duree:.0} s (sans projection : 131 s)");
+    let (_, vphi, _, _) = *surface.last().unwrap();
+    assert!((vphi / v0 - 1.).abs() < 0.003, "critère E2 : {}", vphi / v0);
+}
+
+/// **S709 E3 — le tout-3D de S690 avec la projection de densité** : `V_φ/V_n` à 2,5 s à moins de 0,3 % de sa valeur au départ (sans :
+/// −3,2 %) ; le retournement et l'air (le juge nouveau) ; le coût contre 777 s.
+#[test]
+#[ignore = "le tout-3D avec la projection (≈ 16 min)"]
+fn the_full_3d_with_density_projection_s709() {
+    let mut e = Enregistrement::default();
+    let (p0, a0, masse, _, _, d0) = deux_raccords_porteur(0.0, Large::AucunDensite, Some(&mut e), None);
+    let (_, vn0, vp0) = e.volumes[0];
+    let r0 = vp0 / vn0;
+    let mut prochain = 0f64;
+    let mut r25 = 0f64;
+    for &(t, vn, vp) in &e.volumes {
+        if t >= prochain {
+            prochain += 0.25;
+            println!("S709 E3 : t = {t:.2} s — V_n/V_n(0) = {:.5}, V_φ/V_φ(0) = {:.5}, V_φ/V_n = {:.4}", vn / vn0, vp / vp0, vp / vn);
+        }
+        if t <= 2.5 {
+            r25 = vp / vn;
+        }
+    }
+    println!("S709 E3 : retournement {p0:?} (sans projection 2,637 s, 9,988 m) ; air {a0:?} ; masse {masse:.1e} ; {d0:.0} s (sans : 777 s)");
+    assert!((r25 / r0 - 1.).abs() < 0.003, "critère E3 : V_φ/V_n à 2,5 s {r25} contre {r0}");
 }
 
