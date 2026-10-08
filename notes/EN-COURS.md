@@ -62,48 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S708 — **terminée**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S707 : APIC tasse ses particules sous la crête
-(+3,8 %), et le compte n'en donne pas la surface. **Le volume d'APIC par sa surface, contre le compte.**
+Session : S709 — **en cours**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S708 : à compte exact, APIC perd ≈ 1,3 %/s de
+volume géométrique en mouvement. **Le remède : la projection de densité** (Kugelstadt et al. 2019), en option.
 
-**L'instrument.** Le volume de la surface reconstruite d'APIC (`distance()`, la distance signée aux centres des mailles, l'eau où φ < 0) :
-`V_φ = Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides. Par colonne, la même somme sur la verticale donne la hauteur de la
-surface. On le compare à `V_n = n · quantum`, le volume que comptent les raccords.
+**Ce que la session fait.** `apic3d_densite.rs`, à la fin de chaque pas, après la séparation :
+- la densité aux centres des mailles, par les poids trilinéaires ;
+- le gradient conjugué de la pression, sorti de `project` tel quel (`pcg`), sur `Δq = max(ρ − 1, 0)`, avec la surface à `q = 0` ;
+- chaque particule déplacée de `∇q`, borné à un quart de maille ; les vitesses ne changent pas.
+
+`Large::AucunDensite` est le tout-3D avec la projection, un mode nommé (ADR-277 D2).
 
 **Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
 
-| essai | ce qu'il mesure | critères |
+| essai | ce qu'il juge | critères |
 |---|---|---|
-| **E1** | l'eau au repos (le semis, 4 m, 1 s) : `V_φ / V_n` au départ et à 1 s | l'étalon : `V_φ / V_n` constant à 10⁻³ sur 1 s (l'eau au repos ne doit rien changer) ; sa valeur, le décalage propre de la reconstruction |
-| **E2** | l'onde plate de S707 (10 m, 1,6 s) : `V_φ(t) / V_φ(0)` aux photos ; la crête par la surface, contre la crête par le compte | rapporté ; la croissance de la crête comptée (0,136 → 0,178 m) relue par la surface |
-| **E3** | le tout-3D de S690 (le montage sans raccord, 4 s, le déferlement) : `V_φ(t) / V_φ(0)` à chaque quart de seconde | rapporté et attribué : sous 1 % de dérive, le compte est un bon témoin global de la masse et seule la répartition locale diffère ; au-delà, la masse « au bit » des raccords est à reformuler |
+| **E0** | le défaut, au bit : `pcg` est un déplacement de code | le banc de non-régression du rituel tenu (les empreintes, la scène `--v1`) |
+| **E1** | le repos (le semis, 4 m, 1 s), avec la projection | la vitesse maximale au plus trois fois celle du témoin sans projection (6,8·10⁻⁶ m/s) ; `V_φ/V_n` constant à 10⁻³ |
+| **E2** | l'onde plate (10 m, 1,6 s), avec la projection | `V_φ/V_φ(0)` à 1,6 s à moins de **0,3 %** (sans : −1,87 %) ; la crête par la surface rapportée |
+| **E3** | le tout-3D de S690, avec la projection | `V_φ/V_n` à 2,5 s à moins de 0,3 % de sa valeur au départ (sans : −3,2 %) ; le retournement et l'air rapportés (le juge nouveau) ; le coût mesuré contre 777 s |
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-279)
 
-- **témoin** : E1 l'est pour E2 et E3 (le décalage propre de la reconstruction). E2 et E3 sont lus contre leur propre départ.
-- **instrument** : `V_φ`. Ce que rendrait chaque hypothèse :
-  - APIC garde son volume géométrique : `V_φ(t)/V_φ(0)` à 1 % près ;
-  - APIC le dérive : une pente, ou un saut au déferlement.
-- **calcul** : la résolution de `V_φ`. Une erreur d'un dixième de maille sur la surface, rapportée à 0,5 m d'eau, fait 0,5 % : la mesure
-  vaut pour des dérives de ≥ 1 %. Le coût : ≈ 1 + 3 + 13 min.
+- **témoin** : S708, les mêmes essais sans la projection, par les mêmes fonctions.
+- **instrument** : `V_φ`, étalonné en S708 E1 (3·10⁻⁴) ; le déplacement maximal par pas. Ce que rendrait chaque hypothèse :
+  - le tassement est la cause de la perte de volume : avec la projection, `V_φ` tenu ;
+  - une autre cause : `V_φ` dérive encore.
+- **calcul** : aucun nombre neuf. Le coût : une résolution de plus par pas. On attend 20 à 40 % de plus, et on le mesure.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-279 D1 : la mesure précède toute tolérance nouvelle ;
-  - ADR-276 D1 : E3 passe par la même fonction que le tout-3D (`Large::Aucun`), le volume dans l'enregistrement.
+  - ADR-279 D1, par E3 : le juge nouveau sera mesuré, non supposé ;
+  - ADR-276 D2 : chaque essai ne change que la projection, contre S708 ;
+  - ADR-277 D2 : `Large::AucunDensite`.
 - **pièges** :
-  - les mailles solides (l'escalier du fond) sont exclues ;
-  - les gouttes en l'air comptent dans `V_φ`, comme dans le compte ;
-  - φ est celui du dernier pas.
+  - le tableau `p` de la pression est sauvé et rendu autour de la projection ;
+  - les gouttes sont exclues ;
+  - les étiquettes sont celles de la reconstruction du pas, avant l'advection (une demi-maille au plus) ;
+  - le défaut doit rester au bit.
 
-**Critères de la session.** E1 tenu ; E2 et E3 mesurés et attribués.
+**Critères de la session.** E0 à E2 tenus ; E3 mesuré. Si E2 échoue, on cherche la cause et la session s'arrête quand elle est nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — E1.
-- [x] **P3** — E2.
-- [x] **P4** — E3.
-- [x] **P5** — preuve ; rituel.
+- [ ] **P2** — E0, E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — E3.
+- [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini (E1)** — **tenu** : au repos, `V_φ / V_n` = 0,99967 au départ et à 1 s ; la reconstruction rend le compte à 3·10⁻⁴.
-- **P3 fini (E2)** — l'onde plate : `V_φ/V_φ(0)` 0,996 (0,4 s), 0,989 (1,0 s), **0,981 (1,6 s)** — APIC perd ≈ 1,2 %/s de volume géométrique en mouvement, à compte constant. La crête par la surface est stable (0,149 → 0,133 → 0,137 m) : la croissance comptée (0,178 m) était du tassement.
-- **P4 fini (E3)** — le tout-3D : `V_φ/V_n` 0,9987 → 0,9667 au déferlement (2,5 s) → 0,9409 à 4 s. La dérive dépasse 1 % : la masse « au bit » vaut pour le compte, non pour le volume que simule la 3D. Remède : la projection de densité (S709).
