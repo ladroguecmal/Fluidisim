@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S714 — **en cours**. En autonomie, sans arrêt ; session longue. S713 : sur la plage de Synolakis, le pas de 2,5 ms rend juste la
+Session : S714 — **terminée**. En autonomie, sans arrêt ; session longue. S713 : sur la plage de Synolakis, le pas de 2,5 ms rend juste la
 crête du déferlement, que le pas de 10 ms plaçait 0,04 d trop bas et 0,26 d en arrière. **Le juge des raccords (S690–S703), au pas de
 10 ms, en dépend-il ?**
 
@@ -89,7 +89,8 @@ crête du déferlement, que le pas de 10 ms plaçait 0,04 d trop bas et 0,26 d e
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai.
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — l'essai.
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — au pas de 2,5 ms : le retournement à 2,595 s, 9,938 m (−0,042 s), l'air à 2,750 s ; dans la tolérance d'ADR-278 D2. Le plafond de 10 ms reste.

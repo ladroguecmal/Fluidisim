@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 01:24 +02:00
+JETON            : libre
+Battement        : 2026-10-09 01:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S714 — le juge de S690 au pas de 2,5 ms (session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S713 — L'onde trop haute : ni la maille, ni le pas (session longue) ([journal](notes/JOURNAL.md)). Avant : S712 (Le juge contre le laboratoire)
-Session suivante : S714 — le juge de S690 au pas de 2,5 ms (le déplacement de son déferlement)
+Session en cours : aucune
+Dernière session : S714 — Le juge sous un pas plus court ([journal](notes/JOURNAL.md)). Avant : S713 (L'onde trop haute : ni la maille, ni le pas)
+Session suivante : S715 — la renaissance de la 3D par la surface (N2)
 Maillons        : 1
 Registres       : dernier lot S713 (ADR-213 D3) ; le prochain au plus tard en S716
 ```

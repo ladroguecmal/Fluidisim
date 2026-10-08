@@ -497,6 +497,8 @@ enum Large {
     AucunDensite(crate::apic3d::DensityVariant),
     /// S710 : le même, avec la projection de densité faible (`Complete`, κ en millièmes).
     AucunDensiteFaible(u16),
+    /// S714 : le même (sans projection), le pas plafonné à 2,5 ms au lieu de 10 ms.
+    AucunPasCourt,
     /// S693, S695 : la zone de colonnes de S650 (0,6 m), la vitesse uniforme sur la verticale ; le porteur Saint-Venant, ou SGN si `sgn`.
     Colonnes { sgn: bool },
     /// S698 : le bord à particules, la pose par faces, les vitesses du profil vertical de SGN.
@@ -565,7 +567,8 @@ const PLAN_S699: f32 = 5.0;
 fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
     -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
-    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_));
+    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_) | Large::AucunPasCourt);
+    let plafond_us: u64 = if large_ == Large::AucunPasCourt { 2_500 } else { 10_000 };
     assert_eq!(sans_raccord, x_r == 0., "{large_:?} et x_r = {x_r}");
     assert_eq!(matches!(large_, Large::Rejeu(_)), rejeu.is_some(), "{large_:?} et l'enregistrement");
     assert!(enreg.is_none() || sans_raccord, "seul le montage sans raccord enregistre");
@@ -662,7 +665,7 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     let pas_large = 0.1 * dxs;
     let mut prochain = 0u64;
     while t < 4_000_000 {
-        let us = rel.pas_stable_us(10_000).min(4_000_000 - t);
+        let us = rel.pas_stable_us(plafond_us).min(4_000_000 - t);
         let t1 = (t + us) as f64 * 1e-6;
         while t_sv < t1 - 1e-12 {
             if sgn {
@@ -1864,5 +1867,14 @@ fn the_judge_against_synolakis_at_half_the_cell_s713() {
 fn the_judge_against_synolakis_small_step_s714() {
     let (_, duree) = plage_synolakis_pas(None, 0.025, &[15., 20., 25.], 2_500);
     println!("S714 : {duree:.0} s");
+}
+
+/// **S714 — le juge de S690 au pas de 2,5 ms** (le tout-3D sans raccord, sans projection) : le retournement et l'air, contre le même au pas
+/// de 10 ms (2,637 s, 9,988 m ; l'air à 2,790 s). Rapporte. **Mesuré** : 2,595 s, 9,938 m (−0,042 s) ; l'air à 2,750 s ; 29 min.
+#[test]
+#[ignore = "le tout-3D au pas de 2,5 ms (≈ 29 min)"]
+fn the_full_3d_judge_with_a_short_step_s714() {
+    let (p0, a0, masse, dette, _, d0) = deux_raccords_porteur(0.0, Large::AucunPasCourt, None, None);
+    println!("S714 : le tout-3D au pas de 2,5 ms — retournement {p0:?} (au pas de 10 ms : 2,637 s, 9,988 m) ; air {a0:?} (2,790 s) ; masse {masse:.1e} ; dette {dette:.3} ; {d0:.0} s (au pas de 10 ms : 777 s)");
 }
 

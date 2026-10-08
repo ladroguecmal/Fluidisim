@@ -2000,3 +2000,9 @@ de Synolakis à 1,25 cm (arrêtée après t = 15, ≈ 1 h 05), puis à 2,5 cm av
 reste vers 0,42 d (la mesure : 0,31 d) ; ni la maille ni le pas n'en sont la cause. Avec le pas de 2,5 ms, la crête du déferlement
 (t = 20) rejoint la mesure (0,316 contre 0,318 d) : le juge à 10 ms dépend du pas. Le graphique est mis à jour
 (`captures/s713_synolakis.png`). Maillons **1** (4.14, 4.16). Suivant : **S714**, le juge de S690 au pas de 2,5 ms.
+
+## S714 — 2026-10-09 — Le juge sous un pas plus court
+
+**Entrée.** En autonomie, sans arrêt ; S713. **Fait** ([preuve](../docs/validation/JUGE-PAS-COURT-S714.md)) : le tout-3D de S690 au pas de
+2,5 ms (`Large::AucunPasCourt`). **Mesuré** : le retournement à 2,595 s (−0,042 s), dans la tolérance ; le plafond de 10 ms reste, 2,2 fois
+moins cher. Maillons **1** (4.14). Suivant : **S715**, la renaissance de la 3D par la surface (N2) ; la revue en S716.
