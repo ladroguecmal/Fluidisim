@@ -50,7 +50,7 @@ pub fn ballistic_step(x: [f32; 3], v: [f32; 3], g: [f32; 3], d: f64, rho: f64, d
 impl Apic3 {
     /// **S488 — les gouttes** (K2-4) : à l'initialisation (I-06), un octet par particule. Refus : déjà actives, ou une zone de colonnes.
     pub fn enable_droplets(&mut self, host: &mut HostServices) -> Result<(), Error> {
-        if self.gouttes.is_some() || self.columns.is_some() || self.sortie_droite.is_some() {
+        if self.gouttes.is_some() || self.columns.is_some() || self.sortie_droite.is_some() || self.gauche.is_some() {
             return Err(Error::Domain);
         }
         let cap = self.x.len();

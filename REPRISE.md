@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 14:06 +02:00
+JETON            : libre
+Battement        : 2026-10-08 14:42 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S698 — le raccord du large par particules, le profil vertical de SGN ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S697 — Le raccord du large jugé seul ([journal](notes/JOURNAL.md)). Avant : S696 (la quarante-troisième revue de méthode)
-Session suivante : S698 — le raccord du large par particules (sans zone de colonnes), le profil vertical de SGN
-Maillons        : 1 (4.14 : la cause du raccord du large isolée)
-Registres       : dernier lot S695 (ADR-213 D3) ; le prochain au plus tard en S698
+Session en cours : aucune
+Dernière session : S698 — Le raccord du large par particules ([journal](notes/JOURNAL.md)). Avant : S697 (Le raccord du large jugé seul)
+Session suivante : S699 — la traversée du raccord du large départagée : d'abord entre deux 3D (ADR-273 D1)
+Maillons        : 1
+Registres       : dernier lot S698 (ADR-213 D3) ; le prochain au plus tard en S701
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

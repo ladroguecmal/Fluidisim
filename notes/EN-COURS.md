@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S698 — **en cours**. En autonomie, sans arrêt. S697 : la zone de colonnes du raccord du large (hydrostatique, vitesse uniforme)
+Session : S698 — **terminée**. En autonomie, sans arrêt. S697 : la zone de colonnes du raccord du large (hydrostatique, vitesse uniforme)
 fait tout l'écart. **Le raccord du large par particules**, sans zone de colonnes.
 
 **Ce que la session fait.**
@@ -95,7 +95,8 @@ fait tout l'écart. **Le raccord du large par particules**, sans zone de colonne
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le bord gauche ; l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le bord gauche ; l'essai ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — la pose par rangée laissait un trou d'air (un faux retournement à 0,14 s) : posée face par face. (1) **échoue** : 2,590 s (−0,047 s ; colonnes −0,113 s) ; le témoin à 1,0 m −0,017 s (colonnes −0,055 s) ; (2) tenu.

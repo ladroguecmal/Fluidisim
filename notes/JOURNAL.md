@@ -1868,3 +1868,12 @@ au large, par la même fonction. **Mesuré** : sans raccord, le retournement à 
 repère +0,013 s, la zone de colonnes non traversée −0,055 s, sa traversée −0,058 s. Le raccord du large à la façon de S650 fait tout
 l'écart. Maillons **1** (4.14). Suivant : **S698**, le raccord du large par particules (sans zone de colonnes), avec le profil vertical
 de SGN.
+
+## S698 — 2026-10-08 — Le raccord du large par particules
+
+**Entrée.** En autonomie, sans arrêt ; S697 (la zone de colonnes en cause). **Fait** ([preuve](../docs/validation/RACCORD-LARGE-PARTICULES-S698.md)) :
+le bord gauche d'APIC par particules (`apic3d_gauche.rs`), nourri face par face par le profil vertical de SGN. Une première pose par
+rangée laissait un trou d'air dans la colonne d'entrée, pris pour un retournement à 0,14 s ; corrigée. **Mesuré** : au raccord à
+5,0 m, 2,590 s (−0,047 s ; les colonnes −0,113 s) — le critère de 0,02 s **échoue** ; à 1,0 m, −0,017 s (les colonnes −0,055 s) ;
+l'air à 0,002 s ; la masse au bit. Lot S696–S698. Maillons **1** (4.14). Suivant : **S699**, la traversée départagée (le raccord entre
+deux 3D d'abord, ADR-273 D1).

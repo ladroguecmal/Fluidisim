@@ -426,6 +426,8 @@ pas recopiée ici (L137).
   Saint-Venant : le porteur n'est pas en cause, le raccord du large l'est (l'attribution de S693 corrigée) ([preuve](validation/RELAIS-LARGE-SGN-S695.md)).
   **S697** : le raccord du large jugé seul — sans lui, le retournement à 0,005 s du tout-3D ; la zone de colonnes (−0,055 s) et sa traversée
   (−0,058 s) font tout l'écart ([preuve](validation/RACCORD-LARGE-SEUL-S697.md)).
+  **S698** : le raccord du large par particules, nourri par le profil de SGN — l'écart de −0,113 s à −0,047 s (le bord non traversé
+  −0,017 s ; la traversée −0,030 s, à départager) ([preuve](validation/RACCORD-LARGE-PARTICULES-S698.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
