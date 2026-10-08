@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 20:51 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 20:52 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S710 — la projection de densité faible (session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S709 — La projection de densité (session longue) ([journal](notes/JOURNAL.md)). Avant : S708 (Le volume d'APIC par sa surface)
 Session suivante : S710 — une projection de densité faible (une fraction de l'écart par pas), jugée sur le volume et le plongeon
 Maillons        : 1

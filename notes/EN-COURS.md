@@ -62,55 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S709 — **terminée**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S708 : à compte exact, APIC perd ≈ 1,3 %/s de
-volume géométrique en mouvement. **Le remède : la projection de densité** (Kugelstadt et al. 2019), en option.
+Session : S710 — **en cours**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S709 : la projection de densité tient le volume,
+mais, corrigeant 100 % de l'écart à chaque pas, elle lisse le front et empêche le plongeon. **Une projection faible** : on ne corrige
+qu'une fraction κ de l'écart par pas.
 
-**Ce que la session fait.** `apic3d_densite.rs`, à la fin de chaque pas, après la séparation :
-- la densité aux centres des mailles, par les poids trilinéaires ;
-- le gradient conjugué de la pression, sorti de `project` tel quel (`pcg`), sur `Δq = max(ρ − 1, 0)`, avec la surface à `q = 0` ;
-- chaque particule déplacée de `∇q`, borné à un quart de maille ; les vitesses ne changent pas.
+**Le calcul de κ.** La perte à combattre est de ≈ 1,3 %/s, soit 0,013 % par pas de 10 ms. À l'équilibre, `κ·(ρ − 1)` compense cette
+perte, d'où un biais de densité de `0,013 % / κ`. Avec **κ = 0,05**, le biais est de 0,26 %, et le volume doit tenir à ≈ 0,3 %. Le
+lissage de la dynamique rapide est vingt fois moindre qu'en S709.
 
-`Large::AucunDensite` est le tout-3D avec la projection, un mode nommé (ADR-277 D2).
-
-**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
+**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.** La variante `Complete` (S709), seul κ change (ADR-276 D2).
 
 | essai | ce qu'il juge | critères |
 |---|---|---|
-| **E0** | le défaut, au bit : `pcg` est un déplacement de code | le banc de non-régression du rituel tenu (les empreintes, la scène `--v1`) |
-| **E1** | le repos (le semis, 4 m, 1 s), avec la projection | la vitesse maximale au plus trois fois celle du témoin sans projection (6,8·10⁻⁶ m/s) ; `V_φ/V_n` constant à 10⁻³ |
-| **E2** | l'onde plate (10 m, 1,6 s), avec la projection | `V_φ/V_φ(0)` à 1,6 s à moins de **0,3 %** (sans : −1,87 %) ; la crête par la surface rapportée |
-| **E3** | le tout-3D de S690, avec la projection | `V_φ/V_n` à 2,5 s à moins de 0,3 % de sa valeur au départ (sans : −3,2 %) ; le retournement et l'air rapportés (le juge nouveau) ; le coût mesuré contre 777 s |
+| **E1** | l'onde plate (10 m, 1,6 s), κ = 0,05 | `V_φ/V_φ(0)` à 1,6 s à moins de **0,5 %** (sans projection : −1,87 % ; κ = 1 : −0,10 %) |
+| **E2** | le tout-3D de S690, κ = 0,05 | `V_φ/V_n` à 2,5 s à moins de **0,5 %** de sa valeur au départ (sans projection : −3,2 %) ; **le plongeon gardé** : le retournement à 0,1 s et 0,15 m du juge sans projection (ADR-278 D2 : 2,637 s, 9,988 m), et l'air après lui ; le coût mesuré |
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-279)
+Si E2 tient, la session propose d'allumer la projection faible par défaut. Ce sera une décision (un ADR), avec le banc de non-régression
+réinscrit, car la scène `--v1` changerait. Elle se prendra en session suivante.
 
-- **témoin** : S708, les mêmes essais sans la projection, par les mêmes fonctions.
-- **instrument** : `V_φ`, étalonné en S708 E1 (3·10⁻⁴) ; le déplacement maximal par pas. Ce que rendrait chaque hypothèse :
-  - le tassement est la cause de la perte de volume : avec la projection, `V_φ` tenu ;
-  - une autre cause : `V_φ` dérive encore.
-- **calcul** : aucun nombre neuf. Le coût : une résolution de plus par pas. On attend 20 à 40 % de plus, et on le mesure.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-278, ADR-279)
+
+- **témoin** : S708 (sans projection) et S709 (κ = 1), par les mêmes fonctions.
+- **instrument** : `V_φ`, étalonné en S708 ; le lecteur de retournement de S647. Ce que rendrait chaque hypothèse :
+  - si la force de la correction faisait le lissage, le plongeon revient près du juge, et le volume tient à 0,3 % ;
+  - si la correction de surface, même faible, comble la lèvre, aucun plongeon encore.
+- **calcul** : κ et le biais attendu, ci-dessus. Le coût : celui de S709, ≈ +40 %.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-279 D1, par E3 : le juge nouveau sera mesuré, non supposé ;
-  - ADR-276 D2 : chaque essai ne change que la projection, contre S708 ;
-  - ADR-277 D2 : `Large::AucunDensite`.
+  - ADR-278 D2 : la tolérance du plongeon ;
+  - ADR-279 D1 : la convergence du juge n'est pas mesurée au-delà de S647 ; la tolérance est celle d'ADR-278 ;
+  - ADR-276 D2 : seul κ change.
 - **pièges** :
-  - le tableau `p` de la pression est sauvé et rendu autour de la projection ;
-  - les gouttes sont exclues ;
-  - les étiquettes sont celles de la reconstruction du pas, avant l'advection (une demi-maille au plus) ;
-  - le défaut doit rester au bit.
+  - κ multiplie le second membre, donc le déplacement ; la borne du quart de maille reste ;
+  - le défaut (κ = 1 avec `enable_density_projection`) reste celui de S709.
 
-**Critères de la session.** E0 à E2 tenus ; E3 mesuré. Si E2 échoue, on cherche la cause et la session s'arrête quand elle est nommée.
+**Critères de la session.** E1 et E2 tenus, ou leur échec nommé.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — E0, E1.
-- [x] **P3** — E2.
-- [x] **P4** — E3 (échoue ; E3a mesuré, E3b non lancé).
-- [x] **P5** — preuve ; rituel.
+- [ ] **P2** — κ ; E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — E0 : le banc au bit (les empreintes inchangées). E1 : au repos, avec la projection, 1,5·10⁻⁵ m/s (sans 7,0·10⁻⁶), `V_φ/V_n` 0,99967 → 0,99969, déplacement max 2,2 µm. Tenus.
-- **E2, premier passage : échoue par excès** — `V_φ/V_φ(0)` +7,4 % à 1,6 s, la crête par la surface à 0,185 m. Cause : la correction d'un seul côté (ρ > 1) sur une densité bruitée dilate l'eau à chaque pas. **Second passage**, les mêmes critères : à l'intérieur, `ρ − 1` dans les deux sens ; à la surface, l'excès seul.
-- **P3 fini (E2, second passage)** — **tenu** : `V_φ/V_φ(0)` 0,9993 (0,4 s), 0,9987 (1,0 s), 0,9990 (1,6 s), contre 0,981 sans projection. La crête par la surface est stable (0,136 → 0,140 m), surface et compte d'accord à 2 mm. Le coût : 196 s contre 131 s (+50 %).
-- **E3 : échoue, et la vague ne plonge plus.** `V_φ/V_n` passe de 0,9987 à 0,9924 en 0,25 s, puis tient à 0,991 jusqu'à 4 s (sans projection : 0,941). Mais il n'y a **ni retournement ni air** en 4 s, alors que la vague doit plonger (Grilli, S₀ ≈ 0,23). Deux témoins, une cause chacun : **E3a**, sans correction aux mailles de surface (le plongeon revient-il ?) ; **E3b**, l'excès seul près des parois solides (le saut du départ disparaît-il ?).
-- **P4 fini** — E3a : sans la correction de surface, le plongeon revient à 2,932 s, 10,763 m (+0,30 s). Corriger 100 % de l'écart à chaque pas lisse la dynamique rapide. La projection reste éteinte ; S710, la projection faible.
