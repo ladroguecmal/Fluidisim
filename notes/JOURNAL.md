@@ -1886,3 +1886,11 @@ le tout-3D enregistre le plan x = 5,0 m (les vitesses des faces, les particules 
 corrigé, pour la revue de S701. **Mesuré** : le rejeu à −0,011 s du tout-3D ; le bord est transparent, l'écart de S698 vient de
 l'alimentation par SGN. Maillons **1** (4.14). Suivant : **S700**, l'alimentation par SGN comparée à l'enregistrement (le porteur, le
 profil, la pose).
+
+## S700 — 2026-10-08 — L'alimentation par SGN départagée
+
+**Entrée.** En autonomie, sans arrêt ; S699 (le bord transparent). **Fait** ([preuve](../docs/validation/ALIMENTATION-SGN-S700.md)) : un
+enregistrement du tout-3D, SGN et la 3D comparés au plan, deux rejeux d'une cause chacun. `essai.py` tuait l'essai en imprimant « ū »
+(console Windows) : corrigé. **Mesuré** : l'affine −0,026 s ; la pose par faces +0,085 s ; les vitesses de SGN −0,121 s (la crête
+1,1 cm plus haute au plan). S698 tenait par compensation. Maillons **1** (4.14). Suivant : **S701**, la quarante-quatrième revue
+(S696–S700) ; puis une pose qui reproduise le rejeu exact.

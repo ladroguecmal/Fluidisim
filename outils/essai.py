@@ -19,6 +19,9 @@ import sys
 import time
 from pathlib import Path
 
+# S700 : la console Windows (charmap) refusait « ū » et tuait l'essai ; la sortie en UTF-8, les caractères inconnus remplacés.
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parents[1]
 CODE = ROOT / "code"
 CALCULS = ROOT / "calculs"

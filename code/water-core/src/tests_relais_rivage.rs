@@ -493,6 +493,10 @@ fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64,
 struct Enregistrement {
     faces: Vec<(f64, Vec<f32>)>,
     croisements: Vec<(f64, [f32; 3], [f32; 3], [[f32; 3]; 3])>,
+    /// S700 : au plan, à chaque pas, `(t, h SGN, ū SGN, h 3D, ū 3D)`.
+    plan: Vec<(f64, f64, f64, f64, f64)>,
+    /// S700 : le mode du rejeu — 0 exact (S699), 1 sans matrice affine (R2), 2 par faces (R3).
+    mode: u8,
 }
 
 /// S699 — le plan de l'enregistrement.
@@ -629,11 +633,24 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool, mut enreg: Optio
             let s = (((tf - ta) / (tb - ta).max(1e-12)).clamp(0., 1.)) as f32;
             let bord: Vec<f32> = fa.iter().zip(fb).map(|(a, b)| a + s * (b - a)).collect();
             rel.regler_gauche(&bord).unwrap();
-            let tm = (t as f64 + 0.5 * us as f64) * 1e-6;
-            while curseur < e.croisements.len() && e.croisements[curseur].0 <= tm {
-                let (_, x, v, c) = e.croisements[curseur];
-                rel.apic.pose_left(x, v, c).unwrap();
-                curseur += 1;
+            if e.mode == 2 {
+                // S700 R3 : la pose par faces de S698, la vitesse de la 3D à chaque face (`w = 0`, `C = 0`) ; la couche de surface entière.
+                let v: Vec<f64> = bord.iter().map(|&u| (u as f64).max(0.) * us as f64 * 1e-6 * dxs * dxs).collect();
+                let labels = rel.apic.labels();
+                let mouille: Vec<bool> = (0..nz * ny).map(|kj| labels[kj * nx] == crate::apic3d::WATER).collect();
+                let v: Vec<f64> = v.iter().zip(&mouille).map(|(v, &m)| if m { *v } else { 0. }).collect();
+                let b2 = bord.clone();
+                rel.apic.feed_left(&v, &move |z: f32| {
+                    let k = ((z / dx) as usize).min(nz - 1);
+                    [b2[k * ny..(k + 1) * ny].iter().sum::<f32>() / ny as f32, 0., 0.]
+                }).unwrap();
+            } else {
+                let tm = (t as f64 + 0.5 * us as f64) * 1e-6;
+                while curseur < e.croisements.len() && e.croisements[curseur].0 <= tm {
+                    let (_, x, v, c) = e.croisements[curseur];
+                    rel.apic.pose_left(x, v, if e.mode == 1 { [[0.; 3]; 3] } else { c }).unwrap();
+                    curseur += 1;
+                }
             }
         } else if par_particules {
             let vit = |z: f64| profil_u + (profil_h * profil_h / 6. - z * z / 2.) * profil_uxx;
@@ -675,6 +692,18 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool, mut enreg: Optio
             let i_c = (PLAN_S699 as f64 / dxs).round() as usize;
             let uu = rel.apic.velocity_u();
             e.faces.push((ts, (0..nz * ny).map(|kj| uu[kj * (nx + 1) + i_c]).collect()));
+            // S700 : au plan, la 3D (`h` : la plus haute particule de la tranche ± dx, + dx/4 ; `ū` : les faces sous `h`) et SGN.
+            let haut = p.iter().filter(|q| (q[0] - PLAN_S699).abs() < dx).fold(0f32, |m, q| m.max(q[2])) as f64 + dxs / 4.;
+            let (mut somme, mut n_f) = (0f64, 0usize);
+            for kj in 0..nz * ny {
+                if ((kj / ny) as f64 + 0.5) * dxs < haut {
+                    somme += uu[kj * (nx + 1) + i_c] as f64;
+                    n_f += 1;
+                }
+            }
+            let ub3 = if n_f > 0 { somme / n_f as f64 } else { 0. };
+            let (hs, us_) = (0.5 * (serre.h[i_c - 1] + serre.h[i_c]), 0.5 * (serre.q[i_c - 1] / serre.h[i_c - 1] + serre.q[i_c] / serre.h[i_c]));
+            e.plan.push((ts, hs, us_, haut, ub3));
         }
         if let Some(col) = rel.apic.columns.as_ref() {
             entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
@@ -793,5 +822,31 @@ fn the_offshore_relay_between_two_3d_copies_s699() {
     let ((t0, x0), (tp, xp)) = (p0.expect("témoin"), premier.expect("critère 1 : un retournement"));
     assert!((tp - t0).abs() < 0.02 && (xp - x0).abs() < 0.15, "critère 1 : {tp} {xp} contre {t0} {x0}");
     assert!(masse < 1e-12 && dette < 1.0, "critère 2");
+}
+
+/// **S700 — l'alimentation par SGN départagée** : un enregistrement du tout-3D au plan x = 5,0 m (S699), SGN et la 3D comparés au plan ;
+/// deux rejeux, chacun une seule cause : R2 sans matrice affine, R3 la pose par faces de S698 avec les vitesses de la 3D. Rapporte ;
+/// (2) la masse, la dette. **Mesuré** : R2 2,601 s (−0,037 s), R3 2,711 s (+0,074 s) ; au plan, la crête de SGN 1,1 cm plus haute.
+#[test]
+#[ignore = "le tout-3D enregistré, deux rejeux (≈ 27 min)"]
+fn the_serre_feed_split_against_the_3d_record_s700() {
+    let mut e = Enregistrement::default();
+    let (p0, _, _, _, _, d0) = deux_raccords_porteur(0.0, true, false, Some(&mut e), None);
+    println!("S700 témoin (tout-3D, enregistré) : retournement {p0:?} ; {} pas, {} particules passées ; {d0:.0} s", e.faces.len(), e.croisements.len());
+    // Au plan : les crêtes de h et de ū, SGN contre la 3D.
+    let crete = |f: &dyn Fn(&(f64, f64, f64, f64, f64)) -> f64| e.plan.iter().fold((0f64, f64::MIN), |m, r| if f(r) > m.1 { (r.0, f(r)) } else { m });
+    let (ths, hs) = crete(&|r| r.1);
+    let (thd, hd) = crete(&|r| r.3);
+    let (tus, us_) = crete(&|r| r.2);
+    let (tud, ud) = crete(&|r| r.4);
+    let ecart_h = e.plan.iter().fold(0f64, |m, r| m.max((r.1 - r.3).abs()));
+    let ecart_u = e.plan.iter().fold(0f64, |m, r| m.max((r.2 - r.4).abs()));
+    println!("S700 au plan : crête de h — SGN {hs:.4} m à {ths:.3} s, 3D {hd:.4} m à {thd:.3} s ; crête de ū — SGN {us_:.4} m/s à {tus:.3} s, 3D {ud:.4} m/s à {tud:.3} s ; écarts max |Δh| {ecart_h:.4} m, |Δū| {ecart_u:.4} m/s");
+    for (mode, nom) in [(1u8, "R2 sans matrice affine"), (2, "R3 pose par faces, vitesses de la 3D")] {
+        e.mode = mode;
+        let (premier, air, masse, dette, _, duree) = deux_raccords_porteur(5.0, false, true, None, Some(&e));
+        println!("S700 {nom} : retournement {premier:?} ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s (exact S699 : 2,626 s ; SGN S698 : 2,590 s)");
+        assert!(masse < 1e-12 && dette < 1.0, "critère 2 ({nom})");
+    }
 }
 

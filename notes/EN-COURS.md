@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S700 — **en cours**. En autonomie, sans arrêt. S699 : nourri exactement par la 3D, le bord par particules est transparent
+Session : S700 — **terminée**. En autonomie, sans arrêt. S699 : nourri exactement par la 3D, le bord par particules est transparent
 (−0,011 s). L'écart de S698 (−0,047 s) vient donc de l'alimentation par SGN. Ici, ses trois causes, une à la fois (ADR-276 D2).
 
 **Ce que la session fait.** Un enregistrement du tout-3D au plan x = 5,0 m (S699), et pendant ce passage, au même plan :
@@ -105,7 +105,8 @@ ces deux dernières causes :
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les deux rejeux, la comparaison au plan ; l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — les deux rejeux, la comparaison au plan ; l'essai ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — essai.py tuait l'essai sur « ū » (console) : corrigé. (1) R2 −0,037 s, R3 +0,074 s ; l'affine −0,026 s, la pose +0,085 s, les vitesses de SGN −0,121 s ; (2) tenu.
