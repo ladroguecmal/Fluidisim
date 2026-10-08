@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 13:26 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 13:27 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S695 — le relais au large nourri par Serre–Green–Naghdi ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S694 — Le porteur dispersif : Serre–Green–Naghdi 1D ([journal](notes/JOURNAL.md)). Avant : S693 (Les deux raccords ensemble)
 Session suivante : S695 — le relais au large nourri par Serre–Green–Naghdi (S693 refait)
 Maillons        : 1 (4.14 ; A234 a sa référence)

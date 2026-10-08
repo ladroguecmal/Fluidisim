@@ -62,55 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S694 — **terminée**. En autonomie, sans arrêt (l'utilisateur, 2026-10-08). S693 : Saint-Venant, sans dispersion, raidit l'onde
-du large et fait se retourner la vague trop tôt. **Le porteur dispersif**, Serre–Green–Naghdi (SGN), d'abord en 1D sur fond plat ; il
-servira aussi de référence à A234.
+Session : S695 — **en cours**. En autonomie, sans arrêt. Le relais au large de S693, nourri par SGN (S694) au lieu de Saint-Venant.
 
-**Le schéma** (`serre_1d.rs`, catégorie P) :
+**Ce que la session fait.** `deux_raccords_s693` reçoit le porteur du large : Saint-Venant (S693), ou SGN 1D. SGN est sur fond plat,
+périodique, 40 m, l'onde à 3,4 m ; le large est plat jusqu'au pied (5,696 m), et le raccord est à 5,0 m. Le bord gauche d'APIC reçoit sa
+vitesse moyenne à 5,0 m, comme en S650.
 
-- un pas de Saint-Venant (volumes finis, MUSCL, Rusanov, Heun) ;
-- plus la correction dispersive de Bonneton et al. (2011). On résout, à chaque étage, `h·A − ⅓(h³·A_x)_x = −⅓(h³(2u_x² + g·h_xx))_x`
-  (tridiagonal), puis `(hu)_t` reçoit `h·A`.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-274)
 
-Linéarisé, le schéma rend `ω² = g·d·k²/(1 + (kd)²/3)`, la dispersion de Serre (calculé à la main au plan).
-
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-274)
-
-- **témoin** : le même schéma sans le terme dispersif (Saint-Venant), sur la même onde : le front se raidit.
-- **instrument** : l'onde solitaire exacte de SGN, `η = a·sech²(κ(x − ct))`, `c = √(g(d+a))`, `κ = √(3a)/(2d√(d+a))`, sur un domaine
-  périodique, après 40 `d`. Ce que rendrait chaque hypothèse :
-  - si les équations sont justes, la forme est gardée et la célérité est celle de la formule, l'écart convergeant à l'ordre deux ;
-  - si un signe ou un facteur est faux dans le terme non linéaire, l'onde se déforme ou change de vitesse, sans converger vers
-    l'exacte ;
-  - le témoin se raidit.
-- **calcul** (ce script) :
-  - `a/d` = 0,1 et 0,3 ; `c` = 3,285 et 3,571 m/s ; la largeur `1/κ` = 3,83 et 2,08 m ;
-  - mailles `d/20` et `d/40`, Courant 0,4 ;
-  - la borne de forme : **2 %** de `a`, sous la condition d'ordre (÷ 3 au moins d'une maille à l'autre) ;
-  - la célérité à **0,2 %**. Le plancher : la lecture de la crête, interpolée par une parabole (sans quantum de maille).
-- **ADR** : ADR-271, ADR-273 D1, ADR-274 D1 (le coût mesuré : quelques secondes).
+- **témoin** : le raccord du large à 1,0 m (S693). L'onde y naît dans la 3D et le porteur ne porte rien d'elle : 2,582 s, 9,888 m. C'est
+  la référence du côté d'APIC (ADR-273 D1). Le tout-3D (2,642 s) garde l'écart propre au montage du large (≈ 0,04 s, non départagé en
+  S693).
+- **instrument** : le premier retournement. Ce que rendrait chaque hypothèse :
+  - si SGN porte l'onde comme APIC, le témoin à 0,02 s près ;
+  - si le défaut est ailleurs (le raccord lui-même), 2,52 s comme avec Saint-Venant ;
+  - si SGN corrige trop, au-delà du témoin.
+- **calcul** : aucun nombre neuf. Les références sont mesurées (S693 : 2,524 s avec Saint-Venant, 2,582 s au témoin). Le coût : celui de
+  S693, 10,3 min (SGN 1D, quelques secondes).
+- **ADR** : ADR-273, ADR-274, ADR-275.
 - **pièges** :
-  - la formule de l'onde solitaire, de mémoire. C'est l'essai qui la confirme : un état initial faux ne serait pas stationnaire, et le
-    témoin le distinguerait ;
-  - le périodique dans le système tridiagonal (Sherman–Morrison, comme S665) ;
-  - `u = hu/h` dans les termes dispersifs.
+  - SGN sur fond plat ne voit pas la pente au-delà du pied : les ondes réfléchies vers le large manquent (le relais est à sens unique,
+    comme S650) ;
+  - une seule source : l'onde de SGN et celle de la 3D, la même (x₁ = 3,4 m, ADR-273 D2) ;
+  - le pas de SGN, sous-divisé dans le pas d'APIC.
 
 **Critères, écrits avant.**
 
-1. À `a/d` = 0,1 et 0,3, sur 40 `d` : l'écart de forme au plus **2 %** de `a` à `d/40`, divisé par 3 au moins depuis `d/20`.
-2. La célérité de la crête à **0,2 %** de `√(g(d+a))`.
-3. Le témoin (sans le terme) s'écarte de plus de 10 % de `a`.
-4. La masse au bit (le schéma est conservatif en `h`).
+1. Avec SGN : le premier retournement à moins de **0,02 s** et **0,15 m** du témoin (2,582 s, 9,888 m).
+2. L'air enfermé après lui, en avant ; la masse à 10⁻¹² ; la dette sous un quantum.
+3. Rapporté : l'écart au tout-3D, qui reste à départager.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `serre_1d.rs` ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — le porteur SGN ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-
-- **La réduction linéaire, à la main.** Serre : `u_t + uu_x + gh_x = (1/(3h))(h³(u_xt + uu_xx − u_x²))_x`. Soit `A = u_t + uu_x + gh_x`.
-  - On a `u_xt + uu_xx − u_x² = A_x − 2u_x² − gh_xx`, d'où `hA − ⅓(h³A_x)_x = −⅓(h³(2u_x² + gh_xx))_x`.
-  - Linéarisé, en Fourier : `A(1 + (kd)²/3) = (i/3)·g·d²·k³·η`, d'où `u_t = −igkη/(1 + (kd)²/3)` et `ω² = gdk²/(1 + (kd)²/3)`.
-- **P2 fini** — (1) 0,038 % et 0,086 %, ÷ 3,5 et 4,0 ; (2) +0,027 %, +0,038 % ; (3) Saint-Venant 59 %, 61 % ; (4) ≈ 10⁻¹⁵. La largeur « 2,08 m » du plan était de tête : 2,40 m.
