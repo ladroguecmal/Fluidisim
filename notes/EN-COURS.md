@@ -62,25 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S701 — **terminée**. En autonomie, sans arrêt. **La quarante-quatrième revue de méthode** (ADR-222 D4 : S696–S700).
+Session : S702 — **en cours**. En autonomie, sans arrêt. S700 : la pose par faces de S698, même nourrie des vitesses de la 3D, retarde
+le retournement de 0,085 s. **Une pose qui ne dépend pas du porteur.**
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.**
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-273 D1, ADR-276 D1, D2.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+- **La pose par la grille** (`feed_left_grid`) :
+  - le porteur ne donne que deux choses : la vitesse normale de chaque face du bord et le volume qui la franchit ;
+  - chaque quantum naît dans la tranche que le flux a balayée pendant le pas, `x ∈ [0, u·dt)`, à la sous-maille (y, z) la moins occupée
+    de la face, décalée par une suite à faible discrépance ;
+  - sa vitesse et sa matrice affine sont celles que la grille lui donne là (le G2P d'APIC), comme à toute particule. `w` et le gradient
+    viennent ainsi de la 3D elle-même, non d'un profil.
+- **Le montage passe à un mode nommé** (ADR-277 D2) : `Large::{Aucun, Colonnes, ProfilSgn, Rejeu(..)}`. Chaque mode dit ce qu'il allume ;
+  une combinaison sans sens est refusée par une assertion.
+- **R4** : le rejeu de l'enregistrement du tout-3D par la pose par la grille. Les données sont la vitesse des faces et `h` au plan, celles
+  que SGN donnerait.
 
-**Critères, écrits avant.** (1) ADR-277 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277)
+
+- **témoin** : le tout-3D, et le rejeu exact de S699 (−0,011 s). Le passage qui enregistre doit redonner 2,637 349 s au bit : il vérifie que
+  le passage au mode nommé n'a rien changé.
+- **instrument** : le premier retournement de R4. Ce que rendrait chaque hypothèse :
+  - si la pose par la grille est juste, R4 près de l'exact (−0,011 s) ;
+  - si la naissance dans la tranche ou le G2P ne suffit pas, un écart du côté de R3 (+0,074 s) ou de R2 (−0,037 s).
+- **calcul** : aucun nombre neuf ; ≈ 13 + 7 min.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-273 D1 : la pose est jugée ici contre la 3D (deux copies du même solveur). Elle ne sera nourrie par SGN qu'en S703 ;
+  - ADR-276 D2 : R4 diffère de R3 par la pose seule, non par les données ;
+  - ADR-277 D2 : le mode nommé, cette session.
+- **pièges** :
+  - le `h` de la 3D au plan est lu au quantum de 6 mm ; il fixe la part de la couche de surface ;
+  - la grille au moment de la pose est celle de la fin du pas précédent ;
+  - une boucle sur toutes les particules par face coûterait cher : une seule passe compte l'occupation.
+
+**Critères, écrits avant.**
+
+1. R4 à moins de **0,02 s** et **0,15 m** du tout-3D (2,637 s, 9,988 m).
+2. Le passage qui enregistre au bit de S699 ; la masse à 10⁻¹², la dette sous un quantum.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-277 ; METHODE.
-- [x] **P3** — rituel.
+- [ ] **P2** — le mode nommé ; la pose par la grille ; R4 ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-277 : D1 (un ADR nommé dit comment il est tenu), D2 (un montage à variantes prend un mode nommé) ; la prochaine revue S706.
