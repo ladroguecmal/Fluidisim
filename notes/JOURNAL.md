@@ -1813,3 +1813,11 @@ un pas de Saint-Venant figé, aucune progression, puis l'effondrement du pas au 
 quantum. Demandés par l'utilisateur : [l'analyse par moments](../docs/registres/ANALYSE-PHASES-S690.md) et la gestion du contexte ;
 `outils/essai.py`. Décisions : l'écume continue (seul son visuel attend) ; le LOD de simulation accepté. Maillons **1** (4.14). Suivant :
 **S691, la revue de méthode** (ADR-274) ; puis la conception du LOD de simulation.
+
+## S691 — 2026-10-08 — la quarante-deuxième revue de méthode (ADR-274)
+
+**Entrée.** La revue (S686–S690). **Fait** : [ADR-274](../docs/adr/ADR-274-quarante-deuxieme-revue-de-methode.md). D1 : un calcul long se
+mesure avant de s'annoncer, montre sa progression, s'arrête au double de son estimation (S690 : 8 h à l'aveugle). D2 : il emploie les
+16 cœurs et son attente sert. D3 : une borne sur une lecture quantifiée porte son quantum (S687, S688). D4 : une hauteur se borne par la
+célérité, non par un epsilon (S690 : 1 644 m/s au raccord). Maillons **0** (méthode). Suivant : **S692**, la conception du LOD de
+simulation ; la revue en S696.
