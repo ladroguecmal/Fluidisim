@@ -442,6 +442,8 @@ pas recopiée ici (L137).
   crête (+3,8 %), le compte n'est pas la surface ([preuve](validation/NAISSANCE-3D-S707.md)).
   **S708** : le volume d'APIC par sa surface — à compte constant, −1,2 à −1,3 %/s dès que l'eau bouge ; le juge tout-3D déferle avec
   3,3 % d'eau effective en moins ; la croissance de l'onde plate était du tassement ([preuve](validation/VOLUME-APIC-SURFACE-S708.md)).
+  **S709** : la projection de densité, en option — le volume tenu (onde plate −0,1 %, tout-3D 0,991) ; mais, forte, elle empêche le
+  plongeon (sans surface : 0,3 s plus tard) ; éteinte par défaut, la suite une projection faible ([preuve](validation/PROJECTION-DENSITE-S709.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

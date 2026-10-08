@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S709 — **en cours**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S708 : à compte exact, APIC perd ≈ 1,3 %/s de
+Session : S709 — **terminée**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S708 : à compte exact, APIC perd ≈ 1,3 %/s de
 volume géométrique en mouvement. **Le remède : la projection de densité** (Kugelstadt et al. 2019), en option.
 
 **Ce que la session fait.** `apic3d_densite.rs`, à la fin de chaque pas, après la séparation :
@@ -105,11 +105,12 @@ volume géométrique en mouvement. **Le remède : la projection de densité** (K
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — E0, E1.
 - [x] **P3** — E2.
-- [ ] **P4** — E3.
-- [ ] **P5** — preuve ; rituel.
+- [x] **P4** — E3 (échoue ; E3a mesuré, E3b non lancé).
+- [x] **P5** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — E0 : le banc au bit (les empreintes inchangées). E1 : au repos, avec la projection, 1,5·10⁻⁵ m/s (sans 7,0·10⁻⁶), `V_φ/V_n` 0,99967 → 0,99969, déplacement max 2,2 µm. Tenus.
 - **E2, premier passage : échoue par excès** — `V_φ/V_φ(0)` +7,4 % à 1,6 s, la crête par la surface à 0,185 m. Cause : la correction d'un seul côté (ρ > 1) sur une densité bruitée dilate l'eau à chaque pas. **Second passage**, les mêmes critères : à l'intérieur, `ρ − 1` dans les deux sens ; à la surface, l'excès seul.
 - **P3 fini (E2, second passage)** — **tenu** : `V_φ/V_φ(0)` 0,9993 (0,4 s), 0,9987 (1,0 s), 0,9990 (1,6 s), contre 0,981 sans projection. La crête par la surface est stable (0,136 → 0,140 m), surface et compte d'accord à 2 mm. Le coût : 196 s contre 131 s (+50 %).
 - **E3 : échoue, et la vague ne plonge plus.** `V_φ/V_n` passe de 0,9987 à 0,9924 en 0,25 s, puis tient à 0,991 jusqu'à 4 s (sans projection : 0,941). Mais il n'y a **ni retournement ni air** en 4 s, alors que la vague doit plonger (Grilli, S₀ ≈ 0,23). Deux témoins, une cause chacun : **E3a**, sans correction aux mailles de surface (le plongeon revient-il ?) ; **E3b**, l'excès seul près des parois solides (le saut du départ disparaît-il ?).
+- **P4 fini** — E3a : sans la correction de surface, le plongeon revient à 2,932 s, 10,763 m (+0,30 s). Corriger 100 % de l'écart à chaque pas lisse la dynamique rapide. La projection reste éteinte ; S710, la projection faible.

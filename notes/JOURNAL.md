@@ -1958,3 +1958,12 @@ le volume par la surface reconstruite, `V_φ`. **E1** : l'étalon tenu (0,99967 
 crête par la surface est stable, la croissance comptée était du tassement. **E3** : le tout-3D de S690, `V_φ/V_n` 0,967 au déferlement,
 0,941 à 4 s. APIC perd ≈ 1,3 %/s de volume géométrique en mouvement, à compte exact. Maillons **1** (4.14, 1.6). Suivant : **S709**, la
 projection de densité (en option, jugée sur E1–E3), puis le juge relancé.
+
+## S709 — 2026-10-08 — La projection de densité (session longue)
+
+**Entrée.** En autonomie, sans arrêt ; S708 (−1,3 %/s de volume géométrique). **Fait** ([preuve](../docs/validation/PROJECTION-DENSITE-S709.md)) :
+`apic3d_densite.rs` (Kugelstadt 2019, en option), `pcg` sorti de `project` (le banc au bit). **E1** : le repos tenu. **E2** : l'onde plate
+tenue à −0,1 %, après un premier passage qui dilatait l'eau (+7,4 %, une correction d'un seul côté). **E3 échoue** : le volume du tout-3D
+tenu (0,991), mais la vague ne plonge plus. Sans la correction de surface (E3a), le plongeon revient 0,30 s plus tard. Corriger tout
+l'écart à chaque pas lisse le front. La projection reste éteinte. Maillons **1** (4.14, 1.6). Suivant : **S710**, une projection faible,
+une fraction de l'écart par pas, contre la dérive lente seule.
