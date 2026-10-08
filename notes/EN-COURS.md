@@ -62,48 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S710 — **terminée**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S709 : la projection de densité tient le volume,
-mais, corrigeant 100 % de l'écart à chaque pas, elle lisse le front et empêche le plongeon. **Une projection faible** : on ne corrige
-qu'une fraction κ de l'écart par pas.
+Session : S711 — **en cours**. En autonomie, sans arrêt. **La quarante-sixième revue de méthode** (ADR-222 D4 : S706–S710).
 
-**Le calcul de κ.** La perte à combattre est de ≈ 1,3 %/s, soit 0,013 % par pas de 10 ms. À l'équilibre, `κ·(ρ − 1)` compense cette
-perte, d'où un biais de densité de `0,013 % / κ`. Avec **κ = 0,05**, le biais est de 0,26 %, et le volume doit tenir à ≈ 0,3 %. Le
-lissage de la dynamique rapide est vingt fois moindre qu'en S709.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.** La variante `Complete` (S709), seul κ change (ADR-276 D2).
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, contre leurs critères. Une règle nouvelle se cherche d'abord dans METHODE : ADR-263 D2
+  (un lecteur éprouvé sur des cas posés) et ADR-279 D1 (la convergence du juge) existent déjà ; rien sur le bruit d'un instrument en
+  mouvement, ni sur la grandeur que voit le solveur.
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-| essai | ce qu'il juge | critères |
-|---|---|---|
-| **E1** | l'onde plate (10 m, 1,6 s), κ = 0,05 | `V_φ/V_φ(0)` à 1,6 s à moins de **0,5 %** (sans projection : −1,87 % ; κ = 1 : −0,10 %) |
-| **E2** | le tout-3D de S690, κ = 0,05 | `V_φ/V_n` à 2,5 s à moins de **0,5 %** de sa valeur au départ (sans projection : −3,2 %) ; **le plongeon gardé** : le retournement à 0,1 s et 0,15 m du juge sans projection (ADR-278 D2 : 2,637 s, 9,988 m), et l'air après lui ; le coût mesuré |
-
-Si E2 tient, la session propose d'allumer la projection faible par défaut. Ce sera une décision (un ADR), avec le banc de non-régression
-réinscrit, car la scène `--v1` changerait. Elle se prendra en session suivante.
-
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-278, ADR-279)
-
-- **témoin** : S708 (sans projection) et S709 (κ = 1), par les mêmes fonctions.
-- **instrument** : `V_φ`, étalonné en S708 ; le lecteur de retournement de S647. Ce que rendrait chaque hypothèse :
-  - si la force de la correction faisait le lissage, le plongeon revient près du juge, et le volume tient à 0,3 % ;
-  - si la correction de surface, même faible, comble la lèvre, aucun plongeon encore.
-- **calcul** : κ et le biais attendu, ci-dessus. Le coût : celui de S709, ≈ +40 %.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-278 D2 : la tolérance du plongeon ;
-  - ADR-279 D1 : la convergence du juge n'est pas mesurée au-delà de S647 ; la tolérance est celle d'ADR-278 ;
-  - ADR-276 D2 : seul κ change.
-- **pièges** :
-  - κ multiplie le second membre, donc le déplacement ; la borne du quart de maille reste ;
-  - le défaut (κ = 1 avec `enable_density_projection`) reste celui de S709.
-
-**Critères de la session.** E1 et E2 tenus, ou leur échec nommé.
+**Critères, écrits avant.** (1) ADR-280 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — κ ; E1.
-- [x] **P3** — E2 (échoue).
-- [x] **P4** — preuve ; rituel.
+- [ ] **P2** — ADR-280 ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini (E1)** — **tenu** : κ = 0,05, `V_φ/V_φ(0)` 0,9975 (0,4 s), 0,9954 (1,0 s), 0,9955 (1,6 s) ; un équilibre à −0,45 %, comme le calcul l'attendait (sans projection −1,87 %).
-- **P3 fini (E2)** — échoue : le volume −0,9 % au déferlement (le saut du départ, −0,5 %) ; le plongeon à 2,861 s (+0,22 s). Le lissage n'est pas la cause principale : c'est le volume gardé qui déplace le déferlement. Une référence extérieure est nécessaire.
