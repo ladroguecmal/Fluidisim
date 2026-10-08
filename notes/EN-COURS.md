@@ -62,46 +62,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S703 — **terminée**. En autonomie, sans arrêt. S702 : la pose par la grille, nourrie par la 3D (la vitesse des faces, `h`), est à
-+0,021 s. **Elle est maintenant nourrie par SGN.**
+Session : S704 — **en cours**. En autonomie, sans arrêt. S703 : à pose égale, les données de SGN avancent le retournement de 0,089 s. Au
+plan de 5 m, la crête de la 3D est à 0,139 m au-dessus du niveau, celle de SGN à 0,150 m. **Le juge (le tout-3D à 2,5 cm) est-il juste ?**
 
-**Ce que la session fait.**
+**Ce que la session fait.** L'onde de départ (a = 0,15 m, d = 0,5 m, x₁ = 3,4 m), seule, sur un fond plat de 8 m, pendant 0,8 s. On y lit
+la plus haute hauteur d'eau à cinq plans (3,4 ; 4,0 ; 4,5 ; 5,0 ; 5,4 m), dans trois calculs :
+- APIC 3D à 2,5 cm, le juge ;
+- APIC 3D à 1,25 cm, deux rangées ;
+- SGN.
 
-- **`Large::GrilleSgn`.** Le bord à particules, avec les données de S698 : la vitesse du bord et le volume de chaque face, tirés du
-  profil vertical de SGN. La pose est celle de S702, par la grille.
-- **Le volume au plan, pendant l'enregistrement.** Deux volumes entrés, comparés :
-  - celui que donnent les données de R4 : la vitesse des faces, la couche de surface au prorata de `h` ;
-  - celui des particules réellement passées.
+La hauteur de la 3D est lue **par le volume** des particules de la tranche `|x − plan| < dx/2`, non par la plus haute particule : sa
+résolution est d'un quantum sur `dx × largeur`, 0,8 mm à 2,5 cm.
 
-  Il dit si la couche de surface explique le retard de R4.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277)
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277)
-
-- **témoin** : R4 (S702, +0,021 s) pour la pose ; S698 (−0,047 s) pour les données. Le tout-3D (2,637 s), par la même fonction.
-- **instrument** : le premier retournement de `GrilleSgn` ; le rapport des deux volumes. Ce que rendrait chaque hypothèse :
-  - les vitesses de SGN en cause (S700 : −0,121 s à pose égale) : `GrilleSgn` nettement plus tôt que R4 ;
-  - la pose seule en cause : `GrilleSgn` près de R4 ;
-  - la couche de surface : un volume de R4 sous celui des particules passées.
-- **calcul** : aucun nombre neuf ; ≈ 13 + 7 min.
+- **témoin** : la même onde, la même fonction, à deux résolutions. Seul `dx` change, et la largeur suit pour garder le coût (ADR-276 D2 :
+  la largeur ne change rien à une onde plane, entre deux murs).
+- **instrument** : la crête aux cinq plans. Ce que rendrait chaque hypothèse :
+  - le juge amortit : à 1,25 cm, la crête au plan de 5 m plus haute qu'à 2,5 cm, au-delà de 3 mm (quatre fois la résolution) ;
+  - SGN s'écarte de la 3D : les deux résolutions d'accord, sous SGN ;
+  - les deux à la fois : entre les deux.
+- **calcul** : la résolution de lecture, `quantum / (dx · largeur)` = (0,025³ / 8) / (0,025 × 0,1) = 0,78 mm ; à 1,25 cm sur deux
+  rangées, (0,0125³ / 8) / (0,0125 × 0,025) = 0,78 mm. Le coût : mesuré au premier pas, montré.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-273 D1 : la pose a été jugée contre la 3D en S702 ; elle est nourrie par SGN ici ;
-  - ADR-276 D2 : `GrilleSgn` diffère de S698 par la pose seule, et de R4 par les données seules ;
-  - ADR-277 D2 : un mode nommé de plus.
+  - ADR-276 D1 : l'état initial est construit dans l'essai, depuis une seule fonction, l'onde de S693 (x₁ = 3,4 m) ;
+  - ADR-273 D1 : sans objet, aucun raccord ici.
 - **pièges** :
-  - le pas de chaque enregistrement est la durée entre deux fins de pas ;
-  - le quantum est `dx³/8` (deux particules par axe) ;
-  - au-dessus de `h`, la vitesse du bord est nulle.
+  - le mur de droite, à 8 m : l'onde ne l'atteint pas en 0,8 s (≈ 2 m parcourus) ;
+  - SGN périodique sur 40 m, les plans lus à la face, moyenne des deux mailles.
 
 **Critères, écrits avant.**
 
-1. `GrilleSgn` à moins de **0,02 s** et **0,15 m** du tout-3D (2,637 s, 9,988 m).
-2. Le rapport des volumes mesuré ; la masse à 10⁻¹², la dette sous un quantum.
+1. Les crêtes aux cinq plans pour les trois calculs, et l'attribution selon l'instrument.
+2. Le volume de la 3D tenu (le nombre de particules constant).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `GrilleSgn` ; le volume au plan ; l'essai ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) **échoue** : 2,569 s (−0,068 s ; les données de SGN −0,089 s à pose égale) ; (2) le rapport des volumes 0,986 ; 2,9·10⁻¹⁵, sous un quantum.

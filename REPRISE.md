@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 17:41 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 17:42 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S704 — le juge éprouvé : la crête de l'onde sur fond plat, la 3D à deux résolutions et SGN ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S703 — La pose par la grille nourrie par SGN ([journal](notes/JOURNAL.md)). Avant : S702 (La pose par la grille)
 Session suivante : S704 — l'amortissement de l'onde par le tout-3D à 2,5 cm et par SGN, sur le fond plat : le juge éprouvé
 Maillons        : 1
