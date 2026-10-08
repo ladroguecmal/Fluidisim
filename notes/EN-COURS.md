@@ -62,41 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S695 — **terminée**. En autonomie, sans arrêt. Le relais au large de S693, nourri par SGN (S694) au lieu de Saint-Venant.
+Session : S696 — **en cours**. En autonomie, sans arrêt. **La quarante-troisième revue de méthode** (ADR-222 D4 : S691–S695).
 
-**Ce que la session fait.** `deux_raccords_s693` reçoit le porteur du large : Saint-Venant (S693), ou SGN 1D. SGN est sur fond plat,
-périodique, 40 m, l'onde à 3,4 m ; le large est plat jusqu'au pied (5,696 m), et le raccord est à 5,0 m. Le bord gauche d'APIC reçoit sa
-vitesse moyenne à 5,0 m, comme en S650.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-274)
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-243 D1, ADR-256 D2, ADR-259 D1, ADR-273 D2.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-- **témoin** : le raccord du large à 1,0 m (S693). L'onde y naît dans la 3D et le porteur ne porte rien d'elle : 2,582 s, 9,888 m. C'est
-  la référence du côté d'APIC (ADR-273 D1). Le tout-3D (2,642 s) garde l'écart propre au montage du large (≈ 0,04 s, non départagé en
-  S693).
-- **instrument** : le premier retournement. Ce que rendrait chaque hypothèse :
-  - si SGN porte l'onde comme APIC, le témoin à 0,02 s près ;
-  - si le défaut est ailleurs (le raccord lui-même), 2,52 s comme avec Saint-Venant ;
-  - si SGN corrige trop, au-delà du témoin.
-- **calcul** : aucun nombre neuf. Les références sont mesurées (S693 : 2,524 s avec Saint-Venant, 2,582 s au témoin). Le coût : celui de
-  S693, 10,3 min (SGN 1D, quelques secondes).
-- **ADR** : ADR-273, ADR-274, ADR-275.
-- **pièges** :
-  - SGN sur fond plat ne voit pas la pente au-delà du pied : les ondes réfléchies vers le large manquent (le relais est à sens unique,
-    comme S650) ;
-  - une seule source : l'onde de SGN et celle de la 3D, la même (x₁ = 3,4 m, ADR-273 D2) ;
-  - le pas de SGN, sous-divisé dans le pas d'APIC.
-
-**Critères, écrits avant.**
-
-1. Avec SGN : le premier retournement à moins de **0,02 s** et **0,15 m** du témoin (2,582 s, 9,888 m).
-2. L'air enfermé après lui, en avant ; la masse à 10⁻¹² ; la dette sous un quantum.
-3. Rapporté : l'écart au tout-3D, qui reste à départager.
+**Critères, écrits avant.** (1) ADR-276 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le porteur SGN ; l'essai ; (1)–(3).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — ADR-276 ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) **manqué** : 2,524 s avec SGN, le même qu'avec Saint-Venant ; le porteur n'est pas en cause, le raccord du large l'est ; l'attribution de S693 corrigée (note datée) ; (2) tenu.
