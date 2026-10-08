@@ -62,26 +62,57 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S711 — **terminée**. En autonomie, sans arrêt. **La quarante-sixième revue de méthode** (ADR-222 D4 : S706–S710).
+Session : S712 — **en cours**. En autonomie, sans arrêt ; session longue. S709–S710 : le déferlement du tout-3D bouge de 0,2 à 0,3 s selon
+que la 3D garde ou non son volume. ADR-280 D2 : **une référence extérieure tranche.**
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**La référence.** Les mesures de Synolakis (Caltech), publiées par la NOAA : l'onde solitaire **H/d = 0,3 qui déferle** sur une pente de
+1:19,85, aux instants `t·√(g/d)` = 15, 20, 25, 30. Elles sont téléchargées avec l'accord de l'utilisateur, dans
+[references/synolakis](../references/synolakis/LISEZMOI.md). L'article de Grilli (1997) est payant, et sa prépublication est refusée.
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, contre leurs critères. Une règle nouvelle se cherche d'abord dans METHODE : ADR-263 D2
-  (un lecteur éprouvé sur des cas posés) et ADR-279 D1 (la convergence du juge) existent déjà ; rien sur le bruit d'un instrument en
-  mouvement, ni sur la grandeur que voit le solveur.
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+**Le montage, construit dans l'essai par une seule fonction (ADR-276 D1).**
+- APIC 3D à 2,5 cm, d = 0,5 m (20 mailles par profondeur, comme le juge), deux rangées (une onde plane : la largeur ne change rien) ;
+- un fond en escalier, pente de 1:19,85, pied à `X₀ = 19,85 d` du rivage au repos ;
+- l'onde `OndeSolitaire` (le profil de Synolakis), centrée en `X₁ = X₀ + arccosh(√20)/γ` ;
+- un mur au large à `X₁ + 8 d`, la plage sèche jusqu'à `x = −8 d` ;
+- le temps de 0 à `30·√(d/g)` = 6,77 s.
 
-**Critères, écrits avant.** (1) ADR-280 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Les essais.**
+
+| essai | ce qui change seul | la lecture |
+|---|---|---|
+| **E1** | sans projection de densité (le juge de S690–S703) | aux quatre instants, l'élévation par la surface (φ), lissée sur 10 cm, à chaque point mesuré : l'écart quadratique moyen (`η/d`), et la crête mesurée contre la calculée |
+| **E2** | la projection faible, κ = 0,05 (S710) | la même |
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-279, ADR-280)
+
+- **témoin** : la mesure elle-même. E1 et E2 ne diffèrent que par la projection.
+- **instrument** : l'élévation par la surface reconstruite. ADR-280 D1 : c'est la grandeur que voit le solveur, étalonnée en S708 E1.
+  Son plancher : la dispersion des mesures elles-mêmes, ≈ 0,01 à 0,02 en `η/d` entre points voisins, à t = 25. Ce que rendrait chaque
+  hypothèse :
+  - la version qui garde son volume est la plus juste : E2 a l'écart le plus faible à t = 20 et 25 (le déferlement) ;
+  - la perte de volume aide par hasard : E1 l'emporte ;
+  - un écart entre E1 et E2 sous la dispersion des mesures ne tranche pas.
+- **calcul** :
+  - `γ = √(3·0,3/4)` = 0,474 ; `L = arccosh(4,472)/γ` = 4,59 ; `X₁` = 24,44 d ;
+  - ≈ 145 000 particules à deux rangées, 6,77 s ;
+  - le coût, mesuré au premier passage ; on attend ≈ 15 min par essai.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-280 D2 : la référence extérieure ;
+  - ADR-279 D1 : aucune tolérance nouvelle avant cette mesure ;
+  - ADR-276 D1 : le montage, une seule fonction.
+- **pièges** :
+  - le sens des x : la mesure compte depuis le rivage, positive vers le large ; le domaine, depuis le mur du large ;
+  - η sur la plage sèche n'est pas comparé (aucune mesure là où il n'y a pas d'eau) ;
+  - les instants tombent exactement (pas bornés).
+
+**Critères de la session.** E1 et E2 mesurés contre le laboratoire, et le verdict selon l'instrument. S'il tranche, une proposition sur le
+défaut de la projection ; sinon, la dispersion nommée.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-280 ; METHODE.
-- [x] **P3** — rituel.
+- [x] **P1** — jeton ; plan ; la référence téléchargée.
+- [ ] **P2** — le montage ; E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-280 : D1 (le plancher de bruit, la grandeur que voit le solveur), D2 (la convergence du juge sous ses options ; une référence extérieure) ; la prochaine revue S716.
