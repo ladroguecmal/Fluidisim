@@ -53,5 +53,7 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   particules sous la crête (+3,8 %), si bien que la renaissance et la mort devront lire la surface, non le compte. Le volume d'APIC est
   mesuré par la surface en S708.
 - **Le volume d'APIC** (S708) : à compte exact, la 3D perd ≈ 1,3 % par seconde de volume géométrique en mouvement (ses particules se
-  tassent). Le remède (la projection de densité) passe avant la suite du LOD, car il change le juge lui-même.
+  tassent). Le remède (la projection de densité) passe avant la suite du LOD, car il change le juge lui-même. Au lot S708–S710 : la
+  projection faible tient le volume, mais déplace le déferlement de 0,2 s. Le juge se tranchera contre des mesures de laboratoire
+  (S712), et la projection reste éteinte jusque-là.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

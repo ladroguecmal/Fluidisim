@@ -1967,3 +1967,12 @@ tenue à −0,1 %, après un premier passage qui dilatait l'eau (+7,4 %, une cor
 tenu (0,991), mais la vague ne plonge plus. Sans la correction de surface (E3a), le plongeon revient 0,30 s plus tard. Corriger tout
 l'écart à chaque pas lisse le front. La projection reste éteinte. Maillons **1** (4.14, 1.6). Suivant : **S710**, une projection faible,
 une fraction de l'écart par pas, contre la dérive lente seule.
+
+## S710 — 2026-10-08 — La projection de densité faible (session longue)
+
+**Entrée.** En autonomie, sans arrêt ; S709. **Fait** ([preuve](../docs/validation/PROJECTION-DENSITE-FAIBLE-S710.md)) : la relaxation κ.
+**E1 tenu** : l'onde plate à −0,45 % avec κ = 0,05 (le calcul l'attendait). **E2 échoue** : le tout-3D à −0,9 % (le saut du départ) et
+le plongeon 0,22 s plus tard. Une correction vingt fois plus faible retarde presque autant : c'est le volume gardé, non le lissage, qui
+déplace le déferlement. Le point de déferlement de la 3D a une incertitude de 0,2 à 0,3 s, selon son volume. La projection reste
+éteinte. Maillons **1** (4.14, 1.6). Suivant : **S711**, la quarante-sixième revue ; puis une référence extérieure (le point de
+déferlement mesuré d'une onde solitaire sur une pente proche).

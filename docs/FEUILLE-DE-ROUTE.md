@@ -507,6 +507,9 @@ sur fond plat (il n'amortit pas ; SGN 5 % au-dessus de la 3D convergente) ; l'é
 **S705–S707** : le raccord du large retenu (ADR-278 : la position à 0,15 m, l'instant à 0,1 s) ; la quarante-cinquième revue (ADR-279 :
 la convergence du juge d'abord ; des sessions longues) ; la naissance de la 3D (au repos tenue ; dans l'onde, APIC tasse ses particules
 sous la crête, le compte n'est pas la surface) (4.14).
+**S708–S710** : le volume d'APIC par sa surface (−1,3 %/s en mouvement, à compte exact) ; la projection de densité (Kugelstadt 2019) :
+forte, elle tient le volume mais empêche le plongeon ; faible, elle le tient et le plongeon revient 0,22 s plus tard. Le point de
+déferlement de la 3D dépend de son volume ; une référence extérieure est nécessaire (4.14, 1.6).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
