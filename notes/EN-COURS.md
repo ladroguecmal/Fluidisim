@@ -62,48 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S690 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 4 : la vague qui plonge.
+Session : S691 — **en cours**. En autonomie vers la v2. **La quarante-deuxième revue de méthode** (ADR-222 D4 : S686–S690) ; le lot
+S690–S692 à venir.
 
-**Ce que la session fait.**
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-- **Le relais sur fond en escalier.** `RelaisRivage` lit le fond du bord 3D par l'escalier (`seabed_height`) quand le fond n'est pas
-  lisse. La vague plongeante de S647 est validée sur l'escalier, avec l'air balistique.
-- **La vague de S647** (pente 1:12, `S₀` = 0,231, plongeante) dans le relais à 2,5 cm. APIC va jusqu'à **10,775 m** (431 mailles), Saint-Venant au-delà.
-  Elle est jugée contre le tout-3D de S647–S648 à la même maille (ADR-273 D1, la référence du côté d'APIC).
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles, et les remarques de l'utilisateur du
+  2026-10-08 ; ce qui départagerait une règle nouvelle d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-265 D1, ADR-268 D1, ADR-273.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273)
-
-- **témoin** : le tout-3D de S647–S648 à 2,5 cm : le premier retournement à 2,642 s et 9,988 m, l'air enfermé à 2,817 s et 10,375 m.
-- **instrument** : les lecteurs de S647 et S648, sur la 3D du relais. Ce que rendrait chaque hypothèse :
-  - si le raccord, à 0,40 m au-delà de la chute du jet, ne trouble pas le déferlement, le même retournement et le même air ;
-  - si le raccord renvoie l'onde ou la freine, un retournement déplacé ou absent.
-- **calcul** (ce script) :
-  - à 5 cm, trois mailles de fond tombent à 9,9 m, **avant** la chute du jet (10,5 m) : l'étape ne se fait qu'à 2,5 cm ;
-  - à 2,5 cm, à 10,775 m, sur 7,7 cm de fond (10,8 m n'a que 7,47 cm, refusé par le script), 0,40 m au-delà de l'air enfermé de S648
-    (asserté).
-- **ADR** : ADR-271 D1, ADR-273 D1.
-- **pièges** :
-  - l'air balistique avec la sortie à droite ;
-  - le niveau à 0,55 m, exact sur le réseau des particules (0,55/0,0125) : une seule source, ADR-273 D2 ;
-  - le coût (S647 : 23 min pour 3 s à 2,5 cm), depuis une copie du binaire.
-
-**Critères, écrits avant.**
-
-1. Le premier retournement du relais à moins de **0,02 s** et **0,15 m** du tout-3D (les bornes de S650).
-2. L'air enfermé paraît après le retournement, en avant de lui.
-3. La masse à 10⁻¹² près, la dette sous un quantum.
-4. Rapportés : la remontée de Saint-Venant, sous la maille ; le temps de calcul contre le tout-3D.
+**Critères, écrits avant.** (1) ADR-274 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le fond en escalier dans le relais ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — ADR-274 ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2, en cours (notes)** — Le premier essai a tourné 8 h sans résultat (arrêté). Mesuré ensuite : 2,4 s d'horloge par pas sur un cœur, le
-  pas de Saint-Venant figé à 2,4 ms. Accéléré : les 16 fils (`set_jobs`, au bit, S483) et le pas stable réel du relais (`pas_stable_us`) —
-  2,5 s simulées en 5 min (≈ ×25). La progression affichée a montré **l'effondrement du pas après le déferlement** (163 µs à 3,0 s) ;
-  deux causes suspectées au raccord (une éclaboussure qui soulève le niveau lu ; une colonne presque vide, `F/0,001`) ; le diagnostic
-  tourne ; le remède candidat est prêt (scratchpad `s690_remede.py`, non appliqué). Le brouillon de la revue S691 (`adr274_brouillon.md`).
-- **P2 fini** — (1) 2,624 s, 9,963 m (tout-3D 2,642 s, 9,988 m) ; (2) 2,777 s, 10,325 m ; (3) masse 1,2·10⁻¹⁶, dette sous un quantum ; (4) remontée 0,361 m, 13,6 min pour 4 s sur 16 fils. L'analyse par moments ; `outils/essai.py`.
