@@ -420,7 +420,9 @@ pas recopiée ici (L137).
   enfermé du tout-3D retrouvés (0,02 s, quelques cm) ; le raccord borné par la célérité ; 4 s en 13,6 min sur 16 fils (le premier essai : 8 h)
   ([preuve](validation/RELAIS-PLONGEANTE-S690.md), [analyse par moments](registres/ANALYSE-PHASES-S690.md)). **S693** : les deux raccords
   ensemble (ADR-275, étape 1) — la 3D réduite à la bande de déferlement (÷ 3 particules), la masse au bit ; le retournement 0,12 s trop
-  tôt : Saint-Venant, sans dispersion, raidit l'onde du large (la moitié, mesurée) ([preuve](validation/DEUX-RACCORDS-S693.md)).
+  tôt : Saint-Venant, sans dispersion, raidit l'onde du large (la moitié, mesurée) ([preuve](validation/DEUX-RACCORDS-S693.md)). **S694** :
+  le porteur dispersif, Serre–Green–Naghdi 1D — l'onde solitaire exacte gardée à 0,04–0,09 % sur 40 profondeurs, à l'ordre deux
+  (Saint-Venant : 60 %) ([preuve](validation/SERRE-1D-S694.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

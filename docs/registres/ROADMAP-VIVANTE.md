@@ -17,7 +17,7 @@ L'historique détaillé est dans la [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md) ;
 | régime | sessions par jour | jusqu'à la v2 |
 |---|---|---|
 | en continu, jour et nuit | ≈ 45 | ≈ 2 semaines |
-| la journée (≈ 10 h) + la file de nuit pour les calculs longs | ≈ 20–25 | ≈ 4 à 5 semaines |
+| la journée (≈ 10 h), les calculs longs lancés au moment où ils servent | ≈ 20–25 | ≈ 4 à 5 semaines |
 | quelques heures par jour | ≈ 8 | ≈ 2 à 3 mois |
 
 ## Les phases
@@ -26,7 +26,7 @@ Chaque phase finit par **un jalon visible** : une séance visuelle où l'utilisa
 
 | phase | campagnes | ce qui sera fait | sessions | jalon visible |
 |---|---|---|---|---|
-| **A. La plage complète** (maintenant) | K3, ADR-275 | le relais au rivage fini ; le LOD étapes 1 à 3 (la bande 3D qui naît et meurt avec la vague, la 3D rallumée autour d'un corps) ; le porteur dispersif du large (Serre–Green–Naghdi), qui lève aussi A234 ; la file de nuit | ≈ 25 | **une vague de bout en bout** : la houle du large, le déferlement en 3D, le ressaut et l'écume en 2D, la remontée sur le sable |
+| **A. La plage complète** (maintenant) | K3, ADR-275 | le relais au rivage fini ; le LOD étapes 1 à 3 (la bande 3D qui naît et meurt avec la vague, la 3D rallumée autour d'un corps) ; le porteur dispersif du large (Serre–Green–Naghdi, 1D fait en S694), qui lève aussi A234 | ≈ 25 | **une vague de bout en bout** : la houle du large, le déferlement en 3D, le ressaut et l'écume en 2D, la remontée sur le sable |
 | **B. L'eau qui se déchire** | K2, fin de K3 | les éclaboussures détachées, les gerbes, les bulles, la cavité, le rouleau qui agit ; la marée sur la côte, le précalcul côtier par phase de marée | ≈ 80 | un plongeon, un rocher dans le ressac, un objet qui tombe à l'eau |
 | **C. Le temps réel** | K5, K8 | le LOD complet ; l'activation par présence, agitation et contact ; les budgets, la dégradation, 60 images/s ; **la carte graphique pour APIC** | ≈ 120 | **une scène jouable** : un joueur sur une plage, la 3D qui suit ses gestes, au budget |
 | **D. Les eaux du monde** | K4, fin de K6 et K7 | les lacs, rivières et canaux, l'éditeur de rivières ; les grands navires, les brèches, les contenants réels, le réseau en charge | ≈ 90 | une rivière qui descend à la mer ; un navire qui prend l'eau |
@@ -38,12 +38,12 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
 ## Ce qui dépend de l'utilisateur
 
 - Les verdicts des séances visuelles : R42 **reçu** le 2026-10-08 (la côte qui déferle) ; le prochain au jalon de la phase A.
-- Les choix qu'une session ne peut trancher seule : la file de nuit et le maintien du PC allumé ; plus tard, le budget de la carte
-  graphique et la cible de livraison.
+- Les choix qu'une session ne peut trancher seule : plus tard, le budget de la carte graphique et la cible de livraison. (La file de
+  nuit : non, le 2026-10-08 — les calculs se lancent quand ils servent.)
 
 ## Les risques connus
 
 - **Le coût de la 3D** : il commande le temps réel (phase C). Les leviers sont nommés dans
   [ANALYSE-PHASES-S690](ANALYSE-PHASES-S690.md) ; la carte graphique pour APIC est le plus gros.
 - **Les raccords entre solveurs** (S685–S693) : chacun se juge d'abord entre deux copies du même solveur (ADR-273).
-- **Les calculs longs** : la file de nuit, et l'exploration à 5 cm le jour (ADR-274).
+- **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

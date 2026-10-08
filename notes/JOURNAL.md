@@ -1837,3 +1837,11 @@ min ; le retournement 0,12 s trop tôt, **critère manqué**. Deux sources dans 
 corrigées en route, sans effet. Les témoins (le raccord du large à 1,0, 4,0 et 5,0 m) : plus Saint-Venant porte l'onde, plus elle se
 retourne tôt — la moitié de l'écart ; le reste (0,04 s) non départagé. **R42 reçu.** La feuille de route vivante écrite. Maillons **1**
 (4.14). Suivant : **S694**, le porteur dispersif (Serre–Green–Naghdi 1D, jugé sur l'onde solitaire exacte).
+
+## S694 — 2026-10-08 — Le porteur dispersif : Serre–Green–Naghdi 1D
+
+**Entrée.** En autonomie, sans arrêt. **Fait** ([preuve](../docs/validation/SERRE-1D-S694.md)) : `serre_1d.rs`, Saint-Venant plus la correction
+dispersive de Bonneton et al. (2011). **Mesuré** : l'onde solitaire exacte gardée à 0,04–0,09 % de sa hauteur sur 40 profondeurs, à
+l'ordre deux, la célérité à 0,04 % ; Saint-Venant la déforme de 60 %. La largeur du plan, posée de tête, était fausse (2,08 au lieu
+de 2,40 m). Décision de l'utilisateur : pas de file de nuit. Maillons **1** (4.14 ; A234 a sa référence). Suivant : **S695**, le relais au
+large de S693 nourri par SGN.

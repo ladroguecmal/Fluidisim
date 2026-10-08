@@ -163,6 +163,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [Le porteur dispersif : Serre–Green–Naghdi 1D — S694](validation/SERRE-1D-S694.md) : l'onde solitaire à 0,1 %.
 - [Les deux raccords ensemble : la 3D réduite à la bande de déferlement — S693](validation/DEUX-RACCORDS-S693.md) : ÷ 3, le large demande un porteur dispersif.
 - [La vague qui plonge à travers le relais au rivage — S690](validation/RELAIS-PLONGEANTE-S690.md) : le déferlement du tout-3D retrouvé ; [l'analyse par moments](registres/ANALYSE-PHASES-S690.md).
 - [Le reflux à travers le raccord au rivage — S689](validation/REFLUX-RIVAGE-S689.md) : 10 s, la masse au bit.

@@ -98,6 +98,7 @@ pub mod precalcul;
 pub mod changement_solveur;
 /// S613 — Saint-Venant 2D, le mouillage et le séchage (liste 4.14 ; C04 en 2D, Thacker).
 pub mod saint_venant_2d;
+pub mod serre_1d;
 /// S614 — un très grand événement du large à la plage : Green, l'onde solitaire, la remontée (liste 11.3).
 pub mod grand_evenement;
 /// S615 — les grandes formes cohérentes entre clients : la coupure passe-bas avant W (liste 10.5).

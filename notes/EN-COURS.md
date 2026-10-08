@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S694 — **en cours**. En autonomie, sans arrêt (l'utilisateur, 2026-10-08). S693 : Saint-Venant, sans dispersion, raidit l'onde
+Session : S694 — **terminée**. En autonomie, sans arrêt (l'utilisateur, 2026-10-08). S693 : Saint-Venant, sans dispersion, raidit l'onde
 du large et fait se retourner la vague trop tôt. **Le porteur dispersif**, Serre–Green–Naghdi (SGN), d'abord en 1D sur fond plat ; il
 servira aussi de référence à A234.
 
@@ -105,11 +105,12 @@ Linéarisé, le schéma rend `ω² = g·d·k²/(1 + (kd)²/3)`, la dispersion de
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `serre_1d.rs` ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — `serre_1d.rs` ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
 
 - **La réduction linéaire, à la main.** Serre : `u_t + uu_x + gh_x = (1/(3h))(h³(u_xt + uu_xx − u_x²))_x`. Soit `A = u_t + uu_x + gh_x`.
   - On a `u_xt + uu_xx − u_x² = A_x − 2u_x² − gh_xx`, d'où `hA − ⅓(h³A_x)_x = −⅓(h³(2u_x² + gh_xx))_x`.
   - Linéarisé, en Fourier : `A(1 + (kd)²/3) = (i/3)·g·d²·k³·η`, d'où `u_t = −igkη/(1 + (kd)²/3)` et `ω² = gdk²/(1 + (kd)²/3)`.
+- **P2 fini** — (1) 0,038 % et 0,086 %, ÷ 3,5 et 4,0 ; (2) +0,027 %, +0,038 % ; (3) Saint-Venant 59 %, 61 % ; (4) ≈ 10⁻¹⁵. La largeur « 2,08 m » du plan était de tête : 2,40 m.
