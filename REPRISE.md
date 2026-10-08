@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 18:01 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 18:12 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S707 — la naissance de la 3D (N1, N2 ; session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S706 — la quarante-cinquième revue de méthode (ADR-279) ([journal](notes/JOURNAL.md)). Avant : S705 (Le raccord du large retenu)
 Session suivante : S707 — N1, la naissance de la 3D au repos (LOD-ETAPE-2-S705)
 Maillons        : 0

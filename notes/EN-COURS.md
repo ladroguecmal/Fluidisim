@@ -62,26 +62,56 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S706 — **terminée**. En autonomie, sans arrêt. **La quarante-cinquième revue de méthode** (ADR-222 D4 : S701–S705).
+Session : S707 — **en cours**. En autonomie, sans arrêt. **Première session longue** (ADR-279 D3) : la naissance de la 3D, pièces N1 et N2
+de [LOD-ETAPE-2-S705](../docs/registres/LOD-ETAPE-2-S705.md).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.** `birth_from_columns` (`apic3d_naissance.rs`) fait naître la 3D d'un état 2D :
+- elle retire toutes les particules ;
+- par colonne, elle pose `round(volume / quantum)` particules aux places du réseau, la plus basse d'abord. La hauteur est ainsi tenue au
+  quantum près (3 mm à 2,5 cm), non à la couche (1,25 cm) ;
+- chaque particule prend la vitesse et l'affine du G2P, sur une grille remplie par l'appelant ;
+- l'écart de volume, donné − posé, revient à l'appelant.
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles. Une règle nouvelle n'est écrite qu'après
-  l'avoir cherchée dans METHODE : « convergence » n'y donne qu'une règle sur l'ordre d'un schéma, rien sur le juge ; « tube » et
-  « pipefail » n'y donnent rien.
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
 
-**Critères, écrits avant.** (1) ADR-279 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+| essai | ce qu'il juge | la seule cause qui change | critères |
+|---|---|---|---|
+| **E1 (N1)** | l'eau au repos, fond plat, 4 m, `h` = 0,49 m (une couche partielle), 1 s | la naissance, contre le semis du réseau (le témoin) | posé + écart = donné à 10⁻¹² ; la vitesse maximale après 1 s sous 1 mm/s, et au plus trois fois celle du témoin |
+| **E2 (N2)** | l'onde de S704 sur un fond plat de 10 m, 1,6 s ; à 0,4 s, la 3D est réduite à `(h, ū)` par colonne, puis renaît par le profil vertical de SGN | la renaissance (la perte de la structure verticale), entre deux copies de la 3D (ADR-273 D1) | la crête aux plans 5, 6 et 7 m à moins de **3 mm** de la 3D ininterrompue ; l'instant de la crête au plan de 7 m à moins de **0,02 s** ; le nombre de particules tenu |
+| **E3** | la même naissance à 0,4 s, mais depuis l'état de SGN, qui a porté l'onde depuis le départ | le porteur avant la naissance : SGN au lieu de la 3D | rapporté et attribué ; aucun critère de passage (S704 : SGN 5 % plus haut) |
+
+E3 ne se lance que si E2 tient. Si E2 échoue, la session cherche la cause de E2 et s'arrête quand elle est nommée.
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-279)
+
+- **témoin** : E1, le semis du réseau ; E2, la 3D ininterrompue, par la même fonction ; E3, E2.
+- **instrument** :
+  - la crête, lue par le volume d'une tranche de 10 cm (S704 : résolution 0,2 mm, bruit ≈ ±2 mm) ;
+  - la vitesse maximale des particules.
+
+  Ce que rendrait chaque hypothèse en E2 :
+  - le profil de SGN suffit à refaire la structure verticale : les crêtes à ±2 mm, le bruit de lecture ;
+  - il ne suffit pas : un écart de crête, croissant vers l'aval.
+- **calcul** : les tolérances respectent ADR-279 D1. À 2,5 cm, le juge diffère de sa version à 1,25 cm d'environ 6 mm de crête. 3 mm
+  vaut la moitié de cette convergence, et un peu plus que le bruit de lecture. Le coût : ≈ 1 min par repos, ≈ 3 min par onde.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-273 D1, par E2 : la naissance est jugée entre deux copies de la 3D, avant d'être nourrie par SGN en E3 ;
+  - ADR-276 D2 : chaque essai ne change qu'une cause, la colonne de la table ;
+  - ADR-278 D2 : sans objet ici (aucun déferlement).
+- **pièges** :
+  - la réduction compte les particules par colonne : la masse reste exacte, et l'écart de E2 vaut 0 ;
+  - `ū_x` et `ū_xx` par différences le long de x, nuls aux murs ;
+  - au-dessus de l'eau, le profil est pris à la surface ;
+  - l'instant de réduction doit tomber exactement à 0,4 s : le pas est borné.
+
+**Critères de la session.** E1 et E2 tenus, ou leur échec nommé ; E3 rapporté.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-279 ; METHODE.
-- [x] **P3** — rituel.
+- [x] **P1** — jeton ; plan ; la note du déclencheur.
+- [ ] **P2** — E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — E3.
+- [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-279 : D1 (la convergence du juge mesurée avant la tolérance), D2 (pas de tube après une commande qui doit arrêter la chaîne) ; D3 (des sessions plus longues, une question entière, à la demande de l'utilisateur) ; la prochaine revue S711.

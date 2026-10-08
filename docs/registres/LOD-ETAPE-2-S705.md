@@ -35,3 +35,12 @@ D2 : la position à 0,15 m, l'instant à 0,1 s, l'air, la masse au bit).
 - **La vitesse d'une particule née** : prise au G2P, sur une grille remplie avant la naissance. Une vitesse posée à la main (le profil
   seul) a coûté 0,1 s en S700.
 - **La hauteur rendue à la mort** : lue par le volume des particules, non par la plus haute (S700, S704).
+
+*Note datée du 2026-10-08 (S707), à la demande de l'utilisateur* : « la 3D peut s'allumer à condition qu'il y ait besoin d'elle, comme
+un système de prédiction ; une vague qui ne pourra pas déferler, la 2D suffira peut-être ». Le déclencheur (D1) décide donc d'abord
+**s'il faut** allumer la 3D, puis quand et où. Une vague dont la côte cuite ne prévoit pas le déferlement (Battjes et Janssen, la
+fraction déferlée `Q_b` nulle sur son trajet) reste en 2D du large au sable. La 3D ne s'allume alors que pour une présence proche ou un
+contact (ADR-275 D1).
+
+Un essai s'ajoute à D1 : une petite vague qui ne déferle pas, en 2D seule, contre le tout-3D. Sa remontée sur le sable et son niveau au
+rivage doivent tenir à la tolérance d'ADR-278 D2 (la position à 0,15 m), et son coût doit être mesuré.
