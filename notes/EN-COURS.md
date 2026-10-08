@@ -62,44 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S689 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 3 (le reflux).
+Session : S690 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 4 : la vague qui plonge.
 
-**Ce que la session fait.** **La dette remboursée au quantum.** S685 laissait la dette (ce que Saint-Venant a pris moins ce qu'APIC a
-laissé sortir) s'accumuler : 2 à 3 quanta par rangée en 3 s. Désormais :
+**Ce que la session fait.**
 
-- quand elle atteint un quantum, APIC rend la particule de sa dernière colonne la plus proche du bord (`take_right`) ;
-- quand elle descend sous moins un quantum, Saint-Venant reçoit ce volume dans sa première maille.
-
-La masse reste exacte, et la dette sous un quantum par rangée. Puis l'onde de S685 est suivie 10 s : elle monte, redescend, repasse
-dans la 3D, et ressort encore.
+- **Le relais sur fond en escalier.** `RelaisRivage` lit le fond du bord 3D par l'escalier (`seabed_height`) quand le fond n'est pas
+  lisse. La vague plongeante de S647 est validée sur l'escalier, avec l'air balistique.
+- **La vague de S647** (pente 1:12, `S₀` = 0,231, plongeante) dans le relais à 2,5 cm. APIC va jusqu'à **10,775 m** (431 mailles), Saint-Venant au-delà.
+  Elle est jugée contre le tout-3D de S647–S648 à la même maille (ADR-273 D1, la référence du côté d'APIC).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273)
 
-- **témoin** : S685 sans remboursement (la dette à 2 à 3 quanta par rangée en 3 s).
-- **instrument** : ce que rendrait chaque hypothèse.
-  - Si le reflux passe bien, la masse reste exacte, la dette sous un quantum, la colonne du bord peu tassée, et aucune vitesse
-    parasite.
-  - Une entrée mal placée tasse la colonne du bord, ou lance des particules.
-  - Un remboursement faux fait dériver la masse.
-- **calcul** (ce script) : la dette de S685, 2,1 quanta par rangée à 5 cm et 2,9 à 2,5 cm. Le remboursement a donc de quoi agir.
-- **ADR** : ADR-271, ADR-273.
+- **témoin** : le tout-3D de S647–S648 à 2,5 cm : le premier retournement à 2,642 s et 9,988 m, l'air enfermé à 2,817 s et 10,375 m.
+- **instrument** : les lecteurs de S647 et S648, sur la 3D du relais. Ce que rendrait chaque hypothèse :
+  - si le raccord, à 0,40 m au-delà de la chute du jet, ne trouble pas le déferlement, le même retournement et le même air ;
+  - si le raccord renvoie l'onde ou la freine, un retournement déplacé ou absent.
+- **calcul** (ce script) :
+  - à 5 cm, trois mailles de fond tombent à 9,9 m, **avant** la chute du jet (10,5 m) : l'étape ne se fait qu'à 2,5 cm ;
+  - à 2,5 cm, à 10,775 m, sur 7,7 cm de fond (10,8 m n'a que 7,47 cm, refusé par le script), 0,40 m au-delà de l'air enfermé de S648
+    (asserté).
+- **ADR** : ADR-271 D1, ADR-273 D1.
 - **pièges** :
-  - rendre une particule d'une colonne sans eau (aucune : la dette attend) ;
-  - ajouter un volume à Saint-Venant dans une maille sèche (une hauteur positive, au bit du volume) ;
-  - le signe de la dette.
+  - l'air balistique avec la sortie à droite ;
+  - le niveau à 0,55 m, exact sur le réseau des particules (0,55/0,0125) : une seule source, ADR-273 D2 ;
+  - le coût (S647 : 23 min pour 3 s à 2,5 cm), depuis une copie du binaire.
 
 **Critères, écrits avant.**
 
-1. Sur 10 s, à 5 cm : la masse à 10⁻¹² près.
-2. La dette de chaque rangée sous un quantum, à chaque pas.
-3. La dernière colonne sous 10 particules par maille mouillée.
-4. La vitesse des particules sous 1 m/s (la vitesse de l'onde au raccord, `√(g·h)` ≈ 1,3 m/s, n'est pas une vitesse de particule).
+1. Le premier retournement du relais à moins de **0,02 s** et **0,15 m** du tout-3D (les bornes de S650).
+2. L'air enfermé paraît après le retournement, en avant de lui.
+3. La masse à 10⁻¹² près, la dette sous un quantum.
+4. Rapportés : la remontée de Saint-Venant, sous la maille ; le temps de calcul contre le tout-3D.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le remboursement ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — le fond en escalier dans le relais ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) 2,8·10⁻¹⁶ ; (2) 0,998 quantum ; (3) 9,20 ; (4) 0,539 m/s. La sortie de la 3D surtout par remboursement (20,1 L sur 25,4).
