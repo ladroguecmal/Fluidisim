@@ -440,6 +440,8 @@ pas recopiée ici (L137).
   convergente ; l'écart du raccord (≈ 12 cm sur la plage) sous le visible ([preuve](validation/JUGE-FOND-PLAT-S704.md)).
   **S707** : la naissance de la 3D (LOD, étape 2) — au repos tenue (11 µm/s) ; renée dans l'onde, −6 % : APIC tasse ses particules sous la
   crête (+3,8 %), le compte n'est pas la surface ([preuve](validation/NAISSANCE-3D-S707.md)).
+  **S708** : le volume d'APIC par sa surface — à compte constant, −1,2 à −1,3 %/s dès que l'eau bouge ; le juge tout-3D déferle avec
+  3,3 % d'eau effective en moins ; la croissance de l'onde plate était du tassement ([preuve](validation/VOLUME-APIC-SURFACE-S708.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

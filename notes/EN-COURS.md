@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S708 — **en cours**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S707 : APIC tasse ses particules sous la crête
+Session : S708 — **terminée**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S707 : APIC tasse ses particules sous la crête
 (+3,8 %), et le compte n'en donne pas la surface. **Le volume d'APIC par sa surface, contre le compte.**
 
 **L'instrument.** Le volume de la surface reconstruite d'APIC (`distance()`, la distance signée aux centres des mailles, l'eau où φ < 0) :
@@ -100,9 +100,10 @@ surface. On le compare à `V_n = n · quantum`, le volume que comptent les racco
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — E1.
 - [x] **P3** — E2.
-- [ ] **P4** — E3.
-- [ ] **P5** — preuve ; rituel.
+- [x] **P4** — E3.
+- [x] **P5** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini (E1)** — **tenu** : au repos, `V_φ / V_n` = 0,99967 au départ et à 1 s ; la reconstruction rend le compte à 3·10⁻⁴.
 - **P3 fini (E2)** — l'onde plate : `V_φ/V_φ(0)` 0,996 (0,4 s), 0,989 (1,0 s), **0,981 (1,6 s)** — APIC perd ≈ 1,2 %/s de volume géométrique en mouvement, à compte constant. La crête par la surface est stable (0,149 → 0,133 → 0,137 m) : la croissance comptée (0,178 m) était du tassement.
+- **P4 fini (E3)** — le tout-3D : `V_φ/V_n` 0,9987 → 0,9667 au déferlement (2,5 s) → 0,9409 à 4 s. La dérive dépasse 1 % : la masse « au bit » vaut pour le compte, non pour le volume que simule la 3D. Remède : la projection de densité (S709).

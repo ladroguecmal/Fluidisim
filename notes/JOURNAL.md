@@ -1950,3 +1950,11 @@ tenue** : au repos, 11 µm/s (une première pose, une couche partielle, laissait
 grille, perd autant : la cause est la disposition des particules. Le diagnostic : APIC tasse ses particules sous la crête (+3,8 %), le
 compte n'est pas la surface. Cela touche S704 et la masse « au bit » des raccords, qui compte des particules. Maillons **1** (4.14).
 Suivant : **S708**, le volume d'APIC par la surface contre le compte (le tout-3D de S690, l'onde plate) ; puis N2 par la surface.
+
+## S708 — 2026-10-08 — Le volume d'APIC par sa surface (session longue)
+
+**Entrée.** En autonomie, sans arrêt ; S707 (le compte n'est pas la surface). **Fait** ([preuve](../docs/validation/VOLUME-APIC-SURFACE-S708.md)) :
+le volume par la surface reconstruite, `V_φ`. **E1** : l'étalon tenu (0,99967 au repos). **E2** : l'onde plate perd 1,9 % en 1,6 s ; sa
+crête par la surface est stable, la croissance comptée était du tassement. **E3** : le tout-3D de S690, `V_φ/V_n` 0,967 au déferlement,
+0,941 à 4 s. APIC perd ≈ 1,3 %/s de volume géométrique en mouvement, à compte exact. Maillons **1** (4.14, 1.6). Suivant : **S709**, la
+projection de densité (en option, jugée sur E1–E3), puis le juge relancé.

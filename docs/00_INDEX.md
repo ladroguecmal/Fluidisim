@@ -164,6 +164,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)](registres/LOD-ETAPE-2-S705.md) : cinq pièces, leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [Le volume d'APIC par sa surface, contre le compte — S708](validation/VOLUME-APIC-SURFACE-S708.md) : −1,3 %/s en mouvement.
 - [La naissance de la 3D depuis un état 2D — S707](validation/NAISSANCE-3D-S707.md) : au repos tenue ; le compte n'est pas la surface.
 - [Le juge éprouvé : la crête de l'onde sur fond plat — S704](validation/JUGE-FOND-PLAT-S704.md) : le juge n'amortit pas ; SGN 5 % haut.
 - [La pose par la grille nourrie par SGN — S703](validation/POSE-GRILLE-SGN-S703.md) : les données de SGN en cause (−0,089 s).
