@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S706 — **en cours**. En autonomie, sans arrêt. **La quarante-cinquième revue de méthode** (ADR-222 D4 : S701–S705).
+Session : S706 — **terminée**. En autonomie, sans arrêt. **La quarante-cinquième revue de méthode** (ADR-222 D4 : S701–S705).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
@@ -80,7 +80,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-279 ; METHODE.
-- [ ] **P3** — rituel.
+- [x] **P2** — ADR-279 ; METHODE.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-279 : D1 (la convergence du juge mesurée avant la tolérance), D2 (pas de tube après une commande qui doit arrêter la chaîne) ; D3 (des sessions plus longues, une question entière, à la demande de l'utilisateur) ; la prochaine revue S711.

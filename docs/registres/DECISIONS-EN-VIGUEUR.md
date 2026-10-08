@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**278 ADR** — actée : 227, proposée : 49, rétractée en partie : 2.
+**279 ADR** — actée : 228, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -232,7 +232,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 263 265 266 267 268 269 270 271 272 273 274 276 277 |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 263 265 266 267 268 269 270 271 272 273 274 276 277 279 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 226 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 | 226 |
 | [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |
@@ -287,5 +287,6 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [274](../adr/ADR-274-quarante-deuxieme-revue-de-methode.md) | Quarante-deuxième revue de méthode (S686–S690) | actée | S691 | 222 273 | 276 |
 | [275](../adr/ADR-275-le-lod-de-simulation.md) | Le LOD de simulation : l'eau représentée au niveau qu'elle demande | actée | S692 |  | 278 |
 | [276](../adr/ADR-276-quarante-troisieme-revue-de-methode.md) | Quarante-troisième revue de méthode (S691–S695) | actée | S696 | 222 274 | 277 |
-| [277](../adr/ADR-277-quarante-quatrieme-revue-de-methode.md) | Quarante-quatrième revue de méthode (S696–S700) | actée | S701 | 222 276 | 278 |
+| [277](../adr/ADR-277-quarante-quatrieme-revue-de-methode.md) | Quarante-quatrième revue de méthode (S696–S700) | actée | S701 | 222 276 | 278 279 |
 | [278](../adr/ADR-278-le-raccord-du-large-retenu.md) | Le raccord du large retenu, et la tolérance de l'étape rapportée au juge | actée | S705 | 273 275 277 |  |
+| [279](../adr/ADR-279-quarante-cinquieme-revue-de-methode.md) | Quarante-cinquième revue de méthode (S701–S705) | actée | S706 | 222 277 |  |

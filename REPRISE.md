@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 17:59 +02:00
+JETON            : libre
+Battement        : 2026-10-08 18:01 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S706 — la quarante-cinquième revue de méthode (S701–S705) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S705 — Le raccord du large retenu ; l'étape 2 du LOD conçue ([journal](notes/JOURNAL.md)). Avant : S704 (Le juge éprouvé sur fond plat)
-Session suivante : S706 — la quarante-cinquième revue de méthode (S701–S705) ; puis N1, la naissance de la 3D au repos
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S706 — la quarante-cinquième revue de méthode (ADR-279) ([journal](notes/JOURNAL.md)). Avant : S705 (Le raccord du large retenu)
+Session suivante : S707 — N1, la naissance de la 3D au repos (LOD-ETAPE-2-S705)
+Maillons        : 0
 Registres       : dernier lot S704 (ADR-213 D3) ; le prochain au plus tard en S707
 ```
 

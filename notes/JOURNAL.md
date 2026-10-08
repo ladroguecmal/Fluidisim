@@ -1933,3 +1933,10 @@ large retenu (le bord à particules, la pose par la grille, SGN). D2 : la tolér
 juge, la position à 0,15 m et l'instant à 0,1 s (fondée sur S704, non sur l'écart obtenu). D3 : la crête de SGN, question ouverte. D4 :
 l'étape 1 du LOD close. Le registre [LOD-ETAPE-2-S705](../docs/registres/LOD-ETAPE-2-S705.md) : cinq pièces (N1, N2, M1, D1, E1). La note
 datée sur ADR-275. Maillons **1** (4.14). Suivant : **S706**, la quarante-cinquième revue (S701–S705) ; puis N1, la naissance au repos.
+
+## S706 — 2026-10-08 — la quarante-cinquième revue de méthode (ADR-279)
+
+**Entrée.** La revue (S701–S705). **Fait** : [ADR-279](../docs/adr/ADR-279-quarante-cinquieme-revue-de-methode.md). D1 : avant de fixer une
+tolérance contre une simulation de référence, on mesure sa convergence (S693–S703 visaient 0,02 s sous la précision du juge, S704). D2 :
+une commande qui doit arrêter une chaîne n'est pas suivie d'un tube (S702 : un commit partiel, amendé). Maillons **0** (méthode).
+Suivant : **S707**, N1, la naissance de la 3D au repos (LOD-ETAPE-2-S705) ; la revue en S711.
