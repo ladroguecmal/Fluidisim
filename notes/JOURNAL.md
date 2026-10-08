@@ -1802,3 +1802,14 @@ remboursée au quantum (une particule rendue par la 3D, ou un quantum rendu à S
 la masse à 2,8·10⁻¹⁶, la dette sous un quantum, la colonne du bord à 9,2, la vitesse à 0,54 m/s. La sortie de la 3D passe surtout par le
 remboursement (79 %) : les particules du bord avancent moins vite que le flux ne le demande. Maillons **1** (4.14). Suivant : **S690**,
 la vague qui plonge avec les deux raccords (l'étape 4) ; la revue en S691.
+
+## S690 — 2026-10-08 — La vague qui plonge à travers le relais au rivage
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais, étape 4. **Fait** ([preuve](../docs/validation/RELAIS-PLONGEANTE-S690.md)) : le
+relais sur l'escalier ; la vague de S647 à 2,5 cm, le raccord à 10,775 m. **Le premier essai a tourné 8 h sans résultat** : un seul cœur,
+un pas de Saint-Venant figé, aucune progression, puis l'effondrement du pas au raccord (une colonne 3D vidée, une hauteur ramenée à 1 mm,
+1 644 m/s au bord). Le diagnostic l'a localisé ; le remède borne le raccord par la physique ; les 16 fils et le pas réel rendent 4 s en
+13,6 min. **Mesuré** : le retournement et l'air enfermé du tout-3D retrouvés (0,018 s, 2,5 cm) ; la masse au bit ; la dette sous un
+quantum. Demandés par l'utilisateur : [l'analyse par moments](../docs/registres/ANALYSE-PHASES-S690.md) et la gestion du contexte ;
+`outils/essai.py`. Décisions : l'écume continue (seul son visuel attend) ; le LOD de simulation accepté. Maillons **1** (4.14). Suivant :
+**S691, la revue de méthode** (ADR-274) ; puis la conception du LOD de simulation.

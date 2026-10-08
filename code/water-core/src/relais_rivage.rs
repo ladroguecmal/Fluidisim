@@ -40,6 +40,9 @@ pub struct RelaisRivage {
     /// S689 — les remboursements : les particules rendues par APIC, les quanta ajoutés à Saint-Venant.
     pub rendues: u64,
     pub ajoutes: u64,
+    /// S690 — le relevé du dernier pas : `[η du bord 3D (moyenne), h_e de Saint-Venant, u du bord, flux moyen, la plus grande vitesse
+    /// imposée au bord droit d'APIC, la vitesse des particules posées]`.
+    pub releve: [f64; 6],
     temps: f64,
     droite: Vec<f32>,
     gauche: Vec<f32>,
@@ -55,7 +58,7 @@ impl RelaisRivage {
             return Err(Refus::Montage);
         }
         let n = d.ny * d.nz;
-        Ok(RelaisRivage { apic, sv, dette: vec![0.; d.ny], rendues: 0, ajoutes: 0, temps: 0., droite: vec![0.; n], gauche: vec![0.; n] })
+        Ok(RelaisRivage { apic, sv, dette: vec![0.; d.ny], rendues: 0, ajoutes: 0, releve: [0.; 6], temps: 0., droite: vec![0.; n], gauche: vec![0.; n] })
     }
 
     /// Le quantum d'une particule, m³.
@@ -67,6 +70,16 @@ impl RelaisRivage {
     pub fn volume(&self) -> f64 {
         let reservoir: f64 = self.apic.right_inlet().map_or(0., |r| r.0.iter().sum());
         self.sv.volume() + self.apic.particle_count() as f64 * self.quantum() + reservoir - self.dette.iter().sum::<f64>()
+    }
+
+    /// S690 — le fond du bord droit de la 3D, rangée `j` : le fond lisse au bord, sinon le dessus de l'escalier de la dernière colonne.
+    fn fond_bord(&self, j: usize) -> f64 {
+        let d = self.apic.domain();
+        if self.apic.face_fractions().is_some() {
+            self.apic.smooth_seabed_height(d.nx as f32 * d.dx, (j as f32 + 0.5) * d.dx) as f64
+        } else {
+            self.apic.seabed_height(d.nx - 1, j) as f64
+        }
     }
 
     /// L'état du bord 3D par rangée : le niveau (la plus haute particule de la dernière colonne + `dx/4`, le fond sans particule) et la
@@ -84,14 +97,32 @@ impl RelaisRivage {
                 etat[j].2 += 1;
             }
         }
+        let q = self.quantum();
         etat.iter().enumerate().map(|(j, &(haut, su, n))| {
+            let zb = self.fond_bord(j);
             if n == 0 {
-                let x = d.nx as f32 * d.dx;
-                (self.apic.smooth_seabed_height(x, (j as f32 + 0.5) * d.dx) as f64, 0.)
+                (zb, 0.)
             } else {
-                (haut as f64 + d.dx as f64 / 4., su / n as f64)
+                // S690 : borné par le volume de la colonne, plus une couche — une éclaboussure ne soulève plus le niveau.
+                let par_volume = zb + n as f64 * q / (d.dx as f64 * d.dx as f64) + d.dx as f64 / 2.;
+                ((haut as f64 + d.dx as f64 / 4.).min(par_volume), su / n as f64)
             }
         }).collect()
+    }
+
+    /// **S690 — le pas stable du relais** (µs) : le plus petit du pas stable d'APIC (plafonné à `plafond_us`) et de celui de Saint-Venant,
+    /// Courant 0,4 sur la célérité réelle `|u| + √(g·h)` de ses mailles (au lieu d'une borne fixe, deux à quatre fois plus courte).
+    pub fn pas_stable_us(&self, plafond_us: u64) -> u64 {
+        let sv = &self.sv;
+        let mut c = 0f64;
+        for k in 0..sv.nx * sv.ny {
+            let h = sv.h[k];
+            if h > 1e-6 {
+                c = c.max((sv.qx[k] / h).abs().max((sv.qy[k] / h).abs()) + (sv.g * h).sqrt());
+            }
+        }
+        let p_sv = if c > 0. { (0.4 * sv.dx / c * 1e6) as u64 } else { plafond_us };
+        self.apic.stable_step_us(plafond_us).min(p_sv).max(1)
     }
 
     /// **Un pas** de `us` microsecondes (le plus petit des deux pas stables, à l'appelant).
@@ -108,11 +139,14 @@ impl RelaisRivage {
         let flux: Vec<f64> = self.sv.flux_des_bords().0.to_vec();
         // Le bord droit d'APIC : la vitesse normale `F/h` (sortante positive), le reflux posé.
         let mut entree = vec![0.; d.ny];
+        let mut vmax = 0f64;
         for j in 0..d.ny {
-            let x = d.nx as f32 * d.dx;
-            let zb = self.apic.smooth_seabed_height(x, (j as f32 + 0.5) * d.dx) as f64;
-            let h = (bord[j].0 - zb).max(1e-3);
-            let v = (flux[j] / h) as f32;
+            let zb = self.fond_bord(j);
+            // S690 : le plancher d'un quart de maille, la vitesse bornée par la célérité.
+            let h = (bord[j].0 - zb).max(d.dx as f64 / 4.);
+            let borne = bord[j].1.abs() + 2. * (self.sv.g * h).sqrt();
+            let v = (flux[j] / h).clamp(-borne, borne) as f32;
+            vmax = vmax.max((v as f64).abs());
             for k in 0..d.nz {
                 self.droite[k * d.ny + j] = v;
             }
@@ -121,8 +155,11 @@ impl RelaisRivage {
             }
         }
         self.apic.set_open_boundaries(&self.gauche, &self.droite).map_err(Refus::Apic)?;
-        self.apic.feed_right(&entree, [(flux.iter().sum::<f64>() / d.ny as f64 / (eta - self.sv.z[0]).max(1e-3)) as f32, 0., 0.])
-            .map_err(Refus::Apic)?;
+        let h_moy = (eta - self.sv.z[0]).max(d.dx as f64 / 4.);
+        let borne = u.abs() + 2. * (self.sv.g * h_moy).sqrt();
+        let v_posee = (flux.iter().sum::<f64>() / d.ny as f64 / h_moy).clamp(-borne, borne);
+        self.releve = [eta, he, u, flux.iter().sum::<f64>() / d.ny as f64, vmax, v_posee];
+        self.apic.feed_right(&entree, [v_posee as f32, 0., 0.]).map_err(Refus::Apic)?;
         self.apic.step(us).map_err(Refus::Apic)?;
         let sorti: Vec<f64> = self.apic.right_outlet().map(|s| s.0.to_vec()).unwrap_or_default();
         let q = self.quantum();

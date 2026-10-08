@@ -2020,7 +2020,7 @@ fn the_slip_bed_witness_s645() {
 
 /// **S647 — le lecteur du retournement** : dans la rangée `j`, la colonne la plus avancée où, en montant depuis la marche, l'eau, puis au
 /// moins une maille d'air, puis de l'eau se suivent (`labels`) — la surface n'est plus un graphe. Rend `(i, l'écart d'air en mailles)`.
-fn retournement_s647(a: &Apic3, j: usize, marche: &[f32]) -> Option<(usize, usize)> {
+pub(crate) fn retournement_s647(a: &Apic3, j: usize, marche: &[f32]) -> Option<(usize, usize)> {
     let Domain3 { nx, ny, nz, dx } = a.domain();
     let l = a.labels();
     let mut out = None;
@@ -2159,7 +2159,7 @@ fn a_solitary_wave_plunges_on_a_mild_slope_and_not_on_a_steep_one_fine_s647() {
 
 /// **S648 — le lecteur de l'air enfermé** : les mailles d'air que l'air libre (la rangée du haut) n'atteint pas par voisins (six). Rend
 /// (leur nombre, l'abscisse de leur centre).
-fn air_enferme_s648(a: &Apic3) -> (usize, f64) {
+pub(crate) fn air_enferme_s648(a: &Apic3) -> (usize, f64) {
     let Domain3 { nx, ny, nz, dx } = a.domain();
     let l = a.labels();
     let mut libre = vec![false; nx * ny * nz];

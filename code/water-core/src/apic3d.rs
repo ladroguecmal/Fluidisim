@@ -417,18 +417,19 @@ impl Apic3 {
         Ok(())
     }
 
-    /// **S689 — rendre une particule au bord droit** : la particule de la dernière colonne, rangée `j`, la plus proche du bord, est retirée
-    /// (le remboursement d'une dette du relais au rivage). `false` si la colonne n'en a pas ; non comptée dans la sortie.
+    /// **S689 — rendre une particule au bord droit** : la particule de la rangée `j` la plus proche du bord droit est retirée (le
+    /// remboursement d'une dette du relais au rivage) — S690 : dans n'importe quelle colonne, quand le ressaut a vidé la dernière. `false`
+    /// si la rangée n'en a pas ; non comptée dans la sortie.
     pub fn take_right(&mut self, j: usize) -> bool {
-        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let Domain3 { ny, dx, .. } = self.domain;
         if j >= ny {
             return false;
         }
-        let (x0, y0) = ((nx - 1) as f32 * dx, j as f32 * dx);
+        let y0 = j as f32 * dx;
         let mut choix: Option<usize> = None;
         for k in 0..self.n {
             let p = self.x[k];
-            if p[0] >= x0 && p[1] >= y0 && p[1] < y0 + dx && choix.is_none_or(|c| p[0] > self.x[c][0]) {
+            if p[1] >= y0 && p[1] < y0 + dx && choix.is_none_or(|c| p[0] > self.x[c][0]) {
                 choix = Some(k);
             }
         }

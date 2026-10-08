@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S690 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 4 : la vague qui plonge.
+Session : S690 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 4 : la vague qui plonge.
 
 **Ce que la session fait.**
 
@@ -97,7 +97,13 @@ Session : S690 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le fond en escalier dans le relais ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le fond en escalier dans le relais ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2, en cours (notes)** — Le premier essai a tourné 8 h sans résultat (arrêté). Mesuré ensuite : 2,4 s d'horloge par pas sur un cœur, le
+  pas de Saint-Venant figé à 2,4 ms. Accéléré : les 16 fils (`set_jobs`, au bit, S483) et le pas stable réel du relais (`pas_stable_us`) —
+  2,5 s simulées en 5 min (≈ ×25). La progression affichée a montré **l'effondrement du pas après le déferlement** (163 µs à 3,0 s) ;
+  deux causes suspectées au raccord (une éclaboussure qui soulève le niveau lu ; une colonne presque vide, `F/0,001`) ; le diagnostic
+  tourne ; le remède candidat est prêt (scratchpad `s690_remede.py`, non appliqué). Le brouillon de la revue S691 (`adr274_brouillon.md`).
+- **P2 fini** — (1) 2,624 s, 9,963 m (tout-3D 2,642 s, 9,988 m) ; (2) 2,777 s, 10,325 m ; (3) masse 1,2·10⁻¹⁶, dette sous un quantum ; (4) remontée 0,361 m, 13,6 min pour 4 s sur 16 fils. L'analyse par moments ; `outils/essai.py`.
