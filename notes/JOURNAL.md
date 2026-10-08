@@ -1821,3 +1821,10 @@ mesure avant de s'annoncer, montre sa progression, s'arrête au double de son es
 16 cœurs et son attente sert. D3 : une borne sur une lecture quantifiée porte son quantum (S687, S688). D4 : une hauteur se borne par la
 célérité, non par un epsilon (S690 : 1 644 m/s au raccord). Maillons **0** (méthode). Suivant : **S692**, la conception du LOD de
 simulation ; la revue en S696.
+
+## S692 — 2026-10-08 — La conception du LOD de simulation (ADR-275)
+
+**Entrée.** La proposition de l'utilisateur, acceptée : l'eau d'après déferlement en 2D, la 3D aux jets et aux contacts, l'activation par la
+présence, les billes adaptatives. **Fait** : [ADR-275](../docs/adr/ADR-275-le-lod-de-simulation.md) et [la conception](../docs/registres/LOD-SIMULATION-S692.md)
+— six niveaux (B, B+W, la côte 2D, Saint-Venant, APIC grossier, APIC fin), les critères d'activation, cinq étapes, les billes adaptatives
+en dernier. Lot S690–S692. Maillons **0** (conception). Suivant : **S693**, l'étape 1 (la zone de colonnes avec la sortie à droite).

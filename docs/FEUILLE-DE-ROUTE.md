@@ -492,6 +492,8 @@ remontée manquée de 15 %, localisée : l'onde portée par APIC) ; la quarante 
 entre deux copies du même solveur) (4.14).
 **S687–S689** : le raccord seul entre deux Saint-Venant (le domaine entier redonné) ; le relais jugé du côté d'APIC (le raccord ne
 trouble pas la 3D, la remontée à 91 % de Synolakis) ; le reflux sur 10 s, la dette remboursée au quantum (4.14).
+**S690–S692** : la vague qui plonge à travers le relais (le retournement et l'air du tout-3D ; un calcul de 8 h ramené à 13,6 min) ;
+la quarante-deuxième revue (ADR-274 : les calculs longs mesurés, montrés, sur 16 fils) ; le LOD de simulation décidé (ADR-275) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

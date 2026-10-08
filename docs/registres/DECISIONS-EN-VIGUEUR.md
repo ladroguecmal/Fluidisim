@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**274 ADR** — actée : 223, proposée : 49, rétractée en partie : 2.
+**275 ADR** — actée : 224, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -285,3 +285,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [272](../adr/ADR-272-quarantieme-revue-de-methode.md) | Quarantième revue de méthode (S676–S680) | actée | S681 | 222 270 | 273 |
 | [273](../adr/ADR-273-quarante-et-unieme-revue-de-methode.md) | Quarante et unième revue de méthode (S681–S685) | actée | S686 | 222 272 | 274 |
 | [274](../adr/ADR-274-quarante-deuxieme-revue-de-methode.md) | Quarante-deuxième revue de méthode (S686–S690) | actée | S691 | 222 273 |  |
+| [275](../adr/ADR-275-le-lod-de-simulation.md) | Le LOD de simulation : l'eau représentée au niveau qu'elle demande | actée | S692 |  |  |

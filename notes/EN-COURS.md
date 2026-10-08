@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S692 — **en cours**. En autonomie vers la v2. **La conception du LOD de simulation**, acceptée par l'utilisateur le 2026-10-08
+Session : S692 — **terminée**. En autonomie vers la v2. **La conception du LOD de simulation**, acceptée par l'utilisateur le 2026-10-08
 (*« Ok parfait »*) : l'eau d'après déferlement en 2D, la 3D aux jets et aux contacts, l'activation par la présence, des billes fusionnées ou
 divisées selon l'agitation. Le lot S690–S692.
 
@@ -81,7 +81,8 @@ et leurs essais. (2) ADR-275, qui décide l'échelle et l'ordre. (3) La campagne
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la conception ; ADR-275.
-- [ ] **P3** — lot ; rituel.
+- [x] **P2** — la conception ; ADR-275.
+- [x] **P3** — lot ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — LOD-SIMULATION-S692 (six niveaux, les critères, les raccords, cinq étapes) ; ADR-275.

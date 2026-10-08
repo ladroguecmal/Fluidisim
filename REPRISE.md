@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 11:55 +02:00
+JETON            : libre
+Battement        : 2026-10-08 11:57 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S692 — la conception du LOD de simulation ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S691 — la quarante-deuxième revue de méthode (ADR-274) ([journal](notes/JOURNAL.md)). Avant : S690 (La vague qui plonge à travers le relais au rivage)
-Session suivante : S692 — la conception du LOD de simulation (acceptée le 2026-10-08) ; revue en S696
-Maillons        : 0 (méthode : ADR-274)
-Registres       : dernier lot S689 (ADR-213 D3) ; le prochain au plus tard en S692
+Session en cours : aucune
+Dernière session : S692 — La conception du LOD de simulation (ADR-275) ([journal](notes/JOURNAL.md)). Avant : S691 (la quarante-deuxième revue de méthode)
+Session suivante : S693 — le LOD, étape 1 : la zone de colonnes avec la sortie à droite (les deux raccords ensemble)
+Maillons        : 0 (conception : ADR-275)
+Registres       : dernier lot S692 (ADR-213 D3) ; le prochain au plus tard en S695
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
