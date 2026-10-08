@@ -62,49 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S702 — **terminée**. En autonomie, sans arrêt. S700 : la pose par faces de S698, même nourrie des vitesses de la 3D, retarde
-le retournement de 0,085 s. **Une pose qui ne dépend pas du porteur.**
+Session : S703 — **en cours**. En autonomie, sans arrêt. S702 : la pose par la grille, nourrie par la 3D (la vitesse des faces, `h`), est à
++0,021 s. **Elle est maintenant nourrie par SGN.**
 
 **Ce que la session fait.**
 
-- **La pose par la grille** (`feed_left_grid`) :
-  - le porteur ne donne que deux choses : la vitesse normale de chaque face du bord et le volume qui la franchit ;
-  - chaque quantum naît dans la tranche que le flux a balayée pendant le pas, `x ∈ [0, u·dt)`, à la sous-maille (y, z) la moins occupée
-    de la face, décalée par une suite à faible discrépance ;
-  - sa vitesse et sa matrice affine sont celles que la grille lui donne là (le G2P d'APIC), comme à toute particule. `w` et le gradient
-    viennent ainsi de la 3D elle-même, non d'un profil.
-- **Le montage passe à un mode nommé** (ADR-277 D2) : `Large::{Aucun, Colonnes, ProfilSgn, Rejeu(..)}`. Chaque mode dit ce qu'il allume ;
-  une combinaison sans sens est refusée par une assertion.
-- **R4** : le rejeu de l'enregistrement du tout-3D par la pose par la grille. Les données sont la vitesse des faces et `h` au plan, celles
-  que SGN donnerait.
+- **`Large::GrilleSgn`.** Le bord à particules, avec les données de S698 : la vitesse du bord et le volume de chaque face, tirés du
+  profil vertical de SGN. La pose est celle de S702, par la grille.
+- **Le volume au plan, pendant l'enregistrement.** Deux volumes entrés, comparés :
+  - celui que donnent les données de R4 : la vitesse des faces, la couche de surface au prorata de `h` ;
+  - celui des particules réellement passées.
+
+  Il dit si la couche de surface explique le retard de R4.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277)
 
-- **témoin** : le tout-3D, et le rejeu exact de S699 (−0,011 s). Le passage qui enregistre doit redonner 2,637 349 s au bit : il vérifie que
-  le passage au mode nommé n'a rien changé.
-- **instrument** : le premier retournement de R4. Ce que rendrait chaque hypothèse :
-  - si la pose par la grille est juste, R4 près de l'exact (−0,011 s) ;
-  - si la naissance dans la tranche ou le G2P ne suffit pas, un écart du côté de R3 (+0,074 s) ou de R2 (−0,037 s).
+- **témoin** : R4 (S702, +0,021 s) pour la pose ; S698 (−0,047 s) pour les données. Le tout-3D (2,637 s), par la même fonction.
+- **instrument** : le premier retournement de `GrilleSgn` ; le rapport des deux volumes. Ce que rendrait chaque hypothèse :
+  - les vitesses de SGN en cause (S700 : −0,121 s à pose égale) : `GrilleSgn` nettement plus tôt que R4 ;
+  - la pose seule en cause : `GrilleSgn` près de R4 ;
+  - la couche de surface : un volume de R4 sous celui des particules passées.
 - **calcul** : aucun nombre neuf ; ≈ 13 + 7 min.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-273 D1 : la pose est jugée ici contre la 3D (deux copies du même solveur). Elle ne sera nourrie par SGN qu'en S703 ;
-  - ADR-276 D2 : R4 diffère de R3 par la pose seule, non par les données ;
-  - ADR-277 D2 : le mode nommé, cette session.
+  - ADR-273 D1 : la pose a été jugée contre la 3D en S702 ; elle est nourrie par SGN ici ;
+  - ADR-276 D2 : `GrilleSgn` diffère de S698 par la pose seule, et de R4 par les données seules ;
+  - ADR-277 D2 : un mode nommé de plus.
 - **pièges** :
-  - le `h` de la 3D au plan est lu au quantum de 6 mm ; il fixe la part de la couche de surface ;
-  - la grille au moment de la pose est celle de la fin du pas précédent ;
-  - une boucle sur toutes les particules par face coûterait cher : une seule passe compte l'occupation.
+  - le pas de chaque enregistrement est la durée entre deux fins de pas ;
+  - le quantum est `dx³/8` (deux particules par axe) ;
+  - au-dessus de `h`, la vitesse du bord est nulle.
 
 **Critères, écrits avant.**
 
-1. R4 à moins de **0,02 s** et **0,15 m** du tout-3D (2,637 s, 9,988 m).
-2. Le passage qui enregistre au bit de S699 ; la masse à 10⁻¹², la dette sous un quantum.
+1. `GrilleSgn` à moins de **0,02 s** et **0,15 m** du tout-3D (2,637 s, 9,988 m).
+2. Le rapport des volumes mesuré ; la masse à 10⁻¹², la dette sous un quantum.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le mode nommé ; la pose par la grille ; R4 ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — `GrilleSgn` ; le volume au plan ; l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — (1) **échoue d'une milliseconde** : R4 2,658 s (+0,021 s ; R3 +0,074 s) ; (2) le témoin au bit de S699, 1,2·10⁻¹⁵, sous un quantum.
