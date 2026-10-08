@@ -499,6 +499,9 @@ solitaire à 0,1 %, la référence de A234) ; le raccord du large en cause, non 
 **S696–S698** : la quarante-troisième revue (ADR-276 : un état initial depuis une seule fonction ; un témoin ne fait varier qu'une
 cause) ; le raccord du large jugé seul (la zone de colonnes fait tout l'écart) ; le raccord du large par particules, nourri par le
 profil de SGN (l'écart de −0,113 s à −0,047 s) (4.14).
+**S699–S701** : le raccord du large entre deux 3D (le tout-3D enregistré au plan, rejoué : −0,011 s, le bord transparent) ; l'alimentation
+par SGN départagée (l'affine −0,026 s, la pose par faces +0,085 s, les vitesses de SGN −0,121 s : S698 tenait par compensation) ; la
+quarante-quatrième revue (ADR-277 : un ADR nommé dit comment il est tenu ; un montage à variantes prend un mode nommé) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
