@@ -525,6 +525,31 @@ struct Enregistrement {
     croisements: Vec<(f64, [f32; 3], [f32; 3], [[f32; 3]; 3])>,
     /// S700 : au plan, à chaque pas, `(t, h SGN, ū SGN, h 3D, ū 3D)`.
     plan: Vec<(f64, f64, f64, f64, f64)>,
+    /// S708 : à chaque pas, `(t, V_n le compte, V_φ la surface)`.
+    volumes: Vec<(f64, f64, f64)>,
+}
+
+/// **S708 — le volume d'APIC par sa surface** : `Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides (`distance()`, l'eau où φ < 0) ;
+/// et, par colonne `i` (moyenne sur les rangées), la même somme sur la verticale, la hauteur de la surface. Rend `(V_φ m³, hauteurs m)`.
+fn volume_surface_s708(a: &Apic3) -> (f64, Vec<f64>) {
+    let crate::delta3d::Domain3 { nx, ny, nz, dx } = a.domain();
+    let (phi, l) = (a.distance(), a.labels());
+    let dxs = dx as f64;
+    let (mut v, mut h) = (0f64, vec![0f64; nx]);
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                let c = (k * ny + j) * nx + i;
+                if l[c] == crate::apic3d::SOLID {
+                    continue;
+                }
+                let f = (0.5 - phi[c] as f64 / dxs).clamp(0., 1.);
+                v += f * dxs.powi(3);
+                h[i] += f * dxs / ny as f64;
+            }
+        }
+    }
+    (v, h)
 }
 
 /// S699 — le plan de l'enregistrement.
@@ -755,6 +780,7 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
             let ub3 = if n_f > 0 { somme / n_f as f64 } else { 0. };
             let (hs, us_) = (0.5 * (serre.h[i_c - 1] + serre.h[i_c]), 0.5 * (serre.q[i_c - 1] / serre.h[i_c - 1] + serre.q[i_c] / serre.h[i_c]));
             e.plan.push((ts, hs, us_, haut, ub3));
+            e.volumes.push((ts, rel.apic.particle_count() as f64 * dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64, volume_surface_s708(&rel.apic).0));
         }
         if let Some(col) = rel.apic.columns.as_ref() {
             entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
@@ -1092,6 +1118,12 @@ fn onde_renaissance_s707(mode: Renaissance) -> ([f64; 3], f64, usize, usize, f64
 /// S707 — la même, à `dx` sur `ny` rangées (le témoin du juge : 1,25 cm sur deux rangées).
 #[allow(clippy::type_complexity)]
 fn onde_renaissance_dx_s707(mode: Renaissance, dx: f32, ny: usize) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
+    onde_renaissance_surface_s708(mode, dx, ny, &mut Vec::new())
+}
+
+/// S708 — la même ; `surface` reçoit à chaque photo `(t, V_φ, la crête par la surface lissée sur 40 cm, V_n)`.
+#[allow(clippy::type_complexity)]
+fn onde_renaissance_surface_s708(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let dxs = dx as f64;
@@ -1124,7 +1156,7 @@ fn onde_renaissance_dx_s707(mode: Renaissance, dx: f32, ny: usize) -> ([f64; 3],
     let mut profils: Vec<Vec<f64>> = Vec::new();
     while t < t_fin {
         let borne = if nee { t_fin } else { t_b };
-        let borne = [400_000u64, 600_000, 1_000_000, borne].into_iter().filter(|&b| b > t).min().unwrap_or(borne);
+        let borne = [10_000u64, 400_000, 600_000, 1_000_000, borne].into_iter().filter(|&b| b > t).min().unwrap_or(borne);
         let us = a.stable_step_us(10_000).min(borne - t);
         a.step(us).unwrap();
         t += us;
@@ -1221,7 +1253,7 @@ fn onde_renaissance_dx_s707(mode: Renaissance, dx: f32, ny: usize) -> ([f64; 3],
         }
         // S707 : l'instrument corrigé — à 1,0 s et 1,6 s, le profil de surface (le volume par colonne, moyen sur les rangées), lissé sur
         // 20 cm : la hauteur de la crête et sa position ; la vitesse maximale des particules.
-        if t == 400_000 || t == 600_000 || t == 1_000_000 || t == t_fin {
+        if t == 10_000 || t == 400_000 || t == 600_000 || t == 1_000_000 || t == t_fin {
             // La hauteur par un noyau en tente de ±10 cm sur la position continue de chaque particule : un compte par colonne bougeait
             // de ±50 % quand une file de particules passait une frontière de maille.
             let (l, mut hcol) = (0.1f64, vec![0f64; nx]);
@@ -1256,6 +1288,10 @@ fn onde_renaissance_dx_s707(mode: Renaissance, dx: f32, ny: usize) -> ([f64; 3],
             let (k, _) = a.velocities().iter().enumerate().fold((0, 0f32), |m, (k, v)| { let n = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt(); if n > m.1 { (k, n) } else { m } });
             eprintln!("S707 diagnostic ({mode:?}) à {t1:.2} s : la plus rapide {vmax:.3} m/s en {:?}, vitesse {:?}", a.particles()[k], a.velocities()[k]);
             photos.push((t1, amp - d, pos, vmax));
+            let (vphi, hs) = volume_surface_s708(&a);
+            let demi = (0.2 / dxs).round() as usize;
+            let crete_s = (demi..nx - demi).map(|i| hs[i - demi..i + demi].iter().sum::<f64>() / (2 * demi) as f64).fold(0f64, f64::max);
+            surface.push((t1, vphi, crete_s - d, a.particle_count() as f64 * quantum));
             profils.push(hcol.iter().map(|h| h - d).collect());
         }
         let mut compte = [0usize; 3];
@@ -1383,5 +1419,63 @@ fn the_3d_reposed_with_its_own_grid_s707() {
     let (_, _, _, _, _, p1, e1) = onde_renaissance_s707(Renaissance::GrilleDe3D);
     let mesures: Vec<(f64, (f64, f64, f64))> = p0.iter().zip(e0.iter().zip(&e1)).map(|(p, (a, b))| (p.0, comparer_profils_s707(a, b, 0.025))).collect();
     println!("S707 E2b : reposée, sa propre grille — le profil (t, crête, phase, vitesse max) {p1:.4?} ; contre la 3D ininterrompue (t, (décalage m, facteur, écart m)) {mesures:.4?}");
+}
+
+/// **S708 E1 — l'étalon de `V_φ`** : l'eau au repos (le semis, 4 m, `h` = 0,49 m, 1 s) ; `V_φ / V_n` au départ et à 1 s, constant à 10⁻³.
+#[test]
+#[ignore = "l'eau au repos (≈ 1 min)"]
+fn the_surface_volume_at_rest_s708() {
+    let dx = 0.025f32;
+    let dxs = dx as f64;
+    let (nx, ny, nz) = (160usize, 4usize, 32usize);
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    a.seed(&|p| (p[2] as f64) < 0.49).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let vn = a.particle_count() as f64 * dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64;
+    a.step(1000).unwrap();
+    let r0 = volume_surface_s708(&a).0 / vn;
+    let mut t = 1000u64;
+    while t < 1_000_000 {
+        let us = a.stable_step_us(10_000).min(1_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+    }
+    let r1 = volume_surface_s708(&a).0 / vn;
+    println!("S708 E1 : au repos, V_φ / V_n = {r0:.5} au départ, {r1:.5} à 1 s (V_n = {vn:.6} m³)");
+    assert!((r1 - r0).abs() < 1e-3, "critère : l'étalon constant");
+}
+
+/// **S708 E2 — l'onde plate de S707 par sa surface** : `V_φ(t)/V_φ(0)` aux photos ; la crête par la surface, contre la crête par le compte.
+/// Rapporte.
+#[test]
+#[ignore = "l'onde sur fond plat (≈ 3 min)"]
+fn the_flat_wave_by_its_surface_s708() {
+    let mut surface = Vec::new();
+    let (_, _, _, _, duree, photos, _) = onde_renaissance_surface_s708(Renaissance::Aucune, 0.025, 4, &mut surface);
+    let v0 = surface[0].1;
+    for ((t, vphi, cs, vn), p) in surface.iter().zip(&photos) {
+        println!("S708 E2 : t = {t:.2} s — V_φ/V_φ(0) = {:.4}, V_φ/V_n = {:.4} ; crête par la surface {cs:.4} m, par le compte {:.4} m", vphi / v0, vphi / vn, p.1);
+    }
+    println!("S708 E2 : {duree:.0} s");
+}
+
+/// **S708 E3 — le tout-3D de S690 par sa surface** (le montage sans raccord, 4 s, le déferlement) : `V_φ(t)/V_φ(0)` à chaque quart de
+/// seconde, contre le compte. Rapporte.
+#[test]
+#[ignore = "le tout-3D (≈ 13 min)"]
+fn the_full_3d_volume_by_its_surface_s708() {
+    let mut e = Enregistrement::default();
+    let (p0, a0, _, _, _, d0) = deux_raccords_porteur(0.0, Large::Aucun, Some(&mut e), None);
+    let (_, vn0, vp0) = e.volumes[0];
+    let mut prochain = 0f64;
+    for &(t, vn, vp) in &e.volumes {
+        if t >= prochain {
+            prochain += 0.25;
+            println!("S708 E3 : t = {t:.2} s — V_n/V_n(0) = {:.5}, V_φ/V_φ(0) = {:.5}, V_φ/V_n = {:.4}", vn / vn0, vp / vp0, vp / vn);
+        }
+    }
+    let (t, vn, vp) = *e.volumes.last().unwrap();
+    println!("S708 E3 : fin t = {t:.2} s — V_n/V_n(0) = {:.5}, V_φ/V_φ(0) = {:.5} ; retournement {p0:?}, air {a0:?} ; {d0:.0} s", vn / vn0, vp / vp0);
 }
 

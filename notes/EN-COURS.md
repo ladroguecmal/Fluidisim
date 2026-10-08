@@ -98,9 +98,10 @@ surface. On le compare à `V_n = n · quantum`, le volume que comptent les racco
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E1.
+- [x] **P2** — E1.
 - [ ] **P3** — E2.
 - [ ] **P4** — E3.
 - [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini (E1)** — **tenu** : au repos, `V_φ / V_n` = 0,99967 au départ et à 1 s ; la reconstruction rend le compte à 3·10⁻⁴.
