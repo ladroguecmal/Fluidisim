@@ -14,8 +14,20 @@
 
 use super::*;
 
+/// **S709 — la variante de la projection de densité** (les témoins de E3, une cause chacun).
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum DensityVariant {
+    /// L'intérieur dans les deux sens, la surface en excès seul.
+    Complete,
+    /// Sans correction aux mailles de surface (voisines de l'air).
+    WithoutSurface,
+    /// Comme `Complete`, mais l'excès seul aux mailles voisines d'une paroi solide (les poids trilinéaires s'y perdent dans le solide).
+    SolidExcessOnly,
+}
+
 /// S709 — les tableaux de la projection de densité, réservés à la configuration (I-06).
 pub(crate) struct Densite {
+    pub(crate) variante: DensityVariant,
     pub(crate) rho: Vec<f32>,
     pub(crate) du: Vec<f32>,
     pub(crate) dv: Vec<f32>,
@@ -28,6 +40,11 @@ pub(crate) struct Densite {
 impl Apic3 {
     /// **S709 — la projection de densité**, en option (`None`, le défaut — au bit). Réservé à la configuration (I-06).
     pub fn enable_density_projection(&mut self, host: &mut HostServices) -> Result<(), Error> {
+        self.enable_density_projection_variant(host, DensityVariant::Complete)
+    }
+
+    /// S709 — la même, avec une variante (les témoins).
+    pub fn enable_density_projection_variant(&mut self, host: &mut HostServices, variante: DensityVariant) -> Result<(), Error> {
         if self.densite.is_some() {
             return Err(Error::Domain);
         }
@@ -37,7 +54,7 @@ impl Apic3 {
         host.alloc.alloc_persistent((2 * cells + fu + fv + fw) * 4).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
-        self.densite = Some(Box::new(Densite { rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
+        self.densite = Some(Box::new(Densite { variante, rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0. }));
         Ok(())
     }
@@ -75,7 +92,7 @@ impl Apic3 {
                         self.diag[c] = 0.;
                         continue;
                     }
-                    let (mut diag, mut surface) = (0f32, false);
+                    let (mut diag, mut surface, mut solide) = (0f32, false, false);
                     for (n, f, axis) in self.neighbours(i, j, k).into_iter().flatten() {
                         let a = self.fraction(axis, f);
                         match self.label[n] {
@@ -84,13 +101,18 @@ impl Apic3 {
                                 diag += a / self.theta(c, n);
                                 surface = true;
                             }
-                            _ => {}
+                            _ => solide = true,
                         }
                     }
                     // E2 de S709 : corrigé d'un seul côté (l'excès), le bruit de la densité dilatait l'eau à chaque pas (+7,4 % en
                     // 1,6 s). À l'intérieur, l'écart dans les deux sens ; à la surface, l'excès seul (une maille de surface est en partie
                     // vide, sa densité basse est normale).
-                    let e = if surface { (dens.rho[c] - 1.).max(0.) } else { dens.rho[c] - 1. };
+                    let e = match dens.variante {
+                        DensityVariant::WithoutSurface if surface => 0.,
+                        DensityVariant::SolidExcessOnly if solide => (dens.rho[c] - 1.).max(0.),
+                        _ if surface => (dens.rho[c] - 1.).max(0.),
+                        _ => dens.rho[c] - 1.,
+                    };
                     excess |= e != 0.;
                     // `A·q = −dx²·Δq` : pour `Δq = e`, le second membre est `−dx²·e`.
                     self.rhs[c] = -dx * dx * e;

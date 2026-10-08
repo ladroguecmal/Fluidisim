@@ -493,8 +493,8 @@ fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64,
 enum Large {
     /// S697 : aucun raccord (`x_r` = 0) ; la 3D depuis 0 m, un mur à gauche. Seul mode qui enregistre ; SGN tourne alors à côté, sans agir.
     Aucun,
-    /// S709 : le même, avec la projection de densité d'APIC (`enable_density_projection`).
-    AucunDensite,
+    /// S709 : le même, avec la projection de densité d'APIC, dans sa variante.
+    AucunDensite(crate::apic3d::DensityVariant),
     /// S693, S695 : la zone de colonnes de S650 (0,6 m), la vitesse uniforme sur la verticale ; le porteur Saint-Venant, ou SGN si `sgn`.
     Colonnes { sgn: bool },
     /// S698 : le bord à particules, la pose par faces, les vitesses du profil vertical de SGN.
@@ -563,7 +563,7 @@ const PLAN_S699: f32 = 5.0;
 fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
     -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
-    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite);
+    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_));
     assert_eq!(sans_raccord, x_r == 0., "{large_:?} et x_r = {x_r}");
     assert_eq!(matches!(large_, Large::Rejeu(_)), rejeu.is_some(), "{large_:?} et l'enregistrement");
     assert!(enreg.is_none() || sans_raccord, "seul le montage sans raccord enregistre");
@@ -608,8 +608,8 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     // S709 : la projection de densité.
-    if large_ == Large::AucunDensite {
-        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    if let Large::AucunDensite(v) = large_ {
+        a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
     }
     // S698 : le raccord du large par particules (sans zone de colonnes).
     let par_particules = matches!(large_, Large::ProfilSgn | Large::GrilleSgn | Large::Rejeu(_));
@@ -1552,8 +1552,28 @@ fn the_flat_wave_with_density_projection_s709() {
 #[test]
 #[ignore = "le tout-3D avec la projection (≈ 16 min)"]
 fn the_full_3d_with_density_projection_s709() {
+    full_3d_density_s709(crate::apic3d::DensityVariant::Complete);
+}
+
+/// **S709 E3a — le témoin de E3 : sans correction aux mailles de surface.** La seule cause qui change : la surface. Rapporte.
+#[test]
+#[ignore = "le tout-3D avec la projection sans surface (≈ 18 min)"]
+fn the_full_3d_with_density_projection_without_surface_s709() {
+    full_3d_density_s709(crate::apic3d::DensityVariant::WithoutSurface);
+}
+
+/// **S709 E3b — le témoin de E3 : l'excès seul près des parois solides.** La seule cause qui change : les mailles voisines du fond.
+/// Rapporte.
+#[test]
+#[ignore = "le tout-3D avec la projection, l'excès seul près du solide (≈ 18 min)"]
+fn the_full_3d_with_density_projection_solid_excess_s709() {
+    full_3d_density_s709(crate::apic3d::DensityVariant::SolidExcessOnly);
+}
+
+fn full_3d_density_s709(variante: crate::apic3d::DensityVariant) {
     let mut e = Enregistrement::default();
-    let (p0, a0, masse, _, _, d0) = deux_raccords_porteur(0.0, Large::AucunDensite, Some(&mut e), None);
+    let (p0, a0, masse, _, _, d0) = deux_raccords_porteur(0.0, Large::AucunDensite(variante), Some(&mut e), None);
+    println!("S709 E3 variante {variante:?}");
     let (_, vn0, vp0) = e.volumes[0];
     let r0 = vp0 / vn0;
     let mut prochain = 0f64;
@@ -1568,6 +1588,8 @@ fn the_full_3d_with_density_projection_s709() {
         }
     }
     println!("S709 E3 : retournement {p0:?} (sans projection 2,637 s, 9,988 m) ; air {a0:?} ; masse {masse:.1e} ; {d0:.0} s (sans : 777 s)");
-    assert!((r25 / r0 - 1.).abs() < 0.003, "critère E3 : V_φ/V_n à 2,5 s {r25} contre {r0}");
+    if variante == crate::apic3d::DensityVariant::Complete {
+        assert!((r25 / r0 - 1.).abs() < 0.003, "critère E3 : V_φ/V_n à 2,5 s {r25} contre {r0}");
+    }
 }
 
