@@ -104,9 +104,11 @@ volume géométrique en mouvement. **Le remède : la projection de densité** (K
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — E0, E1.
-- [ ] **P3** — E2.
+- [x] **P3** — E2.
 - [ ] **P4** — E3.
 - [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — E0 : le banc au bit (les empreintes inchangées). E1 : au repos, avec la projection, 1,5·10⁻⁵ m/s (sans 7,0·10⁻⁶), `V_φ/V_n` 0,99967 → 0,99969, déplacement max 2,2 µm. Tenus.
+- **E2, premier passage : échoue par excès** — `V_φ/V_φ(0)` +7,4 % à 1,6 s, la crête par la surface à 0,185 m. Cause : la correction d'un seul côté (ρ > 1) sur une densité bruitée dilate l'eau à chaque pas. **Second passage**, les mêmes critères : à l'intérieur, `ρ − 1` dans les deux sens ; à la surface, l'excès seul.
+- **P3 fini (E2, second passage)** — **tenu** : `V_φ/V_φ(0)` 0,9993 (0,4 s), 0,9987 (1,0 s), 0,9990 (1,6 s), contre 0,981 sans projection. La crête par la surface est stable (0,136 → 0,140 m), surface et compte d'accord à 2 mm. Le coût : 196 s contre 131 s (+50 %).

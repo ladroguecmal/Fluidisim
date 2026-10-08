@@ -5,7 +5,7 @@
 //! À la fin de chaque pas, après la séparation :
 //!
 //! - la densité des particules aux centres des mailles, par les poids trilinéaires, rapportée à la nominale (`PER_AXIS³`) ;
-//! - sur les mailles d'eau, `Δq = max(ρ − 1, 0)`, la surface à `q = 0` (la fraction fantôme de la pression), les parois sans flux — le
+//! - sur les mailles d'eau, `Δq = ρ − 1` à l'intérieur et `max(ρ − 1, 0)` à la surface, la surface à `q = 0` (la fraction fantôme de la pression), les parois sans flux — le
 //!   gradient conjugué de la pression, sur ses propres tableaux sauvés et rendus ;
 //! - chaque particule se déplace de `∇q` (borné à un quart de maille) : la divergence du déplacement vaut l'excès, la densité revient
 //!   à 1. **Les vitesses ne changent pas.**
@@ -75,17 +75,23 @@ impl Apic3 {
                         self.diag[c] = 0.;
                         continue;
                     }
-                    let mut diag = 0f32;
+                    let (mut diag, mut surface) = (0f32, false);
                     for (n, f, axis) in self.neighbours(i, j, k).into_iter().flatten() {
                         let a = self.fraction(axis, f);
                         match self.label[n] {
                             WATER => diag += a,
-                            AIR => diag += a / self.theta(c, n),
+                            AIR => {
+                                diag += a / self.theta(c, n);
+                                surface = true;
+                            }
                             _ => {}
                         }
                     }
-                    let e = (dens.rho[c] - 1.).max(0.);
-                    excess |= e > 0.;
+                    // E2 de S709 : corrigé d'un seul côté (l'excès), le bruit de la densité dilatait l'eau à chaque pas (+7,4 % en
+                    // 1,6 s). À l'intérieur, l'écart dans les deux sens ; à la surface, l'excès seul (une maille de surface est en partie
+                    // vide, sa densité basse est normale).
+                    let e = if surface { (dens.rho[c] - 1.).max(0.) } else { dens.rho[c] - 1. };
+                    excess |= e != 0.;
                     // `A·q = −dx²·Δq` : pour `Δq = e`, le second membre est `−dx²·e`.
                     self.rhs[c] = -dx * dx * e;
                     self.diag[c] = diag;
