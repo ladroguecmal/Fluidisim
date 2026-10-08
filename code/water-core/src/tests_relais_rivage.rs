@@ -300,3 +300,66 @@ fn the_shore_relay_scheme_alone_between_two_saint_venant_s687() {
     }
 }
 
+/// **S689 — le reflux** : l'onde de S685 suivie 10 s à 5 cm (elle monte, redescend, repasse dans la 3D) ; la dette remboursée au quantum.
+/// (1) la masse à 10⁻¹² près ; (2) la dette de chaque rangée sous un quantum ; (3) la dernière colonne sous 10 particules par maille mouillée ;
+/// (4) la vitesse des particules sous 1 m/s.
+#[test]
+#[ignore = "≈ 5 min : l'onde de S685 suivie 10 s"]
+fn the_backwash_crosses_the_shore_relay_s689() {
+    use crate::grand_evenement::OndeSolitaire;
+    let dx = 0.05f32;
+    let (d, niveau, cot, x_pied, fond0, l) = (dx as f64, 0.40f64, 3.0f64, 4.768f64, 0.05f64, 6.6f64);
+    let onde = OndeSolitaire { h: 0.07, d: 0.35, x1: 2.80, g: 9.81 };
+    let fond = move |x: f64| fond0 + (x - x_pied).max(0.) / cot;
+    let eta = move |x: f64| if x < x_pied { onde.eta(x) } else { 0. };
+    let vit = move |x: f64| if x < x_pied { onde.u(x) } else { 0. };
+    let (nx, ny, nz) = ((5.35 / d).round() as usize, 4usize, (0.8 / d).round() as usize);
+    let lx = nx as f64 * d;
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let hauteurs: Vec<f32> = (0..nx * ny).map(|c| fond(((c % nx) as f64 + 0.5) * d) as f32).collect();
+    a.set_seabed_smooth(Some(&hauteurs)).unwrap();
+    let zb: Vec<f32> = (0..nx * 2).map(|s| a.smooth_seabed_height((s as f32 + 0.5) * dx / 2., 0.1)).collect();
+    a.seed(&|p| p[2] > zb[((p[0] / (dx / 2.)) as usize).min(nx * 2 - 1)] && (p[2] as f64) < niveau + eta(p[0] as f64)).unwrap();
+    a.set_particle_velocities(&|p| ([vit(p[0] as f64) as f32, 0., 0.], [[0.; 3]; 3])).unwrap();
+    a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    let nsv = ((l - lx) / d).round() as usize;
+    let z: Vec<f64> = (0..nsv * ny).map(|k| fond(lx + ((k / ny) as f64 + 0.5) * d)).collect();
+    let h: Vec<f64> = z.iter().map(|z| (niveau - z).max(0.)).collect();
+    let mut sv = SaintVenant2D::nouveau(nsv, ny, d, 9.81, z, h, vec![0.; nsv * ny], vec![0.; nsv * ny]).unwrap();
+    sv.regler_ordre_deux(1e-16).unwrap();
+    let mut rel = RelaisRivage::nouveau(a, sv).unwrap();
+    let (q, v0) = (rel.quantum(), rel.volume());
+    let dt_sv = (0.4 * d / (0.5 + (9.81 * 0.45f64).sqrt()) * 1e6) as u64;
+    let (mut t, mut masse, mut dette, mut dens, mut vmax) = (0u64, 0f64, 0f64, 0f64, 0f32);
+    let (mut entre, mut sorti) = (0f64, 0f64);
+    while t < 10_000_000 {
+        let us = rel.apic.stable_step_us(10_000).min(dt_sv).min(10_000_000 - t);
+        rel.pas(us).unwrap();
+        t += us;
+        masse = masse.max((rel.volume() - v0).abs() / v0);
+        dette = dette.max(rel.dette.iter().fold(0f64, |m, x| m.max(x.abs())) / q);
+        let x0 = (nx - 1) as f32 * dx;
+        let n_col = rel.apic.particles().iter().filter(|p| p[0] >= x0).count();
+        let mouillees = (0..nz * ny).filter(|&c| rel.apic.label[c * nx + nx - 1] == crate::apic3d::WATER).count();
+        if mouillees > 0 {
+            dens = dens.max(n_col as f64 / mouillees as f64);
+        }
+        vmax = vmax.max(rel.apic.vel[..rel.apic.n].iter().fold(0f32, |m, v| m.max((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt())));
+        if let Some((_, e, _, _)) = rel.apic.right_inlet() {
+            entre = e;
+        }
+        if let Some((_, s, _)) = rel.apic.right_outlet() {
+            sorti = s;
+        }
+    }
+    let (_, _, posees, refusees) = rel.apic.right_inlet().unwrap();
+    println!("S689 : 10 s ; masse {masse:.1e} ; dette au plus {dette:.3} quantum ; dernière colonne au plus {dens:.2} par maille mouillée ; vitesse max {vmax:.3} m/s",);
+    println!("S689 : de la 3D vers Saint-Venant, {:.2} L franchis + {:.2} L rendus ({} particules) ; de Saint-Venant vers la 3D, {:.2} L posés ({posees}, {refusees} refusées) + {:.2} L ajoutés à Saint-Venant ({} quanta)",
+        sorti * 1e3, rel.rendues as f64 * q * 1e3, rel.rendues, entre * 1e3, rel.ajoutes as f64 * q * 1e3, rel.ajoutes);
+    assert!(masse < 1e-12, "critère 1");
+    assert!(dette < 1.0, "critère 2");
+    assert!(dens <= 10.0, "critère 3");
+    assert!(vmax < 1.0, "critère 4");
+}
+

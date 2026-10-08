@@ -10,8 +10,11 @@
 //!
 //! La masse se compte : Saint-Venant + particules × quantum + réservoir − dette ([`RelaisRivage::volume`]).
 //!
+//! **S689 — la dette remboursée au quantum** : quand elle atteint un quantum, APIC rend la particule de sa dernière colonne la plus proche
+//! du bord ; sous moins un quantum, Saint-Venant reçoit ce volume dans sa première maille. Elle reste sous un quantum par rangée.
+//!
 //! Ne fait pas : un état extérieur par rangée (le bord de Saint-Venant prend la moyenne des rangées — exact au repos et sur une côte
-//! uniforme) ; le remboursement de la dette (des particules retirées quand elle dépasse un quantum) ; le relais au large (S650).
+//! uniforme) ; le relais au large (S650).
 
 use crate::apic3d::Apic3;
 use crate::delta_projection::Error as ErreurApic;
@@ -34,6 +37,9 @@ pub struct RelaisRivage {
     pub sv: SaintVenant2D,
     /// Par rangée, le volume que Saint-Venant a pris de plus qu'APIC n'a laissé sortir (m³).
     pub dette: Vec<f64>,
+    /// S689 — les remboursements : les particules rendues par APIC, les quanta ajoutés à Saint-Venant.
+    pub rendues: u64,
+    pub ajoutes: u64,
     temps: f64,
     droite: Vec<f32>,
     gauche: Vec<f32>,
@@ -49,7 +55,7 @@ impl RelaisRivage {
             return Err(Refus::Montage);
         }
         let n = d.ny * d.nz;
-        Ok(RelaisRivage { apic, sv, dette: vec![0.; d.ny], temps: 0., droite: vec![0.; n], gauche: vec![0.; n] })
+        Ok(RelaisRivage { apic, sv, dette: vec![0.; d.ny], rendues: 0, ajoutes: 0, temps: 0., droite: vec![0.; n], gauche: vec![0.; n] })
     }
 
     /// Le quantum d'une particule, m³.
@@ -119,9 +125,20 @@ impl RelaisRivage {
             .map_err(Refus::Apic)?;
         self.apic.step(us).map_err(Refus::Apic)?;
         let sorti: Vec<f64> = self.apic.right_outlet().map(|s| s.0.to_vec()).unwrap_or_default();
+        let q = self.quantum();
         for j in 0..d.ny {
             let pris = flux[j].max(0.) * dt * d.dx as f64;
             self.dette[j] += pris - sorti.get(j).copied().unwrap_or(0.);
+            // S689 : le remboursement, au quantum.
+            while self.dette[j] >= q && self.apic.take_right(j) {
+                self.dette[j] -= q;
+                self.rendues += 1;
+            }
+            while self.dette[j] <= -q {
+                self.sv.h[j] += q / (self.sv.dx * self.sv.dx);
+                self.dette[j] += q;
+                self.ajoutes += 1;
+            }
         }
         self.temps += dt;
         Ok(())

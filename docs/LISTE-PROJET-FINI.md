@@ -415,7 +415,8 @@ pas recopiée ici (L137).
   Saint-Venant — il redonne le tout-Saint-Venant au dix-millième (2,5 et 1,25 cm), la masse au bit : le déficit de S685 vient de l'onde
   portée par APIC ([preuve](validation/RACCORD-SEUL-S687.md)). **S688** : du côté d'APIC, le raccord ne trouble pas la 3D (1,3 % de la crête à
   2,5 cm) ; lue sous la maille, la remontée du relais à 91 % de Synolakis ; le raccord seul converge vers le domaine entier
-  ([preuve](validation/RELAIS-COTE-APIC-S688.md)).
+  ([preuve](validation/RELAIS-COTE-APIC-S688.md)). **S689** : le reflux — 10 s d'aller-retour à travers le raccord, la masse au bit, la dette
+  remboursée au quantum ([preuve](validation/REFLUX-RIVAGE-S689.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -490,6 +490,8 @@ briques 2 et 3 — APIC 3D laisse sortir et fait entrer l'eau par son bord droit
 **S684–S686** : le raccord au rivage au repos (six plages à quelques µm/s, la masse au bit) ; l'onde solitaire à travers lui (la
 remontée manquée de 15 %, localisée : l'onde portée par APIC) ; la quarante et unième revue (ADR-273 : un raccord jugé d'abord
 entre deux copies du même solveur) (4.14).
+**S687–S689** : le raccord seul entre deux Saint-Venant (le domaine entier redonné) ; le relais jugé du côté d'APIC (le raccord ne
+trouble pas la 3D, la remontée à 91 % de Synolakis) ; le reflux sur 10 s, la dette remboursée au quantum (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S689 — **en cours**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 3 (le reflux).
+Session : S689 — **terminée**. En autonomie vers la v2 ; K3, 4.14 ; le relais au rivage, l'étape 3 (le reflux).
 
 **Ce que la session fait.** **La dette remboursée au quantum.** S685 laissait la dette (ce que Saint-Venant a pris moins ce qu'APIC a
 laissé sortir) s'accumuler : 2 à 3 quanta par rangée en 3 s. Désormais :
@@ -98,7 +98,8 @@ dans la 3D, et ressort encore.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le remboursement ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le remboursement ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) 2,8·10⁻¹⁶ ; (2) 0,998 quantum ; (3) 9,20 ; (4) 0,539 m/s. La sortie de la 3D surtout par remboursement (20,1 L sur 25,4).

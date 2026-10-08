@@ -1794,3 +1794,11 @@ au raccord contre le tout-APIC ; la remontée lue sous la maille. **Mesuré** : 
 2,5 cm) ; le raccord seul converge vers le domaine entier (−3,5 %, −1,1 %, −0,6 %), critère (2) manqué à 5 et 2,5 cm par une borne non
 calculée ; le relais remonte à 91 % de Synolakis à 2,5 cm. Le tout-Saint-Venant n'est pas une référence convergée de la remontée.
 Maillons **1** (4.14). Suivant : **S689**, le reflux (l'étape 3).
+
+## S689 — 2026-10-08 — Le reflux à travers le raccord au rivage
+
+**Entrée.** En autonomie vers la v2 ; K3, 4.14 ; le relais, étape 3. **Fait** ([preuve](../docs/validation/REFLUX-RIVAGE-S689.md)) : la dette
+remboursée au quantum (une particule rendue par la 3D, ou un quantum rendu à Saint-Venant), comptée. **Mesuré** sur 10 s d'aller-retour :
+la masse à 2,8·10⁻¹⁶, la dette sous un quantum, la colonne du bord à 9,2, la vitesse à 0,54 m/s. La sortie de la 3D passe surtout par le
+remboursement (79 %) : les particules du bord avancent moins vite que le flux ne le demande. Maillons **1** (4.14). Suivant : **S690**,
+la vague qui plonge avec les deux raccords (l'étape 4) ; la revue en S691.

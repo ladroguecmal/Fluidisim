@@ -417,6 +417,30 @@ impl Apic3 {
         Ok(())
     }
 
+    /// **S689 — rendre une particule au bord droit** : la particule de la dernière colonne, rangée `j`, la plus proche du bord, est retirée
+    /// (le remboursement d'une dette du relais au rivage). `false` si la colonne n'en a pas ; non comptée dans la sortie.
+    pub fn take_right(&mut self, j: usize) -> bool {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        if j >= ny {
+            return false;
+        }
+        let (x0, y0) = ((nx - 1) as f32 * dx, j as f32 * dx);
+        let mut choix: Option<usize> = None;
+        for k in 0..self.n {
+            let p = self.x[k];
+            if p[0] >= x0 && p[1] >= y0 && p[1] < y0 + dx && choix.is_none_or(|c| p[0] > self.x[c][0]) {
+                choix = Some(k);
+            }
+        }
+        let Some(k) = choix else { return false };
+        let last = self.n - 1;
+        self.x[k] = self.x[last];
+        self.vel[k] = self.vel[last];
+        self.c[k] = self.c[last];
+        self.n = last;
+        true
+    }
+
     /// S683 — l'entrée à droite : `(le réservoir par rangée, m³ ; le volume reçu ; les particules posées ; refusées)` ; `None` sans
     /// sortie à droite.
     pub fn right_inlet(&self) -> Option<(&[f64], f64, u64, u64)> {

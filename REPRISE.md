@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 01:58 +02:00
+JETON            : libre
+Battement        : 2026-10-08 02:16 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S689 — le reflux à travers le raccord au rivage ; la dette remboursée ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S688 — Le relais au rivage jugé du côté d'APIC ; la remontée sous la maille ([journal](notes/JOURNAL.md)). Avant : S687 (Le raccord seul, entre deux Saint-Venant)
-Session suivante : S689 — le reflux à travers le raccord au rivage (l'étape 3)
-Maillons        : 1 (4.14 : le relais jugé du côté d'APIC)
-Registres       : dernier lot S686 (ADR-213 D3) ; le prochain au plus tard en S689
+Session en cours : aucune
+Dernière session : S689 — Le reflux à travers le raccord au rivage ([journal](notes/JOURNAL.md))
+Session suivante : S690 — la vague qui plonge avec les deux raccords (l'étape 4) ; revue en S691
+Maillons        : 1 (4.14 : le reflux)
+Registres       : dernier lot S689 (ADR-213 D3) ; le prochain au plus tard en S692
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
