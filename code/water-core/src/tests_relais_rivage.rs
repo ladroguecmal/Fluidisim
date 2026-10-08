@@ -1026,3 +1026,202 @@ fn the_judge_on_a_flat_bed_s704() {
     }
 }
 
+/// **S707 E1 — l'eau au repos** sur un fond plat (4 m, `h` = 0,49 m : une couche partielle), 1 s : par le semis du réseau (le témoin) ou
+/// par la naissance (`birth_from_columns`). Rend `(vitesse maximale après 1 s, particules, écart de volume, volume posé, volume donné)`.
+fn repos_s707(naissance: bool) -> (f64, usize, f64, f64, f64) {
+    let dx = 0.025f32;
+    let dxs = dx as f64;
+    let (nx, ny, nz, h) = (160usize, 4usize, 32usize, 0.49f64);
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    let quantum = dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64;
+    let donne = h * dxs * dxs * (nx * ny) as f64;
+    let ecart = if naissance {
+        let vol = vec![h * dxs * dxs; nx * ny];
+        let (u, v, w) = (vec![0f32; a.velocity_u().len()], vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+        a.birth_from_columns(&vol, &u, &v, &w).unwrap()
+    } else {
+        a.seed(&|p| (p[2] as f64) < h).unwrap();
+        0.
+    };
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let n0 = a.particle_count();
+    let mut t = 0u64;
+    while t < 1_000_000 {
+        let us = a.stable_step_us(10_000).min(1_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+    }
+    let vmax = a.velocities().iter().fold(0f64, |m, v| m.max(((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64).sqrt()));
+    (vmax, n0, ecart, n0 as f64 * quantum, donne)
+}
+
+/// **S707 E1 (N1) — la naissance au repos** : posé + écart = donné à 10⁻¹² ; la vitesse maximale après 1 s sous 1 mm/s, et au plus trois
+/// fois celle du semis du réseau (le témoin).
+#[test]
+#[ignore = "l'eau au repos, deux fois (≈ 2 min)"]
+fn the_3d_born_at_rest_s707() {
+    let (v0, n0, _, _, _) = repos_s707(false);
+    let (v1, n1, ecart, pose, donne) = repos_s707(true);
+    println!("S707 E1 : le semis — {n0} particules, vitesse max {v0:.2e} m/s ; la naissance — {n1} particules, vitesse max {v1:.2e} m/s, posé {pose:.9} + écart {ecart:.3e} = {:.9} (donné {donne:.9})", pose + ecart);
+    assert!(((pose + ecart) - donne).abs() < 1e-12 * donne, "critère : la masse");
+    assert!(v1 < 1e-3 && v1 <= 3. * v0.max(1e-6), "critère : le repos");
+}
+
+/// **S707 E2, E3 — l'onde de S704 sur un fond plat de 10 m**, 1,6 s, APIC à 2,5 cm sur quatre rangées. `renaissance` : à 0,4 s, la 3D est
+/// réduite à `(h, ū)` par colonne — depuis elle-même (E2), ou depuis SGN qui a porté l'onde depuis le départ (E3) — puis renaît par le
+/// profil vertical de SGN (`birth_from_columns`). Rend `(crêtes aux plans 5, 6, 7 m, l'instant de la crête au plan de 7 m, particules
+/// avant et après la naissance, secondes)`.
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum Renaissance {
+    /// La 3D ininterrompue (le témoin).
+    Aucune,
+    /// E2 : la 3D réduite à `(h, ū)` par colonne, puis renée.
+    DepuisLa3D,
+    /// E3 : la 3D renée depuis l'état de SGN.
+    DepuisSgn,
+}
+
+fn onde_renaissance_s707(mode: Renaissance) -> ([f64; 3], f64, usize, usize, f64) {
+    use crate::grand_evenement::OndeSolitaire;
+    let horloge = std::time::Instant::now();
+    let dx = 0.025f32;
+    let dxs = dx as f64;
+    let (d, a0, lx, lz) = (0.5f64, 0.15f64, 10.0f64, 0.8f64);
+    let onde = OndeSolitaire { h: a0, d, x1: 3.4, g: 9.81 };
+    let (nx, ny, nz) = ((lx / dxs).round() as usize, 4usize, (lz / dxs).round() as usize);
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| onde.u((f % (nx + 1)) as f64 * dxs) as f32).collect();
+    let (v0, w0) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+    a.set_grid_velocities(&u, &v0, &w0).unwrap();
+    a.seed(&|p| (p[2] as f64) < d + onde.eta(p[0] as f64)).unwrap();
+    a.set_particle_velocities(&|p| ([onde.u(p[0] as f64) as f32, 0., 0.], [[0.; 3]; 3])).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let n_sgn = (40. / dxs).round() as usize;
+    let xs = |i: usize| (i as f64 + 0.5) * dxs;
+    let (hs0, qs0): (Vec<f64>, Vec<f64>) = (0..n_sgn).map(|i| {
+        let hh = d + onde.eta(xs(i));
+        (hh, hh * onde.u(xs(i)))
+    }).unzip();
+    let mut serre = crate::serre_1d::Serre1D::nouveau(dxs, 9.81, hs0, qs0, true).unwrap();
+    let plans = [5.0f64, 6.0, 7.0];
+    let quantum = dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64;
+    let largeur = ny as f64 * dxs;
+    let (mut crete, mut t7) = ([0f64; 3], 0f64);
+    let (t_b, t_fin) = (400_000u64, 1_600_000u64);
+    let (mut t, mut t_sv, mut prochain, mut avant, mut apres) = (0u64, 0f64, 0u64, a.particle_count(), a.particle_count());
+    let mut nee = mode == Renaissance::Aucune;
+    while t < t_fin {
+        let borne = if nee { t_fin } else { t_b };
+        let us = a.stable_step_us(10_000).min(borne - t);
+        a.step(us).unwrap();
+        t += us;
+        let t1 = t as f64 * 1e-6;
+        while t_sv < t1 - 1e-12 {
+            let p = serre.pas_stable().min(t1 - t_sv);
+            serre.pas(p).unwrap();
+            t_sv += p;
+        }
+        if !nee && t == t_b {
+            // La réduction à (h, ū) par colonne : depuis la 3D (le compte des particules, la moyenne de leur vitesse), ou depuis SGN.
+            let (mut vol, mut su) = (vec![0f64; nx * ny], vec![0f64; nx * ny]);
+            for (p, v) in a.particles().iter().zip(a.velocities()) {
+                let c = ((p[1] / dx) as usize).min(ny - 1) * nx + ((p[0] / dx) as usize).min(nx - 1);
+                vol[c] += quantum;
+                su[c] += v[0] as f64;
+            }
+            let mut ub: Vec<f64> = (0..nx * ny).map(|c| if vol[c] > 0. { su[c] * quantum / vol[c] } else { 0. }).collect();
+            if mode == Renaissance::DepuisSgn {
+                for c in 0..nx * ny {
+                    let i = c % nx;
+                    vol[c] = serre.h[i] * dxs * dxs;
+                    ub[c] = serre.q[i] / serre.h[i];
+                }
+            }
+            avant = a.particle_count();
+            let hc: Vec<f64> = vol.iter().map(|v| v / (dxs * dxs)).collect();
+            let der = |c: usize, ordre: u8| -> f64 {
+                let i = c % nx;
+                if i == 0 || i + 1 == nx {
+                    return 0.;
+                }
+                if ordre == 1 { (ub[c + 1] - ub[c - 1]) / (2. * dxs) } else { (ub[c + 1] - 2. * ub[c] + ub[c - 1]) / (dxs * dxs) }
+            };
+            let profil = |ubar: f64, h: f64, uxx: f64, z: f64| { let zz = z.min(h); ubar + (h * h / 6. - zz * zz / 2.) * uxx };
+            let mut gu = vec![0f32; a.velocity_u().len()];
+            for k in 0..nz {
+                for j in 0..ny {
+                    for i in 1..nx {
+                        let (cg, cd) = (j * nx + i - 1, j * nx + i);
+                        let (ubf, hf, uxxf) = (0.5 * (ub[cg] + ub[cd]), 0.5 * (hc[cg] + hc[cd]), 0.5 * (der(cg, 2) + der(cd, 2)));
+                        gu[(k * ny + j) * (nx + 1) + i] = profil(ubf, hf, uxxf, (k as f64 + 0.5) * dxs) as f32;
+                    }
+                }
+            }
+            let mut gw = vec![0f32; a.velocity_w().len()];
+            for k in 0..=nz {
+                for j in 0..ny {
+                    for i in 0..nx {
+                        let c = j * nx + i;
+                        gw[(k * ny + j) * nx + i] = (-(k as f64 * dxs).min(hc[c]) * der(c, 1)) as f32;
+                    }
+                }
+            }
+            let gv = vec![0f32; a.velocity_v().len()];
+            let ecart = a.birth_from_columns(&vol, &gu, &gv, &gw).unwrap();
+            apres = a.particle_count();
+            eprintln!("S707 naissance ({mode:?}) à {t1:.2} s : {avant} → {apres} particules, écart {ecart:.2e} m³");
+            nee = true;
+        }
+        let mut compte = [0usize; 3];
+        for q in a.particles() {
+            for (n, &xp) in plans.iter().enumerate() {
+                if (q[0] as f64 - xp).abs() < 0.05 {
+                    compte[n] += 1;
+                }
+            }
+        }
+        for n in 0..3 {
+            let hn = compte[n] as f64 * quantum / (0.1 * largeur);
+            if hn > crete[n] {
+                crete[n] = hn;
+                if n == 2 {
+                    t7 = t1;
+                }
+            }
+        }
+        if t >= prochain {
+            prochain += 400_000;
+            eprintln!("S707 progression ({mode:?}) : t = {t1:.2} s, pas {us} µs, {} particules, {:.0} s d'horloge", a.particle_count(), horloge.elapsed().as_secs_f64());
+        }
+    }
+    (crete, t7, avant, apres, horloge.elapsed().as_secs_f64())
+}
+
+/// **S707 E2 (N2) — la renaissance dans l'onde, entre deux copies de la 3D** (ADR-273 D1) : la crête aux plans 5, 6, 7 m à moins de
+/// 3 mm de la 3D ininterrompue ; l'instant de la crête au plan de 7 m à moins de 0,02 s ; le nombre de particules tenu.
+#[test]
+#[ignore = "l'onde sur fond plat, deux fois (≈ 6 min)"]
+fn the_3d_reborn_in_the_wave_s707() {
+    let (c0, t0, _, _, d0) = onde_renaissance_s707(Renaissance::Aucune);
+    let (c1, t1, avant, apres, d1) = onde_renaissance_s707(Renaissance::DepuisLa3D);
+    let f = |c: [f64; 3]| c.iter().map(|x| format!("{:.4}", x - 0.5)).collect::<Vec<_>>().join(" ; ");
+    println!("S707 E2 : crêtes aux plans 5, 6, 7 m — ininterrompue [{}] (crête à 7 m à {t0:.3} s, {d0:.0} s) ; renée [{}] (à {t1:.3} s, {d1:.0} s) ; particules {avant} → {apres}", f(c0), f(c1));
+    assert_eq!(avant, apres, "critère : les particules");
+    for n in 0..3 {
+        assert!((c1[n] - c0[n]).abs() < 0.003, "critère : la crête au plan {n} ({} contre {})", c1[n], c0[n]);
+    }
+    assert!((t1 - t0).abs() < 0.02, "critère : l'instant de la crête ({t1} contre {t0})");
+}
+
+/// **S707 E3 — la naissance depuis l'état de SGN** à 0,4 s, contre la 3D ininterrompue et contre la renaissance depuis la 3D (E2).
+/// Rapporte.
+#[test]
+#[ignore = "l'onde sur fond plat, née de SGN (≈ 3 min)"]
+fn the_3d_born_from_serre_s707() {
+    let (c2, t2, avant, apres, d2) = onde_renaissance_s707(Renaissance::DepuisSgn);
+    let f = |c: [f64; 3]| c.iter().map(|x| format!("{:.4}", x - 0.5)).collect::<Vec<_>>().join(" ; ");
+    println!("S707 E3 : née de SGN — crêtes aux plans 5, 6, 7 m [{}] (crête à 7 m à {t2:.3} s) ; particules {avant} → {apres} ; {d2:.0} s", f(c2));
+}
+

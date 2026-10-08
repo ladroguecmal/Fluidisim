@@ -109,9 +109,10 @@ E3 ne se lance que si E2 tient. Si E2 échoue, la session cherche la cause de E2
 ### Plan
 
 - [x] **P1** — jeton ; plan ; la note du déclencheur.
-- [ ] **P2** — E1.
+- [x] **P2** — E1.
 - [ ] **P3** — E2.
 - [ ] **P4** — E3.
 - [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini (E1)** — la première pose (une couche partielle en haut) laissait 3,95 mm/s : chaque sous-colonne emplie à la même hauteur, d'un pas régulier ; **tenu** : 1,1·10⁻⁵ m/s (le semis du réseau 6,8·10⁻⁶), la masse au bit.

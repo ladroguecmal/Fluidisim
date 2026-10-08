@@ -2320,6 +2320,8 @@ mod poches;
 mod lisse;
 #[path = "apic3d_gauche.rs"]
 mod gauche;
+#[path = "apic3d_naissance.rs"]
+mod naissance;
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};
 
