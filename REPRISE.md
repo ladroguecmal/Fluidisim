@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 21:22 +02:00
+JETON            : libre
+Battement        : 2026-10-08 21:24 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S711 — la quarante-sixième revue de méthode (S706–S710) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S710 — La projection de densité faible (session longue) ([journal](notes/JOURNAL.md)). Avant : S709 (La projection de densité)
-Session suivante : S711 — la quarante-sixième revue (S706–S710) ; puis une référence extérieure du point de déferlement
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S711 — la quarante-sixième revue de méthode (ADR-280) ([journal](notes/JOURNAL.md)). Avant : S710 (La projection de densité faible)
+Session suivante : S712 — la référence extérieure du point de déferlement (une onde solitaire sur une pente, mesurée)
+Maillons        : 0
 Registres       : dernier lot S710 (ADR-213 D3) ; le prochain au plus tard en S713
 ```
 

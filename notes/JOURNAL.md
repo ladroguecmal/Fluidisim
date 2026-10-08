@@ -1976,3 +1976,11 @@ le plongeon 0,22 s plus tard. Une correction vingt fois plus faible retarde pres
 déplace le déferlement. Le point de déferlement de la 3D a une incertitude de 0,2 à 0,3 s, selon son volume. La projection reste
 éteinte. Maillons **1** (4.14, 1.6). Suivant : **S711**, la quarante-sixième revue ; puis une référence extérieure (le point de
 déferlement mesuré d'une onde solitaire sur une pente proche).
+
+## S711 — 2026-10-08 — la quarante-sixième revue de méthode (ADR-280)
+
+**Entrée.** La revue (S706–S710). **Fait** : [ADR-280](../docs/adr/ADR-280-quarante-sixieme-revue-de-methode.md). D1 : un instrument se juge
+sur son plancher de bruit en mouvement, et sur la grandeur que voit le solveur (S707 : quatre lectures corrigées ; S708 : le compte n'est
+pas la surface). D2 : la convergence du juge s'étend à ses options numériques ; une référence extérieure tranche (S709–S710 : le
+déferlement bouge de 0,2 à 0,3 s selon le volume). Maillons **0** (méthode). Suivant : **S712**, la référence extérieure du point de
+déferlement ; la revue en S716.

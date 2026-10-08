@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S711 — **en cours**. En autonomie, sans arrêt. **La quarante-sixième revue de méthode** (ADR-222 D4 : S706–S710).
+Session : S711 — **terminée**. En autonomie, sans arrêt. **La quarante-sixième revue de méthode** (ADR-222 D4 : S706–S710).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
@@ -80,7 +80,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-280 ; METHODE.
-- [ ] **P3** — rituel.
+- [x] **P2** — ADR-280 ; METHODE.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-280 : D1 (le plancher de bruit, la grandeur que voit le solveur), D2 (la convergence du juge sous ses options ; une référence extérieure) ; la prochaine revue S716.
