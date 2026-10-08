@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 12:00 +02:00
+JETON            : libre
+Battement        : 2026-10-08 13:18 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S693 — le LOD, étape 1 : les deux raccords ensemble, la 3D réduite à la bande de déferlement ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S692 — La conception du LOD de simulation (ADR-275) ([journal](notes/JOURNAL.md)). Avant : S691 (la quarante-deuxième revue de méthode)
-Session suivante : S693 — le LOD, étape 1 : la zone de colonnes avec la sortie à droite (les deux raccords ensemble)
-Maillons        : 0 (conception : ADR-275)
+Session en cours : aucune
+Dernière session : S693 — Les deux raccords ensemble (ADR-275, étape 1) ([journal](notes/JOURNAL.md)). Avant : S692 (La conception du LOD de simulation)
+Session suivante : S694 — le porteur dispersif du large : Serre–Green–Naghdi 1D, jugé sur l'onde solitaire exacte (lève aussi A234)
+Maillons        : 1 (4.14 : la 3D réduite à la bande de déferlement)
 Registres       : dernier lot S692 (ADR-213 D3) ; le prochain au plus tard en S695
 ```
 

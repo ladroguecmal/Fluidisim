@@ -315,9 +315,10 @@ impl Apic3 {
 
     /// **S682 — la sortie à droite** (le relais au rivage, ADR-271) : une particule qui franchit le bord droit n'est plus retenue par
     /// le domaine ; elle est retirée et son volume (`dx³/8`) compté par rangée ([`Apic3::right_outlet`]). Demande les bords ouverts ;
-    /// refusée avec les gouttes et la zone des colonnes. Réservée à la configuration (I-06).
+    /// refusée avec les gouttes (leur état par particule). S693 : permise avec la zone des colonnes, qui n'a que des champs de grille.
+    /// Réservée à la configuration (I-06).
     pub fn enable_right_outlet(&mut self, host: &mut HostServices) -> Result<(), Error> {
-        if self.open_x.is_none() || self.sortie_droite.is_some() || self.gouttes.is_some() || self.columns.is_some() {
+        if self.open_x.is_none() || self.sortie_droite.is_some() || self.gouttes.is_some() {
             return Err(Error::Domain);
         }
         let ny = self.domain.ny;

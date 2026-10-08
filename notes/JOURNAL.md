@@ -1828,3 +1828,12 @@ simulation ; la revue en S696.
 présence, les billes adaptatives. **Fait** : [ADR-275](../docs/adr/ADR-275-le-lod-de-simulation.md) et [la conception](../docs/registres/LOD-SIMULATION-S692.md)
 — six niveaux (B, B+W, la côte 2D, Saint-Venant, APIC grossier, APIC fin), les critères d'activation, cinq étapes, les billes adaptatives
 en dernier. Lot S690–S692. Maillons **0** (conception). Suivant : **S693**, l'étape 1 (la zone de colonnes avec la sortie à droite).
+
+## S693 — 2026-10-08 — Les deux raccords ensemble (ADR-275, étape 1)
+
+**Entrée.** Le LOD de simulation, étape 1. **Fait** ([preuve](../docs/validation/DEUX-RACCORDS-S693.md)) : la zone de colonnes et la sortie
+permises ensemble ; la vague de S647 avec la 3D sur la seule bande de déferlement. **Mesuré** : ÷ 3 particules, la masse au bit, 10,3
+min ; le retournement 0,12 s trop tôt, **critère manqué**. Deux sources dans le montage (une valeur par défaut cachée dans `Plage`)
+corrigées en route, sans effet. Les témoins (le raccord du large à 1,0, 4,0 et 5,0 m) : plus Saint-Venant porte l'onde, plus elle se
+retourne tôt — la moitié de l'écart ; le reste (0,04 s) non départagé. **R42 reçu.** La feuille de route vivante écrite. Maillons **1**
+(4.14). Suivant : **S694**, le porteur dispersif (Serre–Green–Naghdi 1D, jugé sur l'onde solitaire exacte).

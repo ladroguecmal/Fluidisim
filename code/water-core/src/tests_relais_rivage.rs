@@ -479,64 +479,133 @@ fn a_plunging_wave_breaks_through_the_shore_relay_s690() {
     assert!(masse < 1e-12 && dette < 1.0, "critère 3");
 }
 
-/// Diagnostic temporaire de S690 : où naît la vitesse qui effondre le pas : le cas de S647 (`d` = 0,5 m, `H` = 0,15 m, pente 1:12, l'air balistique), APIC 3D sur
-/// l'escalier jusqu'à 10,775 m, Saint-Venant 2D au-delà ; 2,5 cm, 4 s. (1) le premier retournement à 0,02 s et 0,15 m du tout-3D (2,642 s,
-/// 9,988 m, S647) ; (2) l'air enfermé après lui, en avant ; (3) la masse, la dette ; (4) rapportés.
-#[test]
-#[ignore]
-fn diagnostic_temporaire_s690() {
+/// **S693 — les deux raccords ensemble** (ADR-275, étape 1) : la vague de S647, APIC 3D sur `[5,0 ; 10,775]` m. Au large, la zone de
+/// colonnes de S650 (0,6 m) dont le bord gauche est poussé par Saint-Venant (toute la plage, sens unique) ; au rivage, le relais de S690.
+/// (2) le retournement à 0,02 s et 0,15 m du tout-3D, l'air après lui ; (3) la masse, la dette ; (4) rapportés.
+#[allow(clippy::type_complexity)]
+fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let dx = 0.025f32;
-    let (d, h0, cot, x1, x_pied, niveau, l) = (0.5f64, 0.15f64, 12.0f64, 3.4f64, 5.696f64, 0.55f64, 12.8f64);
-    let fond0 = niveau - d;
-    let fond = move |x: f64| fond0 + (x - x_pied).max(0.) / cot;
-    let onde = OndeSolitaire { h: h0, d, x1, g: 9.81 };
-    let (nx, ny, nz) = ((10.775 / dx as f64).round() as usize, 4usize, (1.0 / dx as f64).round() as usize);
-    let lx = nx as f64 * dx as f64;
+    let (d, h0, cot, x_pied, niveau, l, lz, x_f) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64, 10.775f64);
+    let dxs = dx as f64;
+    // Saint-Venant du large, toute la plage, depuis la même onde que la 3D (x₁ = 3,4 m ; ADR-273 D2 — `Plage` la centre à 3,488 m).
+    let onde0 = OndeSolitaire { h: h0, d, x1: 3.4, g: 9.81 };
+    let nl = (l / dxs).round() as usize;
+    let xc = |k: usize| ((k / 3) as f64 + 0.5) * dxs;
+    let zl: Vec<f64> = (0..nl * 3).map(|k| (xc(k) - x_pied).max(0.) / cot).collect();
+    let hl: Vec<f64> = (0..nl * 3).map(|k| (niveau as f64 + onde0.eta(xc(k)) - zl[k]).max(0.)).collect();
+    let ql: Vec<f64> = (0..nl * 3).map(|k| if xc(k) < x_pied { hl[k] * onde0.u(xc(k)) } else { 0. }).collect();
+    let mut large = SaintVenant2D::nouveau(nl, 3, dxs, 9.81, zl, hl, ql, vec![0.; nl * 3]).unwrap();
+    large.regler_ordre_deux(1e-16).unwrap();
+    let i_r = (x_r / dxs).round() as usize;
+    let (nx, ny, nz) = (((x_f - x_r) / dxs).round() as usize, 4usize, (lz / dxs).round() as usize);
     let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
-    let hauteurs: Vec<f32> = (0..nx * ny).map(|c| fond(((c % nx) as f64 + 0.5) * dx as f64) as f32).collect();
-    a.set_seabed(Some(&hauteurs)).unwrap();
+    let xg = move |i: f64| x_r + (i + 0.5) * dxs;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - x_pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
+    a.set_seabed(Some(&fond)).unwrap();
     a.set_ballistic_air(true);
-    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
-    let m2 = marche.clone();
-    let n0 = a.seed(&|p| p[2] > m2[((p[0] / dx) as usize).min(nx - 1)] && (p[2] as f64) < niveau + onde.eta(p[0] as f64)).unwrap();
-    a.set_particle_velocities(&|p| ([if (p[0] as f64) < x_pied { onde.u(p[0] as f64) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])).unwrap();
+    let n_col = (0.6 / dxs).round() as usize;
+    let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx < n_col) as u8).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
     a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
-    // Une seule source (ADR-273 D2) : Saint-Venant part du niveau des particules du bord.
-    let haut = a.particles().iter().filter(|p| p[0] as f64 >= lx - dx as f64).fold(f32::MIN, |m, p| m.max(p[2]));
-    let niv = haut as f64 + dx as f64 / 4.;
-    let d2 = dx as f64;
-    let nsv = ((l - lx) / d2).round() as usize;
-    let z: Vec<f64> = (0..nsv * ny).map(|k| fond(lx + ((k / ny) as f64 + 0.5) * d2)).collect();
-    let h: Vec<f64> = z.iter().map(|z| (niv - z).max(0.)).collect();
-    let mut sv = SaintVenant2D::nouveau(nsv, ny, d2, 9.81, z, h, vec![0.; nsv * ny], vec![0.; nsv * ny]).unwrap();
+    // Le même état initial que la référence (S647, S690 : x₁ = 3,4 m ; ADR-273 D2) — S650 prenait la distance canonique, 3,488 m.
+    let onde = OndeSolitaire { h: h0, d, x1: 3.4, g: 9.81 };
+    let eta: Vec<f32> = (0..nx * ny).map(|c| niveau + onde.eta(xg((c % nx) as f64)) as f32).collect();
+    a.set_columns_surface(&eta).unwrap();
+    let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| {
+        let x = x_r + (f % (nx + 1)) as f64 * dxs;
+        if x < x_pied { onde.u(x) as f32 } else { 0. }
+    }).collect();
+    let (v, w) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+    a.set_grid_velocities(&u, &v, &w).unwrap();
+    let marche: Vec<f32> = (0..nx).map(|i| a.seabed_height(i, 0)).collect();
+    let m2 = marche.clone();
+    let n0 = a.seed(&|p| {
+        let i = ((p[0] / dx) as usize).min(nx - 1);
+        i >= n_col && p[2] > m2[i] && p[2] < niveau + onde.eta(x_r + p[0] as f64) as f32
+    }).unwrap();
+    a.set_particle_velocities(&|p| {
+        let x = x_r + p[0] as f64;
+        ([if x < x_pied { onde.u(x) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])
+    }).unwrap();
+    // Saint-Venant du rivage, au-delà de 10,775 m, depuis le niveau des particules du bord (ADR-273 D2).
+    let lx = nx as f64 * dxs;
+    let haut = a.particles().iter().filter(|p| p[0] as f64 >= lx - dxs).fold(f32::MIN, |m, p| m.max(p[2]));
+    let niv = haut as f64 + dxs / 4.;
+    let nsv = ((l - x_f) / dxs).round() as usize;
+    let z: Vec<f64> = (0..nsv * ny).map(|k| (x_f + ((k / ny) as f64 + 0.5) * dxs - x_pied).max(0.) / cot).collect();
+    let hh: Vec<f64> = z.iter().map(|z| (niv - z).max(0.)).collect();
+    let mut sv = SaintVenant2D::nouveau(nsv, ny, dxs, 9.81, z, hh, vec![0.; nsv * ny], vec![0.; nsv * ny]).unwrap();
     sv.regler_ordre_deux(1e-16).unwrap();
     let mut rel = RelaisRivage::nouveau(a, sv).unwrap();
-    // S690 : les 16 fils de la machine (au bit du séquentiel, S483) ; le pas stable du relais, sur la célérité réelle.
     rel.apic.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
-    let _ = (&marche, air_enferme_s648 as fn(&Apic3) -> (usize, f64), retournement_s647 as fn(&Apic3, usize, &[f32]) -> Option<(usize, usize)>, n0);
-    let (mut t, mut montres) = (0u64, 0usize);
-    while t < 3_300_000 {
-        let us = rel.pas_stable_us(10_000).min(3_300_000 - t);
+    let (q, v0) = (rel.quantum(), rel.volume());
+    let (mut t, mut t_sv, mut entre, mut premier, mut air, mut masse, mut dette) = (0u64, 0f64, 0f64, None, None, 0f64, 0f64);
+    let pas_large = 0.1 * dxs;
+    let mut prochain = 0u64;
+    while t < 4_000_000 {
+        let us = rel.pas_stable_us(10_000).min(4_000_000 - t);
+        let t1 = (t + us) as f64 * 1e-6;
+        while t_sv < t1 - 1e-12 {
+            let p = pas_large.min(t1 - t_sv);
+            large.pas(p).unwrap();
+            t_sv += p;
+        }
+        let c = (i_r - 1) * 3 + 1;
+        let (qq, hs) = (large.qx[c] + large.qx[c + 3], large.h[c] + large.h[c + 3]);
+        let ub = if hs > 0. { (qq / hs) as f32 } else { 0. };
+        rel.regler_gauche(&vec![ub; ny * nz]).unwrap();
         rel.pas(us).unwrap();
         t += us;
-        if us < 1500 && montres < 25 {
-            montres += 1;
-            let n = rel.apic.n;
-            let k = (0..n).max_by(|&x, &y| {
-                let (a, b) = (rel.apic.vel[x], rel.apic.vel[y]);
-                (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]).total_cmp(&(b[0] * b[0] + b[1] * b[1] + b[2] * b[2]))
-            }).unwrap();
-            let (p, v) = (rel.apic.x[k], rel.apic.vel[k]);
-            let x0 = (nx - 1) as f32 * dx;
-            let col: Vec<usize> = (0..ny).map(|j| rel.apic.particles().iter().filter(|q| q[0] >= x0 && (q[1] / dx) as usize == j).count()).collect();
-            let r = rel.releve;
-            eprintln!("t={:.3} pas={us} µs : la plus rapide x={:.3} z={:.3} v=({:.2},{:.2},{:.2}) ; bord η={:.4} h_e={:.4} u={:.3} flux={:.4} v_bord={:.2} v_posée={:.2} ; dernière colonne {:?} ; dette {:?}",
-                t as f64 * 1e-6, p[0], p[2], v[0], v[1], v[2], r[0], r[1], r[2], r[3], r[4], r[5], col, rel.dette.iter().map(|d| (d / rel.quantum() * 100.).round() / 100.).collect::<Vec<_>>());
+        let col = rel.apic.columns.as_ref().unwrap();
+        entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
+        let ts = t as f64 * 1e-6;
+        if premier.is_none() {
+            if let Some((i, _)) = retournement_s647(&rel.apic, ny / 2, &marche) {
+                premier = Some((ts, x_r + (i as f64 + 0.5) * dxs));
+            }
         }
+        let (k, x) = air_enferme_s648(&rel.apic);
+        if k > 0 && premier.is_some() && air.is_none() {
+            air = Some((ts, x_r + x));
+        }
+        masse = masse.max((rel.volume() - v0 - entre).abs() / v0);
+        dette = dette.max(rel.dette.iter().fold(0f64, |m, x| m.max(x.abs())) / q);
+        if t >= prochain {
+            prochain += 250_000;
+            eprintln!("S693 progression (x_r = {x_r} m) : t = {ts:.2} s, pas {us} µs, {} particules, {:.0} s d'horloge", rel.apic.particle_count(), horloge.elapsed().as_secs_f64());
+        }
+    }
+    let duree = horloge.elapsed().as_secs_f64();
+    println!("S693 (x_r = {x_r} m) : {n0} particules posées (S690 : 236 848) ; premier retournement {premier:?} (tout-3D : 2,642 s, 9,988 m) ; air enfermé {air:?} (tout-3D : 2,817 s, 10,375 m) ; masse {masse:.1e} ; dette {dette:.3} quantum ; entré par la gauche {:.4} m³ ; {duree:.0} s de calcul pour 4 s",
+        entre);
+    (premier, air, masse, dette, n0, duree)
+}
+
+/// **S693** — les deux raccords, le raccord du large à 5,0 m (S650). (2) **manqué** : le retournement 0,12 s trop tôt (2,522 s, 9,863 m) ;
+/// (3) tenu. N'affirme que ce qui a tenu (ADR-244) : la masse, la dette, l'air après le retournement.
+#[test]
+#[ignore = "la vague de S647, la 3D réduite à la bande de déferlement, à 2,5 cm, sur les fils de la machine (≈ 10 min)"]
+fn both_relays_together_shrink_the_3d_to_the_breaking_band_s693() {
+    let (premier, air, masse, dette, _, _) = deux_raccords_s693(5.0);
+    let (tp, xp) = premier.expect("un retournement");
+    let (ta, xa) = air.expect("de l'air enfermé");
+    assert!(ta > tp && xa > xp, "critère 2 : l'air");
+    assert!(masse < 1e-12 && dette < 1.0, "critère 3");
+}
+
+/// **S693 — les témoins** : le raccord du large à 4,0 m (Saint-Venant porte l'onde un mètre de plus), puis à 1,0 m (l'onde naît dans la
+/// 3D, Saint-Venant ne porte rien d'elle). Si le porteur Saint-Venant est en faute, le retournement revient au tout-3D à 1,0 m ; si c'est le
+/// raccord du large, il reste en avance. Rapporte.
+#[test]
+#[ignore = "les témoins de S693 (≈ 25 min)"]
+fn the_offshore_relay_witness_s693() {
+    for x_r in [1.0f64, 4.0] {
+        let (premier, air, masse, _, n0, duree) = deux_raccords_s693(x_r);
+        println!("S693 témoin x_r = {x_r} m : {n0} particules ; retournement {premier:?} ; air {air:?} ; masse {masse:.1e} ; {duree:.0} s");
     }
 }
 

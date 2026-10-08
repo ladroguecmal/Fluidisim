@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S693 — **en cours**. En autonomie vers la v2 ; le LOD de simulation (ADR-275), étape 1 : **les deux raccords ensemble**.
+Session : S693 — **terminée**. En autonomie vers la v2 ; le LOD de simulation (ADR-275), étape 1 : **les deux raccords ensemble**.
 
 **Ce que la session fait.**
 
@@ -103,7 +103,14 @@ Session : S693 — **en cours**. En autonomie vers la v2 ; le LOD de simulation 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les deux raccords ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — les deux raccords ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2, en cours (notes)** — Premier essai : 77 664 particules (÷ 3), 10 min, la masse au bit, mais le retournement 0,12 s trop tôt. Le témoin
+  (le raccord du large à 4,0 m) n'a pas déplacé l'écart : Saint-Venant n'était pas la cause. **La cause relue** : deux sources dans le
+  montage (ADR-273 D2 enfreint) — la 3D partait de l'onde de S650 (x₁ = 3,488 m, la distance canonique), la référence S647 et S690 de
+  x₁ = 3,4 m ; et `Plage::nouvelle`, repris de S650, centrait aussi Saint-Venant du large à 3,488 m (une valeur par défaut cachée dans
+  l'aide). Corrigé : le large construit depuis la même onde (3,4 m). Le témoin à 4,0 m avait les mêmes deux sources : à refaire si besoin.
+  Pour la revue S696 : un montage repris d'une session antérieure porte ses valeurs par défaut — les relire toutes contre la référence.
+- **P2 fini** — (1) tenu ; (2) **manqué** (−0,118 s ; la position tenue) ; l'air tenu ; (3) tenu. Les témoins : 2,582 / 2,542 / 2,524 s selon ce que Saint-Venant porte — la moitié de l'écart ; le reste (0,04 s) non départagé. 77 664 particules, 10,3 min.

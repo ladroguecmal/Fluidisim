@@ -149,8 +149,8 @@ impl Apic3 {
         if mask.len() != nx * ny {
             return Err(Error::Shape);
         }
-        // S640 : ni avec le fond lisse ; S682 : ni avec la sortie à droite.
-        if self.columns.is_some() || self.lisse.is_some() || self.sortie_droite.is_some() {
+        // S640 : ni avec le fond lisse. (S693 : la sortie à droite, permise.)
+        if self.columns.is_some() || self.lisse.is_some() {
             return Err(Error::Domain);
         }
         let bytes = columns_reserved_bytes(self.domain).ok_or(Error::Domain)?;

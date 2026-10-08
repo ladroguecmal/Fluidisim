@@ -418,7 +418,9 @@ pas recopiée ici (L137).
   ([preuve](validation/RELAIS-COTE-APIC-S688.md)). **S689** : le reflux — 10 s d'aller-retour à travers le raccord, la masse au bit, la dette
   remboursée au quantum ([preuve](validation/REFLUX-RIVAGE-S689.md)). **S690** : la vague qui plonge à travers le relais — le retournement et l'air
   enfermé du tout-3D retrouvés (0,02 s, quelques cm) ; le raccord borné par la célérité ; 4 s en 13,6 min sur 16 fils (le premier essai : 8 h)
-  ([preuve](validation/RELAIS-PLONGEANTE-S690.md), [analyse par moments](registres/ANALYSE-PHASES-S690.md)).
+  ([preuve](validation/RELAIS-PLONGEANTE-S690.md), [analyse par moments](registres/ANALYSE-PHASES-S690.md)). **S693** : les deux raccords
+  ensemble (ADR-275, étape 1) — la 3D réduite à la bande de déferlement (÷ 3 particules), la masse au bit ; le retournement 0,12 s trop
+  tôt : Saint-Venant, sans dispersion, raidit l'onde du large (la moitié, mesurée) ([preuve](validation/DEUX-RACCORDS-S693.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

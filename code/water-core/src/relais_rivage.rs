@@ -66,10 +66,20 @@ impl RelaisRivage {
         (self.apic.domain().dx as f64).powi(3) / 8.
     }
 
-    /// **La masse** : Saint-Venant + particules × quantum + réservoir − dette (m³).
+    /// **La masse** : Saint-Venant + le volume de la 3D (`total_volume` : les particules, et S693, l'eau d'une zone de colonnes) + réservoir
+    /// − dette (m³). Sans colonnes, particules × quantum, au bit.
     pub fn volume(&self) -> f64 {
         let reservoir: f64 = self.apic.right_inlet().map_or(0., |r| r.0.iter().sum());
-        self.sv.volume() + self.apic.particle_count() as f64 * self.quantum() + reservoir - self.dette.iter().sum::<f64>()
+        self.sv.volume() + self.apic.total_volume() + reservoir - self.dette.iter().sum::<f64>()
+    }
+
+    /// **S693 — le bord gauche d'APIC** (`ny·nz` vitesses normales, rangées `k·ny + j`), pour un relais au large (S650) ; nul par défaut.
+    pub fn regler_gauche(&mut self, v: &[f32]) -> Result<(), Refus> {
+        if v.len() != self.gauche.len() {
+            return Err(Refus::Montage);
+        }
+        self.gauche.copy_from_slice(v);
+        Ok(())
     }
 
     /// S690 — le fond du bord droit de la 3D, rangée `j` : le fond lisse au bord, sinon le dessus de l'escalier de la dernière colonne.
