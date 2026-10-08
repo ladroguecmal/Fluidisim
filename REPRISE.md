@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 19:24 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 19:26 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S708 — le volume d'APIC par la surface contre le compte (session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S707 — La naissance de la 3D (session longue) ([journal](notes/JOURNAL.md)). Avant : S706 (la quarante-cinquième revue de méthode)
 Session suivante : S708 — le volume d'APIC par la surface contre le compte (le tout-3D de S690, l'onde plate) ; puis N2 par la surface
 Maillons        : 1

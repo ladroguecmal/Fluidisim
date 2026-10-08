@@ -62,64 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S707 — **terminée**. En autonomie, sans arrêt. **Première session longue** (ADR-279 D3) : la naissance de la 3D, pièces N1 et N2
-de [LOD-ETAPE-2-S705](../docs/registres/LOD-ETAPE-2-S705.md).
+Session : S708 — **en cours**. En autonomie, sans arrêt ; session longue (ADR-279 D3). S707 : APIC tasse ses particules sous la crête
+(+3,8 %), et le compte n'en donne pas la surface. **Le volume d'APIC par sa surface, contre le compte.**
 
-**Ce que la session fait.** `birth_from_columns` (`apic3d_naissance.rs`) fait naître la 3D d'un état 2D :
-- elle retire toutes les particules ;
-- par colonne, elle pose `round(volume / quantum)` particules aux places du réseau, la plus basse d'abord. La hauteur est ainsi tenue au
-  quantum près (3 mm à 2,5 cm), non à la couche (1,25 cm) ;
-- chaque particule prend la vitesse et l'affine du G2P, sur une grille remplie par l'appelant ;
-- l'écart de volume, donné − posé, revient à l'appelant.
+**L'instrument.** Le volume de la surface reconstruite d'APIC (`distance()`, la distance signée aux centres des mailles, l'eau où φ < 0) :
+`V_φ = Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides. Par colonne, la même somme sur la verticale donne la hauteur de la
+surface. On le compare à `V_n = n · quantum`, le volume que comptent les raccords.
 
 **Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
 
-| essai | ce qu'il juge | la seule cause qui change | critères |
-|---|---|---|---|
-| **E1 (N1)** | l'eau au repos, fond plat, 4 m, `h` = 0,49 m (une couche partielle), 1 s | la naissance, contre le semis du réseau (le témoin) | posé + écart = donné à 10⁻¹² ; la vitesse maximale après 1 s sous 1 mm/s, et au plus trois fois celle du témoin |
-| **E2 (N2)** | l'onde de S704 sur un fond plat de 10 m, 1,6 s ; à 0,4 s, la 3D est réduite à `(h, ū)` par colonne, puis renaît par le profil vertical de SGN | la renaissance (la perte de la structure verticale), entre deux copies de la 3D (ADR-273 D1) | la crête aux plans 5, 6 et 7 m à moins de **3 mm** de la 3D ininterrompue ; l'instant de la crête au plan de 7 m à moins de **0,02 s** ; le nombre de particules tenu |
-| **E3** | la même naissance à 0,4 s, mais depuis l'état de SGN, qui a porté l'onde depuis le départ | le porteur avant la naissance : SGN au lieu de la 3D | rapporté et attribué ; aucun critère de passage (S704 : SGN 5 % plus haut) |
+| essai | ce qu'il mesure | critères |
+|---|---|---|
+| **E1** | l'eau au repos (le semis, 4 m, 1 s) : `V_φ / V_n` au départ et à 1 s | l'étalon : `V_φ / V_n` constant à 10⁻³ sur 1 s (l'eau au repos ne doit rien changer) ; sa valeur, le décalage propre de la reconstruction |
+| **E2** | l'onde plate de S707 (10 m, 1,6 s) : `V_φ(t) / V_φ(0)` aux photos ; la crête par la surface, contre la crête par le compte | rapporté ; la croissance de la crête comptée (0,136 → 0,178 m) relue par la surface |
+| **E3** | le tout-3D de S690 (le montage sans raccord, 4 s, le déferlement) : `V_φ(t) / V_φ(0)` à chaque quart de seconde | rapporté et attribué : sous 1 % de dérive, le compte est un bon témoin global de la masse et seule la répartition locale diffère ; au-delà, la masse « au bit » des raccords est à reformuler |
 
-E3 ne se lance que si E2 tient. Si E2 échoue, la session cherche la cause de E2 et s'arrête quand elle est nommée.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-279)
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-279)
-
-- **témoin** : E1, le semis du réseau ; E2, la 3D ininterrompue, par la même fonction ; E3, E2.
-- **instrument** :
-  - la crête, lue par le volume d'une tranche de 10 cm (S704 : résolution 0,2 mm, bruit ≈ ±2 mm) ;
-  - la vitesse maximale des particules.
-
-  Ce que rendrait chaque hypothèse en E2 :
-  - le profil de SGN suffit à refaire la structure verticale : les crêtes à ±2 mm, le bruit de lecture ;
-  - il ne suffit pas : un écart de crête, croissant vers l'aval.
-- **calcul** : les tolérances respectent ADR-279 D1. À 2,5 cm, le juge diffère de sa version à 1,25 cm d'environ 6 mm de crête. 3 mm
-  vaut la moitié de cette convergence, et un peu plus que le bruit de lecture. Le coût : ≈ 1 min par repos, ≈ 3 min par onde.
+- **témoin** : E1 l'est pour E2 et E3 (le décalage propre de la reconstruction). E2 et E3 sont lus contre leur propre départ.
+- **instrument** : `V_φ`. Ce que rendrait chaque hypothèse :
+  - APIC garde son volume géométrique : `V_φ(t)/V_φ(0)` à 1 % près ;
+  - APIC le dérive : une pente, ou un saut au déferlement.
+- **calcul** : la résolution de `V_φ`. Une erreur d'un dixième de maille sur la surface, rapportée à 0,5 m d'eau, fait 0,5 % : la mesure
+  vaut pour des dérives de ≥ 1 %. Le coût : ≈ 1 + 3 + 13 min.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-273 D1, par E2 : la naissance est jugée entre deux copies de la 3D, avant d'être nourrie par SGN en E3 ;
-  - ADR-276 D2 : chaque essai ne change qu'une cause, la colonne de la table ;
-  - ADR-278 D2 : sans objet ici (aucun déferlement).
+  - ADR-279 D1 : la mesure précède toute tolérance nouvelle ;
+  - ADR-276 D1 : E3 passe par la même fonction que le tout-3D (`Large::Aucun`), le volume dans l'enregistrement.
 - **pièges** :
-  - la réduction compte les particules par colonne : la masse reste exacte, et l'écart de E2 vaut 0 ;
-  - `ū_x` et `ū_xx` par différences le long de x, nuls aux murs ;
-  - au-dessus de l'eau, le profil est pris à la surface ;
-  - l'instant de réduction doit tomber exactement à 0,4 s : le pas est borné.
+  - les mailles solides (l'escalier du fond) sont exclues ;
+  - les gouttes en l'air comptent dans `V_φ`, comme dans le compte ;
+  - φ est celui du dernier pas.
 
-**Critères de la session.** E1 et E2 tenus, ou leur échec nommé ; E3 rapporté.
+**Critères de la session.** E1 tenu ; E2 et E3 mesurés et attribués.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan ; la note du déclencheur.
-- [x] **P2** — E1.
-- [x] **P3** — E2 (échoue, cause nommée).
-- [x] **P4** — E3 (non lancée : subordonnée à E2).
-- [x] **P5** — preuve ; rituel.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — E3.
+- [ ] **P5** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini (E1)** — la première pose (une couche partielle en haut) laissait 3,95 mm/s : chaque sous-colonne emplie à la même hauteur, d'un pas régulier ; **tenu** : 1,1·10⁻⁵ m/s (le semis du réseau 6,8·10⁻⁶), la masse au bit.
-- **E2, l'instrument corrigé avant toute attribution** : le maximum dans le temps d'une tranche de 10 cm donnait au témoin même 0,185 m au plan de 7 m (S704 : 0,15 m) ; c'était le bruit du regroupement, retenu par le maximum. Il est remplacé par des photos à 0,6 s, 1,0 s et 1,6 s : le profil de surface lissé sur 20 cm (le biais de lissage `(k·w)²/3` ≈ 3·10⁻³, soit 0,5 mm), sa crête et sa position. On y ajoute la vitesse maximale des particules. Les critères, aux photos de 1,0 s et 1,6 s : la crête à 3 mm, la position à 5 cm (0,02 s à la célérité).
-- **E2, second passage** : la renaissance doublait la vitesse maximale (1,56 m/s contre 0,79 m/s). La cause : `ū_xx` tiré par dérivée seconde d'une moyenne de particules bruitée. `ū` est désormais lissé sur les rangées et sur 20 cm avant les dérivées. **Constat sur le témoin** : sur fond plat, la 3D ininterrompue à 2,5 cm fait monter la crête lissée de 0,145 m (0,6 s) à 0,184 m (1,6 s), sans perte de particules. À mesurer à 1,25 cm sur la même durée (ADR-279 D1).
-- **E2, troisième lecture (avant toute attribution)** : la vitesse de trop vient de quelques particules de surface à la crête, détachées après la naissance (1,17 m/s vers le bas à 0,6 s), non du corps de l'onde. La position lue au maximum du profil sautait de 40 cm, car le sommet d'une onde solitaire est plat (≈ 5 mm sur ±20 cm). Elle est remplacée par la phase, le centre du volume en excès à ±1,5 m. La crête est lissée sur 40 cm, avec un biais commun aux deux calculs de 1,8 mm. Les critères ne changent pas (3 mm, 5 cm).
-- **E2, quatrième lecture : les grandeurs intégrales.** Les lectures ponctuelles (crête, phase) restaient plus bruitées que les critères : la phase −18, −8, +17 cm ; la crête −2,5, −1,8, −10,8 mm. Le profil entier se compare désormais au témoin : le décalage qui superpose le mieux (la phase), le facteur d'échelle (l'amplitude), l'écart qui reste (la forme), sur la fenêtre où η₀ > 2 cm. Les critères, aux photos de 1,0 s et 1,6 s : le décalage sous 5 cm, le facteur à 2 % (3 mm sur 0,15 m). Le témoin du juge à 1,25 cm se lit de même.
-- **E2, la comparaison intégrale sur profils bruts** : facteur 0,77–0,84, écart 5 cm. C'était le bruit par colonne : deux files de particules par maille en x, une file qui passe la frontière, et la colonne varie de ±50 %. Les profils sont lissés sur 20 cm avant la comparaison, les deux de la même façon.
-- **E2, l'instrument final** : la hauteur par un noyau en tente de ±10 cm, sur la position continue des particules ; un lissage résiduel de 10 cm. Une photo à 0,4 s, juste après la renaissance, donne le plancher de bruit : les deux calculs y portent la même eau par colonne.
-- **P3 fini (E2)** — échoue : à 1,0 s, facteur 0,935, décalage −6 cm. E2b (sa propre grille) perd autant : la cause est la disposition des particules. Le diagnostic : sous l'onde, la densité est à +3,8 %, la surface à 2,1 cm sous le compte. La suite : S708, le volume d'APIC par la surface.
