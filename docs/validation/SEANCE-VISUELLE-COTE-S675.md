@@ -41,4 +41,5 @@ C'est la surface de B : une superposition linéaire, sans la forme du déferleme
 
 ## Le verdict
 
-**R42, envoyé le 2026-10-07** : la côte qui déferle (la surface, la coupe, les profils) — en attente.
+**R42, envoyé le 2026-10-07 — reçu le 2026-10-08** : *« R42 validé »*. La côte qui déferle (la surface, la coupe, les profils) est
+validée à l'œil, sur le rendu d'atelier.

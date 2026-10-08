@@ -174,7 +174,7 @@ pas recopiée ici (L137).
   **S673** : `Cote2D` les porte — `η` relevé de 13 cm au rivage, l'eau qui court le long de la plage ; à 0,2 % et 0,6 % de
   l'équilibre 1D ([preuve](validation/COTE-2D-NIVEAU-DERIVE-S673.md)). **S674** : le niveau rétroagit sur le déferlement (point
   fixe, trois marches) — `Hrms` au rivage +8 %, au point fixe 1D à 0,4 % ([preuve](validation/RETROACTION-NIVEAU-S674.md)). **S675** :
-  la séance visuelle de la côte qui déferle, **R42 posé** ([preuve](validation/SEANCE-VISUELLE-COTE-S675.md)).
+  la séance visuelle de la côte qui déferle, **R42 reçu** (*« R42 validé »*, 2026-10-08) ([preuve](validation/SEANCE-VISUELLE-COTE-S675.md)).
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *partiel* depuis S599 pour le côtier (la bibliothèque de 12.3 ;
   [preuve](validation/COTIER-S599.md)) ; la météo **à la fin** (ADR-197 D5), un système
   complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).
