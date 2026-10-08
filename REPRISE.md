@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 13:18 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 13:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S694 — le porteur dispersif : Serre–Green–Naghdi 1D ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S693 — Les deux raccords ensemble (ADR-275, étape 1) ([journal](notes/JOURNAL.md)). Avant : S692 (La conception du LOD de simulation)
 Session suivante : S694 — le porteur dispersif du large : Serre–Green–Naghdi 1D, jugé sur l'onde solitaire exacte (lève aussi A234)
 Maillons        : 1 (4.14 : la 3D réduite à la bande de déferlement)

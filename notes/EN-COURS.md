@@ -62,55 +62,54 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S693 — **terminée**. En autonomie vers la v2 ; le LOD de simulation (ADR-275), étape 1 : **les deux raccords ensemble**.
+Session : S694 — **en cours**. En autonomie, sans arrêt (l'utilisateur, 2026-10-08). S693 : Saint-Venant, sans dispersion, raidit l'onde
+du large et fait se retourner la vague trop tôt. **Le porteur dispersif**, Serre–Green–Naghdi (SGN), d'abord en 1D sur fond plat ; il
+servira aussi de référence à A234.
 
-**Ce que la session fait.**
+**Le schéma** (`serre_1d.rs`, catégorie P) :
 
-- **La zone de colonnes et la sortie à droite, permises ensemble.** S682 les refusait pour « leurs tableaux par particule » ; la zone de
-  colonnes n'en a aucun (ses champs sont ceux de la grille) : le refus était trop prudent.
-- **`RelaisRivage`** :
-  - le bord gauche d'APIC réglable par l'appelant (il le remettait à zéro) ;
-  - le volume de la 3D pris par `total_volume` (les particules, l'eau des colonnes, leurs soldes) ; sans colonnes, le même nombre
-    qu'avant, au bit.
-- **La vague de S647, 3D réduite.** APIC 3D sur `[5,0 ; 10,775]` m :
-  - au large, la zone de colonnes de S650 (0,6 m), son bord gauche poussé par Saint-Venant ;
-  - au rivage, le relais de S690.
+- un pas de Saint-Venant (volumes finis, MUSCL, Rusanov, Heun) ;
+- plus la correction dispersive de Bonneton et al. (2011). On résout, à chaque étage, `h·A − ⅓(h³·A_x)_x = −⅓(h³(2u_x² + g·h_xx))_x`
+  (tridiagonal), puis `(hu)_t` reçoit `h·A`.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-274)
+Linéarisé, le schéma rend `ω² = g·d·k²/(1 + (kd)²/3)`, la dispersion de Serre (calculé à la main au plan).
 
-- **témoin** : le relais au rivage seul (S690 : 2,624 s, 9,963 m ; l'air à 2,777 s, 10,325 m) et le tout-3D (2,642 s, 9,988 m) ;
-  S684 inchangé (au bit, sans colonnes).
-- **instrument** : les lecteurs de S647–S648 ; la masse (la 3D + Saint-Venant du rivage + réservoir − dette − le volume entré par la
-  gauche). Ce que rendrait chaque hypothèse :
-  - si les deux raccords coexistent, le même retournement que S690, à 0,02 s et 0,15 m (le relais au large de S650 en était à 0,004 s
-    et 0,15 m à 5 cm) ;
-  - un conflit entre la zone de colonnes et la sortie, une masse qui dérive ou une colonne de bord vidée.
-- **calcul** (ce script) : l'eau de la 3D passe de 4.31 à 1.81 m² par mètre de largeur, ÷ 2.4 particules. Le calcul attendu :
-  ≈ 5.7 min au lieu de 13,6 (mesuré au premier pas, ADR-274 D1).
-- **ADR** : ADR-271, ADR-273 D2 (une seule source : Saint-Venant du rivage part du niveau des particules), ADR-274, ADR-275.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-274)
+
+- **témoin** : le même schéma sans le terme dispersif (Saint-Venant), sur la même onde : le front se raidit.
+- **instrument** : l'onde solitaire exacte de SGN, `η = a·sech²(κ(x − ct))`, `c = √(g(d+a))`, `κ = √(3a)/(2d√(d+a))`, sur un domaine
+  périodique, après 40 `d`. Ce que rendrait chaque hypothèse :
+  - si les équations sont justes, la forme est gardée et la célérité est celle de la formule, l'écart convergeant à l'ordre deux ;
+  - si un signe ou un facteur est faux dans le terme non linéaire, l'onde se déforme ou change de vitesse, sans converger vers
+    l'exacte ;
+  - le témoin se raidit.
+- **calcul** (ce script) :
+  - `a/d` = 0,1 et 0,3 ; `c` = 3,285 et 3,571 m/s ; la largeur `1/κ` = 3,83 et 2,08 m ;
+  - mailles `d/20` et `d/40`, Courant 0,4 ;
+  - la borne de forme : **2 %** de `a`, sous la condition d'ordre (÷ 3 au moins d'une maille à l'autre) ;
+  - la célérité à **0,2 %**. Le plancher : la lecture de la crête, interpolée par une parabole (sans quantum de maille).
+- **ADR** : ADR-271, ADR-273 D1, ADR-274 D1 (le coût mesuré : quelques secondes).
 - **pièges** :
-  - S650 pose le fond plat à z = 0 sous les colonnes (l'eau à 0,5 m, non 0,55 m) : la géométrie est celle de S647 décalée de 5 cm ;
-  - le bord gauche ouvert et le bord droit de sortie au même pas ;
-  - la dette et le réservoir de la sortie, à côté des soldes des colonnes.
+  - la formule de l'onde solitaire, de mémoire. C'est l'essai qui la confirme : un état initial faux ne serait pas stationnaire, et le
+    témoin le distinguerait ;
+  - le périodique dans le système tridiagonal (Sherman–Morrison, comme S665) ;
+  - `u = hu/h` dans les termes dispersifs.
 
 **Critères, écrits avant.**
 
-1. Sans colonnes, au bit : S684 inchangé.
-2. Le premier retournement à moins de **0,02 s** et **0,15 m** du tout-3D ; l'air enfermé après lui, en avant.
-3. La masse à 10⁻¹² près en relatif ; la dette sous un quantum.
-4. Rapportés : le temps de calcul contre S690, les particules.
+1. À `a/d` = 0,1 et 0,3, sur 40 `d` : l'écart de forme au plus **2 %** de `a` à `d/40`, divisé par 3 au moins depuis `d/20`.
+2. La célérité de la crête à **0,2 %** de `√(g(d+a))`.
+3. Le témoin (sans le terme) s'écarte de plus de 10 % de `a`.
+4. La masse au bit (le schéma est conservatif en `h`).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les deux raccords ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — `serre_1d.rs` ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2, en cours (notes)** — Premier essai : 77 664 particules (÷ 3), 10 min, la masse au bit, mais le retournement 0,12 s trop tôt. Le témoin
-  (le raccord du large à 4,0 m) n'a pas déplacé l'écart : Saint-Venant n'était pas la cause. **La cause relue** : deux sources dans le
-  montage (ADR-273 D2 enfreint) — la 3D partait de l'onde de S650 (x₁ = 3,488 m, la distance canonique), la référence S647 et S690 de
-  x₁ = 3,4 m ; et `Plage::nouvelle`, repris de S650, centrait aussi Saint-Venant du large à 3,488 m (une valeur par défaut cachée dans
-  l'aide). Corrigé : le large construit depuis la même onde (3,4 m). Le témoin à 4,0 m avait les mêmes deux sources : à refaire si besoin.
-  Pour la revue S696 : un montage repris d'une session antérieure porte ses valeurs par défaut — les relire toutes contre la référence.
-- **P2 fini** — (1) tenu ; (2) **manqué** (−0,118 s ; la position tenue) ; l'air tenu ; (3) tenu. Les témoins : 2,582 / 2,542 / 2,524 s selon ce que Saint-Venant porte — la moitié de l'écart ; le reste (0,04 s) non départagé. 77 664 particules, 10,3 min.
+
+- **La réduction linéaire, à la main.** Serre : `u_t + uu_x + gh_x = (1/(3h))(h³(u_xt + uu_xx − u_x²))_x`. Soit `A = u_t + uu_x + gh_x`.
+  - On a `u_xt + uu_xx − u_x² = A_x − 2u_x² − gh_xx`, d'où `hA − ⅓(h³A_x)_x = −⅓(h³(2u_x² + gh_xx))_x`.
+  - Linéarisé, en Fourier : `A(1 + (kd)²/3) = (i/3)·g·d²·k³·η`, d'où `u_t = −igkη/(1 + (kd)²/3)` et `ω² = gdk²/(1 + (kd)²/3)`.
