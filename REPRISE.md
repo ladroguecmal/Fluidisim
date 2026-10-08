@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 14:42 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 14:44 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S699 — le raccord du large entre deux 3D : le rejeu ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S698 — Le raccord du large par particules ([journal](notes/JOURNAL.md)). Avant : S697 (Le raccord du large jugé seul)
 Session suivante : S699 — la traversée du raccord du large départagée : d'abord entre deux 3D (ADR-273 D1)
 Maillons        : 1

@@ -62,41 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S698 — **terminée**. En autonomie, sans arrêt. S697 : la zone de colonnes du raccord du large (hydrostatique, vitesse uniforme)
-fait tout l'écart. **Le raccord du large par particules**, sans zone de colonnes.
+Session : S699 — **en cours**. En autonomie, sans arrêt. S698 : le raccord du large par particules, nourri par SGN, laisse −0,047 s au
+retournement. Non traversé, il fait −0,017 s ; la traversée coûte −0,030 s. Trois causes y restent mêlées : le porteur, le profil, la
+pose sans matrice affine.
 
-**Ce que la session fait.**
+**Ce que la session fait : le raccord entre deux copies du même solveur** (ADR-273 D1).
 
-- **Le bord gauche d'APIC par particules** (`apic3d_gauche.rs`), le miroir de S682–S683. Les particules qui sortent par la gauche sont
-  retirées et comptées. Le volume qui entre est posé par quanta, chaque particule avec la vitesse que l'appelant donne à sa hauteur.
-- **Le porteur SGN** (S694) au large. Au raccord, `ū = q/h`, puis `ū_x` et `ū_xx` par différences sur ses mailles. Le profil vertical
-  de SGN sur fond plat (z depuis le fond) donne `u(z) = ū + (h²/6 − z²/2)·ū_xx` et `w(z) = −z·ū_x`. C'est la vitesse du bord ouvert,
-  couche par couche, et celle des particules posées.
+- **L'enregistrement.** Le tout-3D (le montage sans raccord de S697) enregistre au plan x = 5,0 m, à chaque pas :
+  - la vitesse normale de chaque face (rangée × couche) ;
+  - chaque particule qui franchit le plan vers la droite : l'instant, la position, la vitesse, la matrice affine.
+- **Le rejeu.** Le montage raccordé à 5,0 m rejoue l'enregistrement par le bord à particules de S698 :
+  - les vitesses des faces, interpolées dans le temps ;
+  - les particules enregistrées, posées telles quelles.
+
+  Ni SGN, ni profil.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276)
 
-- **témoin** : le montage sans raccord de S697, par la même fonction (2,637 s, 9,988 m). Le raccord est la seule chose qui change
-  (ADR-276 D2).
-- **instrument** : le premier retournement, au raccord à 5,0 m. Ce que rendrait chaque hypothèse :
-  - si la zone de colonnes était la cause, et que le bord par particules avec le profil de SGN transmet l'onde, le témoin à 0,02 s près ;
-  - si le bord par particules garde une faute (le profil, la pose), un écart entre le témoin et 2,524 s.
-- **calcul** : aucun nombre neuf. Le coût est celui de S693, ≈ 10 min ; le profil de SGN est calculé à chaque pas.
-- **ADR** : ADR-271, ADR-273, ADR-275, ADR-276.
+- **témoin** : le tout-3D, par la même fonction ; le même passage qui enregistre (2,637 s attendu, S697).
+- **instrument** : le premier retournement. Ce que rendrait chaque hypothèse :
+  - si le bord est transparent quand on le nourrit exactement, le témoin à 0,02 s près. L'écart de S698 revient alors à l'alimentation
+    par SGN (le porteur, le profil, la pose) ;
+  - si le bord lui-même fausse l'onde (la vitesse imposée à la face, le retrait à gauche), un écart proche de celui de S698.
+- **calcul** : aucun nombre neuf. Le coût : ≈ 13,5 min + ≈ 7 min.
+- **ADR** : ADR-273 D1, ADR-276 D2.
 - **pièges** :
-  - la masse : la 3D + le rivage + les réservoirs − la dette − ce qui est entré par la gauche + ce qui en est sorti ;
-  - `ū_xx` par différences centrées sur SGN ;
-  - les couches au-dessus de l'eau : la vitesse du bord y est sans effet (faces d'air).
+  - les indices des particules bougent quand le rivage en retire une. Une paire avant/après qui saute de plus de 0,1 m est écartée,
+    et les particules ajoutées au rivage sont ignorées ;
+  - le décalage d'instant entre les deux passages : une particule est posée au milieu du pas qui suit son passage ;
+  - la masse comptée par quantum posé.
 
 **Critères, écrits avant.**
 
-1. Au raccord à 5,0 m : le retournement à moins de **0,02 s** et **0,15 m** du témoin (2,637 s, 9,988 m).
-2. L'air après lui, en avant ; la masse à 10⁻¹² ; la dette sous un quantum.
+1. Le rejeu à moins de **0,02 s** et **0,15 m** du témoin.
+2. La masse à 10⁻¹², la dette sous un quantum.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le bord gauche ; l'essai ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — l'enregistrement, le rejeu ; l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — la pose par rangée laissait un trou d'air (un faux retournement à 0,14 s) : posée face par face. (1) **échoue** : 2,590 s (−0,047 s ; colonnes −0,113 s) ; le témoin à 1,0 m −0,017 s (colonnes −0,055 s) ; (2) tenu.
