@@ -62,51 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S700 — **terminée**. En autonomie, sans arrêt. S699 : nourri exactement par la 3D, le bord par particules est transparent
-(−0,011 s). L'écart de S698 (−0,047 s) vient donc de l'alimentation par SGN. Ici, ses trois causes, une à la fois (ADR-276 D2).
+Session : S701 — **en cours**. En autonomie, sans arrêt. **La quarante-quatrième revue de méthode** (ADR-222 D4 : S696–S700).
 
-**Ce que la session fait.** Un enregistrement du tout-3D au plan x = 5,0 m (S699), et pendant ce passage, au même plan :
-- le porteur SGN : `h`, `ū` ;
-- la 3D : `h`, la plus haute particule de la tranche ± dx, plus dx/4 ;
-- la 3D : `ū`, la moyenne des vitesses des faces mouillées.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-Puis deux rejeux, chacun ne changeant qu'une chose par rapport à S699 :
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
+  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR** : ADR-222 D4, ADR-273 D1, ADR-276 D1, D2.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-| rejeu | ce qui change seul par rapport au rejeu exact (S699, −0,011 s) |
-|---|---|
-| R2 | les particules posées sans leur matrice affine (`C = 0`) |
-| R3 | la pose par faces de S698 : des quanta posés dans la maille de la face, avec la vitesse de la 3D à cette face, `w = 0`, `C = 0` |
-
-S698 (SGN, profil, pose par faces) diffère de R3 par une seule chose : les vitesses (le porteur et le profil). La comparaison au plan sépare
-ces deux dernières causes :
-- le porteur : l'écart de `h` et de `ū` entre SGN et la 3D, et celui de l'instant de leur crête ;
-- le profil : ce qui reste.
-
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276)
-
-- **témoin** : le rejeu exact de S699 (−0,011 s) ; le tout-3D (2,637 s) par la même fonction.
-- **instrument** : le premier retournement de chaque rejeu ; au plan, la crête de `h` et de `ū`. Ce que rendrait chaque hypothèse :
-  - l'affine en cause : R2 loin de −0,011 s ;
-  - la pose en cause : R3 loin de R2 ;
-  - les vitesses en cause : R3 près de −0,011 s, S698 à −0,047 s, et la crête de SGN en avance ou plus haute que celle de la 3D.
-- **calcul** : aucun nombre neuf ; ≈ 13 + 2 × 7 min.
-- **ADR** : ADR-273 D1, ADR-276 D1, D2.
-- **pièges** :
-  - les drapeaux du montage. Le mode de rejeu est un champ de l'enregistrement. La zone de colonnes ne s'allume ni avec le rejeu ni avec
-    les particules (S699) ;
-  - le `h` de la 3D au plan est lu au quantum (dx/4) ;
-  - SGN tourne dans le passage qui enregistre (`sgn = true`) sans y agir (sans raccord).
-
-**Critères, écrits avant.**
-
-1. R2 et R3 mesurés, et chaque écart attribué à sa seule cause.
-2. La masse à 10⁻¹², la dette sous un quantum.
+**Critères, écrits avant.** (1) ADR-277 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les deux rejeux, la comparaison au plan ; l'essai ; (1)–(2).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — ADR-277 ; METHODE.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-- **P2 fini** — essai.py tuait l'essai sur « ū » (console) : corrigé. (1) R2 −0,037 s, R3 +0,074 s ; l'affine −0,026 s, la pose +0,085 s, les vitesses de SGN −0,121 s ; (2) tenu.
