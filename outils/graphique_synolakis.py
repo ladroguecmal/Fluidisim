@@ -6,7 +6,8 @@ l'essai `the_judge_against_synolakis_*_s712`), et écrit `captures/s712_synolaki
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-VARIANTES = [("sans", "3D sans projection (le juge)", "#d62728"), ("k0.05", "3D, projection faible κ = 0,05", "#1f77b4")]
+VARIANTES = [("sans", "3D, pas 10 ms (le juge)", "#d62728"), ("k0.05", "3D, projection faible", "#1f77b4"),
+             ("sans_pas2500", "3D, pas 2,5 ms", "#2ca02c"), ("sans_fin", "3D à 1,25 cm", "#9467bd")]
 INSTANTS = [15, 20, 25]
 X_MIN, X_MAX, E_MIN, E_MAX = -6.0, 14.0, -0.1, 0.5
 L, H, MARGE = 900, 230, 60
@@ -72,7 +73,7 @@ def main():
         present = any(profil(variante, t) for t in INSTANTS)
         svg.append(f'<line x1="{xl}" y1="{yl + 10}" x2="{xl + 30}" y2="{yl + 10}" stroke="{couleur}" stroke-width="2"/>')
         svg.append(f'<text x="{xl + 36}" y="{yl + 14}">{nom}{"" if present else " (à venir)"}</text>')
-        xl += 330
+        xl += 215
     svg.append(f'<circle cx="{xl + 5}" cy="{yl + 10}" r="3" fill="black"/><text x="{xl + 14}" y="{yl + 14}">mesures (Synolakis, Caltech)</text>')
     svg.append('</svg>')
     sortie = ROOT / "captures/s712_synolakis.svg"

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S713 — **en cours**. En autonomie, sans arrêt ; session longue. L'utilisateur dort et a dit de ne pas s'arrêter. S712 : contre
+Session : S713 — **terminée**. En autonomie, sans arrêt ; session longue. L'utilisateur dort et a dit de ne pas s'arrêter. S712 : contre
 le laboratoire, la 3D à 2,5 cm fait l'onde de Synolakis trop étroite et trop haute avant le déferlement (0,43 d contre 0,31 d à t = 15).
 **La résolution en est-elle la cause ?**
 
@@ -91,9 +91,10 @@ photos à t = 15 et 20, lues dès qu'elles sont prises. Seul `dx` change (ADR-27
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — l'essai à 1,25 cm (arrêté après t = 15).
-- [ ] **P2b** — E2 : le pas plafonné à 2,5 ms (2,5 cm).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2b** — E2 : le pas plafonné à 2,5 ms (2,5 cm).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini** — à 1,25 cm, t = 15 : la crête 0,421 d (2,5 cm : 0,433 ; la mesure : 0,314), l'écart 0,038 d. **La résolution n'est pas la cause** (−0,012 d, sous les 0,05 d attendus). Le calcul a été arrêté après t = 15 : au déferlement, le pas tombait sous 1 ms (≈ 1 h 10 pour t = 15, des heures pour t = 20). Suspect suivant : le pas, `c·dt/dx` ≈ 1 dans les deux calculs (S714).
 - **E2, ajouté à la session (la même question, ADR-279 D3)** : la plage à 2,5 cm, sans projection, le pas plafonné à **2,5 ms** au lieu de 10 ms. `c·dt/dx` passe de ≈ 1 à ≈ 0,25 ; seul le pas change (ADR-276 D2). **Critères, écrits avant** : si le pas est la cause, la crête à t = 15 descend de plus de 0,05 d vers 0,31 d, et l'écart baisse ; sinon, elle reste vers 0,43 d. Le coût : ≈ 4 fois S712 E1, ≈ 45 min jusqu'à t = 25 ; chaque photo est lue dès qu'elle est prise.
+- **P2b fini (E2)** — le pas à 2,5 ms : t = 15, 0,424 d (le pas n'est pas la cause) ; t = 20, 0,316 d en 3,77 d contre 0,318 d en 3,66 d mesurés (le pas compte au déferlement) ; t = 25, 0,218 d en −3,03 d.

@@ -448,6 +448,8 @@ pas recopiée ici (L137).
   point de déferlement de la 3D dépend de son volume à 0,2–0,3 s : il faut une référence extérieure ([preuve](validation/PROJECTION-DENSITE-FAIBLE-S710.md)).
   **S712** : le juge contre le laboratoire (Synolakis, H/d = 0,3, 1:19,85) — les deux versions de la 3D se valent ; toutes deux font
   l'onde trop haute avant le déferlement (0,43–0,48 d contre 0,31 d) ([preuve](validation/JUGE-SYNOLAKIS-S712.md)).
+  **S713** : ni la maille (1,25 cm : 0,421 d) ni le pas (2,5 ms : 0,424 d) n'expliquent l'onde trop haute ; mais avec le pas de 2,5 ms,
+  la crête du déferlement rejoint la mesure (0,316 d contre 0,318 d) ([preuve](validation/ONDE-TROP-HAUTE-S713.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 23:22 +02:00
+JETON            : libre
+Battement        : 2026-10-09 01:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S713 — la plage de Synolakis à 1,25 cm (session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S712 — Le juge contre le laboratoire (session longue) ([journal](notes/JOURNAL.md)). Avant : S711 (la quarante-sixième revue de méthode)
-Session suivante : S713 — la plage de Synolakis à 1,25 cm (la résolution, cause de l'onde trop haute ?)
+Session en cours : aucune
+Dernière session : S713 — L'onde trop haute : ni la maille, ni le pas (session longue) ([journal](notes/JOURNAL.md)). Avant : S712 (Le juge contre le laboratoire)
+Session suivante : S714 — le juge de S690 au pas de 2,5 ms (le déplacement de son déferlement)
 Maillons        : 1
-Registres       : dernier lot S710 (ADR-213 D3) ; le prochain au plus tard en S713
+Registres       : dernier lot S713 (ADR-213 D3) ; le prochain au plus tard en S716
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

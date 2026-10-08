@@ -1847,7 +1847,8 @@ fn the_synolakis_measurements_are_read_s712() {
 }
 
 /// **S713 — la plage de Synolakis à 1,25 cm** (sans projection), jusqu'à t = 20 : la crête et l'écart contre les mesures, contre S712 à
-/// 2,5 cm (t = 15 : 0,433 d, 0,048 d ; t = 20 : 0,277 d, 0,066 d). Rapporte (les photos sont lues dès qu'elles sont prises).
+/// 2,5 cm (t = 15 : 0,433 d, 0,048 d ; t = 20 : 0,277 d, 0,066 d). Rapporte (les photos sont lues dès qu'elles sont prises). **Mesuré**
+/// à t = 15 : 0,421 d, 0,038 d (≈ 1 h 05) ; arrêté ensuite, le pas tombant sous 1 ms au déferlement.
 #[test]
 #[ignore = "la plage de Synolakis à 1,25 cm (≈ 1 h 30)"]
 fn the_judge_against_synolakis_at_half_the_cell_s713() {
@@ -1856,7 +1857,8 @@ fn the_judge_against_synolakis_at_half_the_cell_s713() {
 }
 
 /// **S714 — la plage de Synolakis, le pas plafonné à 2,5 ms** (2,5 cm, sans projection) : `c·dt/dx` ≈ 0,25 au lieu de ≈ 1. Seul le pas
-/// change (contre S712 E1). Rapporte (les photos sont lues dès qu'elles sont prises, marque `S712 photo`).
+/// change (contre S712 E1). Rapporte (les photos sont lues dès qu'elles sont prises, marque `S712 photo`). **Mesuré** : t = 15, 0,424 d ;
+/// t = 20, **0,316 d en 3,77 d** (la mesure : 0,318 d en 3,66 d) ; t = 25, 0,218 d en −3,03 d ; 33 min.
 #[test]
 #[ignore = "la plage de Synolakis, le pas à 2,5 ms (≈ 45 min)"]
 fn the_judge_against_synolakis_small_step_s714() {

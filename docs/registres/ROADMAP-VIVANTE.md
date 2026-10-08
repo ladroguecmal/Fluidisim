@@ -55,5 +55,7 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
 - **Le volume d'APIC** (S708) : à compte exact, la 3D perd ≈ 1,3 % par seconde de volume géométrique en mouvement (ses particules se
   tassent). Le remède (la projection de densité) passe avant la suite du LOD, car il change le juge lui-même. Au lot S708–S710 : la
   projection faible tient le volume, mais déplace le déferlement de 0,2 s. Le juge se tranchera contre des mesures de laboratoire
-  (S712), et la projection reste éteinte jusque-là.
+  (S712), et la projection reste éteinte jusque-là. Au lot S711–S713 : contre les mesures de Synolakis, les deux versions se valent ; la
+  3D fait l'onde trop haute avant le déferlement (une question ouverte), et le pas de 2,5 ms rend juste la crête du déferlement. Le juge
+  de S690 est relancé au pas court (S714).
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

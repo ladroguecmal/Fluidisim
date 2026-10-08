@@ -1992,3 +1992,11 @@ voir les « photos » : le graphique `captures/s712_synolakis.png` lui est envoy
 la plage canonique en 3D. Le premier passage, figé à t ≈ 26,6 par la remontée sur sable sec, a été arrêté ; les photos sont désormais lues
 dès qu'elles sont prises. **Mesuré** : les deux versions de la 3D se valent contre le laboratoire, et toutes deux font l'onde trop étroite
 et trop haute avant le déferlement (0,43–0,48 d contre 0,31 d). Maillons **1** (4.14, 4.16). Suivant : **S713**, la même plage à 1,25 cm.
+
+## S713 — 2026-10-09 — L'onde trop haute : ni la maille, ni le pas (session longue)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; S712. **Fait** ([preuve](../docs/validation/ONDE-TROP-HAUTE-S713.md)) : la plage
+de Synolakis à 1,25 cm (arrêtée après t = 15, ≈ 1 h 05), puis à 2,5 cm avec le pas plafonné à 2,5 ms. **Mesuré** : la crête de t = 15
+reste vers 0,42 d (la mesure : 0,31 d) ; ni la maille ni le pas n'en sont la cause. Avec le pas de 2,5 ms, la crête du déferlement
+(t = 20) rejoint la mesure (0,316 contre 0,318 d) : le juge à 10 ms dépend du pas. Le graphique est mis à jour
+(`captures/s713_synolakis.png`). Maillons **1** (4.14, 4.16). Suivant : **S714**, le juge de S690 au pas de 2,5 ms.
