@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-08 13:46 +02:00
+JETON            : occupé
+Battement        : 2026-10-08 13:47 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S697 — le raccord du large jugé seul ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S696 — la quarante-troisième revue de méthode (ADR-276) ([journal](notes/JOURNAL.md)). Avant : S695 (Le relais au large nourri par Serre–Green–Naghdi)
 Session suivante : S697 — le raccord du large jugé seul (APIC des deux côtés) ; revue en S701
 Maillons        : 0 (méthode : ADR-276)

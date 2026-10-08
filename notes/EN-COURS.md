@@ -62,25 +62,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S696 — **terminée**. En autonomie, sans arrêt. **La quarante-troisième revue de méthode** (ADR-222 D4 : S691–S695).
+Session : S697 — **en cours**. En autonomie, sans arrêt. S695 : le raccord du large fait se retourner la vague trop tôt. Il est jugé seul ici
+(ADR-273 D1, ADR-276 D2 : une seule cause à la fois).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.** Le même montage que S693–S695 (le repère de S650 : l'eau à 0,5 m, le fond plat à z = 0, l'escalier, l'air
+balistique, le relais au rivage), **sans raccord au large** : APIC 3D depuis 0 m, un mur à gauche (`x_r = 0`). On a ainsi trois
+différences, chacune d'une seule cause :
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, chacune contre ses critères et ses contrôles ; ce qui départagerait une règle nouvelle
-  d'une règle existante : sa présence dans METHODE (cherchée avant d'ajouter).
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR** : ADR-222 D4, ADR-243 D1, ADR-256 D2, ADR-259 D1, ADR-273 D2.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+| écart | la cause qui seule change |
+|---|---|
+| sans raccord (0 m) − S690 (2,624 s) | le repère (0,5 m et z = 0, contre 0,55 m et 0,05 m) |
+| raccord à 1,0 m (2,582 s) − sans raccord | la zone de colonnes derrière l'onde, que l'onde ne traverse pas |
+| raccord à 5,0 m (2,524 s) − raccord à 1,0 m | la part de l'onde qui traverse le raccord |
 
-**Critères, écrits avant.** (1) ADR-276 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276)
+
+- **témoin** : le montage sans raccord, construit par la même fonction (`deux_raccords_porteur`, ADR-276 D1), qui ne change que la
+  présence du raccord.
+- **instrument** : le premier retournement. Ce que rendrait chaque hypothèse :
+  - si le repère est neutre, ≈ 2,624 s (S690), et l'écart de 0,04 s est la zone de colonnes ;
+  - si le repère compte, ≈ 2,58 s, et la zone de colonnes est neutre ;
+  - entre les deux, chacune pour sa part.
+- **calcul** : le coût, ≈ 14 min (≈ 237 000 particules, comme S690 : ADR-274 D1).
+- **ADR** : ADR-273, ADR-276.
+- **pièges** :
+  - sans raccord, ni zone de colonnes, ni bord ouvert à gauche, ni volume entré ;
+  - la même onde (x₁ = 3,4 m) ;
+  - le même `lz` (1,0 m).
+
+**Critères, écrits avant.**
+
+1. Les trois écarts mesurés, et chacun attribué à sa seule cause.
+2. La masse à 10⁻¹² près, la dette sous un quantum.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-276 ; METHODE.
-- [x] **P3** — rituel.
+- [ ] **P2** — le montage sans raccord ; l'essai ; (1)–(2).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-276 : D1 (un état initial depuis une seule fonction ; une aide reprise relue), D2 (un témoin ne fait varier qu'une cause) ; la prochaine revue S701.
