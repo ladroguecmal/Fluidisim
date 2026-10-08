@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S703 — **en cours**. En autonomie, sans arrêt. S702 : la pose par la grille, nourrie par la 3D (la vitesse des faces, `h`), est à
+Session : S703 — **terminée**. En autonomie, sans arrêt. S702 : la pose par la grille, nourrie par la 3D (la vitesse des faces, `h`), est à
 +0,021 s. **Elle est maintenant nourrie par SGN.**
 
 **Ce que la session fait.**
@@ -100,7 +100,8 @@ Session : S703 — **en cours**. En autonomie, sans arrêt. S702 : la pose par l
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `GrilleSgn` ; le volume au plan ; l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — `GrilleSgn` ; le volume au plan ; l'essai ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — (1) **échoue** : 2,569 s (−0,068 s ; les données de SGN −0,089 s à pose égale) ; (2) le rapport des volumes 0,986 ; 2,9·10⁻¹⁵, sous un quantum.

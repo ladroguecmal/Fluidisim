@@ -1909,3 +1909,11 @@ la revue en S706.
 (le porteur donne le flux et la vitesse du bord ; la particule prend la vitesse et l'affine du G2P) ; le montage en mode nommé (le
 témoin au bit). **Mesuré** : R4 +0,021 s (la pose par faces +0,074 s) — le critère de 0,02 s manqué d'une milliseconde. Maillons **1**
 (4.14). Suivant : **S703**, la pose par la grille nourrie par SGN, et le volume entré mesuré contre l'enregistrement.
+
+## S703 — 2026-10-08 — La pose par la grille nourrie par SGN
+
+**Entrée.** En autonomie, sans arrêt ; S702. **Fait** ([preuve](../docs/validation/POSE-GRILLE-SGN-S703.md)) : `Large::GrilleSgn` (les
+données de S698, la pose de S702) ; le volume au plan des données de R4 contre les particules passées. **Mesuré** : −0,068 s (le critère
+échoue) ; à pose égale, les données de SGN −0,089 s ; le volume de R4 à 0,986. La crête de la 3D au plan sous l'amplitude de départ : le
+juge lui-même à éprouver. Maillons **1** (4.14). Suivant : **S704**, l'amortissement de l'onde par le tout-3D à 2,5 cm, et par SGN,
+sur le fond plat.

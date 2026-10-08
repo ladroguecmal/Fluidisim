@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-08 17:15 +02:00
+JETON            : libre
+Battement        : 2026-10-08 17:41 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S703 — la pose par la grille nourrie par SGN ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S702 — La pose par la grille ([journal](notes/JOURNAL.md)). Avant : S701 (la quarante-quatrième revue de méthode)
-Session suivante : S703 — la pose par la grille nourrie par SGN ; le volume entré mesuré contre l'enregistrement
+Session en cours : aucune
+Dernière session : S703 — La pose par la grille nourrie par SGN ([journal](notes/JOURNAL.md)). Avant : S702 (La pose par la grille)
+Session suivante : S704 — l'amortissement de l'onde par le tout-3D à 2,5 cm et par SGN, sur le fond plat : le juge éprouvé
 Maillons        : 1
 Registres       : dernier lot S701 (ADR-213 D3) ; le prochain au plus tard en S704
 ```

@@ -434,6 +434,8 @@ pas recopiée ici (L137).
   S698 tenait par compensation ([preuve](validation/ALIMENTATION-SGN-S700.md)).
   **S702** : la pose par la grille (la vitesse et l'affine du G2P), jugée contre la 3D — +0,021 s, le critère de 0,02 s manqué d'une
   milliseconde ; le montage en mode nommé ([preuve](validation/POSE-PAR-LA-GRILLE-S702.md)).
+  **S703** : la pose par la grille nourrie par SGN — −0,068 s ; à pose égale, les données de SGN avancent de 0,089 s ; la crête de la 3D
+  au plan plus basse que l'onde de départ : le juge à éprouver ([preuve](validation/POSE-GRILLE-SGN-S703.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

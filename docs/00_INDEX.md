@@ -163,6 +163,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [La pose par la grille nourrie par SGN — S703](validation/POSE-GRILLE-SGN-S703.md) : les données de SGN en cause (−0,089 s).
 - [La pose par la grille, jugée contre l'enregistrement de la 3D — S702](validation/POSE-PAR-LA-GRILLE-S702.md) : +0,021 s.
 - [L'alimentation par SGN départagée contre l'enregistrement de la 3D — S700](validation/ALIMENTATION-SGN-S700.md) : deux causes opposées.
 - [Le raccord du large entre deux 3D : le rejeu — S699](validation/RACCORD-LARGE-REJEU-S699.md) : le bord transparent (−0,011 s).
