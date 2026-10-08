@@ -428,6 +428,8 @@ pas recopiée ici (L137).
   (−0,058 s) font tout l'écart ([preuve](validation/RACCORD-LARGE-SEUL-S697.md)).
   **S698** : le raccord du large par particules, nourri par le profil de SGN — l'écart de −0,113 s à −0,047 s (le bord non traversé
   −0,017 s ; la traversée −0,030 s, à départager) ([preuve](validation/RACCORD-LARGE-PARTICULES-S698.md)).
+  **S699** : le raccord du large entre deux 3D — le tout-3D enregistré au plan, rejoué par le bord à particules : −0,011 s ; le bord est
+  transparent, l'écart de S698 vient de l'alimentation par SGN ([preuve](validation/RACCORD-LARGE-REJEU-S699.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

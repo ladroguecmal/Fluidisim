@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S699 — **en cours**. En autonomie, sans arrêt. S698 : le raccord du large par particules, nourri par SGN, laisse −0,047 s au
+Session : S699 — **terminée**. En autonomie, sans arrêt. S698 : le raccord du large par particules, nourri par SGN, laisse −0,047 s au
 retournement. Non traversé, il fait −0,017 s ; la traversée coûte −0,030 s. Trois causes y restent mêlées : le porteur, le profil, la
 pose sans matrice affine.
 
@@ -100,7 +100,8 @@ pose sans matrice affine.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'enregistrement, le rejeu ; l'essai ; (1)–(2).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — l'enregistrement, le rejeu ; l'essai ; (1)–(2).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — un premier rejeu rallumait la zone de colonnes (un drapeau) : corrigé. (1) le rejeu 2,626 s contre 2,637 s (−0,011 s) ; (2) 2,6·10⁻¹⁴, sous un quantum.

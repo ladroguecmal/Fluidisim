@@ -1877,3 +1877,12 @@ rangée laissait un trou d'air dans la colonne d'entrée, pris pour un retournem
 5,0 m, 2,590 s (−0,047 s ; les colonnes −0,113 s) — le critère de 0,02 s **échoue** ; à 1,0 m, −0,017 s (les colonnes −0,055 s) ;
 l'air à 0,002 s ; la masse au bit. Lot S696–S698. Maillons **1** (4.14). Suivant : **S699**, la traversée départagée (le raccord entre
 deux 3D d'abord, ADR-273 D1).
+
+## S699 — 2026-10-08 — Le raccord du large entre deux 3D
+
+**Entrée.** En autonomie, sans arrêt ; S698 (−0,047 s, la traversée à départager). **Fait** ([preuve](../docs/validation/RACCORD-LARGE-REJEU-S699.md)) :
+le tout-3D enregistre le plan x = 5,0 m (les vitesses des faces, les particules qui passent) ; le montage raccordé le rejoue par le bord
+à particules (`pose_left`). Un premier rejeu rallumait en silence la zone de colonnes (une combinaison de drapeaux) : 34 min perdues,
+corrigé, pour la revue de S701. **Mesuré** : le rejeu à −0,011 s du tout-3D ; le bord est transparent, l'écart de S698 vient de
+l'alimentation par SGN. Maillons **1** (4.14). Suivant : **S700**, l'alimentation par SGN comparée à l'enregistrement (le porteur, le
+profil, la pose).

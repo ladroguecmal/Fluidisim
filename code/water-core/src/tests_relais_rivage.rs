@@ -484,12 +484,25 @@ fn a_plunging_wave_breaks_through_the_shore_relay_s690() {
 /// (2) le retournement à 0,02 s et 0,15 m du tout-3D, l'air après lui ; (3) la masse, la dette ; (4) rapportés.
 #[allow(clippy::type_complexity)]
 fn deux_raccords_s693(x_r: f64) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
-    deux_raccords_porteur(x_r, false, false)
+    deux_raccords_porteur(x_r, false, false, None, None)
 }
 
+/// **S699 — l'enregistrement du tout-3D au plan x = 5,0 m** : la vitesse normale des faces à chaque pas, et chaque particule qui
+/// franchit le plan vers la droite (l'instant, la position ramenée au plan, la vitesse, la matrice affine).
+#[derive(Default)]
+struct Enregistrement {
+    faces: Vec<(f64, Vec<f32>)>,
+    croisements: Vec<(f64, [f32; 3], [f32; 3], [[f32; 3]; 3])>,
+}
+
+/// S699 — le plan de l'enregistrement.
+const PLAN_S699: f32 = 5.0;
+
 /// S695 — le même montage ; le porteur du large, Saint-Venant (S693) ou, si `sgn`, Serre–Green–Naghdi 1D sur fond plat (S694).
+/// S699 : sans raccord, `enreg` enregistre le plan x = 5,0 m ; raccordé, `rejeu` le rejoue par le bord à particules (ni SGN, ni profil).
 #[allow(clippy::type_complexity)]
-fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool) -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
+fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
+    -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
@@ -521,7 +534,7 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool) -> (Option<(f64,
     a.set_seabed(Some(&fond)).unwrap();
     a.set_ballistic_air(true);
     // S697 : `x_r` = 0, sans raccord au large — ni zone de colonnes, ni bord ouvert à gauche (il reste fermé, nul).
-    let n_col = if x_r > 0. && !particules { (0.6 / dxs).round() as usize } else { 0 };
+    let n_col = if x_r > 0. && !particules && rejeu.is_none() { (0.6 / dxs).round() as usize } else { 0 };
     if n_col > 0 {
         let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx < n_col) as u8).collect();
         a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
@@ -529,7 +542,9 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool) -> (Option<(f64,
     a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     // S698 : le raccord du large par particules (sans zone de colonnes).
-    let par_particules = particules && x_r > 0.;
+    let par_particules = (particules || rejeu.is_some()) && x_r > 0.;
+    let par_profil = par_particules && rejeu.is_none();
+    let mut curseur = 0usize;
     if par_particules {
         a.enable_left_inlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     }
@@ -586,7 +601,7 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool) -> (Option<(f64,
         }
         // S698 : le profil vertical de SGN au raccord, `u(z) = ū + (h²/6 − z²/2)·ū_xx`, `w(z) = −z·ū_x` (fond plat, z depuis le fond).
         let (mut profil_u, mut profil_ux, mut profil_uxx, mut profil_h) = (0f64, 0f64, 0f64, 0f64);
-        if par_particules {
+        if par_profil {
             let uu = |i: usize| serre.q[i] / serre.h[i];
             let (im, i0, ip) = (i_r - 1, i_r, i_r + 1);
             profil_u = 0.5 * (uu(im) + uu(i0));
@@ -606,7 +621,21 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool) -> (Option<(f64,
             let (qq, hs) = (large.qx[c] + large.qx[c + 3], large.h[c] + large.h[c + 3]);
             if hs > 0. { (qq / hs) as f32 } else { 0. }
         };
-        if par_particules {
+        if let Some(e) = rejeu.filter(|_| par_particules) {
+            // S699 : le rejeu — les vitesses des faces interpolées à la fin du pas, les particules passées avant le milieu du pas.
+            let tf = t1;
+            let i = e.faces.partition_point(|(tt, _)| *tt < tf).clamp(1, e.faces.len() - 1);
+            let ((ta, fa), (tb, fb)) = (&e.faces[i - 1], &e.faces[i]);
+            let s = (((tf - ta) / (tb - ta).max(1e-12)).clamp(0., 1.)) as f32;
+            let bord: Vec<f32> = fa.iter().zip(fb).map(|(a, b)| a + s * (b - a)).collect();
+            rel.regler_gauche(&bord).unwrap();
+            let tm = (t as f64 + 0.5 * us as f64) * 1e-6;
+            while curseur < e.croisements.len() && e.croisements[curseur].0 <= tm {
+                let (_, x, v, c) = e.croisements[curseur];
+                rel.apic.pose_left(x, v, c).unwrap();
+                curseur += 1;
+            }
+        } else if par_particules {
             let vit = |z: f64| profil_u + (profil_h * profil_h / 6. - z * z / 2.) * profil_uxx;
             let bord: Vec<f32> = (0..nz * ny).map(|kj| {
                 let z = ((kj / ny) as f64 + 0.5) * dxs;
@@ -630,8 +659,23 @@ fn deux_raccords_porteur(x_r: f64, sgn: bool, particules: bool) -> (Option<(f64,
         } else {
             rel.regler_gauche(&vec![ub; ny * nz]).unwrap();
         }
+        let avant: Vec<[f32; 3]> = if enreg.is_some() { rel.apic.particles().to_vec() } else { Vec::new() };
         rel.pas(us).unwrap();
         t += us;
+        if let Some(e) = enreg.as_deref_mut() {
+            // S699 : le plan x = 5,0 m (`x_r` = 0) ; une paire qui saute de plus de 0,1 m est un échange d'indices au rivage, écartée.
+            let ts = t as f64 * 1e-6;
+            let (p, v, c) = (rel.apic.particles(), rel.apic.velocities(), rel.apic.affine());
+            for k in 0..avant.len().min(p.len()) {
+                let (x0, x1) = (avant[k][0], p[k][0]);
+                if x0 < PLAN_S699 && x1 >= PLAN_S699 && x1 - x0 < 0.1 {
+                    e.croisements.push((ts, [x1 - PLAN_S699, p[k][1], p[k][2]], v[k], c[k]));
+                }
+            }
+            let i_c = (PLAN_S699 as f64 / dxs).round() as usize;
+            let uu = rel.apic.velocity_u();
+            e.faces.push((ts, (0..nz * ny).map(|kj| uu[kj * (nx + 1) + i_c]).collect()));
+        }
         if let Some(col) = rel.apic.columns.as_ref() {
             entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
         }
@@ -692,7 +736,7 @@ fn the_offshore_relay_witness_s693() {
 #[test]
 #[ignore = "le relais au large par SGN (≈ 10 min)"]
 fn the_offshore_relay_fed_by_serre_s695() {
-    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(5.0, true, false);
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(5.0, true, false, None, None);
     println!("S695 : SGN au large ; {n0} particules ; retournement {premier:?} (témoin 2,582 s, 9,888 m ; Saint-Venant 2,524 s ; tout-3D 2,642 s) ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s");
     let (tp, xp) = premier.expect("un retournement");
     let (ta, xa) = air.expect("critère 2 : de l'air enfermé");
@@ -704,7 +748,7 @@ fn the_offshore_relay_fed_by_serre_s695() {
 #[test]
 #[ignore = "le montage sans raccord au large (≈ 14 min)"]
 fn the_offshore_relay_judged_alone_s697() {
-    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(0.0, false, false);
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(0.0, false, false, None, None);
     println!("S697 : sans raccord au large, {n0} particules ; retournement {premier:?} ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s (S690 : 2,624 s ; raccord à 1,0 m : 2,582 s ; à 5,0 m : 2,524 s)");
     assert!(masse < 1e-12 && dette < 1.0, "critère 2");
 }
@@ -716,7 +760,7 @@ fn the_offshore_relay_judged_alone_s697() {
 #[test]
 #[ignore = "le raccord du large par particules (≈ 7 min)"]
 fn the_offshore_relay_by_particles_s698() {
-    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(5.0, true, true);
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(5.0, true, true, None, None);
     println!("S698 : raccord du large par particules ; {n0} particules ; retournement {premier:?} (sans raccord 2,637 s, 9,988 m ; colonnes 2,524 s) ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s");
     let (tp, xp) = premier.expect("critère 1 : un retournement");
     let (ta, xa) = air.expect("critère 2 : de l'air enfermé");
@@ -729,7 +773,25 @@ fn the_offshore_relay_by_particles_s698() {
 #[test]
 #[ignore = "le raccord du large par particules à 1,0 m (≈ 11 min)"]
 fn the_offshore_relay_by_particles_not_crossed_s698() {
-    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(1.0, true, true);
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(1.0, true, true, None, None);
     println!("S698 témoin : raccord par particules à 1,0 m ; {n0} particules ; retournement {premier:?} (sans raccord 2,637 s, 9,988 m ; à 5,0 m 2,590 s) ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s");
     assert!(masse < 1e-12 && dette < 1.0, "critère 2");
 }
+
+/// **S699 — le raccord du large entre deux 3D** (ADR-273 D1) : le tout-3D enregistre le plan x = 5,0 m ; le montage raccordé à 5,0 m
+/// le rejoue par le bord à particules de S698, sans SGN. (1) le rejeu à 0,02 s et 0,15 m du tout-3D ; (2) la masse, la dette.
+/// **Mesuré** : le témoin 2,637 s, 9,988 m ; le rejeu 2,626 s, 9,963 m (−0,011 s) ; la masse 2,6·10⁻¹⁴.
+#[test]
+#[ignore = "le tout-3D enregistré, puis rejoué (≈ 21 min)"]
+fn the_offshore_relay_between_two_3d_copies_s699() {
+    let mut e = Enregistrement::default();
+    let (p0, a0, m0, _, n0, d0) = deux_raccords_porteur(0.0, false, false, Some(&mut e), None);
+    println!("S699 témoin (tout-3D, enregistré) : {n0} particules ; retournement {p0:?} ; air {a0:?} ; masse {m0:.1e} ; {} pas, {} particules passées ; {d0:.0} s",
+        e.faces.len(), e.croisements.len());
+    let (premier, air, masse, dette, n1, duree) = deux_raccords_porteur(5.0, false, true, None, Some(&e));
+    println!("S699 rejeu (raccord à 5,0 m) : {n1} particules ; retournement {premier:?} ; air {air:?} ; masse {masse:.1e} ; dette {dette:.3} ; {duree:.0} s (S698 par SGN : 2,590 s)");
+    let ((t0, x0), (tp, xp)) = (p0.expect("témoin"), premier.expect("critère 1 : un retournement"));
+    assert!((tp - t0).abs() < 0.02 && (xp - x0).abs() < 0.15, "critère 1 : {tp} {xp} contre {t0} {x0}");
+    assert!(masse < 1e-12 && dette < 1.0, "critère 2");
+}
+

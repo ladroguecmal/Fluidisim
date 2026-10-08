@@ -68,6 +68,26 @@ impl Apic3 {
         self.gauche = Some(g);
     }
 
+    /// **S699 — une particule posée telle quelle** au bord gauche (le rejeu d'un enregistrement) : sa position (`x` ramené dans
+    /// `[0, dx)`), sa vitesse, sa matrice affine ; son volume compté comme reçu.
+    pub fn pose_left(&mut self, x: [f32; 3], vel: [f32; 3], c: [[f32; 3]; 3]) -> Result<(), Error> {
+        let Domain3 { ny, nz, dx, .. } = self.domain;
+        let Some(g) = self.gauche.as_mut() else { return Err(Error::Domain) };
+        if self.n >= self.x.len() {
+            g.refusees += 1;
+            return Ok(());
+        }
+        let quantum = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let m = self.n;
+        self.x[m] = [x[0].clamp(0., 0.999 * dx), x[1].clamp(0., ny as f32 * dx * 0.99999), x[2].clamp(0., nz as f32 * dx * 0.99999)];
+        self.vel[m] = vel;
+        self.c[m] = c;
+        self.n += 1;
+        g.entre += quantum;
+        g.posees += 1;
+        Ok(())
+    }
+
     /// **S698 — l'entrée à gauche, face par face** : `volumes` (m³ par face du bord, rangée `j` et couche `k`, rangés `k·ny + j`, positifs)
     /// au réservoir de la face. Chaque quantum entier devient une particule posée **dans la maille derrière sa face** (la première colonne,
     /// couche `k`), à la sous-maille la moins occupée, la plus basse d'abord ; sa vitesse, `vitesse(z)`. L'eau entre ainsi à la hauteur où
