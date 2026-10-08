@@ -504,6 +504,9 @@ par SGN départagée (l'affine −0,026 s, la pose par faces +0,085 s, les vites
 quarante-quatrième revue (ADR-277 : un ADR nommé dit comment il est tenu ; un montage à variantes prend un mode nommé) (4.14).
 **S702–S704** : la pose par la grille (la vitesse et l'affine du G2P ; +0,021 s nourrie par la 3D, −0,068 s par SGN) ; le juge éprouvé
 sur fond plat (il n'amortit pas ; SGN 5 % au-dessus de la 3D convergente) ; l'écart du raccord, ≈ 12 cm sur la plage, sous le visible (4.14).
+**S705–S707** : le raccord du large retenu (ADR-278 : la position à 0,15 m, l'instant à 0,1 s) ; la quarante-cinquième revue (ADR-279 :
+la convergence du juge d'abord ; des sessions longues) ; la naissance de la 3D (au repos tenue ; dans l'onde, APIC tasse ses particules
+sous la crête, le compte n'est pas la surface) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

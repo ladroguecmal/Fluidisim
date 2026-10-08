@@ -1940,3 +1940,13 @@ datée sur ADR-275. Maillons **1** (4.14). Suivant : **S706**, la quarante-cinqu
 tolérance contre une simulation de référence, on mesure sa convergence (S693–S703 visaient 0,02 s sous la précision du juge, S704). D2 :
 une commande qui doit arrêter une chaîne n'est pas suivie d'un tube (S702 : un commit partiel, amendé). Maillons **0** (méthode).
 Suivant : **S707**, N1, la naissance de la 3D au repos (LOD-ETAPE-2-S705) ; la revue en S711.
+
+## S707 — 2026-10-08 — La naissance de la 3D (session longue)
+
+**Entrée.** En autonomie, sans arrêt ; la première session longue (ADR-279 D3) ; l'utilisateur : « la 3D s'allume s'il y a besoin d'elle »
+(noté au déclencheur D1, « peut attendre »). **Fait** ([preuve](../docs/validation/NAISSANCE-3D-S707.md)) : `birth_from_columns`. **E1
+tenue** : au repos, 11 µm/s (une première pose, une couche partielle, laissait 4 mm/s). **E2 échoue** : renée dans l'onde, −6,5 % à
+1,0 s. L'instrument a été corrigé quatre fois avant toute attribution (le noyau en tente, la comparaison intégrale). E2b, avec sa propre
+grille, perd autant : la cause est la disposition des particules. Le diagnostic : APIC tasse ses particules sous la crête (+3,8 %), le
+compte n'est pas la surface. Cela touche S704 et la masse « au bit » des raccords, qui compte des particules. Maillons **1** (4.14).
+Suivant : **S708**, le volume d'APIC par la surface contre le compte (le tout-3D de S690, l'onde plate) ; puis N2 par la surface.

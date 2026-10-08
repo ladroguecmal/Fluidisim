@@ -58,3 +58,7 @@ l'usage).
 - reprendre le LOD de simulation (ADR-275) : la bande 3D qui naît et meurt avec la vague.
 
 La crête de SGN 5 % trop haute reste une question ouverte, celle de l'onde de départ.
+
+*Note datée du 2026-10-08 (S707)* : les hauteurs de cette preuve sont lues par le compte des particules. S707 a montré qu'APIC tasse ses
+particules sous la crête (+3,8 %), si bien que le compte n'en donne pas la surface. L'écart entre 2,5 et 1,25 cm peut donc venir du
+tassement et non de l'onde. Il est à relire par la surface (S708).

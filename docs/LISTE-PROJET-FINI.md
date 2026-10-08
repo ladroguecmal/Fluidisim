@@ -438,6 +438,8 @@ pas recopiée ici (L137).
   au plan plus basse que l'onde de départ : le juge à éprouver ([preuve](validation/POSE-GRILLE-SGN-S703.md)).
   **S704** : le juge éprouvé — il n'amortit pas (à 1,25 cm la crête est plus basse, 0,143 m contre 0,149 m) ; SGN 5 % au-dessus de la 3D
   convergente ; l'écart du raccord (≈ 12 cm sur la plage) sous le visible ([preuve](validation/JUGE-FOND-PLAT-S704.md)).
+  **S707** : la naissance de la 3D (LOD, étape 2) — au repos tenue (11 µm/s) ; renée dans l'onde, −6 % : APIC tasse ses particules sous la
+  crête (+3,8 %), le compte n'est pas la surface ([preuve](validation/NAISSANCE-3D-S707.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

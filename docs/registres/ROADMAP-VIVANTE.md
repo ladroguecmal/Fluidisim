@@ -49,5 +49,7 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   le raccord du large par particules ramène l'écart du retournement de −0,113 s à −0,047 s ; la traversée reste à départager (S699).
   Au lot S699–S701 : nourri exactement par la 3D, le bord est transparent (−0,011 s) ; reste à le nourrir juste depuis SGN (la pose,
   le porteur), S702 et suivantes. Au lot S702–S704 : la pose par la grille, nourrie par SGN, à −0,068 s (≈ 12 cm sur la plage, sous le
-  visible) ; le raccord du large est retenu, le LOD reprend (S705).
+  visible) ; le raccord du large est retenu, le LOD reprend (S705). Au lot S705–S707 : la 3D naît au repos ; dans l'onde, APIC tasse ses
+  particules sous la crête (+3,8 %), si bien que la renaissance et la mort devront lire la surface, non le compte. Le volume d'APIC est
+  mesuré par la surface en S708.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S707 — **en cours**. En autonomie, sans arrêt. **Première session longue** (ADR-279 D3) : la naissance de la 3D, pièces N1 et N2
+Session : S707 — **terminée**. En autonomie, sans arrêt. **Première session longue** (ADR-279 D3) : la naissance de la 3D, pièces N1 et N2
 de [LOD-ETAPE-2-S705](../docs/registres/LOD-ETAPE-2-S705.md).
 
 **Ce que la session fait.** `birth_from_columns` (`apic3d_naissance.rs`) fait naître la 3D d'un état 2D :
@@ -110,9 +110,16 @@ E3 ne se lance que si E2 tient. Si E2 échoue, la session cherche la cause de E2
 
 - [x] **P1** — jeton ; plan ; la note du déclencheur.
 - [x] **P2** — E1.
-- [ ] **P3** — E2.
-- [ ] **P4** — E3.
-- [ ] **P5** — preuve ; rituel.
+- [x] **P3** — E2 (échoue, cause nommée).
+- [x] **P4** — E3 (non lancée : subordonnée à E2).
+- [x] **P5** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini (E1)** — la première pose (une couche partielle en haut) laissait 3,95 mm/s : chaque sous-colonne emplie à la même hauteur, d'un pas régulier ; **tenu** : 1,1·10⁻⁵ m/s (le semis du réseau 6,8·10⁻⁶), la masse au bit.
+- **E2, l'instrument corrigé avant toute attribution** : le maximum dans le temps d'une tranche de 10 cm donnait au témoin même 0,185 m au plan de 7 m (S704 : 0,15 m) ; c'était le bruit du regroupement, retenu par le maximum. Il est remplacé par des photos à 0,6 s, 1,0 s et 1,6 s : le profil de surface lissé sur 20 cm (le biais de lissage `(k·w)²/3` ≈ 3·10⁻³, soit 0,5 mm), sa crête et sa position. On y ajoute la vitesse maximale des particules. Les critères, aux photos de 1,0 s et 1,6 s : la crête à 3 mm, la position à 5 cm (0,02 s à la célérité).
+- **E2, second passage** : la renaissance doublait la vitesse maximale (1,56 m/s contre 0,79 m/s). La cause : `ū_xx` tiré par dérivée seconde d'une moyenne de particules bruitée. `ū` est désormais lissé sur les rangées et sur 20 cm avant les dérivées. **Constat sur le témoin** : sur fond plat, la 3D ininterrompue à 2,5 cm fait monter la crête lissée de 0,145 m (0,6 s) à 0,184 m (1,6 s), sans perte de particules. À mesurer à 1,25 cm sur la même durée (ADR-279 D1).
+- **E2, troisième lecture (avant toute attribution)** : la vitesse de trop vient de quelques particules de surface à la crête, détachées après la naissance (1,17 m/s vers le bas à 0,6 s), non du corps de l'onde. La position lue au maximum du profil sautait de 40 cm, car le sommet d'une onde solitaire est plat (≈ 5 mm sur ±20 cm). Elle est remplacée par la phase, le centre du volume en excès à ±1,5 m. La crête est lissée sur 40 cm, avec un biais commun aux deux calculs de 1,8 mm. Les critères ne changent pas (3 mm, 5 cm).
+- **E2, quatrième lecture : les grandeurs intégrales.** Les lectures ponctuelles (crête, phase) restaient plus bruitées que les critères : la phase −18, −8, +17 cm ; la crête −2,5, −1,8, −10,8 mm. Le profil entier se compare désormais au témoin : le décalage qui superpose le mieux (la phase), le facteur d'échelle (l'amplitude), l'écart qui reste (la forme), sur la fenêtre où η₀ > 2 cm. Les critères, aux photos de 1,0 s et 1,6 s : le décalage sous 5 cm, le facteur à 2 % (3 mm sur 0,15 m). Le témoin du juge à 1,25 cm se lit de même.
+- **E2, la comparaison intégrale sur profils bruts** : facteur 0,77–0,84, écart 5 cm. C'était le bruit par colonne : deux files de particules par maille en x, une file qui passe la frontière, et la colonne varie de ±50 %. Les profils sont lissés sur 20 cm avant la comparaison, les deux de la même façon.
+- **E2, l'instrument final** : la hauteur par un noyau en tente de ±10 cm, sur la position continue des particules ; un lissage résiduel de 10 cm. Une photo à 0,4 s, juste après la renaissance, donne le plancher de bruit : les deux calculs y portent la même eau par colonne.
+- **P3 fini (E2)** — échoue : à 1,0 s, facteur 0,935, décalage −6 cm. E2b (sa propre grille) perd autant : la cause est la disposition des particules. Le diagnostic : sous l'onde, la densité est à +3,8 %, la surface à 2,1 cm sous le compte. La suite : S708, le volume d'APIC par la surface.

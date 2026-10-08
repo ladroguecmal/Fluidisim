@@ -44,3 +44,7 @@ contact (ADR-275 D1).
 
 Un essai s'ajoute à D1 : une petite vague qui ne déferle pas, en 2D seule, contre le tout-3D. Sa remontée sur le sable et son niveau au
 rivage doivent tenir à la tolérance d'ADR-278 D2 (la position à 0,15 m), et son coût doit être mesuré.
+
+*Note datée du 2026-10-08 (S707)* : **N1 tenue** (la naissance au repos, [preuve](../validation/NAISSANCE-3D-S707.md)). **N2 reportée** :
+la renaissance depuis la 3D doit lire et reposer la surface, non le compte, car APIC tasse ses particules sous la crête (+3,8 %). M1 aussi
+devra rendre la surface. D'abord S708 : le volume d'APIC par la surface, contre le compte.
