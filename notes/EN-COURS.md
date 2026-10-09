@@ -62,28 +62,51 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S716 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-septième revue de méthode** (ADR-222 D4 :
-S711–S715).
+Session : S717 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **M1 : la mort de la 3D
+vers Saint-Venant**, par la surface (S715, ADR-280 D1).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.** `mort_vers_sv` : la 3D rend à Saint-Venant, par colonne et par rangée :
+- la hauteur, lue par sa surface reconstruite (φ) au-dessus de l'escalier, puis rapportée au fond continu de Saint-Venant (le niveau de
+  la surface est gardé) ;
+- la quantité de mouvement `h·ū`, `ū` la moyenne des vitesses des particules de la colonne.
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, contre leurs critères. Une règle nouvelle se cherche d'abord dans METHODE :
-  - ADR-274 D1 (une progression montrée) et ADR-280 D1 (le plancher de bruit) existent ;
-  - rien sur les résultats montrés au fil d'un calcul long ;
-  - rien sur une lecture qui ne pouvait pas changer.
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
 
-**Critères, écrits avant.** (1) ADR-281 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+| essai | ce qu'il juge | critères |
+|---|---|---|
+| **E1** | l'eau au repos (fond plat, 4 m, `h` = 0,49 m) : la 3D au repos meurt, Saint-Venant reprend 1 s | le volume rendu à 10⁻³ du volume de la surface ; après 1 s, la vitesse de Saint-Venant sous 1 mm/s et `|η|` sous 2 mm |
+| **E2** | la vague de S690 après le déferlement : à **t = 3,2 s**, toute la 3D meurt ; Saint-Venant reprend la plage entière (la 3D et le rivage réunis) jusqu'à 5 s | contre le tout-3D qui continue jusqu'à 5 s (`Large::AucunJusqua5`, le même montage, ADR-276 D1) : la remontée maximale à **1,25 cm** près (0,15 m sur la pente de 1:12, ADR-278 D2), son instant à **0,1 s** ; le volume rendu à **0,5 %** du volume de la surface et du rivage |
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-278, ADR-280, ADR-281)
+
+- **témoin** : E1, le repos lui-même ; E2, le tout-3D jusqu'à 5 s, par la même fonction (`deux_raccords_porteur`). Seule la mort change
+  (`Large::AucunMort`, un mode nommé, ADR-277 D2).
+- **instrument** : la remontée sous la maille de S688 (le niveau de la plus haute maille mouillée), sur le Saint-Venant du rivage pour le
+  témoin, sur le Saint-Venant réuni après la mort. Elle est recalculée à chaque pas, donc elle peut échouer (ADR-281 D2). Ce que rendrait
+  chaque hypothèse :
+  - la mort rend à Saint-Venant un état juste : la remontée à 1,25 cm ;
+  - elle perd du volume ou de la quantité de mouvement : une remontée plus basse, ou plus tardive.
+- **calcul** :
+  - le volume de la surface est étalonné en S708 (3·10⁻⁴) ;
+  - la différence entre l'escalier et le fond continu se moyenne sur les marches (le niveau est gardé ; le volume en dépend de
+    ≈ dx/2 par marche) : c'est la tolérance de 0,5 % ;
+  - le coût : ≈ 20 min pour le témoin, ≈ 12 min pour la mort.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-273 D1 : le juge est le même solveur continué ;
+  - ADR-280 D1 : la surface ;
+  - ADR-281 D1 : chaque résultat montré dès qu'il est mesuré.
+- **pièges** :
+  - les dispositions des tableaux : Saint-Venant `i·ny + j`, APIC `(k·ny + j)·nx + i` ;
+  - le pas de Saint-Venant seul, par sa propre condition de Courant (0,4) ;
+  - la remontée du témoin se lit sur le Saint-Venant du rivage.
+
+**Critères de la session.** E1 et E2 tenus, ou leur échec nommé.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-281 ; METHODE ; le filtre d'`essai.py`.
-- [x] **P3** — rituel.
+- [ ] **P2** — E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — ADR-281 : D1 (chaque résultat montré dès qu'il est mesuré ; `essai.py` montre toute marque de session), D2 (un critère doit pouvoir échouer) ; la prochaine revue S721.

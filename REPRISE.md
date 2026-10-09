@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 02:17 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 02:19 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S717 — la mort de la 3D vers Saint-Venant par la surface (M1, session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S716 — la quarante-septième revue de méthode (ADR-281) ([journal](notes/JOURNAL.md)). Avant : S715 (La renaissance de la 3D par la surface)
 Session suivante : S717 — M1, la mort de la 3D vers Saint-Venant par la surface
 Maillons        : 0
