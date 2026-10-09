@@ -2020,3 +2020,10 @@ repose. **N2 acquis.** Maillons **1** (4.14). Suivant : **S716**, la quarante-se
 montre chaque résultat dès qu'il est mesuré (S712 : 35 min perdues sur un calcul figé) ; `essai.py` montre toute marque de session. D2 :
 un critère doit pouvoir échouer (S715 : un plancher lu sur un φ d'avant l'opération). Maillons **0** (méthode). Suivant : **S717**, M1, la
 mort de la 3D vers Saint-Venant par la surface ; la revue en S721.
+
+## S717 — 2026-10-09 — La mort de la 3D vers Saint-Venant (session longue)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-2-S705, M1. **Fait** ([preuve](../docs/validation/MORT-3D-S717.md)) :
+`mort_vers_sv` (la surface, `h·ū`), les modes `AucunJusqua5` et `AucunMort`. **E1 tenu** : au repos, le volume au bit, Saint-Venant
+immobile. **E2 tenu** : la 3D morte à 3,2 s, la remontée à 0,2 mm et 2 ms du tout-3D ; 5 s en 519 s contre 1 191 s. **M1 acquis.**
+Maillons **1** (4.14). Suivant : **S718**, la vague de bout en bout (D1 au plus simple, E1).

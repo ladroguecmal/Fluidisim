@@ -52,3 +52,7 @@ devra rendre la surface. D'abord S708 : le volume d'APIC par la surface, contre 
 *Note datée du 2026-10-09 (S715)* : **N2 acquis** — la renaissance par la surface tient à 1 % de la 3D ininterrompue
 ([preuve](../validation/RENAISSANCE-SURFACE-S715.md)). Née de SGN, la 3D garde la phase et naît avec l'onde de SGN, 10 % plus haute,
 qui se repose en ≈ 1 s. Suivant : M1, la mort par la surface.
+
+*Note datée du 2026-10-09 (S717)* : **M1 acquis** — la 3D morte à 3,2 s rend une remontée à 0,2 mm et 2 ms du tout-3D, pour 2,3 fois moins
+de calcul sur 5 s ([preuve](../validation/MORT-3D-S717.md)). Suivant : D1 au plus simple (l'élévation de SGN au bord de la bande) et E1,
+la vague de bout en bout.

@@ -2045,9 +2045,10 @@ fn the_3d_dies_at_rest_s717() {
 }
 
 /// **S717 E2 — la mort de la 3D après le déferlement** (M1) : la vague de S690 ; à 3,2 s, toute la 3D meurt vers Saint-Venant, contre le
-/// tout-3D jusqu'à 5 s. La remontée maximale à 1,25 cm, son instant à 0,1 s ; le volume rendu à 0,5 %.
+/// tout-3D jusqu'à 5 s. La remontée maximale à 1,25 cm, son instant à 0,1 s ; le volume rendu à 0,5 %. **Mesuré** : 0,3385 m à 3,919 s
+/// contre 0,3387 m à 3,917 s ; le volume rendu −3,9·10⁻⁴ ; 519 s contre 1 191 s.
 #[test]
-#[ignore = "le tout-3D jusqu'à 5 s, puis la mort à 3,2 s (≈ 35 min)"]
+#[ignore = "le tout-3D jusqu'à 5 s, puis la mort à 3,2 s (≈ 29 min)"]
 fn the_3d_dies_after_the_break_s717() {
     let max_rem = |e: &Enregistrement| e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
     let mut e0 = Enregistrement::default();

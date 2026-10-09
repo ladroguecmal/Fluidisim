@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S717 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **M1 : la mort de la 3D
+Session : S717 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **M1 : la mort de la 3D
 vers Saint-Venant**, par la surface (S715, ADR-280 D1).
 
 **Ce que la session fait.** `mort_vers_sv` : la 3D rend à Saint-Venant, par colonne et par rangée :
@@ -106,8 +106,9 @@ vers Saint-Venant**, par la surface (S715, ADR-280 D1).
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — E1.
-- [ ] **P3** — E2.
-- [ ] **P4** — preuve ; rituel.
+- [x] **P3** — E2.
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini (E1)** — **tenu** : le volume rendu à 1,1·10⁻¹³ de la surface ; après 1 s, la vitesse de Saint-Venant 5,7·10⁻⁷ m/s, |η| 1,6·10⁻⁷ m.
+- **P3 fini (E2)** — **tenu** : la remontée 0,3385 m à 3,919 s contre 0,3387 m à 3,917 s ; le volume rendu −3,9·10⁻⁴ ; 519 s contre 1 191 s. M1 acquis.
