@@ -62,34 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S741 — **terminée**. La cinquante-deuxième revue de méthode (ADR-222 D4), sur S736–S740.
+Session : S742 — **en cours**. En autonomie ; session longue. ADR-287 D1 : **le banc canonique de la 3D**, avec la projection de densité
+(S740). **La question** : la 3D corrigée passe-t-elle les essais de base d'un modèle de vagues, sans perdre ce qui marchait ?
 
-**Ce que la session fait.** Relire les frictions de S736 à S740 et décider (ADR-287). Celles relevées :
-1. **S739–S740 : un solveur pris pour référence sans son essai canonique.** Le juge du déferlement (S647, S690–S730) et tous les témoins
-   reposaient sur une 3D qui ne garde pas une onde solitaire sur fond plat (le tassement des particules). L'essai qui l'aurait montré, le
-   plus simple d'un modèle de vagues, n'avait jamais été fait en cent sessions ;
-2. **S737 : un critère tiré d'un seuil publié, sans vérifier ce qu'il couvre** (Synolakis : 0,818 pour la montée, 0,479 pour le reflux) ;
-3. **S739 : un résumé qui lit son instrument avant qu'il existe** (la surface à t = 0, ±inf) ;
-4. **S740 : le profil regardé après quatre suspects** ; regardé d'abord, il désignait le tassement ;
-5. **S737, S740 : le piège d'ADR-223 D4 retrouvé deux fois de plus** (un `
-` dans un *heredoc*) ;
-6. S736–S738 : les règles d'ADR-286 appliquées (la durée bornée, la seconde lecture, un sujet à la fois) : elles ont tenu.
+**Le banc** (2,5 cm) :
+- **B1 — l'onde solitaire sur un canal plat** : fait en S740, E7 (la largeur à 92 %, le creux à 9 % de `H`). Repris tel quel.
+- **B2 — la levée sur une pente douce** (`levee_s742`) :
+  - une bosse gaussienne de 15 mm (σ = 1 m) sur 0,30 m d'eau, une pente de 1:30 jusqu'à 0,12 m, un plateau de 7 m, des murs ;
+  - la 3D avec et sans la projection, et deux témoins sur la même bosse : Saint-Venant et SGN (S733, sur fond doux) ;
+  - la grandeur : la plus haute crête lue sur le plateau, de 11,9 m jusqu'à l'arrivée du front au mur, rapportée à sa crête de départ (à
+    0,25 s, ADR-287 D3).
+- **B4 — la remontée de S645 avec la projection** : le montage de S645 tel quel, `d` = 0,35 m, `H/d` = 0,2, 1:3 ; la particule la plus haute
+  contre la loi (0,2295 m ; S645 sans projection : 0,2307 m).
 
-**Critère** : chaque friction a sa suite.
+**Les critères, écrits avant.**
+- B2 :
+  1. la 3D avec la projection à **10 %** du témoin Saint-Venant (la même bosse, non linéaire ; la loi de Green, linéaire, vaut 1,257 et
+     est rapportée) ;
+  2. la 3D sans la projection, rapportée.
+- B4 : 3. la remontée avec la projection à **10 %** de la loi.
 
-**Contrôles du plan** (ADR-266)
+**Les bornes** (ADR-286 D1, `python` au plan) : 18,4 m en tout (6 m plats, 5,4 m de pente, 7 m de plateau). Le front de la bosse (3σ devant
+la crête) touche le mur quand la crête est à 15,4 m : la lecture s'arrête là. La bosse part à 3,5 m, à 3σ + 0,5 m du mur de gauche.
 
-- **témoin** : les journaux et les preuves de S736 à S740.
-- **instrument** : la relecture.
-- **calcul** : aucun.
-- **ADR** : ADR-222 D4 ; ADR-230 D1 (une référence convergée), ADR-280 D2, ADR-281 D1, qu'ADR-287 complète.
-- **pièges** : ADR-223 D4 — l'outil d'écriture pour tout texte qui porte une barre oblique inverse.
+**Contrôles du plan** (ADR-276, ADR-280, ADR-286, ADR-287)
+
+- **témoin** :
+  - Saint-Venant et SGN sur la même bosse (S733) ;
+  - la loi de Green (linéaire, rapportée) ;
+  - la loi de Synolakis pour B4 ;
+  - la 3D sans projection, comme seconde référence.
+- **instrument** : la crête par la surface lissée sur 10 cm, et, en seconde lecture, par les particules (ADR-286 D2).
+- **calcul** : B2, deux fois ≈ 10 min ; B4 ≈ 7 min ; en série.
+- **ADR** : ADR-276 D1 (une seule fonction pour la bosse) ; ADR-287 D1, D3.
+- **pièges** :
+  - la bosse de 15 mm ne fait que 0,6 maille : la lecture par la surface est lissée, et la seconde lecture la contrôle ;
+  - la projection a lissé le plongeon en S709 : B4 dira si elle lisse aussi la remontée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-287 ; METHODE.
-- [x] **P3** — fermeture.
+- [ ] **P2** — B2 (la levée) : le montage, les témoins, la 3D avec et sans projection.
+- [ ] **P3** — B4 (la remontée de S645 avec la projection).
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-287 : D1 les essais canoniques avant toute référence ; D2 un seuil publié avec son phénomène ; D3 la référence lue où l'instrument est valide ; D4 regarder le champ avant le second suspect. METHODE, l'index.
