@@ -2042,3 +2042,10 @@ Maillons **1** (4.14). Suivant : **S719**, la même onde pour SGN et la 3D (le p
 de bout en bout garde +3,0 cm (Boussinesq : +3,3) ; le volume entré par SGN est même 3 % plus bas. La cause est la dynamique propre de
 SGN sur une onde très non linéaire. La note datée est sur ADR-278. Maillons **1** (4.14). Lot S717–S719. Suivant : **S720**, puis la revue
 en S721 ; ensuite le jalon de la phase A, une séance visuelle (R43).
+
+## S720 — 2026-10-09 — Le jalon visuel de la phase A (R43 posée)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort). **Fait** ([preuve](../docs/validation/SEANCE-VISUELLE-BOUT-EN-BOUT-S720.md)) :
+le film des deux montages (le tout-3D, de bout en bout), une image tous les 1/30 s, au bit des nombres ; `outils/rendu_bout_en_bout.py`
+(deux GIF, un PNG, envoyés à l'utilisateur). **R43 posée** : le déferlement, la 3D qui s'éteint, la lame en 2D. Maillons **1** (4.14).
+Suivant : **S721**, la quarante-huitième revue (S716–S720).

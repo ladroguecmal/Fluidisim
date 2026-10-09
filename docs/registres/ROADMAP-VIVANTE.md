@@ -37,7 +37,8 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
 
 ## Ce qui dépend de l'utilisateur
 
-- Les verdicts des séances visuelles : R42 **reçu** le 2026-10-08 (la côte qui déferle) ; le prochain au jalon de la phase A.
+- Les verdicts des séances visuelles : R42 **reçu** le 2026-10-08 (la côte qui déferle) ; **R43 posée** le 2026-10-09 (S720 : la vague de
+  bout en bout contre le tout-3D, le jalon de la phase A).
 - Les choix qu'une session ne peut trancher seule : plus tard, le budget de la carte graphique et la cible de livraison. (La file de
   nuit : non, le 2026-10-08 — les calculs se lancent quand ils servent.)
 

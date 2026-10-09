@@ -460,6 +460,8 @@ pas recopiée ici (L137).
   la tolérance ; la remontée +3,3 cm, venue du large (SGN), non de la mort ([preuve](validation/BOUT-EN-BOUT-S718.md)).
   **S719** : la même onde (Rayleigh) pour SGN et la 3D — la remontée garde +3,0 cm : ni l'onde de départ ni le volume, la dynamique
   propre de SGN contre la 3D ([preuve](validation/MEME-ONDE-S719.md)).
+  **S720** : le jalon visuel de la phase A — la vague de bout en bout contre le tout-3D, rendue ; **R43 posée**
+  ([preuve](validation/SEANCE-VISUELLE-BOUT-EN-BOUT-S720.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

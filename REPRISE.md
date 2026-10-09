@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 03:48 +02:00
+JETON            : libre
+Battement        : 2026-10-09 04:18 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S720 — le jalon visuel de la phase A, préparé : la vague de bout en bout contre le tout-3D, rendue ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S719 — La même onde pour SGN et la 3D ([journal](notes/JOURNAL.md)). Avant : S718 (La vague de bout en bout)
-Session suivante : S720 — la préparation du jalon visuel de la phase A (la vague de bout en bout, rendue) ; la revue en S721
+Session en cours : aucune
+Dernière session : S720 — Le jalon visuel de la phase A (R43 posée) ([journal](notes/JOURNAL.md)). Avant : S719 (La même onde pour SGN et la 3D)
+Session suivante : S721 — la quarante-huitième revue de méthode (S716–S720)
 Maillons        : 1
 Registres       : dernier lot S719 (ADR-213 D3) ; le prochain au plus tard en S722
 ```

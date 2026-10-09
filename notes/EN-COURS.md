@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S720 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **Le jalon visuel de la phase A**, préparé pour la séance R43
+Session : S720 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **Le jalon visuel de la phase A**, préparé pour la séance R43
 que l'utilisateur jugera à son réveil : la vague de bout en bout (S718) contre le tout-3D, rendues côte à côte.
 
 **Ce que la session fait.**
@@ -101,8 +101,9 @@ que l'utilisateur jugera à son réveil : la vague de bout en bout (S718) contre
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'enregistrement ; les deux calculs.
-- [ ] **P3** — le rendu ; le contrôle ; l'envoi.
-- [ ] **P4** — preuve ; rituel.
+- [x] **P2** — l'enregistrement ; les deux calculs.
+- [x] **P3** — le rendu ; le contrôle ; l'envoi.
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2–P3 finis** — les deux films (31 et 106 Mo), au bit des nombres de S717–S718 ; le rendu (deux GIF, un PNG) envoyé à l'utilisateur ; R43 posée.

@@ -549,6 +549,10 @@ struct Enregistrement {
     /// S717 : à chaque pas, `(t, la remontée sous la maille)` ; et, à la mort, `(V rendu à Saint-Venant, V_φ + le rivage)`.
     remontee: Vec<(f64, f64)>,
     mort: Option<(f64, f64)>,
+    /// S720 : le film (une image tous les 1/30 s), écrit au fil du calcul si `Some` : `<4f t, n_part, n_surf, 3D vivante>`, puis
+    /// `n_surf` élévations de la surface de la 2D (NaN où la 3D est active), puis `n_part` × `<3f x, z, |v|>` (la première rangée).
+    film: Option<Vec<u8>>,
+    prochaine_image: f64,
 }
 
 /// **S708 — le volume d'APIC par sa surface** : `Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides (`distance()`, l'eau où φ < 0) ;
@@ -628,6 +632,31 @@ impl OndeDepart {
     fn u(&self, x: f64) -> f64 {
         let e = self.eta(x);
         (self.g * (self.d + self.h)).sqrt() * e / (self.d + e)
+    }
+}
+
+/// **S720 — une image du film** : la surface de la 2D (`surf`, une valeur par maille de `dx` depuis 0 ; NaN où la 3D est active) et
+/// les particules de la première rangée de la 3D, décalées de `x_r`.
+fn image_s720(film: &mut Vec<u8>, t: f64, surf: &[f32], a: Option<(&Apic3, f64)>) {
+    let mut part: Vec<[f32; 3]> = Vec::new();
+    if let Some((a, x_r)) = a {
+        let dx = a.domain().dx;
+        for (p, v) in a.particles().iter().zip(a.velocities()) {
+            if p[1] < dx {
+                part.push([p[0] + x_r as f32, p[2], (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt()]);
+            }
+        }
+    }
+    for x in [t as f32, part.len() as f32, surf.len() as f32, if a.is_some() { 1. } else { 0. }] {
+        film.extend_from_slice(&x.to_le_bytes());
+    }
+    for x in surf {
+        film.extend_from_slice(&x.to_le_bytes());
+    }
+    for p in &part {
+        for x in p {
+            film.extend_from_slice(&x.to_le_bytes());
+        }
     }
 }
 
@@ -903,6 +932,28 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
         }
         if let Some(e) = enreg.as_deref_mut() {
             e.remontee.push((ts, remontee_niveau_s688(&rel.sv, niveau as f64)));
+            if e.film.is_some() && ts >= e.prochaine_image - 1e-9 {
+                e.prochaine_image += 1. / 30.;
+                // La surface de la 2D : SGN au large (jusqu'à x_r), rien sur la bande 3D, le rivage (la moyenne des rangées).
+                let n_tot = ((l / dxs).round()) as usize;
+                let (nsv, nyv) = (rel.sv.nx, rel.sv.ny);
+                let surf: Vec<f32> = (0..n_tot).map(|i| {
+                    let x = (i as f64 + 0.5) * dxs;
+                    if x < x_r {
+                        serre.h[i] as f32
+                    } else if x < x_f {
+                        f32::NAN
+                    } else {
+                        let k = ((x - x_f) / dxs) as usize;
+                        if k < nsv {
+                            ((0..nyv).map(|j| rel.sv.h[k * nyv + j] + rel.sv.z[k * nyv + j]).sum::<f64>() / nyv as f64) as f32
+                        } else {
+                            f32::NAN
+                        }
+                    }
+                }).collect();
+                image_s720(e.film.as_mut().unwrap(), ts, &surf, Some((&rel.apic, x_r)));
+            }
         }
         if meurt && t == t_mort {
             // S717 (M1) : toute la 3D meurt ; Saint-Venant reprend la plage entière, la 3D et le rivage réunis.
@@ -939,6 +990,14 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
                 ts2 += dt;
                 if let Some(e) = enreg.as_deref_mut() {
                     e.remontee.push((ts2, remontee_niveau_s688(&tout, niveau as f64)));
+                    if e.film.is_some() && ts2 >= e.prochaine_image - 1e-9 {
+                        e.prochaine_image += 1. / 30.;
+                        let surf: Vec<f32> = (0..nt).map(|i| {
+                            let s = (0..ny_).map(|j| (tout.h[i * ny_ + j], tout.z[i * ny_ + j])).fold((0f64, 0f64), |m, (h, z)| (m.0 + h, m.1 + h + z));
+                            if s.0 > 1e-3 * ny_ as f64 { (s.1 / ny_ as f64) as f32 } else { f32::NAN }
+                        }).collect();
+                        image_s720(e.film.as_mut().unwrap(), ts2, &surf, None);
+                    }
                 }
             }
             if let Some(e) = enreg.as_deref_mut() {
@@ -2167,5 +2226,21 @@ fn the_same_wave_for_serre_and_the_3d_s719() {
     assert!((tp1 - tp0).abs() < 0.1 && (xp1 - xp0).abs() < 0.15 && ta1 >= tp1, "critère E2 : le retournement");
     assert!(r1 > r0 && (t1 - t0).abs() < 0.1, "acquis E2 : la remontée au-dessus du tout-3D ({r1} à {t1} contre {r0} à {t0})");
     assert!((vr / va - 1.).abs() < 0.005, "critère E2 : le volume");
+}
+
+/// **S720 — le film de la séance visuelle R43** : le tout-3D (`AucunJusqua5`) et la vague de bout en bout (`BoutEnBout`), une image tous les
+/// 1/30 s, écrits dans `calculs/s720_tout3d.bin` et `calculs/s720_bout.bin` (rendus par `outils/rendu_bout_en_bout.py`).
+#[test]
+#[ignore = "les deux films de la séance R43 (≈ 26 min)"]
+fn record_the_end_to_end_wave_for_the_visual_session_s720() {
+    for (mode, x_r, nom) in [(Large::BoutEnBout, 5.0, "s720_bout"), (Large::AucunJusqua5, 0.0, "s720_tout3d")] {
+        let mut e = Enregistrement { film: Some(Vec::new()), ..Default::default() };
+        let (p, a, _, _, _, d) = deux_raccords_porteur(x_r, mode, Some(&mut e), None);
+        let film = e.film.take().unwrap();
+        let chemin = format!("{}/../../calculs/{nom}.bin", env!("CARGO_MANIFEST_DIR"));
+        std::fs::write(&chemin, &film).unwrap();
+        let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+        println!("S720 {nom} : retournement {p:?} ; air {a:?} ; la remontée {rr:.4} m à {tr:.3} s ; le film {} Mo ; {d:.0} s", film.len() / 1_000_000);
+    }
 }
 
