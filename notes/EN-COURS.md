@@ -62,51 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S744 — **terminée**. En autonomie ; session longue. REPOS-PENTE-S743 : la projection de densité met le lac en mouvement contre un
-fond. **La question** : une densité rapportée à la valeur nominale de chaque maille, qui compte le fond, rend-elle à la projection le repos
-et la remontée, sans perdre l'onde solitaire ?
+Session : S745 — **en cours**. En autonomie ; session longue. DENSITE-CONSCIENTE-S744 : la projection consciente du fond rend le repos, mais
+freine encore la remontée (−11 %). **La question** : sans correction aux mailles de surface (`DensityVariant::WithoutSurface`, S709), avec
+le fond compté, la 3D tient-elle à la fois le repos, la remontée et l'onde solitaire ?
 
-**La cause, lue dans le code** (`apic3d_densite.rs`) : la densité d'une maille est `Σ w/8`, les poids trilinéaires des particules. Au bord
-du domaine, les poids sont rabattus : rien ne se perd, et le canal de S740 tenait. Contre un fond posé dans le domaine, une partie des
-poids tombe dans les mailles solides. Les mailles d'eau qui touchent le fond paraissent moins denses qu'elles ne le sont, et la projection
-comble un déficit qui n'existe pas.
+**Une seule différence avec S744** (ADR-276 D2) : la variante `WithoutSurface` au lieu de `Complete`. Dans une lame mince, toutes les mailles
+sont des mailles de surface : cette variante ne les corrige pas.
 
-**Le remède** (`set_density_bed_aware`, **éteint par défaut : au bit**) : chaque maille a sa densité nominale, `Σ w/8` d'un réseau régulier
-(2 × 2 × 2 par maille) posé partout hors du fond, sous l'escalier ou le fond lisse. Elle est calculée une fois, au premier pas, dans un
-tableau réservé à la configuration (I-06). La densité vaut alors `Σ w / nominale`. Au repos, elle vaut 1, fond compris.
+**Les essais, et leurs critères écrits avant** :
+1. **Le repos sur l'escalier**, 1:30 et 1:12 : la vitesse sous 1 cm/s, l'écart par les particules sous 3 mm ;
+2. **la remontée de S645** : à **10 %** de la loi (S744 : −11 % ; sans projection : +0,5 %) ;
+3. **l'onde solitaire sur le canal à 2,5 cm** (S740 E7) : la largeur au-dessus de **80 %**, le creux sous **10 % de `H`**.
 
-**Les essais, et leurs critères écrits avant.**
-1. **Le repos** (S743), l'escalier, 1:30 et 1:12, la projection consciente du fond : la vitesse sous 1 cm/s, l'écart par les particules sous
-   3 mm (S743 sans elle : 6,3 cm/s, 4,7 mm). Le fond lisse rapporté (son défaut propre, S743).
-2. **Le canal** (S740 E5, 5 cm, fond = plancher) : **identique au bit** à la projection d'avant (aucun poids perdu).
-3. **La remontée de S645** (B4 de S742) avec la projection consciente : à **10 %** de la loi (S742 : −12 %).
+Si les trois tiennent, la 3D corrigée passe ces trois essais du banc (ADR-287 D1).
 
-**Contrôles du plan** (ADR-236, ADR-276, ADR-286, ADR-287)
+**Contrôles du plan** (ADR-276, ADR-286, ADR-287)
 
 - **témoin** :
   - le repos exact ;
-  - la projection d'avant, au bit sur le canal ;
   - la loi de Synolakis ;
-  - S645 sans projection (+0,5 %).
-- **instrument** : celui de S743 (deux lectures) et de S645 (la particule la plus haute).
-- **calcul** : le repos, quatre cas, 3 min ; le canal, 2 min ; B4, 6 min.
-- **ADR** :
-  - ADR-276 D2 (une cause : la normalisation) ;
-  - ADR-287 D1 (le banc) ;
-  - ADR-236 (le réseau nominal est celui de la pose, `dx/2`).
-- **pièges** :
-  - le fond doit être posé avant le premier pas (la nominale est calculée au premier) ;
-  - une maille presque toute sous le fond a une nominale minuscule : sous 0,05, la densité n'y est pas corrigée.
+  - l'onde solitaire exacte ;
+  - les mesures de S744 avec `Complete`.
+- **instrument** : ceux de S743, S645 et S740.
+- **calcul** : le repos (2 cas, 2 min), la remontée (6 min), le canal à 2,5 cm (9 min).
+- **ADR** : ADR-276 D2 (une différence) ; ADR-287 D1.
+- **pièges** : S709 a vu `WithoutSurface` laisser plonger la vague (2,932 s), mais sans le fond compté ; le canal dira si elle garde l'onde
+  (la surface n'est plus corrigée, or le tassement est sous la crête).
 
 ### Plan
 
-- [x] **P1** — jeton ; plan ; les lignes du lot S741–S743.
-- [x] **P2** — la densité nominale ; (1), (2).
-- [x] **P3** — (3), la remontée.
-- [x] **P4** — preuve ; fermeture.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — la variante dans les montages ; (1), (2), (3).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **(1) tenu** : l'escalier avec la projection consciente, 6,8 mm/s et 0,02–0,07 mm (comme sans projection). Le lisse : 0,26–0,80 m/s,
-  7–11 mm (il ne diverge plus).
-- **(2) manqué**, la prémisse fausse : la crête finale 112,24 contre 114,02 mm ; aux murs, la nominale dépasse 1 (les poids rabattus).
-- **(3) manqué** : la remontée 0,2042 m (−11,0 %), contre −12 % avant. Le fond n'était pas la cause du freinage.
