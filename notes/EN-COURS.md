@@ -62,34 +62,61 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S732 — **terminée**. La conception du **sélecteur des domaines** (ADR-284, ADR-285 D4) : la pièce qui décide où vont SGN, la 3D
-et Saint-Venant, et quand. L'utilisateur en fait la pièce la plus peaufinée et la plus solide.
+Session : S733 — **en cours**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P1 : le prédicteur**. **La question** : SGN, calculé
+en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se retourne, et où retombe son jet ?
 
-**Ce que la session fait.** Le registre [SELECTEUR-DOMAINES-S732](../docs/registres/SELECTEUR-DOMAINES-S732.md) :
-- ce que le sélecteur décide (s'il faut la 3D, où commencent et finissent ses frontières, quand elle naît et meurt) ;
-- ce qu'il lit (le porteur bon marché : SGN, Saint-Venant ; la bathymétrie ; les corps) ;
-- ses règles (ADR-284 D2) ;
-- sa solidité (la surveillance, le rattrapage, le repli, le journal des décisions) ;
-- la batterie de scènes, chacune avec un témoin tout-3D contrôlé (ADR-285 D1) ;
-- les pièces, une par session, et leurs critères.
+**Ce que la session fait.**
+- **SGN sur un fond doux** (`Serre1D::nouveau_fond`) :
+  - la surface `η = h + z` reconstruite (MUSCL), la hauteur aux faces lue sous elle, le fond continu aux faces ;
+  - la source du fond centrée, `−g·(h⁺ + h⁻)/2·Δz/dx` : le lac au repos est tenu exactement ;
+  - le terme dispersif sur fond doux, `g·η_xx` au lieu de `g·h_xx` (l'approximation de pente douce : les termes en `z_x` négligés).
+  Le domaine reste périodique : le fond monte jusqu'à 4 cm d'eau, puis redescend en miroir. L'onde se retourne bien avant (0,14 m).
+- **Le prédicteur** (`selecteur.rs`, `prevoir`) : SGN sur une copie, jusqu'à un horizon donné. À chaque pas, trois critères de déclenchement
+  publiés sont évalués à la crête :
+  - (K) la vitesse de montée de la surface, `η_t > α·√(g·h)` (Kennedy et al., 2000 ; α = 0,65) ;
+  - (H) le rapport `η/h`, la hauteur de la crête sur la profondeur locale, au-delà de 0,8 ;
+  - (F) le nombre de Froude de la crête, `u/√(g·(h))`, au-delà de 0,8.
 
-Les nombres du registre (le seuil de déferlement d'une onde solitaire sur une pente, la distance de chute du jet) sont calculés par un
-script, et leurs formules citées.
+  Il rend, pour chaque critère, le premier instant et le lieu `(t, x)`, la hauteur de la crête `H_b` et la profondeur au repos `h_b`, et
+  `L_jet = c_b·√(2·H_b/g)` (S732).
+- **La trajectoire de la crête du témoin** (`outils/crete_film.py`), lue dans le film de S730 E2 (`calculs/s730_tout3d_12.bin`) : la
+  plus haute particule et sa place, à chaque image, jusqu'au retournement.
 
-**Contrôles du plan** (ADR-266)
+**Les essais, et leurs critères écrits avant.**
+- **E1 — le fond doux** :
+  1. le lac au repos sur la plage de R43 (le fond monte et redescend), 2 s : la vitesse sous **10⁻¹² m/s**, la masse au bit ;
+  2. la levée d'une onde longue (`kd` ≈ 0,1, 1 mm) sur une pente de 1:50 : la hauteur suit la loi de Green, `H ∝ h^(-1/4)`, à **5 %** de
+     la profondeur 0,5 m à 0,2 m.
+- **E2 — la prévision de R43**, depuis l'état de départ de S730 (l'onde de Boussinesq, `x₁` = 3,4 m), contre le témoin (le retournement à
+  2,620 s et 9,938 m ; l'air à 2,804 s et 10,375 m) :
+  3. la crête de SGN contre celle du témoin, jusqu'à 2,3 s : l'écart de place et de hauteur, **rapporté** (deux modèles ; S713 a vu la 3D
+     trop haute de 40 % sur Synolakis) ;
+  4. pour chaque critère, l'avance `(t_témoin − t, x_témoin − x)` rapportée. Le critère est retenu si son lieu tombe à **0,3 m** du
+     retournement du témoin et son avance entre 0 et 0,3 s : une avance fixe le corrige alors. C'est un calibrage sur une seule scène, et
+     le registre le dit : il se juge à chaque nouveau témoin (P2) ;
+  5. le jet prévu, `x_b(témoin) + L_jet(SGN)`, à **0,15 m** de l'air enfermé du témoin (10,375 m) ;
+  6. **le coût** : une prévision de 3 s sous **100 ms**.
 
-- **témoin** : le tout-3D de S730 (raccord au-delà du jet) pour la scène de R43 ; les autres témoins sont à faire, et le registre le dit.
-- **instrument** : les juges d'ADR-285 D4 (le retournement, le mur `J`, la remontée, le coût, les bascules).
-- **calcul** : aucun calcul long ; un script pour les nombres.
-- **ADR** : ADR-284 D2–D4, ADR-285 D1 et D4, ADR-275 D1 (l'hystérésis), ADR-278 D2 (les tolérances).
-- **pièges** : le déclencheur au plus simple se déclenchait au départ sur les plages de référence (S722) : leurs ondes partent trop près du
-  pied. Les scènes doivent laisser au prédicteur une distance à prévoir.
+**Contrôles du plan** (ADR-266, ADR-273, ADR-276, ADR-280, ADR-284, ADR-285)
+
+- **témoin** : le tout-3D de S730 E2 (raccord au-delà du jet), son film ; pour E1, des solutions exactes (le repos, la loi de Green).
+- **instrument** : la crête du témoin lue sur ses particules (la plus haute, une rangée), notée comme lecture ponctuelle (ADR-280 D1) et
+  rapportée seulement ; les critères 4 et 5 portent sur le retournement et l'air, juges éprouvés (S647, S648).
+- **calcul** : E1 et E2, quelques secondes ; aucun calcul long.
+- **ADR** :
+  - ADR-276 D1 : l'état de départ vient d'`OndeDepart`, la même fonction que le témoin ;
+  - ADR-285 D1 : le témoin a son raccord mesuré (S730, `J` = 0) ;
+  - ADR-278 D2 : les tolérances.
+- **pièges** :
+  - SGN ne déferle pas : après le déclenchement, ses nombres n'ont plus de sens, et la prévision s'arrête au premier ;
+  - la pente de 1:12 n'est pas douce : l'approximation de pente douce y est rapportée comme telle ;
+  - la hauteur doit rester positive : le fond s'arrête à 4 cm.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le registre ; ses nombres.
-- [x] **P3** — fermeture.
+- [ ] **P2** — le fond doux ; E1 ; (1)–(2).
+- [ ] **P3** — le prédicteur, la crête du témoin ; E2 ; (3)–(6).
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — le registre écrit ; `outils/selecteur_nombres.py` : le seuil de Synolakis (0,052 à 1:12), `S₀` par scène, `L_jet` ; contrôle sur S1 : le jet à 10,344 m contre 10,375 m (l'air enfermé du témoin S730).
