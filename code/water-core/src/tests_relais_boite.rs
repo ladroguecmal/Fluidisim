@@ -256,3 +256,106 @@ fn the_box_mass_diagnostic_s725() {
     println!("S725 diagnostic de la masse : {n} pas écartés (sur 120)");
 }
 
+/// S727 — la surface par colonne d'un APIC (φ), rangée `j·nx + i` (m).
+fn surface_colonnes(a: &Apic3) -> Vec<f64> {
+    let d = a.domain();
+    let (phi, l) = (a.distance(), a.labels());
+    let dx = d.dx as f64;
+    let mut h = vec![0f64; d.nx * d.ny];
+    for j in 0..d.ny {
+        for i in 0..d.nx {
+            h[j * d.nx + i] = (0..d.nz).map(|k| {
+                let m = (k * d.ny + j) * d.nx + i;
+                if l[m] != crate::apic3d::SOLID { (0.5 - phi[m] as f64 / dx).clamp(0., 1.) * dx } else { 0. }
+            }).sum();
+        }
+    }
+    h
+}
+
+/// **S727 — B4a, un corps dans la boîte** : une sphère de rayon 8 cm, à demi immergée, tirée à 0,3 m/s pendant 1,5 s, dans la boîte de 1 m ×
+/// 1 m au milieu d'un Saint-Venant de 2 m × 2 m ; contre le même corps dans un APIC entier de 2 m × 2 m, aux mêmes murs. (1) la force à
+/// 10 % ; (2) la surface dans la boîte à 1,0 s, à 20 % de la plus haute vague ; (3) la masse à 10⁻¹². **Mesuré** : la force à 2,0 %, la
+/// surface à 1,7 %, la masse 3,9·10⁻¹⁵ — tenu.
+#[test]
+#[ignore = "un corps dans la boîte, contre un APIC entier (≈ 13 min)"]
+fn a_body_in_the_box_s727() {
+    let (dx, d, rayon, vitesse) = (0.025f32, 0.4f64, 0.08f32, 0.3f32);
+    let (n, nb, nz, o) = (80usize, 40usize, 24usize, 20usize);
+    let fils = || Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32))) as std::sync::Arc<dyn JobSystem + Send + Sync>);
+    // Le centre de la sphère dans le repère du témoin ; dans la boîte, décalé de `o·dx`.
+    let c0 = [0.7f32, 1.0, d as f32];
+    let hors = |p: [f32; 3], c: [f32; 3]| (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) > rayon * rayon;
+    // Le témoin : l'APIC entier.
+    let (mut t3, _ar) = apic(n, n, nz, dx, n * n * nz * 8);
+    t3.set_ballistic_air(true);
+    t3.seed(&|p| (p[2] as f64) < d && hors(p, c0)).unwrap();
+    t3.set_body(Some(crate::apic3d::Sphere3 { center: c0, radius: rayon, velocity: [vitesse, 0., 0.] })).unwrap();
+    t3.set_jobs(fils());
+    // La boîte : le montage de S725, la sphère dedans.
+    let (mut ap, mut arena) = apic(nb, nb, nz, dx, nb * nb * nz * 8);
+    ap.set_ballistic_air(true);
+    ap.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    ap.enable_left_inlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    ap.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    ap.enable_y_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    let ob = o as f32 * dx;
+    let cb = [c0[0] - ob, c0[1] - ob, c0[2]];
+    ap.seed(&|p| (p[2] as f64) < d && hors(p, cb)).unwrap();
+    ap.set_body(Some(crate::apic3d::Sphere3 { center: cb, radius: rayon, velocity: [vitesse, 0., 0.] })).unwrap();
+    ap.set_jobs(fils());
+    ap.step(1000).unwrap();
+    t3.step(1000).unwrap();
+    // Saint-Venant part du niveau que lit la boîte, loin du corps (ADR-283 D1).
+    let d_lu = surface_colonnes(&ap)[(nb - 1) * nb + nb - 1];
+    let mut sv = SaintVenant2D::nouveau(n, n, dx as f64, 9.81, vec![0.; n * n], vec![d_lu; n * n], vec![0.; n * n], vec![0.; n * n]).unwrap();
+    sv.regler_ordre_deux(1e-12).unwrap();
+    let mut r = RelaisBoite::nouveau(ap, sv, o, o).unwrap();
+    let v0 = r.volume();
+    let (mut t, mut masse) = (1000u64, 0f64);
+    let (mut somme_ecart, mut somme_ref) = (0f64, 0f64);
+    let mut surfaces: Option<(Vec<f64>, Vec<f64>)> = None;
+    let horloge = std::time::Instant::now();
+    while t < 1_500_000 {
+        let us = r.pas_stable_us(10_000).min(t3.stable_step_us(10_000)).min(1_500_000 - t);
+        r.pas(us).unwrap();
+        t3.step(us).unwrap();
+        t += us;
+        masse = masse.max((r.volume() - v0).abs() / v0);
+        if t >= 200_000 {
+            let (fb, ft) = (r.apic.body_force(), t3.body_force());
+            somme_ecart += ((fb[0] - ft[0]).powi(2) + (fb[2] - ft[2]).powi(2)).sqrt() * us as f64;
+            somme_ref += (ft[0] * ft[0] + ft[2] * ft[2]).sqrt() * us as f64;
+        }
+        if surfaces.is_none() && t >= 1_000_000 {
+            let (hb, ht) = (surface_colonnes(&r.apic), surface_colonnes(&t3));
+            let sous: Vec<f64> = (0..nb * nb).map(|c| ht[(o + c / nb) * n + o + c % nb]).collect();
+            surfaces = Some((hb, sous));
+            eprintln!("S727 photo : à {:.2} s ; la masse {masse:.1e} ; {:.0} s d'horloge", t as f64 * 1e-6, horloge.elapsed().as_secs_f64());
+        }
+        if t % 250_000 < us {
+            eprintln!("S727 progression : t = {:.2} s, pas {us} µs, {:.0} s d'horloge", t as f64 * 1e-6, horloge.elapsed().as_secs_f64());
+        }
+    }
+    let force = somme_ecart / somme_ref.max(1e-30);
+    let (hb, ht) = surfaces.unwrap();
+    // L'intérieur de la boîte (trois mailles des bords exclues), hors de la sphère (les colonnes sans eau au droit du corps).
+    let (mut s2, mut nn, mut vague) = (0f64, 0usize, 0f64);
+    for jj in 3..nb - 3 {
+        for ii in 3..nb - 3 {
+            let c = jj * nb + ii;
+            if ht[c] > 0.05 && hb[c] > 0.05 {
+                s2 += (hb[c] - ht[c]).powi(2);
+                nn += 1;
+                vague = vague.max((ht[c] - d_lu).abs());
+            }
+        }
+    }
+    let rms = (s2 / nn.max(1) as f64).sqrt();
+    println!("S727 B4a : la force, l'écart moyen {:.1} % ; la surface dans la boîte à 1,0 s, l'écart quadratique {rms:.2e} m contre la plus haute vague {vague:.2e} m ({:.1} %) ; la masse {masse:.1e} ; {:.0} s",
+        100. * force, 100. * rms / vague.max(1e-30), horloge.elapsed().as_secs_f64());
+    assert!(force < 0.10, "critère 1 : la force {force}");
+    assert!(rms < 0.2 * vague, "critère 2 : la surface {rms} contre {vague}");
+    assert!(masse < 1e-12, "critère 3 : la masse {masse}");
+}
+

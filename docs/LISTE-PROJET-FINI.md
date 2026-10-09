@@ -468,6 +468,8 @@ pas recopiée ici (L137).
   l'entrée en y ([preuve](validation/BOITE-QUATRE-BORDS-S724.md)).
   **S725** : le raccord de la boîte (B3) — APIC à quatre bords dans Saint-Venant troué : au repos au micron, la masse au bit, une onde
   longue réfléchie à 9 % ([preuve](validation/RACCORD-BOITE-S725.md)).
+  **S727** : un corps dans la boîte (B4a) — sa force à 2 % et l'eau autour de lui à 1,7 % de la 3D entière, quatre fois moins de
+  particules, la masse au bit ([preuve](validation/CORPS-DANS-LA-BOITE-S727.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

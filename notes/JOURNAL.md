@@ -2093,3 +2093,10 @@ modèles). **B3 acquis.** Maillons **1** (4.14). Lot S723–S725. Suivant : **S7
 deux modèles se juge depuis l'état que chacun lit de l'autre, sur un régime qu'ils portent également (S725 : le niveau de départ, la bosse
 dispersive). D2 : un bilan entre deux solveurs compte chaque volume avec les constantes de son solveur (S725 : la fuite d'un `f32`). D3 :
 rappel, le plan avant le code. Maillons **0** (méthode). Suivant : **S727**, B4, la boîte qui suit un corps ; la revue en S731.
+
+## S727 — 2026-10-09 — Un corps dans la boîte (B4a)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-3-S722. **Fait** ([preuve](../docs/validation/CORPS-DANS-LA-BOITE-S727.md)) :
+une sphère tirée dans la boîte au milieu de Saint-Venant, contre le même corps dans un APIC entier, aux mêmes murs. **Mesuré** : la force
+à 2,0 %, la surface à 1,7 %, la masse 3,9·10⁻¹⁵ (tenu). **B4a acquis.** Maillons **1** (4.14). Suivant : **S728**, B4b, la boîte qui suit
+le corps.

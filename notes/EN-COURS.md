@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S727 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4a : un corps dans la
+Session : S727 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4a : un corps dans la
 boîte**. La boîte est fixe ; une sphère la traverse. Son déplacement avec le corps (B4b) vient ensuite.
 
 **L'essai.** Une sphère de rayon 8 cm, son centre à la surface (z = 0,4 m, à demi immergée), tirée à 0,3 m/s selon x pendant 1,5 s :
@@ -102,7 +102,8 @@ la 3D près du corps) :
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — l'essai ; (1)–(3).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — **tenu** : la force à 2,0 %, la surface à 1,7 %, la masse 3,9·10⁻¹⁵. B4a acquis.

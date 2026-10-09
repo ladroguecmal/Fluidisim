@@ -49,3 +49,6 @@ biais à 0,5 % ([preuve](../validation/BOITE-QUATRE-BORDS-S724.md)). Restent que
 *Note datée du 2026-10-09 (S725)* : **B3 acquis** — la boîte de 3D au milieu de Saint-Venant, au repos au micron, la masse au bit, une
 onde longue réfléchie à 9 % ([preuve](../validation/RACCORD-BOITE-S725.md)). Une onde dispersive réfléchit deux fois plus : c'est le
 désaccord des modèles, non le raccord. Suivant : B4, la boîte qui suit un corps.
+
+*Note datée du 2026-10-09 (S727)* : **B4a acquis** — un corps dans la boîte fixe : sa force à 2 %, l'eau autour de lui à 1,7 % de la 3D
+entière, quatre fois moins de particules ([preuve](../validation/CORPS-DANS-LA-BOITE-S727.md)). Suivant : B4b, la boîte qui suit le corps.
