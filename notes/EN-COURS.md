@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S737 — **en cours**. En autonomie ; session longue. DIAGNOSTIC-S4-S735. **La question** : lus par les particules, le front et la
+Session : S737 — **terminée**. En autonomie ; session longue. DIAGNOSTIC-S4-S735. **La question** : lus par les particules, le front et la
 remontée suivent-ils l'eau, et un juge du retournement qui ignore le bruit de surface garde-t-il les vrais retournements en écartant le faux
 de S4 ?
 
@@ -107,7 +107,7 @@ de S4 ?
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — les deux lectures, le juge robuste ; le cas d'école (1).
 - [x] **P3** — S4 et S2 ; (2), (3).
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — (1) **tenu** : la couche plate, rien ; la lèvre, trouvée (colonne 27, écart 1), comme S647. Le juge robuste, le front par les particules, les deux juges et les deux lectures dans le témoin.

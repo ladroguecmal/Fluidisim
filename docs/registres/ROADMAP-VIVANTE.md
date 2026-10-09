@@ -67,5 +67,7 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   corps** (B4a, B4b) — la force à 2 % (fixe) et 6 % (qui suit), six fois moins de 3D. Reste le déclencheur de présence (B5). Au lot S729–S731 : **B5 fait, l'étape 3 du LOD
   faite** ; R43 reçu, le mur du raccord du rivage effacé (ADR-284) ; **le sélecteur des domaines** devient la campagne suivante, la pièce
   la plus exigée (ADR-285 D4). Au lot S732–S734 : le sélecteur conçu ; le prédicteur prévoit la vague et son jet, pas encore l'instant
-  du déferlement ; un témoin sûr (S2) sur trois ; S4 (la pente de 1:3) à diagnostiquer avant tout calibrage.
+  du déferlement ; un témoin sûr (S2) sur trois ; S4 (la pente de 1:3) à diagnostiquer avant tout calibrage. Au lot S735–S737 : les
+  instruments des témoins prêts (la lecture par les particules, le juge robuste) ; **la 3D trop haute** (S713, R43, S1, S4) devient la
+  question, avant le calibrage.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

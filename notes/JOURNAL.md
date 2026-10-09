@@ -2199,3 +2199,14 @@ Maillons **0** (diagnostic). Suivant : **S736**, la revue de méthode.
 
 Maillons **0** (méthode). Suivant : **S737**, la lecture par les particules et le juge robuste.
 
+## S737 — 2026-10-09 — La lecture par les particules et le juge robuste
+
+**Entrée.** DIAGNOSTIC-S4-S735. **Fait** ([preuve](../docs/validation/LECTURE-PARTICULES-S737.md)) : le front par les particules, le juge
+du retournement robuste (une marge de `dx/4` sur φ). **Mesuré** :
+- le cas d'école tenu ; S2 gardé (0,026 s, 0,075 m) ;
+- la remontée de S4 par les particules suit l'eau (0,517 m au plus, puis −0,17 m) ;
+- un retournement au reflux de S4, attendu : Synolakis, dès 0,141 à 1:3 ; le critère du plan était faux ;
+- la remontée de S4 était plafonnée par le domaine (1,10 m).
+
+Pendant le calcul, l'enquête sur la 3D trop haute : la littérature (l'onde de départ inexacte), le cœur relu, la contradiction avec S645.
+Maillons **1** (4.14). Suivant : **S738**, S645 relancé, puis la bissection.

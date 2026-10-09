@@ -485,6 +485,9 @@ pas recopiée ici (L137).
   ([preuve](validation/TEMOINS-SELECTEUR-S734.md)).
   **S735** : le diagnostic de S4 — le front figé était une lecture fausse de φ ; mais la 3D remonte réellement 37 à 60 % trop haut sur
   1:3 ; le faux retournement, une maille d'air à φ ≈ 0 ([preuve](validation/DIAGNOSTIC-S4-S735.md)).
+  **S737** : la remontée lue par les particules (elle suit l'eau) ; le juge du retournement robuste au bruit (S2 gardé à 0,026 s ; le
+  reflux de S4 déferle, comme le prévoit Synolakis) ; la remontée de S4 était plafonnée par le domaine
+  ([preuve](validation/LECTURE-PARTICULES-S737.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -150,3 +150,10 @@ Plus tard, dans le même registre :
 - Le juge du retournement compte un vide d'une maille à φ ≈ 0.
 
 Les témoins attendent deux choses : une lecture par les particules, et un juge robuste.
+
+*Note datée du 2026-10-09 (S737)* : les instruments des témoins sont prêts ([preuve](../validation/LECTURE-PARTICULES-S737.md)) :
+- la remontée lue par les particules ;
+- le juge du retournement robuste au bruit.
+
+**Correction** : S4 (`H/d` = 0,2, 1:3) déferle au reflux (Synolakis : dès 0,141 à 1:3). Il reste un témoin du déferlement pendant la
+montée ; il n'est pas « sans déferlement ». La scène sans aucun déferlement demande `H/d < 0,141` à 1:3.

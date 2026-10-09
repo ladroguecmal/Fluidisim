@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 13:46 +02:00
+JETON            : libre
+Battement        : 2026-10-09 15:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S737 — la lecture par les particules et le juge robuste ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S736 — la cinquante et unième revue de méthode (ADR-286) ([journal](notes/JOURNAL.md)). Avant : S735 (Le diagnostic de S4)
-Session suivante : S737 — la lecture du front et de la remontée par les particules, et le juge du retournement robuste au bruit (éprouvés sur S1, S2, S4, S647)
-Maillons        : 0
-Registres       : dernier lot S734 (ADR-213 D3) ; le prochain au plus tard en S737
+Session en cours : aucune
+Dernière session : S737 — La lecture par les particules et le juge robuste ([journal](notes/JOURNAL.md)). Avant : S736 (la cinquante et unième revue de méthode)
+Session suivante : S738 — la 3D trop haute : S645 relancé tel quel, puis S4 rapproché de S645 un écart à la fois, puis l'onde de départ exacte
+Maillons        : 1
+Registres       : dernier lot S737 (ADR-213 D3) ; le prochain au plus tard en S740
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

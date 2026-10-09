@@ -532,6 +532,9 @@ contrôlé comme l'objet ; le sélecteur des domaines, la campagne suivante, à 
 **S732–S734** : le sélecteur des domaines conçu (sept scènes, trois juges) ; le prédicteur (SGN sur fond doux en avance, 68 ms pour 3 s :
 la vague et son jet prévus à 0,1 m, l'instant du déferlement pas encore) ; les témoins (S2 sûr ; S3 et S4 à refaire, S4 à diagnostiquer)
 (4.14).
+**S735–S737** : le diagnostic de S4 (le front, une lecture fausse ; la 3D remonte réellement trop haut) ; la cinquante et unième revue
+(ADR-286 : la durée bornée par les frontières, la seconde lecture, un sujet à la fois) ; la lecture par les particules et le juge robuste
+(4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
