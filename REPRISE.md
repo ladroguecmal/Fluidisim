@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 01:58 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 02:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S715 — la renaissance de la 3D par la surface (N2, session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S714 — Le juge sous un pas plus court ([journal](notes/JOURNAL.md)). Avant : S713 (L'onde trop haute : ni la maille, ni le pas)
 Session suivante : S715 — la renaissance de la 3D par la surface (N2)
 Maillons        : 1

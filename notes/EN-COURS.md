@@ -62,35 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S714 — **terminée**. En autonomie, sans arrêt ; session longue. S713 : sur la plage de Synolakis, le pas de 2,5 ms rend juste la
-crête du déferlement, que le pas de 10 ms plaçait 0,04 d trop bas et 0,26 d en arrière. **Le juge des raccords (S690–S703), au pas de
-10 ms, en dépend-il ?**
+Session : S715 — **en cours**. En autonomie, sans arrêt ; session longue. Le LOD reprend (LOD-ETAPE-2-S705, N2). S707 : renée depuis le
+compte de ses particules, la 3D perdait 6 % d'amplitude, car APIC tasse ses particules sous la crête et le compte n'est pas la surface.
+**La renaissance par la surface.**
 
-**L'essai.** Le tout-3D de S690 (le montage sans raccord), avec le pas plafonné à **2,5 ms** : `Large::AucunPasCourt`, un mode nommé
-(ADR-277 D2). Seul le plafond change (ADR-276 D2).
+**Ce que la session fait.** Le montage de l'onde plate (S707, 10 m, 1,6 s, la même fonction) :
+- **`Renaissance::DepuisLaSurface`** : à 0,4 s, chaque colonne est réduite à la hauteur de sa surface reconstruite (φ). Les particules
+  sont reposées à la densité nominale jusqu'à elle, avec le profil vertical de SGN tiré de `ū` lissé, comme en S707. Le compte des
+  particules change (le tassement disparaît), le volume que voit la 3D est gardé ;
+- **la lecture** se fait par la surface (ADR-280 D1) : le profil de la surface reconstruite, moyen sur les rangées. On en tire la
+  comparaison intégrale de S707 (le décalage, le facteur, l'écart), contre la 3D ininterrompue.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-278, ADR-280)
+**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
 
-- **témoin** : le juge de S690 au pas de 10 ms, par la même fonction : retournement à 2,637 s et 9,988 m ; air à 2,790 s.
-- **instrument** : le lecteur de retournement de S647, et l'air enfermé. Ce que rendrait chaque hypothèse :
-  - le juge ne dépend pas du pas : le retournement à moins de 0,1 s et 0,15 m (ADR-278 D2) ;
-  - il en dépend : au-delà. Il faudra alors abaisser le plafond des montages de déferlement, et rejuger le raccord retenu (S703) au même
-    plafond.
-- **calcul** : le coût, au plus 4 fois celui de S690 (13 min) ; au déferlement le pas est déjà sous 2,5 ms, d'où ≈ 35 à 45 min. Mesuré et
-  montré.
+| essai | ce qu'il juge | critères |
+|---|---|---|
+| **E1** | la renaissance par la surface, contre la 3D ininterrompue | à 0,4 s (juste après), le plancher : décalage sous 1 cm, facteur à 0,5 %, `V_φ` continu à 0,3 % ; à 1,0 et 1,6 s : décalage sous **5 cm**, facteur à **2 %** |
+| **E2** (si E1 tient) | la naissance depuis SGN (l'état de SGN à 0,4 s), lue par la surface | rapporté et attribué (S704 : SGN garde 0,150 m, la 3D se pose plus bas) |
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280)
+
+- **témoin** : la 3D ininterrompue, par la même fonction ; S707 E2 (par le compte : facteur 0,935 à 1,0 s).
+- **instrument** : le profil de la surface reconstruite, étalonné en S708 (3·10⁻⁴), et la comparaison intégrale. Son plancher est mesuré
+  à 0,4 s (ADR-280 D1). Ce que rendrait chaque hypothèse :
+  - le tassement était la cause de S707 : E1 tient ;
+  - la perte de la structure verticale (le profil de SGN) compte aussi : un écart demeure.
+- **calcul** : ≈ 3 min par passage, deux passages.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-280 D2 : le juge sous une option numérique ;
-  - ADR-278 D2 : la tolérance ;
-  - ADR-276 D2 : seul le plafond change.
-- **pièges** : `pas_stable_us` du relais prend le plafond ; le relais de Saint-Venant au rivage en dépend aussi (la même borne).
+  - ADR-273 D1 : entre deux copies de la 3D d'abord (E1), puis depuis SGN (E2) ;
+  - ADR-280 D1 : la surface pour la renaissance et pour la lecture ;
+  - ADR-276 D2 : E1 ne change, contre S707 E2, que la hauteur de la réduction.
+- **pièges** :
+  - la masse se compte désormais en volume de surface, non en particules ;
+  - la hauteur par colonne et par rangée, non moyennée sur les rangées, pour la repose.
 
-**Critères.** Le retournement et l'air mesurés, attribués selon l'instrument.
+**Critères de la session.** E1 tenu, ou son échec nommé ; E2 rapporté.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai.
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — E1.
+- [ ] **P3** — E2.
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — au pas de 2,5 ms : le retournement à 2,595 s, 9,938 m (−0,042 s), l'air à 2,750 s ; dans la tolérance d'ADR-278 D2. Le plafond de 10 ms reste.
