@@ -62,52 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S718 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **E1 : la vague de bout
-en bout**. N1, N2 et M1 sont acquis (S707, S715, S717).
+Session : S719 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. S718 : de bout en bout, la remontée
+dépasse le tout-3D de 3,3 cm, et le large (SGN) en est la cause. ADR-278 D3 : l'onde de départ, un profil de Boussinesq (KdV,
+`γ = √(3a/4d³)`), n'est l'équilibre ni de SGN ni de la 3D. **La même onde pour les deux : l'onde solitaire de SGN** (le profil de Rayleigh,
+`k = √(3a/(4d²(d+a)))`, plus large de 14 %), avec la même vitesse `c·η/(d+η)`, `c = √(g(d+a))`.
 
-**Ce que la session fait.** `Large::BoutEnBout`, un mode nommé (ADR-277 D2) :
-- **au large** (0 à 5 m), SGN porte l'onde ;
-- **la bande 3D** (5 à 10,775 m) est nourrie au bord gauche par la pose par la grille, d'après le profil de SGN (S703) ; le relais
-  Saint-Venant tient le rivage ;
-- **à 3,2 s**, après le déferlement et l'air, la 3D meurt (M1). Un seul Saint-Venant reprend la plage entière jusqu'à 5 s :
-  - le large, depuis l'état de SGN ;
-  - la bande, depuis sa surface ;
-  - le rivage, depuis le relais.
+**Les essais.** Le montage de S717–S718 (la même fonction), l'onde de Rayleigh pour SGN, pour Saint-Venant et pour la 3D :
 
-**Le déclencheur, ici.** Pour l'onde de référence (x₁ = 3,4 m), le front touche déjà la bande au départ (η = 2,6 cm à 5 m) : la bande naît
-à t = 0. Le déclencheur qui décide *s'il faut* la 3D (la prédiction du déferlement) attend, à la demande de l'utilisateur.
+| essai | ce qu'il juge | critères |
+|---|---|---|
+| **E1** | le tout-3D jusqu'à 5 s (`Large::AucunRayleigh`) : le nouveau témoin | rapporté (le retournement, l'air, la remontée) |
+| **E2** | de bout en bout (`Large::BoutEnBoutRayleigh`) | contre E1 : le retournement à 0,1 s et 0,15 m (ADR-278 D2), l'air après lui ; **la remontée à 1,25 cm** et 0,1 s ; le volume rendu à 0,5 % ; le coût |
 
-**L'essai et ses critères, écrits avant.** Contre le tout-3D jusqu'à 5 s (`Large::AucunJusqua5`, S717 : le même montage, la même fonction,
-déterministe au bit, donc non relancé) :
-1. le retournement à 0,1 s et 0,15 m du tout-3D (2,637 s, 9,988 m ; ADR-278 D2), l'air après lui ;
-2. la remontée maximale à 1,25 cm et 0,1 s (0,3387 m à 3,917 s) ;
-3. le volume rendu à la mort à 0,5 % ; la masse au bit avant ;
-4. le coût jusqu'à 5 s, mesuré et comparé (le tout-3D : 1 191 s).
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-278, ADR-281)
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-275, ADR-276, ADR-277, ADR-278, ADR-280, ADR-281)
-
-- **témoin** : le tout-3D de S717, par la même fonction.
-- **instrument** : le lecteur de retournement (S647), l'air (S648), la remontée sous la maille (S688), recalculée à chaque pas (ADR-281
-  D2). Ce que rendrait chaque hypothèse :
-  - les pièces s'assemblent sans faute nouvelle : (1) comme S703 (−0,068 s), (2) comme S717 ;
-  - une faute de l'assemblage : un écart de remontée au-delà de 1,25 cm.
-- **calcul** : le coût attendu. La bande 3D seule jusqu'à 3,2 s fait ≈ 93 000 à 109 000 particules, soit ≈ 7 min (S703). Puis
-  Saint-Venant, presque rien. Soit ≈ 8 min, contre ≈ 20 min pour le tout-3D.
+- **témoin** : E1, par la même fonction. Seule l'onde de départ change par rapport à S717–S718 (ADR-276 D2). La forme et la vitesse
+  viennent toutes deux de Rayleigh.
+- **instrument** : ceux de S718 (le retournement, l'air, la remontée sous la maille, recalculée à chaque pas). Ce que rendrait chaque
+  hypothèse :
+  - l'onde de départ était la cause : E2 à 1,25 cm de E1 ;
+  - le porteur SGN lui-même : l'écart demeure, vers 3 cm.
+- **calcul** :
+  - `k_R/γ_KdV = √(d/(d+a)) = √(0,5/0,65) = 0,877` ;
+  - le volume de l'onde, `2a/k`, passe de 0,316 à 0,361 m² par mètre de large ;
+  - le coût : ≈ 20 + 5 min.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-275 D3 : chaque étape jugée sur le déferlement, l'air, la masse et le coût ;
-  - ADR-278 D1 : le raccord retenu ;
-  - ADR-280 D1 : la surface à la mort.
-- **pièges** :
-  - à la mort, la bande commence à x_r = 5 m : la fonction de fond de la mort prend `x + x_r` ;
-  - le large de Saint-Venant vient de SGN, cellule à cellule (le même pas d'espace depuis 0) ;
-  - le volume d'avant la mort compte aussi le large.
+  - ADR-278 D3 : la question ouverte, mise à l'épreuve ;
+  - ADR-276 D1 : l'onde, une seule fonction pour les trois solveurs ;
+  - ADR-277 D2 : deux modes nommés, ramenés aux modes de base dès l'entrée de la fonction.
+- **pièges** : chaque construction de l'onde dans la fonction (Saint-Venant du large, SGN, la 3D) passe par la même structure.
+
+**Critères de la session.** E2 tenu, ou son échec attribué.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le mode ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — E1, E2.
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **L'essai : (2) échoue** — le retournement 2,569 s, 9,863 m (−0,068 s, dans la tolérance, comme S703) ; l'air 2,747 s ; **la remontée 0,3714 m à 3,859 s** (le tout-3D : 0,3387 m ; +3,3 cm) ; le volume rendu −3,8·10⁻⁴ ; **302 s contre 1 191 s** (4 fois moins). Le témoin, une seule cause (la mort) : `Large::BandeJusqua5`, la même bande nourrie par SGN jusqu'à 5 s sans la mort. Si sa remontée est aussi vers 0,37 m, la mort est innocente, et le large (SGN, l'onde 10 % plus haute) est en cause.
-- **P2 fini** — le témoin sans la mort : 0,3714 m à 3,856 s, la même remontée ; la mort est innocente, le large (SGN) en cause (ADR-278 D3). Suite : S719, la même onde (le profil de Rayleigh) pour SGN et la 3D.
