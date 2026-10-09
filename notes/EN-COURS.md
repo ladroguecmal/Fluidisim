@@ -103,7 +103,8 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
 - [x] **P3** — la correction choisie par P2 ; (1), (2), (3).
-- [ ] **P3b** — le compte cumulé (la perte du pas reste due d'un pas à l'autre) ; (1), (2), (3).
+- [x] **P3b** — le compte cumulé (la perte du pas reste due d'un pas à l'autre) ; (1), (2), (3).
+- [ ] **P3c** — le compte cumulé contre Synolakis (ADR-293 D1 : la référence extérieure avant la décision).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
@@ -121,3 +122,9 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
   L'injection est arrêtée, mais le ballottement s'amortit. **L'hypothèse (P3b)** : un cliquet pas à pas. Quand la projection rend moins
   que la perte du pas, le reste est oublié ; quand elle rend plus, elle est rognée. **Le remède** : un compte cumulé, borné en bas par zéro
   (un pas qui gagne de l'énergie n'ouvre aucun droit). **La signature** : l'amortissement près de zéro, la période revenue vers +0,3 %.
+- **P3b fini** (1 011 s), le compte cumulé (`CumulativeStepLoss`) — **les trois tenus** :
+  - (1) le repos : 6,8 mm/s ; 0,02 et 0,07 mm ;
+  - (2) le ballottement : 1,9678 s (**−0,44 %**), l'amortissement **0,16 %** par période ; l'énergie à ±0,005 J en 10 s (1 % du mode) ;
+  - (3) le canal : 92 %, 9,0 mm, la célérité +0,3 %.
+
+  Le cliquet était la cause. Synolakis ensuite (P3c).
