@@ -2404,3 +2404,14 @@ le lot.
 
 La vague déferle plus tard, plus près du rivage ; le raccord du rivage à 12,0 m devient trop près (note datée sur ADR-284). Le lot
 S753–S755. Maillons **1** (4.14). Suivant : **S756**, la revue de méthode.
+
+## S756 — 2026-10-10 — la cinquante-cinquième revue de méthode (ADR-293)
+
+**Entrée.** La revue (S751–S755). **Fait** : [ADR-293](../docs/adr/ADR-293-cinquante-cinquieme-revue-de-methode.md).
+- D1 : une configuration se décide après sa référence extérieure (S752 : ADR-291 renversé par le laboratoire).
+- D2 : l'essai d'une onde mesure sa célérité (S753).
+- D3 : un critère porte sa bande de quantum (S754).
+- D4 : une fenêtre de mesure suit l'événement (S755).
+
+Maillons **0** (méthode). Suivant : **S757**, le banc de la 3D corrigée (ADR-289 D3.2).
+

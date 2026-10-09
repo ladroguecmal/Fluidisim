@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S756 — **en cours**. La cinquante-cinquième revue de méthode (ADR-222 D4), sur S751–S755.
+Session : S756 — **terminée**. La cinquante-cinquième revue de méthode (ADR-222 D4), sur S751–S755.
 
 **Ce que la session fait.** Relire les frictions de S751 à S755 et décider (ADR-293). Celles relevées :
 1. **S752 : une configuration décidée (ADR-291) avant la référence extérieure.** Elle reposait sur une loi théorique (S645), et le
@@ -86,7 +86,8 @@ Session : S756 — **en cours**. La cinquante-cinquième revue de méthode (ADR-
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-293 ; METHODE.
+- [x] **P2** — ADR-293 ; METHODE.
 - [ ] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — ADR-293 : D1 la décision après la référence extérieure ; D2 la célérité mesurée ; D3 la bande de quantum ; D4 la fenêtre qui suit l'événement. METHODE, l'index.
