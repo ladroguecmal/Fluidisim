@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S741 — **en cours**. La cinquante-deuxième revue de méthode (ADR-222 D4), sur S736–S740.
+Session : S741 — **terminée**. La cinquante-deuxième revue de méthode (ADR-222 D4), sur S736–S740.
 
 **Ce que la session fait.** Relire les frictions de S736 à S740 et décider (ADR-287). Celles relevées :
 1. **S739–S740 : un solveur pris pour référence sans son essai canonique.** Le juge du déferlement (S647, S690–S730) et tous les témoins
@@ -89,7 +89,7 @@ Session : S741 — **en cours**. La cinquante-deuxième revue de méthode (ADR-2
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-287 ; METHODE.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — ADR-287 : D1 les essais canoniques avant toute référence ; D2 un seuil publié avec son phénomène ; D3 la référence lue où l'instrument est valide ; D4 regarder le champ avant le second suspect. METHODE, l'index.

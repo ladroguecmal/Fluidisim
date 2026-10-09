@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-10-09 17:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S741 — la cinquante-deuxième revue de méthode (S736–S740) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S740 — Pourquoi la 3D raidit l'onde solitaire : le tassement des particules ([journal](notes/JOURNAL.md)). Avant : S739 (L'onde solitaire se déforme dans la 3D)
-Session suivante : S741 — la cinquante-deuxième revue de méthode (S736–S740) ; puis la 3D avec la projection de densité contre les mesures de Synolakis et sur la vague de R43
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S741 — la cinquante-deuxième revue de méthode (ADR-287) ([journal](notes/JOURNAL.md)). Avant : S740 (Pourquoi la 3D raidit l'onde solitaire : le tassement des particules)
+Session suivante : S742 — le banc canonique de la 3D (ADR-287 D1) avec la projection de densité : l'onde solitaire, Green, l'onde stationnaire, la remontée ; puis Synolakis et le plongeon de R43
+Maillons        : 0
 Registres       : dernier lot S740 (ADR-213 D3) ; le prochain au plus tard en S743
 ```
 

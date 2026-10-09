@@ -2244,3 +2244,15 @@ leurs défauts au bit (le plafond de la pression, la séparation) ; le canal ré
 
 **La cause : le tassement des particules sous la crête.** Le juge du déferlement de S647 à S730 en dépendait ; la référence extérieure
 (Synolakis) tranchera. Profils envoyés. Maillons **1** (4.1). Suivant : **S741**, la revue.
+
+## S741 — 2026-10-09 — la cinquante-deuxième revue de méthode (ADR-287)
+
+**Entrée.** La revue (S736–S740). **Fait** : [ADR-287](../docs/adr/ADR-287-cinquante-deuxieme-revue-de-methode.md).
+- D1 : un solveur ne sert de référence qu'après ses essais canoniques, en banc (l'onde solitaire sur un canal plat, Green, l'onde
+  stationnaire, la remontée). La 3D ne gardait pas l'onde solitaire, et cent sessions de juges en dépendaient.
+- D2 : un seuil publié se cite avec le phénomène qu'il borne (S737 : le reflux de Synolakis).
+- D3 : une référence se lit où son instrument est valide (S739).
+- D4 : un écart de forme se regarde avant le second suspect (S740).
+
+Maillons **0** (méthode). Suivant : **S742**, le banc canonique de la 3D (ADR-287 D1), avec la projection de densité.
+
