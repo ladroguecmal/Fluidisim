@@ -163,6 +163,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [La réévaluation des intentions fondatrices — S643](registres/REEVALUATION-INTENTIONS-S643.md) : chaque section des sources jugée — gardée, dépassée, meilleure solution.
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)](registres/LOD-ETAPE-2-S705.md) : cinq pièces, leurs essais.
+- [Le sélecteur des domaines — conception (S732)](registres/SELECTEUR-DOMAINES-S732.md) : la prévision par le porteur, les frontières, la solidité, sept scènes, trois juges, six pièces.
 - [L'étape 3 du LOD : la 3D rallumée autour d'un corps — conception (S722)](registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5), leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
 - [Le raccord du rivage au-delà du jet — S730](validation/RACCORD-AU-DELA-DU-JET-S730.md) : R43 reçu, le mur effacé.

@@ -45,3 +45,5 @@ hauteur de Saint-Venant. Chaque montage à raccord le rapporte.
 *Note datée du 2026-10-09 (S731)* : l'utilisateur fait du sélecteur des domaines la pièce la plus peaufinée et la plus solide (*« c'est grâce à
 lui que l'on aura le meilleur compromis entre réalisme et performance »*). ADR-285 D4 en fixe les juges : une batterie de scènes, le
 réalisme, le coût, la solidité.
+
+*Note datée du 2026-10-09 (S732)* : le sélecteur est conçu dans [SELECTEUR-DOMAINES-S732](../registres/SELECTEUR-DOMAINES-S732.md).

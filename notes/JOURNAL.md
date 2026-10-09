@@ -2137,3 +2137,15 @@ essais (un nom contenu dans l'autre). Maillons **1** (4.14). Suivant : **S731**,
 
 Maillons **0** (méthode). Suivant : **S732**, la conception du sélecteur.
 
+## S732 — 2026-10-09 — Le sélecteur des domaines conçu
+
+**Entrée.** ADR-285 D4, à la demande de l'utilisateur (la pièce la plus peaufinée et la plus solide) ; `poste` poussée sur GitHub à sa
+demande avant la session. **Fait** : [SELECTEUR-DOMAINES-S732](../docs/registres/SELECTEUR-DOMAINES-S732.md).
+- La prévision par SGN en avance (s'il y aura déferlement, où, quand, le type, le jet).
+- Les frontières au-delà de `x_b + 3·L_jet`.
+- La surveillance, le rattrapage, le repli prudent, le journal rejouable.
+- Sept scènes (plongeante près et loin du bord, glissante, sans déferlement, prévision fausse, deux vagues, un corps dans la lame), trois
+  juges, six pièces.
+
+`outils/selecteur_nombres.py` : le jet de R43 estimé à 10,344 m contre 10,375 m mesurés. Maillons **1** (4.14). Suivant : **S733**, P1, le
+prédicteur.

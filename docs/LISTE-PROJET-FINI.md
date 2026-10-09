@@ -476,6 +476,8 @@ pas recopiée ici (L137).
   la masse au bit, la force à 6 % ; **l'étape 3 du LOD faite** ([preuve](validation/BOITE-NAIT-MEURT-S729.md)).
   **S730** : R43 reçu (ADR-284) ; le raccord du rivage placé au-delà du jet efface le mur de R43 (28 cm → 0) pour 6 % de calcul ; le
   tout-3D refait ([preuve](validation/RACCORD-AU-DELA-DU-JET-S730.md)).
+  **S732** : le sélecteur des domaines conçu ([registre](registres/SELECTEUR-DOMAINES-S732.md)) : la prévision par SGN en avance, les
+  frontières au-delà du jet, la surveillance et le rattrapage, sept scènes jugées contre le tout-3D.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

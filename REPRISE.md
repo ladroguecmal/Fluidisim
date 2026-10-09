@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 08:51 +02:00
+JETON            : libre
+Battement        : 2026-10-09 08:53 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S732 — la conception du sélecteur des domaines (ADR-285 D4) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S731 — la cinquantième revue de méthode (ADR-285) ([journal](notes/JOURNAL.md)). Avant : S730 (Le raccord du rivage au-delà du jet)
-Session suivante : S732 — la conception du sélecteur des domaines (ADR-285 D4) : la batterie de scènes, les trois juges
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S732 — Le sélecteur des domaines conçu ([journal](notes/JOURNAL.md)). Avant : S731 (la cinquantième revue de méthode)
+Session suivante : S733 — le prédicteur du sélecteur (SELECTEUR-DOMAINES-S732, P1) : SGN en avance, le critère de déclenchement, contre le témoin de S730
+Maillons        : 1
 Registres       : dernier lot S731 (ADR-213 D3) ; le prochain au plus tard en S734
 ```
 

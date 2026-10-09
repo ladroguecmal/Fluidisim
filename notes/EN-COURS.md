@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S732 — **en cours**. La conception du **sélecteur des domaines** (ADR-284, ADR-285 D4) : la pièce qui décide où vont SGN, la 3D
+Session : S732 — **terminée**. La conception du **sélecteur des domaines** (ADR-284, ADR-285 D4) : la pièce qui décide où vont SGN, la 3D
 et Saint-Venant, et quand. L'utilisateur en fait la pièce la plus peaufinée et la plus solide.
 
 **Ce que la session fait.** Le registre [SELECTEUR-DOMAINES-S732](../docs/registres/SELECTEUR-DOMAINES-S732.md) :
@@ -89,7 +89,7 @@ script, et leurs formules citées.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le registre ; ses nombres.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — le registre écrit ; `outils/selecteur_nombres.py` : le seuil de Synolakis (0,052 à 1:12), `S₀` par scène, `L_jet` ; contrôle sur S1 : le jet à 10,344 m contre 10,375 m (l'air enfermé du témoin S730).
