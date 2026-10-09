@@ -3130,3 +3130,8 @@ fn channel_weak_density_projection_s740() {
     suspect_s740("E6, la projection de densité faible (κ = 0,05)", 0.05, ReglagesCanal { densite: true, relaxation: Some(0.05), ..Default::default() });
 }
 
+#[test]
+#[ignore = "S740 E7 : la projection de densité à 2,5 cm (≈ 25 min)"]
+fn channel_density_projection_fine_s740() {
+    suspect_s740("E7, la projection de densité", 0.025, ReglagesCanal { densite: true, ..Default::default() });
+}

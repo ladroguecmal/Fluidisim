@@ -110,3 +110,8 @@ avec les nombres, et les suspects suivants sont nommés.
 - **E4** (le pas à 2,5 ms) : la largeur à 23 %, le creux 25 mm, la crête finale 62 mm ; ne guérit pas.
 - **Le profil** (`captures/s740_profils.png`, A à 5 cm, toutes les 0,5 s) : l'onde se scinde. Un long plateau bas, d'environ 20 mm, file
   devant sur plusieurs mètres ; un pic étroit, plus lent, reste derrière ; du bruit et des creux suivent.
+- **E5** (la projection de densité complète) : **la largeur à 84 %**, le creux 15,3 mm (15 % de H), la crête finale 112 mm ; ne guérit pas
+  au sens strict (le creux), mais **la cause principale est désignée : le tassement des particules**. **E6** (faible, κ = 0,05) : la
+  largeur à 39 %, le creux 34 mm, la crête 207 mm.
+- **E7, ajouté après E6** : E5 à 2,5 cm sur le canal, aux mêmes critères, avec les profils. Le conflit à garder en tête : S709 a vu la
+  projection complète empêcher la vague de plonger.
