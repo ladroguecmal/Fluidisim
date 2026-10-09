@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S750 — **en cours**. En autonomie ; session longue. CIBLE-SURFACE-S749 : aucune des six variantes de la projection ne tient à la fois
+Session : S750 — **terminée**. En autonomie ; session longue. CIBLE-SURFACE-S749 : aucune des six variantes de la projection ne tient à la fois
 le repos, l'onde solitaire et la remontée. Les variantes qui corrigent la surface freinent la lame (−11 à −12 %). **La question** : l'un de
 deux remèdes rend-il la remontée à `Complete` (consciente du fond), qui tient déjà le repos et l'onde ?
 
@@ -95,8 +95,8 @@ Si aucun ne la tient, la question reste ouverte, avec les nombres.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — R1 et R2 ; la remontée pour chacun.
-- [ ] **P3** — le repos et l'onde pour le remède qui tient.
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P3** — le repos et l'onde pour le remède qui tient.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** (801 s) — la remontée de S645, les deux à 10 % :
@@ -105,4 +105,7 @@ Si aucun ne la tient, la question reste ouverte, avec les nombres.
   - les étiquettes : 0,175 et 0,200 m.
 
   Les deux tiennent ; le repos et l'onde pour les deux (P3), R1 d'abord.
-
+- **P3 fini** (1 355 s) :
+  - R1 : le repos tenu (6,8 mm/s ; 0,02–0,07 mm) ; le canal à 92 %, le creux 10,8 mm (manqué de 0,8 mm), la crête finale 91,3 mm ;
+  - R2 : le repos tenu ; le canal à 84 %, le creux 13,4 mm ;
+  - le niveau : R1 +2,57 → −0,41 mm ; R2 +2,51 → −1,94 mm.

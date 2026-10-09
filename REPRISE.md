@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 20:52 +02:00
+JETON            : libre
+Battement        : 2026-10-09 21:37 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S750 — deux remèdes au freinage de la lame ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S749 — La surface corrigée vers sa densité attendue ([journal](notes/JOURNAL.md)). Avant : S748 (Où la projection freine la lame : la surface dilatée)
-Session suivante : S750 — deux remèdes au freinage de la lame : le déplacement de la projection avec sa vitesse (G2P à la nouvelle place), et la surface relâchée (kappa 0,1) ; la revue en S751
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S750 — Deux remèdes au freinage de la lame ([journal](notes/JOURNAL.md)). Avant : S749 (La surface corrigée vers sa densité attendue)
+Session suivante : S751 — la cinquante-quatrième revue de méthode (S746–S750) ; puis R1 affiné (le creux au regard du bruit, l'atténuation de l'onde)
+Maillons        : 1
 Registres       : dernier lot S749 (ADR-213 D3) ; le prochain au plus tard en S752
 ```
 

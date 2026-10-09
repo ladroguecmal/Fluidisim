@@ -2343,3 +2343,13 @@ moyen derrière l'onde. **Mesuré** :
 
 Aucune des six variantes ne tient les trois essais. Le suspect suivant : la projection déplace les particules sans leur vitesse. Le lot
 S747–S749. Maillons **0**. Suivant : **S750**, le déplacement avec sa vitesse, ou la surface relâchée ; la revue en S751.
+
+## S750 — 2026-10-09 — Deux remèdes au freinage de la lame
+
+**Entrée.** CIBLE-SURFACE-S749. **Fait** ([preuve](../docs/validation/DEUX-REMEDES-S750.md)) : R1, le déplacement de la projection avec
+sa vitesse (la grille reprise à la nouvelle place) ; R2, la surface relâchée. **Mesuré** :
+- R1 : la remontée +7,9 % (le freinage disparaît, le mécanisme est confirmé) ; le repos et la largeur de l'onde tenus ; le creux 10,8 mm
+  (manqué de 0,8 mm) ; l'onde atténuée de 9 % ;
+- R2 : la remontée −9,8 % ; l'onde moins bien gardée.
+
+R1 est le premier remède qui tient presque tout. Maillons **1** (4.1). Suivant : **S751**, la revue ; puis R1 affiné.
