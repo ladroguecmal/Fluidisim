@@ -88,7 +88,7 @@ Session : S751 — **terminée**. La cinquante-quatrième revue de méthode (ADR
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-290 ; METHODE.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — ADR-290 (D1 le bilan propre d'un opérateur, une variante contre une hypothèse nommée ; D2 la cible vérifiée sur son cas statique ; D3 le repos d'abord). METHODE, l'index.
