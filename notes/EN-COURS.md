@@ -62,52 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S735 — **terminée**. Le diagnostic de S4 (TEMOINS-SELECTEUR-S734). **La question** : sur la pente de 1:3, le « front » d'eau se
-fige à 0,48 m (escalier) ou 0,60 m (fond lisse) au-dessus du niveau, sous une couche d'environ 1 cm qui ne redescend pas ; et le juge voit un
-« retournement » à 4,14 m, loin de la plage. Est-ce de l'eau réellement collée à la pente, ou une lecture fausse ? **Aucun remède dans cette
-session** (ADR-226 D1 : localiser d'abord).
+Session : S736 — **en cours**. La cinquante et unième revue de méthode (ADR-222 D4), sur S731–S735.
 
-**Ce que la session fait.**
-- `temoin_plage_s734` prend des **instantanés** à des instants donnés, écrits dans `calculs/s735_*.csv` :
-  - chaque particule au-delà du pied (x, y, z, la vitesse) ;
-  - par colonne de la plage (la rangée du milieu) : le fond (analytique et lisse), l'épaisseur lue par φ (`volume_surface_s708`), le nombre
-    de particules au-dessus du fond, les étiquettes et φ de chaque maille.
-- Au premier « retournement », les mêmes colonnes autour du lieu détecté.
-- S4 sur fond lisse jusqu'à **5,0 s**, instantanés à 3,5, 4,1, 4,5 et 5,0 s (≈ 25 min).
-- `outils/diagnostic_s735.py` lit les instantanés et dit, par colonne, l'épaisseur lue contre l'épaisseur des particules (le compte ×
-  `dx³/8` / `dx²`).
+**Ce que la session fait.** Relire les frictions de S731 à S735 et décider (ADR-286). Celles relevées :
+1. **S734 : une durée fixée sans calculer quand l'onde atteint le mur** (S3, 67 min de calcul dont la fin ne prouvait rien) ;
+2. **S734 : un critère faux par construction** (le front de S3, alors que le mur est dans l'eau) ;
+3. **S734 : un instrument pris sur une géométrie neuve sans l'éprouver** (le front par φ sur une pente de 1:3 ; ADR-233 D1 le disait
+   déjà). S735 a montré qu'il lisait faux ;
+4. **S734 : une chaîne de calculs lancée avec un chemin relatif**, qui n'a rien lancé ;
+5. **S733, S734 : deux fermetures refusées** (le registre de précision, le lot) : l'outil a fait son office ;
+6. **S731 : le piège d'ADR-223 D4 retrouvé deux fois** ;
+7. **la consigne de l'utilisateur** (2026-10-09) : *« on ne fait plus en parallèle »*.
 
-**Le critère du diagnostic, écrit avant.** La cause est nommée si **deux lectures indépendantes** concordent :
-- **« eau collée »** : au-delà de 12,5 m après 4,5 s, des particules sont présentes, au moins l'équivalent de 5 mm sur une colonne, et
-  presque immobiles (|v| < 5 cm/s) ;
-- **« lecture fausse »** : l'épaisseur lue par φ dépasse 5 mm là où les particules en donnent moins de 1 mm.
+**Critère** : chaque friction a sa suite (une décision, ou « aucune », avec la raison).
 
-Si aucune des deux ne tient, la question reste ouverte et le dit. Pour le « retournement » à 4,14 m, les étiquettes de la colonne montrent ce
-que le juge a vu.
+**Contrôles du plan** (ADR-266)
 
-**Contrôles du plan** (ADR-226, ADR-233, ADR-280, ADR-285)
-
-- **témoin** : le même montage que S734 (S4 sur fond lisse), au bit jusqu'à 5 s ; les instantanés ne changent rien au calcul.
-- **instrument** : les particules, comptées (la comptabilité) ; φ, lue (ce que voit le solveur) ; les deux, nommées à part (ADR-280 D1).
-- **calcul** : ≈ 25 min, seul.
-- **ADR** : ADR-226 D1 (localiser avant le remède) ; ADR-233 D1 (un instrument éprouvé sur sa famille) ; ADR-285 D1.
-- **pièges** :
-  - le fond lisse étiquette autrement les mailles coupées ;
-  - un CSV de 280 000 lignes : seulement la plage (x > 9,8 m).
+- **témoin** : les journaux et les preuves de S731 à S735.
+- **instrument** : la relecture.
+- **calcul** : aucun.
+- **ADR** : ADR-222 D4 ; ADR-233 D1, ADR-235, ADR-257 (les bornes d'un montage), qu'ADR-286 complète.
+- **pièges** : ADR-223 D4 (aucune barre oblique inverse dans un *heredoc*).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les instantanés ; l'outil ; le calcul ; le diagnostic.
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — ADR-286 ; METHODE.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 fini** — le calcul (1 574 s) et `outils/diagnostic_s735.py`.
-  - **« Lecture fausse » : tenu.** φ lit 5 à 37 mm là où les particules en donnent zéro : 4 colonnes à 3,5 s, 8 à 4,1 et 4,5 s, 17 à
-    5,0 s. À 5,0 s, la colonne figée (13,113 m) lit encore 10 mm, sans aucune particule.
-  - **« Eau collée » : non tenu.** Deux colonnes seulement, à 4,5 s (6 et 9 mm, 2–3 cm/s), disparues à 5,0 s. Au-delà de 12,5 m, il y a 172
-    particules à 4,5 s, puis 74 à 5,0 s, qui redescendent à 0,67 m/s.
-  - **La remontée comptée par les particules** (la rangée du milieu) : 0,53 m au seuil de 5 mm, 0,45 m au seuil de 10 mm, de 4,1 à 4,5 s,
-    contre 0,328 m exacts (+37 à +60 %). La 3D remonte réellement trop haut ; une autre question.
-  - **Le « retournement » à 4,14 m** : à x = 4,1375 m, la maille 18 est « air » avec φ = +1 mm (0,04 maille), entre de l'eau à φ = −2 mm
-    et à −6 mm. Le juge compte un vide d'une maille au contact de la surface.
