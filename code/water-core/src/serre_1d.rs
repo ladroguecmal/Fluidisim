@@ -14,14 +14,20 @@
 //! Rusanov, Heun), plus la source `h·A` dans `(hu)_t`. Linéarisé : `ω² = g·d·k²/(1 + (kd)²/3)`, la dispersion de Serre. Sans le terme
 //! (`dispersif = false`), Saint-Venant.
 //!
-//! Ne fait pas : le fond variable, le mouillage et le séchage, la 2D, le déferlement (SGN ne déferle pas : il faudra le basculer vers
-//! Saint-Venant au front, comme les modèles de Boussinesq).
+//! **S733 — le fond doux** (`nouveau_fond`, le prédicteur du sélecteur, SELECTEUR-DOMAINES-S732) : la surface `η = h + z` reconstruite, la
+//! hauteur aux faces lue sous elle (le fond continu aux faces, la moyenne des deux mailles) ; la source du fond centrée,
+//! `−g·(h⁺ + h⁻)/2·(z_{i+½} − z_{i−½})/dx`, qui équilibre exactement les flux d'un lac au repos ; le terme dispersif sur fond doux, `g·η_xx`
+//! au lieu de `g·h_xx` (l'approximation de pente douce : les termes en `z_x` du système complet sont négligés). Sans fond, au bit.
+//!
+//! Ne fait pas : les termes de pente du système complet, le mouillage et le séchage, la 2D, le déferlement (SGN ne déferle pas : il faudra
+//! le basculer vers Saint-Venant au front, comme les modèles de Boussinesq).
 
 /// Une entrée refusée : moins de quatre mailles, un pas ou une maille non positifs, une hauteur non positive, Courant au-delà de ½.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Refus;
 
 /// Un domaine périodique de `nx` mailles de `dx`, la hauteur `h` et le débit `q = h·u`.
+#[derive(Clone)]
 pub struct Serre1D {
     pub nx: usize,
     pub dx: f64,
@@ -30,6 +36,9 @@ pub struct Serre1D {
     pub q: Vec<f64>,
     /// `false` : Saint-Venant seul (le témoin).
     pub dispersif: bool,
+    /// S733 : la cote du fond par maille (nulle sans fond) ; `fond` dit s'il y en a un.
+    pub z: Vec<f64>,
+    fond: bool,
     h0: Vec<f64>,
     q0: Vec<f64>,
     dh: Vec<f64>,
@@ -83,7 +92,19 @@ impl Serre1D {
         if nx < 4 || q.len() != nx || !(dx > 0.) || !(g > 0.) || h.iter().any(|&v| !(v > 0.)) {
             return Err(Refus);
         }
-        Ok(Serre1D { nx, dx, g, h, q, dispersif, h0: vec![0.; nx], q0: vec![0.; nx], dh: vec![0.; nx], dq: vec![0.; nx] })
+        Ok(Serre1D { nx, dx, g, h, q, dispersif, z: vec![0.; nx], fond: false, h0: vec![0.; nx], q0: vec![0.; nx], dh: vec![0.; nx],
+            dq: vec![0.; nx] })
+    }
+
+    /// **S733 — sur un fond doux** `z` (périodique comme le reste) ; mêmes refus, plus une longueur de `z` fausse ou une cote non finie.
+    pub fn nouveau_fond(dx: f64, g: f64, h: Vec<f64>, q: Vec<f64>, z: Vec<f64>, dispersif: bool) -> Result<Serre1D, Refus> {
+        if z.len() != h.len() || z.iter().any(|v| !v.is_finite()) {
+            return Err(Refus);
+        }
+        let mut s = Serre1D::nouveau(dx, g, h, q, dispersif)?;
+        s.z = z;
+        s.fond = true;
+        Ok(s)
     }
 
     /// Le volume (m² par mètre de largeur).
@@ -100,19 +121,27 @@ impl Serre1D {
     /// L'opérateur : `dh`, `dq` depuis `(h, q)`.
     fn operateur(&mut self) {
         let (n, dx, g) = (self.nx, self.dx, self.g);
-        let (h, q) = (&self.h, &self.q);
+        let (h, q, z) = (&self.h, &self.q, &self.z);
         let u: Vec<f64> = (0..n).map(|i| q[i] / h[i]).collect();
+        // S733 : la surface, reconstruite à la place de la hauteur (sans fond, `η = h` au bit).
+        let eta: Vec<f64> = if self.fond { (0..n).map(|i| h[i] + z[i]).collect() } else { h.clone() };
         let m = |i: isize| ((i % n as isize + n as isize) % n as isize) as usize;
         // Les pentes limitées de `h` et `u`.
         let pente = |v: &[f64], i: usize| minmod(v[i] - v[m(i as isize - 1)], v[m(i as isize + 1)] - v[i]);
-        let (sh, su): (Vec<f64>, Vec<f64>) = (0..n).map(|i| (pente(h, i), pente(&u, i))).unzip();
+        let (sh, su): (Vec<f64>, Vec<f64>) = (0..n).map(|i| (pente(&eta, i), pente(&u, i))).unzip();
         self.dh.fill(0.);
         self.dq.fill(0.);
+        // S733 : par maille, la hauteur lue de l'intérieur à sa face droite et à sa face gauche, et la cote de ces faces.
+        let (mut h_d, mut h_g, mut z_d) = (vec![0f64; n], vec![0f64; n], vec![0f64; n]);
         for i in 0..n {
             // La face entre `i` et `i + 1`.
             let j = m(i as isize + 1);
-            let (hl, ul) = (h[i] + 0.5 * sh[i], u[i] + 0.5 * su[i]);
-            let (hr, ur) = (h[j] - 0.5 * sh[j], u[j] - 0.5 * su[j]);
+            let zf = if self.fond { 0.5 * (z[i] + z[j]) } else { 0. };
+            let (hl, ul) = (eta[i] + 0.5 * sh[i] - zf, u[i] + 0.5 * su[i]);
+            let (hr, ur) = (eta[j] - 0.5 * sh[j] - zf, u[j] - 0.5 * su[j]);
+            h_d[i] = hl;
+            h_g[j] = hr;
+            z_d[i] = zf;
             let c = (ul.abs() + (g * hl.max(0.)).sqrt()).max(ur.abs() + (g * hr.max(0.)).sqrt());
             let f0 = 0.5 * (hl * ul + hr * ur) - 0.5 * c * (hr - hl);
             let f1 = 0.5 * (hl * ul * ul + 0.5 * g * hl * hl + hr * ur * ur + 0.5 * g * hr * hr) - 0.5 * c * (hr * ur - hl * ul);
@@ -121,12 +150,19 @@ impl Serre1D {
             self.dh[j] += f0 / dx;
             self.dq[j] += f1 / dx;
         }
+        // S733 : la source du fond, centrée sur les hauteurs des faces — le lac au repos équilibré.
+        if self.fond {
+            for i in 0..n {
+                let z_g = z_d[m(i as isize - 1)];
+                self.dq[i] -= g * 0.5 * (h_d[i] + h_g[i]) * (z_d[i] - z_g) / dx;
+            }
+        }
         if !self.dispersif {
             return;
         }
         // La correction dispersive : h·A − ⅓(h³A_x)_x = −⅓(h³(2u_x² + g·h_xx))_x.
         let ux: Vec<f64> = (0..n).map(|i| (u[m(i as isize + 1)] - u[m(i as isize - 1)]) / (2. * dx)).collect();
-        let hxx: Vec<f64> = (0..n).map(|i| (h[m(i as isize + 1)] - 2. * h[i] + h[m(i as isize - 1)]) / (dx * dx)).collect();
+        let hxx: Vec<f64> = (0..n).map(|i| (eta[m(i as isize + 1)] - 2. * eta[i] + eta[m(i as isize - 1)]) / (dx * dx)).collect();
         let f: Vec<f64> = (0..n).map(|i| h[i].powi(3) * (2. * ux[i] * ux[i] + g * hxx[i])).collect();
         let r: Vec<f64> = (0..n).map(|i| -(f[m(i as isize + 1)] - f[m(i as isize - 1)]) / (6. * dx)).collect();
         let h3 = |i: usize| h[i].powi(3);

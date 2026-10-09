@@ -62,3 +62,84 @@ fn the_serre_solitary_wave_keeps_its_shape_and_speed_s694() {
         assert!(m20 < 1e-12 && m40 < 1e-12, "critère 4 : {a}");
     }
 }
+
+/// S733 — la plage de R43, périodique : le fond plat à 0,5 m jusqu'à 5,696 m, la pente de 1:12 jusqu'à 4 cm d'eau, puis le miroir.
+fn plage_r43_periodique(dx: f64) -> Vec<f64> {
+    let demi = 11.5f64;
+    let n = (2. * demi / dx).round() as usize;
+    (0..n).map(|i| {
+        let x = (i as f64 + 0.5) * dx;
+        let x = if x > demi { 2. * demi - x } else { x };
+        ((x - 5.696).max(0.) / 12.).min(0.46)
+    }).collect()
+}
+
+/// **S733 — E1 (1), le lac au repos sur le fond doux** : la plage de R43, 2 s ; la vitesse sous 10⁻¹² m/s, la masse au bit.
+#[test]
+fn the_serre_lake_at_rest_on_a_sloping_bottom_s733() {
+    let dx = 0.025;
+    let z = plage_r43_periodique(dx);
+    let h: Vec<f64> = z.iter().map(|z| 0.5 - z).collect();
+    let n = z.len();
+    let mut s = Serre1D::nouveau_fond(dx, G, h, vec![0.; n], z, true).unwrap();
+    let v0 = s.volume();
+    let mut t = 0.;
+    while t < 2. {
+        let dt = s.pas_stable().min(2. - t);
+        s.pas(dt).unwrap();
+        t += dt;
+    }
+    let umax = (0..n).map(|i| (s.q[i] / s.h[i]).abs()).fold(0f64, f64::max);
+    let masse = (s.volume() - v0).abs() / v0;
+    println!("S733 E1 (1) : le lac au repos sur la plage de R43, 2 s — la vitesse max {umax:.2e} m/s ; la masse {masse:.1e}");
+    assert!(umax < 1e-12, "critère 1 : la vitesse {umax}");
+    assert!(masse < 1e-14, "critère 1 : la masse {masse}");
+}
+
+/// **S733 — E1 (2), la levée sur le fond doux** : une bosse gaussienne de 1 mm (σ = 0,5 m) partie vers la droite sur 0,5 m d'eau, une pente
+/// de 1:50 jusqu'à 0,2 m, un plateau, le miroir. Saint-Venant (sans dispersion : une bosse courte se disperse sous SGN, la loi de Green est
+/// celle des ondes longues) ; la hauteur sur le plateau contre `(0,5/0,2)^¼` = 1,2574, à 5 %. SGN rapporté.
+#[test]
+fn the_serre_shoaling_follows_green_s733() {
+    let dx = 0.025;
+    let (demi, a, sigma, x0) = (45f64, 1e-3f64, 2f64, 7f64);
+    let n = (2. * demi / dx).round() as usize;
+    let z: Vec<f64> = (0..n).map(|i| {
+        let x = (i as f64 + 0.5) * dx;
+        let x = if x > demi { 2. * demi - x } else { x };
+        ((x - 15.).max(0.) / 50.).min(0.3)
+    }).collect();
+    let mut rapports = Vec::new();
+    // Le témoin de l'usure numérique : la même bosse sur le fond plat, la même durée (sa hauteur à la fin, rapportée).
+    for (dispersif, plat) in [(false, true), (false, false), (true, false)] {
+        let z: Vec<f64> = if plat { vec![0.; n] } else { z.clone() };
+        let (mut h, mut q) = (vec![0f64; n], vec![0f64; n]);
+        for i in 0..n {
+            let x = (i as f64 + 0.5) * dx;
+            let eta = a * (-((x - x0) / sigma).powi(2)).exp();
+            let d = 0.5 - z[i];
+            h[i] = d + eta;
+            q[i] = eta * (G * d).sqrt();
+        }
+        let mut s = Serre1D::nouveau_fond(dx, G, h, q, z.clone(), dispersif).unwrap();
+        let (mut t, mut haut) = (0f64, 0f64);
+        while t < 18. {
+            let dt = s.pas_stable().min(18. - t);
+            s.pas(dt).unwrap();
+            t += dt;
+            for i in 0..n {
+                let x = (i as f64 + 0.5) * dx;
+                if plat || (32. ..38.).contains(&x) {
+                    haut = if plat { (0..n).map(|k| s.h[k] - 0.5).fold(f64::MIN, f64::max) } else { haut.max(s.h[i] + s.z[i] - 0.5) };
+                }
+            }
+        }
+        let r = haut / a;
+        let nom = if plat { "Saint-Venant, fond plat (l'usure)" } else if dispersif { "SGN" } else { "Saint-Venant" };
+        println!("S733 E1 (2), {nom} : la hauteur {:.4} mm, rapport {r:.4} (Green sur le plateau : 1,2574)", haut * 1e3);
+        rapports.push(r);
+    }
+    let green = (0.5f64 / 0.2).powf(0.25);
+    println!("S733 E1 (2) : Saint-Venant sur la pente {:.4}, rapporté à l'usure {:.4} ; Green {green:.4}", rapports[1], rapports[1] / rapports[0]);
+    assert!((rapports[1] / green - 1.).abs() < 0.05, "critère 2 : {}", rapports[1]);
+}

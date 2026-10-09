@@ -115,8 +115,13 @@ en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le fond doux ; E1 ; (1)–(2).
+- [x] **P2** — le fond doux ; E1 ; (1)–(2).
 - [ ] **P3** — le prédicteur, la crête du témoin ; E2 ; (3)–(6).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — **tenu** : (1) le lac au repos sur la plage de R43, 2 s, la vitesse 4,7·10⁻¹⁵ m/s, la masse 0 ; (2) la levée sur 1:50, de
+  0,5 m à 0,2 m, Saint-Venant **1,2292** contre Green 1,2574 (−2,2 %) ; rapporté à l'usure du schéma (la même bosse sur fond plat, 0,9823),
+  1,2514 (−0,5 %) ; SGN 1,1338 (une bosse de σ = 2 m se disperse ; rapporté). **Écart au plan** : l'onde longue sinusoïdale (`kd` ≈ 0,1) aurait
+  31 m, plus que la pente ; à sa place, une bosse gaussienne de σ = 2 m (σ = 0,5 m d'abord : l'écrêtage du limiteur l'usait de 20 % en
+  800 mailles), et le témoin de l'usure sur fond plat. S694 inchangé (sans fond, au bit).
