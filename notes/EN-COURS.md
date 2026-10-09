@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S729 — **en cours**. En autonomie, sans arrêt ; session longue. LOD-ETAPE-3-S722, **B5 : le déclencheur de présence**. La boîte
+Session : S729 — **terminée**. En autonomie, sans arrêt ; session longue. LOD-ETAPE-3-S722, **B5 : le déclencheur de présence**. La boîte
 naît quand un corps touche l'eau, le suit, meurt quand il en sort.
 
 **Ce que la session fait.**
@@ -103,7 +103,8 @@ témoin est un APIC entier aux mêmes murs.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — naître, mourir, le déclencheur ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — naître, mourir, le déclencheur ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — **tenu** : une naissance, une mort ; la force à 6,0 % ; la masse 2,4·10⁻¹⁴ ; aucun choc de niveau. L'étape 3 du LOD faite. L'idée de l'utilisateur (la 3D jusqu'à la plage) inscrite au registre de l'étape 2.

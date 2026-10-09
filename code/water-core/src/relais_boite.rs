@@ -30,6 +30,9 @@ pub struct RelaisBoite {
     /// S725 — la dette de chaque face (m³) : ce que Saint-Venant doit recevoir encore. Elle est rendue par fraction, étalée sur les mailles
     /// voisines : rendue d'un coup dans une seule maille, un quantum (`dx/8` de hauteur) y faisait un pic de 3 mm.
     pub dette: Vec<f64>,
+    /// S729 — le volume tenu hors des faces (m³) : l'écart de la naissance (le donné contre le posé, le réglage du niveau lu, les particules
+    /// retirées du corps), rendu à la mort.
+    pub reste: f64,
 }
 
 impl RelaisBoite {
@@ -45,7 +48,7 @@ impl RelaisBoite {
             return Err(Refus::Montage);
         }
         let n = 2 * (d.nx + d.ny);
-        Ok(RelaisBoite { apic, sv, i0, j0, correction: 0., dette: vec![0.; n] })
+        Ok(RelaisBoite { apic, sv, i0, j0, correction: 0., dette: vec![0.; n], reste: 0. })
     }
 
     /// Le quantum d'APIC (m³).
@@ -71,7 +74,7 @@ impl RelaisBoite {
         v += self.apic.left_inlet().map_or(0., |g| g.3.iter().sum::<f64>());
         v += self.apic.right_inlet().map_or(0., |r| r.0.iter().sum::<f64>());
         v += self.apic.y_boundaries().map_or(0., |b| b.5);
-        v + self.dette.iter().sum::<f64>()
+        v + self.dette.iter().sum::<f64>() + self.reste
     }
 
     /// Le pas stable (µs) sous `plafond_us` : APIC, et Saint-Venant à Courant 0,4.
@@ -86,6 +89,129 @@ impl RelaisBoite {
         }
         let p_sv = if c > 0. { (0.4 * sv.dx / c * 1e6) as u64 } else { plafond_us };
         self.apic.stable_step_us(plafond_us).min(p_sv).max(1)
+    }
+
+    /// **S729 — la naissance d'une boîte au milieu d'un Saint-Venant entier** (B5) : `apic`, configurée et vide, ses quatre bords par
+    /// particules ; ses colonnes sur les mailles `[i0, i0 + nx) × [j0, j0 + ny)`. Elle naît de l'état de Saint-Venant (`birth_from_columns`,
+    /// la vitesse de chaque colonne), **le niveau réglé sur ce que la 3D lit** (ADR-283 D1) : une première naissance mesure le biais de
+    /// lecture, la seconde pose ce qu'il faut pour que la 3D lise le niveau de Saint-Venant. `dedans(p)` : faux pour une place occupée par
+    /// un corps (ses particules sont retirées). Les écarts de volume vont à `reste`.
+    pub fn naitre(mut apic: Apic3, sv: SaintVenant2D, i0: usize, j0: usize, dedans: &dyn Fn([f32; 3]) -> bool) -> Result<Self, Refus> {
+        let d = apic.domain();
+        let (nx, ny, nz) = (d.nx, d.ny, d.nz);
+        let (dx, dxs, nsv) = (d.dx as f64, sv.dx, sv.ny);
+        let quantum = dx.powi(3) / 8.;
+        let etat = |a: usize, b: usize| {
+            let k = (i0 + a) * nsv + j0 + b;
+            let h = sv.h[k];
+            let (u, v) = if h > 1e-6 { (sv.qx[k] / h, sv.qy[k] / h) } else { (0., 0.) };
+            (h, u, v)
+        };
+        // La grille des vitesses : uniforme par colonne (celle de Saint-Venant), moyenne aux faces.
+        let (fu, fv, fw) = (apic.velocity_u().len(), apic.velocity_v().len(), apic.velocity_w().len());
+        let (mut gu, mut gv) = (vec![0f32; fu], vec![0f32; fv]);
+        for k in 0..nz {
+            for b in 0..ny {
+                for a in 0..=nx {
+                    let (ua, ub) = (etat(a.saturating_sub(1).min(nx - 1), b).1, etat(a.min(nx - 1), b).1);
+                    gu[(k * ny + b) * (nx + 1) + a] = (0.5 * (ua + ub)) as f32;
+                }
+            }
+            for b in 0..=ny {
+                for a in 0..nx {
+                    let (va, vb) = (etat(a, b.saturating_sub(1).min(ny - 1)).2, etat(a, b.min(ny - 1)).2);
+                    gv[(k * (ny + 1) + b) * nx + a] = (0.5 * (va + vb)) as f32;
+                }
+            }
+        }
+        let gw = vec![0f32; fw];
+        let lire = |ap: &Apic3| -> Vec<f64> {
+            let (phi, l) = (ap.distance(), ap.labels());
+            (0..nx * ny).map(|c| {
+                let (a, b) = (c / ny, c % ny);
+                (0..nz).map(|k| {
+                    let m = (k * ny + b) * nx + a;
+                    if l[m] != crate::apic3d::SOLID { (0.5 - phi[m] as f64 / dx).clamp(0., 1.) * dx } else { 0. }
+                }).sum()
+            }).collect()
+        };
+        // La première naissance, le biais de lecture mesuré au repos d'un pas nul (la reconstruction seule).
+        let donne: Vec<f64> = (0..nx * ny).map(|c| etat(c % nx, c / nx).0 * dxs * dxs).collect();
+        apic.birth_from_columns(&donne, &gu, &gv, &gw).map_err(Refus::Apic)?;
+        apic.step_upto(1, crate::apic3d::ApicStage::Reconstruct).map_err(Refus::Apic)?;
+        let lu = lire(&apic);
+        let mut biais = 0.;
+        for c in 0..nx * ny {
+            let (a, b) = (c / ny, c % ny);
+            biais += lu[c] - etat(a, b).0;
+        }
+        biais /= (nx * ny) as f64;
+        // La seconde : poser de quoi lire le niveau de Saint-Venant.
+        let pose: Vec<f64> = (0..nx * ny).map(|c| ((etat(c % nx, c / nx).0 - biais) * dxs * dxs).max(0.)).collect();
+        let ecart = apic.birth_from_columns(&pose, &gu, &gv, &gw).map_err(Refus::Apic)?;
+        // Les particules dans le corps, retirées et comptées.
+        let mut retirees = 0usize;
+        let mut k = 0;
+        while k < apic.particle_count() {
+            if !dedans(apic.particles()[k]) {
+                apic.drop_particle(k);
+                retirees += 1;
+            } else {
+                k += 1;
+            }
+        }
+        let mut r = RelaisBoite::nouveau(apic, sv, i0, j0)?;
+        // Saint-Venant a cédé `donne` (le trou gelé), APIC tient `pose − ecart − retirées` : la différence est tenue.
+        let cede: f64 = donne.iter().sum();
+        let tenu = pose.iter().sum::<f64>() - ecart - retirees as f64 * quantum;
+        r.reste = cede - tenu;
+        Ok(r)
+    }
+
+    /// **S729 — la mort de la boîte** (B5) : chaque colonne rend à Saint-Venant sa surface (φ) et sa quantité de mouvement ; ce qui reste
+    /// (les dettes, les réservoirs, le compte contre la surface, `reste`) est réparti également sur les mailles du trou. Rend Saint-Venant
+    /// entier, la masse exacte.
+    pub fn mourir(mut self) -> Result<SaintVenant2D, Refus> {
+        let avant = self.volume();
+        let d = self.apic.domain();
+        let (nx, ny, nz) = (d.nx, d.ny, d.nz);
+        let (dx, dxs) = (d.dx as f64, self.sv.dx);
+        let (phi, l) = (self.apic.distance(), self.apic.labels());
+        let mut h = vec![0f64; nx * ny];
+        for a in 0..nx {
+            for b in 0..ny {
+                h[a * ny + b] = (0..nz).map(|k| {
+                    let m = (k * ny + b) * nx + a;
+                    if l[m] != crate::apic3d::SOLID { (0.5 - phi[m] as f64 / dx).clamp(0., 1.) * dx } else { 0. }
+                }).sum();
+            }
+        }
+        let (mut su, mut sv_, mut n) = (vec![0f64; nx * ny], vec![0f64; nx * ny], vec![0usize; nx * ny]);
+        for (p, v) in self.apic.particles().iter().zip(self.apic.velocities()) {
+            let c = ((p[0] / d.dx).max(0.) as usize).min(nx - 1) * ny + ((p[1] / d.dx).max(0.) as usize).min(ny - 1);
+            su[c] += v[0] as f64;
+            sv_[c] += v[1] as f64;
+            n[c] += 1;
+        }
+        // Ce qui reste, réparti également sur le trou.
+        let hors_trou = {
+            let mut v = 0.;
+            for i in 0..self.sv.nx {
+                for j in 0..self.sv.ny {
+                    if !((self.i0..self.i0 + nx).contains(&i) && (self.j0..self.j0 + ny).contains(&j)) {
+                        v += self.sv.h[i * self.sv.ny + j];
+                    }
+                }
+            }
+            v * dxs * dxs
+        };
+        let rendu: f64 = h.iter().sum::<f64>() * dxs * dxs;
+        let surplus = (avant - hors_trou - rendu) / ((nx * ny) as f64 * dxs * dxs);
+        let hf: Vec<f64> = h.iter().map(|x| (x + surplus).max(0.)).collect();
+        let qx: Vec<f64> = (0..nx * ny).map(|c| hf[c] * su[c] / n[c].max(1) as f64).collect();
+        let qy: Vec<f64> = (0..nx * ny).map(|c| hf[c] * sv_[c] / n[c].max(1) as f64).collect();
+        self.sv.fermer_trou(&hf, &qx, &qy).map_err(|_| Refus::SaintVenant)?;
+        Ok(self.sv)
     }
 
     /// **S728 — la boîte avance d'une colonne vers `+x`** (B4b) : la colonne de derrière rend à Saint-Venant sa surface (φ) et sa quantité de

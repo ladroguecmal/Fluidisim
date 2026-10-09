@@ -445,3 +445,152 @@ fn the_box_follows_the_body_s728() {
     assert!(masse < 1e-12, "critère 3 : la masse {masse}");
 }
 
+/// S729 — le niveau moyen de Saint-Venant sur l'anneau des mailles qui bordent le rectangle `[i0, i0 + nb) × [j0, j0 + nb)` (à une maille).
+fn niveau_anneau(sv: &SaintVenant2D, i0: usize, j0: usize, nb: usize) -> f64 {
+    let (mut s, mut n) = (0f64, 0usize);
+    for i in i0 - 1..=i0 + nb {
+        for j in j0 - 1..=j0 + nb {
+            if i == i0 - 1 || i == i0 + nb || j == j0 - 1 || j == j0 + nb {
+                s += sv.h[i * sv.ny + j];
+                n += 1;
+            }
+        }
+    }
+    s / n as f64
+}
+
+/// **S729 — B5, le déclencheur de présence** : la sphère de B4 (rayon 8 cm) descend de 15 cm au-dessus de l'eau à 0,3 m/s jusqu'à
+/// mi-immersion (0,5 s), avance à 0,3 m/s (1,5 s), remonte et sort (0,6 s), puis l'eau seule (0,6 s). Saint-Venant seul au départ (3 m ×
+/// 2 m) ; la boîte naît quand le bas du corps passe sous le niveau, le suit, meurt 0,2 s après qu'il en est sorti. Contre un APIC entier.
+/// (1) une naissance, une mort ; (2) la force dans l'eau à 10 % ; (3) la masse à 10⁻¹² ; (4) le niveau autour du trou à 1 mm, avant et
+/// après la naissance comme la mort. **Mesuré** : une naissance (0,24 s), une mort (2,47 s) ; la force à 6,0 % ; la masse 2,4·10⁻¹⁴ ;
+/// aucun choc de niveau — tenu.
+#[test]
+#[ignore = "le déclencheur de présence, contre un APIC entier (≈ 36 min)"]
+fn the_box_is_born_and_dies_with_the_body_s729() {
+    let (dx, d, rayon) = (0.025f32, 0.4f64, 0.08f32);
+    let (nxt, nyt, nb, nz) = (120usize, 80usize, 40usize, 24usize);
+    let fils = || Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32))) as std::sync::Arc<dyn JobSystem + Send + Sync>);
+    let mut c = [0.7f32, 1.0, d as f32 + 0.15];
+    let vitesse = |t: f64| -> [f32; 3] {
+        if t < 0.5 { [0., 0., -0.3] } else if t < 2.0 { [0.3, 0., 0.] } else if t < 2.6 { [0., 0., 0.3] } else { [0., 0., 0.] }
+    };
+    let hors = |p: [f32; 3], c: [f32; 3]| (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) > rayon * rayon;
+    // Le témoin.
+    let (mut t3, _ar) = apic(nxt, nyt, nz, dx, nxt * nyt * nz * 8);
+    t3.set_ballistic_air(true);
+    t3.seed(&|p| (p[2] as f64) < d).unwrap();
+    t3.set_body(Some(crate::apic3d::Sphere3 { center: c, radius: rayon, velocity: vitesse(0.) })).unwrap();
+    t3.set_jobs(fils());
+    t3.step(1000).unwrap();
+    // Le niveau que lit la 3D (une seule source).
+    let niveau = surface_colonnes(&t3)[(nyt - 1) * nxt + nxt - 1];
+    let mut sv = Some({
+        let mut s = SaintVenant2D::nouveau(nxt, nyt, dx as f64, 9.81, vec![0.; nxt * nyt], vec![niveau; nxt * nyt], vec![0.; nxt * nyt], vec![0.; nxt * nyt]).unwrap();
+        s.regler_ordre_deux(1e-12).unwrap();
+        s
+    });
+    // La boîte, préparée d'avance (en jeu : une réserve).
+    let mut reserve = Some({
+        let (mut ap, mut arena) = apic(nb, nb, nz, dx, nb * nb * nz * 8);
+        ap.set_ballistic_air(true);
+        ap.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        ap.enable_left_inlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        ap.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        ap.enable_y_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        ap.set_jobs(fils());
+        ap
+    });
+    let mut boite: Option<RelaisBoite> = None;
+    let v0 = sv.as_ref().unwrap().volume();
+    let (mut t, mut masse, mut naissances, mut morts) = (1000u64, 0f64, 0usize, 0usize);
+    let (mut hors_eau_depuis, mut somme_ecart, mut somme_ref) = (None::<f64>, 0f64, 0f64);
+    let (mut choc_naissance, mut choc_mort) = (0f64, 0f64);
+    let horloge = std::time::Instant::now();
+    while t < 3_200_000 {
+        let ts = t as f64 * 1e-6;
+        let v = vitesse(ts);
+        t3.set_body(Some(crate::apic3d::Sphere3 { center: c, radius: rayon, velocity: v })).unwrap();
+        let bas_dans_l_eau = ((c[2] - rayon) as f64) < niveau;
+        // La naissance.
+        if boite.is_none() && bas_dans_l_eau && naissances == 0 {
+            let (i0, j0) = (((c[0] / dx) as usize).saturating_sub(nb / 2), ((c[1] / dx) as usize).saturating_sub(nb / 2));
+            let s = sv.take().unwrap();
+            let avant = niveau_anneau(&s, i0, j0, nb);
+            let (ox, oy) = (i0 as f32 * dx, j0 as f32 * dx);
+            let cb = [c[0] - ox, c[1] - oy, c[2]];
+            let mut ap = reserve.take().unwrap();
+            ap.set_body(Some(crate::apic3d::Sphere3 { center: cb, radius: rayon, velocity: v })).unwrap();
+            let r = RelaisBoite::naitre(ap, s, i0, j0, &|p| hors(p, cb)).unwrap();
+            let apres = niveau_anneau(&r.sv, i0, j0, nb);
+            choc_naissance = (apres - avant).abs();
+            eprintln!("S729 naissance à {ts:.2} s en ({i0}, {j0}) ; le niveau autour {avant:.5} → {apres:.5} ; reste {:.2e} m³", r.reste);
+            boite = Some(r);
+            naissances += 1;
+        }
+        // Le pas.
+        let us_t = t3.stable_step_us(10_000).min(3_200_000 - t);
+        let us = match boite.as_ref() { Some(r) => r.pas_stable_us(10_000).min(us_t), None => us_t };
+        if let Some(r) = boite.as_mut() {
+            let (ox, oy) = (r.i0 as f32 * dx, r.j0 as f32 * dx);
+            r.apic.set_body(Some(crate::apic3d::Sphere3 { center: [c[0] - ox, c[1] - oy, c[2]], radius: rayon, velocity: v })).unwrap();
+            r.pas(us).unwrap();
+            // La boîte suit le corps.
+            while r.apic.body().map_or(false, |b| b.center[0] > (nb as f32 / 2. + 1.) * dx) {
+                r.suivre_x().unwrap();
+            }
+        } else {
+            let s = sv.as_mut().unwrap();
+            let cs = (0..s.nx * s.ny).filter(|&k| s.h[k] > 1e-6).map(|k| (s.qx[k] / s.h[k]).abs().max((s.qy[k] / s.h[k]).abs()) + (9.81 * s.h[k]).sqrt()).fold(0f64, f64::max);
+            let us_sv = if cs > 0. { (0.4 * dx as f64 / cs * 1e6) as u64 } else { us };
+            let us2 = us.min(us_sv).max(1);
+            s.pas(us2 as f64 * 1e-6).unwrap();
+            t3.step(us2).unwrap();
+            for a in 0..3 {
+                c[a] += v[a] * us2 as f32 * 1e-6;
+            }
+            t += us2;
+            masse = masse.max((s.volume() - v0).abs() / v0);
+            continue;
+        }
+        t3.step(us).unwrap();
+        for a in 0..3 {
+            c[a] += v[a] * us as f32 * 1e-6;
+        }
+        t += us;
+        let r = boite.as_ref().unwrap();
+        masse = masse.max((r.volume() - v0).abs() / v0);
+        if bas_dans_l_eau {
+            let (fb, ft) = (r.apic.body_force(), t3.body_force());
+            somme_ecart += ((fb[0] - ft[0]).powi(2) + (fb[2] - ft[2]).powi(2)).sqrt() * us as f64;
+            somme_ref += (ft[0] * ft[0] + ft[2] * ft[2]).sqrt() * us as f64;
+            hors_eau_depuis = None;
+        } else if hors_eau_depuis.is_none() {
+            hors_eau_depuis = Some(ts);
+        }
+        // La mort, 0,2 s après la sortie.
+        if hors_eau_depuis.is_some_and(|t0| t as f64 * 1e-6 - t0 >= 0.2) {
+            let r = boite.take().unwrap();
+            let (i0, j0) = (r.i0, r.j0);
+            let avant = niveau_anneau(&r.sv, i0, j0, nb);
+            let s = r.mourir().unwrap();
+            let apres = niveau_anneau(&s, i0, j0, nb);
+            choc_mort = (apres - avant).abs();
+            masse = masse.max((s.volume() - v0).abs() / v0);
+            eprintln!("S729 mort à {:.2} s ; le niveau autour {avant:.5} → {apres:.5} ; la masse {masse:.1e}", t as f64 * 1e-6);
+            sv = Some(s);
+            morts += 1;
+        }
+        if t % 250_000 < us {
+            eprintln!("S729 progression : t = {:.2} s, la masse {masse:.1e}, {:.0} s d'horloge", t as f64 * 1e-6, horloge.elapsed().as_secs_f64());
+        }
+    }
+    let force = somme_ecart / somme_ref.max(1e-30);
+    println!("S729 B5 : {naissances} naissance(s), {morts} mort(s) ; la force dans l'eau {:.1} % ; la masse {masse:.1e} ; le choc de niveau à la naissance {choc_naissance:.2e} m, à la mort {choc_mort:.2e} m ; {:.0} s",
+        100. * force, horloge.elapsed().as_secs_f64());
+    assert!(naissances == 1 && morts == 1, "critère 1");
+    assert!(force < 0.10, "critère 2 : la force {force}");
+    assert!(masse < 1e-12, "critère 3 : la masse {masse}");
+    assert!(choc_naissance < 1e-3 && choc_mort < 1e-3, "critère 4 : le niveau");
+}
+

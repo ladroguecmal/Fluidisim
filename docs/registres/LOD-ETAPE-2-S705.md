@@ -60,3 +60,9 @@ la vague de bout en bout.
 *Note datée du 2026-10-09 (S718)* : **E1, la vague de bout en bout, fonctionne**, pour 4 fois moins de calcul que le tout-3D
 ([preuve](../validation/BOUT-EN-BOUT-S718.md)). Le déferlement est dans la tolérance. La remontée, +3,3 cm, vient du large (SGN, l'onde de
 départ plus haute), non de la mort. Reste D1, le déclencheur, au plus simple, puis la question d'ADR-278 D3 (S719).
+
+*Note datée du 2026-10-09 (S729), à la demande de l'utilisateur* : « la simulation 3D peut se réaliser jusqu'à la plage si une vague éclate
+trop proche du bord ». Le déclencheur (D1) fixe donc aussi **où s'arrête la bande** : le point de déferlement prévu, plus la distance de
+chute du jet, plus une marge. Si cela dépasse le rivage, la bande couvre la plage. La difficulté est mesurée : sur sable sec, la lame mince
+fait tomber le pas de la 3D sous 0,3 ms (S712). Il faudra la traiter en film mince (S678), ou éteindre la 3D sur le sable dès que le jet est
+retombé.

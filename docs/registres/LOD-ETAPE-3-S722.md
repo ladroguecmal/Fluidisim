@@ -56,3 +56,7 @@ entière, quatre fois moins de particules ([preuve](../validation/CORPS-DANS-LA-
 *Note datée du 2026-10-09 (S728)* : **B4b acquis** — la boîte suit son corps sur 33 colonnes, la force à 6,4 %, l'eau autour de lui à 6,5 %
 de la 3D entière, la masse au bit ([preuve](../validation/BOITE-QUI-SUIT-S728.md)). Le suivi en y est le même geste, à écrire. Suivant :
 B5, le déclencheur de présence.
+
+*Note datée du 2026-10-09 (S729)* : **B5 acquis, l'étape 3 faite** — la boîte naît, suit, meurt avec le corps, sans choc de niveau, la masse
+au bit, la force à 6 % ([preuve](../validation/BOITE-NAIT-MEURT-S729.md)). Restent, plus tard : le suivi en y et en biais (le même geste),
+une réserve de boîtes préparées (en jeu, la naissance n'alloue pas).

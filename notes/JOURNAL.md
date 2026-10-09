@@ -2107,3 +2107,11 @@ le corps.
 `shift_x`, `deplacer_trou_x`, `suivre_x`. **Mesuré** : la boîte suit la sphère sur 33 colonnes ; la force à 6,4 %, la surface à 6,5 %, la
 masse 7,8·10⁻¹⁵ (tenu) ; six fois moins de 3D que le témoin. **B4b acquis.** Maillons **1** (4.14). Suivant : **S729**, B5, le
 déclencheur de présence.
+
+## S729 — 2026-10-09 — La boîte qui naît et meurt avec le corps (B5)
+
+**Entrée.** En autonomie ; LOD-ETAPE-3-S722. **Fait** ([preuve](../docs/validation/BOITE-NAIT-MEURT-S729.md)) : `naitre` (le niveau réglé
+sur ce que lit la 3D), `mourir`, `fermer_trou`, le déclencheur de présence avec hystérésis. **Mesuré** : une naissance, une mort, la force
+à 6 %, la masse 2,4·10⁻¹⁴, aucun choc de niveau (tenu). **L'étape 3 du LOD est faite.** L'utilisateur : « la 3D jusqu'à la plage si une
+vague éclate trop près du bord », inscrit au déclencheur (LOD-ETAPE-2-S705). Maillons **1** (4.14). Suivant : **S730** ; la revue en
+S731.

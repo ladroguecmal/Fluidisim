@@ -472,6 +472,8 @@ pas recopiée ici (L137).
   particules, la masse au bit ([preuve](validation/CORPS-DANS-LA-BOITE-S727.md)).
   **S728** : la boîte qui suit le corps (B4b) — 33 avancées, la force à 6,4 %, l'eau autour de lui à 6,5 %, la masse au bit, six fois
   moins de 3D que le témoin ([preuve](validation/BOITE-QUI-SUIT-S728.md)).
+  **S729** : le déclencheur de présence (B5) — la boîte naît quand le corps touche l'eau et meurt quand il en sort, sans choc de niveau,
+  la masse au bit, la force à 6 % ; **l'étape 3 du LOD faite** ([preuve](validation/BOITE-NAIT-MEURT-S729.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

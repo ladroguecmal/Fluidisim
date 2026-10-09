@@ -81,4 +81,17 @@ impl Apic3 {
         self.bin_fresh = false;
         Ok((mort, qdm, ecart))
     }
+
+    /// **S729 — retirer la particule `k`** (la dernière prend sa place). Sans effet hors du compte.
+    pub fn drop_particle(&mut self, k: usize) {
+        if k >= self.n {
+            return;
+        }
+        let last = self.n - 1;
+        self.x[k] = self.x[last];
+        self.vel[k] = self.vel[last];
+        self.c[k] = self.c[last];
+        self.n = last;
+        self.bin_fresh = false;
+    }
 }

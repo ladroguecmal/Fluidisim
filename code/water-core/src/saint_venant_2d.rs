@@ -360,6 +360,27 @@ impl SaintVenant2D {
         Ok(())
     }
 
+    /// **S729 — fermer le trou** : ses mailles redeviennent actives avec l'état donné (rangé `(i − i0)·(j1 − j0) + (j − j0)`). Refus : sans
+    /// trou, une forme fausse, une hauteur négative.
+    pub fn fermer_trou(&mut self, h: &[f64], qx: &[f64], qy: &[f64]) -> Result<(), Refus> {
+        let ny = self.ny;
+        let Some(tr) = self.trou.as_ref() else { return Err(Refus) };
+        let (ni, nj) = (tr.i1 - tr.i0, tr.j1 - tr.j0);
+        if h.len() != ni * nj || qx.len() != ni * nj || qy.len() != ni * nj || h.iter().any(|v| !(v >= &0.0)) {
+            return Err(Refus);
+        }
+        for a in 0..ni {
+            for b in 0..nj {
+                let k = (tr.i0 + a) * ny + tr.j0 + b;
+                self.h[k] = h[a * nj + b];
+                self.qx[k] = qx[a * nj + b];
+                self.qy[k] = qy[a * nj + b];
+            }
+        }
+        self.trou = None;
+        Ok(())
+    }
+
     /// **S728 — le trou avance d'une colonne vers `+x`** : la colonne `i0` redevient active avec l'état donné (par `j` du trou : `h`, `qx`,
     /// `qy`), la colonne `i1` est gelée. Refus : sans trou, une forme fausse, le trou à moins de trois mailles du bord.
     pub fn deplacer_trou_x(&mut self, h: &[f64], qx: &[f64], qy: &[f64]) -> Result<(), Refus> {
