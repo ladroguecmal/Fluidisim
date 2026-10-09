@@ -62,63 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S739 — **terminée**. En autonomie ; session longue. DISTANCE-PARCOURUE-S738. **La question** : comment l'onde solitaire posée
-aujourd'hui se transforme-t-elle dans la 3D sur un fond plat, et une onde de départ dotée de son profil vertical (celui de SGN, S698) se
-garde-t-elle mieux ?
+Session : S740 — **en cours**. En autonomie ; session longue. ONDE-SOLITAIRE-3D-S739 : la 3D raidit l'onde solitaire sur fond plat. **La
+question** : quelle partie du pas en est la cause ? Les suspects, un à la fois (ADR-276 D2), sur le canal à 5 cm, qui montre le défaut en
+6 min (S739). **Aucun remède adopté dans cette session** : un suspect qui guérit le canal est désigné, puis éprouvé à 2,5 cm.
 
 **Ce que la session fait.**
-- **Un canal plat** (`canal_s739`) : `d` = 0,5 m, `H` = 0,1 m (`H/d` = 0,2, celle de S4), 24 m, deux rangées, des murs. L'onde est centrée à
-  4 m ; 5 s.
-- **Deux ondes de départ**, une seule différence (ADR-276 D2) :
-  - **A**, celle d'aujourd'hui : `η` de Boussinesq (`OndeSolitaire`), `u = c·η/(d + η)` uniforme sur la verticale, `w = 0` ;
-  - **B**, l'onde de Rayleigh (`OndeDepart { rayleigh: true }`, S719, la solitaire de SGN) avec le profil vertical de SGN (S698) :
-    `u(z) = ū + (h²/6 − z²/2)·ū_xx`, `w(z) = −z·ū_x`.
-- **Les mesures, tous les 0,25 s, par la surface** (ADR-280 D1), affichées au fil du calcul (ADR-281 D1) :
-  - la crête (la hauteur, la place) ;
-  - la largeur à mi-hauteur ;
-  - le creux derrière la crête (une traîne) ;
-  - et, comme seconde lecture, la crête par les particules (ADR-286 D2).
-- 5 cm d'abord (≈ 77 000 particules, quelques minutes), puis 2,5 cm pour l'onde retenue (≈ 307 000, ≈ 45 min ; ADR-274 D1).
+- Deux réglages du cœur, **leurs défauts au bit** : `set_pressure_max_iterations` (4 000 par défaut) et `set_separation_passes` (2 par
+  défaut).
+- Le canal relève, à chaque pas, les itérations et le résidu de la pression (`ApicReport`) : le plus grand nombre d'itérations, la part des
+  pas au plafond, le plus grand résidu.
+- Le résumé du canal prend sa référence à 0,25 s (S739 la prenait à 0 s, avant toute surface : ±inf).
 
-**Les bornes** (ADR-286 D1) : la célérité vaut 2,43 m/s ; à 5 s, la crête est à 16,1 m et le front (5 %) à 18,9 m. Le mur est à 24 m :
-5,1 m de marge.
+**Les essais, et leurs critères écrits avant** (le canal A à 5 cm, 4,25 s ; « guérit » = la largeur à mi-hauteur au-dessus de **80 %** de
+celle de 0,25 s, et le creux sous **10 % de `H`**) :
+- **E1 — la pression telle quelle** : les itérations, le résidu. Le plafond est-il atteint ? Rapporté.
+- **E2 — la pression convergée** : le plafond à 100 000. Si E1 atteignait le plafond, E2 dit si c'est la cause.
+- **E3 — sans la séparation des particules** (`set_separation_passes(0)`).
+- **E4 — le pas plafonné à 2,5 ms** (au lieu de 10 ms ; S713 : une maille par pas).
 
-**Les critères, écrits avant.**
-- **E1 — A**, rapporté : la crête, la largeur et le creux selon la distance. S738 attend une crête qui oscille de ±10 %.
-- **E2 — B** est retenue si, sur les 12 m :
-  1. la crête reste à **±3 %** de sa hauteur de départ ;
-  2. la largeur à mi-hauteur à **±5 %** ;
-  3. le creux de la traîne sous **2 % de `H`** ;
-  4. B fait mieux que A sur les trois.
-- **E3 — l'onde retenue à 2,5 cm** : les mêmes critères.
+On s'arrête au premier qui guérit, et on l'éprouve à 2,5 cm (**E5**, les mêmes critères). Si aucun ne guérit, la question reste ouverte,
+avec les nombres, et les suspects suivants sont nommés.
 
-S'il n'y en a pas, la question reste ouverte, avec les nombres. L'application à S4 (l'approche de 3 m) est pour S740.
+**Contrôles du plan** (ADR-226, ADR-276, ADR-286)
 
-**Contrôles du plan** (ADR-226, ADR-273, ADR-276, ADR-280, ADR-281, ADR-286)
-
-- **témoin** : l'onde de SGN (stable, S694) et sa forme exacte ; A contre B, partis du même canal.
-- **instrument** : la surface par φ, et la crête par les particules (une seconde lecture) ; le creux mesuré sur 3 m derrière la crête.
-- **calcul** : E1 et E2 à 5 cm, quelques minutes chacun ; E3 ≈ 45 min ; en série, par chemins absolus.
-- **ADR** : ADR-276 D1 (une seule fonction d'onde : `OndeDepart`) ; ADR-286 D1, D2.
+- **témoin** : le canal de S739, au bit (les réglages à leurs défauts) ; SGN garde la même onde (S694).
+- **instrument** : la largeur à mi-hauteur et le creux, par la surface ; les itérations et le résidu, par le pas lui-même.
+- **calcul** : E1 à E4, ≈ 6 min chacun (A seulement, 3 min) ; E5 ≈ 15 min.
+- **ADR** : ADR-276 D2 (une cause à la fois) ; ADR-286 D1 (le canal de 24 m, 5,1 m de marge, inchangé).
 - **pièges** :
-  - la largeur à mi-hauteur d'une onde qui oscille : lue par interpolation sur la surface lissée (10 cm) ;
-  - à 5 cm, `H` fait deux mailles : 5 cm explore, 2,5 cm juge.
+  - un plafond d'itérations levé peut rendre un pas très long ;
+  - sans séparation, des particules se tassent : le volume est rapporté.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le canal, les deux ondes, les mesures ; E1, E2 à 5 cm.
-- [x] **P3** — **E3 changé, après E1–E2** (aucune onde retenue) : **A à 2,5 cm**, pour savoir si la déformation tient à la maille. Critère
-  écrit avant : à 2,5 cm, la largeur à mi-hauteur reste au-dessus de **80 %** de sa valeur à 0,25 s, et le creux sous **10 % de `H`**
-  jusqu'à 4,25 s. Si oui, la maille de 5 cm est la cause ; sinon, la 3D à la maille des témoins déforme l'onde.
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — les réglages, le relevé de la pression ; E1, E2.
+- [ ] **P3** — E3, E4 si besoin ; E5 pour le suspect désigné.
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — E1 et E2 à 5 cm (349 s) : **les deux ondes se déforment pareil**.
-  - A : la largeur à mi-hauteur passe de 2,33 m (0,25 s) à 1,44 (1,25 s), 0,67 (2,25 s), 0,55 (3,25 s) et 0,49 m (4,25 s) ; la crête 98,
-    86, 114, 111, 100 mm ; le creux derrière −17, −22, −45, −54 mm.
-  - B : la largeur 2,43, 1,41, 0,64, 0,57, 0,82 m ; la crête 104, 80, 120, 129, 94 mm ; le creux −4, −16, −27, −43, −47 mm.
-  - **B non retenue** : l'onde de départ n'est pas la cause. La 3D à 5 cm ne garde pas une onde solitaire : elle la raidit et la rétrécit,
-    comme un modèle sans dispersion, et un creux se creuse derrière.
-  - Le résumé imprimé (±inf) est faux : la mesure à t = 0 est prise avant toute reconstruction de la surface. Les séries affichées font foi.
-- **P3 fini** — A à 2,5 cm (873 s) : la largeur 2,35 → 0,45 m, la crête 96 → 150 mm, le creux −42 mm, la célérité 2,19 m/s (−10 %). **Manqué** : la 3D à la maille des témoins déforme l'onde. Le suspect suivant : la pression (le gradient conjugué plafonné à 4 000 itérations).
