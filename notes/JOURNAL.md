@@ -2124,3 +2124,16 @@ domaines placés et déplacés selon la situation : [ADR-284](../docs/adr/ADR-28
 **Mesuré** : le mur 281,5 mm → 0 avec le raccord à 12,0 m, pour un coût de 1,06× ; le tout-3D refait (remontée +1,6 cm). De bout en bout
 contre lui, la remontée passe à −1,8 cm (S718 : +3,3 cm ; note sur ADR-278). Images envoyées. Le filtre d'`essai.py` a pris les deux
 essais (un nom contenu dans l'autre). Maillons **1** (4.14). Suivant : **S731**, la revue et le lot.
+
+## S731 — 2026-10-09 — la cinquantième revue de méthode (ADR-285)
+
+**Entrée.** La revue (S726–S730) et le lot S729–S731. **Fait** : [ADR-285](../docs/adr/ADR-285-cinquantieme-revue-de-methode.md).
+- D1 : un témoin se contrôle comme l'objet. Le « tout-3D » de la plage portait un raccord non mesuré (un mur de 28 cm) de S717 à S730, et
+  l'attribution de S718 n'avait pas fait varier ce raccord commun.
+- D2 : `essai.py` ne lance que le nom exact (fait, vérifié par `--liste`).
+- D3 : un ADR naît avec sa ligne d'index.
+- D4 : **le sélecteur des domaines**, la campagne suivante, à la demande de l'utilisateur (la pièce la plus peaufinée et la plus solide) :
+  une batterie de scènes, trois juges (le réalisme, le coût, la solidité).
+
+Maillons **0** (méthode). Suivant : **S732**, la conception du sélecteur.
+

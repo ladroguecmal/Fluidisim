@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S731 — **en cours**. La cinquantième revue de méthode (ADR-222 D4), sur S726–S730, et le lot S729–S731 (ADR-213 D3).
+Session : S731 — **terminée**. La cinquantième revue de méthode (ADR-222 D4), sur S726–S730, et le lot S729–S731 (ADR-213 D3).
 
 **Ce que la session fait.**
 - Relire les frictions de S726 à S730, et décider (ADR-285). Les trois relevées :
@@ -79,11 +79,19 @@ Session : S731 — **en cours**. La cinquantième revue de méthode (ADR-222 D4)
 **Critère** : `essai.py` ne lance que l'essai nommé quand un autre nom le contient. Vérifié sur `the_shore_relay_beyond_the_jet_s730`, par
 la liste des essais seulement (sans rien lancer de long : `--liste`).
 
+**Contrôles du plan** (ADR-266)
+
+- **témoin** : `essai.py --liste` sur les trois noms de S730 (aucun calcul long).
+- **instrument** : la liste des essais que cargo désigne (`--list`).
+- **calcul** : aucun.
+- **ADR** : ADR-222 D4 (la revue), ADR-213 D3 (le lot), ADR-285 D3 (l'arbre restauré avant de relancer une fermeture refusée).
+- **pièges** : ADR-223 D4 (pas de barre oblique inverse dans un *heredoc*) — retrouvé deux fois en S731, corrigé par l'outil d'édition.
+
 ### Plan
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — `essai.py` ; ADR-285 ; METHODE ; le lot.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — `essai.py` vérifié par `--liste` : `the_shore_relay_beyond_the_jet_s730` ne désigne plus que lui ; `beyond_the_jet_s730` est refusé (deux essais) ; le nom de E2 ne désigne que E2. ADR-285 écrit ; METHODE ; le lot (FEUILLE-DE-ROUTE, ROADMAP-VIVANTE).
