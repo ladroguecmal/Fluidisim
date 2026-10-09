@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**283 ADR** — actée : 232, proposée : 49, rétractée en partie : 2.
+**284 ADR** — actée : 233, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -294,3 +294,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [281](../adr/ADR-281-quarante-septieme-revue-de-methode.md) | Quarante-septième revue de méthode (S711–S715) | actée | S716 | 222 280 | 282 |
 | [282](../adr/ADR-282-quarante-huitieme-revue-de-methode.md) | Quarante-huitième revue de méthode (S716–S720) | actée | S721 | 222 281 | 283 |
 | [283](../adr/ADR-283-quarante-neuvieme-revue-de-methode.md) | Quarante-neuvième revue de méthode (S721–S725) | actée | S726 | 222 282 |  |
+| [284](../adr/ADR-284-r43-recu-les-domaines-places-selon-la-situation.md) | R43 reçu ; les domaines placés selon la situation | actée | S730 |  |  |

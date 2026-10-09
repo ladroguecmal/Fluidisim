@@ -66,3 +66,6 @@ trop proche du bord ». Le déclencheur (D1) fixe donc aussi **où s'arrête la 
 chute du jet, plus une marge. Si cela dépasse le rivage, la bande couvre la plage. La difficulté est mesurée : sur sable sec, la lame mince
 fait tomber le pas de la 3D sous 0,3 ms (S712). Il faudra la traiter en film mince (S678), ou éteindre la 3D sur le sable dès que le jet est
 retombé.
+
+*Note datée du 2026-10-09 (S730)* : R43 reçu ; ADR-284 décide. Le raccord du rivage, placé au-delà du jet (12,0 m), efface le mur de R43
+pour 6 % de calcul ([preuve](../validation/RACCORD-AU-DELA-DU-JET-S730.md)). Le déclencheur (D1) placera aussi les frontières.

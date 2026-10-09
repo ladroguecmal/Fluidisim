@@ -2115,3 +2115,12 @@ sur ce que lit la 3D), `mourir`, `fermer_trou`, le déclencheur de présence ave
 à 6 %, la masse 2,4·10⁻¹⁴, aucun choc de niveau (tenu). **L'étape 3 du LOD est faite.** L'utilisateur : « la 3D jusqu'à la plage si une
 vague éclate trop près du bord », inscrit au déclencheur (LOD-ETAPE-2-S705). Maillons **1** (4.14). Suivant : **S730** ; la revue en
 S731.
+
+## S730 — 2026-10-09 — Le raccord du rivage au-delà du jet (R43 reçu)
+
+**Entrée.** R43 reçu : réaliste et cohérent, sauf au raccord du rivage (un mur de Saint-Venant, une poche d'air). L'utilisateur demande des
+domaines placés et déplacés selon la situation : [ADR-284](../docs/adr/ADR-284-r43-recu-les-domaines-places-selon-la-situation.md).
+**Fait** ([preuve](../docs/validation/RACCORD-AU-DELA-DU-JET-S730.md)) : le raccord à `x_f`, l'instrument du mur `J`, la planche du jet.
+**Mesuré** : le mur 281,5 mm → 0 avec le raccord à 12,0 m, pour un coût de 1,06× ; le tout-3D refait (remontée +1,6 cm). De bout en bout
+contre lui, la remontée passe à −1,8 cm (S718 : +3,3 cm ; note sur ADR-278). Images envoyées. Le filtre d'`essai.py` a pris les deux
+essais (un nom contenu dans l'autre). Maillons **1** (4.14). Suivant : **S731**, la revue et le lot.

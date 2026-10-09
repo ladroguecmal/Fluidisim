@@ -474,6 +474,8 @@ pas recopiée ici (L137).
   moins de 3D que le témoin ([preuve](validation/BOITE-QUI-SUIT-S728.md)).
   **S729** : le déclencheur de présence (B5) — la boîte naît quand le corps touche l'eau et meurt quand il en sort, sans choc de niveau,
   la masse au bit, la force à 6 % ; **l'étape 3 du LOD faite** ([preuve](validation/BOITE-NAIT-MEURT-S729.md)).
+  **S730** : R43 reçu (ADR-284) ; le raccord du rivage placé au-delà du jet efface le mur de R43 (28 cm → 0) pour 6 % de calcul ; le
+  tout-3D refait ([preuve](validation/RACCORD-AU-DELA-DU-JET-S730.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

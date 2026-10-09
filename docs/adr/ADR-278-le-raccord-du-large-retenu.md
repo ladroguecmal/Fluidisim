@@ -48,3 +48,7 @@ houle (B et W), non par une onde solitaire. La question se rouvre quand le racco
 pour SGN et la 3D, la vague de bout en bout remonte encore 3,0 cm plus haut que le tout-3D. La cause n'est ni l'onde de départ ni le volume
 (la bande nourrie par SGN reçoit 3 % d'eau de moins), mais la dynamique propre de SGN sur une onde très non linéaire. La question reste
 ouverte jusqu'à la houle (W).
+
+*Note datée du 2026-10-09 (S730)* : la remontée de bout en bout, +3,3 cm contre le tout-3D (S718, attribuée au large SGN), devient −1,8 cm
+quand le raccord du rivage est placé au-delà du jet, dans les deux montages ([preuve](../validation/RACCORD-AU-DELA-DU-JET-S730.md)). Une
+part de l'écart venait du raccord du rivage.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S730 — **en cours**. En autonomie ; session longue. **R43 reçu** (ADR-284) : réaliste et cohérent, sauf au raccord du rivage, où
+Session : S730 — **terminée**. En autonomie ; session longue. **R43 reçu** (ADR-284) : réaliste et cohérent, sauf au raccord du rivage, où
 le jet de la 3D retombe contre un mur de Saint-Venant, avec une poche d'air. **La question** : placé au-delà du point où le jet retombe
 (ADR-284 D2), le raccord du rivage efface-t-il ce mur, et à quel coût ?
 
@@ -108,7 +108,7 @@ le jet de la 3D retombe contre un mur de Saint-Venant, avec une poche d'air. **L
 - [x] **P1** — jeton ; ADR-284 ; plan.
 - [x] **P2** — `x_f` et l'instrument du mur ; E1 ; (1)–(5).
 - [x] **P3** — E2, le tout-3D à 12,0 m.
-- [ ] **P4** — preuve ; images ; fermeture.
+- [x] **P4** — preuve ; images ; fermeture.
 
 ### Notes de reprise
 - **P2 et P3, dans un même lancement** (le filtre d'`essai.py` est une sous-chaîne : le nom de E1 est contenu dans celui de E2, les deux ont
