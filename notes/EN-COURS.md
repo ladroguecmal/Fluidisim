@@ -101,8 +101,9 @@ compte de ses particules, la 3D perdait 6 % d'amplitude, car APIC tasse ses part
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E1.
+- [x] **P2** — E1.
 - [ ] **P3** — E2.
 - [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini (E1)** — **tenu** : décalage 1,1 / −2,9 / −0,5 cm, facteur 0,996 / 0,992 / 0,999 aux photos de 0,6, 1,0 et 1,6 s (S707 par le compte : 0,935 à 1,0 s). Particules 271 952 → 270 652. `V_φ` −0,07 % à 0,6 s, −0,31 % à 1,6 s. **Réserve** : la photo de 0,4 s lit un φ reconstruit avant la renaissance (φ ne se refait qu'au pas suivant) ; son « plancher » était trivial, et la mesure vaut à partir de 0,6 s.

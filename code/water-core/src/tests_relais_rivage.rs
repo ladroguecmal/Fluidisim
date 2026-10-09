@@ -1124,6 +1124,8 @@ enum Renaissance {
     DepuisSgn,
     /// E2b : les particules reposées comme en E2, mais avec la grille de la 3D elle-même (non le profil de SGN).
     GrilleDe3D,
+    /// S715 : chaque colonne réduite à la hauteur de sa surface reconstruite (φ), non au compte de ses particules.
+    DepuisLaSurface,
 }
 
 #[allow(clippy::type_complexity)]
@@ -1146,12 +1148,13 @@ fn onde_renaissance_surface_s708(mode: Renaissance, dx: f32, ny: usize, surface:
 /// S709 — la même, avec ou sans la projection de densité.
 #[allow(clippy::type_complexity)]
 fn onde_plate_s709(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>, densite: bool) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
-    onde_plate_s710(mode, dx, ny, surface, if densite { Some(1.) } else { None })
+    onde_plate_s710(mode, dx, ny, surface, if densite { Some(1.) } else { None }, &mut Vec::new())
 }
 
 /// S710 — la même, la projection de densité de relaxation `kappa` (`None` : sans projection).
 #[allow(clippy::type_complexity)]
-fn onde_plate_s710(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>, kappa: Option<f32>) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
+fn onde_plate_s710(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64, f64, f64, f64)>, kappa: Option<f32>,
+    profils_surface: &mut Vec<Vec<f64>>) -> ([f64; 3], f64, usize, usize, f64, Vec<(f64, f64, f64, f64)>, Vec<Vec<f64>>) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let dxs = dx as f64;
@@ -1223,6 +1226,20 @@ fn onde_plate_s710(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64
                     let i = c % nx;
                     vol[c] = serre.h[i] * dxs * dxs;
                     ub[c] = serre.q[i] / serre.h[i];
+                }
+            }
+            if mode == Renaissance::DepuisLaSurface {
+                // S715 : la hauteur de la surface reconstruite, par colonne et par rangée (ADR-280 D1), non le compte.
+                let (phi, l) = (a.distance(), a.labels());
+                for (c, v) in vol.iter_mut().enumerate() {
+                    let mut h = 0f64;
+                    for k in 0..nz {
+                        let m = k * nx * ny + c;
+                        if l[m] != crate::apic3d::SOLID {
+                            h += (0.5 - phi[m] as f64 / dxs).clamp(0., 1.) * dxs;
+                        }
+                    }
+                    *v = h * dxs * dxs;
                 }
             }
             avant = a.particle_count();
@@ -1324,6 +1341,7 @@ fn onde_plate_s710(mode: Renaissance, dx: f32, ny: usize, surface: &mut Vec<(f64
             let demi = (0.2 / dxs).round() as usize;
             let crete_s = (demi..nx - demi).map(|i| hs[i - demi..i + demi].iter().sum::<f64>() / (2 * demi) as f64).fold(0f64, f64::max);
             surface.push((t1, vphi, crete_s - d, a.particle_count() as f64 * quantum));
+            profils_surface.push(hs.iter().map(|h| h - d).collect());
             profils.push(hcol.iter().map(|h| h - d).collect());
         }
         let mut compte = [0usize; 3];
@@ -1619,7 +1637,7 @@ fn full_3d_density_s709(variante: crate::apic3d::DensityVariant) {
 #[ignore = "l'onde sur fond plat (≈ 3 min)"]
 fn the_flat_wave_with_weak_density_projection_s710() {
     let mut surface = Vec::new();
-    let (_, _, _, _, duree, photos, _) = onde_plate_s710(Renaissance::Aucune, 0.025, 4, &mut surface, Some(0.05));
+    let (_, _, _, _, duree, photos, _) = onde_plate_s710(Renaissance::Aucune, 0.025, 4, &mut surface, Some(0.05), &mut Vec::new());
     let v0 = surface[0].1;
     for ((t, vphi, cs, vn), p) in surface.iter().zip(&photos) {
         println!("S710 E1 : t = {t:.2} s — V_φ/V_φ(0) = {:.4}, V_φ/V_n = {:.4} ; crête par la surface {cs:.4} m, par le compte {:.4} m", vphi / v0, vphi / vn, p.1);
@@ -1876,5 +1894,37 @@ fn the_judge_against_synolakis_small_step_s714() {
 fn the_full_3d_judge_with_a_short_step_s714() {
     let (p0, a0, masse, dette, _, d0) = deux_raccords_porteur(0.0, Large::AucunPasCourt, None, None);
     println!("S714 : le tout-3D au pas de 2,5 ms — retournement {p0:?} (au pas de 10 ms : 2,637 s, 9,988 m) ; air {a0:?} (2,790 s) ; masse {masse:.1e} ; dette {dette:.3} ; {d0:.0} s (au pas de 10 ms : 777 s)");
+}
+
+/// **S715 E1 — la renaissance de la 3D par la surface**, contre la 3D ininterrompue, lue par la surface : à 0,4 s, le plancher (décalage
+/// sous 1 cm, facteur à 0,5 %, `V_φ` continu à 0,3 %) ; à 1,0 et 1,6 s, le décalage sous 5 cm et le facteur à 2 %.
+#[test]
+#[ignore = "l'onde sur fond plat, deux fois (≈ 5 min)"]
+fn the_3d_reborn_by_its_surface_s715() {
+    let (mut s0, mut s1, mut e0, mut e1) = (Vec::new(), Vec::new(), Vec::new(), Vec::new());
+    onde_plate_s710(Renaissance::Aucune, 0.025, 4, &mut s0, None, &mut e0);
+    let (_, _, avant, apres, duree, _, _) = onde_plate_s710(Renaissance::DepuisLaSurface, 0.025, 4, &mut s1, None, &mut e1);
+    let mesures: Vec<(f64, (f64, f64, f64))> = s0.iter().zip(e0.iter().zip(&e1)).map(|(p, (a, b))| (p.0, comparer_profils_s707(a, b, 0.025))).collect();
+    let volumes: Vec<(f64, f64, f64)> = s0.iter().zip(&s1).map(|(a, b)| (a.0, a.1, b.1)).collect();
+    println!("S715 E1 : renée par la surface — particules {avant} → {apres} ; (t, (décalage m, facteur, écart m)) {mesures:.4?} ; (t, V_φ ininterrompue, V_φ renée) {volumes:.6?} ; {duree:.0} s");
+    let i04 = mesures.iter().position(|m| (m.0 - 0.4).abs() < 1e-6).unwrap();
+    let (_, (d04, f04, _)) = mesures[i04];
+    assert!(d04.abs() < 0.01 && (f04 - 1.).abs() < 0.005, "critère E1 : le plancher à 0,4 s ({d04}, {f04})");
+    assert!((volumes[i04].2 / volumes[i04].1 - 1.).abs() < 0.003, "critère E1 : V_φ continu ({:?})", volumes[i04]);
+    for (t, (dec, fac, _)) in mesures.iter().filter(|m| m.0 > 0.9) {
+        assert!(dec.abs() < 0.05 && (fac - 1.).abs() < 0.02, "critère E1 : à {t} s, décalage {dec} m, facteur {fac}");
+    }
+}
+
+/// **S715 E2 — la naissance depuis SGN, lue par la surface**, contre la 3D ininterrompue. Rapporte.
+#[test]
+#[ignore = "l'onde sur fond plat, deux fois (≈ 5 min)"]
+fn the_3d_born_from_serre_by_its_surface_s715() {
+    let (mut s0, mut s1, mut e0, mut e1) = (Vec::new(), Vec::new(), Vec::new(), Vec::new());
+    onde_plate_s710(Renaissance::Aucune, 0.025, 4, &mut s0, None, &mut e0);
+    let (_, _, avant, apres, duree, _, _) = onde_plate_s710(Renaissance::DepuisSgn, 0.025, 4, &mut s1, None, &mut e1);
+    let mesures: Vec<(f64, (f64, f64, f64))> = s0.iter().zip(e0.iter().zip(&e1)).map(|(p, (a, b))| (p.0, comparer_profils_s707(a, b, 0.025))).collect();
+    let cretes: Vec<(f64, f64, f64)> = s0.iter().zip(&s1).map(|(a, b)| (a.0, a.2, b.2)).collect();
+    println!("S715 E2 : née de SGN — particules {avant} → {apres} ; (t, (décalage m, facteur, écart m)) {mesures:.4?} ; (t, crête par la surface ininterrompue, née de SGN) {cretes:.4?} ; {duree:.0} s");
 }
 
