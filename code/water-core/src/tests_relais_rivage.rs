@@ -2961,6 +2961,8 @@ struct ReglagesCanal {
     /// S750 : les remèdes — R1, le déplacement avec sa vitesse ; R2, la surface relâchée.
     reechantillonner: bool,
     relaxation_surface: Option<f32>,
+    /// S752 : R1′, le déplacement corrigé par la matrice affine.
+    affine: bool,
 }
 
 /// S740 — ce que la pression a fait sur le canal : le plus grand nombre d'itérations, les pas au plafond, les pas, le plus grand résidu.
@@ -2988,6 +2990,7 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
         }
         a.set_density_bed_aware(r.conscient).unwrap();
         a.set_density_shift_resample(r.reechantillonner).unwrap();
+        a.set_density_shift_affine(r.affine).unwrap();
         if let Some(k) = r.relaxation_surface {
             a.set_density_surface_relaxation(k).unwrap();
         }
@@ -3066,6 +3069,9 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
                 if profil { "B" } else { "A" }, m.0, m.1, m.2 * 1e3, m.5 * 1e3, m.3, m.4 * 1e3, pression.0, pression.1, pression.2, pression.3, horloge.elapsed().as_secs_f64());
             out.push(m);
         }
+    }
+    if let Some(b) = a.density_projection_budget() {
+        eprintln!("S752 le bilan propre de la projection : l'énergie cinétique {:+.4e} J, potentielle {:+.4e} J", b[0], b[1]);
     }
     (out, pression)
 }
@@ -3512,6 +3518,29 @@ fn rest_and_channel_with_two_remedies_s750() {
         println!("S750 {nom}, le canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; le niveau derrière {:+.2} → {:+.2} mm ; {}",
             100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, m[1].6 * 1e3, m.last().unwrap().6 * 1e3,
             if lmin > 0.8 * l0 && creux < 0.01 { "l'onde tenue" } else { "l'onde NON TENUE" });
+    }
+}
+
+/// **S752 — R1′ : le repos, puis le bilan propre de la projection et l'onde sur le canal à 2,5 cm** (`Complete`, R1, R1′). Critères pour R1′ :
+/// le repos (1 cm/s ; 3 mm) ; l'onde (la largeur 80 %, le creux 10 mm, la crête finale à 5 % de celle de 0,25 s).
+#[test]
+#[ignore = "S752 (1), (2) : le repos de R1′ et le canal trois fois (≈ 35 min)"]
+fn affine_shift_rest_and_channel_s752() {
+    // L'instrument éprouvé d'abord : le bilan au repos.
+    for cot in [30.0f64, 12.0] {
+        let (v, ep, ephi, _) = repos_pente_regle_s750(cot, false, Some(crate::apic3d::DensityVariant::Complete), true, &|a: &mut Apic3| a.set_density_shift_affine(true).unwrap());
+        println!("S752 (1) R1′, le repos 1:{cot} : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3,
+            if v < 0.01 && ep < 0.003 { "tenu" } else { "NON TENU" });
+    }
+    for (nom, r1, r1p) in [("Complete", false, false), ("R1", true, false), ("R1′", false, true)] {
+        let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(crate::apic3d::DensityVariant::Complete),
+            reechantillonner: r1, affine: r1p, ..Default::default() });
+        let (l0, c0) = (m[1].3, m[1].2);
+        let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+        let cf = m.last().unwrap().2;
+        let tenue = lmin > 0.8 * l0 && creux < 0.01 && (cf / c0 - 1.).abs() < 0.05;
+        println!("S752 (2) {nom}, le canal : la largeur {:.0} %, le creux {:.1} mm, la crête {:.1} → {:.1} mm ({:+.1} %) ; {}",
+            100. * lmin / l0, creux * 1e3, c0 * 1e3, cf * 1e3, 100. * (cf / c0 - 1.), if tenue { "l'onde tenue" } else { "l'onde NON TENUE" });
     }
 }
 

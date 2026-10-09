@@ -77,6 +77,11 @@ pub(crate) struct Densite {
     pub(crate) reechantillonner: bool,
     /// **S750 — R2** : la relaxation de la correction aux mailles de surface (κ par pas) ; `None`, le défaut : celle de l'intérieur.
     pub(crate) relaxation_surface: Option<f32>,
+    /// **S752 — R1′** : chaque particule déplacée garde sa vitesse, corrigée de `C·Δx` (sa matrice affine, sans la grille).
+    pub(crate) affine: bool,
+    /// **S752 — le bilan propre de la projection** (ADR-290 D1) : l'énergie cinétique et l'énergie potentielle (J, ρ = 1 000 kg/m³) que la
+    /// projection a changées, cumulées depuis la configuration. Une lecture, sans effet.
+    pub(crate) bilan: [f64; 2],
 }
 
 impl Apic3 {
@@ -98,7 +103,8 @@ impl Apic3 {
         })?;
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0., deplacement_lieu: [0.; 3], conscient: false, nominale: vec![0.; cells], nominale_faite: false,
-            colonnes: vec![0; nx * ny], reechantillonner: false, relaxation_surface: None }));
+            colonnes: vec![0; nx * ny], reechantillonner: false, relaxation_surface: None,
+            affine: false, bilan: [0.; 2] }));
         Ok(())
     }
 
@@ -108,6 +114,20 @@ impl Apic3 {
         let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
         d.reechantillonner = on;
         Ok(())
+    }
+
+    /// **S752 — R1′, le déplacement corrigé par la matrice affine** : chaque particule déplacée par la projection garde sa vitesse, plus
+    /// `C·Δx`, sa matrice affine appliquée au déplacement (le premier ordre exact, sans la grille). Refus sans projection.
+    pub fn set_density_shift_affine(&mut self, on: bool) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        d.affine = on;
+        Ok(())
+    }
+
+    /// **S752 — le bilan propre de la projection** : `[l'énergie cinétique, l'énergie potentielle]` (J) que la projection a changées,
+    /// cumulées ; `None` sans projection.
+    pub fn density_projection_budget(&self) -> Option<[f64; 2]> {
+        self.densite.as_ref().map(|d| d.bilan)
     }
 
     /// **S750 — R2, la surface relâchée** : la correction aux mailles de surface faite à `κ ∈ (0, 1]` par pas. Refus sans projection, ou hors
@@ -157,6 +177,18 @@ impl Apic3 {
     pub(crate) fn density_project(&mut self) {
         let Some(mut dens) = self.densite.take() else { return };
         let Domain3 { nx, ny, nz, dx } = self.domain;
+        // S752 : le bilan propre (ADR-290 D1), l'énergie avant.
+        let energie = |a: &Apic3| -> (f64, f64) {
+            let masse = 1000. * (a.domain.dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+            let (mut ec, mut ep) = (0f64, 0f64);
+            for k in 0..a.n {
+                let v = a.vel[k];
+                ec += 0.5 * masse * (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64;
+                ep += masse * 9.81 * a.x[k][2] as f64;
+            }
+            (ec, ep)
+        };
+        let (ec0, ep0) = energie(self);
         let nominal = (PER_AXIS * PER_AXIS * PER_AXIS) as f32;
         // La densité aux centres des mailles, par les poids trilinéaires.
         dens.rho.fill(0.);
@@ -311,6 +343,12 @@ impl Apic3 {
                 for a in 0..3 {
                     self.x[k][a] += s * d[a];
                 }
+                // S752 — R1′ : la vitesse corrigée par la matrice affine, `v_a += Σ_b C[a][b]·Δx_b` (`C[a][b] = ∂v_a/∂x_b`).
+                if dens.affine {
+                    for a in 0..3 {
+                        self.vel[k][a] += (0..3).map(|b| self.c[k][a][b] * s * d[b]).sum::<f32>();
+                    }
+                }
                 // S750 — R1 : la vitesse et la matrice affine de la grille à la nouvelle place.
                 if dens.reechantillonner {
                     let (v, cm) = self.grid_affine(self.x[k]);
@@ -325,6 +363,9 @@ impl Apic3 {
             self.bin_fresh = false;
         }
         self.p.copy_from_slice(&dens.p_sauve);
+        let (ec1, ep1) = energie(self);
+        dens.bilan[0] += ec1 - ec0;
+        dens.bilan[1] += ep1 - ep0;
         self.densite = Some(dens);
     }
 }

@@ -96,4 +96,4 @@ for nd in (8, 12, 16):
 | `20261006-164801-conv12b-s529` | S529 | conv12b-s529 | `SILLAGE_DX=0.125 SILLAGE_NX=448 SILLAGE_NY=320 SILLAGE_NZ=24 DT_US=5000 DUREE=15 SORTIE=calculs/conv_s529_12.bin viewer/target/release/water-viewer.exe --lineaire-sillage` | terminé, 2026-10-06 16:51 |
 | `20261006-202153-eveil` | S547 | eveil | `python outils/eveil.py 14` | terminé, 2026-10-06 21:40 |
 | `20261007-092553-eveil` |  | eveil | `python outils/eveil.py 14` | terminé, 2026-10-07 23:25 |
-| `20261009-075126-eveil` |  | eveil | `python outils/eveil.py 14` | en cours |
+| `20261009-075126-eveil` |  | eveil | `python outils/eveil.py 14` | terminé, 2026-10-09 21:52 |

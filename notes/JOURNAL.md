@@ -2364,3 +2364,12 @@ R1 est le premier remède qui tient presque tout. Maillons **1** (4.1). Suivant 
 
 Maillons **0** (méthode). Suivant : **S752**, R1 affiné (le bilan propre de la projection ; le creux au regard du bruit ; l'atténuation).
 
+## S752 — 2026-10-09 — Le bilan propre de la projection, R1′, la 3D corrigée version 1
+
+**Entrée.** DEUX-REMEDES-S750 ; ADR-290 D1. **Fait** ([preuve](../docs/validation/BILAN-PROJECTION-S752.md)) : le bilan propre de la
+projection, R1′ (`v + C·Δx`). **Mesuré** :
+- R1′ injecte de l'énergie (+2,85 J), la crête +15 %, la remontée −11 % : l'hypothèse est réfutée ;
+- toutes les versions soulèvent un peu l'eau (+2 à +3 J).
+
+**Décision** ([ADR-291](../docs/adr/ADR-291-la-3d-corrigee-version-1.md)) : R1 est la 3D corrigée, version 1, avec ses écarts mesurés (la
+remontée +8 %, l'onde −7,5 %). La suite : la juger contre Synolakis. Le lot S750–S752. Maillons **1** (4.1). Suivant : **S753**.

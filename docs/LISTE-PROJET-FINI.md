@@ -510,6 +510,8 @@ pas recopiée ici (L137).
   (−12 %) ; aucune des six variantes ne tient les trois essais ([preuve](validation/CIBLE-SURFACE-S749.md)).
   **S750** : le déplacement de la projection avec sa vitesse — le repos, la remontée (+7,9 %) et la largeur de l'onde tenus ; le creux
   manqué de 0,8 mm, l'onde atténuée de 9 % ([preuve](validation/DEUX-REMEDES-S750.md)).
+  **S752** : le bilan propre de la projection ; R1′ (`v + C·Δx`) réfutée ; **ADR-291, la 3D corrigée version 1** (R1), ses écarts
+  mesurés ([preuve](validation/BILAN-PROJECTION-S752.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

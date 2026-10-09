@@ -3086,3 +3086,14 @@ fn runup_with_two_remedies_s750() {
     }
 }
 
+/// **S752 — (3) la remontée de S645 avec R1′** (`Complete` consciente, le déplacement corrigé par la matrice affine) : à 10 % de la loi.
+#[test]
+#[ignore = "S752 (3) : la remontée de S645, R1′ (≈ 7 min)"]
+fn runup_with_affine_shift_s752() {
+    let (r, _, n, garde, sous, haut, cr) = onde_sur_pente_observee_s748(0.025, false, false, true, Some(DensityVariant::Complete), true,
+        &|a: &mut Apic3| a.set_density_shift_affine(true).unwrap(), &mut |_, _| {});
+    println!("S752 (3) R1′ : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond ; {}",
+        100. * (haut as f64 / 0.2295 - 1.), cr[0], if (haut as f64 / 0.2295 - 1.).abs() < 0.10 { "TIENT" } else { "ne tient pas" });
+    assert!(garde == n && sous == 0, "les particules");
+}
+

@@ -74,5 +74,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   le banc canonique (ADR-287) montre que la projection ignore le fond (le repos perdu, la remontée freinée) et que le fond lisse ne tient
   pas le repos. Au lot S744–S746 : la projection consciente du fond rend le repos ; corriger la surface garde l'onde mais freine la
   lame, ne pas la corriger fait l'inverse : la voie hybride suit. Au lot S747–S749 : **ADR-289**, le plan des solveurs éprouvés seuls ;
-  six variantes de la projection, aucune ne tient les trois essais ; le suspect suivant, le déplacement sans sa vitesse.
+  six variantes de la projection, aucune ne tient les trois essais ; le suspect suivant, le déplacement sans sa vitesse. Au lot S750–S752 :
+  **la 3D corrigée, version 1** (ADR-291 : la remontée +8 %, l'onde −7,5 % sur 10 m) ; la suite, la juger contre les mesures de Synolakis.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

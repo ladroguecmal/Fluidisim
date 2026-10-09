@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S752 — **en cours**. En autonomie ; session longue. DEUX-REMEDES-S750 : R1 (le déplacement de la projection avec sa vitesse, reprise
+Session : S752 — **terminée**. En autonomie ; session longue. DEUX-REMEDES-S750 : R1 (le déplacement de la projection avec sa vitesse, reprise
 de la grille) tient le repos, la remontée (+7,9 %) et la largeur de l'onde ; mais le creux est manqué de 0,8 mm, et l'onde s'atténue de 9 %
 (91,3 mm contre 100,2 mm avec `Complete`). **La question** : d'où vient l'atténuation, et une mise à jour de la vitesse sans la grille la
 supprime-t-elle ?
@@ -106,8 +106,15 @@ affine `C`). **R1′** (`set_density_shift_affine`) : `v ← v + C·Δx`, la mis
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le bilan, R1′ ; (1), (2).
-- [ ] **P3** — (3).
-- [ ] **P4** — preuve ; le lot ; fermeture.
+- [x] **P2** — le bilan, R1′ ; (1), (2).
+- [x] **P3** — (3).
+- [x] **P4** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
+- **Fini** :
+  - R1′, le repos tenu ;
+  - le bilan : `Complete` 0 / +2,11 J ; R1 +0,12 / +3,02 J ; R1′ +2,85 / +3,06 J ;
+  - l'onde : R1′ à 80 %, 9,3 mm, la crête +14,7 % ;
+  - la remontée : R1′ −11,1 %.
+
+  **L'hypothèse est réfutée.** R1 est retenue : ADR-291.
