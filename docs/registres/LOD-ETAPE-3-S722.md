@@ -42,3 +42,6 @@ Chaque pièce est jugée d'abord entre deux copies du même solveur (ADR-273 D1)
 
 *Note datée du 2026-10-09 (S723)* : **B1 acquis** — Saint-Venant troué, rempli par un second Saint-Venant, à la masse au bit et à 1,6 % du
 Saint-Venant entier, à condition d'échanger le **flux complet** (la masse seule : 8,3 %) ([preuve](../validation/SV-TROUE-S723.md)).
+
+*Note datée du 2026-10-09 (S724)* : **B2 acquis pour la masse et l'écoulement** — la boîte à quatre bords au repos au micron, un courant en
+biais à 0,5 % ([preuve](../validation/BOITE-QUATRE-BORDS-S724.md)). Restent quelques millimètres de rides à l'entrée en y, à juger dans B3.

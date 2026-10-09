@@ -125,6 +125,8 @@ pub struct Apic3 {
     pub(crate) gauche: Option<Box<gauche::BordGauche>>,
     /// **S709 — la projection de densité** (`enable_density_projection`, `apic3d_densite.rs`) ; `None`, le défaut — au bit.
     pub(crate) densite: Option<Box<densite::Densite>>,
+    /// **S724 — les bords en y par particules** (`enable_y_boundaries`, `apic3d_bords_y.rs`) ; `None`, le défaut — au bit.
+    pub(crate) bords_y: Option<Box<bords_y::BordsY>>,
     /// **S639 — le fond en escalier** : par colonne (`j·nx + i`), le nombre de mailles solides depuis le bas ; `None`, pas de fond.
     pub(crate) seabed: Option<Vec<u16>>,
     /// **S640 — le fond lisse** (`set_seabed_smooth`, `apic3d_lisse.rs`) : les hauteurs et les fractions ouvertes des faces ;
@@ -234,6 +236,7 @@ impl Apic3 {
             sortie_droite: None,
             gauche: None,
             densite: None,
+            bords_y: None,
         })
     }
 
@@ -1556,6 +1559,7 @@ impl Apic3 {
         self.advect(dt);
         self.drain_right();
         self.drain_left();
+        self.drain_y();
         mark("advection");
         if upto == ApicStage::Advect {
             return Ok(partial);
@@ -1613,6 +1617,8 @@ impl Apic3 {
                 self.w[(nz * ny + j) * nx + i] = 0.;
             }
         }
+        // S724 : les bords en y par particules imposent leurs vitesses normales.
+        self.walls_y();
     }
 
     /// **Le corps dans la grille** (S393) : les mailles dont le centre est dans la sphère deviennent solides, par-dessus les
@@ -2169,6 +2175,8 @@ impl Apic3 {
         let x_haut = if self.sortie_droite.is_some() { f32::MAX } else { lx - margin };
         // S698 : avec le bord gauche par particules, le bord gauche ne retient plus.
         let x_bas = if self.gauche.is_some() { f32::MIN } else { margin };
+        // S724 : avec les bords en y par particules, le devant et le derrière ne retiennent plus.
+        let (y_bas, y_haut) = if self.bords_y.is_some() { (f32::MIN, f32::MAX) } else { (margin, ly - margin) };
         // S444 : en mode relatif, la vitesse de l'eau est `U + u′` — B à l'instant du début du pas, puis du milieu.
         let t0 = self.background_time_s;
         let relative = self.is_relative();
@@ -2197,7 +2205,7 @@ impl Apic3 {
                     let mid = [p[0] + 0.5 * dt * v1[0], p[1] + 0.5 * dt * v1[1], p[2] + 0.5 * dt * v1[2]];
                     let v2 = with_b(this, this.grid_velocity(mid), mid, t0 + 0.5 * dt as f64);
                     q[0] = (p[0] + dt * v2[0]).clamp(x_bas, x_haut);
-                    q[1] = (p[1] + dt * v2[1]).clamp(margin, ly - margin);
+                    q[1] = (p[1] + dt * v2[1]).clamp(y_bas, y_haut);
                     q[2] = (p[2] + dt * v2[2]).clamp(margin, lz - margin);
                 }
             };
@@ -2336,6 +2344,8 @@ mod gauche;
 mod naissance;
 #[path = "apic3d_densite.rs"]
 mod densite;
+#[path = "apic3d_bords_y.rs"]
+mod bords_y;
 pub use densite::DensityVariant;
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};

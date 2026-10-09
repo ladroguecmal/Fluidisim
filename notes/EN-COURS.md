@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S724 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B2 : APIC à quatre
+Session : S724 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B2 : APIC à quatre
 bords**.
 
 **Ce que la session fait.** `apic3d_bords_y.rs` : les bords en y par particules (le devant, `y = 0`, le derrière, `y = ly`), sur le modèle
@@ -106,7 +106,9 @@ E2 est une solution exacte : un courant uniforme sur un fond plat ne change pas.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les bords en y ; E1, E2.
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — les bords en y ; E1, E2 (partiel), E2b.
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **E1 tenu** : au repos, 4,9·10⁻⁶ m/s, `V_φ` −1,3·10⁻⁷, η à 1 µm. **E2 échoue en partie** : `V_φ` −0,39 % (tenu), la vitesse moyenne à 0,5 % (tenue) ; mais l'écart maximal 0,10 m/s (critère 5 cm/s) et l'étendue de η 7,2 mm (critère 3 mm). Le diagnostic : des particules de surface, l'une ralentie, une autre en chute libre à 1,8 m/s ; un creux de 5,4 mm à l'intérieur. **E2b**, le témoin : le courant en x seulement, les bords en y ouverts sans flux.
+- **P2 fini** — E2b : le même écart de vitesse (0,103 m/s) en x seul, la surface 3,7 mm. L'écart de vitesse est celui de la surface libre d'APIC ; l'entrée en y ajoute ≈ 3,5 mm de rides. B2 acquis pour la masse et l'écoulement.

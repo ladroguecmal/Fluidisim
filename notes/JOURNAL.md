@@ -2070,3 +2070,11 @@ corps), B5 (le déclencheur de présence). Chaque pièce a son essai entre deux 
 `regler_trou`, `pas_avec_flux_trou`, `pas_avec_flux_bords4`. **Mesuré** : rempli par un second Saint-Venant, le trou redonne le
 Saint-Venant entier à 1,6 %, la masse au bit, si l'on échange le flux complet (la masse seule : 8,3 %). Deux longs *heredocs* rejetés par
 bash, sans effet (ADR-267 D2 le défend : à la revue). **B1 acquis.** Maillons **1** (4.14). Suivant : **S724**, B2, APIC à quatre bords.
+
+## S724 — 2026-10-09 — APIC à quatre bords (B2)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-3-S722. **Fait** ([preuve](../docs/validation/BOITE-QUATRE-BORDS-S724.md)) :
+`apic3d_bords_y.rs` (les bords en y par particules). **E1 tenu** : au repos au micron. **E2** : un courant en biais à 0,5 %, le volume à
+0,4 % (tenus) ; l'écart maximal et la surface échouent. Le témoin en x seul montre le même écart de vitesse (la surface libre d'APIC) ;
+l'entrée en y ajoute ≈ 3,5 mm de rides. Maillons **1** (4.14). Suivant : **S725**, B3, le raccord de la boîte avec Saint-Venant ; la revue en
+S726.
