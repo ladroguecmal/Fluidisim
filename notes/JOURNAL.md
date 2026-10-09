@@ -2288,3 +2288,14 @@ rapportée à la nominale de chaque maille (le fond compté). **Mesuré** :
 
 Le suspect suivant : la correction de surface dans la lame mince. Maillons **1** (4.1). Suivant : **S745**, la projection sans correction
 de surface.
+
+## S745 — 2026-10-09 — La projection consciente du fond, sans correction de surface
+
+**Entrée.** DENSITE-CONSCIENTE-S744. **Fait** ([preuve](../docs/validation/SANS-SURFACE-S745.md)) : la variante `WithoutSurface` avec le
+fond compté, sur le repos, la remontée de S645 et le canal à 2,5 cm. **Mesuré** :
+- le repos tenu ;
+- la remontée à −5,5 % (tenu) ;
+- l'onde solitaire laisse un creux de 40 mm (non tenu).
+
+Chaque variante tient ce que l'autre perd ; la voie hybride (la surface corrigée sauf dans la lame mince) suit. Maillons **1** (4.1).
+Suivant : **S746**, la revue ; puis **S747**, la variante hybride.

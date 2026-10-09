@@ -500,6 +500,8 @@ pas recopiée ici (L137).
   le fond lisse ne le tient pas ([preuve](validation/REPOS-PENTE-S743.md)).
   **S744** : la projection de densité consciente du fond — le repos sur l'escalier rendu ; la remontée encore freinée (−11 %)
   ([preuve](validation/DENSITE-CONSCIENTE-S744.md)).
+  **S745** : sans correction de surface, la remontée revient à −5,5 % et le repos tient, mais l'onde solitaire laisse un creux de 40 mm ;
+  la voie suivante, une projection hybride ([preuve](validation/SANS-SURFACE-S745.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

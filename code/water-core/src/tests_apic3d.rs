@@ -1881,12 +1881,17 @@ fn onde_sur_pente_densite_s742(dx: f32, lisse: bool, glissant: bool, balistique:
 
 /// S744 — le même montage, la projection consciente du fond en option.
 fn onde_sur_pente_conscient_s744(dx: f32, lisse: bool, glissant: bool, balistique: bool, densite: bool, conscient: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+    onde_sur_pente_variante_s745(dx, lisse, glissant, balistique, densite.then_some(DensityVariant::Complete), conscient)
+}
+
+/// S745 — le même montage, la variante de la projection en paramètre (`None` : sans projection).
+fn onde_sur_pente_variante_s745(dx: f32, lisse: bool, glissant: bool, balistique: bool, variante: Option<DensityVariant>, conscient: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let (d, h, cot, x1, x_pied, niveau, fond0) = (0.35f64, 0.07f64, 3.0f64, 2.80f64, 4.768f64, 0.40f32, 0.05f32);
     let (nx, ny, nz) = ((6.6 / dx).round() as usize, 4usize, (0.8 / dx).round() as usize);
     let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
-    if densite {
-        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    if let Some(v) = variante {
+        a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
         a.set_density_bed_aware(conscient).unwrap();
     }
     let lz = nz as f32 * dx;
@@ -2959,6 +2964,16 @@ fn the_canonical_runup_bench_with_density_s742() {
 fn the_runup_with_bed_aware_density_s744() {
     let (r, _, n, garde, sous, haut, cr) = onde_sur_pente_conscient_s744(0.025, false, false, true, true, true);
     println!("S744 (3) : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
+        100. * (haut as f64 / 0.2295 - 1.), cr[0]);
+    assert!(garde == n && sous == 0, "les particules");
+}
+
+/// **S745 — (2) la remontée de S645, la projection consciente sans correction de surface** : à 10 % de la loi (0,2295 m).
+#[test]
+#[ignore = "S745 (2) : la remontée de S645 (≈ 7 min)"]
+fn runup_without_surface_correction_s745() {
+    let (r, _, n, garde, sous, haut, cr) = onde_sur_pente_variante_s745(0.025, false, false, true, Some(DensityVariant::WithoutSurface), true);
+    println!("S745 (2) : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
         100. * (haut as f64 / 0.2295 - 1.), cr[0]);
     assert!(garde == n && sous == 0, "les particules");
 }

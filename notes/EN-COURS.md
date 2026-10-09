@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S745 — **en cours**. En autonomie ; session longue. DENSITE-CONSCIENTE-S744 : la projection consciente du fond rend le repos, mais
+Session : S745 — **terminée**. En autonomie ; session longue. DENSITE-CONSCIENTE-S744 : la projection consciente du fond rend le repos, mais
 freine encore la remontée (−11 %). **La question** : sans correction aux mailles de surface (`DensityVariant::WithoutSurface`, S709), avec
 le fond compté, la 3D tient-elle à la fois le repos, la remontée et l'onde solitaire ?
 
@@ -92,7 +92,13 @@ Si les trois tiennent, la 3D corrigée passe ces trois essais du banc (ADR-287 D
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la variante dans les montages ; (1), (2), (3).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — la variante dans les montages ; (1), (2), (3).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** :
+  - (1) **tenu** : 6,8 mm/s ; 0,02–0,07 mm ;
+  - (2) **tenu** : 0,2169 m, −5,5 % ;
+  - (3) **non tenu** : la largeur à 87 %, mais un creux de 40,5 mm et une crête finale de 109,5 mm.
+
+  La voie hybride (la surface corrigée en eau profonde, pas dans la lame mince) pour S747.

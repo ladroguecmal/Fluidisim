@@ -166,6 +166,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le sélecteur des domaines — conception (S732)](registres/SELECTEUR-DOMAINES-S732.md) : la prévision par le porteur, les frontières, la solidité, sept scènes, trois juges, six pièces.
 - [L'étape 3 du LOD : la 3D rallumée autour d'un corps — conception (S722)](registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5), leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [La projection consciente du fond, sans correction de surface — S745](validation/SANS-SURFACE-S745.md) : la remontée rendue, l'onde moins bien gardée.
 - [La projection de densité consciente du fond — S744](validation/DENSITE-CONSCIENTE-S744.md) : le repos rendu ; la remontée encore freinée.
 - [Le lac au repos sur une pente — S743](validation/REPOS-PENTE-S743.md) : seul l'escalier sans projection tient ; la projection ignore le fond.
 - [Le banc canonique de la 3D, première passe — S742](validation/BANC-CANONIQUE-S742.md) : la projection garde l'onde mais freine la remontée.

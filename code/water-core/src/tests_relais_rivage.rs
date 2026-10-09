@@ -2956,6 +2956,8 @@ struct ReglagesCanal {
     relaxation: Option<f32>,
     /// S744 : la projection consciente du fond.
     conscient: bool,
+    /// S745 : la variante de la projection (`None` : `Complete`).
+    variante: Option<crate::apic3d::DensityVariant>,
 }
 
 /// S740 — ce que la pression a fait sur le canal : le plus grand nombre d'itérations, les pas au plafond, les pas, le plus grand résidu.
@@ -2977,7 +2979,7 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
         a.set_separation_passes(n);
     }
     if r.densite {
-        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, r.variante.unwrap_or(crate::apic3d::DensityVariant::Complete)).unwrap();
         if let Some(k) = r.relaxation {
             a.set_density_relaxation(k).unwrap();
         }
@@ -3281,6 +3283,11 @@ fn repos_pente_s743(cot: f64, lisse: bool, densite: bool) -> (f64, f64, f64, usi
 
 /// S744 — le même repos, la projection consciente du fond en option (`set_density_bed_aware`).
 fn repos_pente_s744(cot: f64, lisse: bool, densite: bool, conscient: bool) -> (f64, f64, f64, usize) {
+    repos_pente_s745(cot, lisse, densite.then_some(crate::apic3d::DensityVariant::Complete), conscient)
+}
+
+/// S745 — le même repos, la variante de la projection en paramètre (`None` : sans projection).
+fn repos_pente_s745(cot: f64, lisse: bool, variante: Option<crate::apic3d::DensityVariant>, conscient: bool) -> (f64, f64, f64, usize) {
     let (dx, niveau) = (0.025f32, 0.3f64);
     let dxs = dx as f64;
     let lx = 1.0 + cot * niveau + 0.5;
@@ -3294,8 +3301,8 @@ fn repos_pente_s744(cot: f64, lisse: bool, densite: bool, conscient: bool) -> (f
         a.set_seabed(Some(&fond)).unwrap();
     }
     a.set_ballistic_air(true);
-    if densite {
-        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    if let Some(v) = variante {
+        a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
         a.set_density_bed_aware(conscient).unwrap();
     }
     let marche: Vec<f32> = (0..nx).map(|i| if lisse { a.smooth_seabed_height(((i as f64 + 0.5) * dxs) as f32, 0.025) } else { a.seabed_height(i, 0) }).collect();
@@ -3396,3 +3403,25 @@ fn the_channel_is_unchanged_by_bed_awareness_s744() {
     println!("S744 (2) le canal : la crête finale {:.2} contre {:.2} mm ; identique au bit : {pareil}", m0.last().unwrap().2 * 1e3, m1.last().unwrap().2 * 1e3);
     let _ = pareil;
 }
+
+/// **S745 — (1) le repos, (3) le canal, avec la projection consciente sans correction de surface.** (1) l'escalier, la vitesse sous 1 cm/s,
+/// l'écart par les particules sous 3 mm ; (3) le canal à 2,5 cm, la largeur au-dessus de 80 %, le creux sous 10 % de `H`.
+#[test]
+#[ignore = "S745 (1) et (3) : le repos et le canal (≈ 12 min)"]
+fn rest_and_channel_without_surface_correction_s745() {
+    let mut tenus = Vec::new();
+    for cot in [30.0f64, 12.0] {
+        let (v, ep, ephi, _) = repos_pente_s745(cot, false, Some(crate::apic3d::DensityVariant::WithoutSurface), true);
+        let tenu = v < 0.01 && ep < 0.003;
+        println!("S745 (1) 1:{cot} escalier : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3, if tenu { "tenu" } else { "NON TENU" });
+        tenus.push(tenu);
+    }
+    let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(crate::apic3d::DensityVariant::WithoutSurface), ..Default::default() });
+    let l0 = m[1].3;
+    let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+    let canal = lmin > 0.8 * l0 && creux < 0.01;
+    println!("S745 (3) le canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; {}",
+        100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, if canal { "tenu" } else { "NON TENU" });
+    println!("S745 : le repos {tenus:?}, le canal {canal}");
+}
+
