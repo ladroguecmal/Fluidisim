@@ -106,8 +106,20 @@ de S4 ?
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — les deux lectures, le juge robuste ; le cas d'école (1).
-- [ ] **P3** — S4 et S2 ; (2), (3).
+- [x] **P3** — S4 et S2 ; (2), (3).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — (1) **tenu** : la couche plate, rien ; la lèvre, trouvée (colonne 27, écart 1), comme S647. Le juge robuste, le front par les particules, les deux juges et les deux lectures dans le témoin.
+- **P3 fini** :
+  - **(3) tenu** : S2, le juge robuste à 3,315 s, à 12,088 m, contre 3,290 s et 12,013 m pour S647 (0,026 s ; 0,075 m).
+  - **(2), la remontée par les particules redescend : tenu.** Elle passe par 0,4585 m à 4,0 s et un maximum de 0,5168 m à 4,5 s, puis
+    redescend à 0,2835 m à 5,0 s et à −0,1665 m à 6,0 s.
+  - **(2), aucun retournement : manqué**, mais le critère était faux. Le juge robuste écarte le faux de S647 (4,938 s, à 4,14 m) et en voit
+    un autre à 5,681 s, à 10,54 m, en plein reflux. **Synolakis (1987)** : le déferlement pendant le reflux commence à
+    `H/d > 0,479·cot^(−10/9)`, soit 0,141 à 1:3. S4 (0,2) doit donc déferler au reflux. Le plan avait pris le seuil de la montée (0,818,
+    soit 0,241) pour un seuil d'absence de tout déferlement.
+  - **Trouvé en route** :
+    - la remontée de S4 a été **plafonnée par le domaine**. Le fond rejoint le plafond (1,10 m) à 13,11 m ; la « remontée » par φ vaut
+      0,6001 m, soit le plafond ; les particules montent à z = 1,094 m ;
+    - S645 (le même cas, `d` = 0,35 m, sa propre géométrie) remontait à 98 % de la loi.
