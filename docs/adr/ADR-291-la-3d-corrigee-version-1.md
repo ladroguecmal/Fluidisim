@@ -55,3 +55,6 @@ sélecteur, R43 et S1 sont refaits avec elle.
 (+0,012 d à t = 15), mais elle est en retard, et le retard grandit (1,0 d, puis 2,2 d). R1 ralentit la vague de 5,6 % (2,290 m/s contre
 2,426 ; `Complete` : +0,4 %). Le laboratoire tranchera entre `Complete` et R1 (S754)
 ([preuve](../validation/SYNOLAKIS-CORRIGEE-S753.md)).
+
+*Note datée du 2026-10-09 (S754)* : D1 est remplacé par [ADR-292](ADR-292-la-3d-corrigee-complete-jugee-par-le-laboratoire.md) :
+`Complete` consciente du fond, sans R1, suit mieux les mesures de Synolakis.

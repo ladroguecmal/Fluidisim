@@ -514,6 +514,8 @@ pas recopiée ici (L137).
   mesurés ([preuve](validation/BILAN-PROJECTION-S752.md)).
   **S753** : contre Synolakis, la 3D corrigée a la bonne hauteur (+0,012 d) mais une vague trop lente (R1 : −5,6 % de célérité) ; le choix
   d'ADR-291 était prématuré ([preuve](validation/SYNOLAKIS-CORRIGEE-S753.md)).
+  **S754** : `Complete` consciente suit mieux Synolakis (l'écart 0,035, 0,047, 0,025 d ; sans correction 0,044, 0,066, 0,035) ; **ADR-292**,
+  elle est la 3D corrigée ([preuve](validation/COMPLETE-SYNOLAKIS-S754.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

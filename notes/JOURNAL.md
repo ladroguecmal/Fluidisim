@@ -2383,3 +2383,14 @@ de Synolakis, contre les mesures. **Mesuré** :
 
 La célérité relue sur le canal : R1 la ralentit de 5,6 %, `Complete` la garde (+0,4 %). Le choix d'ADR-291 était prématuré (note datée).
 Maillons **1** (4.1). Suivant : **S754**, `Complete` contre Synolakis.
+
+## S754 — 2026-10-09 — `Complete` consciente contre Synolakis ; ADR-292
+
+**Entrée.** SYNOLAKIS-CORRIGEE-S753. **Fait** ([preuve](../docs/validation/COMPLETE-SYNOLAKIS-S754.md)) : `Complete` consciente du fond,
+sans R1, sur la plage de Synolakis. **Mesuré** :
+- l'écart aux mesures 0,035, 0,047, 0,025 d ; sans correction 0,044, 0,066, 0,035 ; R1 0,030, 0,075, 0,059 ;
+- la célérité juste ; la lame sur la plage au plus près de la mesure.
+
+Le critère (1) est manqué de 0,0009 d, sous le quantum. **Décision** ([ADR-292](../docs/adr/ADR-292-la-3d-corrigee-complete-jugee-par-le-laboratoire.md)) :
+`Complete` consciente est la 3D corrigée ; R1 écartée. Maillons **1** (4.1). Suivant : **S755**, refaire R43 et S1 avec la 3D corrigée ;
+le lot.

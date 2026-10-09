@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S754 — **en cours**. En autonomie ; session longue. SYNOLAKIS-CORRIGEE-S753 : R1 rend la hauteur juste mais ralentit la vague
+Session : S754 — **terminée**. En autonomie ; session longue. SYNOLAKIS-CORRIGEE-S753 : R1 rend la hauteur juste mais ralentit la vague
 (−5,6 %) ; `Complete` garde la célérité (+0,4 %) mais freine la remontée de S645 contre la loi théorique (−11 %). **La question** : laquelle
 des deux suit le mieux les **mesures** de Synolakis (ADR-280 D2 : la référence extérieure tranche) ?
 
@@ -88,7 +88,14 @@ Sinon, R1 reste, et la question de la célérité reste ouverte.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1), (2), (3).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — l'essai ; (1), (2), (3).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (2 531 s) :
+  - t = 15 : 0,3644 d en 7,77 d, l'écart 0,0348 d ;
+  - t = 20 : 0,3228 d en 2,97 d, 0,0466 d ;
+  - t = 25 : 0,1967 d en −1,53 d, 0,0246 d.
+
+  (1) manqué de 0,0009 d, sous le quantum ; (2) et (3) tenus. Mieux que la 3D sans correction aux trois instants. **ADR-292** : `Complete`
+  consciente est la 3D corrigée, le critère (1) levé par écrit.
