@@ -98,7 +98,16 @@ que le juge a vu.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les instantanés ; l'outil ; le calcul ; le diagnostic.
+- [x] **P2** — les instantanés ; l'outil ; le calcul ; le diagnostic.
 - [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — le calcul (1 574 s) et `outils/diagnostic_s735.py`.
+  - **« Lecture fausse » : tenu.** φ lit 5 à 37 mm là où les particules en donnent zéro : 4 colonnes à 3,5 s, 8 à 4,1 et 4,5 s, 17 à
+    5,0 s. À 5,0 s, la colonne figée (13,113 m) lit encore 10 mm, sans aucune particule.
+  - **« Eau collée » : non tenu.** Deux colonnes seulement, à 4,5 s (6 et 9 mm, 2–3 cm/s), disparues à 5,0 s. Au-delà de 12,5 m, il y a 172
+    particules à 4,5 s, puis 74 à 5,0 s, qui redescendent à 0,67 m/s.
+  - **La remontée comptée par les particules** (la rangée du milieu) : 0,53 m au seuil de 5 mm, 0,45 m au seuil de 10 mm, de 4,1 à 4,5 s,
+    contre 0,328 m exacts (+37 à +60 %). La 3D remonte réellement trop haut ; une autre question.
+  - **Le « retournement » à 4,14 m** : à x = 4,1375 m, la maille 18 est « air » avec φ = +1 mm (0,04 maille), entre de l'eau à φ = −2 mm
+    et à −6 mm. Le juge compte un vide d'une maille au contact de la surface.

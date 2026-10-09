@@ -2559,6 +2559,8 @@ struct ScenePlage {
     duree: f64,
     /// S734 : le fond lisse (S640) au lieu de l'escalier — S4 sur 1:3 piégeait l'eau dans les marches.
     lisse: bool,
+    /// S735 : les instants (s) des instantanés écrits dans `calculs/` (le diagnostic de S4) ; vide : aucun.
+    instantanes: &'static [f64],
 }
 
 impl ScenePlage {
@@ -2671,7 +2673,13 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
             if let Some((i, _)) = retournement_s647(&a, ny / 2, &marche) {
                 r.retournement = Some((ts, xg(i as f64)));
                 eprintln!("S734 {} : le retournement à {ts:.3} s, x = {:.3} m", s.nom, xg(i as f64));
+                if !s.instantanes.is_empty() {
+                    instantane_s735(&a, s, &marche, ts, "retournement", i.saturating_sub(3), (i + 4).min(nx));
+                }
             }
+        }
+        if s.instantanes.iter().any(|&ti| ((ti * 1e6).round() as u64) > t - us && ((ti * 1e6).round() as u64) <= t) {
+            instantane_s735(&a, s, &marche, ts, "plage", ((pied / dxs) as usize).min(nx), nx);
         }
         let (k, x) = air_enferme_s648(&a);
         if k > 0 && r.air.is_none() {
@@ -2709,7 +2717,7 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
 #[test]
 #[ignore = "le témoin S4 du sélecteur, tout-3D (≈ 25 min)"]
 fn the_selector_witness_s4_no_breaking_s734() {
-    let s = ScenePlage { nom: "S4", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: false };
+    let s = ScenePlage { nom: "S4", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: false, instantanes: &[] };
     let r = temoin_plage_s734(&s);
     let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
     println!("S734 S4 : la remontée {:.4} m contre {exacte:.4} m ({:+.1} %)", r.remontee.1, 100. * (r.remontee.1 / exacte - 1.));
@@ -2724,7 +2732,7 @@ fn the_selector_witness_s4_no_breaking_s734() {
 #[test]
 #[ignore = "le témoin S2 du sélecteur, tout-3D (≈ 40 min)"]
 fn the_selector_witness_s2_synolakis_s734() {
-    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false };
+    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false, instantanes: &[] };
     let r = temoin_plage_s734(&s);
     assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
     assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
@@ -2737,7 +2745,7 @@ fn the_selector_witness_s2_synolakis_s734() {
 #[test]
 #[ignore = "le témoin S3 du sélecteur, tout-3D (≈ 1 h)"]
 fn the_selector_witness_s3_spilling_s734() {
-    let s = ScenePlage { nom: "S3", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 12., lisse: false };
+    let s = ScenePlage { nom: "S3", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 12., lisse: false, instantanes: &[] };
     let r = temoin_plage_s734(&s);
     println!("S734 S3 : le retournement {:?} (la question de la scène) ; le niveau au mur {:.1} mm du repos", r.retournement, r.mur_eta * 1e3);
     assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
@@ -2749,7 +2757,7 @@ fn the_selector_witness_s3_spilling_s734() {
 #[test]
 #[ignore = "le témoin S4 du sélecteur sur le fond lisse, tout-3D (≈ 35 min)"]
 fn the_selector_witness_s4_on_a_smooth_bottom_s734() {
-    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true };
+    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true, instantanes: &[] };
     let r = temoin_plage_s734(&s);
     let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
     println!("S734 S4 lisse : la remontée {:.4} m contre {exacte:.4} m ({:+.1} %)", r.remontee.1, 100. * (r.remontee.1 / exacte - 1.));
@@ -2757,4 +2765,52 @@ fn the_selector_witness_s4_on_a_smooth_bottom_s734() {
     assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
     assert!(r.retournement.is_none(), "critère 1 : un retournement");
     assert!((r.remontee.1 / exacte - 1.).abs() < 0.15, "critère 2 : la remontée");
+}
+
+/// **S735 — un instantané du témoin** (le diagnostic de S4), écrit dans `calculs/s735_<nom de la scène>_<quoi>_<t ms>_{particules,colonnes}.csv` :
+/// les particules des colonnes `[i0, i1)` (x, y, z, u, w, |v|) ; par colonne de la rangée du milieu, le fond lisse et l'escalier, l'épaisseur
+/// lue par φ, le nombre de particules au-dessus du fond dans la rangée, et, par maille, l'étiquette et φ (`k:étiquette:φ`).
+fn instantane_s735(a: &Apic3, s: &ScenePlage, marche: &[f32], t: f64, quoi: &str, i0: usize, i1: usize) {
+    let crate::delta3d::Domain3 { nx, ny, nz, dx } = a.domain();
+    let base = format!("{}/../../calculs/s735_{}_{quoi}_{:05}", env!("CARGO_MANIFEST_DIR"), s.nom.replace(' ', "_"), (t * 1000.).round() as u64);
+    let (x0, x1) = (i0 as f32 * dx, i1 as f32 * dx);
+    let mut lignes = String::from("x;y;z;u;w;v\n");
+    let mut compte = vec![0usize; nx];
+    for (p, v) in a.particles().iter().zip(a.velocities()) {
+        let i = ((p[0] / dx) as usize).min(nx - 1);
+        let j = ((p[1] / dx) as usize).min(ny - 1);
+        if j == ny / 2 {
+            compte[i] += 1;
+        }
+        if p[0] >= x0 && p[0] < x1 {
+            lignes += &format!("{:.4};{:.4};{:.4};{:.4};{:.4};{:.4}\n", p[0], p[1], p[2], v[0], v[2], (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt());
+        }
+    }
+    let _ = std::fs::write(format!("{base}_particules.csv"), lignes);
+    let (_, h) = volume_surface_s708(a);
+    let (phi, l) = (a.distance(), a.labels());
+    let j = ny / 2;
+    let mut col = String::from("x;fond_marche;fond_lisse;h_phi;particules_rangee;mailles\n");
+    for i in i0..i1 {
+        let x = (i as f32 + 0.5) * dx;
+        let lisse = if s.lisse { a.smooth_seabed_height(x, (j as f32 + 0.5) * dx) } else { f32::NAN };
+        let mailles: Vec<String> = (0..nz).filter_map(|k| {
+            let m = (k * ny + j) * nx + i;
+            (phi[m] < 2. * dx || l[m] != crate::apic3d::AIR).then(|| format!("{k}:{}:{:.4}", l[m], phi[m]))
+        }).collect();
+        col += &format!("{x:.4};{:.4};{:.4};{:.5};{};{}\n", marche[i], lisse, h[i], compte[i], mailles.join(" "));
+    }
+    let _ = std::fs::write(format!("{base}_colonnes.csv"), col);
+    eprintln!("S735 instantané {} {quoi} à {t:.3} s : {base}_*.csv", s.nom);
+}
+
+/// **S735 — le diagnostic de S4** : S4 sur le fond lisse jusqu'à 5,0 s, les instantanés à 3,5, 4,1, 4,5 et 5,0 s, et au premier
+/// « retournement ». Rapporte ; n'affirme rien (le diagnostic se lit par `outils/diagnostic_s735.py`).
+#[test]
+#[ignore = "le diagnostic de S4, sur le fond lisse (≈ 25 min)"]
+fn the_s4_front_diagnostic_s735() {
+    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 5.0, lisse: true,
+        instantanes: &[3.5, 4.1, 4.5, 5.0] };
+    let r = temoin_plage_s734(&s);
+    println!("S735 S4 lisse : la remontée lue {:.4} m à {:.3} s ; le front {:.3} m ; retournement {:?}", r.remontee.1, r.remontee.0, r.front_max, r.retournement);
 }
