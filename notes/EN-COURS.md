@@ -87,7 +87,7 @@ Session : S756 — **terminée**. La cinquante-cinquième revue de méthode (ADR
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-293 ; METHODE.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — ADR-293 : D1 la décision après la référence extérieure ; D2 la célérité mesurée ; D3 la bande de quantum ; D4 la fenêtre qui suit l'événement. METHODE, l'index.
