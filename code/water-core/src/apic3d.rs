@@ -2346,6 +2346,8 @@ mod naissance;
 mod densite;
 #[path = "apic3d_bords_y.rs"]
 mod bords_y;
+#[path = "apic3d_deplacement.rs"]
+mod deplacement;
 pub use densite::DensityVariant;
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};

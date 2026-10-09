@@ -88,6 +88,53 @@ impl RelaisBoite {
         self.apic.stable_step_us(plafond_us).min(p_sv).max(1)
     }
 
+    /// **S728 — la boîte avance d'une colonne vers `+x`** (B4b) : la colonne de derrière rend à Saint-Venant sa surface (φ) et sa quantité de
+    /// mouvement ; celle de devant naît de l'état de Saint-Venant ; les écarts (le compte contre la surface derrière, le donné contre le posé
+    /// devant) vont aux dettes des faces voisines. La masse reste exacte.
+    pub fn suivre_x(&mut self) -> Result<(), Refus> {
+        let d = self.apic.domain();
+        let (nx, ny, nz) = (d.nx, d.ny, d.nz);
+        let (dx, dxs, nsv) = (d.dx as f64, self.sv.dx, self.sv.ny);
+        if self.i0 + nx + 4 > self.sv.nx {
+            return Err(Refus::Montage);
+        }
+        // Derrière : la surface de la colonne 0 et la vitesse moyenne de ses particules, par rangée.
+        let (phi, l) = (self.apic.distance(), self.apic.labels());
+        let h_der: Vec<f64> = (0..ny).map(|j| (0..nz).map(|k| {
+            let m = (k * ny + j) * nx;
+            if l[m] != crate::apic3d::SOLID { (0.5 - phi[m] as f64 / dx).clamp(0., 1.) * dx } else { 0. }
+        }).sum()).collect();
+        let (mut su, mut sv_, mut n) = (vec![0f64; ny], vec![0f64; ny], vec![0usize; ny]);
+        for (p, v) in self.apic.particles().iter().zip(self.apic.velocities()) {
+            if p[0] < d.dx {
+                let j = ((p[1] / d.dx).max(0.) as usize).min(ny - 1);
+                su[j] += v[0] as f64;
+                sv_[j] += v[1] as f64;
+                n[j] += 1;
+            }
+        }
+        let qx_der: Vec<f64> = (0..ny).map(|j| h_der[j] * su[j] / n[j].max(1) as f64).collect();
+        let qy_der: Vec<f64> = (0..ny).map(|j| h_der[j] * sv_[j] / n[j].max(1) as f64).collect();
+        // Devant : l'état de Saint-Venant, la colonne i0 + nx.
+        let i_dev = self.i0 + nx;
+        let vol_dev: Vec<f64> = (0..ny).map(|j| self.sv.h[i_dev * nsv + self.j0 + j] * dxs * dxs).collect();
+        let vit_dev: Vec<[f32; 3]> = (0..ny).map(|j| {
+            let k = i_dev * nsv + self.j0 + j;
+            let h = self.sv.h[k];
+            if h > 1e-6 { [(self.sv.qx[k] / h) as f32, (self.sv.qy[k] / h) as f32, 0.] } else { [0.; 3] }
+        }).collect();
+        let (mort, _qdm, ecart) = self.apic.shift_x(&vol_dev, &vit_dev).map_err(Refus::Apic)?;
+        self.sv.deplacer_trou_x(&h_der, &qx_der, &qy_der).map_err(|_| Refus::SaintVenant)?;
+        for j in 0..ny {
+            // la gauche : APIC a perdu le compte, Saint-Venant a reçu la surface ; la différence lui est due.
+            self.dette[j] += mort[j] - h_der[j] * dxs * dxs;
+            // la droite : Saint-Venant a cédé le volume de la colonne, APIC en a posé ; le reste lui est dû.
+            self.dette[ny + j] += ecart[j];
+        }
+        self.i0 += 1;
+        Ok(())
+    }
+
     /// **Un pas** de `us` microsecondes.
     pub fn pas(&mut self, us: u64) -> Result<(), Refus> {
         let d = self.apic.domain();

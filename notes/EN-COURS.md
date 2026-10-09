@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S728 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4b : la boîte qui suit
+Session : S728 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4b : la boîte qui suit
 le corps**.
 
 **Ce que la session fait.**
@@ -105,7 +105,8 @@ fait 3 m × 2 m. Le témoin est un APIC entier de 3 m × 2 m (≈ 1,2 million de
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le déplacement ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — le déplacement ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — **tenu** : 33 avancées, la force à 6,4 %, la surface à 6,5 %, la masse 7,8·10⁻¹⁵. B4b acquis.

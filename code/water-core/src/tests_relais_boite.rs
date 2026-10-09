@@ -359,3 +359,89 @@ fn a_body_in_the_box_s727() {
     assert!(masse < 1e-12, "critère 3 : la masse {masse}");
 }
 
+/// **S728 — B4b, la boîte qui suit le corps** : la sphère de B4a tirée à 0,3 m/s pendant 3 s (0,9 m) ; la boîte de 1 m × 1 m avance d'une
+/// colonne chaque fois que le corps dépasse son milieu d'une maille ; Saint-Venant 3 m × 2 m ; contre un APIC entier de 3 m × 2 m aux mêmes
+/// murs. (1) la force à 10 % ; (2) la surface autour du corps à 2,5 s à 20 % de la plus haute vague ; (3) la masse à 10⁻¹². **Mesuré** :
+/// 33 avancées ; la force à 6,4 %, la surface à 6,5 %, la masse 7,8·10⁻¹⁵ — tenu.
+#[test]
+#[ignore = "la boîte qui suit le corps, contre un APIC entier (≈ 37 min)"]
+fn the_box_follows_the_body_s728() {
+    let (dx, d, rayon, vitesse) = (0.025f32, 0.4f64, 0.08f32, 0.3f32);
+    let (nxt, nyt, nb, nz, ox, oy) = (120usize, 80usize, 40usize, 24usize, 10usize, 20usize);
+    let fils = || Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32))) as std::sync::Arc<dyn JobSystem + Send + Sync>);
+    let c0 = [0.7f32, 1.0, d as f32];
+    let hors = |p: [f32; 3], c: [f32; 3]| (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) > rayon * rayon;
+    let (mut t3, _ar) = apic(nxt, nyt, nz, dx, nxt * nyt * nz * 8);
+    t3.set_ballistic_air(true);
+    t3.seed(&|p| (p[2] as f64) < d && hors(p, c0)).unwrap();
+    t3.set_body(Some(crate::apic3d::Sphere3 { center: c0, radius: rayon, velocity: [vitesse, 0., 0.] })).unwrap();
+    t3.set_jobs(fils());
+    let (mut ap, mut arena) = apic(nb, nb, nz, dx, nb * nb * nz * 8);
+    ap.set_ballistic_air(true);
+    ap.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    ap.enable_left_inlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    ap.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    ap.enable_y_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    let cb = [c0[0] - ox as f32 * dx, c0[1] - oy as f32 * dx, c0[2]];
+    ap.seed(&|p| (p[2] as f64) < d && hors(p, cb)).unwrap();
+    ap.set_body(Some(crate::apic3d::Sphere3 { center: cb, radius: rayon, velocity: [vitesse, 0., 0.] })).unwrap();
+    ap.set_jobs(fils());
+    ap.step(1000).unwrap();
+    t3.step(1000).unwrap();
+    let d_lu = surface_colonnes(&ap)[(nb - 1) * nb + nb - 1];
+    let mut sv = SaintVenant2D::nouveau(nxt, nyt, dx as f64, 9.81, vec![0.; nxt * nyt], vec![d_lu; nxt * nyt], vec![0.; nxt * nyt], vec![0.; nxt * nyt]).unwrap();
+    sv.regler_ordre_deux(1e-12).unwrap();
+    let mut r = RelaisBoite::nouveau(ap, sv, ox, oy).unwrap();
+    let v0 = r.volume();
+    let (mut t, mut masse, mut avancees) = (1000u64, 0f64, 0usize);
+    let (mut somme_ecart, mut somme_ref) = (0f64, 0f64);
+    let mut photo: Option<(Vec<f64>, Vec<f64>)> = None;
+    let horloge = std::time::Instant::now();
+    while t < 3_000_000 {
+        let us = r.pas_stable_us(10_000).min(t3.stable_step_us(10_000)).min(3_000_000 - t);
+        r.pas(us).unwrap();
+        t3.step(us).unwrap();
+        t += us;
+        // La boîte suit : une colonne dès que le corps dépasse son milieu d'une maille.
+        while r.apic.body().map_or(false, |b| b.center[0] > (nb as f32 / 2. + 1.) * dx) {
+            r.suivre_x().unwrap();
+            avancees += 1;
+        }
+        masse = masse.max((r.volume() - v0).abs() / v0);
+        if t >= 200_000 {
+            let (fb, ft) = (r.apic.body_force(), t3.body_force());
+            somme_ecart += ((fb[0] - ft[0]).powi(2) + (fb[2] - ft[2]).powi(2)).sqrt() * us as f64;
+            somme_ref += (ft[0] * ft[0] + ft[2] * ft[2]).sqrt() * us as f64;
+        }
+        if photo.is_none() && t >= 2_500_000 {
+            let (hb, ht) = (surface_colonnes(&r.apic), surface_colonnes(&t3));
+            let (bi, bj) = (r.i0, r.j0);
+            let sous: Vec<f64> = (0..nb * nb).map(|c| ht[(bj + c / nb) * nxt + bi + c % nb]).collect();
+            photo = Some((hb, sous));
+            eprintln!("S728 photo : à {:.2} s ; la boîte en ({bi}, {bj}) ; {avancees} avancées ; la masse {masse:.1e}", t as f64 * 1e-6);
+        }
+        if t % 250_000 < us {
+            eprintln!("S728 progression : t = {:.2} s, pas {us} µs, {avancees} avancées, la masse {masse:.1e}, {:.0} s d'horloge", t as f64 * 1e-6, horloge.elapsed().as_secs_f64());
+        }
+    }
+    let force = somme_ecart / somme_ref.max(1e-30);
+    let (hb, ht) = photo.unwrap();
+    let (mut s2, mut nn, mut vague) = (0f64, 0usize, 0f64);
+    for jj in 3..nb - 3 {
+        for ii in 3..nb - 3 {
+            let c = jj * nb + ii;
+            if ht[c] > 0.05 && hb[c] > 0.05 {
+                s2 += (hb[c] - ht[c]).powi(2);
+                nn += 1;
+                vague = vague.max((ht[c] - d_lu).abs());
+            }
+        }
+    }
+    let rms = (s2 / nn.max(1) as f64).sqrt();
+    println!("S728 B4b : {avancees} avancées ; la force, l'écart moyen {:.1} % ; la surface autour du corps à 2,5 s, {rms:.2e} m contre la plus haute vague {vague:.2e} m ({:.1} %) ; la masse {masse:.1e} ; {:.0} s",
+        100. * force, 100. * rms / vague.max(1e-30), horloge.elapsed().as_secs_f64());
+    assert!(force < 0.10, "critère 1 : la force {force}");
+    assert!(rms < 0.2 * vague, "critère 2 : la surface {rms} contre {vague}");
+    assert!(masse < 1e-12, "critère 3 : la masse {masse}");
+}
+

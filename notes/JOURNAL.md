@@ -2100,3 +2100,10 @@ rappel, le plan avant le code. Maillons **0** (méthode). Suivant : **S727**, B4
 une sphère tirée dans la boîte au milieu de Saint-Venant, contre le même corps dans un APIC entier, aux mêmes murs. **Mesuré** : la force
 à 2,0 %, la surface à 1,7 %, la masse 3,9·10⁻¹⁵ (tenu). **B4a acquis.** Maillons **1** (4.14). Suivant : **S728**, B4b, la boîte qui suit
 le corps.
+
+## S728 — 2026-10-09 — La boîte qui suit le corps (B4b)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-3-S722. **Fait** ([preuve](../docs/validation/BOITE-QUI-SUIT-S728.md)) :
+`shift_x`, `deplacer_trou_x`, `suivre_x`. **Mesuré** : la boîte suit la sphère sur 33 colonnes ; la force à 6,4 %, la surface à 6,5 %, la
+masse 7,8·10⁻¹⁵ (tenu) ; six fois moins de 3D que le témoin. **B4b acquis.** Maillons **1** (4.14). Suivant : **S729**, B5, le
+déclencheur de présence.

@@ -360,6 +360,28 @@ impl SaintVenant2D {
         Ok(())
     }
 
+    /// **S728 — le trou avance d'une colonne vers `+x`** : la colonne `i0` redevient active avec l'état donné (par `j` du trou : `h`, `qx`,
+    /// `qy`), la colonne `i1` est gelée. Refus : sans trou, une forme fausse, le trou à moins de trois mailles du bord.
+    pub fn deplacer_trou_x(&mut self, h: &[f64], qx: &[f64], qy: &[f64]) -> Result<(), Refus> {
+        let ny = self.ny;
+        let Some(tr) = self.trou.as_mut() else { return Err(Refus) };
+        let nj = tr.j1 - tr.j0;
+        if h.len() != nj || qx.len() != nj || qy.len() != nj || tr.i1 + 4 > self.nx || h.iter().any(|v| !(v >= &0.0)) {
+            return Err(Refus);
+        }
+        for (n, j) in (tr.j0..tr.j1).enumerate() {
+            let k = tr.i0 * ny + j;
+            tr.masque[k] = false;
+            self.h[k] = h[n];
+            self.qx[k] = qx[n];
+            self.qy[k] = qy[n];
+            tr.masque[tr.i1 * ny + j] = true;
+        }
+        tr.i0 += 1;
+        tr.i1 += 1;
+        Ok(())
+    }
+
     /// **S723 — un pas, le flux imposé sur les faces du trou** : par face, `[masse, normale, tangentielle]` orienté vers `+x` ou `+y` ; la
     /// gauche, la droite (par `j`, `j1 − j0` chacune), puis le bas, le haut (par `i`, `i1 − i0` chacune).
     pub fn pas_avec_flux_trou(&mut self, dt: f64, flux: &[[f64; 3]]) -> Result<(), Refus> {

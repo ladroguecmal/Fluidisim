@@ -524,6 +524,8 @@ SGN) (4.14).
 revue (ADR-282 : la fermeture par `outils/fermer.py`) ; l'étape 3 du LOD conçue (la 3D rallumée autour d'un corps) (4.14).
 **S723–S725** : Saint-Venant troué (B1 : le flux complet, 1,6 %) ; APIC à quatre bords (B2 : la masse et l'écoulement) ; le raccord de la
 boîte (B3 : au repos au micron, la masse au bit, une onde longue réfléchie à 9 %) (4.14).
+**S726–S728** : la quarante-neuvième revue (ADR-283 : un raccord entre deux modèles jugé depuis l'état lu, sur un régime partagé) ; un corps
+dans la boîte (B4a : la force à 2 %) ; la boîte qui suit le corps (B4b : 33 avancées, la force à 6,4 %, six fois moins de 3D) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
