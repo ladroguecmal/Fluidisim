@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S746 — **en cours**. La cinquante-troisième revue de méthode (ADR-222 D4), sur S741–S745.
+Session : S746 — **terminée**. La cinquante-troisième revue de méthode (ADR-222 D4), sur S741–S745.
 
 **Ce que la session fait.** Relire les frictions de S741 à S745 et décider (ADR-288). Celles relevées :
 1. **S742 : un essai de propagation lancé avant le repos.** La levée (B2) tournait sur un fond lisse qui ne tient pas le repos (S743) ;
@@ -90,7 +90,7 @@ session (« **S…–Snnn** »).
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-288 ; METHODE ; l'outil et son essai.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — ADR-288 (D1 le repos d'abord ; D2 trois quanta, la crête dans une fenêtre ; D3 le lot vérifié par l'outil ; D4 la prémisse « au bit » vérifiée sur un petit cas). `rituel.py` : le faux appel `fin --lot` refuse (« aucune ligne de lot **S…–S746** »), sans rien écrire. METHODE, l'index.

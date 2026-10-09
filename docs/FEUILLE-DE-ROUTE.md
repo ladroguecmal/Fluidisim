@@ -540,6 +540,8 @@ solitaire ; **la cause, le tassement des particules**, que la projection de dens
 **S741–S743** : la cinquante-deuxième revue (ADR-287 : un solveur de référence après ses essais canoniques) ; le banc canonique, première
 passe (la projection freine la remontée de 12 %) ; le lac au repos sur une pente (seul l'escalier sans projection le tient) (4.1). *Lot
 écrit en S744, oublié à la fermeture de S743.*
+**S744–S746** : la projection de densité consciente du fond (le repos rendu) ; sans correction de surface (la remontée à −5,5 %, mais
+l'onde solitaire moins bien gardée) ; la cinquante-troisième revue (ADR-288 : le repos d'abord ; le lot vérifié par l'outil) (4.1).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

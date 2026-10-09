@@ -72,5 +72,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   question, avant le calibrage. Au lot S738–S740 : **sa cause trouvée**, le tassement des particules sous la crête ; la projection de
   densité garde l'onde solitaire. Reste à juger la 3D ainsi corrigée contre les mesures de Synolakis, et son plongeon. Au lot S741–S743 :
   le banc canonique (ADR-287) montre que la projection ignore le fond (le repos perdu, la remontée freinée) et que le fond lisse ne tient
-  pas le repos.
+  pas le repos. Au lot S744–S746 : la projection consciente du fond rend le repos ; corriger la surface garde l'onde mais freine la
+  lame, ne pas la corriger fait l'inverse : la voie hybride suit.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

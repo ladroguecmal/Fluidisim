@@ -2299,3 +2299,14 @@ fond compté, sur le repos, la remontée de S645 et le canal à 2,5 cm. **Mesur�
 
 Chaque variante tient ce que l'autre perd ; la voie hybride (la surface corrigée sauf dans la lame mince) suit. Maillons **1** (4.1).
 Suivant : **S746**, la revue ; puis **S747**, la variante hybride.
+
+## S746 — 2026-10-09 — la cinquante-troisième revue de méthode (ADR-288)
+
+**Entrée.** La revue (S741–S745). **Fait** : [ADR-288](../docs/adr/ADR-288-cinquante-troisieme-revue-de-methode.md).
+- D1 : le banc canonique a un ordre, le repos d'abord (S742 : la levée sur un fond qui ne tient pas le repos).
+- D2 : une amplitude au-dessus de trois quanta, une crête suivie dans une fenêtre (S742).
+- D3 : `rituel.py fin --lot` refuse sans la ligne de lot (S743), fait et éprouvé.
+- D4 : une prémisse « au bit » vérifiée sur un petit cas (S744).
+
+Maillons **0** (méthode). Suivant : **S747**, la projection hybride.
+
