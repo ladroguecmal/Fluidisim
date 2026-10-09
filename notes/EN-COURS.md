@@ -62,51 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S728 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4b : la boîte qui suit
-le corps**.
+Session : S729 — **en cours**. En autonomie, sans arrêt ; session longue. LOD-ETAPE-3-S722, **B5 : le déclencheur de présence**. La boîte
+naît quand un corps touche l'eau, le suit, meurt quand il en sort.
 
 **Ce que la session fait.**
-- **`Apic3::shift_x`** (`apic3d_deplacement.rs`) : chaque particule recule d'une maille. Celles qui sortent derrière meurent (leur volume
-  et leur quantité de mouvement rendus par rangée). La colonne de devant naît d'un volume donné par rangée, chaque sous-colonne emplie à la
-  même hauteur (S707). Le corps recule d'une maille dans le repère de la boîte.
-- **`SaintVenant2D::deplacer_trou_x`** : la colonne de derrière redevient active avec l'état donné ; celle de devant est gelée.
-- **`RelaisBoite::suivre_x`** :
-  - la colonne de derrière rend à Saint-Venant sa surface (φ, ADR-280 D1) et sa quantité de mouvement ;
-  - la colonne de devant naît de l'état de Saint-Venant ;
-  - les écarts (le compte contre la surface derrière, le donné contre le posé devant) vont aux dettes des faces voisines : la masse est
-    exacte.
+- **`RelaisBoite::naitre`** : au milieu d'un Saint-Venant entier, une boîte naît de son état :
+  - les colonnes par `birth_from_columns` (S707) ;
+  - la vitesse de chaque colonne, celle de Saint-Venant ;
+  - **le niveau réglé sur ce que la 3D lit** (ADR-283 D1) : une première naissance mesure le biais de lecture, une seconde pose ce qu'il
+    faut pour que la 3D lise le niveau de Saint-Venant. L'écart est tenu dans la masse (`reste`), rendu à la mort.
+- **`RelaisBoite::mourir`** : la boîte rend à Saint-Venant, colonne par colonne, sa surface (φ) et sa quantité de mouvement
+  (`SaintVenant2D::fermer_trou`). Ce qui reste (les dettes, les réservoirs, le compte contre la surface, `reste`) est réparti également sur
+  les mailles du trou : la masse est exacte.
+- **Le déclencheur** : la boîte naît quand le bas du corps passe sous le niveau ; elle meurt quand il en est sorti depuis 0,2 s
+  (l'hystérésis).
 
-**L'essai et ses critères, écrits avant.** La sphère de B4a (rayon 8 cm, à demi immergée), tirée à 0,3 m/s pendant **3 s** (0,9 m, plus que
-la boîte). La boîte de 1 m × 1 m la suit : elle avance d'une colonne chaque fois que le corps dépasse son milieu d'une maille. Saint-Venant
-fait 3 m × 2 m. Le témoin est un APIC entier de 3 m × 2 m (≈ 1,2 million de particules), aux mêmes murs.
-1. La force sur la sphère : l'écart moyen au témoin, de 0,2 à 3,0 s, sous **10 %** ;
-2. la surface autour du corps à 2,5 s (la boîte où elle est alors) : l'écart quadratique moyen sous **20 %** de la plus haute vague du témoin ;
-3. la masse à 10⁻¹².
+**L'essai et ses critères, écrits avant.** La sphère de B4 (rayon 8 cm) descend de 15 cm au-dessus de l'eau à 0,3 m/s jusqu'à mi-immersion
+(0,5 s), avance à 0,3 m/s (1,5 s), remonte et sort (0,6 s), puis l'eau seule (0,6 s) ; 3,2 s en tout. Saint-Venant fait 3 m × 2 m ; le
+témoin est un APIC entier aux mêmes murs.
+1. la boîte naît une fois, meurt une fois ;
+2. la force sur la sphère dans l'eau : l'écart moyen au témoin sous **10 %** ;
+3. la masse à 10⁻¹², à la naissance et à la mort comprises ;
+4. aucun choc de niveau : le niveau moyen de Saint-Venant autour du trou, juste avant et juste après la naissance comme la mort, à
+   **1 mm** près.
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-283)
 
-- **témoin** : le même corps dans la 3D entière (ADR-273 D1) ; B4a pour le raccord fixe (2,0 % et 1,7 %).
-- **instrument** : la force à chaque pas ; la surface par colonne (φ) dans la fenêtre de la boîte ; la masse à chaque pas. Ce que rendrait
-  chaque hypothèse :
-  - le déplacement est sans faute : comme B4a ;
-  - une naissance ou une mort brusque : un saut de force à chaque avancée, et des rides derrière la boîte.
-- **calcul** :
-  - le corps avance de 0,9 m, soit 36 colonnes, une avancée tous les ≈ 83 ms ;
-  - le témoin : ≈ 1,2 million de particules, ≈ 25 min ; la boîte : ≈ 6 min.
+- **témoin** : le même corps, le même mouvement, dans un APIC entier (ADR-273 D1).
+- **instrument** : la force, la masse, le niveau autour du trou, recalculés à chaque pas (ADR-281 D2).
+- **calcul** : le témoin, ≈ 1,2 million de particules sur 3,2 s, ≈ 40 min ; la boîte, quelques minutes.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-283 D1, D2 : l'état lu ; les constantes de Saint-Venant dans ses volumes ;
+  - ADR-283 D1 : le niveau lu, réglé à la naissance ;
   - ADR-280 D1 : la surface à la mort ;
-  - ADR-282 : la fermeture par l'outil.
+  - ADR-275 D1 : l'hystérésis.
 - **pièges** :
-  - la fenêtre de comparaison suit la boîte (son origine change à chaque avancée) ;
-  - la dette des faces de gauche reçoit l'écart de la mort, celle de droite l'écart de la naissance ;
-  - le trou ne doit pas approcher le bord de Saint-Venant (trois mailles).
+  - les particules dans la sphère, à la naissance (une sphère en partie dans l'eau) : elles sont retirées et comptées dans `reste` ;
+  - le corps hors de l'eau n'a pas de boîte ; sa force est nulle dans les deux ;
+  - la naissance alloue une boîte (en jeu, une réserve ; ici, l'essai la prépare d'avance).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le déplacement ; l'essai ; (1)–(3).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — naître, mourir, le déclencheur ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — **tenu** : 33 avancées, la force à 6,4 %, la surface à 6,5 %, la masse 7,8·10⁻¹⁵. B4b acquis.
