@@ -62,53 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S724 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B2 : APIC à quatre
-bords**.
+Session : S725 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B3 : le raccord de la
+boîte**. Saint-Venant troué (B1) et APIC à quatre bords (B2) sont réunis.
 
-**Ce que la session fait.** `apic3d_bords_y.rs` : les bords en y par particules (le devant, `y = 0`, le derrière, `y = ly`), sur le modèle
-du bord gauche (S698), avec la pose par la grille (S702) :
-- la vitesse normale imposée aux faces ;
-- les particules qui sortent, retirées et comptées ;
-- l'entrée posée par quanta, avec la vitesse et l'affine du G2P.
+**Ce que la session fait.** `relais_boite.rs`, `RelaisBoite`. À chaque pas, pour chaque face du trou :
+1. l'état de la colonne 3D voisine (le niveau par la surface, les vitesses moyennes) ;
+2. le flux complet de Rusanov contre la maille active de Saint-Venant, donné à Saint-Venant (`pas_avec_flux_trou`) ;
+3. `F₀/h` devient la vitesse du bord d'APIC (bornée par la célérité), et l'eau qui entre est posée ;
+4. le pas d'APIC ;
+5. le bilan de la face (cédé contre reçu et rendu) : l'écart va à la maille active, et la masse est exacte par construction.
 
-Avec les bords en x qui existent (la gauche S698, la droite S682), la boîte est ouverte sur ses quatre côtés.
+Les sorties en y sont comptées par face (`y_outlet_step`), et le flux de Rusanov rendu public (`flux_rusanov`).
 
-**Les essais ; chacun a ses critères, écrits avant lui.** Une boîte de 1 m × 1 m, 0,4 m d'eau, `dx` = 2,5 cm, les quatre bords ouverts.
+*Note* : le code a été écrit avant ce plan ; les critères ci-dessous le précèdent, avant tout essai.
+
+**Les essais ; chacun a ses critères, écrits avant lui.** Saint-Venant 3 m × 3 m (`dx` = 2,5 cm), 0,4 m d'eau, fond plat ; la boîte de
+1 m × 1 m au milieu (≈ 205 000 particules).
 
 | essai | ce qu'il juge | critères |
 |---|---|---|
-| **E1** | le repos (les vitesses imposées nulles) | après 1 s, la vitesse maximale sous 1 mm/s ; `V_φ` constant à 10⁻³ |
-| **E2** | un courant uniforme en biais, (0,2 ; 0,1) m/s, 5 s : il entre par la gauche et par le devant (la pose par la grille), sort par la droite et par le derrière (le retrait) | `V_φ` tenu à **0,5 %** ; à l'intérieur (trois mailles des bords exclues), la vitesse moyenne des particules à **2 %** du courant, l'écart maximal sous 5 cm/s ; la surface plate à **3 mm** (l'étendue de η par la surface) |
-
-E2 est une solution exacte : un courant uniforme sur un fond plat ne change pas.
+| **E1** | le repos, 1 s | la vitesse maximale d'APIC et de Saint-Venant sous 1 mm/s ; la masse à 10⁻¹² ; `|η|` de Saint-Venant sous 1 mm |
+| **E2** | une bosse de 2 cm (rayon 0,4 m) qui traverse la boîte, 1,2 s, contre le Saint-Venant entier | la masse à 10⁻¹² ; **ce que la boîte réfléchit** (l'écart de η en arrière de la boîte, x de 0,2 à 0,9 m) sous **10 %** de l'amplitude ; l'écart en aval rapporté (la 3D est dispersive, Saint-Venant non) |
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-282)
 
-- **témoin** : la solution exacte, le courant uniforme.
-- **instrument** :
-  - `V_φ` (la surface, ADR-280 D1) ;
-  - la vitesse moyenne des particules de l'intérieur ;
-  - η par colonne, par la surface.
-
-  Tous sont recalculés à la fin (ADR-281 D2). Ce que rendrait chaque hypothèse :
-  - les bords en y sont justes : E2 tient ;
-  - une faute de pose ou de retrait : `V_φ` dérive, ou la surface penche vers un bord.
+- **témoin** : E1, le repos ; E2, le Saint-Venant entier, le même pas. La réflexion se juge en arrière de la boîte, où la 3D et Saint-Venant
+  ne diffèrent que par le raccord.
+- **instrument** : la masse (Saint-Venant hors du trou, les particules, les réservoirs), recalculée à chaque pas ; l'écart de η dans des
+  bandes (ADR-281 D2 : ils peuvent échouer).
 - **calcul** :
-  - 40 × 40 × 16 mailles d'eau × 8 particules ≈ 205 000 particules ;
-  - le pas de 10 ms ;
-  - ≈ 3 à 5 min pour E2.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-273 D1 (la 3D seule, contre l'exact) ; ADR-282 (la fermeture par l'outil).
+  - la bosse : `kd` ≈ 1,6 au rayon 0,4 m pour 0,4 m d'eau, donc dispersive. D'où un écart en aval attendu, et la réflexion jugée seule ;
+  - le coût : ≈ 1 min pour E1, ≈ 3 min pour E2.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-273 D1 : le raccord se juge contre le même Saint-Venant, sans trou ;
+  - ADR-280 D1 : la surface ;
+  - ADR-282 : la fermeture par l'outil.
 - **pièges** :
-  - les coins : une particule sort par x ou par y, comptée une fois (le retrait en x d'abord, puis en y) ;
-  - les gouttes refusées avec les bords en y ;
-  - les faces au-dessus de l'eau : la vitesse imposée y est nulle.
+  - les signes des quatre faces dans le bilan ;
+  - le niveau d'une colonne qui sèche (le plancher de `dx/4`) ;
+  - la pose à droite reste celle du réseau (S683).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les bords en y ; E1, E2 (partiel), E2b.
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — E1, E2.
+- [ ] **P3** — preuve ; fermeture (le lot S723–S725).
 
 ### Notes de reprise
-- **E1 tenu** : au repos, 4,9·10⁻⁶ m/s, `V_φ` −1,3·10⁻⁷, η à 1 µm. **E2 échoue en partie** : `V_φ` −0,39 % (tenu), la vitesse moyenne à 0,5 % (tenue) ; mais l'écart maximal 0,10 m/s (critère 5 cm/s) et l'étendue de η 7,2 mm (critère 3 mm). Le diagnostic : des particules de surface, l'une ralentie, une autre en chute libre à 1,8 m/s ; un creux de 5,4 mm à l'intérieur. **E2b**, le témoin : le courant en x seulement, les bords en y ouverts sans flux.
-- **P2 fini** — E2b : le même écart de vitesse (0,103 m/s) en x seul, la surface 3,7 mm. L'écart de vitesse est celui de la surface libre d'APIC ; l'entrée en y ajoute ≈ 3,5 mm de rides. B2 acquis pour la masse et l'écoulement.
