@@ -62,49 +62,51 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S723 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B1 : Saint-Venant
-troué**.
+Session : S724 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B2 : APIC à quatre
+bords**.
 
-**Ce que la session fait.** Dans `SaintVenant2D`, à l'ordre deux :
-- **`regler_trou(i0, i1, j0, j1)`** : un rectangle de mailles gelées. Leurs faces avec l'eau active deviennent des parois (la pression de
-  la maille active, aucun flux calculé), et la reconstruction des mailles voisines n'y lit rien (les pentes y sont nulles, comme aux
-  bords du domaine) ;
-- **`pas_avec_flux_trou(dt, flux)`** : sur chaque face du trou, la masse `F` entre dans la maille active (positive) ou en sort. Elle
-  emporte `F·u` et `F·v` de la maille active, comme le flux imposé au bord droit (S687). Les faces sont rangées : la gauche, la droite (par
-  `j`), puis le bas, le haut (par `i`) ;
-- **`pas_avec_flux_bords4(dt, flux)`** : le même flux imposé sur les quatre bords du domaine (la gauche, la droite par `j` ; le bas, le
-  haut par `i`), positif vers l'intérieur.
+**Ce que la session fait.** `apic3d_bords_y.rs` : les bords en y par particules (le devant, `y = 0`, le derrière, `y = ly`), sur le modèle
+du bord gauche (S698), avec la pose par la grille (S702) :
+- la vitesse normale imposée aux faces ;
+- les particules qui sortent, retirées et comptées ;
+- l'entrée posée par quanta, avec la vitesse et l'affine du G2P.
 
-Sans trou ni flux, le code ne change pas (le banc au bit).
+Avec les bords en x qui existent (la gauche S698, la droite S682), la boîte est ouverte sur ses quatre côtés.
 
-**L'essai, entre deux copies du même solveur (ADR-273 D1).** Une bosse d'eau (2 cm, rayon 0,3 m) sur un fond plat de 3 m × 3 m
-(`dx` = 5 cm) s'étale en rond ; un trou de 0,75 m × 1,25 m sur son chemin. Le Saint-Venant troué et un second Saint-Venant, qui remplit le
-trou, échangent à chaque pas le flux de masse de Rusanov calculé entre leurs mailles voisines. Le même flux, de signe opposé, va aux deux.
+**Les essais ; chacun a ses critères, écrits avant lui.** Une boîte de 1 m × 1 m, 0,4 m d'eau, `dx` = 2,5 cm, les quatre bords ouverts.
 
-**Critères, écrits avant.**
-1. La masse des deux ensemble, au bit (10⁻¹²).
-2. Contre le Saint-Venant entier, après 1,5 s : l'écart maximal de `h` sous **5 %** de l'amplitude de la bosse (1 mm). Le flux d'interface
-   est gelé sur le pas de Heun, et d'ordre un : une erreur d'ordre `dt` est attendue.
-3. Le banc de non-régression au bit (le défaut inchangé).
+| essai | ce qu'il juge | critères |
+|---|---|---|
+| **E1** | le repos (les vitesses imposées nulles) | après 1 s, la vitesse maximale sous 1 mm/s ; `V_φ` constant à 10⁻³ |
+| **E2** | un courant uniforme en biais, (0,2 ; 0,1) m/s, 5 s : il entre par la gauche et par le devant (la pose par la grille), sort par la droite et par le derrière (le retrait) | `V_φ` tenu à **0,5 %** ; à l'intérieur (trois mailles des bords exclues), la vitesse moyenne des particules à **2 %** du courant, l'écart maximal sous 5 cm/s ; la surface plate à **3 mm** (l'étendue de η par la surface) |
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-277, ADR-281)
+E2 est une solution exacte : un courant uniforme sur un fond plat ne change pas.
 
-- **témoin** : le Saint-Venant entier, le même pas, la même bosse.
-- **instrument** : l'écart maximal de `h` et la masse, recalculés à la fin (ADR-281 D2 : ils peuvent échouer).
-- **calcul** : la bosse de 2 cm sur 0,5 m d'eau, `c` = 2,2 m/s : en 1,5 s, l'onde parcourt 3,3 m et traverse le trou. Le pas : Courant
-  0,4.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-273 D1 (deux copies) ; ADR-282 (la fermeture par l'outil).
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-282)
+
+- **témoin** : la solution exacte, le courant uniforme.
+- **instrument** :
+  - `V_φ` (la surface, ADR-280 D1) ;
+  - la vitesse moyenne des particules de l'intérieur ;
+  - η par colonne, par la surface.
+
+  Tous sont recalculés à la fin (ADR-281 D2). Ce que rendrait chaque hypothèse :
+  - les bords en y sont justes : E2 tient ;
+  - une faute de pose ou de retrait : `V_φ` dérive, ou la surface penche vers un bord.
+- **calcul** :
+  - 40 × 40 × 16 mailles d'eau × 8 particules ≈ 205 000 particules ;
+  - le pas de 10 ms ;
+  - ≈ 3 à 5 min pour E2.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-273 D1 (la 3D seule, contre l'exact) ; ADR-282 (la fermeture par l'outil).
 - **pièges** :
-  - les quatre côtés ont des signes opposés ; on vérifie que la masse se tient pour chacun ;
-  - les coins du trou n'ont pas de face diagonale (rien à faire) ;
-  - le chemin d'ordre un n'est pas touché (le trou demande l'ordre deux).
+  - les coins : une particule sort par x ou par y, comptée une fois (le retrait en x d'abord, puis en y) ;
+  - les gouttes refusées avec les bords en y ;
+  - les faces au-dessus de l'eau : la vitesse imposée y est nulle.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le trou, les flux ; l'essai ; (1)–(3).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — les bords en y ; E1, E2.
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **Premier passage** : la masse au bit (3,5·10⁻¹⁵), mais l'écart 8,3 % de la bosse (critère 5 %). Seule la masse était échangée ; chaque côté prenait sa propre pression de paroi, et l'interface réfléchissait. **Second passage**, les mêmes critères : le **flux complet** de Rusanov (la masse, la normale avec sa pression, la tangentielle) par face, le même vecteur aux deux côtés, la pression de paroi retirée ; la quantité de mouvement aussi conservée.
-- **P2 fini** — **tenu** : la masse 2,8·10⁻¹⁵, l'écart 0,32 mm (1,6 %), le banc au bit, les essais de Saint-Venant passent. B1 acquis.
