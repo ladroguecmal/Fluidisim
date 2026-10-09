@@ -62,77 +62,64 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S733 — **terminée**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P1 : le prédicteur**. **La question** : SGN, calculé
-en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se retourne, et où retombe son jet ?
+Session : S734 — **en cours**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P2 : les témoins**. **La question** : les scènes
+S2, S3 et S4 en tout-3D, sans aucun raccord, que donnent-elles (le retournement, la crête, la remontée), et que prévoit le prédicteur de
+S733 sur chacune ? Ce sont les données du calibrage du prédicteur (S735).
 
 **Ce que la session fait.**
-- **SGN sur un fond doux** (`Serre1D::nouveau_fond`) :
-  - la surface `η = h + z` reconstruite (MUSCL), la hauteur aux faces lue sous elle, le fond continu aux faces ;
-  - la source du fond centrée, `−g·(h⁺ + h⁻)/2·Δz/dx` : le lac au repos est tenu exactement ;
-  - le terme dispersif sur fond doux, `g·η_xx` au lieu de `g·h_xx` (l'approximation de pente douce : les termes en `z_x` négligés).
-  Le domaine reste périodique : le fond monte jusqu'à 4 cm d'eau, puis redescend en miroir. L'onde se retourne bien avant (0,14 m).
-- **Le prédicteur** (`selecteur.rs`, `prevoir`) : SGN sur une copie, jusqu'à un horizon donné. À chaque pas, trois critères de déclenchement
-  publiés sont évalués à la crête :
-  - (K) la vitesse de montée de la surface, `η_t > α·√(g·h)` (Kennedy et al., 2000 ; α = 0,65) ;
-  - (H) le rapport `η/h`, la hauteur de la crête sur la profondeur locale, au-delà de 0,8 ;
-  - (F) le nombre de Froude de la crête, `u/√(g·(h))`, au-delà de 0,8.
+- **`temoin_plage_s734`**, un témoin tout-3D générique, sur le modèle de S712. L'onde solitaire (`OndeSolitaire`) part centrée à
+  `L + approche` du pied, où `L = arccosh(√20)/γ·d` est la distance où elle tombe à 5 % ; l'approche donne au prédicteur au moins 2 s (le
+  piège de S722).
+  - Le domaine : un mur 8 d derrière, la plage ; quatre rangées, 2,5 cm ; aucun raccord, aucune sortie (ADR-285 D1).
+  - À chaque pas : le retournement (S647), l'air (S648), la crête par la surface (`volume_surface_s708`, ADR-280 D1), le front d'eau (la
+    dernière colonne où l'épaisseur lue dépasse 5 mm). Tous les 0,1 s, la crête est affichée (ADR-281 D1).
+- **Le prédicteur sur la même scène** (`porteur_plage_s734`, SGN à 5 cm sur la plage en miroir, le fond arrêté à 4 cm d'eau) : les trois
+  critères publiés et les six variantes de S733, rapportés.
+- Les scènes (`python outils/selecteur_nombres.py` pour S2 à S4 ; les dimensions par le script du plan) :
 
-  Il rend, pour chaque critère, le premier instant et le lieu `(t, x)`, la hauteur de la crête `H_b` et la profondeur au repos `h_b`, et
-  `L_jet = c_b·√(2·H_b/g)` (S732).
-- **La trajectoire de la crête du témoin** (`outils/crete_film.py`), lue dans le film de S730 E2 (`calculs/s730_tout3d_12.bin`) : la
-  plus haute particule et sa place, à chaque image, jusqu'au retournement.
+| scène | `d`, `H/d`, pente | la plage du domaine | durée | particules, calcul |
+|---|---|---|---|---|
+| **S2** — Synolakis | 0,5 m, 0,3, 1:19,85 ; l'approche 2,5 m | jusqu'à 8 d au-delà du rivage (S712) | 7 s (t·√(g/d) ≈ 25 depuis le pied, S712) | ≈ 350 k ; ≈ 40 min |
+| **S3** — glissante | 0,3 m, 0,5, 1:90 ; 3 m | **un mur à 16 m du pied** (0,12 m d'eau) : le rivage est à 27 m, 23 s de trajet | 12 s | ≈ 270 k ; ≈ 1 h |
+| **S4** — sans déferlement | 0,5 m, **0,2, 1:3** ; 3 m | jusqu'à 8 d au-delà du rivage | 6 s | ≈ 270 k ; ≈ 25 min |
 
-**Les essais, et leurs critères écrits avant.**
-- **E1 — le fond doux** :
-  1. le lac au repos sur la plage de R43 (le fond monte et redescend), 2 s : la vitesse sous **10⁻¹² m/s**, la masse au bit ;
-  2. la levée d'une onde longue (`kd` ≈ 0,1, 1 mm) sur une pente de 1:50 : la hauteur suit la loi de Green, `H ∝ h^(-1/4)`, à **5 %** de
-     la profondeur 0,5 m à 0,2 m.
-- **E2 — la prévision de R43**, depuis l'état de départ de S730 (l'onde de Boussinesq, `x₁` = 3,4 m), contre le témoin (le retournement à
-  2,620 s et 9,938 m ; l'air à 2,804 s et 10,375 m) :
-  3. la crête de SGN contre celle du témoin, jusqu'à 2,3 s : l'écart de place et de hauteur, **rapporté** (deux modèles ; S713 a vu la 3D
-     trop haute de 40 % sur Synolakis) ;
-  4. pour chaque critère, l'avance `(t_témoin − t, x_témoin − x)` rapportée. Le critère est retenu si son lieu tombe à **0,3 m** du
-     retournement du témoin et son avance entre 0 et 0,3 s : une avance fixe le corrige alors. C'est un calibrage sur une seule scène, et
-     le registre le dit : il se juge à chaque nouveau témoin (P2) ;
-  5. le jet prévu, `x_b(témoin) + L_jet(SGN)`, à **0,15 m** de l'air enfermé du témoin (10,375 m) ;
-  6. **le coût** : une prévision de 3 s sous **100 ms**.
+S4 change de pente par rapport au registre (0,03 sur 1:12) : une onde de 15 mm y ferait 0,6 maille. À 1:3, le seuil de Synolakis est
+`H/d` = 0,241, et `S₀` = 1,13 ne prévoit aucun déferlement. La remontée exacte (Synolakis, la loi des ondes non déferlantes) vaut
+**0,328 m**.
 
-**Contrôles du plan** (ADR-266, ADR-273, ADR-276, ADR-280, ADR-284, ADR-285)
+**Les critères, écrits avant.**
+- Chaque témoin (ADR-285 D1) : aucun raccord ; le nombre de particules constant (aucune sortie) ; **le front d'eau jamais à moins de 1 m du
+  mur de droite** (S3 : le mur à 16 m ne doit rien voir).
+- **S4** : (1) **aucun retournement** en 6 s ; (2) la remontée maximale (la cote du fond sous le front, moins `d`) à **15 %** de 0,328 m
+  (le pas d'une colonne sur 1:3 vaut 8 mm, 2,5 %).
+- **S2** : (3) un retournement ; son instant et son lieu rapportés. Les profils de laboratoire à t·√(g/d) = 15, 20, 25 (comptés depuis la
+  place de départ de S712) comparés et rapportés.
+- **S3** : (4) le retournement, rapporté **qu'il ait lieu ou non** : c'est la question de la scène (faut-il la 3D pour un déferlement
+  glissant ?).
+- **Le prédicteur** : rapporté sur chaque scène, aucun critère ici. Le calibrage se fait en S735, sur S1 à S4 ensemble.
 
-- **témoin** : le tout-3D de S730 E2 (raccord au-delà du jet), son film ; pour E1, des solutions exactes (le repos, la loi de Green).
-- **instrument** : la crête du témoin lue sur ses particules (la plus haute, une rangée), notée comme lecture ponctuelle (ADR-280 D1) et
-  rapportée seulement ; les critères 4 et 5 portent sur le retournement et l'air, juges éprouvés (S647, S648).
-- **calcul** : E1 et E2, quelques secondes ; aucun calcul long.
+**Contrôles du plan** (ADR-266, ADR-273, ADR-276, ADR-279, ADR-280, ADR-281, ADR-285)
+
+- **témoin** : ces scènes **sont** les témoins. Contrôlés comme des objets (ADR-285 D1) : aucun raccord, les murs mesurés par le front.
+  S2 contre les mesures de laboratoire (S712) ; S4 contre la loi exacte.
+- **instrument** :
+  - la crête et le front lus par la surface (ADR-280 D1) ;
+  - le retournement et l'air, juges éprouvés (S647, S648) ;
+  - le plancher du front : une colonne, 8 mm sur 1:3.
+- **calcul** : S4 (25 min), S2 (40 min), S3 (1 h), en série, en arrière-plan (`essai.py`, chacun par son nom exact, ADR-285 D2).
 - **ADR** :
-  - ADR-276 D1 : l'état de départ vient d'`OndeDepart`, la même fonction que le témoin ;
-  - ADR-285 D1 : le témoin a son raccord mesuré (S730, `J` = 0) ;
-  - ADR-278 D2 : les tolérances.
+  - ADR-276 D1 : chaque scène part d'une seule fonction d'onde (`OndeSolitaire`), pour la 3D et pour SGN ;
+  - ADR-279 D1 : la convergence de ces témoins n'est pas mesurée ici ; elle est rapportée comme manquante ;
+  - ADR-285 D1.
 - **pièges** :
-  - SGN ne déferle pas : après le déclenchement, ses nombres n'ont plus de sens, et la prévision s'arrête au premier ;
-  - la pente de 1:12 n'est pas douce : l'approximation de pente douce y est rapportée comme telle ;
-  - la hauteur doit rester positive : le fond s'arrête à 4 cm.
+  - la lame mince sur sable sec fait tomber le pas (S712 : 0,34 ms à t·√(g/d) = 30), d'où les durées bornées ;
+  - le prédicteur sur 1:3 sort de la pente douce : rapporté comme tel.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le fond doux ; E1 ; (1)–(2).
-- [x] **P3** — le prédicteur, la crête du témoin ; E2 ; (3)–(6).
-- [x] **P3b** — **E3, ajouté après E2** (le coût manqué) : le même prédicteur à `dx` = 5 cm. Critères écrits avant : (7) la prévision de 3 s
-  sous **100 ms** ; (8) la convergence : pour chaque critère (et chaque variante rapportée), l'instant à **0,05 s** et le lieu à **0,1 m** de
-  ceux de 2,5 cm ; la crête à 2,6 s à 5 % de celle de 2,5 cm. Jugé contre le prédicteur à 2,5 cm, non contre le témoin.
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — le témoin générique, le porteur générique ; la compilation ; S4.
+- [ ] **P3** — S2 et S3 (en arrière-plan) ; les nombres au fil du calcul.
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — **tenu** : (1) le lac au repos sur la plage de R43, 2 s, la vitesse 4,7·10⁻¹⁵ m/s, la masse 0 ; (2) la levée sur 1:50, de
-  0,5 m à 0,2 m, Saint-Venant **1,2292** contre Green 1,2574 (−2,2 %) ; rapporté à l'usure du schéma (la même bosse sur fond plat, 0,9823),
-  1,2514 (−0,5 %) ; SGN 1,1338 (une bosse de σ = 2 m se disperse ; rapporté). **Écart au plan** : l'onde longue sinusoïdale (`kd` ≈ 0,1) aurait
-  31 m, plus que la pente ; à sa place, une bosse gaussienne de σ = 2 m (σ = 0,5 m d'abord : l'écrêtage du limiteur l'usait de 20 % en
-  800 mailles), et le témoin de l'usure sur fond plat. S694 inchangé (sans fond, au bit).
-- **P3 fini** — E2 : (4) **manqué** pour les trois seuils publiés : Kennedy 0,65 déclenche à 2,729 s, 10,463 m (0,52 m trop loin) ; le
-  rapport de hauteur 0,8 à 2,339 s, 9,312 m (0,63 m trop tôt) ; Froude 0,8 à 2,970 s, 10,788 m. (5) **tenu pour les trois** : le jet à
-  10,24–10,28 m, contre 10,375 m pour l'air du témoin. (6) **manqué** : 277 ms. Rapportées, hors critère : Kennedy 0,35 (2,404 s ;
-  9,812 m) et le rapport 1,0 (2,523 s ; 9,738 m) tomberaient dans la fenêtre, mais un seuil choisi sur la scène qui le juge ne juge rien
-  (ADR-248 D2) : il faut d'autres témoins (P2 du registre). (3) La crête : la même place que le témoin (9,113 contre 9,106 m à 2,3 s ;
-  9,838 contre 9,874 m à 2,6 s) ; une hauteur bien plus basse au dernier mètre (168 contre 228 mm à 2,6 s ; `outils/crete_film.py`). La
-  pente douce à 1:12, ou la 3D trop haute (S713), restent à départager. L'essai n'affirme plus que (5).
-- **P3b fini** — E3 **tenu** : la prévision de 3 s à 5 cm en 68 ms ; le pire écart à 2,5 cm sur neuf critères 0,030 s et 0,062 m ; la crête à 2,6 s −2,2 %.
