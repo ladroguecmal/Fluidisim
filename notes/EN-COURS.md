@@ -62,43 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S719 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. S718 : de bout en bout, la remontée
-dépasse le tout-3D de 3,3 cm, et le large (SGN) en est la cause. ADR-278 D3 : l'onde de départ, un profil de Boussinesq (KdV,
-`γ = √(3a/4d³)`), n'est l'équilibre ni de SGN ni de la 3D. **La même onde pour les deux : l'onde solitaire de SGN** (le profil de Rayleigh,
-`k = √(3a/(4d²(d+a)))`, plus large de 14 %), avec la même vitesse `c·η/(d+η)`, `c = √(g(d+a))`.
+Session : S720 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **Le jalon visuel de la phase A**, préparé pour la séance R43
+que l'utilisateur jugera à son réveil : la vague de bout en bout (S718) contre le tout-3D, rendues côte à côte.
 
-**Les essais.** Le montage de S717–S718 (la même fonction), l'onde de Rayleigh pour SGN, pour Saint-Venant et pour la 3D :
+**Ce que la session fait.**
+- **L'enregistrement** (`Enregistrement::film`). Une image tous les 1/30 s :
+  - la surface de la 2D là où elle est active (SGN au large, Saint-Venant au rivage, puis la plage entière après la mort) ;
+  - les particules d'une rangée de la 3D (la première, `y < dx`), leur vitesse.
+  Les deux calculs sont enregistrés : le tout-3D (`AucunJusqua5`) et la vague de bout en bout (`BoutEnBout`), l'onde de départ de
+  référence (Boussinesq).
+- **Le rendu** (`outils/rendu_bout_en_bout.py`, d'après `rendu_rouleau.py` de S658), numpy et PIL. Deux GIF, le tout-3D en haut, de bout
+  en bout en bas, à la même heure :
+  - la plage entière ;
+  - le déferlement de près.
+  Un PNG de quatre instants sert à l'aperçu.
 
-| essai | ce qu'il juge | critères |
-|---|---|---|
-| **E1** | le tout-3D jusqu'à 5 s (`Large::AucunRayleigh`) : le nouveau témoin | rapporté (le retournement, l'air, la remontée) |
-| **E2** | de bout en bout (`Large::BoutEnBoutRayleigh`) | contre E1 : le retournement à 0,1 s et 0,15 m (ADR-278 D2), l'air après lui ; **la remontée à 1,25 cm** et 0,1 s ; le volume rendu à 0,5 % ; le coût |
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-281)
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-278, ADR-281)
-
-- **témoin** : E1, par la même fonction. Seule l'onde de départ change par rapport à S717–S718 (ADR-276 D2). La forme et la vitesse
-  viennent toutes deux de Rayleigh.
-- **instrument** : ceux de S718 (le retournement, l'air, la remontée sous la maille, recalculée à chaque pas). Ce que rendrait chaque
-  hypothèse :
-  - l'onde de départ était la cause : E2 à 1,25 cm de E1 ;
-  - le porteur SGN lui-même : l'écart demeure, vers 3 cm.
+- **témoin** : le tout-3D lui-même, rendu à côté.
+- **instrument** : l'image. Elle est contrôlée par les nombres de S717–S718, qui doivent se lire sur elle :
+  - le retournement près de 2,6 s et de 9,9–10 m ;
+  - la lame la plus haute vers 3,9 s ;
+  - la 3D éteinte après 3,2 s, en bas.
 - **calcul** :
-  - `k_R/γ_KdV = √(d/(d+a)) = √(0,5/0,65) = 0,877` ;
-  - le volume de l'onde, `2a/k`, passe de 0,316 à 0,361 m² par mètre de large ;
-  - le coût : ≈ 20 + 5 min.
+  - la taille de l'enregistrement, une rangée sur quatre : ≈ 60 000 particules × 12 octets × 150 images ≈ 110 Mo pour le tout-3D,
+    ≈ 50 Mo pour l'autre, dans `calculs/` (hors du dépôt) ;
+  - le coût : ≈ 20 + 6 min.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-278 D3 : la question ouverte, mise à l'épreuve ;
-  - ADR-276 D1 : l'onde, une seule fonction pour les trois solveurs ;
-  - ADR-277 D2 : deux modes nommés, ramenés aux modes de base dès l'entrée de la fonction.
-- **pièges** : chaque construction de l'onde dans la fonction (Saint-Venant du large, SGN, la 3D) passe par la même structure.
+  - ADR-276 D1 : la même fonction pour les deux calculs ;
+  - ADR-281 D1 : l'enregistrement s'écrit au fil du calcul.
+- **pièges** :
+  - les x de la bande, décalés de `x_r` ;
+  - après la mort, il n'y a plus de particules ;
+  - la mémoire des GIF (≈ 150 images de 1 300 × 300 px, en palette).
 
-**Critères de la session.** E2 tenu, ou son échec attribué.
+**Critères.** Les deux GIF et le PNG produits, les nombres de contrôle lisibles sur eux ; le livrable déposé pour l'utilisateur.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — E1, E2.
-- [x] **P3** — preuve ; rituel.
+- [ ] **P2** — l'enregistrement ; les deux calculs.
+- [ ] **P3** — le rendu ; le contrôle ; l'envoi.
+- [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini** — E1 (Rayleigh, le tout-3D) : 2,558 s, la remontée 0,3504 m ; E2 (de bout en bout) : 2,521 s, 0,3806 m (+3,0 cm). L'onde de départ n'est pas la cause, ni le volume (0,0300 contre 0,0309 m³) : la dynamique propre de SGN.
