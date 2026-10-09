@@ -2983,6 +2983,8 @@ struct ReglagesCanal {
     affine: bool,
     /// S758 : la projection neutre en énergie.
     neutre: bool,
+    /// S759 : la correction d'énergie.
+    energie: Option<crate::apic3d::EnergyCorrection>,
 }
 
 /// S740 — ce que la pression a fait sur le canal : le plus grand nombre d'itérations, les pas au plafond, les pas, le plus grand résidu.
@@ -3012,6 +3014,9 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
         a.set_density_shift_resample(r.reechantillonner).unwrap();
         a.set_density_shift_affine(r.affine).unwrap();
         a.set_density_energy_neutral(r.neutre).unwrap();
+        if let Some(m) = r.energie {
+            a.set_density_energy_correction(m).unwrap();
+        }
         if let Some(k) = r.relaxation_surface {
             a.set_density_surface_relaxation(k).unwrap();
         }
@@ -3741,5 +3746,48 @@ fn sloshing_energy_budget_s759() {
             }
         }
     }
+}
+
+/// **S759 — la correction d'énergie choisie par le bilan** : (1) le repos sur l'escalier ; (2) le ballottement, avec son bilan d'énergie ;
+/// (3) l'onde solitaire sur le canal à 2,5 cm. Les critères de S758.
+#[test]
+#[ignore = "S759 : le repos, le ballottement, le canal, la correction d'énergie (≈ 20 min)"]
+fn energy_correction_s759() {
+    let mode = match std::env::var("S759_MODE").as_deref() {
+        Ok("H1") => crate::apic3d::EnergyCorrection::AllGain,
+        Ok("H2") => crate::apic3d::EnergyCorrection::BeyondStepLoss,
+        _ => crate::apic3d::EnergyCorrection::CumulativeStepLoss,
+    };
+    println!("S759 la correction : {mode:?}");
+    let regle = move |a: &mut Apic3| a.set_density_energy_correction(mode).unwrap();
+    for cot in [30.0f64, 12.0] {
+        let (v, ep, ephi, _) = repos_pente_regle_s750(cot, false, Some(crate::apic3d::DensityVariant::Complete), true, &regle);
+        println!("S759 (1) le repos 1:{cot} : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3,
+            if v < 0.01 && ep < 0.003 { "tenu" } else { "NON TENU" });
+    }
+    let (lx, d, g) = (2.0f64, 0.5f64, 9.81f64);
+    let k = std::f64::consts::PI / lx;
+    let exacte = 2. * std::f64::consts::PI / (g * k * (k * d).tanh()).sqrt();
+    let (p, amort, n, e) = ballottement_energie_s759(true, &regle);
+    println!("S759 (2) le ballottement : la période {p:.4} s ({:+.2} %) ; l'amortissement {:.2} % par période ; {n} passages ; {}",
+        100. * (p / exacte - 1.), 100. * amort, if (p / exacte - 1.).abs() < 0.01 && (-0.005..0.01).contains(&amort) { "tenu" } else { "NON TENU" });
+    let mut prochaine = 1.0;
+    for &(t, ei, bi) in &e {
+        if t + 1e-9 >= prochaine {
+            println!("S759 (2) t = {t:.2} s : l'énergie {:+.4} J ; dont la projection {:+.4} J", ei - e[0].1, bi - e[0].2);
+            prochaine += 1.0;
+        }
+    }
+    let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(crate::apic3d::DensityVariant::Complete),
+        energie: Some(mode), ..Default::default() });
+    let l0 = m[1].3;
+    let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+    let pts: Vec<(f64, f64)> = m.iter().filter(|x| x.0 >= 1.0).map(|x| (x.0, x.1)).collect();
+    let (mt, mx) = (pts.iter().map(|p| p.0).sum::<f64>() / pts.len() as f64, pts.iter().map(|p| p.1).sum::<f64>() / pts.len() as f64);
+    let cel = pts.iter().map(|p| (p.0 - mt) * (p.1 - mx)).sum::<f64>() / pts.iter().map(|p| (p.0 - mt).powi(2)).sum::<f64>();
+    let cex = (9.81f64 * 0.6).sqrt();
+    println!("S759 (3) le canal : la largeur {:.0} %, le creux {:.1} mm, la crête finale {:.1} mm, la célérité {cel:.3} m/s ({:+.1} %) ; {}",
+        100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, 100. * (cel / cex - 1.),
+        if lmin > 0.8 * l0 && creux < 0.01 && (cel / cex - 1.).abs() < 0.01 { "tenu" } else { "NON TENU" });
 }
 

@@ -102,7 +102,8 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
-- [ ] **P3** — la correction choisie par P2 ; (1), (2), (3).
+- [x] **P3** — la correction choisie par P2 ; (1), (2), (3).
+- [ ] **P3b** — le compte cumulé (la perte du pas reste due d'un pas à l'autre) ; (1), (2), (3).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
@@ -112,3 +113,11 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
   - la perte du pas et le gain de la projection sont réguliers (≈ 0,12 et 0,15 J/s).
 
   Le remède : la projection ne rend que ce que le pas a perdu (`BeyondStepLoss`).
+- **P3 fini** (993 s), H2 pas à pas (`BeyondStepLoss`) :
+  - (1) le repos **tenu** (6,8 mm/s ; 0,02 et 0,07 mm) ;
+  - (2) le ballottement **NON TENU** : 2,0102 s (**+1,70 %**), l'amortissement **+2,74 %** par période ; l'énergie −0,20 J en 10 s ;
+  - (3) le canal **tenu** : 93 %, 8,8 mm, −0,3 %.
+
+  L'injection est arrêtée, mais le ballottement s'amortit. **L'hypothèse (P3b)** : un cliquet pas à pas. Quand la projection rend moins
+  que la perte du pas, le reste est oublié ; quand elle rend plus, elle est rognée. **Le remède** : un compte cumulé, borné en bas par zéro
+  (un pas qui gagne de l'énergie n'ouvre aucun droit). **La signature** : l'amortissement près de zéro, la période revenue vers +0,3 %.

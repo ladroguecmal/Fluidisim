@@ -1507,6 +1507,8 @@ impl Apic3 {
         }
         // Les coefficients dimensionnés se construisent en f64 et s'arrondissent en f32 (I-08, ADR-141).
         let dt = (duration_us as f64 * 1e-6) as f32;
+        // S759 : l'énergie au début du pas (rien sans la correction `BeyondStepLoss`).
+        self.density_energy_mark();
         // S398 : sans zone de colonnes, ces quatre appels ne font rien.
         self.columns_begin();
         self.particles_to_grid();
@@ -2365,7 +2367,7 @@ mod densite;
 mod bords_y;
 #[path = "apic3d_deplacement.rs"]
 mod deplacement;
-pub use densite::DensityVariant;
+pub use densite::{DensityVariant, EnergyCorrection};
 pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, POCHE_MAILLES_MIN, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};
 

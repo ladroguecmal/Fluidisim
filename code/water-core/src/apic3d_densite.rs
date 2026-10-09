@@ -47,6 +47,21 @@ pub fn densite_attendue_s749(a: f32) -> f32 {
     }
 }
 
+/// **S759 — la correction d'énergie de la projection** (BALLOTTEMENT-S757 : l'oscillation grandit de 2,8 % par période). L'excédent est
+/// retiré à l'énergie cinétique des particules, uniformément (les vitesses et les matrices affines mises à l'échelle) ; jamais ajouté.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EnergyCorrection {
+    /// Aucune (le défaut, au bit).
+    Off,
+    /// **H1** : tout le gain d'énergie de la projection est retiré.
+    AllGain,
+    /// **H2** : la projection ne rend que l'énergie que le pas a perdue ; l'excédent est retiré.
+    BeyondStepLoss,
+    /// **S759 — H2 cumulé** : comme `BeyondStepLoss`, mais la perte que la projection n'a pas rendue reste due aux pas suivants (le compte
+    /// borné en bas par zéro : un pas qui gagne de l'énergie n'ouvre aucun droit).
+    CumulativeStepLoss,
+}
+
 /// S747 — le nombre de mailles d'eau d'une colonne sous lequel la variante hybride ne corrige rien (la règle du film du rivage, S678).
 pub const LAME_MINCE_S747: u16 = 3;
 
@@ -81,6 +96,12 @@ pub(crate) struct Densite {
     pub(crate) affine: bool,
     /// **S758 — la projection neutre en énergie** : chaque particule déplacée de Δz garde son énergie, `|v|² ← max(|v|² − 2g·Δz, 0)`.
     pub(crate) neutre: bool,
+    /// **S759 — la correction d'énergie** ; `Off`, le défaut.
+    pub(crate) correction: EnergyCorrection,
+    /// S759 — l'énergie des particules au début du pas (J), pour `BeyondStepLoss`.
+    pub(crate) energie_pas: f64,
+    /// S759 — la perte due (J), pour `CumulativeStepLoss`.
+    pub(crate) credit: f64,
     /// **S752 — le bilan propre de la projection** (ADR-290 D1) : l'énergie cinétique et l'énergie potentielle (J, ρ = 1 000 kg/m³) que la
     /// projection a changées, cumulées depuis la configuration. Une lecture, sans effet.
     pub(crate) bilan: [f64; 2],
@@ -106,7 +127,7 @@ impl Apic3 {
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0., deplacement_lieu: [0.; 3], conscient: false, nominale: vec![0.; cells], nominale_faite: false,
             colonnes: vec![0; nx * ny], reechantillonner: false, relaxation_surface: None,
-            affine: false, neutre: false, bilan: [0.; 2] }));
+            affine: false, neutre: false, correction: EnergyCorrection::Off, energie_pas: f64::NAN, credit: 0., bilan: [0.; 2] }));
         Ok(())
     }
 
@@ -132,6 +153,37 @@ impl Apic3 {
         let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
         d.neutre = on;
         Ok(())
+    }
+
+    /// **S759 — la correction d'énergie de la projection** (`EnergyCorrection`). Refus sans projection.
+    pub fn set_density_energy_correction(&mut self, mode: EnergyCorrection) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        d.correction = mode;
+        Ok(())
+    }
+
+    /// S759 — l'énergie des particules (J, ρ = 1 000 kg/m³, g = 9,81) : `(cinétique, potentielle)`, et la cinétique hors gouttes.
+    fn energie_s759(&self) -> (f64, f64, f64) {
+        let masse = 1000. * (self.domain.dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let (mut ec, mut ep, mut eau) = (0f64, 0f64, 0f64);
+        for k in 0..self.n {
+            let v = self.vel[k];
+            let e = 0.5 * masse * (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64;
+            ec += e;
+            ep += masse * 9.81 * self.x[k][2] as f64;
+            if !self.is_droplet(k) {
+                eau += e;
+            }
+        }
+        (ec, ep, eau)
+    }
+
+    /// S759 — l'énergie au début du pas, retenue pour `BeyondStepLoss` (rien sinon).
+    pub(crate) fn density_energy_mark(&mut self) {
+        if self.densite.as_ref().is_some_and(|d| matches!(d.correction, EnergyCorrection::BeyondStepLoss | EnergyCorrection::CumulativeStepLoss)) {
+            let (ec, ep, _) = self.energie_s759();
+            self.densite.as_mut().unwrap().energie_pas = ec + ep;
+        }
     }
 
     /// **S752 — le bilan propre de la projection** : `[l'énergie cinétique, l'énergie potentielle]` (J) que la projection a changées,
@@ -188,17 +240,7 @@ impl Apic3 {
         let Some(mut dens) = self.densite.take() else { return };
         let Domain3 { nx, ny, nz, dx } = self.domain;
         // S752 : le bilan propre (ADR-290 D1), l'énergie avant.
-        let energie = |a: &Apic3| -> (f64, f64) {
-            let masse = 1000. * (a.domain.dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
-            let (mut ec, mut ep) = (0f64, 0f64);
-            for k in 0..a.n {
-                let v = a.vel[k];
-                ec += 0.5 * masse * (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64;
-                ep += masse * 9.81 * a.x[k][2] as f64;
-            }
-            (ec, ep)
-        };
-        let (ec0, ep0) = energie(self);
+        let (ec0, ep0, _) = self.energie_s759();
         let nominal = (PER_AXIS * PER_AXIS * PER_AXIS) as f32;
         // La densité aux centres des mailles, par les poids trilinéaires.
         dens.rho.fill(0.);
@@ -384,7 +426,41 @@ impl Apic3 {
             self.bin_fresh = false;
         }
         self.p.copy_from_slice(&dens.p_sauve);
-        let (ec1, ep1) = energie(self);
+        let (mut ec1, ep1, eau) = self.energie_s759();
+        // S759 : l'excédent d'énergie retiré à l'énergie cinétique de l'eau, uniformément ; jamais ajouté.
+        let gain = (ec1 + ep1) - (ec0 + ep0);
+        let excedent = match dens.correction {
+            EnergyCorrection::Off => 0.,
+            EnergyCorrection::AllGain => gain,
+            EnergyCorrection::BeyondStepLoss => {
+                let perte = (dens.energie_pas - (ec0 + ep0)).max(0.);
+                if perte.is_finite() { gain - perte } else { gain }
+            }
+            EnergyCorrection::CumulativeStepLoss => {
+                let pas = dens.energie_pas - (ec0 + ep0);
+                if pas.is_finite() {
+                    dens.credit = (dens.credit + pas).max(0.);
+                }
+                let e = gain - dens.credit;
+                dens.credit = (-e).max(0.);
+                e
+            }
+        };
+        if excedent > 0. && eau > 1e-12 {
+            let f = ((eau - excedent).max(0.) / eau).sqrt() as f32;
+            for k in 0..self.n {
+                if self.is_droplet(k) {
+                    continue;
+                }
+                for a in 0..3 {
+                    self.vel[k][a] *= f;
+                    for b in 0..3 {
+                        self.c[k][a][b] *= f;
+                    }
+                }
+            }
+            ec1 = self.energie_s759().0;
+        }
         dens.bilan[0] += ec1 - ec0;
         dens.bilan[1] += ep1 - ep0;
         self.densite = Some(dens);
