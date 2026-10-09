@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-09 21:37 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S751 — la cinquante-quatrième revue de méthode (S746–S750) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S750 — Deux remèdes au freinage de la lame ([journal](notes/JOURNAL.md)). Avant : S749 (La surface corrigée vers sa densité attendue)
 Session suivante : S751 — la cinquante-quatrième revue de méthode (S746–S750) ; puis R1 affiné (le creux au regard du bruit, l'atténuation de l'onde)
 Maillons        : 1

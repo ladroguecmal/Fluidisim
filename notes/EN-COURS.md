@@ -62,50 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S750 — **terminée**. En autonomie ; session longue. CIBLE-SURFACE-S749 : aucune des six variantes de la projection ne tient à la fois
-le repos, l'onde solitaire et la remontée. Les variantes qui corrigent la surface freinent la lame (−11 à −12 %). **La question** : l'un de
-deux remèdes rend-il la remontée à `Complete` (consciente du fond), qui tient déjà le repos et l'onde ?
+Session : S751 — **en cours**. La cinquante-quatrième revue de méthode (ADR-222 D4), sur S746–S750.
 
-**Les deux remèdes, chacun une différence avec `Complete` (ADR-276 D2)** :
-- **R1, le déplacement avec sa vitesse** (`set_density_shift_resample`) : chaque particule déplacée par la projection reprend la vitesse et
-  la matrice affine de la grille à sa nouvelle place (`grid_affine`). Dans APIC, la vitesse d'une particule est déjà celle de la grille à sa
-  place (le G2P) : la déplacer sans la mettre à jour place une vitesse au mauvais endroit dans un champ cisaillé.
-- **R2, la surface relâchée** (`set_density_surface_relaxation`) : aux mailles de surface, la correction est faite à κ = 0,1 par pas ;
-  à l'intérieur, à 1.
+**Ce que la session fait.** Relire les frictions de S746 à S750 et décider (ADR-290). Celles relevées :
+1. **S744–S749 : six variantes de la projection essayées avant que le mécanisme soit nommé.** Le mécanisme (le déplacement sans la vitesse)
+   a été trouvé en S750 en raisonnant sur l'opérateur. S748 mesurait l'énergie de la lame, mais pas l'effet propre de la projection à
+   chaque pas, et l'a attribué à la dilatation ;
+2. **S749 : une formule de cible (ρ* = 0,875 au repos) supposée, non vérifiée sur son cas statique** avant 20 min de calcul ;
+3. **S749–S750 : la remontée lancée avant le repos**, contre ADR-288 D1, pour gagner du temps ; le repos ne coûte que 2 min ;
+4. **S748 : un tracé raté au premier essai** (l'échelle, les noms de fichiers) ;
+5. **S747 : le piège d'ADR-223 D4, dans la mémoire elle-même** ;
+6. S749 : la vérification du lot (ADR-288 D3) a fait son office.
 
-**Les essais, et leurs critères écrits avant** :
-- **la remontée de S645 d'abord**, pour R1 et R2 (6 min chacun) : à **10 %** de la loi ;
-- pour un remède qui la tient, **le repos** (l'escalier : 1 cm/s ; 3 mm) et **l'onde solitaire** (le canal à 2,5 cm : la largeur 80 % ; le
-  creux 10 % de `H`).
+**Critère** : chaque friction a sa suite.
 
-Si aucun ne la tient, la question reste ouverte, avec les nombres.
+**Contrôles du plan** (ADR-266)
 
-**Contrôles du plan** (ADR-276, ADR-287, ADR-288)
-
-- **témoin** : `Complete` consciente (S744 : le repos, l'onde, −11 %) ; S645 sans projection (+0,5 %) ; la loi.
-- **instrument** : ceux de S645, S743 et S740.
-- **calcul** : 2 × 6 min, puis 15 min pour le remède retenu.
-- **ADR** : ADR-276 D2 ; ADR-287 D1 ; ADR-288 D1 (le repos aussi pour le remède retenu).
-- **pièges** :
-  - R1 reprend la vitesse de la grille : c'est déjà la règle d'APIC au G2P, mais à un moment du pas où la grille a été projetée. Le repos
-    dira s'il dérange ;
-  - R2 ralentit la correction de surface : la dilatation de S748 peut revenir, plus lentement.
+- **témoin** : les journaux et les preuves de S746 à S750.
+- **instrument** : la relecture.
+- **calcul** : aucun.
+- **ADR** : ADR-222 D4 ; ADR-226 D1 ; ADR-288 D1, D4, qu'ADR-290 complète.
+- **pièges** : ADR-223 D4.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — R1 et R2 ; la remontée pour chacun.
-- [x] **P3** — le repos et l'onde pour le remède qui tient.
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — ADR-290 ; METHODE.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 fini** (801 s) — la remontée de S645, les deux à 10 % :
-  - **R1, le déplacement avec sa vitesse : 0,2475 m, +7,9 %** ; le freinage disparaît, le mécanisme est confirmé ;
-  - **R2, la surface relâchée : 0,2071 m, −9,8 %** ;
-  - les étiquettes : 0,175 et 0,200 m.
-
-  Les deux tiennent ; le repos et l'onde pour les deux (P3), R1 d'abord.
-- **P3 fini** (1 355 s) :
-  - R1 : le repos tenu (6,8 mm/s ; 0,02–0,07 mm) ; le canal à 92 %, le creux 10,8 mm (manqué de 0,8 mm), la crête finale 91,3 mm ;
-  - R2 : le repos tenu ; le canal à 84 %, le creux 13,4 mm ;
-  - le niveau : R1 +2,57 → −0,41 mm ; R2 +2,51 → −1,94 mm.
