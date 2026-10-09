@@ -62,49 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S755 — **terminée**. En autonomie ; session longue. ADR-289 D3.3, ADR-292 : **refaire le témoin tout-3D de R43 avec la 3D
-corrigée.** C'est le montage de S730 E2 (`d` = 0,5 m, `H/d` = 0,3, 1:12, le raccord du rivage à 12,0 m) qui jugeait les raccords et le
-sélecteur. **La question** : avec une 3D qui garde l'onde, où et quand la vague de R43 plonge-t-elle, et de combien les mesures changent-elles ?
+Session : S756 — **en cours**. La cinquante-cinquième revue de méthode (ADR-222 D4), sur S751–S755.
 
-**L'essai** : `Large::AucunCorrigee` (le tout-3D de S730 E2, 5 s, la projection `Complete` consciente du fond) ; le film à 1/30 s
-(`calculs/s755_tout3d_corrigee.bin`), pour un rendu plus tard.
+**Ce que la session fait.** Relire les frictions de S751 à S755 et décider (ADR-293). Celles relevées :
+1. **S752 : une configuration décidée (ADR-291) avant la référence extérieure.** Elle reposait sur une loi théorique (S645), et le
+   laboratoire l'a renversée deux sessions plus tard (ADR-292) ;
+2. **S753 : la célérité, la grandeur qui départageait, n'était pas mesurée par le banc**, alors que les données du canal la portaient ;
+3. **S754 : un critère manqué sous le quantum (0,45 mm), puis levé par écrit.** Le critère ne portait pas sa bande de quantum ;
+4. **S755 : une fenêtre de mesure figée** (le mur sur [2,4 ; 3,2 s], tirée de l'ancien déferlement), qui ne voit plus l'événement quand il
+   se déplace ;
+5. S751–S755 : la méthode du bilan propre (ADR-290 D1) a réfuté R1′ en une session.
 
-**Les mesures, contre S730 E2 (sans correction)** :
-- le retournement (S730 : 2,620 s, 9,938 m) ;
-- l'air enfermé (2,804 s ; 10,375 m) ;
-- la remontée (0,3547 m à 3,942 s) ;
-- le mur au raccord (0 mm) ;
-- la masse ;
-- le coût (1 152 s).
+**Critère** : chaque friction a sa suite.
 
-**Les critères, écrits avant** :
-1. la masse à 10⁻¹² ;
-2. le mur au raccord sous 1 cm ;
-3. un retournement dans le domaine.
+**Contrôles du plan** (ADR-266)
 
-Le reste est **rapporté** : c'est le nouveau témoin, sans référence extérieure sur cette plage. SGN (S733) prévoyait le déclenchement plus tard
-que l'ancienne 3D (Kennedy 0,65 : 2,73 s ; 10,46 m). La concordance avec SGN est rapportée, non jugée.
-
-**Contrôles du plan** (ADR-285, ADR-286, ADR-289, ADR-292)
-
-- **témoin** : S730 E2 (la 3D sans correction) ; SGN (S733), rapporté.
-- **instrument** : ceux de S730 (le juge du retournement de S647, l'air, le mur `J`, la remontée par Saint-Venant au-delà du raccord).
-- **calcul** : ≈ 25 à 30 min.
-- **ADR** : ADR-292 ; ADR-286 D1 (le raccord à 12,0 m ; S730 n'y voyait rien arriver avant 3,2 s, et la remontée passe dans Saint-Venant) ;
-  ADR-285 D1 (le mur mesuré).
-- **pièges** : le juge de S647 compte un vide d'une maille à φ ≈ 0 (S735). Le juge robuste (S737) n'est pas branché dans ce montage : un
-  retournement très précoce ou loin de la vague serait suspect, et rapporté comme tel.
+- **témoin** : les journaux et les preuves de S751 à S755.
+- **instrument** : la relecture.
+- **calcul** : aucun.
+- **ADR** : ADR-222 D4 ; ADR-280 D2, ADR-288 D2, qu'ADR-293 complète.
+- **pièges** : ADR-223 D4.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le mode ; l'essai ; (1)–(3), les mesures.
-- [x] **P3** — preuve ; le lot ; fermeture.
+- [ ] **P2** — ADR-293 ; METHODE.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 fini** (1 235 s) :
-  - le retournement à 3,092 s et 11,088 m ; l'air à 3,257 s et 11,425 m ; la remontée 0,3005 m ;
-  - le mur 0 ; la masse 1,2·10⁻¹⁶ ;
-  - critères tenus.
-
-  La vague déferle 0,47 s plus tard, 1,15 m plus près du rivage. Le raccord à 12,0 m devient trop près (la règle d'ADR-284 : ≈ 12,2 m).
