@@ -62,32 +62,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S756 — **terminée**. La cinquante-cinquième revue de méthode (ADR-222 D4), sur S751–S755.
+Session : S757 — **en cours**. En autonomie ; session longue. ADR-289 D3.2 : **le banc de la 3D corrigée** (ADR-292). Il a déjà :
+- le repos (S744) ;
+- l'onde solitaire et sa célérité (S744, S752) ;
+- la remontée de S645 (S744) ;
+- Synolakis (S754).
 
-**Ce que la session fait.** Relire les frictions de S751 à S755 et décider (ADR-293). Celles relevées :
-1. **S752 : une configuration décidée (ADR-291) avant la référence extérieure.** Elle reposait sur une loi théorique (S645), et le
-   laboratoire l'a renversée deux sessions plus tard (ADR-292) ;
-2. **S753 : la célérité, la grandeur qui départageait, n'était pas mesurée par le banc**, alors que les données du canal la portaient ;
-3. **S754 : un critère manqué sous le quantum (0,45 mm), puis levé par écrit.** Le critère ne portait pas sa bande de quantum ;
-4. **S755 : une fenêtre de mesure figée** (le mur sur [2,4 ; 3,2 s], tirée de l'ancien déferlement), qui ne voit plus l'événement quand il
-   se déplace ;
-5. S751–S755 : la méthode du bilan propre (ADR-290 D1) a réfuté R1′ en une session.
+Il lui manque l'onde stationnaire. La rupture de barrage attend les mesures de Martin et Moyce (1952) : un téléchargement, demandé à
+l'utilisateur.
 
-**Critère** : chaque friction a sa suite.
+**L'essai** (`ballottement_s757`) :
+- une cuve de 2 m × 0,05 m (deux rangées), 0,5 m d'eau, 2,5 cm ;
+- le mode (1, 0) posé au repos à son maximum, `η = A·cos(πx/L)`, `A` = 40 mm (3,2 quanta de pose, ADR-288 D2), 10 s ;
+- la 3D sans projection, puis la 3D corrigée (`Complete` consciente du fond).
 
-**Contrôles du plan** (ADR-266)
+La surface au mur de gauche est lue par φ à chaque pas. **La période** est tirée des passages par zéro (interpolés), **l'amortissement**
+de la décroissance des extrêmes.
 
-- **témoin** : les journaux et les preuves de S751 à S755.
-- **instrument** : la relecture.
-- **calcul** : aucun.
-- **ADR** : ADR-222 D4 ; ADR-280 D2, ADR-288 D2, qu'ADR-293 complète.
-- **pièges** : ADR-223 D4.
+**La référence exacte** (la dispersion linéaire) : `ω² = g·k·tanh(k·d)`, `k = π/L`, soit **T = 1,9768 s**. `ka` = 0,063 : la correction
+non linéaire est sous 1 %.
+
+**Les critères, écrits avant** (ADR-293 D3 : avec la bande de quantum) :
+1. la période à **1 %** de T, la bande de lecture comprise : le passage par zéro est interpolé entre deux pas, le pas faisant ≈ 1/300 de
+   la période ;
+2. l'amortissement rapporté : la décroissance des extrêmes par période. S413 avait 0,08 à 0,3 % par période sans projection.
+
+**Contrôles du plan** (ADR-287, ADR-288, ADR-293)
+
+- **témoin** : la dispersion linéaire exacte ; la 3D sans projection (S399, S413 : +0,36 % à 2,5 cm).
+- **instrument** : la surface par φ au mur ; la période par les passages par zéro (une grandeur intégrée sur cinq périodes).
+- **calcul** : 2 × ≈ 3 min.
+- **ADR** : ADR-287 D1 (le banc) ; ADR-288 D2 (trois quanta) ; ADR-293 D2, D3.
+- **pièges** : le mode (1, 0) seul n'est posé qu'au premier ordre ; un peu du mode (2, 0) naît, il est rapporté.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-293 ; METHODE.
-- [x] **P3** — fermeture.
+- [ ] **P2** — l'essai ; (1), (2).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-293 : D1 la décision après la référence extérieure ; D2 la célérité mesurée ; D3 la bande de quantum ; D4 la fenêtre qui suit l'événement. METHODE, l'index.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-10 00:24 +02:00
+JETON            : occupé
+Battement        : 2026-10-10 00:25 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S757 — le banc de la 3D corrigée : le ballottement ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S756 — la cinquante-cinquième revue de méthode (ADR-293) ([journal](notes/JOURNAL.md)). Avant : S755 (Le témoin de R43 refait avec la 3D corrigée)
 Session suivante : S757 — le banc de la 3D corrigée (ADR-289 D3.2) : le ballottement, la rupture de barrage, l'onde solitaire avec sa célérité ; une commande
 Maillons        : 0
