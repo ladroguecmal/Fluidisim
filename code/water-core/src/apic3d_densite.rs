@@ -72,6 +72,11 @@ pub(crate) struct Densite {
     pub(crate) nominale_faite: bool,
     /// S747 — les mailles d'eau de chaque colonne (`nx·ny`), comptées à chaque pas pour la variante hybride.
     pub(crate) colonnes: Vec<u16>,
+    /// **S750 — R1** : chaque particule déplacée reprend la vitesse et la matrice affine de la grille à sa nouvelle place ; `false`, le
+    /// défaut : la vitesse gardée (S709, au bit).
+    pub(crate) reechantillonner: bool,
+    /// **S750 — R2** : la relaxation de la correction aux mailles de surface (κ par pas) ; `None`, le défaut : celle de l'intérieur.
+    pub(crate) relaxation_surface: Option<f32>,
 }
 
 impl Apic3 {
@@ -93,7 +98,26 @@ impl Apic3 {
         })?;
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0., deplacement_lieu: [0.; 3], conscient: false, nominale: vec![0.; cells], nominale_faite: false,
-            colonnes: vec![0; nx * ny] }));
+            colonnes: vec![0; nx * ny], reechantillonner: false, relaxation_surface: None }));
+        Ok(())
+    }
+
+    /// **S750 — R1, le déplacement avec sa vitesse** : chaque particule déplacée par la projection reprend la vitesse et la matrice affine de
+    /// la grille à sa nouvelle place (la règle du G2P d'APIC). Refus sans projection.
+    pub fn set_density_shift_resample(&mut self, on: bool) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        d.reechantillonner = on;
+        Ok(())
+    }
+
+    /// **S750 — R2, la surface relâchée** : la correction aux mailles de surface faite à `κ ∈ (0, 1]` par pas. Refus sans projection, ou hors
+    /// de `(0, 1]`.
+    pub fn set_density_surface_relaxation(&mut self, kappa: f32) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        if !(kappa > 0. && kappa <= 1.) {
+            return Err(Error::Domain);
+        }
+        d.relaxation_surface = Some(kappa);
         Ok(())
     }
 
@@ -225,7 +249,8 @@ impl Apic3 {
                     };
                     excess |= e != 0.;
                     // `A·q = −dx²·Δq` : pour `Δq = e`, le second membre est `−dx²·e`.
-                    self.rhs[c] = -dx * dx * e * dens.relaxation;
+                    let relache = if surface { dens.relaxation_surface.unwrap_or(1.) } else { 1. };
+                    self.rhs[c] = -dx * dx * e * dens.relaxation * relache;
                     self.diag[c] = diag;
                 }
             }
@@ -285,6 +310,12 @@ impl Apic3 {
                 let s = if norme > borne { borne / norme } else { 1. };
                 for a in 0..3 {
                     self.x[k][a] += s * d[a];
+                }
+                // S750 — R1 : la vitesse et la matrice affine de la grille à la nouvelle place.
+                if dens.reechantillonner {
+                    let (v, cm) = self.grid_affine(self.x[k]);
+                    self.vel[k] = v;
+                    self.c[k] = cm;
                 }
                 if s * norme > dens.deplacement_max {
                     dens.deplacement_max = s * norme;

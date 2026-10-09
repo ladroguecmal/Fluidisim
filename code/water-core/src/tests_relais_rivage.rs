@@ -2958,6 +2958,9 @@ struct ReglagesCanal {
     conscient: bool,
     /// S745 : la variante de la projection (`None` : `Complete`).
     variante: Option<crate::apic3d::DensityVariant>,
+    /// S750 : les remèdes — R1, le déplacement avec sa vitesse ; R2, la surface relâchée.
+    reechantillonner: bool,
+    relaxation_surface: Option<f32>,
 }
 
 /// S740 — ce que la pression a fait sur le canal : le plus grand nombre d'itérations, les pas au plafond, les pas, le plus grand résidu.
@@ -2984,6 +2987,10 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
             a.set_density_relaxation(k).unwrap();
         }
         a.set_density_bed_aware(r.conscient).unwrap();
+        a.set_density_shift_resample(r.reechantillonner).unwrap();
+        if let Some(k) = r.relaxation_surface {
+            a.set_density_surface_relaxation(k).unwrap();
+        }
     }
     let plafond = if r.plafond_us > 0 { r.plafond_us } else { 10_000 };
     let plafond_iter = r.iterations.unwrap_or(crate::apic3d::PRESSURE_MAX_ITERATIONS);
@@ -3298,6 +3305,11 @@ fn repos_pente_s744(cot: f64, lisse: bool, densite: bool, conscient: bool) -> (f
 
 /// S745 — le même repos, la variante de la projection en paramètre (`None` : sans projection).
 fn repos_pente_s745(cot: f64, lisse: bool, variante: Option<crate::apic3d::DensityVariant>, conscient: bool) -> (f64, f64, f64, usize) {
+    repos_pente_regle_s750(cot, lisse, variante, conscient, &|_| {})
+}
+
+/// S750 — le même repos, un réglage de plus (les remèdes R1, R2).
+fn repos_pente_regle_s750(cot: f64, lisse: bool, variante: Option<crate::apic3d::DensityVariant>, conscient: bool, regle: &dyn Fn(&mut Apic3)) -> (f64, f64, f64, usize) {
     let (dx, niveau) = (0.025f32, 0.3f64);
     let dxs = dx as f64;
     let lx = 1.0 + cot * niveau + 0.5;
@@ -3315,6 +3327,7 @@ fn repos_pente_s745(cot: f64, lisse: bool, variante: Option<crate::apic3d::Densi
         a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
         a.set_density_bed_aware(conscient).unwrap();
     }
+    regle(&mut a);
     let marche: Vec<f32> = (0..nx).map(|i| if lisse { a.smooth_seabed_height(((i as f64 + 0.5) * dxs) as f32, 0.025) } else { a.seabed_height(i, 0) }).collect();
     let zb_fin: Vec<f32> = (0..nx * 4).map(|k| if lisse { a.smooth_seabed_height((k as f32 + 0.5) * dx / 4., 0.025) } else { marche[k / 4] }).collect();
     let n = a.seed(&|p| {
@@ -3472,6 +3485,33 @@ fn rest_channel_and_level_with_surface_target_s749() {
         let (n0, n1) = (m[1].6, m.last().unwrap().6);
         println!("S749 (2, 4) {nom}, canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; le niveau derrière {:+.2} → {:+.2} mm ; {}",
             100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, n0 * 1e3, n1 * 1e3, if lmin > 0.8 * l0 && creux < 0.01 { "l'onde tenue" } else { "l'onde NON TENUE" });
+    }
+}
+
+/// **S750 — le repos et l'onde solitaire pour les deux remèdes** (`Complete` consciente) : le repos sur l'escalier (1 cm/s ; 3 mm), le canal à
+/// 2,5 cm (la largeur 80 % ; le creux 10 % de `H`), et le niveau derrière l'onde (rapporté).
+#[test]
+#[ignore = "S750 : le repos et le canal, deux remèdes (≈ 28 min)"]
+fn rest_and_channel_with_two_remedies_s750() {
+    let remedes: [(&str, bool, Option<f32>); 2] = [("R1, le déplacement avec sa vitesse", true, None), ("R2, la surface relâchée", false, Some(0.1))];
+    for (nom, r1, r2) in remedes {
+        for cot in [30.0f64, 12.0] {
+            let (v, ep, ephi, _) = repos_pente_regle_s750(cot, false, Some(crate::apic3d::DensityVariant::Complete), true, &|a: &mut Apic3| {
+                a.set_density_shift_resample(r1).unwrap();
+                if let Some(k) = r2 {
+                    a.set_density_surface_relaxation(k).unwrap();
+                }
+            });
+            println!("S750 {nom}, le repos 1:{cot} : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3,
+                if v < 0.01 && ep < 0.003 { "tenu" } else { "NON TENU" });
+        }
+        let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(crate::apic3d::DensityVariant::Complete),
+            reechantillonner: r1, relaxation_surface: r2, ..Default::default() });
+        let l0 = m[1].3;
+        let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+        println!("S750 {nom}, le canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; le niveau derrière {:+.2} → {:+.2} mm ; {}",
+            100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, m[1].6 * 1e3, m.last().unwrap().6 * 1e3,
+            if lmin > 0.8 * l0 && creux < 0.01 { "l'onde tenue" } else { "l'onde NON TENUE" });
     }
 }
 

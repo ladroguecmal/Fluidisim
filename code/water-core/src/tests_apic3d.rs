@@ -1886,13 +1886,13 @@ fn onde_sur_pente_conscient_s744(dx: f32, lisse: bool, glissant: bool, balistiqu
 
 /// S745 — le même montage, la variante de la projection en paramètre (`None` : sans projection).
 fn onde_sur_pente_variante_s745(dx: f32, lisse: bool, glissant: bool, balistique: bool, variante: Option<DensityVariant>, conscient: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
-    onde_sur_pente_observee_s748(dx, lisse, glissant, balistique, variante, conscient, &mut |_, _| {})
+    onde_sur_pente_observee_s748(dx, lisse, glissant, balistique, variante, conscient, &|_| {}, &mut |_, _| {})
 }
 
 /// S748 — le même montage, un observateur appelé après chaque pas (`(l'état, t en µs)`), sans effet sur le calcul.
 #[allow(clippy::too_many_arguments)]
 fn onde_sur_pente_observee_s748(dx: f32, lisse: bool, glissant: bool, balistique: bool, variante: Option<DensityVariant>, conscient: bool,
-    observe: &mut dyn FnMut(&Apic3, u64)) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+    regle: &dyn Fn(&mut Apic3), observe: &mut dyn FnMut(&Apic3, u64)) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let (d, h, cot, x1, x_pied, niveau, fond0) = (0.35f64, 0.07f64, 3.0f64, 2.80f64, 4.768f64, 0.40f32, 0.05f32);
     let (nx, ny, nz) = ((6.6 / dx).round() as usize, 4usize, (0.8 / dx).round() as usize);
@@ -1901,6 +1901,8 @@ fn onde_sur_pente_observee_s748(dx: f32, lisse: bool, glissant: bool, balistique
         a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
         a.set_density_bed_aware(conscient).unwrap();
     }
+    // S750 : un réglage de plus (les remèdes R1, R2).
+    regle(&mut a);
     let lz = nz as f32 * dx;
     let fond: Vec<f32> = (0..nx * ny).map(|c| {
         let x = ((c % nx) as f32 + 0.5) * dx;
@@ -3010,7 +3012,7 @@ fn where_the_projection_slows_the_swash_s748() {
         let mut serie = Vec::new();
         let mut prochaine = 0u64;
         let mut profil = 0u64;
-        let _ = onde_sur_pente_observee_s748(dx, false, false, true, variante, true, &mut |a: &Apic3, t: u64| {
+        let _ = onde_sur_pente_observee_s748(dx, false, false, true, variante, true, &|_| {}, &mut |a: &Apic3, t: u64| {
             if t < prochaine {
                 return;
             }
@@ -3065,5 +3067,22 @@ fn runup_with_surface_target_s749() {
     println!("S749 (3) : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
         100. * (haut as f64 / 0.2295 - 1.), cr[0]);
     assert!(garde == n && sous == 0, "les particules");
+}
+
+/// **S750 — la remontée de S645 avec les deux remèdes** (`Complete` consciente du fond) : R1, le déplacement avec sa vitesse ; R2, la surface
+/// relâchée (κ = 0,1). Chacun à 10 % de la loi (0,2295 m) ; rapporté.
+#[test]
+#[ignore = "S750 : la remontée de S645, deux remèdes (≈ 13 min)"]
+fn runup_with_two_remedies_s750() {
+    let remedes: [(&str, &dyn Fn(&mut Apic3)); 2] = [
+        ("R1, le déplacement avec sa vitesse", &|a: &mut Apic3| a.set_density_shift_resample(true).unwrap()),
+        ("R2, la surface relâchée (κ = 0,1)", &|a: &mut Apic3| a.set_density_surface_relaxation(0.1).unwrap()),
+    ];
+    for (nom, regle) in remedes {
+        let (r, _, n, garde, sous, haut, cr) = onde_sur_pente_observee_s748(0.025, false, false, true, Some(DensityVariant::Complete), true, regle, &mut |_, _| {});
+        println!("S750 {nom} : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond ; {}",
+            100. * (haut as f64 / 0.2295 - 1.), cr[0], if (haut as f64 / 0.2295 - 1.).abs() < 0.10 { "TIENT" } else { "ne tient pas" });
+        assert!(garde == n && sous == 0, "les particules");
+    }
 }
 

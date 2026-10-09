@@ -94,8 +94,15 @@ Si aucun ne la tient, la question reste ouverte, avec les nombres.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — R1 et R2 ; la remontée pour chacun.
+- [x] **P2** — R1 et R2 ; la remontée pour chacun.
 - [ ] **P3** — le repos et l'onde pour le remède qui tient.
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (801 s) — la remontée de S645, les deux à 10 % :
+  - **R1, le déplacement avec sa vitesse : 0,2475 m, +7,9 %** ; le freinage disparaît, le mécanisme est confirmé ;
+  - **R2, la surface relâchée : 0,2071 m, −9,8 %** ;
+  - les étiquettes : 0,175 et 0,200 m.
+
+  Les deux tiennent ; le repos et l'onde pour les deux (P3), R1 d'abord.
+
