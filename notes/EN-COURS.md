@@ -62,53 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S717 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **M1 : la mort de la 3D
-vers Saint-Venant**, par la surface (S715, ADR-280 D1).
+Session : S718 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **E1 : la vague de bout
+en bout**. N1, N2 et M1 sont acquis (S707, S715, S717).
 
-**Ce que la session fait.** `mort_vers_sv` : la 3D rend à Saint-Venant, par colonne et par rangée :
-- la hauteur, lue par sa surface reconstruite (φ) au-dessus de l'escalier, puis rapportée au fond continu de Saint-Venant (le niveau de
-  la surface est gardé) ;
-- la quantité de mouvement `h·ū`, `ū` la moyenne des vitesses des particules de la colonne.
+**Ce que la session fait.** `Large::BoutEnBout`, un mode nommé (ADR-277 D2) :
+- **au large** (0 à 5 m), SGN porte l'onde ;
+- **la bande 3D** (5 à 10,775 m) est nourrie au bord gauche par la pose par la grille, d'après le profil de SGN (S703) ; le relais
+  Saint-Venant tient le rivage ;
+- **à 3,2 s**, après le déferlement et l'air, la 3D meurt (M1). Un seul Saint-Venant reprend la plage entière jusqu'à 5 s :
+  - le large, depuis l'état de SGN ;
+  - la bande, depuis sa surface ;
+  - le rivage, depuis le relais.
 
-**Les essais, dans l'ordre ; chacun a ses critères, écrits avant lui.**
+**Le déclencheur, ici.** Pour l'onde de référence (x₁ = 3,4 m), le front touche déjà la bande au départ (η = 2,6 cm à 5 m) : la bande naît
+à t = 0. Le déclencheur qui décide *s'il faut* la 3D (la prédiction du déferlement) attend, à la demande de l'utilisateur.
 
-| essai | ce qu'il juge | critères |
-|---|---|---|
-| **E1** | l'eau au repos (fond plat, 4 m, `h` = 0,49 m) : la 3D au repos meurt, Saint-Venant reprend 1 s | le volume rendu à 10⁻³ du volume de la surface ; après 1 s, la vitesse de Saint-Venant sous 1 mm/s et `|η|` sous 2 mm |
-| **E2** | la vague de S690 après le déferlement : à **t = 3,2 s**, toute la 3D meurt ; Saint-Venant reprend la plage entière (la 3D et le rivage réunis) jusqu'à 5 s | contre le tout-3D qui continue jusqu'à 5 s (`Large::AucunJusqua5`, le même montage, ADR-276 D1) : la remontée maximale à **1,25 cm** près (0,15 m sur la pente de 1:12, ADR-278 D2), son instant à **0,1 s** ; le volume rendu à **0,5 %** du volume de la surface et du rivage |
+**L'essai et ses critères, écrits avant.** Contre le tout-3D jusqu'à 5 s (`Large::AucunJusqua5`, S717 : le même montage, la même fonction,
+déterministe au bit, donc non relancé) :
+1. le retournement à 0,1 s et 0,15 m du tout-3D (2,637 s, 9,988 m ; ADR-278 D2), l'air après lui ;
+2. la remontée maximale à 1,25 cm et 0,1 s (0,3387 m à 3,917 s) ;
+3. le volume rendu à la mort à 0,5 % ; la masse au bit avant ;
+4. le coût jusqu'à 5 s, mesuré et comparé (le tout-3D : 1 191 s).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-278, ADR-280, ADR-281)
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-275, ADR-276, ADR-277, ADR-278, ADR-280, ADR-281)
 
-- **témoin** : E1, le repos lui-même ; E2, le tout-3D jusqu'à 5 s, par la même fonction (`deux_raccords_porteur`). Seule la mort change
-  (`Large::AucunMort`, un mode nommé, ADR-277 D2).
-- **instrument** : la remontée sous la maille de S688 (le niveau de la plus haute maille mouillée), sur le Saint-Venant du rivage pour le
-  témoin, sur le Saint-Venant réuni après la mort. Elle est recalculée à chaque pas, donc elle peut échouer (ADR-281 D2). Ce que rendrait
-  chaque hypothèse :
-  - la mort rend à Saint-Venant un état juste : la remontée à 1,25 cm ;
-  - elle perd du volume ou de la quantité de mouvement : une remontée plus basse, ou plus tardive.
-- **calcul** :
-  - le volume de la surface est étalonné en S708 (3·10⁻⁴) ;
-  - la différence entre l'escalier et le fond continu se moyenne sur les marches (le niveau est gardé ; le volume en dépend de
-    ≈ dx/2 par marche) : c'est la tolérance de 0,5 % ;
-  - le coût : ≈ 20 min pour le témoin, ≈ 12 min pour la mort.
+- **témoin** : le tout-3D de S717, par la même fonction.
+- **instrument** : le lecteur de retournement (S647), l'air (S648), la remontée sous la maille (S688), recalculée à chaque pas (ADR-281
+  D2). Ce que rendrait chaque hypothèse :
+  - les pièces s'assemblent sans faute nouvelle : (1) comme S703 (−0,068 s), (2) comme S717 ;
+  - une faute de l'assemblage : un écart de remontée au-delà de 1,25 cm.
+- **calcul** : le coût attendu. La bande 3D seule jusqu'à 3,2 s fait ≈ 93 000 à 109 000 particules, soit ≈ 7 min (S703). Puis
+  Saint-Venant, presque rien. Soit ≈ 8 min, contre ≈ 20 min pour le tout-3D.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-273 D1 : le juge est le même solveur continué ;
-  - ADR-280 D1 : la surface ;
-  - ADR-281 D1 : chaque résultat montré dès qu'il est mesuré.
+  - ADR-275 D3 : chaque étape jugée sur le déferlement, l'air, la masse et le coût ;
+  - ADR-278 D1 : le raccord retenu ;
+  - ADR-280 D1 : la surface à la mort.
 - **pièges** :
-  - les dispositions des tableaux : Saint-Venant `i·ny + j`, APIC `(k·ny + j)·nx + i` ;
-  - le pas de Saint-Venant seul, par sa propre condition de Courant (0,4) ;
-  - la remontée du témoin se lit sur le Saint-Venant du rivage.
-
-**Critères de la session.** E1 et E2 tenus, ou leur échec nommé.
+  - à la mort, la bande commence à x_r = 5 m : la fonction de fond de la mort prend `x + x_r` ;
+  - le large de Saint-Venant vient de SGN, cellule à cellule (le même pas d'espace depuis 0) ;
+  - le volume d'avant la mort compte aussi le large.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — E1.
-- [x] **P3** — E2.
-- [x] **P4** — preuve ; rituel.
+- [ ] **P2** — le mode ; l'essai ; (1)–(4).
+- [ ] **P3** — preuve ; rituel.
 
 ### Notes de reprise
-- **P2 fini (E1)** — **tenu** : le volume rendu à 1,1·10⁻¹³ de la surface ; après 1 s, la vitesse de Saint-Venant 5,7·10⁻⁷ m/s, |η| 1,6·10⁻⁷ m.
-- **P3 fini (E2)** — **tenu** : la remontée 0,3385 m à 3,919 s contre 0,3387 m à 3,917 s ; le volume rendu −3,9·10⁻⁴ ; 519 s contre 1 191 s. M1 acquis.
