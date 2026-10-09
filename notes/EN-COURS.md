@@ -62,52 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S742 — **terminée**. En autonomie ; session longue. ADR-287 D1 : **le banc canonique de la 3D**, avec la projection de densité
-(S740). **La question** : la 3D corrigée passe-t-elle les essais de base d'un modèle de vagues, sans perdre ce qui marchait ?
+Session : S743 — **en cours**. En autonomie ; session longue. BANC-CANONIQUE-S742 : sur le fond lisse en pente, le bassin oscillait de
+±20 mm, et la lecture par φ portait des dents de scie de ±10 mm. **La question** : la 3D tient-elle un lac au repos sur une pente ? Et si
+non, est-ce le mouvement réel ou la lecture ?
 
-**Le banc** (2,5 cm) :
-- **B1 — l'onde solitaire sur un canal plat** : fait en S740, E7 (la largeur à 92 %, le creux à 9 % de `H`). Repris tel quel.
-- **B2 — la levée sur une pente douce** (`levee_s742`) :
-  - une bosse gaussienne de 15 mm (σ = 1 m) sur 0,30 m d'eau, une pente de 1:30 jusqu'à 0,12 m, un plateau de 7 m, des murs ;
-  - la 3D avec et sans la projection, et deux témoins sur la même bosse : Saint-Venant et SGN (S733, sur fond doux) ;
-  - la grandeur : la plus haute crête lue sur le plateau, de 11,9 m jusqu'à l'arrivée du front au mur, rapportée à sa crête de départ (à
-    0,25 s, ADR-287 D3).
-- **B4 — la remontée de S645 avec la projection** : le montage de S645 tel quel, `d` = 0,35 m, `H/d` = 0,2, 1:3 ; la particule la plus haute
-  contre la loi (0,2295 m ; S645 sans projection : 0,2307 m).
+**L'essai** (`repos_pente_s743`) :
+- 1 m plat à 0,30 m d'eau, puis la pente jusqu'au sec, puis 0,5 m de sec ; 2,5 cm, deux rangées, l'air balistique ; 2 s ;
+- huit configurations :
+  - deux pentes, 1:30 et 1:12 ;
+  - deux fonds, l'escalier (`set_seabed`) et le lisse (`set_seabed_smooth`) ;
+  - avec ou sans la projection de densité.
+- Deux lectures de la surface, contre le niveau au repos (ADR-286 D2) :
+  - **par φ** (l'épaisseur de `volume_surface_s708` ajoutée au fond) ;
+  - **par les particules** : la plus haute de chaque colonne, plus `dx/4`.
+- Le plus grand écart de chacune au niveau, sur les colonnes mouillées de plus de trois mailles. La plus grande vitesse des particules.
 
-**Les critères, écrits avant.**
-- B2 :
-  1. la 3D avec la projection à **10 %** du témoin Saint-Venant (la même bosse, non linéaire ; la loi de Green, linéaire, vaut 1,257 et
-     est rapportée) ;
-  2. la 3D sans la projection, rapportée.
-- B4 : 3. la remontée avec la projection à **10 %** de la loi.
+**Les quanta** (ADR-236) : la pose par couches de 12,5 mm ; la lecture par les particules est donc à `dx/4` près, la colonne d'1/30 de
+maille de pente par colonne.
 
-**Les bornes** (ADR-286 D1, `python` au plan) : 18,4 m en tout (6 m plats, 5,4 m de pente, 7 m de plateau). Le front de la bosse (3σ devant
-la crête) touche le mur quand la crête est à 15,4 m : la lecture s'arrête là. La bosse part à 3,5 m, à 3σ + 0,5 m du mur de gauche.
+**Le critère, écrit avant** : le repos est tenu si, sur 2 s,
+- la plus grande vitesse reste sous **1 cm/s** ;
+- l'écart de la surface **par les particules** reste sous **3 mm**.
 
-**Contrôles du plan** (ADR-276, ADR-280, ADR-286, ADR-287)
+L'écart par φ est rapporté à part. S'il dépasse celui des particules, la lecture est en cause (S735), et non l'eau.
 
-- **témoin** :
-  - Saint-Venant et SGN sur la même bosse (S733) ;
-  - la loi de Green (linéaire, rapportée) ;
-  - la loi de Synolakis pour B4 ;
-  - la 3D sans projection, comme seconde référence.
-- **instrument** : la crête par la surface lissée sur 10 cm, et, en seconde lecture, par les particules (ADR-286 D2).
-- **calcul** : B2, deux fois ≈ 10 min ; B4 ≈ 7 min ; en série.
-- **ADR** : ADR-276 D1 (une seule fonction pour la bosse) ; ADR-287 D1, D3.
-- **pièges** :
-  - la bosse de 15 mm ne fait que 0,6 maille : la lecture par la surface est lissée, et la seconde lecture la contrôle ;
-  - la projection a lissé le plongeon en S709 : B4 dira si elle lisse aussi la remontée.
+**Contrôles du plan** (ADR-236, ADR-286, ADR-287)
+
+- **témoin** : le repos exact (vitesse nulle, surface plate) ; S639 avait tenu le repos sur une pente en escalier.
+- **instrument** : deux lectures de la surface, et la vitesse.
+- **calcul** : huit cas de ≈ 15 000 à 45 000 particules, 2 s : quelques minutes en tout.
+- **ADR** :
+  - ADR-287 D1 (le banc) ;
+  - ADR-286 D1 (aucune frontière atteinte : rien ne bouge) ;
+  - ADR-236 (les quanta).
+- **pièges** : la colonne de rivage, où la profondeur passe sous une maille, est exclue des écarts et rapportée à part.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — B2 (la levée) : le montage, les témoins, la 3D avec et sans projection.
-- [x] **P3** — B4 (la remontée de S645 avec la projection).
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — l'essai ; les huit cas.
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2** — B2 sans conclusion. Saint-Venant 1,152, SGN 1,271 ; la 3D avec projection 3,33, sans projection aucune crête lue. Le profil,
-  regardé (ADR-287 D4) : la bosse sous le quantum de pose (une couche de 12,5 mm), des dents de scie de ±10 mm sur la pente lisse dès le
-  départ, le bassin qui oscille de ±20 mm. Les profils dans `captures/s742_levee_profils.png`.
-- **P3** — B4 avec la projection : **0,2020 m (−12 %), manqué** ; sans projection 0,2307 m. La projection freine la lame.
