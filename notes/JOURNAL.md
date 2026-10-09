@@ -2415,3 +2415,12 @@ S753–S755. Maillons **1** (4.14). Suivant : **S756**, la revue de méthode.
 
 Maillons **0** (méthode). Suivant : **S757**, le banc de la 3D corrigée (ADR-289 D3.2).
 
+## S757 — 2026-10-10 — Le ballottement de la 3D corrigée
+
+**Entrée.** ADR-289 D3.2. **Fait** ([preuve](../docs/validation/BALLOTTEMENT-S757.md)) : le mode (1, 0) d'une cuve de 2 m, contre la
+dispersion linéaire exacte. **Mesuré** :
+- la 3D corrigée a la période juste (+0,33 %), mais l'oscillation grandit de 2,8 % par période : la projection injecte de l'énergie ;
+- la 3D sans projection s'effondre (+6,6 % ; 35 % d'amortissement), contre S413 dans une autre cuve.
+
+La rupture de barrage attend les mesures de Martin et Moyce (un téléchargement à accorder, inscrit dans la boussole). Maillons **1** (4.1).
+Suivant : **S758**, une projection neutre en énergie.

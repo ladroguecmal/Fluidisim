@@ -518,6 +518,8 @@ pas recopiée ici (L137).
   elle est la 3D corrigée ([preuve](validation/COMPLETE-SYNOLAKIS-S754.md)).
   **S755** : le témoin de R43 refait — la vague déferle 0,47 s plus tard et 1,15 m plus près du rivage (3,09 s ; 11,09 m) ; le raccord
   du rivage à 12,0 m devient trop près ([preuve](validation/TEMOIN-R43-CORRIGE-S755.md)).
+  **S757** : le ballottement — la période de la 3D corrigée à 0,33 % de l'exacte ; mais l'oscillation grandit de 2,8 % par période (la
+  projection ajoute de l'énergie) ([preuve](validation/BALLOTTEMENT-S757.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

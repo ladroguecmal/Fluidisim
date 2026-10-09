@@ -3602,3 +3602,65 @@ fn the_r43_witness_with_the_corrected_3d_s755() {
     assert!(p.is_some(), "critère 3 : aucun retournement");
 }
 
+/// **S757 — le ballottement** (ADR-289 D3.2, le banc de la 3D corrigée) : une cuve de 2 m × 0,05 m, 0,5 m d'eau, 2,5 cm ; le mode (1, 0) posé au
+/// repos à son maximum (`A` = 40 mm), 10 s. `corrigee` : la 3D corrigée d'ADR-292. Rend `(la période, s ; l'amortissement par période, part ;
+/// les passages par zéro comptés)`, la surface lue par φ au mur de gauche.
+fn ballottement_s757(corrigee: bool) -> (f64, f64, usize) {
+    let (lx, d, amp, dx) = (2.0f64, 0.5f64, 0.04f64, 0.025f32);
+    let dxs = dx as f64;
+    let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, ((d + 0.2) / dxs).ceil() as usize);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    if corrigee {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_bed_aware(true).unwrap();
+    }
+    a.seed(&|p| (p[2] as f64) < d + amp * (std::f64::consts::PI * p[0] as f64 / lx).cos()).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let (mut t, fin) = (0u64, 10_000_000u64);
+    let mut serie: Vec<(f64, f64)> = Vec::new();
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        a.step(us).unwrap();
+        t += us;
+        let (_, h) = volume_surface_s708(&a);
+        serie.push((t as f64 * 1e-6, h[0] - d));
+    }
+    // Les passages par zéro, interpolés ; les extrêmes entre deux passages.
+    let mut zeros = Vec::new();
+    for w in serie.windows(2) {
+        let ((t0, e0), (t1, e1)) = (w[0], w[1]);
+        if e0 != 0. && e0.signum() != e1.signum() {
+            zeros.push(t0 + (t1 - t0) * e0 / (e0 - e1));
+        }
+    }
+    let periode = if zeros.len() >= 3 { 2. * (zeros[zeros.len() - 1] - zeros[0]) / (zeros.len() - 1) as f64 } else { f64::NAN };
+    let mut extremes = Vec::new();
+    for w in zeros.windows(2) {
+        let e = serie.iter().filter(|(t, _)| *t > w[0] && *t < w[1]).fold(0f64, |m, (_, e)| m.max(e.abs()));
+        extremes.push(e);
+    }
+    // L'amortissement par période : la décroissance géométrique des extrêmes (deux demi-périodes par période).
+    let amort = if extremes.len() >= 3 {
+        let r = (extremes[extremes.len() - 1] / extremes[0]).powf(1. / (extremes.len() - 1) as f64);
+        1. - r * r
+    } else {
+        f64::NAN
+    };
+    (periode, amort, zeros.len())
+}
+
+/// **S757 — (1) la période du ballottement à 1 % de la dispersion linéaire exacte, (2) l'amortissement rapporté** ; la 3D sans projection, puis
+/// la 3D corrigée.
+#[test]
+#[ignore = "S757 : le ballottement, deux 3D (≈ 6 min)"]
+fn the_sloshing_bench_s757() {
+    let (lx, d, g) = (2.0f64, 0.5f64, 9.81f64);
+    let k = std::f64::consts::PI / lx;
+    let exacte = 2. * std::f64::consts::PI / (g * k * (k * d).tanh()).sqrt();
+    for (nom, corrigee) in [("sans projection", false), ("la 3D corrigée", true)] {
+        let (p, amort, n) = ballottement_s757(corrigee);
+        println!("S757 {nom} : la période {p:.4} s contre {exacte:.4} s ({:+.2} %) ; l'amortissement {:.2} % par période ; {n} passages par zéro ; {}",
+            100. * (p / exacte - 1.), 100. * amort, if (p / exacte - 1.).abs() < 0.01 { "tenu" } else { "NON TENU" });
+    }
+}

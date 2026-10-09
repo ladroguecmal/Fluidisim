@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S757 — **en cours**. En autonomie ; session longue. ADR-289 D3.2 : **le banc de la 3D corrigée** (ADR-292). Il a déjà :
+Session : S757 — **terminée**. En autonomie ; session longue. ADR-289 D3.2 : **le banc de la 3D corrigée** (ADR-292). Il a déjà :
 - le repos (S744) ;
 - l'onde solitaire et sa célérité (S744, S752) ;
 - la remontée de S645 (S744) ;
@@ -98,7 +98,12 @@ non linéaire est sous 1 %.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (1), (2).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — l'essai ; (1), (2).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (565 s) :
+  - sans projection : 2,1062 s (+6,56 %), 35 % d'amortissement, 5 passages ;
+  - **la 3D corrigée : 1,9831 s (+0,33 %, tenu)**, l'amortissement −2,77 % : l'oscillation grandit.
+
+  La projection injecte de l'énergie : le défaut suivant. La 3D sans projection contredit S413 (une autre cuve) : à comprendre.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-10 00:25 +02:00
+JETON            : libre
+Battement        : 2026-10-10 00:39 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S757 — le banc de la 3D corrigée : le ballottement ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S756 — la cinquante-cinquième revue de méthode (ADR-293) ([journal](notes/JOURNAL.md)). Avant : S755 (Le témoin de R43 refait avec la 3D corrigée)
-Session suivante : S757 — le banc de la 3D corrigée (ADR-289 D3.2) : le ballottement, la rupture de barrage, l'onde solitaire avec sa célérité ; une commande
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S757 — Le ballottement de la 3D corrigée ([journal](notes/JOURNAL.md)). Avant : S756 (la cinquante-cinquième revue de méthode)
+Session suivante : S758 — une projection neutre en énergie (retirer l'énergie potentielle qu'elle ajoute), jugée sur le ballottement, l'onde solitaire et Synolakis
+Maillons        : 1
 Registres       : dernier lot S755 (ADR-213 D3) ; le prochain au plus tard en S758
 ```
 
