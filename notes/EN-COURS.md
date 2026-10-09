@@ -62,27 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S721 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-huitième revue de méthode** (ADR-222 D4 :
-S716–S720).
+Session : S722 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). L'étape 2 du LOD est faite : N1, N2, M1 et la vague de bout en
+bout (S707–S720) ; R43 attend son verdict. Le déclencheur au plus simple (D1) est remis : sur les plages de référence, l'onde touche la
+bande dès le départ, et il ne se juge pas utilement sans la décision « faut-il la 3D ? », que l'utilisateur a voulu remettre.
+**La conception de l'étape 3 : la 3D rallumée autour d'un corps** (ADR-275 D2).
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**Ce que la session fait.** Le registre `LOD-ETAPE-3-S722` : les pièces, une par session au plus, chacune avec son essai.
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, contre leurs critères. Une règle se cherche d'abord dans METHODE : ADR-279 D2 (pas de
-  tube, pas de chaîne qui doit s'arrêter) existe, mais elle a été enfreinte deux fois. La protection ne peut donc pas être une règle de
-  plus : il faut un outil.
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue ; ADR-279 D2, remplacé par un outil.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-277)
 
-**Critères, écrits avant.** (1) ADR-282 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+- **témoin** : sans objet (une conception).
+- **instrument** : chaque pièce nomme son essai, et d'abord son essai entre deux copies du même solveur (ADR-273 D1).
+- **calcul** : le coût d'une boîte de 3D de 1 m × 1 m, à 2,5 cm, sur 0,5 m d'eau : 40 × 40 × 20 mailles d'eau × 8 particules ≈ 256 000
+  particules. C'est l'ordre du tout-3D de S690 : il est montré et mesuré dans la pièce qui l'emploie.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-275 D2 ;
+  - ADR-273 D1, pièce par pièce ;
+  - ADR-280 D1 : la surface à la naissance et à la mort ;
+  - ADR-282 : la fermeture par l'outil.
+- **pièges** : un raccord sur quatre côtés n'est pas deux raccords de plus. Les coins, où deux côtés se touchent, ont leur propre essai.
+
+**Critères.** Le registre, chaque pièce avec son essai et son critère ; la note sur ADR-275.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-282 ; METHODE ; `outils/fermer.py`.
-- [x] **P3** — rituel, par `fermer.py` lui-même.
+- [ ] **P2** — le registre ; la note.
+- [ ] **P3** — la fermeture (`fermer.py`).
 
 ### Notes de reprise
-- **P2 fini** — ADR-282 : D1 (`outils/fermer.py`, une fermeture qui ne commet que si tout a réussi), D2 (un script de fin vise des chaînes uniques) ; la prochaine revue S726.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 04:21 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 04:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S722 — la conception de l'étape 3 du LOD : la 3D rallumée autour d'un corps ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S721 — la quarante-huitième revue de méthode (ADR-282) ([journal](notes/JOURNAL.md)). Avant : S720 (Le jalon visuel de la phase A)
 Session suivante : S722 — la suite de la phase A (le déclencheur au plus simple, ou la LOD étape 3) ; R43 en attente
 Maillons        : 0
