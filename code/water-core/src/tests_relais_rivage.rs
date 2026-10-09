@@ -2544,3 +2544,211 @@ fn the_predictor_at_five_centimetres_s733() {
     assert!((eg / ef - 1.).abs() < 0.05, "critère 8 : la crête");
 }
 
+/// S734 — une scène de la batterie du sélecteur (SELECTEUR-DOMAINES-S732 §5) : l'onde solitaire `rapport·d` sur une plage `1:cot`, centrée à
+/// `L + approche` du pied (`L = arccosh(√20)/γ·d`), un mur `8 d` derrière ; la plage jusqu'à `terre` m au-delà du rivage (ou un mur à
+/// `mur_apres_pied` m du pied, s'il est donné).
+#[derive(Clone, Copy, Debug)]
+struct ScenePlage {
+    nom: &'static str,
+    d: f64,
+    rapport: f64,
+    cot: f64,
+    approche: f64,
+    terre: f64,
+    mur_apres_pied: Option<f64>,
+    duree: f64,
+    /// S734 : le fond lisse (S640) au lieu de l'escalier — S4 sur 1:3 piégeait l'eau dans les marches.
+    lisse: bool,
+}
+
+impl ScenePlage {
+    /// `(pied, centre de l'onde, longueur du domaine)`, depuis le mur de gauche.
+    fn geometrie(&self) -> (f64, f64, f64) {
+        let gamma = (3. * self.rapport / 4.).sqrt();
+        let l = (20f64.sqrt()).acosh() / gamma * self.d;
+        let centre = 8. * self.d;
+        let pied = centre + l + self.approche;
+        let lx = match self.mur_apres_pied { Some(m) => pied + m, None => pied + self.cot * self.d + self.terre };
+        (pied, centre, lx)
+    }
+
+    fn onde(&self) -> crate::grand_evenement::OndeSolitaire {
+        crate::grand_evenement::OndeSolitaire { h: self.rapport * self.d, d: self.d, x1: self.geometrie().1, g: 9.81 }
+    }
+}
+
+/// S734 — le porteur du prédicteur sur une scène : SGN à `dx` sur la plage en miroir (le miroir rend le mur de gauche), le fond arrêté à
+/// 4 cm d'eau ; la même onde que la 3D (ADR-276 D1). Rend `(le porteur, la demi-longueur)`.
+fn porteur_plage_s734(s: &ScenePlage, dx: f64) -> (crate::serre_1d::Serre1D, f64) {
+    let (pied, _, lx) = s.geometrie();
+    let demi = (pied + s.cot * (s.d - 0.04) + 0.5).min(lx);
+    let onde = s.onde();
+    let n = (2. * demi / dx).round() as usize;
+    let (mut z, mut h, mut q) = (vec![0f64; n], vec![0f64; n], vec![0f64; n]);
+    for i in 0..n {
+        let x = (i as f64 + 0.5) * dx;
+        let (xm, signe) = if x > demi { (2. * demi - x, -1.) } else { (x, 1.) };
+        z[i] = ((xm - pied).max(0.) / s.cot).min(s.d - 0.04);
+        h[i] = s.d + onde.eta(xm) - z[i];
+        q[i] = if xm < pied { signe * h[i] * onde.u(xm) } else { 0. };
+    }
+    (crate::serre_1d::Serre1D::nouveau_fond(dx, 9.81, h, q, z, true).unwrap(), demi)
+}
+
+/// S734 — ce que rend un témoin : le retournement `(t, x)`, l'air, la remontée maximale `(t, R)`, le front le plus avancé (m), la crête
+/// `(t, x, η)` tous les 0,1 s, les particules au départ et à la fin, les secondes.
+#[derive(Debug, Default)]
+struct Temoin {
+    retournement: Option<(f64, f64)>,
+    air: Option<(f64, f64)>,
+    remontee: (f64, f64),
+    front_max: f64,
+    crete: Vec<(f64, f64, f64)>,
+    particules: (usize, usize),
+    duree: f64,
+}
+
+/// **S734 — le témoin tout-3D d'une scène** : APIC à 2,5 cm, quatre rangées, aucun raccord ni sortie (ADR-285 D1), le pas plafonné à
+/// 10 ms ; les juges à chaque pas, la crête affichée tous les 0,1 s ; le prédicteur rapporté d'abord.
+fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
+    use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
+    use crate::selecteur::{prevoir, Critere};
+    let horloge = std::time::Instant::now();
+    let (dx, d, cot) = (0.025f32, s.d, s.cot);
+    let dxs = dx as f64;
+    let (pied, _, lx) = s.geometrie();
+    let onde = s.onde();
+    // Le prédicteur, sur la même scène (rapporté, S735 calibre).
+    let (porteur, demi) = porteur_plage_s734(s, 0.05);
+    let criteres = [Critere::Kennedy(0.65), Critere::Hauteur(0.8), Critere::Froude(0.8), Critere::Kennedy(0.35), Critere::Kennedy(0.5),
+        Critere::Hauteur(0.6), Critere::Hauteur(1.0), Critere::Froude(0.5), Critere::Froude(0.6)];
+    let (prev, _) = prevoir(&porteur, d, demi, s.duree, &criteres, 10.).unwrap();
+    for (c, p) in criteres.iter().zip(&prev) {
+        println!("S734 {} prédicteur {c:?} : {:?}", s.nom, p.map(|p| (format!("{:.3} s", p.t), format!("{:.3} m", p.x), format!("L_jet {:.3} m", p.l_jet))));
+    }
+    let (nx, ny) = ((lx / dxs).round() as usize, 4usize);
+    let seuil = 0.818 * cot.powf(-10. / 9.);
+    let remontee_exacte = if s.rapport < seuil { 2.831 * cot.sqrt() * s.rapport.powf(1.25) * d } else { 0. };
+    let haut = d + (2. * s.rapport * d).max(remontee_exacte + 0.1) + 0.15;
+    let nz = (haut / dxs).ceil() as usize;
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let xg = |i: f64| (i + 0.5) * dxs;
+    let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
+    if s.lisse {
+        a.set_seabed_smooth(Some(&fond)).unwrap();
+    } else {
+        a.set_seabed(Some(&fond)).unwrap();
+    }
+    a.set_ballistic_air(true);
+    let u: Vec<f32> = (0..a.velocity_u().len()).map(|f| {
+        let x = (f % (nx + 1)) as f64 * dxs;
+        if x < pied { onde.u(x) as f32 } else { 0. }
+    }).collect();
+    let (v0, w0) = (vec![0f32; a.velocity_v().len()], vec![0f32; a.velocity_w().len()]);
+    a.set_grid_velocities(&u, &v0, &w0).unwrap();
+    let marche: Vec<f32> = (0..nx).map(|i| if s.lisse { a.smooth_seabed_height(xg(i as f64) as f32, 0.05) } else { a.seabed_height(i, 0) }).collect();
+    let zb_fin: Vec<f32> = (0..nx * 4).map(|k| if s.lisse { a.smooth_seabed_height((k as f32 + 0.5) * dx / 4., 0.05) } else { marche[k / 4] }).collect();
+    let n0 = a.seed(&|p| {
+        let k = ((p[0] / (dx / 4.)) as usize).min(nx * 4 - 1);
+        p[2] > zb_fin[k] && (p[2] as f64) < d + onde.eta(p[0] as f64)
+    }).unwrap();
+    a.set_particle_velocities(&|p| {
+        let x = p[0] as f64;
+        ([if x < pied { onde.u(x) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])
+    }).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let mut r = Temoin { remontee: (0., f64::MIN), ..Default::default() };
+    let fin = (s.duree * 1e6).round() as u64;
+    let (mut t, mut prochaine) = (0u64, 0u64);
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        a.step(us).unwrap();
+        t += us;
+        let ts = t as f64 * 1e-6;
+        if r.retournement.is_none() {
+            if let Some((i, _)) = retournement_s647(&a, ny / 2, &marche) {
+                r.retournement = Some((ts, xg(i as f64)));
+                eprintln!("S734 {} : le retournement à {ts:.3} s, x = {:.3} m", s.nom, xg(i as f64));
+            }
+        }
+        let (k, x) = air_enferme_s648(&a);
+        if k > 0 && r.air.is_none() {
+            r.air = Some((ts, x));
+        }
+        let (_, h) = volume_surface_s708(&a);
+        if let Some(i) = (0..nx).rev().find(|&i| h[i] > 0.005) {
+            let x = xg(i as f64);
+            r.front_max = r.front_max.max(x);
+            let rr = (x - pied).max(0.) / cot - d;
+            if rr > r.remontee.1 {
+                r.remontee = (ts, rr);
+            }
+        }
+        if t >= prochaine {
+            prochaine += 100_000;
+            let (ic, ec) = (0..nx).filter(|&i| h[i] > 1e-3).map(|i| (i, marche[i] as f64 + h[i] - d)).fold((0, f64::MIN), |m, p| if p.1 > m.1 { p } else { m });
+            r.crete.push((ts, xg(ic as f64), ec));
+            eprintln!("S734 {} : t = {ts:.2} s, la crête x = {:.3} m, η = {:.1} mm ; le front {:.3} m (mur {lx:.2} m) ; la remontée {:.4} m ; pas {us} µs ; {:.0} s d'horloge",
+                s.nom, xg(ic as f64), ec * 1e3, r.front_max, r.remontee.1, horloge.elapsed().as_secs_f64());
+        }
+    }
+    r.particules = (n0, a.particle_count());
+    r.duree = horloge.elapsed().as_secs_f64();
+    println!("S734 {} : retournement {:?} ; air {:?} ; la remontée {:.4} m à {:.3} s ; le front le plus avancé {:.3} m (mur à {lx:.3} m) ; particules {} → {} ; {:.0} s",
+        s.nom, r.retournement, r.air, r.remontee.1, r.remontee.0, r.front_max, r.particules.0, r.particules.1, r.duree);
+    r
+}
+
+/// **S734 — S4, sans déferlement** : `H/d` = 0,2 sur 1:3, `d` = 0,5 m, 6 s. (1) aucun retournement ; (2) la remontée à 15 % de la loi de
+/// Synolakis (0,328 m) ; le témoin contrôlé (le nombre de particules, le front à plus de 1 m du mur).
+#[test]
+#[ignore = "le témoin S4 du sélecteur, tout-3D (≈ 25 min)"]
+fn the_selector_witness_s4_no_breaking_s734() {
+    let s = ScenePlage { nom: "S4", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: false };
+    let r = temoin_plage_s734(&s);
+    let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
+    println!("S734 S4 : la remontée {:.4} m contre {exacte:.4} m ({:+.1} %)", r.remontee.1, 100. * (r.remontee.1 / exacte - 1.));
+    assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
+    assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
+    assert!(r.retournement.is_none(), "critère 1 : un retournement");
+    assert!((r.remontee.1 / exacte - 1.).abs() < 0.15, "critère 2 : la remontée");
+}
+
+/// **S734 — S2, Synolakis** : `H/d` = 0,3 sur 1:19,85, `d` = 0,5 m, le départ de S712 (sans approche), 5,65 s (t·√(g/d) = 25). (3) un
+/// retournement ; le témoin contrôlé.
+#[test]
+#[ignore = "le témoin S2 du sélecteur, tout-3D (≈ 40 min)"]
+fn the_selector_witness_s2_synolakis_s734() {
+    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false };
+    let r = temoin_plage_s734(&s);
+    assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
+    assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
+    assert!(r.retournement.is_some(), "critère 3 : aucun retournement");
+}
+
+/// **S734 — S3, glissante** : `H/d` = 0,5 sur 1:90, `d` = 0,3 m, un mur à 16 m du pied, 12 s. (4) le retournement, rapporté qu'il ait lieu ou
+/// non ; le témoin contrôlé.
+#[test]
+#[ignore = "le témoin S3 du sélecteur, tout-3D (≈ 1 h)"]
+fn the_selector_witness_s3_spilling_s734() {
+    let s = ScenePlage { nom: "S3", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 12., lisse: false };
+    let r = temoin_plage_s734(&s);
+    println!("S734 S3 : le retournement {:?} (la question de la scène)", r.retournement);
+    assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
+    assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
+}
+
+/// **S734 — S4 sur le fond lisse** (ajouté après S4 en escalier : la remontée +47 %, l'eau piégée dans les marches de 1:3, un retournement au
+/// reflux) : les mêmes critères, (1) aucun retournement, (2) la remontée à 15 % de 0,328 m.
+#[test]
+#[ignore = "le témoin S4 du sélecteur sur le fond lisse, tout-3D (≈ 35 min)"]
+fn the_selector_witness_s4_on_a_smooth_bottom_s734() {
+    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true };
+    let r = temoin_plage_s734(&s);
+    let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
+    println!("S734 S4 lisse : la remontée {:.4} m contre {exacte:.4} m ({:+.1} %)", r.remontee.1, 100. * (r.remontee.1 / exacte - 1.));
+    assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
+    assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
+    assert!(r.retournement.is_none(), "critère 1 : un retournement");
+    assert!((r.remontee.1 / exacte - 1.).abs() < 0.15, "critère 2 : la remontée");
+}

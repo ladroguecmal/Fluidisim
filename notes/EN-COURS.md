@@ -118,8 +118,21 @@ S4 change de pente par rapport au registre (0,03 sur 1:12) : une onde de 15 mm y
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le témoin générique, le porteur générique ; la compilation ; S4.
+- [x] **P2** — le témoin générique, le porteur générique ; la compilation ; S4.
 - [ ] **P3** — S2 et S3 (en arrière-plan) ; les nombres au fil du calcul.
+- [ ] **P3c** — **ajouté après S4** : S4 sur le **fond lisse** (S640), les mêmes critères (1) et (2) ; la comparaison des deux fonds localise
+  l'écart (ADR-226 D1).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **Écart au plan, S2** : sans approche ajoutée (le départ de S712) ; le retournement vient vers 3,3 s, ce qui laisse au prédicteur plus de
+  2 s ; les instants du laboratoire restent ceux de S712.
+- **P2 fini** — **S4 en escalier : (1) et (2) manqués.**
+  - La remontée est de 0,4835 m à 4,48 s contre 0,328 m (+47 %).
+  - Un « retournement » est vu à 5,913 s, à 10,34 m, au reflux ; de l'air enfermé à 3,11 s, à 11,34 m.
+  - Le front reste figé à 12,763 m dès 4,7 s : l'eau est piégée dans les marches. À 1:3 et 2,5 cm, le fond monte d'une maille toutes les
+    trois colonnes.
+  - Le témoin lui-même (aucune sortie, le front à 2,5 m du mur) tient. 1 965 s.
+  - **Le prédicteur sur S4** : Kennedy 0,65 ne se déclenche pas, ce qui est juste. Les huit autres se déclenchent tous à 11,2–11,6 m, au
+    rivage et dans la zone de jet de rive (le fond arrêté à 4 cm commence à 11,19 m).
+  - **S2 en cours** : le retournement à 3,290 s, à 12,013 m (0,21 m d'eau).
