@@ -483,3 +483,76 @@ fn the_boundary_fluxes_balance_the_volume_s680() {
     assert!(m.flux_des_bords().0.iter().chain(m.flux_des_bords().1).all(|&f| f == 0.0));
 }
 
+/// **S723 — B1, Saint-Venant troué, entre deux copies** (ADR-273 D1) : une bosse de 2 cm (rayon 0,3 m) sur un fond plat de 3 m × 3 m, 0,5 m
+/// d'eau, `dx` = 5 cm ; un trou `[25, 40) × [20, 45)` rempli par un second Saint-Venant. À chaque pas, le flux de masse de Rusanov entre les
+/// mailles voisines, le même aux deux, de signe opposé. (1) la masse des deux au bit ; (2) contre le Saint-Venant entier à 1,5 s, l'écart
+/// maximal de `h` sous 5 % de l'amplitude (1 mm). **Mesuré** : la masse 2,8·10⁻¹⁵ ; l'écart 0,32 mm (1,6 %), le flux complet échangé (la
+/// masse seule laissait 8,3 % : l'interface réfléchissait).
+#[test]
+fn the_holed_saint_venant_is_whole_again_with_its_filling_s723() {
+    let (n, dx, d, a, r) = (60usize, 0.05f64, 0.5f64, 0.02f64, 0.3f64);
+    let (i0, i1, j0, j1) = (25usize, 40usize, 20usize, 45usize);
+    let bosse = |i: usize, j: usize| {
+        let (x, y) = ((i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx);
+        d + a * (-((x - 1.0).powi(2) + (y - 1.2).powi(2)) / (r * r)).exp()
+    };
+    let h0: Vec<f64> = (0..n * n).map(|k| bosse(k / n, k % n)).collect();
+    let mut entier = SaintVenant2D::nouveau(n, n, dx, G, vec![0.0; n * n], h0.clone(), vec![0.0; n * n], vec![0.0; n * n]).unwrap();
+    entier.regler_ordre_deux(1e-12).unwrap();
+    let mut troue = entier.clone();
+    troue.regler_trou(i0, i1, j0, j1).unwrap();
+    let (ni, nj) = (i1 - i0, j1 - j0);
+    let hi: Vec<f64> = (0..ni * nj).map(|k| bosse(i0 + k / nj, j0 + k % nj)).collect();
+    let mut dedans = SaintVenant2D::nouveau(ni, nj, dx, G, vec![0.0; ni * nj], hi, vec![0.0; ni * nj], vec![0.0; ni * nj]).unwrap();
+    dedans.regler_ordre_deux(1e-12).unwrap();
+    let v0 = entier.volume();
+    let v_trou0: f64 = (i0..i1).flat_map(|i| (j0..j1).map(move |j| (i, j))).map(|(i, j)| troue.h[i * n + j]).sum::<f64>() * dx * dx;
+    // Le flux complet de Rusanov (ordre un) entre la maille `a` (à gauche selon l'axe) et la maille `b` : `[masse, normale, tangentielle]`.
+    let flux_ab = |sa: &SaintVenant2D, ka: usize, sb: &SaintVenant2D, kb: usize, axe: usize| {
+        let v = |s: &SaintVenant2D, k: usize| (vitesse(s.h[k], s.qx[k], 1e-12), vitesse(s.h[k], s.qy[k], 1e-12));
+        let ((uxa, uya), (uxb, uyb)) = (v(sa, ka), v(sb, kb));
+        if axe == 0 { rusanov(G, sa.h[ka], uxa, uya, sb.h[kb], uxb, uyb) } else { rusanov(G, sa.h[ka], uya, uxa, sb.h[kb], uyb, uxb) }
+    };
+    let mut t = 0.0;
+    while t < 1.5 - 1e-12 {
+        let c = (0..n * n).map(|k| vitesse(entier.h[k], entier.qx[k], 1e-12).abs().max(vitesse(entier.h[k], entier.qy[k], 1e-12).abs()) + (G * entier.h[k]).sqrt()).fold(0.0, f64::max);
+        let dt = (0.4 * dx / c).min(1.5 - t);
+        entier.pas(dt).unwrap();
+        // Le flux de chaque face d'interface, orienté vers +x ou +y : le même vecteur aux deux côtés (chacun connaît son côté actif).
+        let mut ft = vec![[0.0; 3]; 2 * (ni + nj)];
+        let mut fd = vec![[0.0; 3]; 2 * (ni + nj)];
+        for j in 0..nj {
+            let f = flux_ab(&troue, (i0 - 1) * n + j0 + j, &dedans, j, 0);
+            ft[j] = f;
+            fd[j] = f;
+            let f = flux_ab(&dedans, (ni - 1) * nj + j, &troue, i1 * n + j0 + j, 0);
+            ft[nj + j] = f;
+            fd[nj + j] = f;
+        }
+        for i in 0..ni {
+            let f = flux_ab(&troue, (i0 + i) * n + j0 - 1, &dedans, i * nj, 1);
+            ft[2 * nj + i] = f;
+            fd[2 * nj + i] = f;
+            let f = flux_ab(&dedans, i * nj + nj - 1, &troue, (i0 + i) * n + j1, 1);
+            ft[2 * nj + ni + i] = f;
+            fd[2 * nj + ni + i] = f;
+        }
+        // Le dedans range ses bords : la gauche, la droite (par j), le bas, le haut (par i) — le même ordre.
+        troue.pas_avec_flux_trou(dt, &ft).unwrap();
+        dedans.pas_avec_flux_bords4(dt, &fd).unwrap();
+        t += dt;
+    }
+    let v_troue: f64 = troue.volume() - (i0..i1).flat_map(|i| (j0..j1).map(move |j| (i, j))).map(|(i, j)| troue.h[i * n + j]).sum::<f64>() * dx * dx;
+    let masse = ((v_troue + dedans.volume()) - v0).abs() / v0;
+    let mut ecart = 0f64;
+    for i in 0..n {
+        for j in 0..n {
+            let hc = if (i0..i1).contains(&i) && (j0..j1).contains(&j) { dedans.h[(i - i0) * nj + (j - j0)] } else { troue.h[i * n + j] };
+            ecart = ecart.max((hc - entier.h[i * n + j]).abs());
+        }
+    }
+    println!("S723 B1 : la masse {masse:.1e} (le trou gelé au départ {v_trou0:.4} m³) ; l'écart maximal de h contre le Saint-Venant entier {ecart:.2e} m ({:.1} % de la bosse)", 100. * ecart / a);
+    assert!(masse < 1e-12, "critère 1 : la masse {masse}");
+    assert!(ecart < 0.05 * a, "critère 2 : l'écart {ecart}");
+}
+

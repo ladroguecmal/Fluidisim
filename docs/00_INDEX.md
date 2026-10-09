@@ -165,6 +165,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)](registres/LOD-ETAPE-2-S705.md) : cinq pièces, leurs essais.
 - [L'étape 3 du LOD : la 3D rallumée autour d'un corps — conception (S722)](registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5), leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [Saint-Venant troué, rempli par un second Saint-Venant — S723](validation/SV-TROUE-S723.md) : B1, le flux complet, 1,6 %.
 - [La séance visuelle R43 : la vague de bout en bout contre le tout-3D — S720](validation/SEANCE-VISUELLE-BOUT-EN-BOUT-S720.md) : R43 posée.
 - [La même onde pour SGN et la 3D — S719](validation/MEME-ONDE-S719.md) : l'écart de remontée vient de la dynamique de SGN.
 - [La vague de bout en bout — S718](validation/BOUT-EN-BOUT-S718.md) : 4 fois moins cher ; la remontée +3,3 cm, venue du large.

@@ -39,3 +39,6 @@ Chaque pièce est jugée d'abord entre deux copies du même solveur (ADR-273 D1)
 - **Le coût** : une boîte de 1 m × 1 m sur 0,5 m d'eau compte ≈ 256 000 particules à 2,5 cm, l'ordre du tout-3D de S690. La boîte se
   dimensionne sur le corps.
 - **La lecture** : par la surface (ADR-280 D1) ; chaque résultat montré au fil du calcul (ADR-281 D1).
+
+*Note datée du 2026-10-09 (S723)* : **B1 acquis** — Saint-Venant troué, rempli par un second Saint-Venant, à la masse au bit et à 1,6 % du
+Saint-Venant entier, à condition d'échanger le **flux complet** (la masse seule : 8,3 %) ([preuve](../validation/SV-TROUE-S723.md)).

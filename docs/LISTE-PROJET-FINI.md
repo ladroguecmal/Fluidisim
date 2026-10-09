@@ -462,6 +462,8 @@ pas recopiée ici (L137).
   propre de SGN contre la 3D ([preuve](validation/MEME-ONDE-S719.md)).
   **S720** : le jalon visuel de la phase A — la vague de bout en bout contre le tout-3D, rendue ; **R43 posée**
   ([preuve](validation/SEANCE-VISUELLE-BOUT-EN-BOUT-S720.md)).
+  **S723** : Saint-Venant troué (LOD étape 3, B1) — le trou rempli par un second Saint-Venant, le flux complet échangé : la masse au bit,
+  à 1,6 % du Saint-Venant entier ([preuve](validation/SV-TROUE-S723.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

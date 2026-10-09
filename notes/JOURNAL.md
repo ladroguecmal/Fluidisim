@@ -2063,3 +2063,10 @@ ferme par l'outil lui-même. Maillons **0** (méthode). Suivant : **S722** ; la 
 rallumée autour d'un corps : B1 (Saint-Venant troué), B2 (APIC à quatre bords), B3 (le raccord de la boîte), B4 (la boîte qui suit le
 corps), B5 (le déclencheur de présence). Chaque pièce a son essai entre deux copies du même solveur d'abord. Le déclencheur au plus simple
 (D1) est remis : il ne se juge pas utilement sur les plages de référence. Maillons **1** (4.14). Lot S720–S722. Suivant : **S723**, B1.
+
+## S723 — 2026-10-09 — Saint-Venant troué (B1)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-3-S722. **Fait** ([preuve](../docs/validation/SV-TROUE-S723.md)) :
+`regler_trou`, `pas_avec_flux_trou`, `pas_avec_flux_bords4`. **Mesuré** : rempli par un second Saint-Venant, le trou redonne le
+Saint-Venant entier à 1,6 %, la masse au bit, si l'on échange le flux complet (la masse seule : 8,3 %). Deux longs *heredocs* rejetés par
+bash, sans effet (ADR-267 D2 le défend : à la revue). **B1 acquis.** Maillons **1** (4.14). Suivant : **S724**, B2, APIC à quatre bords.

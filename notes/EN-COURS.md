@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S723 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B1 : Saint-Venant
+Session : S723 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B1 : Saint-Venant
 troué**.
 
 **Ce que la session fait.** Dans `SaintVenant2D`, à l'ordre deux :
@@ -102,7 +102,9 @@ trou, échangent à chaque pas le flux de masse de Rusanov calculé entre leurs 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le trou, les flux ; l'essai ; (1)–(3).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — le trou, les flux ; l'essai ; (1)–(3).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **Premier passage** : la masse au bit (3,5·10⁻¹⁵), mais l'écart 8,3 % de la bosse (critère 5 %). Seule la masse était échangée ; chaque côté prenait sa propre pression de paroi, et l'interface réfléchissait. **Second passage**, les mêmes critères : le **flux complet** de Rusanov (la masse, la normale avec sa pression, la tangentielle) par face, le même vecteur aux deux côtés, la pression de paroi retirée ; la quantité de mouvement aussi conservée.
+- **P2 fini** — **tenu** : la masse 2,8·10⁻¹⁵, l'écart 0,32 mm (1,6 %), le banc au bit, les essais de Saint-Venant passent. B1 acquis.

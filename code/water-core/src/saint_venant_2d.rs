@@ -52,6 +52,72 @@ pub struct SaintVenant2D {
     /// S687 — le flux imposé à la face droite pour le pas en cours (`pas_avec_flux_droit`).
     flux_impose: Vec<f64>,
     flux_actif: bool,
+    /// **S723 — le trou** (`regler_trou`) : les mailles gelées, et le flux de masse imposé sur ses faces au pas en cours.
+    trou: Option<Trou>,
+    /// S723 — le flux imposé sur les quatre bords du domaine au pas en cours (`pas_avec_flux_bords4`).
+    flux4: Vec<[f64; 3]>,
+    flux4_actif: bool,
+}
+
+/// **S723 — un trou rectangulaire** `[i0, i1) × [j0, j1)` : le masque des mailles gelées, le flux de ses faces (la gauche, la droite par
+/// `j` ; le bas, le haut par `i` ; positif vers la maille active).
+#[derive(Clone, Debug)]
+struct Trou {
+    i0: usize,
+    i1: usize,
+    j0: usize,
+    j1: usize,
+    masque: Vec<bool>,
+    flux: Vec<[f64; 3]>,
+    actif: bool,
+}
+
+/// **S723** — le flux complet `f = [masse, normale, tangentielle]` d'une face de normale selon `x` (`axe` 0) ou `y` (`axe` 1), orienté
+/// vers `+axe`, sur la maille active `k`, à droite de la face (`a_droite`) ou à gauche. La pression de paroi que l'opérateur a mise sur
+/// cette face est retirée : le flux la remplace. Le même vecteur, appliqué aux deux côtés, conserve la masse et la quantité de mouvement.
+fn imposer_face(k: usize, f: [f64; 3], axe: usize, a_droite: bool, g: f64, h: &[f64], t: &mut Travail) {
+    let p = 0.5 * g * h[k] * h[k];
+    let s = if a_droite { 1.0 } else { -1.0 };
+    let (dn, dt) = if axe == 0 { (&mut t.dqx, &mut t.dqy) } else { (&mut t.dqy, &mut t.dqx) };
+    t.dh[k] += s * f[0];
+    dn[k] += s * (f[1] - p);
+    dt[k] += s * f[2];
+}
+
+/// **S723** — les flux imposés (le trou, les quatre bords) appliqués après l'opérateur, à chaque étage de Heun.
+#[allow(clippy::too_many_arguments)]
+fn imposer_s723(nx: usize, ny: usize, g: f64, trou: Option<&Trou>, flux4: Option<&[[f64; 3]]>, h: &[f64], t: &mut Travail) {
+    if let Some(tr) = trou.filter(|t| t.actif) {
+        let (di, dj) = (tr.i1 - tr.i0, tr.j1 - tr.j0);
+        for (n, &f) in tr.flux.iter().enumerate() {
+            // La gauche du trou : l'actif à gauche de la face ; la droite : à droite ; le bas : en dessous ; le haut : au-dessus.
+            let (k, axe, a_droite) = if n < dj {
+                ((tr.i0 - 1) * ny + tr.j0 + n, 0, false)
+            } else if n < 2 * dj {
+                (tr.i1 * ny + tr.j0 + (n - dj), 0, true)
+            } else if n < 2 * dj + di {
+                ((tr.i0 + n - 2 * dj) * ny + tr.j0 - 1, 1, false)
+            } else {
+                ((tr.i0 + n - 2 * dj - di) * ny + tr.j1, 1, true)
+            };
+            imposer_face(k, f, axe, a_droite, g, h, t);
+        }
+    }
+    if let Some(f4) = flux4 {
+        for (n, &f) in f4.iter().enumerate() {
+            // Le bord gauche : la maille à droite de la face ; le droit : à gauche ; le bas : au-dessus ; le haut : en dessous.
+            let (k, axe, a_droite) = if n < ny {
+                (n, 0, true)
+            } else if n < 2 * ny {
+                ((nx - 1) * ny + (n - ny), 0, false)
+            } else if n < 2 * ny + nx {
+                ((n - 2 * ny) * ny, 1, true)
+            } else {
+                ((n - 2 * ny - nx) * ny + ny - 1, 1, false)
+            };
+            imposer_face(k, f, axe, a_droite, g, h, t);
+        }
+    }
 }
 
 /// **S620** — les tableaux de l'ordre deux, alloués au réglage : `η`, les quatre pentes d'une direction, l'état du début du pas (Heun).
@@ -155,9 +221,12 @@ fn imposer_flux_droit(nx: usize, ny: usize, g: f64, eps4: f64, h: &[f64], qx: &[
     }
 }
 
-/// **S620** — l'opérateur d'ordre deux : remplit `dh`, `dqx`, `dqy` (multipliés par `dt/dx` au pas) depuis l'état `(h, qx, qy)`.
+/// **S620** — l'opérateur d'ordre deux : remplit `dh`, `dqx`, `dqy` (multipliés par `dt/dx` au pas) depuis l'état `(h, qx, qy)`. S723 :
+/// `masque` (les mailles gelées d'un trou) — leurs faces avec l'eau active sont des parois, et les pentes voisines y sont nulles.
 #[allow(clippy::too_many_arguments)]
-fn operateur2(nx: usize, ny: usize, g: f64, eps4: f64, z: &[f64], h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, o: &mut Ordre2) {
+fn operateur2(nx: usize, ny: usize, g: f64, eps4: f64, z: &[f64], h: &[f64], qx: &[f64], qy: &[f64], t: &mut Travail, o: &mut Ordre2,
+    masque: Option<&[bool]>) {
+    let gele = |k: usize| masque.is_some_and(|m| m[k]);
     let n = nx * ny;
     for k in 0..n {
         t.u[k] = vitesse(h[k], qx[k], eps4);
@@ -172,7 +241,7 @@ fn operateur2(nx: usize, ny: usize, g: f64, eps4: f64, z: &[f64], h: &[f64], qx:
         let (pas, bord) = if axe == 0 { (ny, nx) } else { (1, ny) };
         for k in 0..n {
             let i = if axe == 0 { k / ny } else { k % ny };
-            if i == 0 || i == bord - 1 {
+            if i == 0 || i == bord - 1 || gele(k) || gele(k - pas) || gele(k + pas) {
                 o.sh[k] = 0.0;
                 o.se[k] = 0.0;
                 o.su[k] = 0.0;
@@ -190,6 +259,11 @@ fn operateur2(nx: usize, ny: usize, g: f64, eps4: f64, z: &[f64], h: &[f64], qx:
         let gauche = |m: usize| if axe == 0 { m } else { (m / (ny - 1)) * ny + m % (ny - 1) };
         for (m, f) in faces.iter_mut().enumerate() {
             let (l, r) = (gauche(m), gauche(m) + pas);
+            // S723 : une face qui touche une maille gelée est une paroi pour la maille active (sa pression), sans flux.
+            if gele(l) || gele(r) {
+                *f = [0.0, 0.0, 0.0, if gele(l) { 0.0 } else { 0.5 * g * h[l] * h[l] }, if gele(r) { 0.0 } else { 0.5 * g * h[r] * h[r] }];
+                continue;
+            }
             let (hl0, el, ul, tl) = (h[l] + 0.5 * o.sh[l], o.e[l] + 0.5 * o.se[l], un[l] + 0.5 * sun[l], ut[l] + 0.5 * sut[l]);
             let (hr0, er, ur, tr) = (h[r] - 0.5 * o.sh[r], o.e[r] - 0.5 * o.se[r], un[r] - 0.5 * sun[r], ut[r] - 0.5 * sut[r]);
             let zs = (el - hl0).max(er - hr0);
@@ -260,8 +334,54 @@ impl SaintVenant2D {
         let travail = Travail { u: vec![0.0; n], v: vec![0.0; n], dh: vec![0.0; n], dqx: vec![0.0; n], dqy: vec![0.0; n],
             fx: vec![[0.0; 5]; (nx - 1) * ny], fy: vec![[0.0; 5]; nx * (ny - 1)] };
         Ok(SaintVenant2D { nx, ny, dx, g, z, h, qx, qy, eps4: EPS4, frottement_n: 0.0, travail, ordre2: None, flux_bords: vec![0.0; 2 * ny],
-            flux_impose: vec![0.0; ny], flux_actif: false })
+            flux_impose: vec![0.0; ny], flux_actif: false, trou: None, flux4: vec![[0.0; 3]; 2 * (nx + ny)], flux4_actif: false })
     }
+
+    /// **S723 — un trou** `[i0, i1) × [j0, j1)`, strictement à l'intérieur du domaine : ses mailles sont gelées (elles ne changent plus),
+    /// leurs faces avec l'eau active sont des parois qui reçoivent le flux de `pas_avec_flux_trou`. Ordre deux seulement.
+    pub fn regler_trou(&mut self, i0: usize, i1: usize, j0: usize, j1: usize) -> Result<(), Refus> {
+        if self.ordre2.is_none() || self.trou.is_some() || !(0 < i0 && i0 < i1 && i1 < self.nx && 0 < j0 && j0 < j1 && j1 < self.ny) {
+            return Err(Refus);
+        }
+        let mut masque = vec![false; self.nx * self.ny];
+        for i in i0..i1 {
+            for j in j0..j1 {
+                masque[i * self.ny + j] = true;
+            }
+        }
+        self.trou = Some(Trou { i0, i1, j0, j1, masque, flux: vec![[0.0; 3]; 2 * (i1 - i0) + 2 * (j1 - j0)], actif: false });
+        Ok(())
+    }
+
+    /// **S723 — un pas, le flux imposé sur les faces du trou** : par face, `[masse, normale, tangentielle]` orienté vers `+x` ou `+y` ; la
+    /// gauche, la droite (par `j`, `j1 − j0` chacune), puis le bas, le haut (par `i`, `i1 − i0` chacune).
+    pub fn pas_avec_flux_trou(&mut self, dt: f64, flux: &[[f64; 3]]) -> Result<(), Refus> {
+        let Some(tr) = self.trou.as_mut() else { return Err(Refus) };
+        if flux.len() != tr.flux.len() || flux.iter().flatten().any(|f| !f.is_finite()) {
+            return Err(Refus);
+        }
+        tr.flux.copy_from_slice(flux);
+        tr.actif = true;
+        let r = self.pas_interne(dt, Some((0.0, None, None)));
+        if let Some(tr) = self.trou.as_mut() {
+            tr.actif = false;
+        }
+        r
+    }
+
+    /// **S723 — un pas, le flux imposé sur les quatre bords du domaine** : par face, `[masse, normale, tangentielle]` orienté vers `+x` ou
+    /// `+y` ; la gauche, la droite (par `j`), puis le bas, le haut (par `i`). Ordre deux seulement.
+    pub fn pas_avec_flux_bords4(&mut self, dt: f64, flux: &[[f64; 3]]) -> Result<(), Refus> {
+        if self.ordre2.is_none() || flux.len() != 2 * (self.nx + self.ny) || flux.iter().flatten().any(|f| !f.is_finite()) {
+            return Err(Refus);
+        }
+        self.flux4.copy_from_slice(flux);
+        self.flux4_actif = true;
+        let r = self.pas_interne(dt, Some((0.0, None, None)));
+        self.flux4_actif = false;
+        r
+    }
+
 
     /// **S620 — passer à l'ordre deux**, avec le `ε` de la vitesse désingularisée (m⁴) ; alloue ses tableaux ici, jamais au pas.
     pub fn regler_ordre_deux(&mut self, eps4: f64) -> Result<(), Refus> {
@@ -355,7 +475,8 @@ impl SaintVenant2D {
             o.h0.copy_from_slice(&self.h);
             o.qx0.copy_from_slice(&self.qx);
             o.qy0.copy_from_slice(&self.qy);
-            operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o);
+            let masque = self.trou.as_ref().map(|t| &t.masque[..]);
+            operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o, masque);
             if let Some((t, gauche, droite)) = bord {
                 if let Some(ext) = gauche {
                     let (he, ue) = ext(t);
@@ -369,12 +490,20 @@ impl SaintVenant2D {
             if self.flux_actif {
                 imposer_flux_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, &self.flux_impose, droite_f);
             }
+            if self.trou.is_some() || self.flux4_actif {
+                let f4 = if self.flux4_actif { Some(&self.flux4[..]) } else { None };
+                imposer_s723(nx, ny, g, self.trou.as_ref(), f4, &self.h, &mut self.travail);
+            }
             for i in 0..n {
+                if self.trou.as_ref().is_some_and(|t| t.masque[i]) {
+                    continue;
+                }
                 self.h[i] += k * self.travail.dh[i];
                 self.qx[i] += k * self.travail.dqx[i];
                 self.qy[i] += k * self.travail.dqy[i];
             }
-            operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o);
+            let masque = self.trou.as_ref().map(|t| &t.masque[..]);
+            operateur2(nx, ny, g, eps4, &self.z, &self.h, &self.qx, &self.qy, &mut self.travail, o, masque);
             if let Some((t, gauche, droite)) = bord {
                 if let Some(ext) = gauche {
                     let (he, ue) = ext(t + dt);
@@ -388,7 +517,14 @@ impl SaintVenant2D {
             if self.flux_actif {
                 imposer_flux_droit(nx, ny, g, eps4, &self.h, &self.qx, &self.qy, &mut self.travail, &self.flux_impose, droite_f);
             }
+            if self.trou.is_some() || self.flux4_actif {
+                let f4 = if self.flux4_actif { Some(&self.flux4[..]) } else { None };
+                imposer_s723(nx, ny, g, self.trou.as_ref(), f4, &self.h, &mut self.travail);
+            }
             for i in 0..n {
+                if self.trou.as_ref().is_some_and(|t| t.masque[i]) {
+                    continue;
+                }
                 let (h2, x2, y2) = (self.h[i] + k * self.travail.dh[i], self.qx[i] + k * self.travail.dqx[i], self.qy[i] + k * self.travail.dqy[i]);
                 self.h[i] = 0.5 * (o.h0[i] + h2);
                 self.qx[i] = 0.5 * (o.qx0[i] + x2);
