@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S719 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. S718 : de bout en bout, la remontée
+Session : S719 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. S718 : de bout en bout, la remontée
 dépasse le tout-3D de 3,3 cm, et le large (SGN) en est la cause. ADR-278 D3 : l'onde de départ, un profil de Boussinesq (KdV,
 `γ = √(3a/4d³)`), n'est l'équilibre ni de SGN ni de la 3D. **La même onde pour les deux : l'onde solitaire de SGN** (le profil de Rayleigh,
 `k = √(3a/(4d²(d+a)))`, plus large de 14 %), avec la même vitesse `c·η/(d+η)`, `c = √(g(d+a))`.
@@ -97,7 +97,8 @@ dépasse le tout-3D de 3,3 cm, et le large (SGN) en est la cause. ADR-278 D3 : l
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E1, E2.
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — E1, E2.
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini** — E1 (Rayleigh, le tout-3D) : 2,558 s, la remontée 0,3504 m ; E2 (de bout en bout) : 2,521 s, 0,3806 m (+3,0 cm). L'onde de départ n'est pas la cause, ni le volume (0,0300 contre 0,0309 m³) : la dynamique propre de SGN.

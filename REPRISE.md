@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 03:16 +02:00
+JETON            : libre
+Battement        : 2026-10-09 03:46 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S719 — la même onde pour SGN et la 3D (le profil de Rayleigh ; session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S718 — La vague de bout en bout (session longue) ([journal](notes/JOURNAL.md)). Avant : S717 (La mort de la 3D vers Saint-Venant)
-Session suivante : S719 — la même onde pour SGN et la 3D (le profil de Rayleigh) ; la remontée de bout en bout
+Session en cours : aucune
+Dernière session : S719 — La même onde pour SGN et la 3D ([journal](notes/JOURNAL.md)). Avant : S718 (La vague de bout en bout)
+Session suivante : S720 — la préparation du jalon visuel de la phase A (la vague de bout en bout, rendue) ; la revue en S721
 Maillons        : 1
-Registres       : dernier lot S716 (ADR-213 D3) ; le prochain au plus tard en S719
+Registres       : dernier lot S719 (ADR-213 D3) ; le prochain au plus tard en S722
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -43,3 +43,8 @@ houle (B et W), non par une onde solitaire. La question se rouvre quand le racco
 
 **D4 — L'étape 1 du LOD (ADR-275 D2) est close** avec D1. L'étape 2, la bande 3D qui naît et meurt avec la vague, est conçue dans
 [LOD-ETAPE-2-S705](../registres/LOD-ETAPE-2-S705.md).
+
+*Note datée du 2026-10-09 (S719)* : D3 mise à l'épreuve ([preuve](../validation/MEME-ONDE-S719.md)). Avec la même onde de départ (Rayleigh)
+pour SGN et la 3D, la vague de bout en bout remonte encore 3,0 cm plus haut que le tout-3D. La cause n'est ni l'onde de départ ni le volume
+(la bande nourrie par SGN reçoit 3 % d'eau de moins), mais la dynamique propre de SGN sur une onde très non linéaire. La question reste
+ouverte jusqu'à la houle (W).

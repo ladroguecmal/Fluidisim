@@ -517,6 +517,9 @@ du déferlement (4.14, 4.16).
 **S714–S716** : le juge de S690 au pas de 2,5 ms (−0,042 s, dans la tolérance ; le plafond de 10 ms reste) ; la renaissance de la 3D par
 la surface (N2 acquis, à 1 % de la 3D ininterrompue) ; la quarante-septième revue (ADR-281 : chaque résultat montré dès qu'il est
 mesuré ; un critère doit pouvoir échouer) (4.14).
+**S717–S719** : la mort de la 3D vers Saint-Venant (M1 acquis, la remontée à 0,2 mm) ; la vague de bout en bout (4 fois moins cher que
+le tout-3D, le déferlement dans la tolérance, la remontée +3 cm) ; la même onde pour SGN et la 3D (l'écart vient de la dynamique de
+SGN) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
