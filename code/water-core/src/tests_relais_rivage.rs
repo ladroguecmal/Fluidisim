@@ -2603,6 +2603,8 @@ struct Temoin {
     air: Option<(f64, f64)>,
     remontee: (f64, f64),
     front_max: f64,
+    /// S734 (S3) : quand le mur de droite est dans l'eau, le plus grand écart du niveau de sa colonne au repos (m) ; zéro sinon.
+    mur_eta: f64,
     crete: Vec<(f64, f64, f64)>,
     particules: (usize, usize),
     duree: f64,
@@ -2676,6 +2678,9 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
             r.air = Some((ts, x));
         }
         let (_, h) = volume_surface_s708(&a);
+        if s.mur_apres_pied.is_some() {
+            r.mur_eta = r.mur_eta.max((marche[nx - 1] as f64 + h[nx - 1] - d).abs());
+        }
         if let Some(i) = (0..nx).rev().find(|&i| h[i] > 0.005) {
             let x = xg(i as f64);
             r.front_max = r.front_max.max(x);
@@ -2727,15 +2732,16 @@ fn the_selector_witness_s2_synolakis_s734() {
 }
 
 /// **S734 — S3, glissante** : `H/d` = 0,5 sur 1:90, `d` = 0,3 m, un mur à 16 m du pied, 12 s. (4) le retournement, rapporté qu'il ait lieu ou
-/// non ; le témoin contrôlé.
+/// non ; le témoin contrôlé. Le mur est dans l'eau (0,12 m) : le critère du front ne s'y applique pas ; **corrigé avant le calcul** — le
+/// niveau de la colonne du mur reste à 5 mm du repos (l'onde ne l'atteint pas).
 #[test]
 #[ignore = "le témoin S3 du sélecteur, tout-3D (≈ 1 h)"]
 fn the_selector_witness_s3_spilling_s734() {
     let s = ScenePlage { nom: "S3", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 12., lisse: false };
     let r = temoin_plage_s734(&s);
-    println!("S734 S3 : le retournement {:?} (la question de la scène)", r.retournement);
+    println!("S734 S3 : le retournement {:?} (la question de la scène) ; le niveau au mur {:.1} mm du repos", r.retournement, r.mur_eta * 1e3);
     assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
-    assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
+    assert!(r.mur_eta < 0.005, "le témoin : l'onde atteint le mur");
 }
 
 /// **S734 — S4 sur le fond lisse** (ajouté après S4 en escalier : la remontée +47 %, l'eau piégée dans les marches de 1:3, un retournement au

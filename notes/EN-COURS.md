@@ -136,3 +136,7 @@ S4 change de pente par rapport au registre (0,03 sur 1:12) : une onde de 15 mm y
   - **Le prédicteur sur S4** : Kennedy 0,65 ne se déclenche pas, ce qui est juste. Les huit autres se déclenchent tous à 11,2–11,6 m, au
     rivage et dans la zone de jet de rive (le fond arrêté à 4 cm commence à 11,19 m).
   - **S2 en cours** : le retournement à 3,290 s, à 12,013 m (0,21 m d'eau).
+- **S3, un défaut du montage, trouvé avant son calcul** : son mur (16 m après le pied) est dans 0,12 m d'eau. Le critère « le front à plus de
+  1 m du mur » y est faux par construction. **Corrigé avant le calcul** : le niveau de la colonne du mur reste à 5 mm du repos.
+- **Reprise** (2026-10-09) : le travail fait après `44807cd2` a été effacé à la demande de l'utilisateur. S2, S3 et S4 sur fond lisse
+  tournent en série, seuls.
