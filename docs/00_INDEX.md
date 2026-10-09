@@ -166,6 +166,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le sélecteur des domaines — conception (S732)](registres/SELECTEUR-DOMAINES-S732.md) : la prévision par le porteur, les frontières, la solidité, sept scènes, trois juges, six pièces.
 - [L'étape 3 du LOD : la 3D rallumée autour d'un corps — conception (S722)](registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5), leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [La 3D trop haute sur S4 : la distance parcourue — S738](validation/DISTANCE-PARCOURUE-S738.md) : aucune régression ; l'onde de départ se transforme.
 - [La lecture par les particules et le juge robuste — S737](validation/LECTURE-PARTICULES-S737.md) : deux instruments prêts ; la 3D trop haute, ouverte.
 - [Le diagnostic de S4 — S735](validation/DIAGNOSTIC-S4-S735.md) : le front, une lecture fausse ; la 3D remonte réellement trop haut.
 - [Les témoins du sélecteur — S734](validation/TEMOINS-SELECTEUR-S734.md) : S2 sûr ; S3 et S4 manqués, les raisons écrites.

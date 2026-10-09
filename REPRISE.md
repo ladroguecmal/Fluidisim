@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 15:01 +02:00
+JETON            : libre
+Battement        : 2026-10-09 16:25 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S738 — la 3D trop haute : S645 relancé, puis la bissection ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S737 — La lecture par les particules et le juge robuste ([journal](notes/JOURNAL.md)). Avant : S736 (la cinquante et unième revue de méthode)
-Session suivante : S738 — la 3D trop haute : S645 relancé tel quel, puis S4 rapproché de S645 un écart à la fois, puis l'onde de départ exacte
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S738 — La 3D trop haute sur S4 : la distance parcourue ([journal](notes/JOURNAL.md)). Avant : S737 (La lecture par les particules et le juge robuste)
+Session suivante : S739 — l'onde solitaire dans la 3D sur un long canal plat (crête, largeur, volume, vitesse, traîne selon la distance), puis l'onde de départ exacte
+Maillons        : 0
 Registres       : dernier lot S737 (ADR-213 D3) ; le prochain au plus tard en S740
 ```
 

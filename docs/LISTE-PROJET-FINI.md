@@ -488,6 +488,8 @@ pas recopiée ici (L137).
   **S737** : la remontée lue par les particules (elle suit l'eau) ; le juge du retournement robuste au bruit (S2 gardé à 0,026 s ; le
   reflux de S4 déferle, comme le prévoit Synolakis) ; la remontée de S4 était plafonnée par le domaine
   ([preuve](validation/LECTURE-PARTICULES-S737.md)).
+  **S738** : S645 redonné au millimètre (aucune régression) ; la remontée de S4 trop haute vient de la distance parcourue sur le fond
+  plat (+47 % avec 3 m de plus, −7 % sans) : l'onde de départ se transforme dans la 3D ([preuve](validation/DISTANCE-PARCOURUE-S738.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

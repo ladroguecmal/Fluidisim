@@ -157,3 +157,7 @@ Les témoins attendent deux choses : une lecture par les particules, et un juge 
 
 **Correction** : S4 (`H/d` = 0,2, 1:3) déferle au reflux (Synolakis : dès 0,141 à 1:3). Il reste un témoin du déferlement pendant la
 montée ; il n'est pas « sans déferlement ». La scène sans aucun déferlement demande `H/d < 0,141` à 1:3.
+
+*Note datée du 2026-10-09 (S738)* : la remontée trop haute de S4 vient de la distance parcourue sur le fond plat
+([preuve](../validation/DISTANCE-PARCOURUE-S738.md)). L'onde de départ (une vitesse uniforme sur la verticale) se transforme dans la 3D.
+Les témoins de la batterie en dépendent ; l'onde de départ exacte vient avant le calibrage.

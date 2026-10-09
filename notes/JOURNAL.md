@@ -2210,3 +2210,15 @@ du retournement robuste (une marge de `dx/4` sur φ). **Mesuré** :
 
 Pendant le calcul, l'enquête sur la 3D trop haute : la littérature (l'onde de départ inexacte), le cœur relu, la contradiction avec S645.
 Maillons **1** (4.14). Suivant : **S738**, S645 relancé, puis la bissection.
+
+## S738 — 2026-10-09 — La 3D trop haute sur S4 : la distance parcourue
+
+**Entrée.** LECTURE-PARTICULES-S737 : S4 contre S645. **Fait** ([preuve](../docs/validation/DISTANCE-PARCOURUE-S738.md)) : les variantes
+de S4 vers S645, l'instrument de S645 dans le témoin. **Mesuré** :
+- E1 : S645 redonné au millimètre (0,2307 m), aucune régression ;
+- E2 : le plafond relevé, +47 % encore ;
+- E3 : l'onde à la distance canonique du pied, **−7 %**.
+
+**L'écart désigné : la distance parcourue sur le fond plat.** L'onde de départ (une vitesse uniforme sur la verticale) se transforme dans la
+3D, et c'est le suspect commun de la crête trop haute (S713, S1). Maillons **0** (diagnostic). Suivant : **S739**, l'onde dans la 3D sur un
+long canal plat, puis l'onde de départ exacte.
