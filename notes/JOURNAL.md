@@ -2027,3 +2027,10 @@ mort de la 3D vers Saint-Venant par la surface ; la revue en S721.
 `mort_vers_sv` (la surface, `h·ū`), les modes `AucunJusqua5` et `AucunMort`. **E1 tenu** : au repos, le volume au bit, Saint-Venant
 immobile. **E2 tenu** : la 3D morte à 3,2 s, la remontée à 0,2 mm et 2 ms du tout-3D ; 5 s en 519 s contre 1 191 s. **M1 acquis.**
 Maillons **1** (4.14). Suivant : **S718**, la vague de bout en bout (D1 au plus simple, E1).
+
+## S718 — 2026-10-09 — La vague de bout en bout (session longue)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-2-S705, E1. **Fait** ([preuve](../docs/validation/BOUT-EN-BOUT-S718.md)) :
+`Large::BoutEnBout` (SGN, la bande 3D, la mort, Saint-Venant) et le témoin sans la mort. **Mesuré** : le déferlement dans la tolérance
+(−0,068 s) ; la remontée +3,3 cm, la même sans la mort : la mort est innocente, le large (SGN) en cause ; **302 s contre 1 191 s**.
+Maillons **1** (4.14). Suivant : **S719**, la même onde pour SGN et la 3D (le profil de Rayleigh).

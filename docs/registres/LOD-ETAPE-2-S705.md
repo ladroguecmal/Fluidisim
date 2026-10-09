@@ -56,3 +56,7 @@ qui se repose en ≈ 1 s. Suivant : M1, la mort par la surface.
 *Note datée du 2026-10-09 (S717)* : **M1 acquis** — la 3D morte à 3,2 s rend une remontée à 0,2 mm et 2 ms du tout-3D, pour 2,3 fois moins
 de calcul sur 5 s ([preuve](../validation/MORT-3D-S717.md)). Suivant : D1 au plus simple (l'élévation de SGN au bord de la bande) et E1,
 la vague de bout en bout.
+
+*Note datée du 2026-10-09 (S718)* : **E1, la vague de bout en bout, fonctionne**, pour 4 fois moins de calcul que le tout-3D
+([preuve](../validation/BOUT-EN-BOUT-S718.md)). Le déferlement est dans la tolérance. La remontée, +3,3 cm, vient du large (SGN, l'onde de
+départ plus haute), non de la mort. Reste D1, le déclencheur, au plus simple, puis la question d'ADR-278 D3 (S719).

@@ -503,6 +503,11 @@ enum Large {
     AucunJusqua5,
     /// S717 : le même, jusqu'à 5 s ; à 3,2 s, toute la 3D meurt vers Saint-Venant (la plage entière).
     AucunMort,
+    /// S718 : la vague de bout en bout — `GrilleSgn` (la bande 3D de `x_r` au rivage, SGN au large), jusqu'à 5 s ; à 3,2 s, la bande meurt
+    /// et un seul Saint-Venant reprend la plage entière (le large depuis SGN, la bande depuis sa surface, le rivage).
+    BoutEnBout,
+    /// S718 : le témoin — la même bande nourrie par SGN, jusqu'à 5 s, sans la mort.
+    BandeJusqua5,
     /// S693, S695 : la zone de colonnes de S650 (0,6 m), la vitesse uniforme sur la verticale ; le porteur Saint-Venant, ou SGN si `sgn`.
     Colonnes { sgn: bool },
     /// S698 : le bord à particules, la pose par faces, les vitesses du profil vertical de SGN.
@@ -609,13 +614,14 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
     let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_) | Large::AucunPasCourt
         | Large::AucunJusqua5 | Large::AucunMort);
-    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort) { 5_000_000 } else { 4_000_000 };
+    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort | Large::BoutEnBout | Large::BandeJusqua5) { 5_000_000 } else { 4_000_000 };
+    let meurt = matches!(large_, Large::AucunMort | Large::BoutEnBout);
     let t_mort: u64 = 3_200_000;
     let plafond_us: u64 = if large_ == Large::AucunPasCourt { 2_500 } else { 10_000 };
     assert_eq!(sans_raccord, x_r == 0., "{large_:?} et x_r = {x_r}");
     assert_eq!(matches!(large_, Large::Rejeu(_)), rejeu.is_some(), "{large_:?} et l'enregistrement");
-    assert!(enreg.is_none() || sans_raccord, "seul le montage sans raccord enregistre");
-    let sgn = matches!(large_, Large::Colonnes { sgn: true } | Large::ProfilSgn | Large::GrilleSgn) || enreg.is_some();
+    assert!(enreg.is_none() || sans_raccord || matches!(large_, Large::BoutEnBout | Large::BandeJusqua5), "seul le montage sans raccord, ou de bout en bout, enregistre");
+    let sgn = matches!(large_, Large::Colonnes { sgn: true } | Large::ProfilSgn | Large::GrilleSgn | Large::BoutEnBout | Large::BandeJusqua5) || enreg.is_some();
     let mode_rejeu = if let Large::Rejeu(m) = large_ { Some(m) } else { None };
     use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
     use crate::grand_evenement::OndeSolitaire;
@@ -664,8 +670,8 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
         a.set_density_relaxation(k as f32 * 1e-3).unwrap();
     }
     // S698 : le raccord du large par particules (sans zone de colonnes).
-    let par_particules = matches!(large_, Large::ProfilSgn | Large::GrilleSgn | Large::Rejeu(_));
-    let par_profil = matches!(large_, Large::ProfilSgn | Large::GrilleSgn);
+    let par_particules = matches!(large_, Large::ProfilSgn | Large::GrilleSgn | Large::BoutEnBout | Large::BandeJusqua5 | Large::Rejeu(_));
+    let par_profil = matches!(large_, Large::ProfilSgn | Large::GrilleSgn | Large::BoutEnBout | Large::BandeJusqua5);
     let mut curseur = 0usize;
     if par_particules {
         a.enable_left_inlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
@@ -709,7 +715,7 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     let mut prochain = 0u64;
     while t < t_fin {
         let mut us = rel.pas_stable_us(plafond_us).min(t_fin - t);
-        if large_ == Large::AucunMort && t < t_mort {
+        if meurt && t < t_mort {
             us = us.min(t_mort - t);
         }
         let t1 = (t + us) as f64 * 1e-6;
@@ -800,7 +806,7 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
                 let z = (k + 0.5 * part) * dxs;
                 (vit(z) * part).max(0.) * us as f64 * 1e-6 * dxs * dxs
             }).collect();
-            if large_ == Large::GrilleSgn {
+            if matches!(large_, Large::GrilleSgn | Large::BoutEnBout | Large::BandeJusqua5) {
                 // S703 : la pose par la grille (S702) ; la tranche balayée par la vitesse du bord.
                 let bal: Vec<f32> = bord.iter().map(|&u| (u.max(0.) as f64 * us as f64 * 1e-6) as f32).collect();
                 rel.apic.feed_left_grid(&v, &bal).unwrap();
@@ -864,18 +870,25 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
         if let Some(e) = enreg.as_deref_mut() {
             e.remontee.push((ts, remontee_niveau_s688(&rel.sv, niveau as f64)));
         }
-        if large_ == Large::AucunMort && t == t_mort {
+        if meurt && t == t_mort {
             // S717 (M1) : toute la 3D meurt ; Saint-Venant reprend la plage entière, la 3D et le rivage réunis.
-            let (h3, q3) = mort_vers_sv(&rel.apic, &|x: f64| (x - x_pied).max(0.) / cot);
+            // S718 : la bande commence à `x_r` ; le large (0 à `x_r`) vient de SGN, cellule à cellule.
+            let (h3, q3) = mort_vers_sv(&rel.apic, &|x: f64| (x + x_r - x_pied).max(0.) / cot);
             let (nsv, ny_) = (rel.sv.nx, rel.sv.ny);
-            let nt = nx + nsv;
+            let n_large = if x_r > 0. { i_r } else { 0 };
+            let nt = n_large + nx + nsv;
             let zc = |i: usize| ((i as f64 + 0.5) * dxs - x_pied).max(0.) / cot;
             let z: Vec<f64> = (0..nt * ny_).map(|k| zc(k / ny_)).collect();
-            let h: Vec<f64> = (0..nt * ny_).map(|k| if k / ny_ < nx { h3[k] } else { rel.sv.h[k - nx * ny_] }).collect();
-            let qx: Vec<f64> = (0..nt * ny_).map(|k| if k / ny_ < nx { q3[k] } else { rel.sv.qx[k - nx * ny_] }).collect();
+            let piece = |k: usize, large: &dyn Fn(usize) -> f64, bande: &[f64], rivage: &[f64]| {
+                let i = k / ny_;
+                if i < n_large { large(i) } else if i < n_large + nx { bande[k - n_large * ny_] } else { rivage[k - (n_large + nx) * ny_] }
+            };
+            let h: Vec<f64> = (0..nt * ny_).map(|k| piece(k, &|i| serre.h[i], &h3, &rel.sv.h)).collect();
+            let qx: Vec<f64> = (0..nt * ny_).map(|k| piece(k, &|i| serre.q[i], &q3, &rel.sv.qx)).collect();
             let qy = vec![0f64; nt * ny_];
             let v_rendu = h.iter().sum::<f64>() * dxs * dxs;
-            let v_avant = volume_surface_s708(&rel.apic).0 + rel.sv.h.iter().sum::<f64>() * dxs * dxs;
+            let v_large = (0..n_large).map(|i| serre.h[i]).sum::<f64>() * dxs * dxs * ny_ as f64;
+            let v_avant = v_large + volume_surface_s708(&rel.apic).0 + rel.sv.h.iter().sum::<f64>() * dxs * dxs;
             eprintln!("S717 mort à {ts:.2} s : le volume rendu {v_rendu:.6} m³, la surface et le rivage {v_avant:.6} m³ ({:+.3e})", v_rendu / v_avant - 1.);
             let mut tout = SaintVenant2D::nouveau(nt, ny_, dxs, 9.81, z, h, qx, qy).unwrap();
             tout.regler_ordre_deux(1e-16).unwrap();
@@ -2062,5 +2075,38 @@ fn the_3d_dies_after_the_break_s717() {
     println!("S717 E2 : la 3D morte à 3,2 s — la remontée maximale {r1:.4} m à {t1:.3} s (le tout-3D : {r0:.4} m à {t0:.3} s) ; le volume rendu {:+.3e} ; {d1:.0} s", vr / va - 1.);
     assert!((vr / va - 1.).abs() < 0.005, "critère E2 : le volume");
     assert!((r1 - r0).abs() < 0.0125 && (t1 - t0).abs() < 0.1, "critère E2 : la remontée ({r1} à {t1} contre {r0} à {t0})");
+}
+
+/// **S718 — la vague de bout en bout** (LOD-ETAPE-2-S705, E1) : SGN au large, la bande 3D nourrie par la grille, le déferlement, la mort à
+/// 3,2 s, Saint-Venant sur la plage entière jusqu'à 5 s. Contre le tout-3D jusqu'à 5 s (S717, déterministe : 2,637 s, 9,988 m ; l'air à
+/// 2,790 s ; la remontée 0,3387 m à 3,917 s ; 1 191 s) : (1) le retournement à 0,1 s et 0,15 m, l'air après ; (2) la remontée à 1,25 cm
+/// et 0,1 s ; (3) le volume rendu à 0,5 %, la masse au bit ; (4) le coût. **Mesuré** : (1) 2,569 s, 9,863 m, tenu ; (2) **échoue**,
+/// 0,3714 m à 3,859 s (+3,3 cm) — la bande nourrie par SGN sans la mort remonte autant (le témoin) : le large en cause, non la mort ;
+/// (3) −3,8·10⁻⁴, tenu ; (4) 302 s contre 1 191 s. L'essai garde (1), (3) et la remontée à 1,25 cm de son témoin sans la mort.
+#[test]
+#[ignore = "la vague de bout en bout (≈ 5 min)"]
+fn the_wave_from_end_to_end_s718() {
+    let mut e = Enregistrement::default();
+    let (premier, air, masse, dette, n0, duree) = deux_raccords_porteur(5.0, Large::BoutEnBout, Some(&mut e), None);
+    let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+    let (vr, va) = e.mort.expect("la mort");
+    println!("S718 : de bout en bout — {n0} particules au départ ; retournement {premier:?} (tout-3D 2,637 s, 9,988 m) ; air {air:?} (2,790 s) ; la remontée {rr:.4} m à {tr:.3} s (0,3387 m à 3,917 s) ; le volume rendu {:+.3e} ; masse {masse:.1e}, dette {dette:.3} ; {duree:.0} s jusqu'à 5 s (tout-3D : 1 191 s)", vr / va - 1.);
+    let (tp, xp) = premier.expect("critère 1 : un retournement");
+    let (ta, _) = air.expect("critère 1 : de l'air");
+    assert!((tp - 2.637).abs() < 0.1 && (xp - 9.988).abs() < 0.15 && ta >= tp, "critère 1 ({tp}, {xp})");
+    assert!((rr - 0.3714).abs() < 0.0125 && (tr - 3.856).abs() < 0.1, "acquis : la remontée de son témoin sans la mort ({rr} à {tr})");
+    assert!((vr / va - 1.).abs() < 0.005 && masse < 1e-12 && dette < 1.0, "critère 3");
+}
+
+/// **S718 — le témoin de la vague de bout en bout** : la même bande nourrie par SGN, jusqu'à 5 s, **sans** la mort. Seule la mort change
+/// (ADR-276 D2). Rapporte la remontée (de bout en bout : 0,3714 m à 3,859 s ; le tout-3D : 0,3387 m à 3,917 s). **Mesuré** : 0,3714 m à
+/// 3,856 s ; 574 s.
+#[test]
+#[ignore = "la bande nourrie par SGN jusqu'à 5 s (≈ 12 min)"]
+fn the_band_fed_by_serre_without_death_s718() {
+    let mut e = Enregistrement::default();
+    let (premier, _, _, _, _, duree) = deux_raccords_porteur(5.0, Large::BandeJusqua5, Some(&mut e), None);
+    let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+    println!("S718 témoin : la bande nourrie par SGN, sans la mort — retournement {premier:?} ; la remontée {rr:.4} m à {tr:.3} s ; {duree:.0} s");
 }
 

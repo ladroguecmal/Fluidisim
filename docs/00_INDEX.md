@@ -164,6 +164,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)](registres/LOD-ETAPE-2-S705.md) : cinq pièces, leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [La vague de bout en bout — S718](validation/BOUT-EN-BOUT-S718.md) : 4 fois moins cher ; la remontée +3,3 cm, venue du large.
 - [La mort de la 3D vers Saint-Venant, par la surface — S717](validation/MORT-3D-S717.md) : M1 acquis, la remontée à 0,2 mm.
 - [La renaissance de la 3D par la surface — S715](validation/RENAISSANCE-SURFACE-S715.md) : N2 acquis.
 - [Le juge des raccords sous un pas plus court — S714](validation/JUGE-PAS-COURT-S714.md) : −0,042 s, dans la tolérance.

@@ -456,6 +456,8 @@ pas recopiée ici (L137).
   phase juste, l'onde 10 % plus haute qui se repose ([preuve](validation/RENAISSANCE-SURFACE-S715.md)).
   **S717** : la mort de la 3D vers Saint-Venant par la surface (M1 acquis) — la remontée à 0,2 mm et 2 ms du tout-3D ; 5 s en 519 s
   contre 1 191 s ([preuve](validation/MORT-3D-S717.md)).
+  **S718** : la vague de bout en bout (SGN, la bande 3D, la mort, Saint-Venant) — 4 fois moins cher que le tout-3D, le déferlement dans
+  la tolérance ; la remontée +3,3 cm, venue du large (SGN), non de la mort ([preuve](validation/BOUT-EN-BOUT-S718.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

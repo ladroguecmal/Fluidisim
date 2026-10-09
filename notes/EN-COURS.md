@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S718 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **E1 : la vague de bout
+Session : S718 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-2-S705, **E1 : la vague de bout
 en bout**. N1, N2 et M1 sont acquis (S707, S715, S717).
 
 **Ce que la session fait.** `Large::BoutEnBout`, un mode nommé (ADR-277 D2) :
@@ -105,7 +105,9 @@ déterministe au bit, donc non relancé) :
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le mode ; l'essai ; (1)–(4).
-- [ ] **P3** — preuve ; rituel.
+- [x] **P2** — le mode ; l'essai ; (1)–(4).
+- [x] **P3** — preuve ; rituel.
 
 ### Notes de reprise
+- **L'essai : (2) échoue** — le retournement 2,569 s, 9,863 m (−0,068 s, dans la tolérance, comme S703) ; l'air 2,747 s ; **la remontée 0,3714 m à 3,859 s** (le tout-3D : 0,3387 m ; +3,3 cm) ; le volume rendu −3,8·10⁻⁴ ; **302 s contre 1 191 s** (4 fois moins). Le témoin, une seule cause (la mort) : `Large::BandeJusqua5`, la même bande nourrie par SGN jusqu'à 5 s sans la mort. Si sa remontée est aussi vers 0,37 m, la mort est innocente, et le large (SGN, l'onde 10 % plus haute) est en cause.
+- **P2 fini** — le témoin sans la mort : 0,3714 m à 3,856 s, la même remontée ; la mort est innocente, le large (SGN) en cause (ADR-278 D3). Suite : S719, la même onde (le profil de Rayleigh) pour SGN et la 3D.
