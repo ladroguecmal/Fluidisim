@@ -62,64 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S737 — **terminée**. En autonomie ; session longue. DIAGNOSTIC-S4-S735. **La question** : lus par les particules, le front et la
-remontée suivent-ils l'eau, et un juge du retournement qui ignore le bruit de surface garde-t-il les vrais retournements en écartant le faux
-de S4 ?
-
-**Ce que la session fait.**
-- **Le front par les particules** (`front_particules_s737`) : par colonne, l'épaisseur comptée `n·dx/(8·ny)` (toutes les rangées). Le front
-  est la colonne la plus avancée au-dessus de 5 mm dont la voisine d'amont l'est aussi, ce qui écarte une goutte isolée. La remontée vaut
-  `zb(front) − d`. **Sa seconde lecture** (ADR-286 D2) : le front par φ de S734, rapporté à côté au fil du calcul.
-- **Le juge robuste** (`retournement_robuste_s737`) : celui de S647, mais une maille « air » du vide ne compte que si son φ dépasse
-  `dx/4`. Plus près, c'est l'interface (S735 : φ = +1 mm). **Le juge de S647 reste tel quel**, et les deux sont rapportés.
-- `temoin_plage_s734` rapporte les deux juges, les deux fronts, et la série de la remontée par les particules tous les 0,1 s.
+Session : S738 — **en cours**. En autonomie ; session longue. LECTURE-PARTICULES-S737. **La question** : pourquoi la 3D remonte-t-elle
+S4 (`H/d` = 0,2, 1:3, `d` = 0,5 m) à 0,52 m au moins, quand S645, le même cas à `d` = 0,35 m, remontait à 98 % de la loi (0,2307 m contre
+0,2295) ? **Une cause à la fois, du moins cher au plus cher (ADR-276 D2) ; aucun remède dans cette session.**
 
 **Les essais, et leurs critères écrits avant.**
-1. **Le cas d'école de S647** (une couche plate ; une lèvre d'eau au-dessus d'un vide) : le juge robuste ne trouve rien sur la couche, et
-   trouve la lèvre.
-2. **S4 sur fond lisse**, 6 s : le juge robuste **ne voit aucun retournement** (celui de S647 en voyait un à 4,94 s, à 4,14 m). La
-   remontée par les particules **redescend** : à 6 s, sous 80 % de son maximum. Son maximum est rapporté contre 0,328 m (S735 attend 0,45
-   à 0,53 m).
-3. **S2**, 5,65 s : le juge robuste voit le retournement à **0,05 s et 0,1 m** de celui de S647 (3,290 s ; 12,01 m).
+- **E1 — S645 relancé tel quel** (`ballistic_air_lets_the_swash_run_up_fine_s645`, ≈ 5 min). Le code d'aujourd'hui redonne-t-il 0,2307 m
+  (la particule la plus haute) à 2 mm près ? Si non : **une régression**, la bissection de l'historique est la suite, et rien d'autre.
+- **E2 à E5 — S4 rapproché de S645**, un écart à la fois. Chaque variante garde les précédentes :
+  - **E2, le plafond** : le domaine monte à 1,0 m au-dessus du niveau (au lieu de 0,6 m) ;
+  - **E3, l'approche** : l'onde à la distance canonique du pied, comme S645 (sans les 3 m de plus) ;
+  - **E4, la vitesse sur la grille** : posée sur les particules seulement, comme S645 ;
+  - **E5, l'échelle** : `d` = 0,35 m, `H` = 0,07 m, la même géométrie que S645 sauf le mur du large.
 
-**Les bornes de durée** (ADR-286 D1, `python` au plan) :
-- S4 : le mur à 15,31 m ; même à +80 % de la loi, la lame s'arrête à 13,08 m, soit 2,2 m de marge ;
-- S2 : le mur à 20,22 m ; le front de S734 s'arrêtait à 17,59 m, soit 2,6 m de marge.
+  Chacune rapporte trois lectures de la remontée :
+  - la particule la plus haute au-delà du pied (l'instrument de S645) ;
+  - le front par les particules (S737), au seuil de 5 mm ;
+  - la loi.
 
-**Contrôles du plan** (ADR-226, ADR-233, ADR-280, ADR-285, ADR-286)
+  **L'écart désigné** est la première variante qui ramène la remontée (la particule la plus haute) à moins de 15 % de la loi.
+- **Les bornes** (ADR-286 D1) :
+  - avec le plafond à 1,0 m au-dessus du niveau, le fond le rejoint à 1,5/3 = 0,5 m après le rivage… *au plus 1,0 m de remontée* ;
+  - la plage fait 4 m au-delà du rivage, soit 1,33 m de hauteur : le plafond est la frontière, et une remontée qui l'atteint est
+    rapportée comme plafonnée ;
+  - la durée, 6 s : la remontée culmine vers 4,5 s.
 
-- **témoin** :
-  - le juge de S647 sur les mêmes calculs ;
-  - le cas d'école de S647 ;
-  - la loi de Synolakis, rapportée.
-- **instrument** : le front par les particules, éprouvé sur S4 lui-même, contre φ (ADR-286 D2) ; le compte de toutes les rangées (et non
-  plus d'une seule) divise le bruit par deux.
-- **calcul** : S4 (≈ 35 min), puis S2 (≈ 28 min), en série, par chemins absolus (ADR-286 D3).
+**Contrôles du plan** (ADR-226, ADR-276, ADR-285, ADR-286)
+
+- **témoin** : S645, mesuré aujourd'hui ; la loi de Synolakis (le déferlement au reflux n'y change rien : la remontée précède le reflux).
+- **instrument** : trois lectures de la même grandeur (ADR-286 D2), rapportées au fil du calcul.
+- **calcul** : E1, 5 min ; E2 à E5, ≈ 30, 25, 25 et 10 min, en série, par chemins absolus.
 - **ADR** :
-  - ADR-280 D1 : deux lectures nommées ;
-  - ADR-245 D2 : un seuil dans une seule fonction (`dx/4`, une constante).
+  - ADR-276 D2 : une cause à la fois, le plan écrit ce que chaque variante change ;
+  - ADR-286 D1 : les frontières, chiffrées.
 - **pièges** :
-  - changer le juge de S647 changerait toutes les mesures passées ; il n'est pas touché ;
-  - le seuil de `dx/4` doit garder la lèvre du cas d'école.
+  - S645 avait un mur au bout de la plage, à 0,26 m au-dessus du niveau ; S4 n'en a pas. E5 le dit ;
+  - la variante qui « ramène » peut cacher deux causes : on s'arrête à la première, et le rapport le dit.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les deux lectures, le juge robuste ; le cas d'école (1).
-- [x] **P3** — S4 et S2 ; (2), (3).
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — E1.
+- [ ] **P3** — les variantes de la scène ; E2 à E5 (on s'arrête à la première qui ramène).
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — (1) **tenu** : la couche plate, rien ; la lèvre, trouvée (colonne 27, écart 1), comme S647. Le juge robuste, le front par les particules, les deux juges et les deux lectures dans le témoin.
-- **P3 fini** :
-  - **(3) tenu** : S2, le juge robuste à 3,315 s, à 12,088 m, contre 3,290 s et 12,013 m pour S647 (0,026 s ; 0,075 m).
-  - **(2), la remontée par les particules redescend : tenu.** Elle passe par 0,4585 m à 4,0 s et un maximum de 0,5168 m à 4,5 s, puis
-    redescend à 0,2835 m à 5,0 s et à −0,1665 m à 6,0 s.
-  - **(2), aucun retournement : manqué**, mais le critère était faux. Le juge robuste écarte le faux de S647 (4,938 s, à 4,14 m) et en voit
-    un autre à 5,681 s, à 10,54 m, en plein reflux. **Synolakis (1987)** : le déferlement pendant le reflux commence à
-    `H/d > 0,479·cot^(−10/9)`, soit 0,141 à 1:3. S4 (0,2) doit donc déferler au reflux. Le plan avait pris le seuil de la montée (0,818,
-    soit 0,241) pour un seuil d'absence de tout déferlement.
-  - **Trouvé en route** :
-    - la remontée de S4 a été **plafonnée par le domaine**. Le fond rejoint le plafond (1,10 m) à 13,11 m ; la « remontée » par φ vaut
-      0,6001 m, soit le plafond ; les particules montent à z = 1,094 m ;
-    - S645 (le même cas, `d` = 0,35 m, sa propre géométrie) remontait à 98 % de la loi.

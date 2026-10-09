@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 15:00 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 15:01 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S738 — la 3D trop haute : S645 relancé, puis la bissection ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S737 — La lecture par les particules et le juge robuste ([journal](notes/JOURNAL.md)). Avant : S736 (la cinquante et unième revue de méthode)
 Session suivante : S738 — la 3D trop haute : S645 relancé tel quel, puis S4 rapproché de S645 un écart à la fois, puis l'onde de départ exacte
 Maillons        : 1
