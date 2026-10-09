@@ -2941,13 +2941,48 @@ type MesureCanal = (f64, f64, f64, f64, f64, f64);
 /// `w = −z·ū_x` ; sinon **A**, l'onde d'aujourd'hui (Boussinesq, `u = c·η/(d + η)` uniforme, `w = 0`). La vitesse est posée sur les
 /// particules seulement (S645). Les mesures tous les 0,25 s, par la surface lissée sur 10 cm.
 fn canal_s739(dx: f32, profil: bool, duree: f64) -> Vec<MesureCanal> {
+    canal_regle_s740(dx, profil, duree, ReglagesCanal::default()).0
+}
+
+/// S740 — les réglages du canal (le diagnostic) : le plafond d'itérations de la pression, les passes de séparation, le plafond du pas (µs) ;
+/// `None` ou 0 : le défaut.
+#[derive(Clone, Copy, Debug, Default)]
+struct ReglagesCanal {
+    iterations: Option<u32>,
+    separation: Option<usize>,
+    plafond_us: u64,
+    /// S740 E5–E6 : la projection de densité (S709), et sa relaxation (S710 ; `None` : celle par défaut).
+    densite: bool,
+    relaxation: Option<f32>,
+}
+
+/// S740 — ce que la pression a fait sur le canal : le plus grand nombre d'itérations, les pas au plafond, les pas, le plus grand résidu.
+type PressionCanal = (u32, usize, usize, f64);
+
+/// **S740 — le canal de S739, réglé**, et le relevé de la pression à chaque pas.
+fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec<MesureCanal>, PressionCanal) {
     let horloge = std::time::Instant::now();
     let (d, h0, lx, x1) = (0.5f64, 0.1f64, 24.0f64, 4.0f64);
     let dxs = dx as f64;
     let onde = OndeDepart { h: h0, d, x1, g: 9.81, rayleigh: profil };
     let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, ((d + 0.3) / dxs).ceil() as usize);
-    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
     a.set_ballistic_air(true);
+    if let Some(n) = r.iterations {
+        a.set_pressure_max_iterations(n);
+    }
+    if let Some(n) = r.separation {
+        a.set_separation_passes(n);
+    }
+    if r.densite {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        if let Some(k) = r.relaxation {
+            a.set_density_relaxation(k).unwrap();
+        }
+    }
+    let plafond = if r.plafond_us > 0 { r.plafond_us } else { 10_000 };
+    let plafond_iter = r.iterations.unwrap_or(crate::apic3d::PRESSURE_MAX_ITERATIONS);
+    let mut pression: PressionCanal = (0, 0, 0, 0.);
     a.seed(&|p| (p[2] as f64) < d + onde.eta(p[0] as f64)).unwrap();
     // ū et ses dérivées, par différences centrées sur un pas fin.
     let eps = 1e-3;
@@ -2992,27 +3027,35 @@ fn canal_s739(dx: f32, profil: bool, duree: f64) -> Vec<MesureCanal> {
     let fin = (duree * 1e6).round() as u64;
     let (mut t, mut prochaine) = (0u64, 250_000u64);
     while t < fin {
-        let us = a.stable_step_us(10_000).min(fin - t).min(prochaine - t);
-        a.step(us).unwrap();
+        let us = a.stable_step_us(plafond).min(fin - t).min(prochaine - t);
+        let rap = a.step(us).unwrap();
+        pression = (pression.0.max(rap.iterations), pression.1 + usize::from(rap.iterations >= plafond_iter), pression.2 + 1, pression.3.max(rap.residual));
         t += us;
         if t >= prochaine {
+            // S740 : le profil de la surface (non lissé), tous les 0,5 s, dans calculs/s740_profil_<dx>_<t>.csv.
+            if std::env::var("PROFILS").is_ok() && t % 500_000 == 0 {
+                let (_, h) = volume_surface_s708(&a);
+                let lignes: String = (0..nx).map(|i| format!("{:.4};{:.5}\n", (i as f64 + 0.5) * dxs, h[i] - d)).collect();
+                let _ = std::fs::write(format!("{}/../../calculs/s740_profil_{}_{:04}.csv", env!("CARGO_MANIFEST_DIR"), (dxs * 1000.).round(), t / 1000), lignes);
+            }
             prochaine += 250_000;
             let m = mesurer(&a, t as f64 * 1e-6);
-            eprintln!("S739 {} {dx} m : t = {:.2} s, la crête x = {:.3} m, η = {:.1} mm (particules {:.1}) ; la largeur à mi-hauteur {:.3} m ; le creux {:.1} mm ; {:.0} s d'horloge",
-                if profil { "B" } else { "A" }, m.0, m.1, m.2 * 1e3, m.5 * 1e3, m.3, m.4 * 1e3, horloge.elapsed().as_secs_f64());
+            eprintln!("S739 {} {dx} m : t = {:.2} s, la crête x = {:.3} m, η = {:.1} mm (particules {:.1}) ; la largeur à mi-hauteur {:.3} m ; le creux {:.1} mm ; la pression : {} itérations au plus, {} pas au plafond sur {}, résidu {:.1e} ; {:.0} s d'horloge",
+                if profil { "B" } else { "A" }, m.0, m.1, m.2 * 1e3, m.5 * 1e3, m.3, m.4 * 1e3, pression.0, pression.1, pression.2, pression.3, horloge.elapsed().as_secs_f64());
             out.push(m);
         }
     }
-    out
+    (out, pression)
 }
 
 /// S739 — le résumé d'une série : `(l'écart extrême de la crête à sa valeur de départ, celui de la largeur, le creux le plus profond)`,
 /// rapportés (la crête et la largeur en part de leur valeur à t = 0, le creux en part de `H`).
 fn resume_canal_s739(m: &[MesureCanal]) -> (f64, f64, f64) {
-    let (e0, l0) = (m[0].2, m[0].3);
-    let crete = m.iter().map(|x| (x.2 / e0 - 1.).abs()).fold(0f64, f64::max);
-    let largeur = m.iter().map(|x| (x.3 / l0 - 1.).abs()).fold(0f64, f64::max);
-    let creux = m.iter().map(|x| -x.4).fold(0f64, f64::max) / 0.1;
+    // S740 : la référence à 0,25 s (la mesure de 0 s précède toute surface reconstruite).
+    let (e0, l0) = (m[1].2, m[1].3);
+    let crete = m[1..].iter().map(|x| (x.2 / e0 - 1.).abs()).fold(0f64, f64::max);
+    let largeur = m[1..].iter().map(|x| (x.3 / l0 - 1.).abs()).fold(0f64, f64::max);
+    let creux = m[1..].iter().map(|x| -x.4).fold(0f64, f64::max) / 0.1;
     (crete, largeur, creux)
 }
 
@@ -3039,3 +3082,51 @@ fn the_solitary_wave_in_a_flat_channel_fine_s739() {
     let r = resume_canal_s739(&m);
     println!("S739 E3 {} (2,5 cm) : la crête ±{:.1} %, la largeur ±{:.1} %, le creux {:.1} % de H", if profil { "B" } else { "A" }, 100. * r.0, 100. * r.1, 100. * r.2);
 }
+
+/// **S740 — un suspect sur le canal A à 5 cm** (4,25 s) : rapporte la pression et dit si le canal « guérit » (la largeur à mi-hauteur au-dessus
+/// de 80 % de celle de 0,25 s, le creux sous 10 % de `H`, jusqu'à la fin).
+fn suspect_s740(nom: &str, dx: f32, r: ReglagesCanal) {
+    let (m, p) = canal_regle_s740(dx, false, 4.25, r);
+    let l0 = m[1].3;
+    let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+    let gueri = lmin > 0.8 * l0 && creux < 0.01;
+    println!("S740 {nom} ({dx} m) : la largeur {:.3} → {:.3} m au plus bas ({:.0} %), le creux {:.1} mm ({:.0} % de H), la crête finale {:.1} mm ; la pression : {} itérations au plus, {} pas au plafond sur {}, résidu {:.1e} ; {}",
+        l0, lmin, 100. * lmin / l0, creux * 1e3, 1e3 * creux / 0.1 / 10., m.last().unwrap().2 * 1e3, p.0, p.1, p.2, p.3, if gueri { "GUÉRIT" } else { "ne guérit pas" });
+}
+
+#[test]
+#[ignore = "S740 E1 : la pression telle quelle (≈ 3 min)"]
+fn channel_pressure_as_is_s740() {
+    suspect_s740("E1, la pression telle quelle", 0.05, ReglagesCanal::default());
+}
+
+#[test]
+#[ignore = "S740 E2 : la pression convergée (≈ 5 min)"]
+fn channel_converged_pressure_s740() {
+    suspect_s740("E2, le plafond à 100 000", 0.05, ReglagesCanal { iterations: Some(100_000), ..Default::default() });
+}
+
+#[test]
+#[ignore = "S740 E3 : sans séparation (≈ 3 min)"]
+fn channel_without_separation_s740() {
+    suspect_s740("E3, sans séparation", 0.05, ReglagesCanal { separation: Some(0), ..Default::default() });
+}
+
+#[test]
+#[ignore = "S740 E4 : le pas à 2,5 ms (≈ 8 min)"]
+fn channel_short_step_s740() {
+    suspect_s740("E4, le pas à 2,5 ms", 0.05, ReglagesCanal { plafond_us: 2_500, ..Default::default() });
+}
+
+#[test]
+#[ignore = "S740 E5 : la projection de densité (≈ 4 min)"]
+fn channel_density_projection_s740() {
+    suspect_s740("E5, la projection de densité", 0.05, ReglagesCanal { densite: true, ..Default::default() });
+}
+
+#[test]
+#[ignore = "S740 E6 : la projection de densité faible (≈ 4 min)"]
+fn channel_weak_density_projection_s740() {
+    suspect_s740("E6, la projection de densité faible (κ = 0,05)", 0.05, ReglagesCanal { densite: true, relaxation: Some(0.05), ..Default::default() });
+}
+

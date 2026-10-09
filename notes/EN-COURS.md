@@ -96,8 +96,17 @@ avec les nombres, et les suspects suivants sont nommés.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les réglages, le relevé de la pression ; E1, E2.
-- [ ] **P3** — E3, E4 si besoin ; E5 pour le suspect désigné.
+- [x] **P2** — les réglages, le relevé de la pression ; E1, E2.
+- [ ] **P3** — E3, E4 ; **ajoutés après E4** (aucun n'a guéri ; le profil montre l'onde qui se scinde, un long plateau devant, un pic
+  serré derrière, comme un tassement des particules sous la crête) : **E5, la projection de densité** (S709, complète) et **E6, faible**
+  (κ = 0,05, S710). Les mêmes critères. Puis l'essai à 2,5 cm du suspect désigné.
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — E1 : la pression converge en **138 itérations au plus**, jamais au plafond (0 sur 523 pas), résidu 1,0·10⁻⁶ ; la largeur
+  tombe à 20 %, le creux à 54 mm ; ne guérit pas. E2 (le plafond à 100 000) : **identique au bit**. Le plafond de la pression n'est pas la
+  cause.
+- **E3** (sans séparation) : la largeur à 22 %, le creux 46 mm, la crête finale 82 mm ; ne guérit pas.
+- **E4** (le pas à 2,5 ms) : la largeur à 23 %, le creux 25 mm, la crête finale 62 mm ; ne guérit pas.
+- **Le profil** (`captures/s740_profils.png`, A à 5 cm, toutes les 0,5 s) : l'onde se scinde. Un long plateau bas, d'environ 20 mm, file
+  devant sur plusieurs mètres ; un pic étroit, plus lent, reste derrière ; du bruit et des creux suivent.

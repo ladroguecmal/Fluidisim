@@ -138,6 +138,10 @@ pub struct Apic3 {
     /// **S645 — l'air balistique** (`set_ballistic_air`) : une face d'air qu'une particule a alimentée garde sa vitesse (et la gravité)
     /// au lieu de recevoir l'extrapolation ; `false`, le défaut : extrapolée (S318).
     pub(crate) ballistic_air: bool,
+    /// **S740** — le plafond d'itérations du gradient conjugué (`set_pressure_max_iterations`) ; défaut `PRESSURE_MAX_ITERATIONS`, au bit.
+    pub(crate) pression_max_iterations: u32,
+    /// **S740** — les passes de la séparation des particules (`set_separation_passes`) ; défaut `SEPARATION_PASSES`, au bit.
+    pub(crate) separation_passes: usize,
     /// **S653 — le corps libre** (`set_body_mass`) : la masse de la sphère, kg ; `None`, le défaut : la sphère imposée (S393), au bit.
     pub(crate) body_mass: Option<f32>,
     /// **S655** — l'accélération du corps libre au pas précédent (la masse ajoutée implicite).
@@ -223,6 +227,8 @@ impl Apic3 {
             lisse: None,
             seabed_slip: false,
             ballistic_air: false,
+            pression_max_iterations: PRESSURE_MAX_ITERATIONS,
+            separation_passes: SEPARATION_PASSES,
             body_mass: None,
             body_accel: [0.; 3],
             columns: None,
@@ -605,6 +611,17 @@ impl Apic3 {
     /// mince, étiqueté d'air, garde sa vitesse et la gravité au lieu de recevoir celle de l'eau derrière lui (A333).
     pub fn set_ballistic_air(&mut self, on: bool) {
         self.ballistic_air = on;
+    }
+
+    /// **S740 — le plafond d'itérations du gradient conjugué** de la projection (le diagnostic de l'onde solitaire, ONDE-SOLITAIRE-3D-S739) ;
+    /// le défaut, `PRESSURE_MAX_ITERATIONS`, au bit.
+    pub fn set_pressure_max_iterations(&mut self, n: u32) {
+        self.pression_max_iterations = n.max(1);
+    }
+
+    /// **S740 — les passes de la séparation des particules** (0 : aucune) ; le défaut, `SEPARATION_PASSES`, au bit.
+    pub fn set_separation_passes(&mut self, n: usize) {
+        self.separation_passes = n;
     }
 
     /// **S639** — la hauteur du fond en escalier de la colonne `(i, j)` (m) ; 0 sans fond.
@@ -1966,7 +1983,7 @@ impl Apic3 {
         let mut rz = Self::dot(&self.r, &self.z);
         let mut rr = b2;
         let mut it = 0u32;
-        while b2 > 0. && rr > PRESSURE_TOLERANCE2 * b2 && it < PRESSURE_MAX_ITERATIONS {
+        while b2 > 0. && rr > PRESSURE_TOLERANCE2 * b2 && it < self.pression_max_iterations {
             let (d, mut q) = (core::mem::take(&mut self.d), core::mem::take(&mut self.q));
             self.apply(&d, &mut q);
             let dq = Self::dot(&d, &q);
@@ -2244,7 +2261,7 @@ impl Apic3 {
         let (lx, ly, lz) = (nx as f32 * dx, ny as f32 * dx, nz as f32 * dx);
         let (d_min, margin) = (SEPARATION * dx, 1e-3 * dx);
         let n = self.n;
-        for _ in 0..SEPARATION_PASSES {
+        for _ in 0..self.separation_passes {
             self.bin();
             // S483 (ADR-222 D2) : chaque particule **collecte** sa poussée sur ses voisines (mailles en z, y, x ; particules dans
             // l'ordre du tri) — l'ordre de `separate_shift` de la carte —, au lieu de l'accumuler par paires : une écriture disjointe,
