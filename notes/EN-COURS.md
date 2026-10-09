@@ -108,3 +108,4 @@ S4 (`H/d` = 0,2, 1:3, `d` = 0,5 m) à 0,52 m au moins, quand S645, le même cas 
 
 ### Notes de reprise
 - **P2 fini** — E1 : **S645 redonne exactement 0,2307 m** (la particule la plus haute), 0,2250 m (étiquettes), la crête 0,0730 m ; 380 s. **Aucune régression** : l'écart est dans le montage. Les variantes E2 à E5 écrites (`s4_vers_s645_s738`), l'instrument de S645 ajouté au témoin.
+- **E2** (le plafond à 1,0 m au-dessus du niveau, l'escalier) : la particule la plus haute **0,4808 m (+46,6 %)** ; le front par les particules 0,4335 m à 4,1 s (+32,2 %) ; par φ 0,4835 m (le même figement qu'en S734, qui n'était donc pas dû au plafond sur l'escalier) ; le juge robuste : aucun retournement (celui de S647 en voit un à 5,913 s, 10,34 m) ; 2 462 s. **Ne ramène pas** : E3.
