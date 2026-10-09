@@ -2310,3 +2310,14 @@ Suivant : **S746**, la revue ; puis **S747**, la variante hybride.
 
 Maillons **0** (méthode). Suivant : **S747**, la projection hybride.
 
+## S747 — 2026-10-09 — La projection de densité hybride ; ADR-289
+
+**Entrée.** SANS-SURFACE-S745. **Fait** ([preuve](../docs/validation/DENSITE-HYBRIDE-S747.md)) : `DensityVariant::Hybrid`, complète sauf dans
+la lame mince. **Mesuré** :
+- le repos et l'onde solitaire tenus (92 % ; 9 mm) ;
+- la remontée freinée (−12,2 %) : le freinage vient de la correction dans le ressaut, pas de la lame mince.
+
+L'utilisateur a demandé pourquoi le défaut n'avait pas été vu plus tôt, et proposé d'éprouver chaque solveur seul avant de les combiner. Il
+voulait un avis réfléchi : [ADR-289](../docs/adr/ADR-289-des-solveurs-eprouves-seuls-avant-d-etre-combines.md) (trois familles ; un banc à
+référence indépendante par solveur ; la 3D corrigée d'abord ; la fusion de Saint-Venant et SGN décidée après le banc de la 2D ; les
+nouveautés attendent). Maillons **1** (4.1). Suivant : **S748**, le ressaut qui freine la lame.

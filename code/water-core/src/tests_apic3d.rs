@@ -2978,3 +2978,13 @@ fn runup_without_surface_correction_s745() {
     assert!(garde == n && sous == 0, "les particules");
 }
 
+/// **S747 — (2) la remontée de S645, la projection hybride consciente du fond** : à 10 % de la loi (0,2295 m).
+#[test]
+#[ignore = "S747 (2) : la remontée de S645, la projection hybride (≈ 8 min)"]
+fn runup_with_hybrid_density_s747() {
+    let (r, _, n, garde, sous, haut, cr) = onde_sur_pente_variante_s745(0.025, false, false, true, Some(DensityVariant::Hybrid), true);
+    println!("S747 (2) : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
+        100. * (haut as f64 / 0.2295 - 1.), cr[0]);
+    assert!(garde == n && sous == 0, "les particules");
+}
+

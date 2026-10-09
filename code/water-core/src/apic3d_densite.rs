@@ -23,7 +23,14 @@ pub enum DensityVariant {
     WithoutSurface,
     /// Comme `Complete`, mais l'excès seul aux mailles voisines d'une paroi solide (les poids trilinéaires s'y perdent dans le solide).
     SolidExcessOnly,
+    /// **S747 — hybride** : comme `Complete` dans une colonne qui porte au moins `LAME_MINCE_S747` mailles d'eau ; aucune correction dans
+    /// une colonne plus mince (la lame, le jet de rive). `Complete` garde l'onde solitaire mais freine la lame (S744) ; `WithoutSurface` libère
+    /// la lame mais laisse une traîne derrière l'onde (S745).
+    Hybrid,
 }
+
+/// S747 — le nombre de mailles d'eau d'une colonne sous lequel la variante hybride ne corrige rien (la règle du film du rivage, S678).
+pub const LAME_MINCE_S747: u16 = 3;
 
 /// S709 — les tableaux de la projection de densité, réservés à la configuration (I-06).
 pub(crate) struct Densite {
@@ -43,6 +50,8 @@ pub(crate) struct Densite {
     /// S744 — la nominale de chaque maille, calculée au premier pas (`nominale_faite`).
     pub(crate) nominale: Vec<f32>,
     pub(crate) nominale_faite: bool,
+    /// S747 — les mailles d'eau de chaque colonne (`nx·ny`), comptées à chaque pas pour la variante hybride.
+    pub(crate) colonnes: Vec<u16>,
 }
 
 impl Apic3 {
@@ -59,11 +68,12 @@ impl Apic3 {
         let Domain3 { nx, ny, nz, .. } = self.domain;
         let cells = nx * ny * nz;
         let (fu, fv, fw) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz, nx * ny * (nz + 1));
-        host.alloc.alloc_persistent((3 * cells + fu + fv + fw) * 4).map_err(|e| match e {
+        host.alloc.alloc_persistent((3 * cells + fu + fv + fw) * 4 + nx * ny * 2).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
-            p_sauve: vec![0.; cells], deplacement_max: 0., conscient: false, nominale: vec![0.; cells], nominale_faite: false }));
+            p_sauve: vec![0.; cells], deplacement_max: 0., conscient: false, nominale: vec![0.; cells], nominale_faite: false,
+            colonnes: vec![0; nx * ny] }));
         Ok(())
     }
 
@@ -144,6 +154,14 @@ impl Apic3 {
                 }
             }
         }
+        // S747 : les mailles d'eau de chaque colonne, pour la variante hybride.
+        if dens.variante == DensityVariant::Hybrid {
+            for j in 0..ny {
+                for i in 0..nx {
+                    dens.colonnes[j * nx + i] = (0..nz).filter(|&k| self.label[self.cell(i, j, k)] == WATER).count().min(u16::MAX as usize) as u16;
+                }
+            }
+        }
         // Le second membre et la diagonale, comme la pression : la surface à q = 0 (la fraction fantôme), les parois sans flux.
         dens.p_sauve.copy_from_slice(&self.p);
         let mut excess = false;
@@ -173,6 +191,7 @@ impl Apic3 {
                     // 1,6 s). À l'intérieur, l'écart dans les deux sens ; à la surface, l'excès seul (une maille de surface est en partie
                     // vide, sa densité basse est normale).
                     let e = match dens.variante {
+                        DensityVariant::Hybrid if dens.colonnes[j * nx + i] < LAME_MINCE_S747 => 0.,
                         DensityVariant::WithoutSurface if surface => 0.,
                         DensityVariant::SolidExcessOnly if solide => (dens.rho[c] - 1.).max(0.),
                         _ if surface => (dens.rho[c] - 1.).max(0.),

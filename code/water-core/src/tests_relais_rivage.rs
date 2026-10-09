@@ -3425,3 +3425,23 @@ fn rest_and_channel_without_surface_correction_s745() {
     println!("S745 : le repos {tenus:?}, le canal {canal}");
 }
 
+/// **S747 — (1) le repos, (3) le canal, avec la projection hybride consciente du fond** : les critères de S745.
+#[test]
+#[ignore = "S747 (1) et (3) : le repos et le canal, la projection hybride (≈ 13 min)"]
+fn rest_and_channel_with_hybrid_density_s747() {
+    let mut tenus = Vec::new();
+    for cot in [30.0f64, 12.0] {
+        let (v, ep, ephi, _) = repos_pente_s745(cot, false, Some(crate::apic3d::DensityVariant::Hybrid), true);
+        let tenu = v < 0.01 && ep < 0.003;
+        println!("S747 (1) 1:{cot} escalier : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3, if tenu { "tenu" } else { "NON TENU" });
+        tenus.push(tenu);
+    }
+    let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(crate::apic3d::DensityVariant::Hybrid), ..Default::default() });
+    let l0 = m[1].3;
+    let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+    let canal = lmin > 0.8 * l0 && creux < 0.01;
+    println!("S747 (3) le canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; {}",
+        100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, if canal { "tenu" } else { "NON TENU" });
+    println!("S747 : le repos {tenus:?}, le canal {canal}");
+}
+

@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**288 ADR** — actée : 237, proposée : 49, rétractée en partie : 2.
+**289 ADR** — actée : 238, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -299,3 +299,4 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [286](../adr/ADR-286-cinquante-et-unieme-revue-de-methode.md) | Cinquante et unième revue de méthode (S731–S735) | actée | S736 | 222 285 | 287 |
 | [287](../adr/ADR-287-cinquante-deuxieme-revue-de-methode.md) | Cinquante-deuxième revue de méthode (S736–S740) | actée | S741 | 222 286 | 288 |
 | [288](../adr/ADR-288-cinquante-troisieme-revue-de-methode.md) | Cinquante-troisième revue de méthode (S741–S745) | actée | S746 | 222 287 |  |
+| [289](../adr/ADR-289-des-solveurs-eprouves-seuls-avant-d-etre-combines.md) | Des solveurs éprouvés seuls avant d'être combinés | actée | S747 |  |  |

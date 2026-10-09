@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S747 — **en cours**. En autonomie ; session longue. SANS-SURFACE-S745 : corriger la surface (`Complete`) garde l'onde mais freine la
+Session : S747 — **terminée**. En autonomie ; session longue. SANS-SURFACE-S745 : corriger la surface (`Complete`) garde l'onde mais freine la
 lame ; ne pas la corriger (`WithoutSurface`) fait l'inverse. **La question** : une projection hybride tient-elle les trois essais du banc ?
 
 **La variante** (`DensityVariant::Hybrid`, consciente du fond) :
@@ -92,7 +92,13 @@ Le compte se fait sur les étiquettes du pas (les mailles d'eau de la colonne).
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la variante ; (1), (2), (3).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — la variante ; (1), (2), (3).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** :
+  - (1) **tenu** : 6,8 mm/s ; 0,01–0,07 mm ;
+  - (3) **tenu** : 92 % ; 9,0 mm ; la crête finale 100,2 mm ;
+  - (2) **non tenu** : 0,2015 m, −12,2 %. Le freinage vient de la correction en eau plus profonde (le ressaut).
+- **La discussion avec l'utilisateur** : il aurait éprouvé chaque solveur seul, sous stress, avant de les combiner, et voulait un avis
+  réfléchi. Plan accepté (*« Ok parfait »*) : ADR-289.
