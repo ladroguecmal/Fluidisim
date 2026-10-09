@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 22:22 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 22:23 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S753 — la 3D corrigée contre les mesures de Synolakis ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S752 — Le bilan propre de la projection, R1′, la 3D corrigée version 1 ([journal](notes/JOURNAL.md)). Avant : S751 (la cinquante-quatrième revue de méthode)
 Session suivante : S753 — la 3D corrigée (ADR-291) contre les mesures de Synolakis (H/d = 0,3, le déferlement, les profils à t = 15, 20, 25)
 Maillons        : 1

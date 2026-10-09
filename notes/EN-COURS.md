@@ -62,59 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S752 — **terminée**. En autonomie ; session longue. DEUX-REMEDES-S750 : R1 (le déplacement de la projection avec sa vitesse, reprise
-de la grille) tient le repos, la remontée (+7,9 %) et la largeur de l'onde ; mais le creux est manqué de 0,8 mm, et l'onde s'atténue de 9 %
-(91,3 mm contre 100,2 mm avec `Complete`). **La question** : d'où vient l'atténuation, et une mise à jour de la vitesse sans la grille la
-supprime-t-elle ?
+Session : S753 — **en cours**. En autonomie ; session longue. ADR-289 D3.3, ADR-291 D4 : **la 3D corrigée contre une référence extérieure**,
+les mesures de laboratoire de Synolakis (l'onde solitaire `H/d` = 0,3 qui déferle sur la plage canonique de 1:19,85 ; S712, `references/synolakis/`).
 
-**Le bilan propre de la projection** (ADR-290 D1) : à chaque pas, l'énergie cinétique et l'énergie potentielle de toutes les particules,
-juste avant et juste après `density_project` ; leur somme cumulée est rendue par le cœur (`density_projection_budget`). C'est une lecture,
-sans effet.
+**L'essai** : le montage de S712 (`d` = 0,5 m, 2,5 cm, le pas plafonné à 2,5 ms comme S713 E2), avec la 3D corrigée (ADR-291 : `Complete`,
+consciente du fond, R1). Les profils de la surface à t·√(g/d) = 15, 20, 25, comparés aux mesures par `comparer_synolakis_s712` : l'écart
+quadratique moyen, la crête mesurée contre la calculée.
 
-**L'hypothèse nommée** : R1 remplace la vitesse de chaque particule déplacée par celle de la grille à sa nouvelle place. Ce passage par la
-grille lisse la vitesse, et retire de l'énergie à l'onde. Or une particule d'APIC porte le gradient de vitesse autour d'elle (sa matrice
-affine `C`). **R1′** (`set_density_shift_affine`) : `v ← v + C·Δx`, la mise à jour exacte au premier ordre, sans grille, `C` gardée.
+**Le témoin** : S713 E2, la 3D sans correction au même pas :
 
-**Signature prédite** :
-- R1 retire de l'énergie cinétique à chaque pas, R1′ presque rien ;
-- R1′ garde la remontée comme R1, car le déplacement porte sa vitesse ;
-- R1′ garde l'onde comme `Complete`.
+| t | la crête mesurée | S713 E2, la 3D sans correction | l'écart quadratique |
+|---|---|---|---|
+| 15 | 0,314 d en 8,38 d | 0,424 d en 8,07 d | 0,044 d |
+| 20 | 0,318 d en 3,66 d | 0,316 d en 3,77 d | 0,066 d |
+| 25 | 0,190 d en 0,30 d | 0,218 d en −3,03 d | 0,035 d |
 
-**Les essais, et leurs critères écrits avant** (ADR-290 D3 : le repos d'abord) :
-1. **R1′, le repos** sur l'escalier, 1:30 et 1:12 : 1 cm/s ; 3 mm.
-2. **Le bilan sur le canal à 2,5 cm**, `Complete`, R1, R1′ (4,25 s) : l'énergie cumulée retirée par la projection, rapportée ; et pour R1′,
-   **l'onde** (la largeur 80 % ; le creux 10 mm ; **la crête finale à 5 % de celle de 0,25 s**).
-3. **R1′, la remontée de S645** : à 10 % de la loi.
+**Les critères, écrits avant** :
+1. **la crête à t = 15 à 0,05 d de la mesure** (sans correction, 0,11 d de trop : l'onde trop haute de S713) ;
+2. **l'écart quadratique plus petit que S713 E2** à au moins deux des trois instants.
 
-**Les quanta** (ADR-288 D2) : le creux se lit à environ 1 mm près (la surface lissée sur 10 cm) ; au départ, l'onde montre déjà un creux de
-5 mm, l'ajustement de l'onde de départ (S739 : −4,8 mm à 0,25 s). Le critère de 10 mm est au-dessus des deux.
+**Le repos** (ADR-290 D3) : la 3D corrigée tient le repos sur l'escalier à 1:30 et 1:12 (S750) ; la plage de 1:19,85 est entre les deux.
 
-**Contrôles du plan** (ADR-276, ADR-287, ADR-288, ADR-290)
+**Contrôles du plan** (ADR-280, ADR-287, ADR-289, ADR-291)
 
-- **témoin** :
-  - `Complete` et R1 (S750), sur les mêmes essais ;
-  - l'onde exacte ;
-  - la loi de Synolakis ;
-  - le repos exact.
-- **instrument** : le bilan propre de la projection (nouveau, éprouvé d'abord : nul au repos, à 10⁻¹⁰ J) ; ceux de S743, S740 et S645.
-- **calcul** : le repos (2 min), le canal trois fois (≈ 30 min), la remontée (7 min).
-- **ADR** : ADR-276 D2 (R1′ diffère de R1 par la mise à jour seule) ; ADR-290 D1, D3.
+- **témoin** : les mesures de Synolakis (la référence extérieure, ADR-280 D2) ; S713 E2 (la 3D sans correction).
+- **instrument** : `comparer_synolakis_s712`, éprouvé en S712–S713 (le profil par la surface, lissé sur 10 cm).
+- **calcul** : ≈ 45 min, en arrière-plan.
+- **ADR** : ADR-280 D2 (une référence extérieure tranche) ; ADR-289 D3.3 ; ADR-291 D4.
 - **pièges** :
-  - `C·Δx` suppose un déplacement petit devant la maille (borné au quart de maille par la projection) ;
-  - l'énergie potentielle dépend de `z` ; seul le changement par la projection compte.
+  - les mesures portent une onde générée par un batteur, amortie sur le trajet (le NOAA le dit) : un écart restant n'est pas
+    forcément celui de la 3D ;
+  - à t = 25, la lame monte sur le sable sec : le pas tombe (S712).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le bilan, R1′ ; (1), (2).
-- [x] **P3** — (3).
-- [x] **P4** — preuve ; le lot ; fermeture.
+- [ ] **P2** — la configuration dans le montage ; l'essai ; (1), (2).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **Fini** :
-  - R1′, le repos tenu ;
-  - le bilan : `Complete` 0 / +2,11 J ; R1 +0,12 / +3,02 J ; R1′ +2,85 / +3,06 J ;
-  - l'onde : R1′ à 80 %, 9,3 mm, la crête +14,7 % ;
-  - la remontée : R1′ −11,1 %.
-
-  **L'hypothèse est réfutée.** R1 est retenue : ADR-291.
