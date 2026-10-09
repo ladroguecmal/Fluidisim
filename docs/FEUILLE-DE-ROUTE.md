@@ -529,6 +529,10 @@ dans la boîte (B4a : la force à 2 %) ; la boîte qui suit le corps (B4b : 33 a
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 
+**S729–S731** : la boîte qui naît et meurt avec le corps (B5 : l'étape 3 du LOD faite) ; **R43 reçu** (ADR-284) — le raccord du rivage placé
+au-delà du jet efface le mur de Saint-Venant (28 cm → 0) pour 6 % de calcul, le tout-3D refait ; la cinquantième revue (ADR-285 : un témoin
+contrôlé comme l'objet ; le sélecteur des domaines, la campagne suivante, à la demande de l'utilisateur) (4.14).
+
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
 tenu par `etat_projet.py --check`. Ici, l'ordre. Les jalons du §2 et les portes E et F restent vrais : ils disent les

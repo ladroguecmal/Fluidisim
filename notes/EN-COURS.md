@@ -82,7 +82,8 @@ la liste des essais seulement (sans rien lancer de long : `--liste`).
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `essai.py` ; ADR-285 ; METHODE ; le lot.
+- [x] **P2** — `essai.py` ; ADR-285 ; METHODE ; le lot.
 - [ ] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — `essai.py` vérifié par `--liste` : `the_shore_relay_beyond_the_jet_s730` ne désigne plus que lui ; `beyond_the_jet_s730` est refusé (deux essais) ; le nom de E2 ne désigne que E2. ADR-285 écrit ; METHODE ; le lot (FEUILLE-DE-ROUTE, ROADMAP-VIVANTE).

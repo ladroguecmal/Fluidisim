@@ -41,3 +41,7 @@ hauteur de Saint-Venant. Chaque montage à raccord le rapporte.
 
 - ADR-275 D2 garde ses étapes ; D3 s'y insère avant l'étape 4.
 - Le juge tout-3D de la plage (S717) avait le même raccord : ses mesures de remontée sont à relire après S730.
+
+*Note datée du 2026-10-09 (S731)* : l'utilisateur fait du sélecteur des domaines la pièce la plus peaufinée et la plus solide (*« c'est grâce à
+lui que l'on aura le meilleur compromis entre réalisme et performance »*). ADR-285 D4 en fixe les juges : une batterie de scènes, le
+réalisme, le coût, la solidité.

@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Lancer un essai long du cœur sans charger la discussion — S690 (ANALYSE-PHASES-S690 §4).
 
-    python outils/essai.py <nom de l'essai> [--marque S690] [--ignore] [--sans-compiler]
+    python outils/essai.py <nom de l'essai> [--marque S690] [--ignore] [--sans-compiler] [--plusieurs] [--liste]
 
 1. compile les essais du cœur (`cargo test --release --offline -p water-core --lib --no-run`) ;
 2. copie le binaire dans `calculs/` (ADR-265 D1 : un essai long tourne depuis une copie, la compilation suivante ne le gêne pas) ;
 3. lance l'essai (`--ignored` si demandé), le journal complet dans `calculs/essai_<nom>.log` ;
 4. n'affiche que les lignes utiles : celles qui portent la marque (par défaut, le préfixe `S<nnn>` tiré du nom), la progression, les
    échecs ; puis un résumé : la durée, le résultat.
+
+**S731 (ADR-285 D2)** : le filtre de cargo est une sous-chaîne (S730 : E1 a lancé E2, dont le nom contient le sien). Avant de lancer,
+l'outil liste les essais que le nom désigne : un seul, il tourne ; plusieurs, dont un porte exactement ce nom, lui seul tourne
+(`--exact`) ; plusieurs sans nom exact, refusé, sauf `--plusieurs`. `--liste` montre ce qui tournerait, sans rien lancer.
 
 Les essais longs affichent eux-mêmes leur progression (`eprintln!("S690 progression : …")`, ADR-274 D1).
 """
@@ -48,6 +52,8 @@ def main():
     ap.add_argument("--marque", default=None)
     ap.add_argument("--ignore", action="store_true", help="lancer un essai marqué #[ignore]")
     ap.add_argument("--sans-compiler", action="store_true")
+    ap.add_argument("--plusieurs", action="store_true", help="accepter un nom qui désigne plusieurs essais")
+    ap.add_argument("--liste", action="store_true", help="lister les essais désignés, sans rien lancer")
     a = ap.parse_args()
     marque = a.marque or (re.search(r"s\d{3}", a.nom).group(0).upper() if re.search(r"s\d{3}", a.nom) else a.nom)
     CALCULS.mkdir(exist_ok=True)
@@ -59,8 +65,24 @@ def main():
         sys.exit(f"{copie.name} tourne déjà : l'arrêter (Stop-Process) ou attendre sa fin")
     if not a.sans_compiler:
         shutil.copyfile(binaire_des_essais(), copie)
+    # S731 (ADR-285 D2) : ce que le nom désigne.
+    ign = ["--ignored"] if a.ignore else []
+    liste = subprocess.run([str(copie), a.nom, "--list"] + ign, cwd=CODE / "water-core", capture_output=True, text=True,
+                           encoding="utf-8", errors="replace").stdout
+    designes = [l[:-len(": test")] for l in liste.splitlines() if l.endswith(": test")]
+    exacts = [d for d in designes if d.split("::")[-1] == a.nom]
+    filtre = [a.nom]
+    if len(designes) > 1 and len(exacts) == 1:
+        filtre = [exacts[0], "--exact"]
+    elif len(designes) > 1 and not a.plusieurs:
+        sys.exit("le nom désigne plusieurs essais (--plusieurs pour les lancer tous) :\n  " + "\n  ".join(designes))
+    elif not designes:
+        sys.exit("aucun essai ne porte ce nom" + ("" if a.ignore else " (un essai #[ignore] demande --ignore)"))
+    if a.liste:
+        print("tournerait :", exacts[0] if filtre[-1] == "--exact" else ", ".join(designes))
+        return
     journal = CALCULS / f"essai_{a.nom}.log"
-    cmd = [str(copie), a.nom, "--nocapture", "--test-threads", "1"] + (["--ignored"] if a.ignore else [])
+    cmd = [str(copie)] + filtre + ["--nocapture", "--test-threads", "1"] + ign
     debut = time.time()
     # S716 (ADR-281 D1) : toute ligne marquée d'une session (« S712 photo » dans un essai de S713) est utile.
     utiles = re.compile(rf"({re.escape(marque)}|S\d{{3}} |progression|panicked|test result|critère|error)")
