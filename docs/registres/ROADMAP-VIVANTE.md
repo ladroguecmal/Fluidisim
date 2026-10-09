@@ -70,5 +70,7 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   du déferlement ; un témoin sûr (S2) sur trois ; S4 (la pente de 1:3) à diagnostiquer avant tout calibrage. Au lot S735–S737 : les
   instruments des témoins prêts (la lecture par les particules, le juge robuste) ; **la 3D trop haute** (S713, R43, S1, S4) devient la
   question, avant le calibrage. Au lot S738–S740 : **sa cause trouvée**, le tassement des particules sous la crête ; la projection de
-  densité garde l'onde solitaire. Reste à juger la 3D ainsi corrigée contre les mesures de Synolakis, et son plongeon.
+  densité garde l'onde solitaire. Reste à juger la 3D ainsi corrigée contre les mesures de Synolakis, et son plongeon. Au lot S741–S743 :
+  le banc canonique (ADR-287) montre que la projection ignore le fond (le repos perdu, la remontée freinée) et que le fond lisse ne tient
+  pas le repos.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

@@ -537,6 +537,9 @@ la vague et son jet prévus à 0,1 m, l'instant du déferlement pas encore) ; le
 (4.14).
 **S738–S740** : la 3D trop haute — aucune régression (S645 redonné) ; la distance parcourue sur le fond plat ; la 3D ne garde pas une onde
 solitaire ; **la cause, le tassement des particules**, que la projection de densité corrige (la largeur à 92 %, à 2,5 cm) (4.1, 4.14).
+**S741–S743** : la cinquante-deuxième revue (ADR-287 : un solveur de référence après ses essais canoniques) ; le banc canonique, première
+passe (la projection freine la remontée de 12 %) ; le lac au repos sur une pente (seul l'escalier sans projection le tient) (4.1). *Lot
+écrit en S744, oublié à la fermeture de S743.*
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

@@ -62,51 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S743 — **terminée**. En autonomie ; session longue. BANC-CANONIQUE-S742 : sur le fond lisse en pente, le bassin oscillait de
-±20 mm, et la lecture par φ portait des dents de scie de ±10 mm. **La question** : la 3D tient-elle un lac au repos sur une pente ? Et si
-non, est-ce le mouvement réel ou la lecture ?
+Session : S744 — **en cours**. En autonomie ; session longue. REPOS-PENTE-S743 : la projection de densité met le lac en mouvement contre un
+fond. **La question** : une densité rapportée à la valeur nominale de chaque maille, qui compte le fond, rend-elle à la projection le repos
+et la remontée, sans perdre l'onde solitaire ?
 
-**L'essai** (`repos_pente_s743`) :
-- 1 m plat à 0,30 m d'eau, puis la pente jusqu'au sec, puis 0,5 m de sec ; 2,5 cm, deux rangées, l'air balistique ; 2 s ;
-- huit configurations :
-  - deux pentes, 1:30 et 1:12 ;
-  - deux fonds, l'escalier (`set_seabed`) et le lisse (`set_seabed_smooth`) ;
-  - avec ou sans la projection de densité.
-- Deux lectures de la surface, contre le niveau au repos (ADR-286 D2) :
-  - **par φ** (l'épaisseur de `volume_surface_s708` ajoutée au fond) ;
-  - **par les particules** : la plus haute de chaque colonne, plus `dx/4`.
-- Le plus grand écart de chacune au niveau, sur les colonnes mouillées de plus de trois mailles. La plus grande vitesse des particules.
+**La cause, lue dans le code** (`apic3d_densite.rs`) : la densité d'une maille est `Σ w/8`, les poids trilinéaires des particules. Au bord
+du domaine, les poids sont rabattus : rien ne se perd, et le canal de S740 tenait. Contre un fond posé dans le domaine, une partie des
+poids tombe dans les mailles solides. Les mailles d'eau qui touchent le fond paraissent moins denses qu'elles ne le sont, et la projection
+comble un déficit qui n'existe pas.
 
-**Les quanta** (ADR-236) : la pose par couches de 12,5 mm ; la lecture par les particules est donc à `dx/4` près, la colonne d'1/30 de
-maille de pente par colonne.
+**Le remède** (`set_density_bed_aware`, **éteint par défaut : au bit**) : chaque maille a sa densité nominale, `Σ w/8` d'un réseau régulier
+(2 × 2 × 2 par maille) posé partout hors du fond, sous l'escalier ou le fond lisse. Elle est calculée une fois, au premier pas, dans un
+tableau réservé à la configuration (I-06). La densité vaut alors `Σ w / nominale`. Au repos, elle vaut 1, fond compris.
 
-**Le critère, écrit avant** : le repos est tenu si, sur 2 s,
-- la plus grande vitesse reste sous **1 cm/s** ;
-- l'écart de la surface **par les particules** reste sous **3 mm**.
+**Les essais, et leurs critères écrits avant.**
+1. **Le repos** (S743), l'escalier, 1:30 et 1:12, la projection consciente du fond : la vitesse sous 1 cm/s, l'écart par les particules sous
+   3 mm (S743 sans elle : 6,3 cm/s, 4,7 mm). Le fond lisse rapporté (son défaut propre, S743).
+2. **Le canal** (S740 E5, 5 cm, fond = plancher) : **identique au bit** à la projection d'avant (aucun poids perdu).
+3. **La remontée de S645** (B4 de S742) avec la projection consciente : à **10 %** de la loi (S742 : −12 %).
 
-L'écart par φ est rapporté à part. S'il dépasse celui des particules, la lecture est en cause (S735), et non l'eau.
+**Contrôles du plan** (ADR-236, ADR-276, ADR-286, ADR-287)
 
-**Contrôles du plan** (ADR-236, ADR-286, ADR-287)
-
-- **témoin** : le repos exact (vitesse nulle, surface plate) ; S639 avait tenu le repos sur une pente en escalier.
-- **instrument** : deux lectures de la surface, et la vitesse.
-- **calcul** : huit cas de ≈ 15 000 à 45 000 particules, 2 s : quelques minutes en tout.
+- **témoin** :
+  - le repos exact ;
+  - la projection d'avant, au bit sur le canal ;
+  - la loi de Synolakis ;
+  - S645 sans projection (+0,5 %).
+- **instrument** : celui de S743 (deux lectures) et de S645 (la particule la plus haute).
+- **calcul** : le repos, quatre cas, 3 min ; le canal, 2 min ; B4, 6 min.
 - **ADR** :
+  - ADR-276 D2 (une cause : la normalisation) ;
   - ADR-287 D1 (le banc) ;
-  - ADR-286 D1 (aucune frontière atteinte : rien ne bouge) ;
-  - ADR-236 (les quanta).
-- **pièges** : la colonne de rivage, où la profondeur passe sous une maille, est exclue des écarts et rapportée à part.
+  - ADR-236 (le réseau nominal est celui de la pose, `dx/2`).
+- **pièges** :
+  - le fond doit être posé avant le premier pas (la nominale est calculée au premier) ;
+  - une maille presque toute sous le fond a une nominale minuscule : sous 0,05, la densité n'y est pas corrigée.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; les huit cas.
-- [x] **P3** — preuve ; fermeture.
+- [x] **P1** — jeton ; plan ; les lignes du lot S741–S743.
+- [ ] **P2** — la densité nominale ; (1), (2).
+- [ ] **P3** — (3), la remontée.
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — le repos tenu sur l'escalier sans projection (6,8 mm/s ; 0,01–0,07 mm). Il n'est pas tenu dans les six autres cas :
-  - l'escalier avec projection : 6,3 cm/s, 4,7 mm ;
-  - le lisse sans projection : 0,27–0,68 m/s, 0,8–1,4 mm par les particules, 22 mm par φ ;
-  - le lisse avec projection : 1,9 m/s, 36–53 mm.
-
-  393 s.
