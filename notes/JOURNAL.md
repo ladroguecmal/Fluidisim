@@ -2373,3 +2373,13 @@ projection, R1′ (`v + C·Δx`). **Mesuré** :
 
 **Décision** ([ADR-291](../docs/adr/ADR-291-la-3d-corrigee-version-1.md)) : R1 est la 3D corrigée, version 1, avec ses écarts mesurés (la
 remontée +8 %, l'onde −7,5 %). La suite : la juger contre Synolakis. Le lot S750–S752. Maillons **1** (4.1). Suivant : **S753**.
+
+## S753 — 2026-10-09 — La 3D corrigée contre Synolakis
+
+**Entrée.** ADR-289 D3.3 ; ADR-291 D4. **Fait** ([preuve](../docs/validation/SYNOLAKIS-CORRIGEE-S753.md)) : la 3D corrigée sur la plage
+de Synolakis, contre les mesures. **Mesuré** :
+- la hauteur juste à t = 15 (+0,012 d ; sans correction +0,11 d) ;
+- mais la vague en retard, de plus en plus (1,0 d puis 2,2 d).
+
+La célérité relue sur le canal : R1 la ralentit de 5,6 %, `Complete` la garde (+0,4 %). Le choix d'ADR-291 était prématuré (note datée).
+Maillons **1** (4.1). Suivant : **S754**, `Complete` contre Synolakis.

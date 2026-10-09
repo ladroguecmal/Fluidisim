@@ -1922,6 +1922,12 @@ fn plage_synolakis_dx(kappa: Option<f32>, dx: f32, jusqua: &[f64]) -> (Vec<(f64,
 /// S714 — la même, le pas plafonné à `plafond_us`.
 #[allow(clippy::type_complexity)]
 fn plage_synolakis_pas(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: u64) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
+    plage_synolakis_conf_s753(kappa, dx, jusqua, plafond_us, false)
+}
+
+/// S753 — la même, `corrigee` : la 3D corrigée d'ADR-291 (`Complete`, consciente du fond, R1).
+#[allow(clippy::type_complexity)]
+fn plage_synolakis_conf_s753(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: u64, corrigee: bool) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let (d, rapport, cot, g) = (0.5f64, 0.3f64, 19.85f64, 9.81f64);
@@ -1940,6 +1946,11 @@ fn plage_synolakis_pas(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: 
     let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
     a.set_seabed(Some(&fond)).unwrap();
     a.set_ballistic_air(true);
+    if corrigee {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_bed_aware(true).unwrap();
+        a.set_density_shift_resample(true).unwrap();
+    }
     if let Some(k) = kappa {
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
         a.set_density_relaxation(k).unwrap();
@@ -1994,7 +2005,7 @@ fn plage_synolakis_pas(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: 
             }
             // Le profil enregistré pour le graphique (calculs/, hors du dépôt suivi).
             let nom = format!("{}/../../calculs/synolakis_{}{}_t{:.0}.csv", env!("CARGO_MANIFEST_DIR"), kappa.map_or("sans".to_string(), |k| format!("k{k}")),
-                if dx < 0.02 { "_fin".to_string() } else if plafond_us < 10_000 { format!("_pas{plafond_us}") } else { String::new() }, ts);
+                if corrigee { "_corrigee".to_string() } else if dx < 0.02 { "_fin".to_string() } else if plafond_us < 10_000 { format!("_pas{plafond_us}") } else { String::new() }, ts);
             let lignes: String = profil.iter().filter(|(_, e)| e.is_finite()).map(|(x, e)| format!("{x:.4};{e:.5}
 ")).collect();
             let _ = std::fs::write(nom, lignes);
@@ -3542,5 +3553,17 @@ fn affine_shift_rest_and_channel_s752() {
         println!("S752 (2) {nom}, le canal : la largeur {:.0} %, le creux {:.1} mm, la crête {:.1} → {:.1} mm ({:+.1} %) ; {}",
             100. * lmin / l0, creux * 1e3, c0 * 1e3, cf * 1e3, 100. * (cf / c0 - 1.), if tenue { "l'onde tenue" } else { "l'onde NON TENUE" });
     }
+}
+
+/// **S753 — la 3D corrigée contre Synolakis** (ADR-291 D4) : le montage de S712, 2,5 cm, le pas plafonné à 2,5 ms (S713 E2), les profils à t·√(g/d)
+/// = 15, 20, 25 comparés aux mesures (les lignes « S712 photo »). Rapporte ; les critères se lisent dans la preuve.
+#[test]
+#[ignore = "S753 : la 3D corrigée contre les mesures de Synolakis (≈ 45 min)"]
+fn the_corrected_3d_against_synolakis_s753() {
+    let (photos, d) = plage_synolakis_conf_s753(None, 0.025, &[15., 20., 25.], 2_500, true);
+    for (t, _, vol) in &photos {
+        println!("S753 t = {t:.0} : V_φ/V_n {vol:.4}");
+    }
+    println!("S753 : {d:.0} s");
 }
 

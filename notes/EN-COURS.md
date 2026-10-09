@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S753 — **en cours**. En autonomie ; session longue. ADR-289 D3.3, ADR-291 D4 : **la 3D corrigée contre une référence extérieure**,
+Session : S753 — **terminée**. En autonomie ; session longue. ADR-289 D3.3, ADR-291 D4 : **la 3D corrigée contre une référence extérieure**,
 les mesures de laboratoire de Synolakis (l'onde solitaire `H/d` = 0,3 qui déferle sur la plage canonique de 1:19,85 ; S712, `references/synolakis/`).
 
 **L'essai** : le montage de S712 (`d` = 0,5 m, 2,5 cm, le pas plafonné à 2,5 ms comme S713 E2), avec la 3D corrigée (ADR-291 : `Complete`,
@@ -97,7 +97,14 @@ quadratique moyen, la crête mesurée contre la calculée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la configuration dans le montage ; l'essai ; (1), (2).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — la configuration dans le montage ; l'essai ; (1), (2).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (2 648 s) :
+  - t = 15 : 0,326 d en 9,42 d, l'écart 0,030 d ;
+  - t = 20 : 0,319 d en 5,82 d, 0,075 d ;
+  - t = 25 : 0,450 d en 0,72 d, 0,059 d.
+
+  (1) tenu ; (2) manqué. La célérité relue sur le canal : `Complete` +0,4 %, R1 −5,6 %, R1′ −1,3 %. R1 ralentit la vague : le choix
+  d'ADR-291 était prématuré, une note datée y est ajoutée.

@@ -166,6 +166,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le sélecteur des domaines — conception (S732)](registres/SELECTEUR-DOMAINES-S732.md) : la prévision par le porteur, les frontières, la solidité, sept scènes, trois juges, six pièces.
 - [L'étape 3 du LOD : la 3D rallumée autour d'un corps — conception (S722)](registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5), leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [La 3D corrigée contre Synolakis — S753](validation/SYNOLAKIS-CORRIGEE-S753.md) : la hauteur juste, la vague trop lente (R1).
 - [Le bilan propre de la projection, et R1′ — S752](validation/BILAN-PROJECTION-S752.md) : R1′ réfutée ; R1 retenue (ADR-291).
 - [Deux remèdes au freinage de la lame — S750](validation/DEUX-REMEDES-S750.md) : le déplacement avec sa vitesse tient presque tout.
 - [La surface corrigée vers sa densité attendue — S749](validation/CIBLE-SURFACE-S749.md) : l'onde gardée, le repos et la lame non.

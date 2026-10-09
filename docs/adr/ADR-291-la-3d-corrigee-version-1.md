@@ -50,3 +50,8 @@ sélecteur, R43 et S1 sont refaits avec elle.
 - La 3D corrigée reste une option du cœur (éteinte par défaut, au bit pour les essais anciens). Les montages nouveaux l'activent.
 - Le bilan propre de la projection (`density_projection_budget`, S752) le montre : toutes les variantes soulèvent un peu l'eau, de +2 à +3 J
   d'énergie potentielle en 4 s sur le canal. C'est un écart connu, à suivre.
+
+*Note datée du 2026-10-09 (S753)* : **le choix de D1 était prématuré.** Contre les mesures de Synolakis, la 3D corrigée a la bonne hauteur
+(+0,012 d à t = 15), mais elle est en retard, et le retard grandit (1,0 d, puis 2,2 d). R1 ralentit la vague de 5,6 % (2,290 m/s contre
+2,426 ; `Complete` : +0,4 %). Le laboratoire tranchera entre `Complete` et R1 (S754)
+([preuve](../validation/SYNOLAKIS-CORRIGEE-S753.md)).
