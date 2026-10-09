@@ -62,56 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S725 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B3 : le raccord de la
-boîte**. Saint-Venant troué (B1) et APIC à quatre bords (B2) sont réunis.
+Session : S726 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-neuvième revue de méthode** (ADR-222 D4 :
+S721–S725).
 
-**Ce que la session fait.** `relais_boite.rs`, `RelaisBoite`. À chaque pas, pour chaque face du trou :
-1. l'état de la colonne 3D voisine (le niveau par la surface, les vitesses moyennes) ;
-2. le flux complet de Rusanov contre la maille active de Saint-Venant, donné à Saint-Venant (`pas_avec_flux_trou`) ;
-3. `F₀/h` devient la vitesse du bord d'APIC (bornée par la célérité), et l'eau qui entre est posée ;
-4. le pas d'APIC ;
-5. le bilan de la face (cédé contre reçu et rendu) : l'écart va à la maille active, et la masse est exacte par construction.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-Les sorties en y sont comptées par face (`y_outlet_step`), et le flux de Rusanov rendu public (`flux_rusanov`).
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, contre leurs critères. Les règles se cherchent d'abord dans METHODE :
+  - ADR-273 D1, un raccord jugé d'abord entre deux copies du même solveur ;
+  - ADR-273 D2, une seule source ;
+  - ADR-267 D2, un script de plus de 20 lignes par l'outil d'écriture ;
+  - le plan avant le travail.
+  Rien encore sur le régime commun de deux modèles différents, ni sur les constantes de deux solveurs mêlées dans un bilan.
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-*Note* : le code a été écrit avant ce plan ; les critères ci-dessous le précèdent, avant tout essai.
-
-**Les essais ; chacun a ses critères, écrits avant lui.** Saint-Venant 3 m × 3 m (`dx` = 2,5 cm), 0,4 m d'eau, fond plat ; la boîte de
-1 m × 1 m au milieu (≈ 205 000 particules).
-
-| essai | ce qu'il juge | critères |
-|---|---|---|
-| **E1** | le repos, 1 s | la vitesse maximale d'APIC et de Saint-Venant sous 1 mm/s ; la masse à 10⁻¹² ; `|η|` de Saint-Venant sous 1 mm |
-| **E2** | une bosse de 2 cm (rayon 0,4 m) qui traverse la boîte, 1,2 s, contre le Saint-Venant entier | la masse à 10⁻¹² ; **ce que la boîte réfléchit** (l'écart de η en arrière de la boîte, x de 0,2 à 0,9 m) sous **10 %** de l'amplitude ; l'écart en aval rapporté (la 3D est dispersive, Saint-Venant non) |
-
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-282)
-
-- **témoin** : E1, le repos ; E2, le Saint-Venant entier, le même pas. La réflexion se juge en arrière de la boîte, où la 3D et Saint-Venant
-  ne diffèrent que par le raccord.
-- **instrument** : la masse (Saint-Venant hors du trou, les particules, les réservoirs), recalculée à chaque pas ; l'écart de η dans des
-  bandes (ADR-281 D2 : ils peuvent échouer).
-- **calcul** :
-  - la bosse : `kd` ≈ 1,6 au rayon 0,4 m pour 0,4 m d'eau, donc dispersive. D'où un écart en aval attendu, et la réflexion jugée seule ;
-  - le coût : ≈ 1 min pour E1, ≈ 3 min pour E2.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-273 D1 : le raccord se juge contre le même Saint-Venant, sans trou ;
-  - ADR-280 D1 : la surface ;
-  - ADR-282 : la fermeture par l'outil.
-- **pièges** :
-  - les signes des quatre faces dans le bilan ;
-  - le niveau d'une colonne qui sèche (le plancher de `dx/4`) ;
-  - la pose à droite reste celle du réseau (S683).
+**Critères, écrits avant.** (1) ADR-283 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — E1, E2, E2′.
-- [x] **P3** — preuve ; fermeture (le lot S723–S725).
+- [ ] **P2** — ADR-283 ; METHODE.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **E1, premier passage : échoue** (APIC 1,2 m/s, Saint-Venant 0,5 m/s, 6 cm). Le diagnostic du premier pas : la surface reconstruite de la boîte se lit à 0,39931 m pour 0,4 m posés. Saint-Venant, à 0,4 m, poussait son eau dans la boîte ; elle n'y entre que par quanta, le niveau lu ne monte pas, et le couplage s'emballe. **Le remède de S684** (ADR-273 D2, une seule source) : Saint-Venant part du niveau que lit la 3D. Les mêmes critères.
-- **E1 tenu** (second passage) : APIC 4,6·10⁻⁶ m/s, Saint-Venant 2,4·10⁻⁶ m/s, |η| 2,9·10⁻⁷ m, la masse 6,5·10⁻¹⁴.
-- **E2, premier passage : échoue** — la masse 6,1·10⁻¹¹ (critère 10⁻¹²), la réflexion 23 % (critère 10 %), l'aval 17 %. La cause : le bilan rendu d'un coup à une seule maille ; un quantum fait `dx/8` de hauteur (3 mm), un pic sur une onde de 2 cm. **Le remède** : une dette par face, comptée dans la masse, rendue par fraction (20 % par pas), étalée sur six mailles voisines. Le plancher `max(0)` de la hauteur est retiré (il cassait la masse). Les mêmes critères.
-- **E2, second passage** (la dette étalée) : la réflexion 18,8 %, la masse 5,8·10⁻¹¹ ; la dette n'était pas la cause principale. **Le témoin était mal choisi** : la bosse de rayon 0,4 m est dispersive (`kd` ≈ 1,6). La 3D la porte autrement que Saint-Venant, et ce désaccord physique réfléchit aussi. Le jugement du raccord demande une onde que les deux portent également. **E2′**, les mêmes critères : une onde longue (rayon 1,2 m, `kd` ≈ 0,5), Saint-Venant 6 m × 6 m, la boîte au milieu. La masse (6·10⁻¹¹) reste à expliquer.
-- **E2′ (l'onde longue) : la réflexion 8,7 % (tenue)**, l'aval 13,5 % ; la masse 2,4·10⁻¹¹ (échoue). Le diagnostic, pas à pas : ≈ 10⁻¹² m³ par pas pendant l'entrée, 1,7·10⁻⁸ de l'échange. C'est la précision d'un `f32` : le pas d'APIC (0,025000000373) contre celui de Saint-Venant (0,025). **Le remède** : tout ce qui touche Saint-Venant se compte avec son pas, et les volumes posés sont répartis par des poids normalisés.
-- **P2 fini** — E1 tenu (6,5·10⁻¹⁴) ; E2 la réflexion 18 % (la bosse dispersive : le désaccord des modèles) ; **E2′ tenu** : la réflexion 9,0 %, la masse 2,3·10⁻¹⁴. B3 acquis.
