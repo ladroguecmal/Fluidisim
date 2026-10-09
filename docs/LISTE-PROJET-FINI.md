@@ -494,6 +494,8 @@ pas recopiée ici (L137).
   comme à 5 cm, quelle que soit l'onde de départ) : la cause commune de la 3D trop haute ([preuve](validation/ONDE-SOLITAIRE-3D-S739.md)).
   **S740** : **la cause trouvée, le tassement des particules** sous la crête ; la projection de densité garde l'onde (à 2,5 cm, la
   largeur à 92 %, le creux à 9 % de `H`) ; ni la pression, ni la séparation, ni le pas ([preuve](validation/TASSEMENT-PARTICULES-S740.md)).
+  **S742** : le banc canonique, première passe — l'onde solitaire tenue avec la projection ; mais la projection freine la remontée de
+  12 % ; la levée sans conclusion (le quantum de pose, le repos sur fond lisse en pente) ([preuve](validation/BANC-CANONIQUE-S742.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

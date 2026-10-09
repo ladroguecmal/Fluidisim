@@ -3135,3 +3135,136 @@ fn channel_weak_density_projection_s740() {
 fn channel_density_projection_fine_s740() {
     suspect_s740("E7, la projection de densité", 0.025, ReglagesCanal { densite: true, ..Default::default() });
 }
+
+/// S742 — la plage douce de la levée : 6 m plats à 0,30 m d'eau, une pente de 1:30 jusqu'à 0,12 m, un plateau ; 18,4 m. Le fond (m).
+fn fond_levee_s742(x: f64) -> f64 {
+    ((x - 6.0).max(0.) / 30.).min(0.18)
+}
+
+/// S742 — la bosse de la levée (ADR-276 D1, une seule fonction) : `η = a·exp(−((x − 3,5)/σ)²)`, `a` = 15 mm, σ = 1 m, vers la droite,
+/// `u = c·η/(d + η)` uniforme (`c = √(g·d)`, `d` la profondeur locale).
+fn bosse_levee_s742(x: f64) -> (f64, f64) {
+    let eta = 0.015 * (-((x - 3.5) / 1.0f64).powi(2)).exp();
+    let d = 0.3 - fond_levee_s742(x);
+    (eta, (9.81 * d).sqrt() * eta / (d + eta))
+}
+
+/// **S742 — B2, la levée sur une pente douce**. `modele` : 0, la 3D sans projection ; 1, la 3D avec la projection de densité ; 2, Saint-Venant ;
+/// 3, SGN. Rend `(la crête à 0,25 s, la plus haute crête sur le plateau de 11,9 m jusqu'à ce que la crête passe 15,4 m, sa seconde lecture
+/// par les particules (la 3D) ou NaN, secondes)`.
+fn levee_s742(modele: u8) -> (f64, f64, f64, f64) {
+    let horloge = std::time::Instant::now();
+    let (lx, niveau, dx) = (18.4f64, 0.3f64, 0.025f64);
+    let (mut c0, mut haut, mut haut_p) = (f64::NAN, f64::MIN, f64::NAN);
+    if modele >= 2 {
+        // Les témoins : SGN ou Saint-Venant sur fond doux (S733), la plage en miroir (le miroir rend les murs).
+        let n = (2. * lx / dx).round() as usize;
+        let (mut z, mut h, mut q) = (vec![0f64; n], vec![0f64; n], vec![0f64; n]);
+        for i in 0..n {
+            let x = (i as f64 + 0.5) * dx;
+            let (xm, signe) = if x > lx { (2. * lx - x, -1.) } else { (x, 1.) };
+            let (e, u) = bosse_levee_s742(xm);
+            z[i] = fond_levee_s742(xm);
+            h[i] = niveau + e - z[i];
+            q[i] = signe * h[i] * u;
+        }
+        let mut s = crate::serre_1d::Serre1D::nouveau_fond(dx, 9.81, h, q, z, modele == 3).unwrap();
+        let mut t = 0f64;
+        loop {
+            let p = s.pas_stable();
+            s.pas(p).unwrap();
+            t += p;
+            let m = lx / dx;
+            let (ic, ec) = (0..m as usize).map(|i| (i, s.h[i] + s.z[i] - niveau)).fold((0, f64::MIN), |a, b| if b.1 > a.1 { b } else { a });
+            let xc = (ic as f64 + 0.5) * dx;
+            if c0.is_nan() && t >= 0.25 {
+                c0 = ec;
+            }
+            if xc > 15.4 || t > 14. {
+                break;
+            }
+            if xc >= 11.9 {
+                haut = haut.max(ec);
+            }
+        }
+        return (c0, haut, haut_p, horloge.elapsed().as_secs_f64());
+    }
+    let dxf = dx as f32;
+    let (nx, ny, nz) = ((lx / dx).round() as usize, 2usize, ((niveau + 0.1) / dx).ceil() as usize);
+    let (mut a, mut arena) = apic(nx, ny, nz, dxf, nx * ny * nz * 8);
+    let fond: Vec<f32> = (0..nx * ny).map(|c| fond_levee_s742(((c % nx) as f64 + 0.5) * dx) as f32).collect();
+    a.set_seabed_smooth(Some(&fond)).unwrap();
+    a.set_ballistic_air(true);
+    if modele == 1 {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    }
+    a.seed(&|p| (p[2] as f64) > fond_levee_s742(p[0] as f64) && (p[2] as f64) < niveau + bosse_levee_s742(p[0] as f64).0).unwrap();
+    a.set_particle_velocities(&|p| ([bosse_levee_s742(p[0] as f64).1 as f32, 0., 0.], [[0.; 3]; 3])).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let lissage = 2usize;
+    let (mut t, mut prochaine) = (0u64, 0u64);
+    loop {
+        let us = a.stable_step_us(10_000);
+        a.step(us).unwrap();
+        t += us;
+        let ts = t as f64 * 1e-6;
+        let (_, h) = volume_surface_s708(&a);
+        let eta: Vec<f64> = (0..nx).map(|i| {
+            let (g0, g1) = (i.saturating_sub(lissage), (i + lissage).min(nx - 1));
+            let x = (i as f64 + 0.5) * dx;
+            h[g0..=g1].iter().sum::<f64>() / (g1 - g0 + 1) as f64 - (niveau - fond_levee_s742(x))
+        }).collect();
+        let (ic, ec) = eta.iter().enumerate().fold((0, f64::MIN), |m, (i, &e)| if e > m.1 { (i, e) } else { m });
+        let xc = (ic as f64 + 0.5) * dx;
+        if c0.is_nan() && ts >= 0.25 {
+            c0 = ec;
+        }
+        if xc > 15.4 || ts > 14. {
+            break;
+        }
+        if xc >= 11.9 && ec > haut {
+            haut = ec;
+            haut_p = a.particles().iter().filter(|p| ((p[0] as f64) - xc).abs() < 0.25).fold(0f32, |m, p| m.max(p[2])) as f64 + dx / 4. - niveau;
+        }
+        if t >= prochaine {
+            // S742 : regarder le champ (ADR-287 D4) — le profil lu, tous les 0,5 s, si `PROFILS` est posé.
+            if std::env::var("PROFILS").is_ok() {
+                let lignes: String = (0..nx).map(|i| format!("{:.4};{:.5};{:.5}\n", (i as f64 + 0.5) * dx, eta[i], h[i])).collect();
+                let _ = std::fs::write(format!("{}/../../calculs/s742_profil_{modele}_{:05}.csv", env!("CARGO_MANIFEST_DIR"), t / 1000), lignes);
+            }
+            prochaine += 500_000;
+            eprintln!("S742 B2 3D{} : t = {ts:.2} s, la crête x = {xc:.3} m, η = {:.2} mm ; sur le plateau au plus {:.2} mm ; {:.0} s d'horloge",
+                if modele == 1 { " avec projection" } else { " sans projection" }, ec * 1e3, haut.max(0.) * 1e3, horloge.elapsed().as_secs_f64());
+        }
+    }
+    (c0, haut, haut_p, horloge.elapsed().as_secs_f64())
+}
+
+/// **S742 — B2** : la levée, la 3D avec et sans projection, Saint-Venant et SGN. Critère : la 3D avec projection à 10 % du rapport de
+/// Saint-Venant. **Mesuré : sans conclusion** — la bosse de 15 mm est sous le quantum de pose (12,5 mm), la lecture par φ sur le fond lisse
+/// en pente porte des dents de scie de ±10 mm, et le bassin oscille de ±20 mm. N'affirme rien (ADR-244 D1) ; les témoins : Saint-Venant
+/// 1,152, SGN 1,271.
+#[test]
+#[ignore = "S742 B2 : la levée sur une pente douce (≈ 25 min)"]
+fn the_canonical_shoaling_bench_s742() {
+    let noms = ["la 3D sans projection", "la 3D avec projection", "Saint-Venant", "SGN"];
+    let mut rapports = [0f64; 4];
+    for m in [2u8, 3, 1, 0] {
+        let (c0, h, hp, d) = levee_s742(m);
+        rapports[m as usize] = h / c0;
+        println!("S742 B2 {} : la crête de départ {:.2} mm, sur le plateau {:.2} mm (particules {:.2}) ; le rapport {:.4} (Green 1,2574) ; {d:.0} s",
+            noms[m as usize], c0 * 1e3, h * 1e3, hp * 1e3, h / c0);
+    }
+    println!("S742 B2 : la 3D avec projection {:.4}, Saint-Venant {:.4} ({:+.1} %) ; sans projection {:.4} ({:+.1} %) ; SGN {:.4}",
+        rapports[1], rapports[2], 100. * (rapports[1] / rapports[2] - 1.), rapports[0], 100. * (rapports[0] / rapports[2] - 1.), rapports[3]);
+    let _ = rapports;
+}
+
+/// **S742 — regarder le champ de B2** (ADR-287 D4) : la 3D avec projection seule, les profils écrits ; aucun critère.
+#[test]
+#[ignore = "S742 : les profils de la levée, la 3D avec projection (≈ 8 min)"]
+fn the_shoaling_profiles_s742() {
+    let r = levee_s742(1);
+    println!("S742 profils : {r:?}");
+}
+

@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 17:37 +02:00
+JETON            : libre
+Battement        : 2026-10-09 18:17 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S742 — le banc canonique de la 3D (ADR-287 D1) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S741 — la cinquante-deuxième revue de méthode (ADR-287) ([journal](notes/JOURNAL.md)). Avant : S740 (Pourquoi la 3D raidit l'onde solitaire : le tassement des particules)
-Session suivante : S742 — le banc canonique de la 3D (ADR-287 D1) avec la projection de densité : l'onde solitaire, Green, l'onde stationnaire, la remontée ; puis Synolakis et le plongeon de R43
+Session en cours : aucune
+Dernière session : S742 — Le banc canonique de la 3D, première passe ([journal](notes/JOURNAL.md)). Avant : S741 (la cinquante-deuxième revue de méthode)
+Session suivante : S743 — le lac au repos sur une pente (escalier et lisse, avec et sans projection), puis les variantes de la projection sur le canal et la remontée
 Maillons        : 0
 Registres       : dernier lot S740 (ADR-213 D3) ; le prochain au plus tard en S743
 ```

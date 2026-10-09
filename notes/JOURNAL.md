@@ -2256,3 +2256,14 @@ leurs défauts au bit (le plafond de la pression, la séparation) ; le canal ré
 
 Maillons **0** (méthode). Suivant : **S742**, le banc canonique de la 3D (ADR-287 D1), avec la projection de densité.
 
+## S742 — 2026-10-09 — Le banc canonique de la 3D, première passe
+
+**Entrée.** ADR-287 D1. **Fait** ([preuve](../docs/validation/BANC-CANONIQUE-S742.md)) : la levée sur une pente douce (B2), la remontée de
+S645 avec la projection (B4). **Mesuré** :
+- B1 (S740) tenu ;
+- B2 sans conclusion : la bosse sous le quantum de pose, et la 3D sur fond lisse en pente ne tient pas le repos (ou sa lecture ne le tient
+  pas) ;
+- B4 manqué : la projection complète freine la remontée de 12 %.
+
+La projection garde l'onde au large mais freine le jet de rive. Maillons **0**. Suivant : **S743**, le lac au repos sur une pente, puis les
+variantes de la projection.

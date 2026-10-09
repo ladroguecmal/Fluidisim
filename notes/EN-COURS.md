@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S742 — **en cours**. En autonomie ; session longue. ADR-287 D1 : **le banc canonique de la 3D**, avec la projection de densité
+Session : S742 — **terminée**. En autonomie ; session longue. ADR-287 D1 : **le banc canonique de la 3D**, avec la projection de densité
 (S740). **La question** : la 3D corrigée passe-t-elle les essais de base d'un modèle de vagues, sans perdre ce qui marchait ?
 
 **Le banc** (2,5 cm) :
@@ -102,8 +102,12 @@ la crête) touche le mur quand la crête est à 15,4 m : la lecture s'arrête l�
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — B2 (la levée) : le montage, les témoins, la 3D avec et sans projection.
-- [ ] **P3** — B4 (la remontée de S645 avec la projection).
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P2** — B2 (la levée) : le montage, les témoins, la 3D avec et sans projection.
+- [x] **P3** — B4 (la remontée de S645 avec la projection).
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2** — B2 sans conclusion. Saint-Venant 1,152, SGN 1,271 ; la 3D avec projection 3,33, sans projection aucune crête lue. Le profil,
+  regardé (ADR-287 D4) : la bosse sous le quantum de pose (une couche de 12,5 mm), des dents de scie de ±10 mm sur la pente lisse dès le
+  départ, le bassin qui oscille de ±20 mm. Les profils dans `captures/s742_levee_profils.png`.
+- **P3** — B4 avec la projection : **0,2020 m (−12 %), manqué** ; sans projection 0,2307 m. La projection freine la lame.
