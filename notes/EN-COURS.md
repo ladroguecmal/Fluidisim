@@ -62,57 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S730 — **terminée**. En autonomie ; session longue. **R43 reçu** (ADR-284) : réaliste et cohérent, sauf au raccord du rivage, où
-le jet de la 3D retombe contre un mur de Saint-Venant, avec une poche d'air. **La question** : placé au-delà du point où le jet retombe
-(ADR-284 D2), le raccord du rivage efface-t-il ce mur, et à quel coût ?
+Session : S731 — **en cours**. La cinquantième revue de méthode (ADR-222 D4), sur S726–S730, et le lot S729–S731 (ADR-213 D3).
 
 **Ce que la session fait.**
-- `deux_raccords_porteur` prend la place du raccord du rivage, `x_f` ; 10,775 m reste le défaut, au bit.
-- **L'instrument du mur** (ADR-284 D4), à chaque pas : `J(t)`, le niveau de Saint-Venant à sa première maille (moyenne des rangées), moins
-  le niveau de la 3D à sa dernière colonne (fond + l'épaisseur d'eau lue par φ, `volume_surface_s708`).
-- `x_f` = **12,0 m** : 0,30 m au-delà du rivage au repos (11,696 m). La 3D couvre la plage où le jet retombe (≈ 10,4–10,8 m) et la lame qui
-  remonte, jusqu'à sa mort à 3,2 s (M1) ; Saint-Venant prend le sable sec au-delà.
+- Relire les frictions de S726 à S730, et décider (ADR-285). Les trois relevées :
+  1. **le témoin tout-3D de la plage portait un raccord** (Saint-Venant au rivage, à 10,775 m) dont personne n'avait mesuré le saut. De
+     S717 à S730, ses remontées et la conclusion de S718–S719 (« le large SGN en cause ») en dépendaient. C'est l'utilisateur qui l'a vu,
+     sur une image (R43) ;
+  2. **le filtre d'`essai.py`** est une sous-chaîne : E1 de S730 a lancé E2 aussi, et dans l'autre ordre ;
+  3. **un ADR créé sans sa ligne d'index** a fait refuser la fermeture de S730 ; l'arbre est resté modifié, à restaurer à la main.
+- **La demande de l'utilisateur** (2026-10-09, après S730) : le système qui choisit le type de simulation (SGN, la 3D, Saint-Venant) doit être
+  la pièce la plus peaufinée et la plus solide. La revue en fait la campagne suivante, avec ses juges.
+- `essai.py` : un nom qui en désigne plusieurs est refusé, sauf s'il en désigne un exactement (alors seul lui tourne).
+- Le lot : FEUILLE-DE-ROUTE et ROADMAP-VIVANTE (S729–S731).
 
-**Les essais, et leurs critères écrits avant.**
-- **E1 — de bout en bout** (`BoutEnBout`, 5 s), `x_f` = 10,775 m (le montage de R43) puis 12,0 m :
-  1. **le mur** : le plus grand `J` sur [2,4 s ; 3,2 s] à 12,0 m sous **1 cm**, et sous le quart de celui de 10,775 m. Le plancher de bruit
-     de l'instrument (ADR-280 D1) est le plus grand `|J|` avant l'arrivée de l'onde (t < 1,5 s) ; le critère n'est pas plus fin que lui ;
-  2. le retournement à 0,15 m et 0,1 s de celui de 10,775 m (ADR-278 D2 ; l'amont ne change pas) ;
-  3. la masse à 10⁻¹² ;
-  4. le coût rapporté ; s'il dépasse deux fois celui de 10,775 m, la lame mince en 3D (S712) est la suite ;
-  5. le film à 1/30 s, et l'image de l'instant de la capture de l'utilisateur, à lui envoyer.
-- **E2 — le tout-3D** (`AucunJusqua5`), `x_f` = 12,0 m : le nouveau témoin. Il rapporte le retournement, l'air, la remontée, `J`, le coût et
-  le film, contre S717 (2,637 s, 9,988 m ; 1 191 s). Critères : le retournement à 0,15 m et 0,1 s de S717 ; la masse à 10⁻¹² ; `J` sous 1 cm.
-
-**Contrôles du plan** (ADR-266, ADR-273, ADR-277, ADR-278, ADR-280, ADR-281, ADR-283, ADR-284)
-
-- **témoin** : le même montage à 10,775 m, mesuré par le même instrument dans le même essai (ADR-273 D1).
-- **instrument** : `J` lu par la surface de la 3D (ADR-280 D1), son plancher de bruit mesuré avant l'onde ; affiché au fil du calcul
-  (ADR-281 D1).
-- **calcul** :
-  - E1 : deux fois ≈ 5 min ;
-  - E2 : ≈ 20 à 25 min.
-
-  La 3D grandit de 431 à 480 colonnes (+11 %), sur du sable presque sec.
-- **ADR** :
-  - ADR-284 D2 et D4 ;
-  - ADR-283 D1 : Saint-Venant part du niveau que lit la 3D, comme avant ;
-  - ADR-278 D2 : les tolérances du juge.
-- **pièges** :
-  - le raccord sur du sable sec : Saint-Venant à `h` = 0, la vitesse imposée au bord d'APIC bornée par la célérité (S690) ;
-  - la lame mince en 3D fait tomber le pas (S712) ;
-  - `x_f` change `nx` : tout ce qui dépend de 431 colonnes (la mort, le film) le lit de `nx`.
+**Critère** : `essai.py` ne lance que l'essai nommé quand un autre nom le contient. Vérifié sur `the_shore_relay_beyond_the_jet_s730`, par
+la liste des essais seulement (sans rien lancer de long : `--liste`).
 
 ### Plan
 
-- [x] **P1** — jeton ; ADR-284 ; plan.
-- [x] **P2** — `x_f` et l'instrument du mur ; E1 ; (1)–(5).
-- [x] **P3** — E2, le tout-3D à 12,0 m.
-- [x] **P4** — preuve ; images ; fermeture.
+- [x] **P1** — jeton ; plan.
+- [ ] **P2** — `essai.py` ; ADR-285 ; METHODE ; le lot.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 et P3, dans un même lancement** (le filtre d'`essai.py` est une sous-chaîne : le nom de E1 est contenu dans celui de E2, les deux ont
-  tourné, E2 d'abord). **E1 tenu** : le mur 281,5 mm (à 2,934 s, R43) → 0,0 mm (le bruit 0,69 → 0,00 mm) ; le retournement 2,569 s / 9,863 m
-  → 2,588 s / 9,913 m ; la masse 1,6·10⁻¹⁵ ; le coût 291 → 308 s (1,06×). La remontée 0,3714 → 0,3364 m. **E2 tenu** : le tout-3D à 12,0 m,
-  le retournement 2,620 s / 9,938 m (S717 : 2,637 s / 9,988 m), l'air 2,804 s / 10,375 m, la masse 1,2·10⁻¹⁶, le mur 0, la remontée
-  0,3547 m à 3,942 s, 1 152 s. De bout en bout contre le tout-3D, la remontée passe de +3,3 cm (S718) à −1,8 cm.

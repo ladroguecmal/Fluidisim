@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 08:36 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 08:39 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S731 — la cinquantième revue de méthode (S726–S730) et le lot ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S730 — Le raccord du rivage au-delà du jet (R43 reçu) ([journal](notes/JOURNAL.md)). Avant : S729 (La boîte qui naît et meurt avec le corps)
 Session suivante : S731 — la cinquantième revue de méthode (S726–S730) et le lot ; puis ADR-284 D3, la place des frontières tirée de la prédiction
 Maillons        : 1
