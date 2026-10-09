@@ -89,7 +89,8 @@ session (« **S…–Snnn** »).
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-288 ; METHODE ; l'outil et son essai.
+- [x] **P2** — ADR-288 ; METHODE ; l'outil et son essai.
 - [ ] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — ADR-288 (D1 le repos d'abord ; D2 trois quanta, la crête dans une fenêtre ; D3 le lot vérifié par l'outil ; D4 la prémisse « au bit » vérifiée sur un petit cas). `rituel.py` : le faux appel `fin --lot` refuse (« aucune ligne de lot **S…–S746** »), sans rien écrire. METHODE, l'index.

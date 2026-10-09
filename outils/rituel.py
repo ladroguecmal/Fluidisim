@@ -148,6 +148,9 @@ def fin(argv) -> int:
         lignes = [l for l in entree.group(1).splitlines() if l.strip()]
         if len(lignes) > 20:
             manques.append(f"journal : l'entrée {session} a {len(lignes)} lignes de texte (vingt au plus)")
+    # S746 (ADR-288 D3) : un lot passé sans ses lignes (S743) — la feuille de route doit porter une ligne de lot qui finit par la session.
+    if "--lot" in argv and not re.search(rf"\*\*S\d+–{session}\*\*", lire(ROOT / "docs/FEUILLE-DE-ROUTE.md")):
+        manques.append(f"FEUILLE-DE-ROUTE : aucune ligne de lot « **S…–{session}** » — le lot s'écrit avant --lot (ADR-288 D3)")
     if not manques:
         if "--sans-banc" in argv:
             print(f"BANC sauté : {option('--sans-banc')} (à dire au journal)")
