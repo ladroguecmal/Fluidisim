@@ -62,43 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S747 — **terminée**. En autonomie ; session longue. SANS-SURFACE-S745 : corriger la surface (`Complete`) garde l'onde mais freine la
-lame ; ne pas la corriger (`WithoutSurface`) fait l'inverse. **La question** : une projection hybride tient-elle les trois essais du banc ?
+Session : S748 — **en cours**. En autonomie ; session longue. ADR-289 D3.1 ; DENSITE-HYBRIDE-S747 : la projection hybride garde le repos et
+l'onde solitaire, mais freine la remontée de S645 (−12 %). **La question** : où et quand la projection freine-t-elle la lame ? **Un
+diagnostic, aucun remède** (ADR-226 D1 ; ADR-287 D4 : regarder le champ).
 
-**La variante** (`DensityVariant::Hybrid`, consciente du fond) :
-- comme `Complete`, partout où la colonne porte au moins **trois mailles d'eau** (la règle du film du rivage, S678) ;
-- **aucune correction** dans une colonne qui en porte moins : la lame mince, le jet de rive.
+**L'essai** (`ressaut_s748`) : le montage de S645 (2,5 cm, l'escalier, l'air balistique), deux fois, sans projection puis avec la
+projection hybride consciente du fond. Tous les 0,05 s :
+- **le front par les particules** (S737) ;
+- **l'énergie de l'eau au-delà du pied moins 0,5 m** : `Σ (½·|v|² + g·z)·quantum` ;
+- **le plus grand déplacement imposé par la projection au dernier pas** (`density_projection_shift`) ;
+- tous les 0,25 s, **le profil de la surface** (la plus haute particule par colonne), écrit dans `calculs/s748_*.csv` et tracé.
 
-Le compte se fait sur les étiquettes du pas (les mailles d'eau de la colonne).
+**Le critère du diagnostic, écrit avant** : la cause est localisée si l'on peut dire
+- (a) **l'instant** où les fronts divergent de plus de 1 cm ;
+- (b) si, à cet instant, **l'énergie** de la lame avec projection est plus basse (de plus de 2 %) ;
+- (c) **où** la projection déplace le plus les particules à ce moment : dans le ressaut, ou ailleurs.
 
-**Les essais, et leurs critères écrits avant** (les mêmes que S745, ADR-288 D1 : le repos d'abord) :
-1. **Le repos sur l'escalier**, 1:30 et 1:12 : la vitesse sous 1 cm/s, l'écart par les particules sous 3 mm ;
-2. **la remontée de S645** : à **10 %** de la loi (`Complete` −11 % ; `WithoutSurface` −5,5 %) ;
-3. **l'onde solitaire sur le canal à 2,5 cm** : la largeur au-dessus de **80 %**, le creux sous **10 % de `H`** (`Complete` 9 mm ;
-   `WithoutSurface` 40,5 mm).
+Sinon, la question reste ouverte, et les lectures sont rapportées.
 
-**Les quanta** (ADR-288 D2) : le seuil de trois mailles vaut 7,5 cm d'eau. La lame de S645 en a moins, le canal (0,5 m) beaucoup plus.
+**Contrôles du plan** (ADR-226, ADR-286, ADR-287, ADR-288)
 
-**Contrôles du plan** (ADR-276, ADR-287, ADR-288)
-
-- **témoin** : les deux variantes de S744 et S745, sur les mêmes essais ; le repos exact ; la loi ; l'onde exacte.
-- **instrument** : ceux de S743, S645 et S740.
-- **calcul** : le repos (2 min), la remontée (8 min), le canal (13 min), en série.
-- **ADR** : ADR-276 D2 (une différence : le seuil de la lame mince) ; ADR-287 D1 ; ADR-288 D1, D2.
-- **pièges** :
-  - une colonne qui passe le seuil pendant le pas change de traitement : c'est le comportement voulu ;
-  - le juge du déferlement, plus tard, dira si la variante garde le plongeon (S709).
+- **témoin** : le même montage sans projection (S645 redonné au millimètre en S738).
+- **instrument** : le front par les particules, éprouvé en S737 ; l'énergie, une somme sur les particules ; le déplacement, rendu par le
+  cœur.
+- **calcul** : deux fois ≈ 6 min.
+- **ADR** : ADR-226 D1 (localiser d'abord) ; ADR-287 D4 ; ADR-286 D2 (deux lectures du front : les particules, et les profils regardés).
+- **pièges** : l'énergie potentielle dépend de la référence de `z` ; seules les différences entre les deux calculs comptent.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la variante ; (1), (2), (3).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — l'essai ; les deux calculs ; les profils tracés ; (a), (b), (c).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** :
-  - (1) **tenu** : 6,8 mm/s ; 0,01–0,07 mm ;
-  - (3) **tenu** : 92 % ; 9,0 mm ; la crête finale 100,2 mm ;
-  - (2) **non tenu** : 0,2015 m, −12,2 %. Le freinage vient de la correction en eau plus profonde (le ressaut).
-- **La discussion avec l'utilisateur** : il aurait éprouvé chaque solveur seul, sous stress, avant de les combiner, et voulait un avis
-  réfléchi. Plan accepté (*« Ok parfait »*) : ADR-289.
