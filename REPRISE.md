@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 13:06 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 13:11 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S735 — le diagnostic de S4 (le front figé sur la pente de 1:3) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S734 — Les témoins du sélecteur (P2), en partie ([journal](notes/JOURNAL.md)). Avant : S733 (Le prédicteur du sélecteur)
 Session suivante : S735 — le diagnostic de S4 (le front figé sur la pente de 1:3 : de l'eau collée, ou une lecture fausse ?), avant tout calibrage du prédicteur
 Maillons        : 1
