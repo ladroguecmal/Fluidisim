@@ -88,7 +88,8 @@ script, et leurs formules citées.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le registre ; ses nombres.
+- [x] **P2** — le registre ; ses nombres.
 - [ ] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — le registre écrit ; `outils/selecteur_nombres.py` : le seuil de Synolakis (0,052 à 1:12), `S₀` par scène, `L_jet` ; contrôle sur S1 : le jet à 10,344 m contre 10,375 m (l'air enfermé du témoin S730).
