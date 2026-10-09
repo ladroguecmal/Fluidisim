@@ -107,8 +107,17 @@ S'il n'y en a pas, la question reste ouverte, avec les nombres. L'application à
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le canal, les deux ondes, les mesures ; E1, E2 à 5 cm.
-- [ ] **P3** — E3, l'onde retenue à 2,5 cm.
+- [x] **P2** — le canal, les deux ondes, les mesures ; E1, E2 à 5 cm.
+- [ ] **P3** — **E3 changé, après E1–E2** (aucune onde retenue) : **A à 2,5 cm**, pour savoir si la déformation tient à la maille. Critère
+  écrit avant : à 2,5 cm, la largeur à mi-hauteur reste au-dessus de **80 %** de sa valeur à 0,25 s, et le creux sous **10 % de `H`**
+  jusqu'à 4,25 s. Si oui, la maille de 5 cm est la cause ; sinon, la 3D à la maille des témoins déforme l'onde.
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — E1 et E2 à 5 cm (349 s) : **les deux ondes se déforment pareil**.
+  - A : la largeur à mi-hauteur passe de 2,33 m (0,25 s) à 1,44 (1,25 s), 0,67 (2,25 s), 0,55 (3,25 s) et 0,49 m (4,25 s) ; la crête 98,
+    86, 114, 111, 100 mm ; le creux derrière −17, −22, −45, −54 mm.
+  - B : la largeur 2,43, 1,41, 0,64, 0,57, 0,82 m ; la crête 104, 80, 120, 129, 94 mm ; le creux −4, −16, −27, −43, −47 mm.
+  - **B non retenue** : l'onde de départ n'est pas la cause. La 3D à 5 cm ne garde pas une onde solitaire : elle la raidit et la rétrécit,
+    comme un modèle sans dispersion, et un creux se creuse derrière.
+  - Le résumé imprimé (±inf) est faux : la mesure à t = 0 est prise avant toute reconstruction de la surface. Les séries affichées font foi.

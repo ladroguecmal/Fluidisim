@@ -2931,3 +2931,111 @@ fn s4_toward_s645_particle_velocity_s738() {
 fn s4_toward_s645_scale_s738() {
     s4_vers_s645_s738(5);
 }
+
+/// S739 — une mesure de l'onde du canal : `(t, x de la crête, η de la crête, largeur à mi-hauteur, le creux derrière, la crête par les
+/// particules)`, m.
+type MesureCanal = (f64, f64, f64, f64, f64, f64);
+
+/// **S739 — l'onde solitaire dans la 3D sur un canal plat** : `d` = 0,5 m, `H` = 0,1 m, 24 m, deux rangées, des murs ; l'onde centrée à
+/// 4 m. `profil` : **B**, l'onde de Rayleigh (`OndeDepart`, S719) avec le profil vertical de SGN (S698), `u(z) = ū + (h²/6 − z²/2)·ū_xx`,
+/// `w = −z·ū_x` ; sinon **A**, l'onde d'aujourd'hui (Boussinesq, `u = c·η/(d + η)` uniforme, `w = 0`). La vitesse est posée sur les
+/// particules seulement (S645). Les mesures tous les 0,25 s, par la surface lissée sur 10 cm.
+fn canal_s739(dx: f32, profil: bool, duree: f64) -> Vec<MesureCanal> {
+    let horloge = std::time::Instant::now();
+    let (d, h0, lx, x1) = (0.5f64, 0.1f64, 24.0f64, 4.0f64);
+    let dxs = dx as f64;
+    let onde = OndeDepart { h: h0, d, x1, g: 9.81, rayleigh: profil };
+    let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, ((d + 0.3) / dxs).ceil() as usize);
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    a.seed(&|p| (p[2] as f64) < d + onde.eta(p[0] as f64)).unwrap();
+    // ū et ses dérivées, par différences centrées sur un pas fin.
+    let eps = 1e-3;
+    let ub = |x: f64| onde.u(x);
+    a.set_particle_velocities(&|p| {
+        let (x, z) = (p[0] as f64, p[2] as f64);
+        if !profil {
+            return ([ub(x) as f32, 0., 0.], [[0.; 3]; 3]);
+        }
+        let h = d + onde.eta(x);
+        let ux = (ub(x + eps) - ub(x - eps)) / (2. * eps);
+        let uxx = (ub(x + eps) - 2. * ub(x) + ub(x - eps)) / (eps * eps);
+        ([(ub(x) + (h * h / 6. - z * z / 2.) * uxx) as f32, 0., (-z * ux) as f32], [[0.; 3]; 3])
+    }).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let lissage = ((0.05 / dxs).round() as usize).max(1);
+    let mesurer = |a: &Apic3, t: f64| -> MesureCanal {
+        let (_, h) = volume_surface_s708(a);
+        let eta: Vec<f64> = (0..nx).map(|i| {
+            let (g0, g1) = (i.saturating_sub(lissage), (i + lissage).min(nx - 1));
+            h[g0..=g1].iter().sum::<f64>() / (g1 - g0 + 1) as f64 - d
+        }).collect();
+        let (ic, ec) = eta.iter().enumerate().fold((0, f64::MIN), |m, (i, &e)| if e > m.1 { (i, e) } else { m });
+        let x = |i: usize| (i as f64 + 0.5) * dxs;
+        let moitie = ec / 2.;
+        let cote = |dir: isize| -> f64 {
+            let mut i = ic as isize;
+            while i + dir >= 0 && ((i + dir) as usize) < nx && eta[(i + dir) as usize] > moitie {
+                i += dir;
+            }
+            let (i0, i1) = (i as usize, ((i + dir).clamp(0, nx as isize - 1)) as usize);
+            let (e0, e1) = (eta[i0], eta[i1]);
+            x(i0) + (x(i1) - x(i0)) * if (e0 - e1).abs() > 1e-12 { (e0 - moitie) / (e0 - e1) } else { 0. }
+        };
+        let largeur = cote(1) - cote(-1);
+        let creux = (0..nx).filter(|&i| x(i) > x(ic) - 4. && x(i) < x(ic) - 1.5).map(|i| eta[i]).fold(0f64, f64::min);
+        let haut = a.particles().iter().filter(|p| ((p[0] as f64) - x(ic)).abs() < 0.5).fold(0f32, |m, p| m.max(p[2])) as f64 + dxs / 4. - d;
+        let _ = t;
+        (t, x(ic), ec, largeur, creux, haut)
+    };
+    let mut out = vec![mesurer(&a, 0.)];
+    let fin = (duree * 1e6).round() as u64;
+    let (mut t, mut prochaine) = (0u64, 250_000u64);
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t).min(prochaine - t);
+        a.step(us).unwrap();
+        t += us;
+        if t >= prochaine {
+            prochaine += 250_000;
+            let m = mesurer(&a, t as f64 * 1e-6);
+            eprintln!("S739 {} {dx} m : t = {:.2} s, la crête x = {:.3} m, η = {:.1} mm (particules {:.1}) ; la largeur à mi-hauteur {:.3} m ; le creux {:.1} mm ; {:.0} s d'horloge",
+                if profil { "B" } else { "A" }, m.0, m.1, m.2 * 1e3, m.5 * 1e3, m.3, m.4 * 1e3, horloge.elapsed().as_secs_f64());
+            out.push(m);
+        }
+    }
+    out
+}
+
+/// S739 — le résumé d'une série : `(l'écart extrême de la crête à sa valeur de départ, celui de la largeur, le creux le plus profond)`,
+/// rapportés (la crête et la largeur en part de leur valeur à t = 0, le creux en part de `H`).
+fn resume_canal_s739(m: &[MesureCanal]) -> (f64, f64, f64) {
+    let (e0, l0) = (m[0].2, m[0].3);
+    let crete = m.iter().map(|x| (x.2 / e0 - 1.).abs()).fold(0f64, f64::max);
+    let largeur = m.iter().map(|x| (x.3 / l0 - 1.).abs()).fold(0f64, f64::max);
+    let creux = m.iter().map(|x| -x.4).fold(0f64, f64::max) / 0.1;
+    (crete, largeur, creux)
+}
+
+/// **S739 — E1 et E2 à 5 cm** : A puis B sur le canal, 5 s. B est retenue si sa crête reste à ±3 %, sa largeur à ±5 %, son creux sous 2 % de
+/// `H`, et si elle fait mieux que A sur les trois.
+#[test]
+#[ignore = "S739 : le canal plat à 5 cm, les deux ondes (≈ 6 min)"]
+fn the_solitary_wave_in_a_flat_channel_s739() {
+    let a = canal_s739(0.05, false, 5.0);
+    let b = canal_s739(0.05, true, 5.0);
+    let (ra, rb) = (resume_canal_s739(&a), resume_canal_s739(&b));
+    println!("S739 E1 A (5 cm) : la crête ±{:.1} %, la largeur ±{:.1} %, le creux {:.1} % de H", 100. * ra.0, 100. * ra.1, 100. * ra.2);
+    println!("S739 E2 B (5 cm) : la crête ±{:.1} %, la largeur ±{:.1} %, le creux {:.1} % de H", 100. * rb.0, 100. * rb.1, 100. * rb.2);
+    let retenue = rb.0 < 0.03 && rb.1 < 0.05 && rb.2 < 0.02 && rb.0 < ra.0 && rb.1 < ra.1 && rb.2 < ra.2;
+    println!("S739 : B {}", if retenue { "retenue" } else { "non retenue" });
+}
+
+/// **S739 — E3 : l'onde à 2,5 cm** (`PROFIL=1` pour B, sinon A), les mêmes critères.
+#[test]
+#[ignore = "S739 : le canal plat à 2,5 cm (≈ 45 min)"]
+fn the_solitary_wave_in_a_flat_channel_fine_s739() {
+    let profil = std::env::var("PROFIL").is_ok_and(|v| v == "1");
+    let m = canal_s739(0.025, profil, 5.0);
+    let r = resume_canal_s739(&m);
+    println!("S739 E3 {} (2,5 cm) : la crête ±{:.1} %, la largeur ±{:.1} %, le creux {:.1} % de H", if profil { "B" } else { "A" }, 100. * r.0, 100. * r.1, 100. * r.2);
+}
