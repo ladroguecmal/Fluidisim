@@ -62,44 +62,53 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S748 — **terminée**. En autonomie ; session longue. ADR-289 D3.1 ; DENSITE-HYBRIDE-S747 : la projection hybride garde le repos et
-l'onde solitaire, mais freine la remontée de S645 (−12 %). **La question** : où et quand la projection freine-t-elle la lame ? **Un
-diagnostic, aucun remède** (ADR-226 D1 ; ADR-287 D4 : regarder le champ).
+Session : S749 — **en cours**. En autonomie ; session longue. SURFACE-DILATEE-S748 : la projection dilate la couche de surface, parce qu'elle
+n'y corrige que l'excès. **La question** : corrigée dans les deux sens vers sa densité attendue, la surface reste-t-elle à sa place, et la 3D
+tient-elle les trois essais ?
 
-**L'essai** (`ressaut_s748`) : le montage de S645 (2,5 cm, l'escalier, l'air balistique), deux fois, sans projection puis avec la
-projection hybride consciente du fond. Tous les 0,05 s :
-- **le front par les particules** (S737) ;
-- **l'énergie de l'eau au-delà du pied moins 0,5 m** : `Σ (½·|v|² + g·z)·quantum` ;
-- **le plus grand déplacement imposé par la projection au dernier pas** (`density_projection_shift`) ;
-- tous les 0,25 s, **le profil de la surface** (la plus haute particule par colonne), écrit dans `calculs/s748_*.csv` et tracé.
+**La densité attendue d'une maille de surface** : le noyau de la densité (le chapeau trilinéaire, d'une maille de demi-largeur) appliqué à
+une eau uniforme sous une surface plane, située à `a = −φ/dx` mailles au-dessus du centre (φ lu à la maille) :
+- `ρ*(a) = 0,5 + a − a²/2` pour `0 ≤ a ≤ 1` ;
+- `0,5 + a + a²/2` pour `−1 ≤ a < 0` ;
+- 1 au-dessus, 0 en dessous.
 
-**Le critère du diagnostic, écrit avant** : la cause est localisée si l'on peut dire
-- (a) **l'instant** où les fronts divergent de plus de 1 cm ;
-- (b) si, à cet instant, **l'énergie** de la lame avec projection est plus basse (de plus de 2 %) ;
-- (c) **où** la projection déplace le plus les particules à ce moment : dans le ressaut, ou ailleurs.
+Au repos, la surface est sur la face haute de la dernière maille : `a = 0,5`, et `ρ* = 0,875`, la valeur exacte du réseau de pose (deux
+particules par maille, aux quarts). **Corriger `ρ − ρ*` dans les deux sens ne bouge donc rien au repos**, et empêche la surface de se
+dilater.
 
-Sinon, la question reste ouverte, et les lectures sont rapportées.
+**La variante** (`DensityVariant::SurfaceTarget`, consciente du fond) : l'intérieur dans les deux sens vers 1, la surface dans les deux sens
+vers `ρ*`. Le seuil de la lame mince (S747) n'est pas repris : une seule différence avec `Complete` (ADR-276 D2).
 
-**Contrôles du plan** (ADR-226, ADR-286, ADR-287, ADR-288)
+**Les critères, écrits avant** (ADR-288 D1 : le repos d'abord) :
+1. **Le repos** sur l'escalier, 1:30 et 1:12 : la vitesse sous 1 cm/s, l'écart par les particules sous 3 mm ;
+2. **l'onde solitaire** sur le canal à 2,5 cm : la largeur au-dessus de 80 %, le creux sous 10 % de `H` ;
+3. **la remontée de S645** : à 10 % de la loi ;
+4. **le niveau** : sur le canal, le niveau moyen de la surface loin derrière l'onde (de 0,5 à 2,5 m) reste à **1 mm** du repos, là où
+   `Complete` le soulevait de 3 à 5 mm (S748).
 
-- **témoin** : le même montage sans projection (S645 redonné au millimètre en S738).
-- **instrument** : le front par les particules, éprouvé en S737 ; l'énergie, une somme sur les particules ; le déplacement, rendu par le
-  cœur.
-- **calcul** : deux fois ≈ 6 min.
-- **ADR** : ADR-226 D1 (localiser d'abord) ; ADR-287 D4 ; ADR-286 D2 (deux lectures du front : les particules, et les profils regardés).
-- **pièges** : l'énergie potentielle dépend de la référence de `z` ; seules les différences entre les deux calculs comptent.
+**Les quanta** (ADR-288 D2) : la lecture du niveau par les particules vaut `dx/4` près (6 mm) ; le niveau moyen sur 2 m (80 colonnes) en
+tire un plancher d'environ 1 mm. Le critère 4 est donc à la limite : il est rapporté, et ne fait pas échouer seul.
+
+**Contrôles du plan** (ADR-236, ADR-276, ADR-287, ADR-288)
+
+- **témoin** :
+  - le repos exact ;
+  - l'onde exacte ;
+  - la loi de Synolakis ;
+  - les variantes de S744 à S747 sur les mêmes essais.
+- **instrument** : ceux de S743, S740 et S645 ; le niveau moyen, une lecture nouvelle sur le canal, éprouvée sur la variante `Complete` (elle
+  doit montrer les 3 à 5 mm de S748).
+- **calcul** : le repos (2 min), le canal (13 min), la remontée (7 min), en série.
+- **ADR** : ADR-276 D2 ; ADR-287 D1 ; ADR-288 D1, D2.
+- **pièges** :
+  - φ lu à une maille dont le centre est presque à la surface : `a` voisin de 0, `ρ*` voisin de 0,5 ;
+  - une surface en pente : la formule suppose une surface plane, horizontale ; elle est approchée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; les deux calculs ; les profils tracés ; (a), (b), (c).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — la variante ; (1), (3).
+- [ ] **P3** — (2), (4) sur le canal.
+- [ ] **P4** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (798 s) :
-  - (a) les fronts divergent à 1,26 s ;
-  - (b) l'énergie de la lame baisse avec la projection, de −1,8 % (0,8 s) à −15,5 % (3,0 s) ;
-  - (c) le déplacement est d'environ 1 mm à chaque pas, à la surface libre, partout.
-
-  Le profil (`captures/s748_ressaut.png`) : la surface est plus haute de 3 à 5 mm partout avec la projection. **La cause : la correction de
-  surface d'un seul côté (l'excès) dilate la couche de surface.**
