@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S733 — **en cours**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P1 : le prédicteur**. **La question** : SGN, calculé
+Session : S733 — **terminée**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P1 : le prédicteur**. **La question** : SGN, calculé
 en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se retourne, et où retombe son jet ?
 
 **Ce que la session fait.**
@@ -120,7 +120,7 @@ en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se
 - [x] **P3b** — **E3, ajouté après E2** (le coût manqué) : le même prédicteur à `dx` = 5 cm. Critères écrits avant : (7) la prévision de 3 s
   sous **100 ms** ; (8) la convergence : pour chaque critère (et chaque variante rapportée), l'instant à **0,05 s** et le lieu à **0,1 m** de
   ceux de 2,5 cm ; la crête à 2,6 s à 5 % de celle de 2,5 cm. Jugé contre le prédicteur à 2,5 cm, non contre le témoin.
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — **tenu** : (1) le lac au repos sur la plage de R43, 2 s, la vitesse 4,7·10⁻¹⁵ m/s, la masse 0 ; (2) la levée sur 1:50, de

@@ -121,3 +121,19 @@ Plus tard, dans le même registre :
 - **Le critère de déclenchement de SGN** : il sera choisi par la mesure, en P1, entre les critères publiés.
 - **Le déferlement glissant (S3)** : la 3D ou la 2D, à trancher par le juge du réalisme.
 - **Le budget de R4** : à fixer avec la scène du jeu (ADR-262 : le budget est un plafond).
+
+*Note datée du 2026-10-09 (S733), après la question de l'utilisateur sur le coût et le découpage* :
+- **Le serveur** ne porte aucun domaine : la 3D, SGN et Saint-Venant locaux sont des détails (δ), calculés par chaque client autour de ce
+  qu'il voit, sans autorité de jeu (liste 10.2, 10.4). Le sélecteur tourne sur chaque client.
+- **Son coût propre** est mesuré au banc (P6) comme un critère : la prévision, les naissances, les déplacements et les morts, rapportés au
+  pas de la 3D.
+- **Le découpage** : ADR-006 (S01) l'a décidé. Une grille d'adressage fixe et hiérarchique (64, 512, 4 096 m, codes de Morton) sert au
+  réseau, à la persistance et au routage. Chaque domaine de calcul est **un ensemble épars de blocs de 8³ mailles**, pas une boîte
+  subdivisée : la forme est portée par les blocs, une fusion est une union, une séparation une partition, et le coût se compte en blocs.
+  Notre 3D travaille encore en une boîte par domaine. **Pièce P7** : le sélecteur raisonne en blocs ; une frontière qui bouge ajoute ou
+  retire des blocs (le geste de B4b).
+
+*Note datée du 2026-10-09 (S733)* : **P1, le prédicteur**, fait en partie ([preuve](../validation/PREDICTEUR-S733.md)) :
+- la place de la vague et son jet sont prévus à 0,1 m, pour 68 ms ;
+- l'instant du déclenchement ne l'est pas encore : les seuils publiés tombent de 0,5 à 0,85 m à côté. Le calibrage attend les témoins de
+  P2.

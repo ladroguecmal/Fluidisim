@@ -2149,3 +2149,16 @@ demande avant la session. **Fait** : [SELECTEUR-DOMAINES-S732](../docs/registres
 
 `outils/selecteur_nombres.py` : le jet de R43 estimé à 10,344 m contre 10,375 m mesurés. Maillons **1** (4.14). Suivant : **S733**, P1, le
 prédicteur.
+
+## S733 — 2026-10-09 — Le prédicteur du sélecteur (P1)
+
+**Entrée.** En autonomie ; SELECTEUR-DOMAINES-S732. L'utilisateur a demandé : pousser de temps en temps (fait) ; le coût côté serveur
+(aucun : δ est local au client, 10.2, 10.4) ; le découpage en pavés (ADR-006 : des blocs épars, pièce P7, note au registre).
+**Fait** ([preuve](../docs/validation/PREDICTEUR-S733.md)) : SGN sur fond doux, `selecteur::prevoir`, `outils/crete_film.py`.
+**Mesuré** :
+- le lac au repos à 5·10⁻¹⁵ m/s ; Green à 2,2 % ;
+- la crête et le jet de R43 prévus à 0,1 m ;
+- les seuils publiés hors du retournement (manqué ; la levée de SGN −26 % au dernier mètre) ;
+- 277 ms à 2,5 cm (manqué), puis 68 ms à 5 cm (E3, tenu).
+
+Maillons **1** (4.14). Suivant : **S734**, P2, les témoins.
