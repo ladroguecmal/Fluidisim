@@ -3614,6 +3614,21 @@ fn ballottement_s757(corrigee: bool) -> (f64, f64, usize) {
 
 /// S758 — le même ballottement, un réglage de plus.
 fn ballottement_regle_s758(corrigee: bool, regle: &dyn Fn(&mut Apic3)) -> (f64, f64, usize) {
+    let (p, amort, n, _) = ballottement_energie_s759(corrigee, regle);
+    (p, amort, n)
+}
+
+/// S759 — l'énergie des particules (J, ρ = 1 000 kg/m³, g = 9,81), `Σ ½mv² + mgz`, comme le bilan propre de la projection (S752).
+fn energie_particules_s759(a: &Apic3) -> f64 {
+    let masse = 1000. * (a.domain.dx as f64).powi(3) / 8.;
+    (0..a.n).map(|k| {
+        let v = a.vel[k];
+        0.5 * masse * (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64 + masse * 9.81 * a.x[k][2] as f64
+    }).sum()
+}
+
+/// S759 — le même ballottement, avec la série de l'énergie : `(t, l'énergie des particules, le bilan propre cumulé de la projection)`.
+fn ballottement_energie_s759(corrigee: bool, regle: &dyn Fn(&mut Apic3)) -> (f64, f64, usize, Vec<(f64, f64, f64)>) {
     let (lx, d, amp, dx) = (2.0f64, 0.5f64, 0.04f64, 0.025f32);
     let dxs = dx as f64;
     let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, ((d + 0.2) / dxs).ceil() as usize);
@@ -3628,12 +3643,15 @@ fn ballottement_regle_s758(corrigee: bool, regle: &dyn Fn(&mut Apic3)) -> (f64, 
     a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
     let (mut t, fin) = (0u64, 10_000_000u64);
     let mut serie: Vec<(f64, f64)> = Vec::new();
+    let mut energies = vec![(0., energie_particules_s759(&a), 0.)];
     while t < fin {
         let us = a.stable_step_us(10_000).min(fin - t);
         a.step(us).unwrap();
         t += us;
         let (_, h) = volume_surface_s708(&a);
         serie.push((t as f64 * 1e-6, h[0] - d));
+        let b = a.density_projection_budget().map_or(0., |b| b[0] + b[1]);
+        energies.push((t as f64 * 1e-6, energie_particules_s759(&a), b));
     }
     // Les passages par zéro, interpolés ; les extrêmes entre deux passages.
     let mut zeros = Vec::new();
@@ -3656,7 +3674,7 @@ fn ballottement_regle_s758(corrigee: bool, regle: &dyn Fn(&mut Apic3)) -> (f64, 
     } else {
         f64::NAN
     };
-    (periode, amort, zeros.len())
+    (periode, amort, zeros.len(), energies)
 }
 
 /// **S757 — (1) la période du ballottement à 1 % de la dispersion linéaire exacte, (2) l'amortissement rapporté** ; la 3D sans projection, puis
@@ -3701,5 +3719,27 @@ fn energy_neutral_projection_s758() {
     println!("S758 (3) le canal : la largeur {:.0} %, le creux {:.1} mm, la crête finale {:.1} mm, la célérité {cel:.3} m/s ({:+.1} %) ; {}",
         100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, 100. * (cel / cex - 1.),
         if lmin > 0.8 * l0 && creux < 0.01 && (cel / cex - 1.).abs() < 0.01 { "tenu" } else { "NON TENU" });
+}
+
+/// **S759 — le bilan d'énergie du ballottement** : l'énergie des particules à chaque seconde, séparée en ce que le pas change et ce que la
+/// projection change (son bilan propre). Départage H1 (le pas conserve) et H2 (le pas perd, la projection rend trop). L'énergie du mode posé :
+/// `½ρg·A²/2·Lx·Ly` = 0,392 J.
+#[test]
+#[ignore = "S759 : le bilan d'énergie du ballottement, deux 3D (≈ 10 min)"]
+fn sloshing_energy_budget_s759() {
+    let mode = 0.5 * 1000. * 9.81 * 0.04f64.powi(2) / 2. * 2.0 * 0.05;
+    for (nom, corrigee) in [("sans projection", false), ("la 3D corrigée", true)] {
+        let (p, amort, n, e) = ballottement_energie_s759(corrigee, &|_| {});
+        println!("S759 {nom} : la période {p:.4} s ; l'amortissement {:.2} % par période ; {n} passages ; l'énergie du mode {mode:.3} J", 100. * amort);
+        let (e0, b0) = (e[0].1, e[0].2);
+        let mut prochaine = 0.5;
+        for &(t, ei, bi) in &e {
+            if t + 1e-9 >= prochaine {
+                let (total, proj) = (ei - e0, bi - b0);
+                println!("S759 {nom} t = {t:.2} s : l'énergie {total:+.4} J ; dont la projection {proj:+.4} J ; dont le pas {:+.4} J", total - proj);
+                prochaine += 0.5;
+            }
+        }
+    }
 }
 

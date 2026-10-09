@@ -101,8 +101,14 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
+- [x] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
 - [ ] **P3** — la correction choisie par P2 ; (1), (2), (3).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (579 s) — **H2** :
+  - sans projection, le pas perd 4,32 J en 10 s (dix fois l'énergie du mode, 0,392 J) : le tassement ;
+  - la 3D corrigée : le pas perd 1,20 J, la projection rend 1,50 J ; **l'excédent, +0,30 J**, est presque l'énergie du mode ;
+  - la perte du pas et le gain de la projection sont réguliers (≈ 0,12 et 0,15 J/s).
+
+  Le remède : la projection ne rend que ce que le pas a perdu (`BeyondStepLoss`).
