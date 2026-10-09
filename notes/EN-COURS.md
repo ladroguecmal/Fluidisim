@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S743 — **en cours**. En autonomie ; session longue. BANC-CANONIQUE-S742 : sur le fond lisse en pente, le bassin oscillait de
+Session : S743 — **terminée**. En autonomie ; session longue. BANC-CANONIQUE-S742 : sur le fond lisse en pente, le bassin oscillait de
 ±20 mm, et la lecture par φ portait des dents de scie de ±10 mm. **La question** : la 3D tient-elle un lac au repos sur une pente ? Et si
 non, est-ce le mouvement réel ou la lecture ?
 
@@ -100,7 +100,13 @@ L'écart par φ est rapporté à part. S'il dépasse celui des particules, la le
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; les huit cas.
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — l'essai ; les huit cas.
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — le repos tenu sur l'escalier sans projection (6,8 mm/s ; 0,01–0,07 mm). Il n'est pas tenu dans les six autres cas :
+  - l'escalier avec projection : 6,3 cm/s, 4,7 mm ;
+  - le lisse sans projection : 0,27–0,68 m/s, 0,8–1,4 mm par les particules, 22 mm par φ ;
+  - le lisse avec projection : 1,9 m/s, 36–53 mm.
+
+  393 s.

@@ -2267,3 +2267,13 @@ S645 avec la projection (B4). **Mesuré** :
 
 La projection garde l'onde au large mais freine le jet de rive. Maillons **0**. Suivant : **S743**, le lac au repos sur une pente, puis les
 variantes de la projection.
+
+## S743 — 2026-10-09 — Le lac au repos sur une pente
+
+**Entrée.** BANC-CANONIQUE-S742. **Fait** ([preuve](../docs/validation/REPOS-PENTE-S743.md)) : le repos sur deux pentes, deux fonds, avec
+et sans projection, par deux lectures. **Mesuré** :
+- seul l'escalier sans projection tient (6,8 mm/s ; 0,01 mm) ;
+- la projection met le lac en mouvement contre un fond (6 cm/s, 5 mm ; elle diverge sur le fond lisse) ;
+- le fond lisse ne tient pas le repos (0,3 à 0,7 m/s ; la lecture par φ fausse de 22 mm).
+
+La suite : la projection de densité consciente du fond. Maillons **0**. Suivant : **S744**.

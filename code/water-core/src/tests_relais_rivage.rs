@@ -3268,3 +3268,89 @@ fn the_shoaling_profiles_s742() {
     println!("S742 profils : {r:?}");
 }
 
+/// **S743 — le lac au repos sur une pente** (ADR-287 D1) : 1 m plat à 0,30 m d'eau, la pente `1:cot` jusqu'au sec, 0,5 m de sec ; 2,5 cm,
+/// deux rangées, l'air balistique, 2 s. `lisse` : le fond lisse (S640), sinon l'escalier ; `densite` : la projection de densité (S709). Rend
+/// `(la plus grande vitesse, m/s ; le plus grand écart de la surface au niveau par les particules, m ; par φ, m ; particules)`, les écarts
+/// pris sur les colonnes mouillées de plus de trois mailles.
+fn repos_pente_s743(cot: f64, lisse: bool, densite: bool) -> (f64, f64, f64, usize) {
+    let (dx, niveau) = (0.025f32, 0.3f64);
+    let dxs = dx as f64;
+    let lx = 1.0 + cot * niveau + 0.5;
+    let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, ((niveau + 0.15) / dxs).ceil() as usize);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let zf = |x: f64| ((x - 1.0).max(0.) / cot).min(niveau + 0.1);
+    let fond: Vec<f32> = (0..nx * ny).map(|c| zf(((c % nx) as f64 + 0.5) * dxs) as f32).collect();
+    if lisse {
+        a.set_seabed_smooth(Some(&fond)).unwrap();
+    } else {
+        a.set_seabed(Some(&fond)).unwrap();
+    }
+    a.set_ballistic_air(true);
+    if densite {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+    }
+    let marche: Vec<f32> = (0..nx).map(|i| if lisse { a.smooth_seabed_height(((i as f64 + 0.5) * dxs) as f32, 0.025) } else { a.seabed_height(i, 0) }).collect();
+    let zb_fin: Vec<f32> = (0..nx * 4).map(|k| if lisse { a.smooth_seabed_height((k as f32 + 0.5) * dx / 4., 0.025) } else { marche[k / 4] }).collect();
+    let n = a.seed(&|p| {
+        let k = ((p[0] / (dx / 4.)) as usize).min(nx * 4 - 1);
+        p[2] > zb_fin[k] && (p[2] as f64) < niveau
+    }).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    // Le niveau tel que les particules le posent (la plus haute + dx/4), lu sur le plat : la référence de la lecture par les particules.
+    let haut_col = |a: &Apic3| -> Vec<f64> {
+        let mut h = vec![f64::MIN; nx];
+        for p in a.particles() {
+            let i = ((p[0] / dx) as usize).min(nx - 1);
+            h[i] = h[i].max(p[2] as f64 + dxs / 4.);
+        }
+        h
+    };
+    let ref_p = haut_col(&a)[(0.5 / dxs) as usize];
+    let profond = |i: usize| niveau - zf((i as f64 + 0.5) * dxs) > 3. * dxs;
+    let (mut vmax, mut ecart_p, mut ecart_phi) = (0f64, 0f64, 0f64);
+    let mut ref_phi = f64::NAN;
+    let fin = 2_000_000u64;
+    let mut t = 0u64;
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        let r = a.step(us).unwrap();
+        t += us;
+        vmax = vmax.max(r.max_speed as f64);
+        let (_, h) = volume_surface_s708(&a);
+        let hp = haut_col(&a);
+        // La lecture par φ, rapportée à la sienne sur le plat après le premier pas (ADR-287 D3).
+        let i0 = (0.5 / dxs) as usize;
+        if ref_phi.is_nan() {
+            ref_phi = marche[i0] as f64 + h[i0];
+        }
+        for i in 0..nx {
+            if profond(i) {
+                ecart_p = ecart_p.max((hp[i] - ref_p).abs());
+                ecart_phi = ecart_phi.max((marche[i] as f64 + h[i] - ref_phi).abs());
+            }
+        }
+    }
+    (vmax, ecart_p, ecart_phi, n)
+}
+
+/// **S743 — le lac au repos, les huit cas** : la vitesse sous 1 cm/s et l'écart par les particules sous 3 mm sur 2 s ; l'écart par φ rapporté.
+#[test]
+#[ignore = "S743 : le lac au repos sur une pente, huit cas (≈ 10 min)"]
+fn the_lake_at_rest_on_slopes_s743() {
+    let mut echecs = Vec::new();
+    for cot in [30.0f64, 12.0] {
+        for lisse in [false, true] {
+            for densite in [false, true] {
+                let (v, ep, ephi, n) = repos_pente_s743(cot, lisse, densite);
+                let tenu = v < 0.01 && ep < 0.003;
+                println!("S743 1:{cot} {} {} : la vitesse {:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {n} particules ; {}",
+                    if lisse { "lisse" } else { "escalier" }, if densite { "avec projection" } else { "sans projection" }, v, ep * 1e3, ephi * 1e3,
+                    if tenu { "tenu" } else { "NON TENU" });
+                if !tenu {
+                    echecs.push((cot, lisse, densite));
+                }
+            }
+        }
+    }
+    println!("S743 : {} cas non tenus : {echecs:?}", echecs.len());
+}

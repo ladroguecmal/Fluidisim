@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 18:18 +02:00
+JETON            : libre
+Battement        : 2026-10-09 18:28 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S743 — le lac au repos sur une pente (ADR-287 D1) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S742 — Le banc canonique de la 3D, première passe ([journal](notes/JOURNAL.md)). Avant : S741 (la cinquante-deuxième revue de méthode)
-Session suivante : S743 — le lac au repos sur une pente (escalier et lisse, avec et sans projection), puis les variantes de la projection sur le canal et la remontée
+Session en cours : aucune
+Dernière session : S743 — Le lac au repos sur une pente ([journal](notes/JOURNAL.md)). Avant : S742 (Le banc canonique de la 3D, première passe)
+Session suivante : S744 — la projection de densité consciente du fond (le solide compté plein), jugée sur le repos, le canal et la remontée de S645
 Maillons        : 0
-Registres       : dernier lot S740 (ADR-213 D3) ; le prochain au plus tard en S743
+Registres       : dernier lot S743 (ADR-213 D3) ; le prochain au plus tard en S746
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
