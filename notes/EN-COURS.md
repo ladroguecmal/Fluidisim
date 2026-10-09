@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S716 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-septième revue de méthode** (ADR-222 D4 :
+Session : S716 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-septième revue de méthode** (ADR-222 D4 :
 S711–S715).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
@@ -82,7 +82,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-281 ; METHODE ; le filtre d'`essai.py`.
-- [ ] **P3** — rituel.
+- [x] **P2** — ADR-281 ; METHODE ; le filtre d'`essai.py`.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
+- **P2 fini** — ADR-281 : D1 (chaque résultat montré dès qu'il est mesuré ; `essai.py` montre toute marque de session), D2 (un critère doit pouvoir échouer) ; la prochaine revue S721.

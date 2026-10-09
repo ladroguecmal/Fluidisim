@@ -57,5 +57,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   projection faible tient le volume, mais déplace le déferlement de 0,2 s. Le juge se tranchera contre des mesures de laboratoire
   (S712), et la projection reste éteinte jusque-là. Au lot S711–S713 : contre les mesures de Synolakis, les deux versions se valent ; la
   3D fait l'onde trop haute avant le déferlement (une question ouverte), et le pas de 2,5 ms rend juste la crête du déferlement. Le juge
-  de S690 est relancé au pas court (S714).
+  de S690 est relancé au pas court (S714). Au lot S714–S716 : le juge tient au pas court ; la 3D renaît par sa surface (N2 acquis) ;
+  la suite de la phase A est M1 (la mort), puis le déclencheur et l'ensemble.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

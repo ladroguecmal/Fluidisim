@@ -62,7 +62,8 @@ def main():
     journal = CALCULS / f"essai_{a.nom}.log"
     cmd = [str(copie), a.nom, "--nocapture", "--test-threads", "1"] + (["--ignored"] if a.ignore else [])
     debut = time.time()
-    utiles = re.compile(rf"({re.escape(marque)}|progression|panicked|test result|critère|error)")
+    # S716 (ADR-281 D1) : toute ligne marquée d'une session (« S712 photo » dans un essai de S713) est utile.
+    utiles = re.compile(rf"({re.escape(marque)}|S\d{{3}} |progression|panicked|test result|critère|error)")
     resultat = None
     with open(journal, "w", encoding="utf-8") as j:
         proc = subprocess.Popen(cmd, cwd=CODE / "water-core", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,

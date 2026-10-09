@@ -514,6 +514,9 @@ déferlement de la 3D dépend de son volume ; une référence extérieure est n�
 convergence du juge sous ses options) ; le juge contre le laboratoire (Synolakis : les deux versions de la 3D se valent, toutes deux
 font l'onde trop haute avant le déferlement) ; ni la maille ni le pas n'en sont la cause, mais le pas de 2,5 ms rend juste la crête
 du déferlement (4.14, 4.16).
+**S714–S716** : le juge de S690 au pas de 2,5 ms (−0,042 s, dans la tolérance ; le plafond de 10 ms reste) ; la renaissance de la 3D par
+la surface (N2 acquis, à 1 % de la 3D ininterrompue) ; la quarante-septième revue (ADR-281 : chaque résultat montré dès qu'il est
+mesuré ; un critère doit pouvoir échouer) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

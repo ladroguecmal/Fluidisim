@@ -2013,3 +2013,10 @@ moins cher. Maillons **1** (4.14). Suivant : **S715**, la renaissance de la 3D p
 `Renaissance::DepuisLaSurface`, la lecture des profils par la surface. **E1 tenu** : renée par la surface, la 3D reste à 1 % de la 3D
 ininterrompue (facteur 0,992 à 1,0 s ; par le compte, S707 : 0,935). **E2** : née de SGN, la phase juste, l'onde 10 % plus haute qui se
 repose. **N2 acquis.** Maillons **1** (4.14). Suivant : **S716**, la quarante-septième revue ; puis M1, la mort par la surface.
+
+## S716 — 2026-10-09 — la quarante-septième revue de méthode (ADR-281)
+
+**Entrée.** La revue (S711–S715). **Fait** : [ADR-281](../docs/adr/ADR-281-quarante-septieme-revue-de-methode.md). D1 : un calcul long
+montre chaque résultat dès qu'il est mesuré (S712 : 35 min perdues sur un calcul figé) ; `essai.py` montre toute marque de session. D2 :
+un critère doit pouvoir échouer (S715 : un plancher lu sur un φ d'avant l'opération). Maillons **0** (méthode). Suivant : **S717**, M1, la
+mort de la 3D vers Saint-Venant par la surface ; la revue en S721.
