@@ -2607,6 +2607,11 @@ struct Temoin {
     front_max: f64,
     /// S734 (S3) : quand le mur de droite est dans l'eau, le plus grand écart du niveau de sa colonne au repos (m) ; zéro sinon.
     mur_eta: f64,
+    /// S737 : le juge robuste (`retournement_robuste_s737`), `(t, x)`.
+    retournement_robuste: Option<(f64, f64)>,
+    /// S737 : la remontée par les particules, la plus haute `(t, R)`, et sa série tous les 0,1 s `(t, R)`.
+    remontee_particules: (f64, f64),
+    serie_particules: Vec<(f64, f64)>,
     crete: Vec<(f64, f64, f64)>,
     particules: (usize, usize),
     duree: f64,
@@ -2615,7 +2620,7 @@ struct Temoin {
 /// **S734 — le témoin tout-3D d'une scène** : APIC à 2,5 cm, quatre rangées, aucun raccord ni sortie (ADR-285 D1), le pas plafonné à
 /// 10 ms ; les juges à chaque pas, la crête affichée tous les 0,1 s ; le prédicteur rapporté d'abord.
 fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
-    use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
+    use crate::apic3d::tests::{air_enferme_s648, retournement_robuste_s737, retournement_s647};
     use crate::selecteur::{prevoir, Critere};
     let horloge = std::time::Instant::now();
     let (dx, d, cot) = (0.025f32, s.d, s.cot);
@@ -2661,7 +2666,7 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
         ([if x < pied { onde.u(x) as f32 } else { 0. }, 0., 0.], [[0.; 3]; 3])
     }).unwrap();
     a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
-    let mut r = Temoin { remontee: (0., f64::MIN), ..Default::default() };
+    let mut r = Temoin { remontee: (0., f64::MIN), remontee_particules: (0., f64::MIN), ..Default::default() };
     let fin = (s.duree * 1e6).round() as u64;
     let (mut t, mut prochaine) = (0u64, 0u64);
     while t < fin {
@@ -2681,9 +2686,20 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
         if s.instantanes.iter().any(|&ti| ((ti * 1e6).round() as u64) > t - us && ((ti * 1e6).round() as u64) <= t) {
             instantane_s735(&a, s, &marche, ts, "plage", ((pied / dxs) as usize).min(nx), nx);
         }
+        if r.retournement_robuste.is_none() {
+            if let Some((i, _)) = retournement_robuste_s737(&a, ny / 2, &marche) {
+                r.retournement_robuste = Some((ts, xg(i as f64)));
+                eprintln!("S737 {} : le retournement robuste à {ts:.3} s, x = {:.3} m", s.nom, xg(i as f64));
+            }
+        }
         let (k, x) = air_enferme_s648(&a);
         if k > 0 && r.air.is_none() {
             r.air = Some((ts, x));
+        }
+        // S737 : le front par les particules (la seconde lecture de celui par φ, ADR-286 D2).
+        let (_, rp) = front_particules_s737(&a, pied, cot, d, 0.005);
+        if rp > r.remontee_particules.1 {
+            r.remontee_particules = (ts, rp);
         }
         let (_, h) = volume_surface_s708(&a);
         if s.mur_apres_pied.is_some() {
@@ -2701,7 +2717,8 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
             prochaine += 100_000;
             let (ic, ec) = (0..nx).filter(|&i| h[i] > 1e-3).map(|i| (i, marche[i] as f64 + h[i] - d)).fold((0, f64::MIN), |m, p| if p.1 > m.1 { p } else { m });
             r.crete.push((ts, xg(ic as f64), ec));
-            eprintln!("S734 {} : t = {ts:.2} s, la crête x = {:.3} m, η = {:.1} mm ; le front {:.3} m (mur {lx:.2} m) ; la remontée {:.4} m ; pas {us} µs ; {:.0} s d'horloge",
+            r.serie_particules.push((ts, rp));
+            eprintln!("S734 {} : t = {ts:.2} s, la crête x = {:.3} m, η = {:.1} mm ; le front {:.3} m (mur {lx:.2} m) ; la remontée {:.4} m (par les particules {rp:.4} m) ; pas {us} µs ; {:.0} s d'horloge",
                 s.nom, xg(ic as f64), ec * 1e3, r.front_max, r.remontee.1, horloge.elapsed().as_secs_f64());
         }
     }
@@ -2813,4 +2830,53 @@ fn the_s4_front_diagnostic_s735() {
         instantanes: &[3.5, 4.1, 4.5, 5.0] };
     let r = temoin_plage_s734(&s);
     println!("S735 S4 lisse : la remontée lue {:.4} m à {:.3} s ; le front {:.3} m ; retournement {:?}", r.remontee.1, r.remontee.0, r.front_max, r.retournement);
+}
+
+/// **S737 — le front par les particules** : par colonne, l'épaisseur comptée sur toutes les rangées, `n·dx/(8·ny)` ; le front est la colonne
+/// la plus avancée au-delà du pied dont l'épaisseur et celle de sa voisine d'amont dépassent `seuil` (une goutte isolée ne compte pas). Rend
+/// `(x du front, la remontée zb(x) − d)` ; `(pied, −d)` sans front.
+fn front_particules_s737(a: &Apic3, pied: f64, cot: f64, d: f64, seuil: f64) -> (f64, f64) {
+    let crate::delta3d::Domain3 { nx, ny, dx, .. } = a.domain();
+    let mut n = vec![0usize; nx];
+    for p in a.particles() {
+        n[((p[0] / dx) as usize).min(nx - 1)] += 1;
+    }
+    let e = |i: usize| n[i] as f64 * dx as f64 / (8. * ny as f64);
+    let i_pied = ((pied / dx as f64) as usize).min(nx - 1);
+    match (i_pied.max(1)..nx).rev().find(|&i| e(i) >= seuil && e(i - 1) >= seuil) {
+        Some(i) => {
+            let x = (i as f64 + 0.5) * dx as f64;
+            (x, (x - pied).max(0.) / cot - d)
+        }
+        None => (pied, -d),
+    }
+}
+
+/// **S737 — (2) S4 sur fond lisse, les deux lectures et les deux juges** : le juge robuste ne voit aucun retournement ; la remontée par les
+/// particules redescend sous 80 % de son maximum à 6 s ; son maximum rapporté contre 0,328 m.
+#[test]
+#[ignore = "S4 sur fond lisse, les deux lectures (≈ 35 min)"]
+fn the_particle_front_and_robust_judge_on_s4_s737() {
+    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true, instantanes: &[] };
+    let r = temoin_plage_s734(&s);
+    let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
+    let fin = r.serie_particules.last().map_or(f64::NAN, |p| p.1);
+    println!("S737 (2) S4 lisse : le juge robuste {:?} (S647 : {:?}) ; la remontée par les particules {:.4} m à {:.3} s ({:+.1} % de {exacte:.4} m), {fin:.4} m à la fin ; par φ {:.4} m",
+        r.retournement_robuste, r.retournement, r.remontee_particules.1, r.remontee_particules.0, 100. * (r.remontee_particules.1 / exacte - 1.), r.remontee.1);
+    for (t, rr) in r.serie_particules.iter().filter(|(t, _)| ((t * 10.).round() as i64) % 5 == 0) {
+        println!("S737 (2) la remontée par les particules à {t:.1} s : {rr:.4} m");
+    }
+    assert!(r.retournement_robuste.is_none(), "critère 2 : le juge robuste");
+    assert!(fin < 0.8 * r.remontee_particules.1, "critère 2 : la remontée ne redescend pas");
+}
+
+/// **S737 — (3) S2, les deux juges** : le juge robuste à 0,05 s et 0,1 m de celui de S647.
+#[test]
+#[ignore = "S2, les deux juges (≈ 28 min)"]
+fn the_robust_judge_keeps_the_s2_breaking_s737() {
+    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false, instantanes: &[] };
+    let r = temoin_plage_s734(&s);
+    println!("S737 (3) S2 : le juge robuste {:?}, celui de S647 {:?} ; la remontée par les particules {:.4} m", r.retournement_robuste, r.retournement, r.remontee_particules.1);
+    let ((t1, x1), (t0, x0)) = (r.retournement_robuste.expect("critère 3 : aucun"), r.retournement.expect("S647 : aucun"));
+    assert!((t1 - t0).abs() < 0.05 && (x1 - x0).abs() < 0.1, "critère 3");
 }

@@ -105,8 +105,9 @@ de S4 ?
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — les deux lectures, le juge robuste ; le cas d'école (1).
+- [x] **P2** — les deux lectures, le juge robuste ; le cas d'école (1).
 - [ ] **P3** — S4 et S2 ; (2), (3).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — (1) **tenu** : la couche plate, rien ; la lèvre, trouvée (colonne 27, écart 1), comme S647. Le juge robuste, le front par les particules, les deux juges et les deux lectures dans le témoin.

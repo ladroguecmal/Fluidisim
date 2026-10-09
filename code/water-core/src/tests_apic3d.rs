@@ -2045,6 +2045,58 @@ pub(crate) fn retournement_s647(a: &Apic3, j: usize, marche: &[f32]) -> Option<(
     out
 }
 
+/// **S737 — la marge du juge robuste** : une maille « air » du vide ne compte que si φ y dépasse cette part de la maille (S735 : un vide d'une
+/// maille à φ = +1 mm, l'interface, faisait un faux retournement).
+pub(crate) const MARGE_RETOURNEMENT_S737: f32 = 0.25;
+
+/// **S737 — le lecteur du retournement, robuste au bruit de surface** : celui de S647, mais une maille d'air ne compte dans le vide que si
+/// `φ > MARGE_RETOURNEMENT_S737·dx` ; plus près de zéro, c'est l'interface, et elle ne sépare pas deux eaux. Rend `(i, l'écart en mailles)`.
+pub(crate) fn retournement_robuste_s737(a: &Apic3, j: usize, marche: &[f32]) -> Option<(usize, usize)> {
+    let Domain3 { nx, ny, nz, dx } = a.domain();
+    let (l, phi) = (a.labels(), a.distance());
+    let mut out = None;
+    for (i, &zb) in marche.iter().enumerate().take(nx) {
+        let k0 = (zb / dx).round() as usize;
+        let (mut eau, mut trou, mut ecart) = (false, 0usize, 0usize);
+        for k in k0..nz {
+            let m = (k * ny + j) * nx + i;
+            let vide = l[m] == AIR && phi[m] > MARGE_RETOURNEMENT_S737 * dx;
+            if l[m] == WATER && eau && trou > 0 {
+                ecart = ecart.max(trou);
+                break;
+            } else if l[m] == WATER {
+                eau = true;
+            } else if vide && eau {
+                trou += 1;
+            }
+        }
+        if ecart > 0 {
+            out = Some((i, ecart));
+        }
+    }
+    out
+}
+
+/// **S737 (1) — le juge robuste sur le cas d'école de S647** : la couche plate, rien ; la lèvre au-dessus du vide, trouvée.
+#[test]
+fn the_robust_overturn_reader_keeps_the_posed_lip_s737() {
+    let (nx, ny, nz, dx) = (40usize, 4usize, 20usize, 0.05f32);
+    let marche = vec![0f32; nx];
+    for levre in [false, true] {
+        let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        a.seed(&|p| p[2] < 0.3 || (levre && (1.0..1.4).contains(&p[0]) && (0.45..0.6).contains(&p[2]))).unwrap();
+        a.step_upto(1, ApicStage::Reconstruct).unwrap();
+        let (r, r0) = (retournement_robuste_s737(&a, ny / 2, &marche), retournement_s647(&a, ny / 2, &marche));
+        println!("S737 (1) le juge robuste, lèvre {levre} : {r:?} (S647 : {r0:?})");
+        if levre {
+            let (i, ecart) = r.expect("critère 1 : la lèvre");
+            assert!((20..28).contains(&i) && ecart >= 1, "critère 1 : {i} {ecart}");
+        } else {
+            assert_eq!(r, None, "critère 1 : la couche plate");
+        }
+    }
+}
+
 /// **S647 (1) — le lecteur éprouvé** (ADR-263 D2) : une couche plate, aucun retournement ; la même avec une lèvre d'eau au-dessus d'un vide
 /// d'air (x ∈ [1,0 ; 1,4] m, z ∈ [0,45 ; 0,60] m, la couche sous 0,30 m), le retournement trouvé dans la lèvre.
 #[test]
