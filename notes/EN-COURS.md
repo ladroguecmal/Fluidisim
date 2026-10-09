@@ -62,48 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S720 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **Le jalon visuel de la phase A**, préparé pour la séance R43
-que l'utilisateur jugera à son réveil : la vague de bout en bout (S718) contre le tout-3D, rendues côte à côte.
+Session : S721 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-huitième revue de méthode** (ADR-222 D4 :
+S716–S720).
 
-**Ce que la session fait.**
-- **L'enregistrement** (`Enregistrement::film`). Une image tous les 1/30 s :
-  - la surface de la 2D là où elle est active (SGN au large, Saint-Venant au rivage, puis la plage entière après la mort) ;
-  - les particules d'une rangée de la 3D (la première, `y < dx`), leur vitesse.
-  Les deux calculs sont enregistrés : le tout-3D (`AucunJusqua5`) et la vague de bout en bout (`BoutEnBout`), l'onde de départ de
-  référence (Boussinesq).
-- **Le rendu** (`outils/rendu_bout_en_bout.py`, d'après `rendu_rouleau.py` de S658), numpy et PIL. Deux GIF, le tout-3D en haut, de bout
-  en bout en bas, à la même heure :
-  - la plage entière ;
-  - le déferlement de près.
-  Un PNG de quatre instants sert à l'aperçu.
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-276, ADR-277, ADR-281)
+- **témoin** : sans objet (une revue).
+- **instrument** : la relecture des cinq sessions, contre leurs critères. Une règle se cherche d'abord dans METHODE : ADR-279 D2 (pas de
+  tube, pas de chaîne qui doit s'arrêter) existe, mais elle a été enfreinte deux fois. La protection ne peut donc pas être une règle de
+  plus : il faut un outil.
+- **calcul** : aucun nombre hors des sessions relues.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue ; ADR-279 D2, remplacé par un outil.
+- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
 
-- **témoin** : le tout-3D lui-même, rendu à côté.
-- **instrument** : l'image. Elle est contrôlée par les nombres de S717–S718, qui doivent se lire sur elle :
-  - le retournement près de 2,6 s et de 9,9–10 m ;
-  - la lame la plus haute vers 3,9 s ;
-  - la 3D éteinte après 3,2 s, en bas.
-- **calcul** :
-  - la taille de l'enregistrement, une rangée sur quatre : ≈ 60 000 particules × 12 octets × 150 images ≈ 110 Mo pour le tout-3D,
-    ≈ 50 Mo pour l'autre, dans `calculs/` (hors du dépôt) ;
-  - le coût : ≈ 20 + 6 min.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-276 D1 : la même fonction pour les deux calculs ;
-  - ADR-281 D1 : l'enregistrement s'écrit au fil du calcul.
-- **pièges** :
-  - les x de la bande, décalés de `x_r` ;
-  - après la mort, il n'y a plus de particules ;
-  - la mémoire des GIF (≈ 150 images de 1 300 × 300 px, en palette).
-
-**Critères.** Les deux GIF et le PNG produits, les nombres de contrôle lisibles sur eux ; le livrable déposé pour l'utilisateur.
+**Critères, écrits avant.** (1) ADR-282 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
+coûté ; (3) la prochaine revue nommée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'enregistrement ; les deux calculs.
-- [x] **P3** — le rendu ; le contrôle ; l'envoi.
-- [x] **P4** — preuve ; rituel.
+- [ ] **P2** — ADR-282 ; METHODE ; `outils/fermer.py`.
+- [ ] **P3** — rituel, par `fermer.py` lui-même.
 
 ### Notes de reprise
-- **P2–P3 finis** — les deux films (31 et 106 Mo), au bit des nombres de S717–S718 ; le rendu (deux GIF, un PNG) envoyé à l'utilisateur ; R43 posée.
