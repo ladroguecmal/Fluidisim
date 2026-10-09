@@ -44,6 +44,8 @@ pub(crate) struct Densite {
     pub(crate) p_sauve: Vec<f32>,
     /// Le déplacement maximal du dernier pas, m (pour la mesure).
     pub(crate) deplacement_max: f32,
+    /// S748 — la place de la particule la plus déplacée au dernier pas (m ; une lecture, sans effet).
+    pub(crate) deplacement_lieu: [f32; 3],
     /// **S744 — la densité consciente du fond** (`set_density_bed_aware`) : la densité d'une maille rapportée à sa nominale, celle d'un
     /// réseau régulier posé partout hors du fond ; `false`, le défaut : rapportée à 1 (S709, au bit).
     pub(crate) conscient: bool,
@@ -72,7 +74,7 @@ impl Apic3 {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
-            p_sauve: vec![0.; cells], deplacement_max: 0., conscient: false, nominale: vec![0.; cells], nominale_faite: false,
+            p_sauve: vec![0.; cells], deplacement_max: 0., deplacement_lieu: [0.; 3], conscient: false, nominale: vec![0.; cells], nominale_faite: false,
             colonnes: vec![0; nx * ny] }));
         Ok(())
     }
@@ -102,6 +104,11 @@ impl Apic3 {
     /// S709 — le déplacement maximal du dernier pas (m) ; `None` sans projection de densité.
     pub fn density_projection_shift(&self) -> Option<f32> {
         self.densite.as_ref().map(|d| d.deplacement_max)
+    }
+
+    /// **S748** — la place de la particule la plus déplacée par la projection au dernier pas (m) ; `None` sans projection.
+    pub fn density_projection_shift_place(&self) -> Option<[f32; 3]> {
+        self.densite.as_ref().map(|d| d.deplacement_lieu)
     }
 
     /// S709 — la projection de densité (rien sans `enable_density_projection`).
@@ -260,7 +267,10 @@ impl Apic3 {
                 for a in 0..3 {
                     self.x[k][a] += s * d[a];
                 }
-                dens.deplacement_max = dens.deplacement_max.max(s * norme);
+                if s * norme > dens.deplacement_max {
+                    dens.deplacement_max = s * norme;
+                    dens.deplacement_lieu = self.x[k];
+                }
             }
             self.bin_fresh = false;
         }

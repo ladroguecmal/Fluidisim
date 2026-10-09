@@ -1886,6 +1886,13 @@ fn onde_sur_pente_conscient_s744(dx: f32, lisse: bool, glissant: bool, balistiqu
 
 /// S745 — le même montage, la variante de la projection en paramètre (`None` : sans projection).
 fn onde_sur_pente_variante_s745(dx: f32, lisse: bool, glissant: bool, balistique: bool, variante: Option<DensityVariant>, conscient: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+    onde_sur_pente_observee_s748(dx, lisse, glissant, balistique, variante, conscient, &mut |_, _| {})
+}
+
+/// S748 — le même montage, un observateur appelé après chaque pas (`(l'état, t en µs)`), sans effet sur le calcul.
+#[allow(clippy::too_many_arguments)]
+fn onde_sur_pente_observee_s748(dx: f32, lisse: bool, glissant: bool, balistique: bool, variante: Option<DensityVariant>, conscient: bool,
+    observe: &mut dyn FnMut(&Apic3, u64)) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let (d, h, cot, x1, x_pied, niveau, fond0) = (0.35f64, 0.07f64, 3.0f64, 2.80f64, 4.768f64, 0.40f32, 0.05f32);
     let (nx, ny, nz) = ((6.6 / dx).round() as usize, 4usize, (0.8 / dx).round() as usize);
@@ -1932,6 +1939,7 @@ fn onde_sur_pente_variante_s745(dx: f32, lisse: bool, glissant: bool, balistique
         let us = a.stable_step_us(10_000).min(duree - t);
         a.step(us).unwrap();
         t += us;
+        observe(&a, t);
         let mut f = f32::NEG_INFINITY;
         for i in 0..nx {
             let k0 = (marche[i] / dx).round() as usize;
@@ -2986,5 +2994,66 @@ fn runup_with_hybrid_density_s747() {
     println!("S747 (2) : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
         100. * (haut as f64 / 0.2295 - 1.), cr[0]);
     assert!(garde == n && sous == 0, "les particules");
+}
+
+/// **S748 — où la projection freine la lame** (ADR-289 D3.1) : le montage de S645, sans projection puis avec la projection hybride consciente
+/// du fond. Tous les 0,05 s : le front par les particules (5 mm, sa voisine aussi), l'énergie au-delà du pied moins 0,5 m, le déplacement le
+/// plus grand de la projection et sa place ; tous les 0,25 s, le profil (la plus haute particule par colonne) dans `calculs/s748_*.csv`.
+/// Rapporte ; n'affirme rien (un diagnostic).
+#[test]
+#[ignore = "S748 : le ressaut avec et sans projection (≈ 13 min)"]
+fn where_the_projection_slows_the_swash_s748() {
+    let (dx, ny, x_pied, fond0, niveau, cot) = (0.025f32, 4usize, 4.768f32, 0.05f32, 0.40f32, 3.0f32);
+    let q = (dx as f64).powi(3) / 8.;
+    let mut series: Vec<Vec<(f64, f64, f64, f32, [f32; 3])>> = Vec::new();
+    for (nom, variante) in [("sans", None), ("hybride", Some(DensityVariant::Hybrid))] {
+        let mut serie = Vec::new();
+        let mut prochaine = 0u64;
+        let mut profil = 0u64;
+        let _ = onde_sur_pente_observee_s748(dx, false, false, true, variante, true, &mut |a: &Apic3, t: u64| {
+            if t < prochaine {
+                return;
+            }
+            prochaine += 50_000;
+            let nx = a.domain().nx;
+            let mut n = vec![0usize; nx];
+            let mut e = 0f64;
+            for (p, v) in a.particles().iter().zip(a.velocities()) {
+                n[((p[0] / dx) as usize).min(nx - 1)] += 1;
+                if p[0] > x_pied - 0.5 {
+                    e += (0.5 * ((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) as f64) + 9.81 * p[2] as f64) * q;
+                }
+            }
+            let ep = |i: usize| n[i] as f64 * dx as f64 / (8. * ny as f64);
+            let i_pied = (x_pied / dx) as usize;
+            let front = (i_pied..nx).rev().find(|&i| ep(i) >= 0.005 && ep(i - 1) >= 0.005).map_or(x_pied, |i| (i as f32 + 0.5) * dx);
+            let r = fond0 + (front - x_pied) / cot - niveau;
+            let (dep, lieu) = (a.density_projection_shift().unwrap_or(0.), a.density_projection_shift_place().unwrap_or([0.; 3]));
+            serie.push((t as f64 * 1e-6, r as f64, e, dep, lieu));
+            if t >= profil {
+                profil += 250_000;
+                let mut haut = vec![f32::MIN; nx];
+                for p in a.particles() {
+                    let i = ((p[0] / dx) as usize).min(nx - 1);
+                    haut[i] = haut[i].max(p[2] + dx / 4.);
+                }
+                let lignes: String = (0..nx).map(|i| format!("{:.4};{:.5}\n", (i as f32 + 0.5) * dx, if haut[i] > f32::MIN { haut[i] } else { f32::NAN })).collect();
+                let _ = std::fs::write(format!("{}/../../calculs/s748_{nom}_{:04}.csv", env!("CARGO_MANIFEST_DIR"), t / 1000), lignes);
+            }
+        });
+        series.push(serie);
+    }
+    let (s0, s1) = (&series[0], &series[1]);
+    let mut divergence = None;
+    for (a, b) in s0.iter().zip(s1) {
+        if (b.0 - a.0).abs() < 1e-3 && divergence.is_none() && (a.1 - b.1).abs() > 0.01 * 3f64.recip().max(0.) && (a.1 - b.1).abs() * 3. > 0.01 {
+            divergence = Some((a.0, a.1, b.1, a.2, b.2, b.3, b.4));
+        }
+    }
+    for (a, b) in s0.iter().zip(s1).filter(|(a, _)| ((a.0 * 20.).round() as i64) % 4 == 0) {
+        println!("S748 t = {:.2} s : la remontée sans {:.4} m, hybride {:.4} m ; l'énergie au-delà du pied −0,5 m, hybride − sans {:+.4} J ({:+.2} %) ; le déplacement de la projection {:.2} mm en x = {:.3} m, z = {:.3} m",
+            a.0, a.1, b.1, b.2 - a.2, 100. * (b.2 / a.2 - 1.), b.3 * 1e3, b.4[0], b.4[2]);
+    }
+    println!("S748 (a) la divergence des fronts (plus de 1 cm le long de la pente) : {divergence:?}");
 }
 

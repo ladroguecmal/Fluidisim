@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S748 — **en cours**. En autonomie ; session longue. ADR-289 D3.1 ; DENSITE-HYBRIDE-S747 : la projection hybride garde le repos et
+Session : S748 — **terminée**. En autonomie ; session longue. ADR-289 D3.1 ; DENSITE-HYBRIDE-S747 : la projection hybride garde le repos et
 l'onde solitaire, mais freine la remontée de S645 (−12 %). **La question** : où et quand la projection freine-t-elle la lame ? **Un
 diagnostic, aucun remède** (ADR-226 D1 ; ADR-287 D4 : regarder le champ).
 
@@ -92,7 +92,14 @@ Sinon, la question reste ouverte, et les lectures sont rapportées.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; les deux calculs ; les profils tracés ; (a), (b), (c).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — l'essai ; les deux calculs ; les profils tracés ; (a), (b), (c).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (798 s) :
+  - (a) les fronts divergent à 1,26 s ;
+  - (b) l'énergie de la lame baisse avec la projection, de −1,8 % (0,8 s) à −15,5 % (3,0 s) ;
+  - (c) le déplacement est d'environ 1 mm à chaque pas, à la surface libre, partout.
+
+  Le profil (`captures/s748_ressaut.png`) : la surface est plus haute de 3 à 5 mm partout avec la projection. **La cause : la correction de
+  surface d'un seul côté (l'excès) dilate la couche de surface.**

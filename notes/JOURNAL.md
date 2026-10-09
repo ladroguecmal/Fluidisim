@@ -2321,3 +2321,14 @@ L'utilisateur a demandé pourquoi le défaut n'avait pas été vu plus tôt, et 
 voulait un avis réfléchi : [ADR-289](../docs/adr/ADR-289-des-solveurs-eprouves-seuls-avant-d-etre-combines.md) (trois familles ; un banc à
 référence indépendante par solveur ; la 3D corrigée d'abord ; la fusion de Saint-Venant et SGN décidée après le banc de la 2D ; les
 nouveautés attendent). Maillons **1** (4.1). Suivant : **S748**, le ressaut qui freine la lame.
+
+## S748 — 2026-10-09 — Où la projection freine la lame : la surface dilatée
+
+**Entrée.** ADR-289 D3.1 ; DENSITE-HYBRIDE-S747. **Fait** ([preuve](../docs/validation/SURFACE-DILATEE-S748.md)) : un observateur dans le
+montage de S645, la place du plus grand déplacement, les profils tracés. **Mesuré** :
+- l'énergie de la lame baisse continûment avec la projection (−15 % à 3 s) ;
+- le déplacement est d'environ 1 mm à chaque pas, à la surface, partout ;
+- la surface entière est plus haute de 3 à 5 mm.
+
+**La cause : la correction de surface d'un seul côté dilate la couche de surface.** Maillons **0** (diagnostic). Suivant : **S749**, la
+surface corrigée dans les deux sens, vers sa fraction d'eau.
