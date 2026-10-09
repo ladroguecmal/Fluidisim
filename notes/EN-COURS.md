@@ -62,49 +62,52 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S729 — **terminée**. En autonomie, sans arrêt ; session longue. LOD-ETAPE-3-S722, **B5 : le déclencheur de présence**. La boîte
-naît quand un corps touche l'eau, le suit, meurt quand il en sort.
+Session : S730 — **en cours**. En autonomie ; session longue. **R43 reçu** (ADR-284) : réaliste et cohérent, sauf au raccord du rivage, où
+le jet de la 3D retombe contre un mur de Saint-Venant, avec une poche d'air. **La question** : placé au-delà du point où le jet retombe
+(ADR-284 D2), le raccord du rivage efface-t-il ce mur, et à quel coût ?
 
 **Ce que la session fait.**
-- **`RelaisBoite::naitre`** : au milieu d'un Saint-Venant entier, une boîte naît de son état :
-  - les colonnes par `birth_from_columns` (S707) ;
-  - la vitesse de chaque colonne, celle de Saint-Venant ;
-  - **le niveau réglé sur ce que la 3D lit** (ADR-283 D1) : une première naissance mesure le biais de lecture, une seconde pose ce qu'il
-    faut pour que la 3D lise le niveau de Saint-Venant. L'écart est tenu dans la masse (`reste`), rendu à la mort.
-- **`RelaisBoite::mourir`** : la boîte rend à Saint-Venant, colonne par colonne, sa surface (φ) et sa quantité de mouvement
-  (`SaintVenant2D::fermer_trou`). Ce qui reste (les dettes, les réservoirs, le compte contre la surface, `reste`) est réparti également sur
-  les mailles du trou : la masse est exacte.
-- **Le déclencheur** : la boîte naît quand le bas du corps passe sous le niveau ; elle meurt quand il en est sorti depuis 0,2 s
-  (l'hystérésis).
+- `deux_raccords_porteur` prend la place du raccord du rivage, `x_f` ; 10,775 m reste le défaut, au bit.
+- **L'instrument du mur** (ADR-284 D4), à chaque pas : `J(t)`, le niveau de Saint-Venant à sa première maille (moyenne des rangées), moins
+  le niveau de la 3D à sa dernière colonne (fond + l'épaisseur d'eau lue par φ, `volume_surface_s708`).
+- `x_f` = **12,0 m** : 0,30 m au-delà du rivage au repos (11,696 m). La 3D couvre la plage où le jet retombe (≈ 10,4–10,8 m) et la lame qui
+  remonte, jusqu'à sa mort à 3,2 s (M1) ; Saint-Venant prend le sable sec au-delà.
 
-**L'essai et ses critères, écrits avant.** La sphère de B4 (rayon 8 cm) descend de 15 cm au-dessus de l'eau à 0,3 m/s jusqu'à mi-immersion
-(0,5 s), avance à 0,3 m/s (1,5 s), remonte et sort (0,6 s), puis l'eau seule (0,6 s) ; 3,2 s en tout. Saint-Venant fait 3 m × 2 m ; le
-témoin est un APIC entier aux mêmes murs.
-1. la boîte naît une fois, meurt une fois ;
-2. la force sur la sphère dans l'eau : l'écart moyen au témoin sous **10 %** ;
-3. la masse à 10⁻¹², à la naissance et à la mort comprises ;
-4. aucun choc de niveau : le niveau moyen de Saint-Venant autour du trou, juste avant et juste après la naissance comme la mort, à
-   **1 mm** près.
+**Les essais, et leurs critères écrits avant.**
+- **E1 — de bout en bout** (`BoutEnBout`, 5 s), `x_f` = 10,775 m (le montage de R43) puis 12,0 m :
+  1. **le mur** : le plus grand `J` sur [2,4 s ; 3,2 s] à 12,0 m sous **1 cm**, et sous le quart de celui de 10,775 m. Le plancher de bruit
+     de l'instrument (ADR-280 D1) est le plus grand `|J|` avant l'arrivée de l'onde (t < 1,5 s) ; le critère n'est pas plus fin que lui ;
+  2. le retournement à 0,15 m et 0,1 s de celui de 10,775 m (ADR-278 D2 ; l'amont ne change pas) ;
+  3. la masse à 10⁻¹² ;
+  4. le coût rapporté ; s'il dépasse deux fois celui de 10,775 m, la lame mince en 3D (S712) est la suite ;
+  5. le film à 1/30 s, et l'image de l'instant de la capture de l'utilisateur, à lui envoyer.
+- **E2 — le tout-3D** (`AucunJusqua5`), `x_f` = 12,0 m : le nouveau témoin. Il rapporte le retournement, l'air, la remontée, `J`, le coût et
+  le film, contre S717 (2,637 s, 9,988 m ; 1 191 s). Critères : le retournement à 0,15 m et 0,1 s de S717 ; la masse à 10⁻¹² ; `J` sous 1 cm.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-283)
+**Contrôles du plan** (ADR-266, ADR-273, ADR-277, ADR-278, ADR-280, ADR-281, ADR-283, ADR-284)
 
-- **témoin** : le même corps, le même mouvement, dans un APIC entier (ADR-273 D1).
-- **instrument** : la force, la masse, le niveau autour du trou, recalculés à chaque pas (ADR-281 D2).
-- **calcul** : le témoin, ≈ 1,2 million de particules sur 3,2 s, ≈ 40 min ; la boîte, quelques minutes.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-283 D1 : le niveau lu, réglé à la naissance ;
-  - ADR-280 D1 : la surface à la mort ;
-  - ADR-275 D1 : l'hystérésis.
+- **témoin** : le même montage à 10,775 m, mesuré par le même instrument dans le même essai (ADR-273 D1).
+- **instrument** : `J` lu par la surface de la 3D (ADR-280 D1), son plancher de bruit mesuré avant l'onde ; affiché au fil du calcul
+  (ADR-281 D1).
+- **calcul** :
+  - E1 : deux fois ≈ 5 min ;
+  - E2 : ≈ 20 à 25 min.
+
+  La 3D grandit de 431 à 480 colonnes (+11 %), sur du sable presque sec.
+- **ADR** :
+  - ADR-284 D2 et D4 ;
+  - ADR-283 D1 : Saint-Venant part du niveau que lit la 3D, comme avant ;
+  - ADR-278 D2 : les tolérances du juge.
 - **pièges** :
-  - les particules dans la sphère, à la naissance (une sphère en partie dans l'eau) : elles sont retirées et comptées dans `reste` ;
-  - le corps hors de l'eau n'a pas de boîte ; sa force est nulle dans les deux ;
-  - la naissance alloue une boîte (en jeu, une réserve ; ici, l'essai la prépare d'avance).
+  - le raccord sur du sable sec : Saint-Venant à `h` = 0, la vitesse imposée au bord d'APIC bornée par la célérité (S690) ;
+  - la lame mince en 3D fait tomber le pas (S712) ;
+  - `x_f` change `nx` : tout ce qui dépend de 431 colonnes (la mort, le film) le lit de `nx`.
 
 ### Plan
 
-- [x] **P1** — jeton ; plan.
-- [x] **P2** — naître, mourir, le déclencheur ; l'essai ; (1)–(4).
-- [x] **P3** — preuve ; fermeture.
+- [x] **P1** — jeton ; ADR-284 ; plan.
+- [ ] **P2** — `x_f` et l'instrument du mur ; E1 ; (1)–(5).
+- [ ] **P3** — E2, le tout-3D à 12,0 m.
+- [ ] **P4** — preuve ; images ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — **tenu** : une naissance, une mort ; la force à 6,0 % ; la masse 2,4·10⁻¹⁴ ; aucun choc de niveau. L'étape 3 du LOD faite. L'idée de l'utilisateur (la 3D jusqu'à la plage) inscrite au registre de l'étape 2.
