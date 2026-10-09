@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S751 — **en cours**. La cinquante-quatrième revue de méthode (ADR-222 D4), sur S746–S750.
+Session : S751 — **terminée**. La cinquante-quatrième revue de méthode (ADR-222 D4), sur S746–S750.
 
 **Ce que la session fait.** Relire les frictions de S746 à S750 et décider (ADR-290). Celles relevées :
 1. **S744–S749 : six variantes de la projection essayées avant que le mécanisme soit nommé.** Le mécanisme (le déplacement sans la vitesse)
@@ -87,7 +87,8 @@ Session : S751 — **en cours**. La cinquante-quatrième revue de méthode (ADR-
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-290 ; METHODE.
+- [x] **P2** — ADR-290 ; METHODE.
 - [ ] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — ADR-290 (D1 le bilan propre d'un opérateur, une variante contre une hypothèse nommée ; D2 la cible vérifiée sur son cas statique ; D3 le repos d'abord). METHODE, l'index.

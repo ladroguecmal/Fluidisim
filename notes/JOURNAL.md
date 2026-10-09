@@ -2353,3 +2353,14 @@ sa vitesse (la grille reprise à la nouvelle place) ; R2, la surface relâchée.
 - R2 : la remontée −9,8 % ; l'onde moins bien gardée.
 
 R1 est le premier remède qui tient presque tout. Maillons **1** (4.1). Suivant : **S751**, la revue ; puis R1 affiné.
+
+## S751 — 2026-10-09 — la cinquante-quatrième revue de méthode (ADR-290)
+
+**Entrée.** La revue (S746–S750). **Fait** : [ADR-290](../docs/adr/ADR-290-cinquante-quatrieme-revue-de-methode.md).
+- D1 : un opérateur suspect se mesure par son propre bilan à chaque pas, et une variante n'est essayée que contre une hypothèse nommée
+  (S744–S749 : six variantes avant le mécanisme).
+- D2 : une formule de cible se vérifie sur son cas statique (S749).
+- D3 : le repos d'abord, même pressé.
+
+Maillons **0** (méthode). Suivant : **S752**, R1 affiné (le bilan propre de la projection ; le creux au regard du bruit ; l'atténuation).
+
