@@ -2332,3 +2332,14 @@ montage de S645, la place du plus grand déplacement, les profils tracés. **Mes
 
 **La cause : la correction de surface d'un seul côté dilate la couche de surface.** Maillons **0** (diagnostic). Suivant : **S749**, la
 surface corrigée dans les deux sens, vers sa fraction d'eau.
+
+## S749 — 2026-10-09 — La surface corrigée vers sa densité attendue
+
+**Entrée.** SURFACE-DILATEE-S748. **Fait** ([preuve](../docs/validation/CIBLE-SURFACE-S749.md)) : `DensityVariant::SurfaceTarget`, le niveau
+moyen derrière l'onde. **Mesuré** :
+- l'onde gardée (96 %) ;
+- le repos perdu (4,4 mm : la formule ne colle pas à la lecture réelle) ;
+- la remontée encore freinée (−12,3 %).
+
+Aucune des six variantes ne tient les trois essais. Le suspect suivant : la projection déplace les particules sans leur vitesse. Le lot
+S747–S749. Maillons **0**. Suivant : **S750**, le déplacement avec sa vitesse, ou la surface relâchée ; la revue en S751.

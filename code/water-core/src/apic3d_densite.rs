@@ -27,6 +27,24 @@ pub enum DensityVariant {
     /// une colonne plus mince (la lame, le jet de rive). `Complete` garde l'onde solitaire mais freine la lame (S744) ; `WithoutSurface` libère
     /// la lame mais laisse une traîne derrière l'onde (S745).
     Hybrid,
+    /// **S749 — la surface vers sa densité attendue** : l'intérieur vers 1, la surface dans les deux sens vers `densite_attendue_s749(−φ/dx)`,
+    /// la densité que le noyau lit d'une eau uniforme sous une surface plane (S748 : corriger la surface d'un seul côté la dilatait).
+    SurfaceTarget,
+}
+
+/// **S749 — la densité attendue d'une maille de surface** : le noyau de la densité (le chapeau trilinéaire, d'une maille de demi-largeur) sur
+/// une eau uniforme sous une surface plane, à `a` mailles au-dessus du centre de la maille. Au repos, la surface sur la face haute (`a` = ½)
+/// donne 0,875, la valeur exacte du réseau de pose.
+pub fn densite_attendue_s749(a: f32) -> f32 {
+    if a >= 1. {
+        1.
+    } else if a >= 0. {
+        0.5 + a - 0.5 * a * a
+    } else if a >= -1. {
+        0.5 + a + 0.5 * a * a
+    } else {
+        0.
+    }
 }
 
 /// S747 — le nombre de mailles d'eau d'une colonne sous lequel la variante hybride ne corrige rien (la règle du film du rivage, S678).
@@ -199,6 +217,7 @@ impl Apic3 {
                     // vide, sa densité basse est normale).
                     let e = match dens.variante {
                         DensityVariant::Hybrid if dens.colonnes[j * nx + i] < LAME_MINCE_S747 => 0.,
+                        DensityVariant::SurfaceTarget if surface => dens.rho[c] - densite_attendue_s749(-self.phi[c] / dx),
                         DensityVariant::WithoutSurface if surface => 0.,
                         DensityVariant::SolidExcessOnly if solide => (dens.rho[c] - 1.).max(0.),
                         _ if surface => (dens.rho[c] - 1.).max(0.),

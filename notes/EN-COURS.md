@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S749 — **en cours**. En autonomie ; session longue. SURFACE-DILATEE-S748 : la projection dilate la couche de surface, parce qu'elle
+Session : S749 — **terminée**. En autonomie ; session longue. SURFACE-DILATEE-S748 : la projection dilate la couche de surface, parce qu'elle
 n'y corrige que l'excès. **La question** : corrigée dans les deux sens vers sa densité attendue, la surface reste-t-elle à sa place, et la 3D
 tient-elle les trois essais ?
 
@@ -107,8 +107,15 @@ tire un plancher d'environ 1 mm. Le critère 4 est donc à la limite : il est ra
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la variante ; (1), (3).
-- [ ] **P3** — (2), (4) sur le canal.
-- [ ] **P4** — preuve ; le lot ; fermeture.
+- [x] **P2** — la variante ; (1), (3).
+- [x] **P3** — (2), (4) sur le canal.
+- [x] **P4** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
+- **Fini** :
+  - (1) **non tenu** : 9,8 mm/s ; 4,38 mm ;
+  - (2) **tenu** : 96 % ; 8,3 mm ;
+  - (3) **non tenu** : −12,3 % ;
+  - (4) `Complete` +2,73 → −0,48 mm ; `SurfaceTarget` +6,66 → +4,40 mm.
+
+  Aucune des six variantes ne tient les trois essais. Le suspect suivant : le déplacement sans sa vitesse.

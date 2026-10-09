@@ -2934,7 +2934,7 @@ fn s4_toward_s645_scale_s738() {
 
 /// S739 — une mesure de l'onde du canal : `(t, x de la crête, η de la crête, largeur à mi-hauteur, le creux derrière, la crête par les
 /// particules)`, m.
-type MesureCanal = (f64, f64, f64, f64, f64, f64);
+type MesureCanal = (f64, f64, f64, f64, f64, f64, f64);
 
 /// **S739 — l'onde solitaire dans la 3D sur un canal plat** : `d` = 0,5 m, `H` = 0,1 m, 24 m, deux rangées, des murs ; l'onde centrée à
 /// 4 m. `profil` : **B**, l'onde de Rayleigh (`OndeDepart`, S719) avec le profil vertical de SGN (S698), `u(z) = ū + (h²/6 − z²/2)·ū_xx`,
@@ -3025,8 +3025,18 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
         let largeur = cote(1) - cote(-1);
         let creux = (0..nx).filter(|&i| x(i) > x(ic) - 4. && x(i) < x(ic) - 1.5).map(|i| eta[i]).fold(0f64, f64::min);
         let haut = a.particles().iter().filter(|p| ((p[0] as f64) - x(ic)).abs() < 0.5).fold(0f32, |m, p| m.max(p[2])) as f64 + dxs / 4. - d;
+        // S749 : le niveau moyen loin derrière l'onde (0,5 à 2,5 m), par les particules (la plus haute de chaque colonne, plus dx/4).
+        let (i0, i1) = ((0.5 / dxs) as usize, (2.5 / dxs) as usize);
+        let mut hc = vec![f32::MIN; i1 - i0];
+        for p in a.particles() {
+            let i = (p[0] / dx) as usize;
+            if (i0..i1).contains(&i) {
+                hc[i - i0] = hc[i - i0].max(p[2]);
+            }
+        }
+        let niveau = hc.iter().map(|&z| z as f64 + dxs / 4. - d).sum::<f64>() / hc.len() as f64;
         let _ = t;
-        (t, x(ic), ec, largeur, creux, haut)
+        (t, x(ic), ec, largeur, creux, haut, niveau)
     };
     let mut out = vec![mesurer(&a, 0.)];
     let fin = (duree * 1e6).round() as u64;
@@ -3443,5 +3453,25 @@ fn rest_and_channel_with_hybrid_density_s747() {
     println!("S747 (3) le canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; {}",
         100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, if canal { "tenu" } else { "NON TENU" });
     println!("S747 : le repos {tenus:?}, le canal {canal}");
+}
+
+/// **S749 — la surface vers sa densité attendue** : (1) le repos sur l'escalier ; (2) l'onde solitaire sur le canal à 2,5 cm ; (4) le niveau
+/// moyen loin derrière l'onde, contre la variante `Complete` (l'instrument éprouvé : elle doit montrer la surface soulevée de S748).
+#[test]
+#[ignore = "S749 (1), (2), (4) : le repos et le canal, deux variantes (≈ 28 min)"]
+fn rest_channel_and_level_with_surface_target_s749() {
+    for cot in [30.0f64, 12.0] {
+        let (v, ep, ephi, _) = repos_pente_s745(cot, false, Some(crate::apic3d::DensityVariant::SurfaceTarget), true);
+        println!("S749 (1) 1:{cot} escalier : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3,
+            if v < 0.01 && ep < 0.003 { "tenu" } else { "NON TENU" });
+    }
+    for (nom, v) in [("Complete", crate::apic3d::DensityVariant::Complete), ("SurfaceTarget", crate::apic3d::DensityVariant::SurfaceTarget)] {
+        let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(v), ..Default::default() });
+        let l0 = m[1].3;
+        let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+        let (n0, n1) = (m[1].6, m.last().unwrap().6);
+        println!("S749 (2, 4) {nom}, canal à 2,5 cm : la largeur {l0:.3} → {lmin:.3} m ({:.0} %), le creux {:.1} mm, la crête finale {:.1} mm ; le niveau derrière {:+.2} → {:+.2} mm ; {}",
+            100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, n0 * 1e3, n1 * 1e3, if lmin > 0.8 * l0 && creux < 0.01 { "l'onde tenue" } else { "l'onde NON TENUE" });
+    }
 }
 

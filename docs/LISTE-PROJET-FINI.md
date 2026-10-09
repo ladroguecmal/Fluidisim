@@ -506,6 +506,8 @@ pas recopiée ici (L137).
   seul avant d'être combiné ([preuve](validation/DENSITE-HYBRIDE-S747.md)).
   **S748** : la projection freine la lame parce qu'elle dilate la couche de surface (la surface +3 à 5 mm partout, l'énergie −15 % à 3 s)
   ([preuve](validation/SURFACE-DILATEE-S748.md)).
+  **S749** : la surface corrigée vers sa densité attendue garde l'onde (96 %), mais ne tient pas le repos et freine encore la lame
+  (−12 %) ; aucune des six variantes ne tient les trois essais ([preuve](validation/CIBLE-SURFACE-S749.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

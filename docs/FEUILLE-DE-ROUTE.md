@@ -542,6 +542,8 @@ passe (la projection freine la remontée de 12 %) ; le lac au repos sur une pent
 écrit en S744, oublié à la fermeture de S743.*
 **S744–S746** : la projection de densité consciente du fond (le repos rendu) ; sans correction de surface (la remontée à −5,5 %, mais
 l'onde solitaire moins bien gardée) ; la cinquante-troisième revue (ADR-288 : le repos d'abord ; le lot vérifié par l'outil) (4.1).
+**S747–S749** : ADR-289 (chaque solveur éprouvé seul, la 3D corrigée d'abord) ; la projection hybride ; la surface dilatée (S748) ; la
+surface vers sa densité attendue — aucune des six variantes ne tient à la fois le repos, l'onde et la remontée (4.1).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 20:18 +02:00
+JETON            : libre
+Battement        : 2026-10-09 20:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S749 — la surface corrigée vers sa densité attendue ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S748 — Où la projection freine la lame : la surface dilatée ([journal](notes/JOURNAL.md)). Avant : S747 (La projection de densité hybride)
-Session suivante : S749 — la surface corrigée dans les deux sens, vers sa fraction d'eau lue par phi ; jugée sur le repos, l'onde solitaire et la remontée ; le lot
+Session en cours : aucune
+Dernière session : S749 — La surface corrigée vers sa densité attendue ([journal](notes/JOURNAL.md)). Avant : S748 (Où la projection freine la lame : la surface dilatée)
+Session suivante : S750 — deux remèdes au freinage de la lame : le déplacement de la projection avec sa vitesse (G2P à la nouvelle place), et la surface relâchée (kappa 0,1) ; la revue en S751
 Maillons        : 0
-Registres       : dernier lot S746 (ADR-213 D3) ; le prochain au plus tard en S749
+Registres       : dernier lot S749 (ADR-213 D3) ; le prochain au plus tard en S752
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
