@@ -62,48 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S757 — **terminée**. En autonomie ; session longue. ADR-289 D3.2 : **le banc de la 3D corrigée** (ADR-292). Il a déjà :
-- le repos (S744) ;
-- l'onde solitaire et sa célérité (S744, S752) ;
-- la remontée de S645 (S744) ;
-- Synolakis (S754).
+Session : S758 — **en cours**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
+grandit de 2,8 % par période ; S752 avait mesuré la projection qui ajoute de l'énergie potentielle (+2 à +3 J en 4 s). **La question** : une
+projection qui rend à chaque particule l'énergie de son déplacement vertical arrête-t-elle l'injection, sans perdre ce que la 3D corrigée
+tient ?
 
-Il lui manque l'onde stationnaire. La rupture de barrage attend les mesures de Martin et Moyce (1952) : un téléchargement, demandé à
-l'utilisateur.
+**L'hypothèse nommée** (ADR-290 D1) : la projection élève des particules de Δz sans rien leur prendre. **La règle** (`set_density_energy_neutral`) :
+chaque particule déplacée garde son énergie, `|v|² ← max(|v|² − 2g·Δz, 0)`, sa vitesse mise à l'échelle dans sa direction. C'est la règle
+d'une bille qui monte ou descend dans la pesanteur.
 
-**L'essai** (`ballottement_s757`) :
-- une cuve de 2 m × 0,05 m (deux rangées), 0,5 m d'eau, 2,5 cm ;
-- le mode (1, 0) posé au repos à son maximum, `η = A·cos(πx/L)`, `A` = 40 mm (3,2 quanta de pose, ADR-288 D2), 10 s ;
-- la 3D sans projection, puis la 3D corrigée (`Complete` consciente du fond).
+**Signature prédite** :
+- le bilan propre de la projection (S752) : l'énergie potentielle ajoutée compensée par l'énergie cinétique retirée ;
+- le ballottement : l'amortissement près de zéro (ni négatif) ;
+- la période et l'onde solitaire inchangées.
 
-La surface au mur de gauche est lue par φ à chaque pas. **La période** est tirée des passages par zéro (interpolés), **l'amortissement**
-de la décroissance des extrêmes.
+**Les critères, écrits avant** (ADR-290 D3, le repos d'abord ; ADR-293 D3, la bande de quantum) :
+1. **le repos** sur l'escalier (1 cm/s ; 3 mm) ;
+2. **le ballottement** : la période à 1 % ; l'amortissement entre **−0,5 % et +1 %** par période (la 3D sans projection, dans la cuve de
+   S413 : 0,08 à 0,3 %) ;
+3. **l'onde solitaire** sur le canal à 2,5 cm : la largeur 80 %, le creux 10 mm, la célérité à 1 % (ADR-293 D2).
 
-**La référence exacte** (la dispersion linéaire) : `ω² = g·k·tanh(k·d)`, `k = π/L`, soit **T = 1,9768 s**. `ka` = 0,063 : la correction
-non linéaire est sous 1 %.
+Synolakis (45 min) vient ensuite, si les trois tiennent.
 
-**Les critères, écrits avant** (ADR-293 D3 : avec la bande de quantum) :
-1. la période à **1 %** de T, la bande de lecture comprise : le passage par zéro est interpolé entre deux pas, le pas faisant ≈ 1/300 de
-   la période ;
-2. l'amortissement rapporté : la décroissance des extrêmes par période. S413 avait 0,08 à 0,3 % par période sans projection.
+**Contrôles du plan** (ADR-276, ADR-287, ADR-290, ADR-293)
 
-**Contrôles du plan** (ADR-287, ADR-288, ADR-293)
-
-- **témoin** : la dispersion linéaire exacte ; la 3D sans projection (S399, S413 : +0,36 % à 2,5 cm).
-- **instrument** : la surface par φ au mur ; la période par les passages par zéro (une grandeur intégrée sur cinq périodes).
-- **calcul** : 2 × ≈ 3 min.
-- **ADR** : ADR-287 D1 (le banc) ; ADR-288 D2 (trois quanta) ; ADR-293 D2, D3.
-- **pièges** : le mode (1, 0) seul n'est posé qu'au premier ordre ; un peu du mode (2, 0) naît, il est rapporté.
+- **témoin** :
+  - la 3D corrigée sans la règle (S744, S752, S757) ;
+  - la dispersion exacte ;
+  - l'onde exacte et sa célérité.
+- **instrument** : le bilan propre (S752) ; ceux de S743, S757, S740.
+- **calcul** : le repos 2 min, le ballottement 5 min, le canal 10 min.
+- **ADR** : ADR-276 D2 (une différence) ; ADR-290 D1 ; ADR-293 D2, D3.
+- **pièges** :
+  - au repos, les particules n'ont pas de vitesse : la règle ne peut rien retirer, l'énergie d'un déplacement vers le haut y reste ;
+  - une particule qui descend gagne de la vitesse : la règle doit le permettre, sans quoi l'énergie fuit.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1), (2).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — la règle ; (1), (2), (3).
+- [ ] **P3** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (565 s) :
-  - sans projection : 2,1062 s (+6,56 %), 35 % d'amortissement, 5 passages ;
-  - **la 3D corrigée : 1,9831 s (+0,33 %, tenu)**, l'amortissement −2,77 % : l'oscillation grandit.
-
-  La projection injecte de l'énergie : le défaut suivant. La 3D sans projection contredit S413 (une autre cuve) : à comprendre.

@@ -66,7 +66,8 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 - **Il accorde** : chaque téléchargement. **Accordés et faits le 2026-10-05** (S482) : le Godot 4.7 mono double de DyingStar et une copie
   superficielle de DyingStar (`develop`), hors du dépôt, dans `C:/Users/antoi/FluidisimExterne/`.
 - **En attente de lui aujourd'hui** : le **SDK .NET 9** (le C# de DyingStar ne se compile pas sans lui) — à demander quand on en aura
-  besoin. Refusée (S482) : la relance planifiée. Une question nouvelle s'inscrit ici, une ligne, et se retire quand il a répondu.
+  besoin. Refusée (S482) : la relance planifiée. **Depuis S757** : les mesures de rupture de barrage de Martin et Moyce (1952, PDF publics)
+  pour le banc de la 3D (ADR-289 D3.2) — un téléchargement à accorder. Une question nouvelle s'inscrit ici, une ligne, et se retire quand il a répondu.
 - **Répondues le 2026-10-07** ([ADR-261](docs/adr/ADR-261-reponses-du-2026-10-07.md)) : l'eau placée après le relief, relief recalculé à
   proximité ; le découpage le plus puissant (étude) ; toutes les anciennes intentions rejugées ; glace et réalisme sans limite ; air
   respirable s'il l'est ; un seul travailleur, un seul PC.
