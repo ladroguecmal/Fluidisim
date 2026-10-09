@@ -143,3 +143,10 @@ Plus tard, dans le même registre :
 - S3 déferle à 3,49 s, mais sa durée dépassait son mur : à refaire.
 - S4 n'a pas de témoin valable : le front se fige sur la pente de 1:3, que le fond soit en escalier ou lisse. À diagnostiquer en S735,
   avant tout calibrage.
+
+*Note datée du 2026-10-09 (S735)* : S4 diagnostiqué ([preuve](../validation/DIAGNOSTIC-S4-S735.md)).
+- Le front figé était une lecture fausse de φ.
+- La 3D remonte réellement trop haut : +37 % au moins, comme sa crête trop haute de S713 et de S1.
+- Le juge du retournement compte un vide d'une maille à φ ≈ 0.
+
+Les témoins attendent deux choses : une lecture par les particules, et un juge robuste.

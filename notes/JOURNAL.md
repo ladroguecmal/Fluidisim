@@ -2175,3 +2175,14 @@ tranche 2D étirée en vague uniforme : pas le souhait) ; le dépôt est revenu 
 
 Le prédicteur : le rapport 0,8 juste sur S2, faux sur S1 ; SGN déclenche 2 à 6 s trop tard sur S3. Maillons **1** (4.14). Suivant :
 **S735**, le diagnostic de S4.
+
+## S735 — 2026-10-09 — Le diagnostic de S4
+
+**Entrée.** TEMOINS-SELECTEUR-S734 : le front figé sur 1:3. **Fait** ([preuve](../docs/validation/DIAGNOSTIC-S4-S735.md)) : les
+instantanés du témoin, `outils/diagnostic_s735.py`. **Mesuré**, par deux lectures indépendantes :
+- le front figé est une **lecture fausse** de φ (10 à 30 mm lus, zéro particule ; elle persiste après leur départ) ; ce n'est pas de l'eau
+  collée (les particules redescendent) ;
+- **la 3D remonte réellement trop haut** : 0,45 à 0,53 m comptés, contre 0,328 m exacts (+37 à +60 %) ;
+- le faux retournement est une maille d'air à φ = +1 mm.
+
+Maillons **0** (diagnostic). Suivant : **S736**, la revue de méthode.

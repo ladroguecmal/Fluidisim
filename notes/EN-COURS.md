@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S735 — **en cours**. Le diagnostic de S4 (TEMOINS-SELECTEUR-S734). **La question** : sur la pente de 1:3, le « front » d'eau se
+Session : S735 — **terminée**. Le diagnostic de S4 (TEMOINS-SELECTEUR-S734). **La question** : sur la pente de 1:3, le « front » d'eau se
 fige à 0,48 m (escalier) ou 0,60 m (fond lisse) au-dessus du niveau, sous une couche d'environ 1 cm qui ne redescend pas ; et le juge voit un
 « retournement » à 4,14 m, loin de la plage. Est-ce de l'eau réellement collée à la pente, ou une lecture fausse ? **Aucun remède dans cette
 session** (ADR-226 D1 : localiser d'abord).
@@ -99,7 +99,7 @@ que le juge a vu.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — les instantanés ; l'outil ; le calcul ; le diagnostic.
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — le calcul (1 574 s) et `outils/diagnostic_s735.py`.
