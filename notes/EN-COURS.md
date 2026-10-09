@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S721 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-huitième revue de méthode** (ADR-222 D4 :
+Session : S721 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-huitième revue de méthode** (ADR-222 D4 :
 S716–S720).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
@@ -81,7 +81,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-282 ; METHODE ; `outils/fermer.py`.
-- [ ] **P3** — rituel, par `fermer.py` lui-même.
+- [x] **P2** — ADR-282 ; METHODE ; `outils/fermer.py`.
+- [x] **P3** — rituel, par `fermer.py` lui-même.
 
 ### Notes de reprise
+- **P2 fini** — ADR-282 : D1 (`outils/fermer.py`, une fermeture qui ne commet que si tout a réussi), D2 (un script de fin vise des chaînes uniques) ; la prochaine revue S726.

@@ -2049,3 +2049,10 @@ en S721 ; ensuite le jalon de la phase A, une séance visuelle (R43).
 le film des deux montages (le tout-3D, de bout en bout), une image tous les 1/30 s, au bit des nombres ; `outils/rendu_bout_en_bout.py`
 (deux GIF, un PNG, envoyés à l'utilisateur). **R43 posée** : le déferlement, la 3D qui s'éteint, la lame en 2D. Maillons **1** (4.14).
 Suivant : **S721**, la quarante-huitième revue (S716–S720).
+
+## S721 — 2026-10-09 — la quarante-huitième revue de méthode (ADR-282)
+
+**Entrée.** La revue (S716–S720). **Fait** : [ADR-282](../docs/adr/ADR-282-quarante-huitieme-revue-de-methode.md). D1 : une session se
+ferme par `outils/fermer.py`, qui ne commet que si le script de fin, la compilation et le rituel ont réussi (S702, S719 : une chaîne `;`
+avait commis un état partiel ; la règle d'ADR-279 D2 n'avait pas suffi). D2 : un script de fin vise des chaînes uniques. La session se
+ferme par l'outil lui-même. Maillons **0** (méthode). Suivant : **S722** ; la revue en S726. R43 attend le verdict de l'utilisateur.
