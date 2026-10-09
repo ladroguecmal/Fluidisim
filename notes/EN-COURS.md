@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S726 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-neuvième revue de méthode** (ADR-222 D4 :
+Session : S726 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-neuvième revue de méthode** (ADR-222 D4 :
 S721–S725).
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268)
@@ -84,7 +84,8 @@ coûté ; (3) la prochaine revue nommée.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-283 ; METHODE.
-- [ ] **P3** — fermeture.
+- [x] **P2** — ADR-283 ; METHODE.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — ADR-283 : D1 (un état et un régime partagés pour juger un raccord entre deux modèles), D2 (les constantes de chaque solveur dans un bilan), D3 (rappel : le plan avant le code) ; la prochaine revue S731.

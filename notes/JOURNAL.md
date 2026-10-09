@@ -2086,3 +2086,10 @@ S726.
 départ (Saint-Venant part de ce que lit la 3D, comme en S684), les pics d'un quantum dans une maille, la fuite de masse d'un `f32`.
 **Mesuré** : au repos au micron, la masse au bit ; une onde longue réfléchie à 9 % (tenu) ; une bosse dispersive à 18 % (le désaccord des
 modèles). **B3 acquis.** Maillons **1** (4.14). Lot S723–S725. Suivant : **S726**, la quarante-neuvième revue ; puis B4.
+
+## S726 — 2026-10-09 — la quarante-neuvième revue de méthode (ADR-283)
+
+**Entrée.** La revue (S721–S725). **Fait** : [ADR-283](../docs/adr/ADR-283-quarante-neuvieme-revue-de-methode.md). D1 : un raccord entre
+deux modèles se juge depuis l'état que chacun lit de l'autre, sur un régime qu'ils portent également (S725 : le niveau de départ, la bosse
+dispersive). D2 : un bilan entre deux solveurs compte chaque volume avec les constantes de son solveur (S725 : la fuite d'un `f32`). D3 :
+rappel, le plan avant le code. Maillons **0** (méthode). Suivant : **S727**, B4, la boîte qui suit un corps ; la revue en S731.

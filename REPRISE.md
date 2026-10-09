@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-10-09 06:01 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S726 — la quarante-neuvième revue de méthode (S721–S725) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S725 — Le raccord de la boîte (B3) ([journal](notes/JOURNAL.md))
-Session suivante : S726 — la quarante-neuvième revue de méthode (S721–S725) ; puis B4, la boîte qui suit un corps
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S726 — la quarante-neuvième revue de méthode (ADR-283) ([journal](notes/JOURNAL.md)). Avant : S725 (Le raccord de la boîte)
+Session suivante : S727 — B4, la boîte qui suit un corps
+Maillons        : 0
 Registres       : dernier lot S725 (ADR-213 D3) ; le prochain au plus tard en S728
 ```
 
