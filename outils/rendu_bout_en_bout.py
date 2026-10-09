@@ -12,6 +12,10 @@ La 2D (SGN au large, Saint-Venant au rivage, puis la plage entière après la mo
 particules de la 3D (une rangée sur quatre) sont colorées par leur vitesse.
 
     python outils/rendu_bout_en_bout.py calculs/s720_tout3d.bin calculs/s720_bout.bin calculs/s720
+
+S730 (ADR-284) : deux titres en option (le film du haut, celui du bas), et `<sortie>_jet.png`, le jet de près à quatre instants :
+
+    python outils/rendu_bout_en_bout.py calculs/s720_bout.bin calculs/s730_bout_12.bin calculs/s730 "Avant" "Après"
 """
 import struct
 import sys
@@ -102,9 +106,12 @@ def legende(w):
     return img
 
 
+TITRES = ["Tout-3D (la référence)", "De bout en bout : SGN, bande 3D, Saint-Venant (4 fois moins de calcul)"]
+
+
 def paire(haut, bas, cadre, echelle):
-    a = rendre(haut, cadre, echelle, "Tout-3D (la référence)")
-    b = rendre(bas, cadre, echelle, "De bout en bout : SGN, bande 3D, Saint-Venant (4 fois moins de calcul)")
+    a = rendre(haut, cadre, echelle, TITRES[0])
+    b = rendre(bas, cadre, echelle, TITRES[1])
     l = legende(a.width)
     c = Image.new('RGB', (a.width, a.height + b.height + l.height + 4), (0, 0, 0))
     c.paste(a, (0, 0))
@@ -129,6 +136,8 @@ def animer(paires, cadre, echelle, sortie):
 
 
 def main(argv):
+    if len(argv) >= 5:
+        TITRES[:] = argv[3:5]
     tout, bout = lire(argv[0]), lire(argv[1])
     paires = apparier(tout, bout)
     print(f"{len(tout)} et {len(bout)} images ; {len(paires)} paires ; t de {paires[0][1][0]:.3f} à {paires[-1][1][0]:.3f} s")
@@ -142,7 +151,16 @@ def main(argv):
         planche.paste(v, (0, y))
         y += v.height + 6
     planche.save(argv[2] + '_instants.png')
-    print("écrit", argv[2] + '_plage.gif', argv[2] + '_deferlement.gif', argv[2] + '_instants.png')
+    # S730 : le jet de près.
+    choix = [min(paires, key=lambda p: abs(p[1][0] - t)) for t in (2.70, 2.80, 2.90, 3.05)]
+    vues = [paire(a, b, (9.2, 12.4, 0.3, 0.9), 220) for a, b in choix]
+    planche = Image.new('RGB', (vues[0].width, sum(v.height for v in vues) + 6 * len(vues)), (0, 0, 0))
+    y = 0
+    for v in vues:
+        planche.paste(v, (0, y))
+        y += v.height + 6
+    planche.save(argv[2] + '_jet.png')
+    print("écrit", argv[2] + '_plage.gif', argv[2] + '_deferlement.gif', argv[2] + '_instants.png', argv[2] + '_jet.png')
     return 0
 
 

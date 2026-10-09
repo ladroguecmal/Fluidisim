@@ -553,6 +553,9 @@ struct Enregistrement {
     /// `n_surf` élévations de la surface de la 2D (NaN où la 3D est active), puis `n_part` × `<3f x, z, |v|>` (la première rangée).
     film: Option<Vec<u8>>,
     prochaine_image: f64,
+    /// S730 (ADR-284 D4) : à chaque pas avant la mort, `(t, J)` — le niveau de Saint-Venant à sa première maille (moyenne des rangées) moins
+    /// celui de la 3D à sa dernière colonne (le fond + l'épaisseur lue par φ) ; zéro si les deux côtés sont secs (moins d'un millimètre).
+    mur: Vec<(f64, f64)>,
 }
 
 /// **S708 — le volume d'APIC par sa surface** : `Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides (`distance()`, l'eau où φ < 0) ;
@@ -666,7 +669,14 @@ const PLAN_S699: f32 = 5.0;
 /// S695 — le même montage ; le porteur du large, Saint-Venant (S693) ou, si `sgn`, Serre–Green–Naghdi 1D sur fond plat (S694).
 /// S699 : sans raccord, `enreg` enregistre le plan x = 5,0 m ; raccordé, `rejeu` le rejoue par le bord à particules (ni SGN, ni profil).
 #[allow(clippy::type_complexity)]
-fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
+fn deux_raccords_porteur(x_r: f64, large_: Large, enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
+    -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
+    deux_raccords_porteur_xf(x_r, large_, 10.775, enreg, rejeu)
+}
+
+/// S730 (ADR-284) — le même montage, le raccord du rivage à `x_f` (10,775 m : trois mailles de fond, le montage de R43).
+#[allow(clippy::type_complexity)]
+fn deux_raccords_porteur_xf(x_r: f64, large_: Large, x_f: f64, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
     -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     // S719 : l'onde de Rayleigh, puis le mode de base.
     let rayleigh = matches!(large_, Large::AucunRayleigh | Large::BoutEnBoutRayleigh);
@@ -690,7 +700,8 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     use crate::apic3d::tests::{air_enferme_s648, retournement_s647};
     let horloge = std::time::Instant::now();
     let dx = 0.025f32;
-    let (d, h0, cot, x_pied, niveau, l, lz, x_f) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64, 10.775f64);
+    let (d, h0, cot, x_pied, niveau, l, lz) = (0.5f64, 0.15f64, 12.0f64, 5.696f64, 0.5f32, 12.8f64, 1.0f64);
+    assert!(x_f > x_r && x_f < l, "le raccord du rivage dans la plage");
     let dxs = dx as f64;
     // Saint-Venant du large, toute la plage, depuis la même onde que la 3D (x₁ = 3,4 m ; ADR-273 D2 — `Plage` la centre à 3,488 m).
     let onde0 = OndeDepart { h: h0, d, x1: 3.4, g: 9.81, rayleigh };
@@ -921,6 +932,14 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
             entre = entre_g - sorti_g - res_g.iter().sum::<f64>();
         }
         let ts = t as f64 * 1e-6;
+        // S730 (ADR-284 D4) : le saut du niveau au raccord du rivage.
+        if let Some(e) = enreg.as_deref_mut() {
+            let h3 = volume_surface_s708(&rel.apic).1[nx - 1];
+            let nyv = rel.sv.ny;
+            let (hs, es) = (0..nyv).fold((0f64, 0f64), |m, j| (m.0 + rel.sv.h[j], m.1 + rel.sv.h[j] + rel.sv.z[j]));
+            let j_mur = if h3 < 1e-3 && hs / (nyv as f64) < 1e-3 { 0. } else { es / nyv as f64 - (marche[nx - 1] as f64 + h3) };
+            e.mur.push((ts, j_mur));
+        }
         if premier.is_none() {
             if let Some((i, _)) = retournement_s647(&rel.apic, ny / 2, &marche) {
                 premier = Some((ts, x_r + (i as f64 + 0.5) * dxs));
@@ -2379,3 +2398,55 @@ fn the_four_sided_box_with_a_straight_current_s724() {
         v1 / v0 - 1., moy[0], moy[1]);
 }
 
+/// S730 — le mur au raccord (ADR-284 D4), lu dans l'enregistrement : `(le plus grand J sur [2,4 s ; 3,2 s], l'instant ; le plancher de bruit,
+/// le plus grand |J| avant 1,5 s)`.
+fn mur_s730(e: &Enregistrement) -> (f64, f64, f64) {
+    let (t_m, j_m) = e.mur.iter().filter(|(t, _)| *t >= 2.4 && *t <= 3.2).fold((0f64, f64::MIN), |m, &(t, j)| if j > m.1 { (t, j) } else { m });
+    let bruit = e.mur.iter().filter(|(t, _)| *t < 1.5).fold(0f64, |m, &(_, j)| m.max(j.abs()));
+    (j_m, t_m, bruit)
+}
+
+/// **S730 — E1, le raccord du rivage au-delà du jet** (ADR-284 D2) : la vague de bout en bout, le raccord à 10,775 m (R43) puis à 12,0 m
+/// (0,30 m au-delà du rivage au repos). (1) le mur, `J` sur [2,4 ; 3,2 s], sous 1 cm à 12,0 m et sous le quart de celui de 10,775 m ;
+/// (2) le retournement à 0,15 m et 0,1 s ; (3) la masse à 10⁻¹² ; (4) le coût, rapporté ; (5) le film de 12,0 m, `calculs/s730_bout_12.bin`.
+#[test]
+#[ignore = "la vague de bout en bout, le raccord du rivage à 10,775 puis 12,0 m (≈ 12 min)"]
+fn the_shore_relay_beyond_the_jet_s730() {
+    let mut res = Vec::new();
+    for (x_f, film) in [(10.775f64, false), (12.0, true)] {
+        let mut e = Enregistrement { film: film.then(Vec::new), ..Default::default() };
+        let (p, a, masse, _, _, d) = deux_raccords_porteur_xf(5.0, Large::BoutEnBout, x_f, Some(&mut e), None);
+        if let Some(f) = e.film.take() {
+            std::fs::write(format!("{}/../../calculs/s730_bout_12.bin", env!("CARGO_MANIFEST_DIR")), &f).unwrap();
+        }
+        let (j, tj, bruit) = mur_s730(&e);
+        let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+        println!("S730 E1, x_f = {x_f} m : le mur J = {:.1} mm à {tj:.3} s (bruit {:.2} mm) ; retournement {p:?} ; air {a:?} ; la masse {masse:.1e} ; la remontée {rr:.4} m à {tr:.3} s ; {d:.0} s",
+            j * 1e3, bruit * 1e3);
+        res.push((j, bruit, p.expect("un retournement"), masse, d));
+    }
+    let ((j0, _, p0, _, d0), (j1, b1, p1, m1, d1)) = (res[0], res[1]);
+    println!("S730 E1 : le mur {:.1} → {:.1} mm ; le coût {d0:.0} → {d1:.0} s ({:.2}×)", j0 * 1e3, j1 * 1e3, d1 / d0);
+    assert!(b1 < 0.01, "le plancher de bruit de l'instrument au-dessus du critère : {b1}");
+    assert!(j1 < 0.01 && j1 < 0.25 * j0, "critère 1 : le mur {j1} contre {j0}");
+    assert!((p1.0 - p0.0).abs() < 0.1 && (p1.1 - p0.1).abs() < 0.15, "critère 2 : le retournement");
+    assert!(m1 < 1e-12, "critère 3 : la masse {m1}");
+}
+
+/// **S730 — E2, le tout-3D, le raccord du rivage à 12,0 m** : le nouveau témoin (ADR-284). Le retournement à 0,15 m et 0,1 s de S717 (2,637 s,
+/// 9,988 m) ; la masse à 10⁻¹² ; le mur sous 1 cm. Le film : `calculs/s730_tout3d_12.bin`.
+#[test]
+#[ignore = "le tout-3D, le raccord du rivage à 12,0 m (≈ 25 min)"]
+fn the_all_3d_reference_with_the_shore_relay_beyond_the_jet_s730() {
+    let mut e = Enregistrement { film: Some(Vec::new()), ..Default::default() };
+    let (p, a, masse, _, _, d) = deux_raccords_porteur_xf(0.0, Large::AucunJusqua5, 12.0, Some(&mut e), None);
+    std::fs::write(format!("{}/../../calculs/s730_tout3d_12.bin", env!("CARGO_MANIFEST_DIR")), e.film.take().unwrap()).unwrap();
+    let (j, tj, bruit) = mur_s730(&e);
+    let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+    println!("S730 E2, le tout-3D à 12,0 m : le mur J = {:.1} mm à {tj:.3} s (bruit {:.2} mm) ; retournement {p:?} ; air {a:?} ; la masse {masse:.1e} ; la remontée {rr:.4} m à {tr:.3} s ; {d:.0} s (S717 : 1 191 s)",
+        j * 1e3, bruit * 1e3);
+    let (tp, xp) = p.expect("un retournement");
+    assert!((tp - 2.637).abs() < 0.1 && (xp - 9.988).abs() < 0.15, "le retournement");
+    assert!(masse < 1e-12, "la masse {masse}");
+    assert!(j < 0.01, "le mur {j}");
+}

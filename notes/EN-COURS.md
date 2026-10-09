@@ -106,8 +106,13 @@ le jet de la 3D retombe contre un mur de Saint-Venant, avec une poche d'air. **L
 ### Plan
 
 - [x] **P1** — jeton ; ADR-284 ; plan.
-- [ ] **P2** — `x_f` et l'instrument du mur ; E1 ; (1)–(5).
-- [ ] **P3** — E2, le tout-3D à 12,0 m.
+- [x] **P2** — `x_f` et l'instrument du mur ; E1 ; (1)–(5).
+- [x] **P3** — E2, le tout-3D à 12,0 m.
 - [ ] **P4** — preuve ; images ; fermeture.
 
 ### Notes de reprise
+- **P2 et P3, dans un même lancement** (le filtre d'`essai.py` est une sous-chaîne : le nom de E1 est contenu dans celui de E2, les deux ont
+  tourné, E2 d'abord). **E1 tenu** : le mur 281,5 mm (à 2,934 s, R43) → 0,0 mm (le bruit 0,69 → 0,00 mm) ; le retournement 2,569 s / 9,863 m
+  → 2,588 s / 9,913 m ; la masse 1,6·10⁻¹⁵ ; le coût 291 → 308 s (1,06×). La remontée 0,3714 → 0,3364 m. **E2 tenu** : le tout-3D à 12,0 m,
+  le retournement 2,620 s / 9,938 m (S717 : 2,637 s / 9,988 m), l'air 2,804 s / 10,375 m, la masse 1,2·10⁻¹⁶, le mur 0, la remontée
+  0,3547 m à 3,942 s, 1 152 s. De bout en bout contre le tout-3D, la remontée passe de +3,3 cm (S718) à −1,8 cm.
