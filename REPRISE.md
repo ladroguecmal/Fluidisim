@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 23:58 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 23:59 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S755 — le témoin de R43 refait avec la 3D corrigée ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S754 — `Complete` consciente contre Synolakis ; ADR-292 ([journal](notes/JOURNAL.md)). Avant : S753 (La 3D corrigée contre Synolakis)
 Session suivante : S755 — refaire R43 et S1 (le déferlement, le jet, la remontée) avec la 3D corrigée (ADR-292) ; le lot ; la revue en S756
 Maillons        : 1

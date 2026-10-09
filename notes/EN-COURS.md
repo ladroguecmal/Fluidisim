@@ -62,40 +62,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S754 — **terminée**. En autonomie ; session longue. SYNOLAKIS-CORRIGEE-S753 : R1 rend la hauteur juste mais ralentit la vague
-(−5,6 %) ; `Complete` garde la célérité (+0,4 %) mais freine la remontée de S645 contre la loi théorique (−11 %). **La question** : laquelle
-des deux suit le mieux les **mesures** de Synolakis (ADR-280 D2 : la référence extérieure tranche) ?
+Session : S755 — **en cours**. En autonomie ; session longue. ADR-289 D3.3, ADR-292 : **refaire le témoin tout-3D de R43 avec la 3D
+corrigée.** C'est le montage de S730 E2 (`d` = 0,5 m, `H/d` = 0,3, 1:12, le raccord du rivage à 12,0 m) qui jugeait les raccords et le
+sélecteur. **La question** : avec une 3D qui garde l'onde, où et quand la vague de R43 plonge-t-elle, et de combien les mesures changent-elles ?
 
-**L'essai** : le montage de S753, `Complete` consciente du fond, sans R1 ; le même pas (2,5 ms), les profils à t·√(g/d) = 15, 20, 25. Une
-seule différence avec S753 : R1 (ADR-276 D2).
+**L'essai** : `Large::AucunCorrigee` (le tout-3D de S730 E2, 5 s, la projection `Complete` consciente du fond) ; le film à 1/30 s
+(`calculs/s755_tout3d_corrigee.bin`), pour un rendu plus tard.
 
-**Les critères, écrits avant** — `Complete` est retenue à la place de R1 si :
-1. la crête à t = 15 reste à **0,05 d** de la mesure ;
-2. sa place à t = 15 et à t = 20 est plus proche de la mesure que celle de R1 (S753 : 9,42 d et 5,82 d, contre 8,38 d et 3,66 d) ;
-3. l'écart quadratique est plus petit que celui de R1 à au moins deux des trois instants (S753 : 0,030, 0,075, 0,059 d).
+**Les mesures, contre S730 E2 (sans correction)** :
+- le retournement (S730 : 2,620 s, 9,938 m) ;
+- l'air enfermé (2,804 s ; 10,375 m) ;
+- la remontée (0,3547 m à 3,942 s) ;
+- le mur au raccord (0 mm) ;
+- la masse ;
+- le coût (1 152 s).
 
-Sinon, R1 reste, et la question de la célérité reste ouverte.
+**Les critères, écrits avant** :
+1. la masse à 10⁻¹² ;
+2. le mur au raccord sous 1 cm ;
+3. un retournement dans le domaine.
 
-**Contrôles du plan** (ADR-276, ADR-280, ADR-289, ADR-291)
+Le reste est **rapporté** : c'est le nouveau témoin, sans référence extérieure sur cette plage. SGN (S733) prévoyait le déclenchement plus tard
+que l'ancienne 3D (Kennedy 0,65 : 2,73 s ; 10,46 m). La concordance avec SGN est rapportée, non jugée.
 
-- **témoin** : les mesures de Synolakis ; S753 (R1) ; S713 E2 (sans correction).
-- **instrument** : `comparer_synolakis_s712`.
-- **calcul** : ≈ 45 min.
-- **ADR** : ADR-280 D2 ; ADR-276 D2 ; ADR-291 (et sa note de S753).
-- **pièges** : `Complete` freinait la lame de S645 (une onde posée près du pied, contre la loi) ; le laboratoire peut en juger autrement, ou
-  pas.
+**Contrôles du plan** (ADR-285, ADR-286, ADR-289, ADR-292)
+
+- **témoin** : S730 E2 (la 3D sans correction) ; SGN (S733), rapporté.
+- **instrument** : ceux de S730 (le juge du retournement de S647, l'air, le mur `J`, la remontée par Saint-Venant au-delà du raccord).
+- **calcul** : ≈ 25 à 30 min.
+- **ADR** : ADR-292 ; ADR-286 D1 (le raccord à 12,0 m ; S730 n'y voyait rien arriver avant 3,2 s, et la remontée passe dans Saint-Venant) ;
+  ADR-285 D1 (le mur mesuré).
+- **pièges** : le juge de S647 compte un vide d'une maille à φ ≈ 0 (S735). Le juge robuste (S737) n'est pas branché dans ce montage : un
+  retournement très précoce ou loin de la vague serait suspect, et rapporté comme tel.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1), (2), (3).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — le mode ; l'essai ; (1)–(3), les mesures.
+- [ ] **P3** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (2 531 s) :
-  - t = 15 : 0,3644 d en 7,77 d, l'écart 0,0348 d ;
-  - t = 20 : 0,3228 d en 2,97 d, 0,0466 d ;
-  - t = 25 : 0,1967 d en −1,53 d, 0,0246 d.
-
-  (1) manqué de 0,0009 d, sous le quantum ; (2) et (3) tenus. Mieux que la 3D sans correction aux trois instants. **ADR-292** : `Complete`
-  consciente est la 3D corrigée, le critère (1) levé par écrit.
