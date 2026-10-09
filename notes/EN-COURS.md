@@ -117,7 +117,7 @@ en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le fond doux ; E1 ; (1)–(2).
 - [x] **P3** — le prédicteur, la crête du témoin ; E2 ; (3)–(6).
-- [ ] **P3b** — **E3, ajouté après E2** (le coût manqué) : le même prédicteur à `dx` = 5 cm. Critères écrits avant : (7) la prévision de 3 s
+- [x] **P3b** — **E3, ajouté après E2** (le coût manqué) : le même prédicteur à `dx` = 5 cm. Critères écrits avant : (7) la prévision de 3 s
   sous **100 ms** ; (8) la convergence : pour chaque critère (et chaque variante rapportée), l'instant à **0,05 s** et le lieu à **0,1 m** de
   ceux de 2,5 cm ; la crête à 2,6 s à 5 % de celle de 2,5 cm. Jugé contre le prédicteur à 2,5 cm, non contre le témoin.
 - [ ] **P4** — preuve ; fermeture.
@@ -135,3 +135,4 @@ en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se
   (ADR-248 D2) : il faut d'autres témoins (P2 du registre). (3) La crête : la même place que le témoin (9,113 contre 9,106 m à 2,3 s ;
   9,838 contre 9,874 m à 2,6 s) ; une hauteur bien plus basse au dernier mètre (168 contre 228 mm à 2,6 s ; `outils/crete_film.py`). La
   pente douce à 1:12, ou la 3D trop haute (S713), restent à départager. L'essai n'affirme plus que (5).
+- **P3b fini** — E3 **tenu** : la prévision de 3 s à 5 cm en 68 ms ; le pire écart à 2,5 cm sur neuf critères 0,030 s et 0,062 m ; la crête à 2,6 s −2,2 %.

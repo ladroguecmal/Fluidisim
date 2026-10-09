@@ -2461,18 +2461,8 @@ fn the_all_3d_reference_with_the_shore_relay_beyond_the_jet_s730() {
 #[test]
 fn the_predictor_foresees_the_r43_breaking_s733() {
     use crate::selecteur::{prevoir, Critere};
-    let (dx, d, niveau, x_pied, cot, demi) = (0.025f64, 0.5f64, 0.5f64, 5.696f64, 12.0f64, 11.5f64);
-    let onde = OndeDepart { h: 0.15, d, x1: 3.4, g: 9.81, rayleigh: false };
-    let n = (2. * demi / dx).round() as usize;
-    let (mut z, mut h, mut q) = (vec![0f64; n], vec![0f64; n], vec![0f64; n]);
-    for i in 0..n {
-        let x = (i as f64 + 0.5) * dx;
-        let (xm, signe) = if x > demi { (2. * demi - x, -1.) } else { (x, 1.) };
-        z[i] = ((xm - x_pied).max(0.) / cot).min(0.46);
-        h[i] = niveau + onde.eta(xm) - z[i];
-        q[i] = if xm < x_pied { signe * h[i] * onde.u(xm) } else { 0. };
-    }
-    let porteur = crate::serre_1d::Serre1D::nouveau_fond(dx, 9.81, h, q, z, true).unwrap();
+    let (niveau, demi) = (0.5f64, 11.5f64);
+    let porteur = porteur_r43_s733(0.025);
     let criteres = [Critere::Kennedy(0.65), Critere::Hauteur(0.8), Critere::Froude(0.8)];
     let horloge = std::time::Instant::now();
     let (prev, crete) = prevoir(&porteur, niveau, demi, 3.0, &criteres, 0.1).unwrap();
@@ -2508,3 +2498,49 @@ fn the_predictor_foresees_the_r43_breaking_s733() {
         assert!((x_t + p.l_jet - x_air).abs() < 0.15, "critère 5 : le jet");
     }
 }
+
+/// S733 — le porteur de la prévision de R43 à la maille `dx` : SGN sur la plage de R43 périodique en miroir (le mur de gauche du témoin),
+/// l'onde de départ du témoin (`OndeDepart`, ADR-276 D1).
+fn porteur_r43_s733(dx: f64) -> crate::serre_1d::Serre1D {
+    let (d, niveau, x_pied, cot, demi) = (0.5f64, 0.5f64, 5.696f64, 12.0f64, 11.5f64);
+    let onde = OndeDepart { h: 0.15, d, x1: 3.4, g: 9.81, rayleigh: false };
+    let n = (2. * demi / dx).round() as usize;
+    let (mut z, mut h, mut q) = (vec![0f64; n], vec![0f64; n], vec![0f64; n]);
+    for i in 0..n {
+        let x = (i as f64 + 0.5) * dx;
+        let (xm, signe) = if x > demi { (2. * demi - x, -1.) } else { (x, 1.) };
+        z[i] = ((xm - x_pied).max(0.) / cot).min(0.46);
+        h[i] = niveau + onde.eta(xm) - z[i];
+        q[i] = if xm < x_pied { signe * h[i] * onde.u(xm) } else { 0. };
+    }
+    crate::serre_1d::Serre1D::nouveau_fond(dx, 9.81, h, q, z, true).unwrap()
+}
+
+/// **S733 — E3, le prédicteur à 5 cm** : (7) la prévision de 3 s sous 100 ms ; (8) pour chaque critère et chaque variante, l'instant à
+/// 0,05 s et le lieu à 0,1 m de ceux de 2,5 cm, la crête à 2,6 s à 5 %. Jugé contre le prédicteur à 2,5 cm.
+#[test]
+fn the_predictor_at_five_centimetres_s733() {
+    use crate::selecteur::{prevoir, Critere};
+    let criteres = [Critere::Kennedy(0.65), Critere::Hauteur(0.8), Critere::Froude(0.8), Critere::Kennedy(0.35), Critere::Kennedy(0.5),
+        Critere::Hauteur(0.6), Critere::Hauteur(1.0), Critere::Froude(0.5), Critere::Froude(0.6)];
+    let (fin, grossier) = (porteur_r43_s733(0.025), porteur_r43_s733(0.05));
+    let (pf, cf) = prevoir(&fin, 0.5, 11.5, 3.0, &criteres, 0.1).unwrap();
+    let (pg, cg) = prevoir(&grossier, 0.5, 11.5, 3.0, &criteres, 0.1).unwrap();
+    let horloge = std::time::Instant::now();
+    let _ = prevoir(&grossier, 0.5, 11.5, 3.0, &criteres[..3], 10.).unwrap();
+    let duree = horloge.elapsed().as_secs_f64();
+    let mut pire = (0f64, 0f64);
+    for ((c, f), g) in criteres.iter().zip(&pf).zip(&pg) {
+        let (f, g) = (f.expect("déclenché à 2,5 cm"), g.expect("déclenché à 5 cm"));
+        println!("S733 E3 (8) {c:?} : 2,5 cm {:.3} s, {:.3} m ; 5 cm {:.3} s, {:.3} m ; écart {:+.3} s, {:+.3} m", f.t, f.x, g.t, g.x, g.t - f.t, g.x - f.x);
+        pire = (pire.0.max((g.t - f.t).abs()), pire.1.max((g.x - f.x).abs()));
+    }
+    let a = |c: &[(f64, f64, f64)]| c.iter().min_by(|p, q| (p.0 - 2.6).abs().total_cmp(&(q.0 - 2.6).abs())).unwrap().2;
+    let (ef, eg) = (a(&cf), a(&cg));
+    println!("S733 E3 : la crête à 2,6 s, 2,5 cm {:.1} mm, 5 cm {:.1} mm ({:+.1} %) ; le pire écart {:.3} s, {:.3} m ; la prévision de 3 s à 5 cm en {:.1} ms",
+        ef * 1e3, eg * 1e3, 100. * (eg / ef - 1.), pire.0, pire.1, duree * 1e3);
+    assert!(duree < 0.1, "critère 7 : {duree} s");
+    assert!(pire.0 < 0.05 && pire.1 < 0.1, "critère 8 : {pire:?}");
+    assert!((eg / ef - 1.).abs() < 0.05, "critère 8 : la crête");
+}
+
