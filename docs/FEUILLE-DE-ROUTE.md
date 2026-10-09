@@ -535,6 +535,8 @@ la vague et son jet prévus à 0,1 m, l'instant du déferlement pas encore) ; le
 **S735–S737** : le diagnostic de S4 (le front, une lecture fausse ; la 3D remonte réellement trop haut) ; la cinquante et unième revue
 (ADR-286 : la durée bornée par les frontières, la seconde lecture, un sujet à la fois) ; la lecture par les particules et le juge robuste
 (4.14).
+**S738–S740** : la 3D trop haute — aucune régression (S645 redonné) ; la distance parcourue sur le fond plat ; la 3D ne garde pas une onde
+solitaire ; **la cause, le tassement des particules**, que la projection de densité corrige (la largeur à 92 %, à 2,5 cm) (4.1, 4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

@@ -31,3 +31,7 @@ de trancher.
 ## 3. La prochaine revue
 
 S716.
+
+*Note datée du 2026-10-09 (S740)* : la convergence du juge sur ses options numériques (D2) a pris tout son poids. Sans projection de densité,
+la 3D raidit l'onde solitaire par le tassement de ses particules ([preuve](../validation/TASSEMENT-PARTICULES-S740.md)) ; le juge de S647 en
+dépendait. Sa référence extérieure (les mesures de Synolakis) tranchera.

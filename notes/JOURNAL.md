@@ -2232,3 +2232,15 @@ ondes de départ (A : celle d'aujourd'hui ; B : avec le profil vertical de SGN).
 
 Ce n'est donc ni la maille ni l'onde de départ. C'est la cause commune de la 3D trop haute (S713, S733, S738). Le suspect suivant : la
 pression, plafonnée à 4 000 itérations. Maillons **0** (diagnostic). Suivant : **S740**, la pression du canal.
+
+## S740 — 2026-10-09 — Pourquoi la 3D raidit l'onde solitaire : le tassement des particules
+
+**Entrée.** ONDE-SOLITAIRE-3D-S739. **Fait** ([preuve](../docs/validation/TASSEMENT-PARTICULES-S740.md)) : deux réglages du cœur, à
+leurs défauts au bit (le plafond de la pression, la séparation) ; le canal réglé, qui relève la pression et écrit les profils.
+**Mesuré** :
+- la pression converge (138 itérations, jamais au plafond) ; ni elle, ni la séparation, ni le pas n'en sont la cause ;
+- le profil montre l'onde qui se scinde ;
+- **la projection de densité garde l'onde** : à 2,5 cm, la largeur à 92 %, le creux à 9 % de `H`.
+
+**La cause : le tassement des particules sous la crête.** Le juge du déferlement de S647 à S730 en dépendait ; la référence extérieure
+(Synolakis) tranchera. Profils envoyés. Maillons **1** (4.1). Suivant : **S741**, la revue.

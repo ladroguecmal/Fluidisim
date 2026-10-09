@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S740 — **en cours**. En autonomie ; session longue. ONDE-SOLITAIRE-3D-S739 : la 3D raidit l'onde solitaire sur fond plat. **La
+Session : S740 — **terminée**. En autonomie ; session longue. ONDE-SOLITAIRE-3D-S739 : la 3D raidit l'onde solitaire sur fond plat. **La
 question** : quelle partie du pas en est la cause ? Les suspects, un à la fois (ADR-276 D2), sur le canal à 5 cm, qui montre le défaut en
 6 min (S739). **Aucun remède adopté dans cette session** : un suspect qui guérit le canal est désigné, puis éprouvé à 2,5 cm.
 
@@ -97,10 +97,10 @@ avec les nombres, et les suspects suivants sont nommés.
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — les réglages, le relevé de la pression ; E1, E2.
-- [ ] **P3** — E3, E4 ; **ajoutés après E4** (aucun n'a guéri ; le profil montre l'onde qui se scinde, un long plateau devant, un pic
+- [x] **P3** — E3, E4 ; **ajoutés après E4** (aucun n'a guéri ; le profil montre l'onde qui se scinde, un long plateau devant, un pic
   serré derrière, comme un tassement des particules sous la crête) : **E5, la projection de densité** (S709, complète) et **E6, faible**
   (κ = 0,05, S710). Les mêmes critères. Puis l'essai à 2,5 cm du suspect désigné.
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — E1 : la pression converge en **138 itérations au plus**, jamais au plafond (0 sur 523 pas), résidu 1,0·10⁻⁶ ; la largeur
@@ -115,3 +115,4 @@ avec les nombres, et les suspects suivants sont nommés.
   largeur à 39 %, le creux 34 mm, la crête 207 mm.
 - **E7, ajouté après E6** : E5 à 2,5 cm sur le canal, aux mêmes critères, avec les profils. Le conflit à garder en tête : S709 a vu la
   projection complète empêcher la vague de plonger.
+- **E7** (la projection de densité, 2,5 cm) : la largeur à **92 %**, le creux **9,0 mm**, la crête finale 98,8 mm ; 266 itérations au plus ; 544 s. **Guérit.** Les profils envoyés à l'utilisateur.

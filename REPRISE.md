@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 16:53 +02:00
+JETON            : libre
+Battement        : 2026-10-09 17:35 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S740 — pourquoi la 3D ne garde pas l'onde solitaire ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S739 — L'onde solitaire se déforme dans la 3D ([journal](notes/JOURNAL.md)). Avant : S738 (La 3D trop haute sur S4 : la distance parcourue)
-Session suivante : S740 — la pression du canal : les itérations et le résidu du gradient conjugué à chaque pas ; le plafond levé ; puis les autres suspects
-Maillons        : 0
-Registres       : dernier lot S737 (ADR-213 D3) ; le prochain au plus tard en S740
+Session en cours : aucune
+Dernière session : S740 — Pourquoi la 3D raidit l'onde solitaire : le tassement des particules ([journal](notes/JOURNAL.md)). Avant : S739 (L'onde solitaire se déforme dans la 3D)
+Session suivante : S741 — la cinquante-deuxième revue de méthode (S736–S740) ; puis la 3D avec la projection de densité contre les mesures de Synolakis et sur la vague de R43
+Maillons        : 1
+Registres       : dernier lot S740 (ADR-213 D3) ; le prochain au plus tard en S743
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
