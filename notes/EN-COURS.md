@@ -62,48 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S727 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4a : un corps dans la
-boîte**. La boîte est fixe ; une sphère la traverse. Son déplacement avec le corps (B4b) vient ensuite.
+Session : S728 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4b : la boîte qui suit
+le corps**.
 
-**L'essai.** Une sphère de rayon 8 cm, son centre à la surface (z = 0,4 m, à demi immergée), tirée à 0,3 m/s selon x pendant 1,5 s :
-- **le témoin** : un APIC entier de 2 m × 2 m (80 × 80 × 24, ≈ 820 000 particules), aux murs fermés ;
-- **la boîte** : un APIC de 1 m × 1 m au milieu, dans un Saint-Venant de 2 m × 2 m troué au même endroit, aux mêmes murs.
+**Ce que la session fait.**
+- **`Apic3::shift_x`** (`apic3d_deplacement.rs`) : chaque particule recule d'une maille. Celles qui sortent derrière meurent (leur volume
+  et leur quantité de mouvement rendus par rangée). La colonne de devant naît d'un volume donné par rangée, chaque sous-colonne emplie à la
+  même hauteur (S707). Le corps recule d'une maille dans le repère de la boîte.
+- **`SaintVenant2D::deplacer_trou_x`** : la colonne de derrière redevient active avec l'état donné ; celle de devant est gelée.
+- **`RelaisBoite::suivre_x`** :
+  - la colonne de derrière rend à Saint-Venant sa surface (φ, ADR-280 D1) et sa quantité de mouvement ;
+  - la colonne de devant naît de l'état de Saint-Venant ;
+  - les écarts (le compte contre la surface derrière, le donné contre le posé devant) vont aux dettes des faces voisines : la masse est
+    exacte.
 
-Les deux ont les mêmes murs : les vagues qui y rebondissent sont les mêmes. Seul le dehors de la boîte change, la 3D contre Saint-Venant.
-
-**Critères, écrits avant** (ADR-283 D1 : les vagues d'un corps sont courtes, et Saint-Venant les porte mal ; on juge ce qui compte en jeu,
-la 3D près du corps) :
-1. la force sur la sphère : son écart moyen au témoin, sur 0,2 à 1,5 s, sous **10 %** de sa moyenne ;
-2. la surface dans la boîte à 1,0 s : l'écart quadratique moyen au témoin sous **20 %** de la plus haute vague du témoin ;
+**L'essai et ses critères, écrits avant.** La sphère de B4a (rayon 8 cm, à demi immergée), tirée à 0,3 m/s pendant **3 s** (0,9 m, plus que
+la boîte). La boîte de 1 m × 1 m la suit : elle avance d'une colonne chaque fois que le corps dépasse son milieu d'une maille. Saint-Venant
+fait 3 m × 2 m. Le témoin est un APIC entier de 3 m × 2 m (≈ 1,2 million de particules), aux mêmes murs.
+1. La force sur la sphère : l'écart moyen au témoin, de 0,2 à 3,0 s, sous **10 %** ;
+2. la surface autour du corps à 2,5 s (la boîte où elle est alors) : l'écart quadratique moyen sous **20 %** de la plus haute vague du témoin ;
 3. la masse à 10⁻¹².
 
 **Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-283)
 
-- **témoin** : la même 3D, entière (ADR-273 D1). Les murs sont les mêmes ; la boîte et ses particules aussi, au même réseau.
-- **instrument** :
-  - la force sur le corps (`body_force`), à chaque pas ;
-  - la surface par colonne (φ), dans la boîte ;
-  - la masse.
-  Tous peuvent échouer (ADR-281 D2). Ce que rendrait chaque hypothèse :
-  - si le raccord renvoie peu des vagues courtes, la force et la surface sont près du témoin ;
-  - s'il les réfléchit, la surface dans la boîte s'en écarte, la force moins.
+- **témoin** : le même corps dans la 3D entière (ADR-273 D1) ; B4a pour le raccord fixe (2,0 % et 1,7 %).
+- **instrument** : la force à chaque pas ; la surface par colonne (φ) dans la fenêtre de la boîte ; la masse à chaque pas. Ce que rendrait
+  chaque hypothèse :
+  - le déplacement est sans faute : comme B4a ;
+  - une naissance ou une mort brusque : un saut de force à chaque avancée, et des rides derrière la boîte.
 - **calcul** :
-  - le témoin : ≈ 820 000 particules, ≈ 17 min pour 1,5 s ;
-  - la boîte : ≈ 205 000 particules, ≈ 4 min.
+  - le corps avance de 0,9 m, soit 36 colonnes, une avancée tous les ≈ 83 ms ;
+  - le témoin : ≈ 1,2 million de particules, ≈ 25 min ; la boîte : ≈ 6 min.
 - **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-283 D1 : l'état de départ de Saint-Venant est le niveau que lit la boîte ; le régime est celui du jeu, et la limite est nommée ;
-  - ADR-276 D1 : la même construction pour les deux, la sphère et le réseau ;
+  - ADR-283 D1, D2 : l'état lu ; les constantes de Saint-Venant dans ses volumes ;
+  - ADR-280 D1 : la surface à la mort ;
   - ADR-282 : la fermeture par l'outil.
 - **pièges** :
-  - le repère : la boîte commence à (0,5 ; 0,5) m dans le témoin ;
-  - les particules hors de la sphère au départ ;
-  - le même pas pour les deux (le plus petit).
+  - la fenêtre de comparaison suit la boîte (son origine change à chaque avancée) ;
+  - la dette des faces de gauche reçoit l'écart de la mort, celle de droite l'écart de la naissance ;
+  - le trou ne doit pas approcher le bord de Saint-Venant (trois mailles).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — l'essai ; (1)–(3).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — le déplacement ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — **tenu** : la force à 2,0 %, la surface à 1,7 %, la masse 3,9·10⁻¹⁵. B4a acquis.
