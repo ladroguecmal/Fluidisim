@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 16:25 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 16:26 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S739 — l'onde solitaire dans la 3D sur un canal plat ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S738 — La 3D trop haute sur S4 : la distance parcourue ([journal](notes/JOURNAL.md)). Avant : S737 (La lecture par les particules et le juge robuste)
 Session suivante : S739 — l'onde solitaire dans la 3D sur un long canal plat (crête, largeur, volume, vitesse, traîne selon la distance), puis l'onde de départ exacte
 Maillons        : 0

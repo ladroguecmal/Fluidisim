@@ -62,51 +62,53 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S738 — **terminée**. En autonomie ; session longue. LECTURE-PARTICULES-S737. **La question** : pourquoi la 3D remonte-t-elle
-S4 (`H/d` = 0,2, 1:3, `d` = 0,5 m) à 0,52 m au moins, quand S645, le même cas à `d` = 0,35 m, remontait à 98 % de la loi (0,2307 m contre
-0,2295) ? **Une cause à la fois, du moins cher au plus cher (ADR-276 D2) ; aucun remède dans cette session.**
+Session : S739 — **en cours**. En autonomie ; session longue. DISTANCE-PARCOURUE-S738. **La question** : comment l'onde solitaire posée
+aujourd'hui se transforme-t-elle dans la 3D sur un fond plat, et une onde de départ dotée de son profil vertical (celui de SGN, S698) se
+garde-t-elle mieux ?
 
-**Les essais, et leurs critères écrits avant.**
-- **E1 — S645 relancé tel quel** (`ballistic_air_lets_the_swash_run_up_fine_s645`, ≈ 5 min). Le code d'aujourd'hui redonne-t-il 0,2307 m
-  (la particule la plus haute) à 2 mm près ? Si non : **une régression**, la bissection de l'historique est la suite, et rien d'autre.
-- **E2 à E5 — S4 rapproché de S645**, un écart à la fois. Chaque variante garde les précédentes :
-  - **E2, le plafond** : le domaine monte à 1,0 m au-dessus du niveau (au lieu de 0,6 m) ;
-  - **E3, l'approche** : l'onde à la distance canonique du pied, comme S645 (sans les 3 m de plus) ;
-  - **E4, la vitesse sur la grille** : posée sur les particules seulement, comme S645 ;
-  - **E5, l'échelle** : `d` = 0,35 m, `H` = 0,07 m, la même géométrie que S645 sauf le mur du large.
+**Ce que la session fait.**
+- **Un canal plat** (`canal_s739`) : `d` = 0,5 m, `H` = 0,1 m (`H/d` = 0,2, celle de S4), 24 m, deux rangées, des murs. L'onde est centrée à
+  4 m ; 5 s.
+- **Deux ondes de départ**, une seule différence (ADR-276 D2) :
+  - **A**, celle d'aujourd'hui : `η` de Boussinesq (`OndeSolitaire`), `u = c·η/(d + η)` uniforme sur la verticale, `w = 0` ;
+  - **B**, l'onde de Rayleigh (`OndeDepart { rayleigh: true }`, S719, la solitaire de SGN) avec le profil vertical de SGN (S698) :
+    `u(z) = ū + (h²/6 − z²/2)·ū_xx`, `w(z) = −z·ū_x`.
+- **Les mesures, tous les 0,25 s, par la surface** (ADR-280 D1), affichées au fil du calcul (ADR-281 D1) :
+  - la crête (la hauteur, la place) ;
+  - la largeur à mi-hauteur ;
+  - le creux derrière la crête (une traîne) ;
+  - et, comme seconde lecture, la crête par les particules (ADR-286 D2).
+- 5 cm d'abord (≈ 77 000 particules, quelques minutes), puis 2,5 cm pour l'onde retenue (≈ 307 000, ≈ 45 min ; ADR-274 D1).
 
-  Chacune rapporte trois lectures de la remontée :
-  - la particule la plus haute au-delà du pied (l'instrument de S645) ;
-  - le front par les particules (S737), au seuil de 5 mm ;
-  - la loi.
+**Les bornes** (ADR-286 D1) : la célérité vaut 2,43 m/s ; à 5 s, la crête est à 16,1 m et le front (5 %) à 18,9 m. Le mur est à 24 m :
+5,1 m de marge.
 
-  **L'écart désigné** est la première variante qui ramène la remontée (la particule la plus haute) à moins de 15 % de la loi.
-- **Les bornes** (ADR-286 D1) :
-  - avec le plafond à 1,0 m au-dessus du niveau, le fond le rejoint à 1,5/3 = 0,5 m après le rivage… *au plus 1,0 m de remontée* ;
-  - la plage fait 4 m au-delà du rivage, soit 1,33 m de hauteur : le plafond est la frontière, et une remontée qui l'atteint est
-    rapportée comme plafonnée ;
-  - la durée, 6 s : la remontée culmine vers 4,5 s.
+**Les critères, écrits avant.**
+- **E1 — A**, rapporté : la crête, la largeur et le creux selon la distance. S738 attend une crête qui oscille de ±10 %.
+- **E2 — B** est retenue si, sur les 12 m :
+  1. la crête reste à **±3 %** de sa hauteur de départ ;
+  2. la largeur à mi-hauteur à **±5 %** ;
+  3. le creux de la traîne sous **2 % de `H`** ;
+  4. B fait mieux que A sur les trois.
+- **E3 — l'onde retenue à 2,5 cm** : les mêmes critères.
 
-**Contrôles du plan** (ADR-226, ADR-276, ADR-285, ADR-286)
+S'il n'y en a pas, la question reste ouverte, avec les nombres. L'application à S4 (l'approche de 3 m) est pour S740.
 
-- **témoin** : S645, mesuré aujourd'hui ; la loi de Synolakis (le déferlement au reflux n'y change rien : la remontée précède le reflux).
-- **instrument** : trois lectures de la même grandeur (ADR-286 D2), rapportées au fil du calcul.
-- **calcul** : E1, 5 min ; E2 à E5, ≈ 30, 25, 25 et 10 min, en série, par chemins absolus.
-- **ADR** :
-  - ADR-276 D2 : une cause à la fois, le plan écrit ce que chaque variante change ;
-  - ADR-286 D1 : les frontières, chiffrées.
+**Contrôles du plan** (ADR-226, ADR-273, ADR-276, ADR-280, ADR-281, ADR-286)
+
+- **témoin** : l'onde de SGN (stable, S694) et sa forme exacte ; A contre B, partis du même canal.
+- **instrument** : la surface par φ, et la crête par les particules (une seconde lecture) ; le creux mesuré sur 3 m derrière la crête.
+- **calcul** : E1 et E2 à 5 cm, quelques minutes chacun ; E3 ≈ 45 min ; en série, par chemins absolus.
+- **ADR** : ADR-276 D1 (une seule fonction d'onde : `OndeDepart`) ; ADR-286 D1, D2.
 - **pièges** :
-  - S645 avait un mur au bout de la plage, à 0,26 m au-dessus du niveau ; S4 n'en a pas. E5 le dit ;
-  - la variante qui « ramène » peut cacher deux causes : on s'arrête à la première, et le rapport le dit.
+  - la largeur à mi-hauteur d'une onde qui oscille : lue par interpolation sur la surface lissée (10 cm) ;
+  - à 5 cm, `H` fait deux mailles : 5 cm explore, 2,5 cm juge.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — E1.
-- [x] **P3** — les variantes de la scène ; E2 à E5 (on s'arrête à la première qui ramène).
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — le canal, les deux ondes, les mesures ; E1, E2 à 5 cm.
+- [ ] **P3** — E3, l'onde retenue à 2,5 cm.
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — E1 : **S645 redonne exactement 0,2307 m** (la particule la plus haute), 0,2250 m (étiquettes), la crête 0,0730 m ; 380 s. **Aucune régression** : l'écart est dans le montage. Les variantes E2 à E5 écrites (`s4_vers_s645_s738`), l'instrument de S645 ajouté au témoin.
-- **E2** (le plafond à 1,0 m au-dessus du niveau, l'escalier) : la particule la plus haute **0,4808 m (+46,6 %)** ; le front par les particules 0,4335 m à 4,1 s (+32,2 %) ; par φ 0,4835 m (le même figement qu'en S734, qui n'était donc pas dû au plafond sur l'escalier) ; le juge robuste : aucun retournement (celui de S647 en voit un à 5,913 s, 10,34 m) ; 2 462 s. **Ne ramène pas** : E3.
-- **E3** (la distance canonique) : la particule la plus haute **0,3046 m (−7,1 %)** ; le front par les particules 0,2751 m (−16 %) ; par φ 0,3085 m ; 1 949 s. **Ramène** : l'écart désigné est la distance parcourue sur le fond plat. E4 et E5 non lancés (le plan s'arrête à la première).
