@@ -131,6 +131,7 @@ pub mod delta3d;
 pub mod apic3d;
 pub mod relais_rivage;
 pub mod relais_boite;
+pub mod selecteur;
 /// S448 — le raccord d'une bande `Apic3` (eau totale) dans une mer `Volume3` (δ relatif), C7d-3c (ADR-214).
 pub mod band_in_sea;
 

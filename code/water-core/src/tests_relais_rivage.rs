@@ -2450,3 +2450,61 @@ fn the_all_3d_reference_with_the_shore_relay_beyond_the_jet_s730() {
     assert!(masse < 1e-12, "la masse {masse}");
     assert!(j < 0.01, "le mur {j}");
 }
+
+/// **S733 — E2, la prévision de R43** (SELECTEUR-DOMAINES-S732, P1) : SGN sur fond doux, depuis l'état de départ du témoin (l'onde de
+/// Boussinesq de S730, `x₁` = 3,4 m, la même fonction `OndeDepart`, ADR-276 D1), la plage de R43 périodique en miroir (le miroir rend aussi le
+/// mur de gauche du témoin). Contre le témoin de S730 E2 (le retournement 2,620 s et 9,938 m ; l'air 2,804 s et 10,375 m) :
+/// (3) la crête rapportée ; (4) un critère dont le lieu tombe à 0,3 m du retournement et l'avance entre 0 et 0,3 s ; (5) son jet,
+/// `x_b(témoin) + L_jet`, à 0,15 m de l'air ; (6) la prévision de 3 s sous 100 ms. **Mesuré** : (4) **manqué** — Kennedy (0,65) et Froude
+/// (0,8) déclenchent 0,5 et 0,85 m trop loin, le rapport de hauteur (0,8) 0,6 m trop tôt ; (5) **tenu pour les trois** (10,24 à 10,28 m) ;
+/// (6) **manqué**, 277 ms. N'affirme que ce qui a tenu (ADR-244 D1) : le jet de chaque critère.
+#[test]
+fn the_predictor_foresees_the_r43_breaking_s733() {
+    use crate::selecteur::{prevoir, Critere};
+    let (dx, d, niveau, x_pied, cot, demi) = (0.025f64, 0.5f64, 0.5f64, 5.696f64, 12.0f64, 11.5f64);
+    let onde = OndeDepart { h: 0.15, d, x1: 3.4, g: 9.81, rayleigh: false };
+    let n = (2. * demi / dx).round() as usize;
+    let (mut z, mut h, mut q) = (vec![0f64; n], vec![0f64; n], vec![0f64; n]);
+    for i in 0..n {
+        let x = (i as f64 + 0.5) * dx;
+        let (xm, signe) = if x > demi { (2. * demi - x, -1.) } else { (x, 1.) };
+        z[i] = ((xm - x_pied).max(0.) / cot).min(0.46);
+        h[i] = niveau + onde.eta(xm) - z[i];
+        q[i] = if xm < x_pied { signe * h[i] * onde.u(xm) } else { 0. };
+    }
+    let porteur = crate::serre_1d::Serre1D::nouveau_fond(dx, 9.81, h, q, z, true).unwrap();
+    let criteres = [Critere::Kennedy(0.65), Critere::Hauteur(0.8), Critere::Froude(0.8)];
+    let horloge = std::time::Instant::now();
+    let (prev, crete) = prevoir(&porteur, niveau, demi, 3.0, &criteres, 0.1).unwrap();
+    let duree = horloge.elapsed().as_secs_f64();
+    let (t_t, x_t, x_air) = (2.620287f64, 9.9375f64, 10.375f64);
+    for (t, x, e) in &crete {
+        println!("S733 E2 (3) la crête de SGN : t = {t:.2} s, x = {x:.3} m, η = {:.1} mm", e * 1e3);
+    }
+    let mut retenu = None;
+    for (c, p) in criteres.iter().zip(&prev) {
+        match p {
+            Some(p) => {
+                let (avance, ecart) = (t_t - p.t, x_t - p.x);
+                let bon = ecart.abs() <= 0.3 && (0. ..=0.3).contains(&avance);
+                println!("S733 E2 (4) {c:?} : t = {:.3} s, x = {:.3} m (avance {avance:+.3} s, {ecart:+.3} m) ; h_b {:.3} m, H_b {:.3} m, L_jet {:.3} m ; le jet {:.3} m (l'air du témoin {x_air}) ; {}",
+                    p.t, p.x, p.h_b, p.hauteur, p.l_jet, x_t + p.l_jet, if bon { "retenu possible" } else { "hors du critère" });
+                if bon && retenu.is_none() {
+                    retenu = Some((*c, *p));
+                }
+            }
+            None => println!("S733 E2 (4) {c:?} : aucun déclenchement en 3 s"),
+        }
+    }
+    // Rapporté seulement : la sensibilité aux seuils (non un critère, ADR-244 D1).
+    let variantes = [Critere::Kennedy(0.35), Critere::Kennedy(0.5), Critere::Hauteur(0.6), Critere::Hauteur(1.0), Critere::Froude(0.5), Critere::Froude(0.6)];
+    let (pv, _) = prevoir(&porteur, niveau, demi, 3.0, &variantes, 10.).unwrap();
+    for (c, p) in variantes.iter().zip(&pv) {
+        println!("S733 E2 (rapporté) {c:?} : {:?}", p.map(|p| (format!("{:.3} s", p.t), format!("{:.3} m", p.x))));
+    }
+    println!("S733 E2 (6) : la prévision de 3 s en {:.1} ms ; retenu : {retenu:?}", duree * 1e3);
+    for p in prev.iter() {
+        let p = p.expect("chaque critère se déclenche");
+        assert!((x_t + p.l_jet - x_air).abs() < 0.15, "critère 5 : le jet");
+    }
+}

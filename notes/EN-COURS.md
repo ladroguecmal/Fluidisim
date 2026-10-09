@@ -116,7 +116,10 @@ en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le fond doux ; E1 ; (1)–(2).
-- [ ] **P3** — le prédicteur, la crête du témoin ; E2 ; (3)–(6).
+- [x] **P3** — le prédicteur, la crête du témoin ; E2 ; (3)–(6).
+- [ ] **P3b** — **E3, ajouté après E2** (le coût manqué) : le même prédicteur à `dx` = 5 cm. Critères écrits avant : (7) la prévision de 3 s
+  sous **100 ms** ; (8) la convergence : pour chaque critère (et chaque variante rapportée), l'instant à **0,05 s** et le lieu à **0,1 m** de
+  ceux de 2,5 cm ; la crête à 2,6 s à 5 % de celle de 2,5 cm. Jugé contre le prédicteur à 2,5 cm, non contre le témoin.
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
@@ -125,3 +128,10 @@ en avance depuis l'état de départ, prévoit-il où et quand la vague de R43 se
   1,2514 (−0,5 %) ; SGN 1,1338 (une bosse de σ = 2 m se disperse ; rapporté). **Écart au plan** : l'onde longue sinusoïdale (`kd` ≈ 0,1) aurait
   31 m, plus que la pente ; à sa place, une bosse gaussienne de σ = 2 m (σ = 0,5 m d'abord : l'écrêtage du limiteur l'usait de 20 % en
   800 mailles), et le témoin de l'usure sur fond plat. S694 inchangé (sans fond, au bit).
+- **P3 fini** — E2 : (4) **manqué** pour les trois seuils publiés : Kennedy 0,65 déclenche à 2,729 s, 10,463 m (0,52 m trop loin) ; le
+  rapport de hauteur 0,8 à 2,339 s, 9,312 m (0,63 m trop tôt) ; Froude 0,8 à 2,970 s, 10,788 m. (5) **tenu pour les trois** : le jet à
+  10,24–10,28 m, contre 10,375 m pour l'air du témoin. (6) **manqué** : 277 ms. Rapportées, hors critère : Kennedy 0,35 (2,404 s ;
+  9,812 m) et le rapport 1,0 (2,523 s ; 9,738 m) tomberaient dans la fenêtre, mais un seuil choisi sur la scène qui le juge ne juge rien
+  (ADR-248 D2) : il faut d'autres témoins (P2 du registre). (3) La crête : la même place que le témoin (9,113 contre 9,106 m à 2,3 s ;
+  9,838 contre 9,874 m à 2,6 s) ; une hauteur bien plus basse au dernier mètre (168 contre 228 mm à 2,6 s ; `outils/crete_film.py`). La
+  pente douce à 1:12, ou la 3D trop haute (S713), restent à départager. L'essai n'affirme plus que (5).
