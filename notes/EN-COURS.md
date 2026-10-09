@@ -62,53 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S758 — **terminée**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
-grandit de 2,8 % par période ; S752 avait mesuré la projection qui ajoute de l'énergie potentielle (+2 à +3 J en 4 s). **La question** : une
-projection qui rend à chaque particule l'énergie de son déplacement vertical arrête-t-elle l'injection, sans perdre ce que la 3D corrigée
-tient ?
+Session : S759 — **en cours**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
+grandit de 2,8 % par période. S758 a réfuté la correction particule par particule. **La question** : d'où vient l'énergie gagnée, et quelle
+correction globale l'arrête sans perdre ce que la 3D corrigée tient ?
 
-**L'hypothèse nommée** (ADR-290 D1) : la projection élève des particules de Δz sans rien leur prendre. **La règle** (`set_density_energy_neutral`) :
-chaque particule déplacée garde son énergie, `|v|² ← max(|v|² − 2g·Δz, 0)`, sa vitesse mise à l'échelle dans sa direction. C'est la règle
-d'une bille qui monte ou descend dans la pesanteur.
+**Ce qui manque avant de corriger** : le bilan d'énergie du pas lui-même. Sans projection, le même ballottement s'amortit de 35 % par
+période : le pas perd donc de l'énergie (sans doute l'eau qui se tasse et descend). Si la projection rend surtout cette perte, lui retirer
+tout son gain laisserait l'amortissement du pas : la correction serait fausse.
 
-**Signature prédite** :
-- le bilan propre de la projection (S752) : l'énergie potentielle ajoutée compensée par l'énergie cinétique retirée ;
-- le ballottement : l'amortissement près de zéro (ni négatif) ;
-- la période et l'onde solitaire inchangées.
+**Les deux hypothèses nommées** (ADR-290 D1), départagées par P2 :
+- **H1** : le pas conserve presque l'énergie ; le gain vient de la projection. Le remède : retirer à l'énergie cinétique, uniformément,
+  tout le gain de la projection.
+- **H2** : le pas perd de l'énergie (le tassement) ; la projection en rend plus qu'il n'en a perdu. Le remède : la projection ne rend que
+  ce que le pas a perdu ; l'excédent est retiré à l'énergie cinétique, uniformément.
+
+**L'instrument** (ADR-286 D2, une seconde lecture indépendante de φ) : l'énergie des particules, `Σ ½mv² + mgz`, à chaque pas, avant le pas,
+avant la projection, après. Le bilan propre de la projection (S752) donne l'écart entre les deux dernières.
 
 **Les critères, écrits avant** (ADR-290 D3, le repos d'abord ; ADR-293 D3, la bande de quantum) :
 1. **le repos** sur l'escalier (1 cm/s ; 3 mm) ;
-2. **le ballottement** : la période à 1 % ; l'amortissement entre **−0,5 % et +1 %** par période (la 3D sans projection, dans la cuve de
-   S413 : 0,08 à 0,3 %) ;
+2. **le ballottement** : la période à 1 % ; l'amortissement entre **−0,5 % et +1 %** par période ;
 3. **l'onde solitaire** sur le canal à 2,5 cm : la largeur 80 %, le creux 10 mm, la célérité à 1 % (ADR-293 D2).
 
 Synolakis (45 min) vient ensuite, si les trois tiennent.
 
 **Contrôles du plan** (ADR-276, ADR-287, ADR-290, ADR-293)
 
-- **témoin** :
-  - la 3D corrigée sans la règle (S744, S752, S757) ;
-  - la dispersion exacte ;
-  - l'onde exacte et sa célérité.
-- **instrument** : le bilan propre (S752) ; ceux de S743, S757, S740.
-- **calcul** : le repos 2 min, le ballottement 5 min, le canal 10 min.
-- **ADR** : ADR-276 D2 (une différence) ; ADR-290 D1 ; ADR-293 D2, D3.
+- **témoin** : la 3D corrigée sans correction (S757) ; la 3D sans projection (S757) ; la dispersion exacte.
+- **instrument** : l'énergie des particules (nouvelle : sa seconde lecture est φ, S757) ; le bilan propre (S752).
+- **calcul** : le bilan du ballottement 2 × 5 min ; le repos 2 min ; le ballottement 5 min ; le canal 10 min.
+- **ADR** : ADR-276 D2 (une différence) ; ADR-286 D2 ; ADR-290 D1 ; ADR-293 D2, D3.
 - **pièges** :
-  - au repos, les particules n'ont pas de vitesse : la règle ne peut rien retirer, l'énergie d'un déplacement vers le haut y reste ;
-  - une particule qui descend gagne de la vitesse : la règle doit le permettre, sans quoi l'énergie fuit.
+  - la correction met à l'échelle les vitesses **et** la matrice affine (APIC) : sinon le transfert vers la grille rend l'énergie ;
+  - au repos, l'énergie cinétique est nulle : la correction ne peut rien retirer et ne doit rien diviser par zéro ;
+  - l'énergie potentielle de l'eau prise à g = 9,81, la même que le bilan propre ;
+  - les gouttes balistiques restent hors de la correction, comme hors de la projection.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la règle ; (1), (2), (3).
-- [x] **P3** — preuve ; le lot ; fermeture.
+- [ ] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
+- [ ] **P3** — la correction choisie par P2 ; (1), (2), (3).
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (1 113 s) — **tous les critères tombent** :
-  - le repos : 0,11–0,16 m/s, 8 mm ;
-  - le ballottement : −36,7 %, 68 % d'amortissement ;
-  - le bilan : +5,9 J cinétique ;
-  - le canal : 59 %, 10,9 mm, −4,3 %.
-
-  **L'hypothèse est réfutée** : les déplacements de la projection ne sont pas des mouvements dans la pesanteur. La suite : une correction
-  globale de l'énergie.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-10 01:04 +02:00
+JETON            : occupé
+Battement        : 2026-10-10 01:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S759 — le bilan d'énergie du ballottement, puis une correction de l'énergie de la projection ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S758 — Une projection neutre en énergie, particule par particule : réfutée ([journal](notes/JOURNAL.md)). Avant : S757 (Le ballottement de la 3D corrigée)
 Session suivante : S759 — une correction globale de l'énergie de la projection (l'énergie potentielle ajoutée retirée uniformément à l'énergie cinétique), jugée sur le repos, le ballottement, l'onde solitaire
 Maillons        : 0
