@@ -47,3 +47,7 @@ lui que l'on aura le meilleur compromis entre réalisme et performance »*). ADR
 réalisme, le coût, la solidité.
 
 *Note datée du 2026-10-09 (S732)* : le sélecteur est conçu dans [SELECTEUR-DOMAINES-S732](../registres/SELECTEUR-DOMAINES-S732.md).
+
+*Note datée du 2026-10-10 (S755)* : avec la 3D corrigée (ADR-292), la vague de R43 déferle à 3,09 s et 11,09 m, le jet vers 11,4 m. La
+règle de D2 placerait le raccord du rivage vers 12,2 m : celui de S730 (12,0 m) est trop près pour elle
+([preuve](../validation/TEMOIN-R43-CORRIGE-S755.md)).

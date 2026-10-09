@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S755 — **en cours**. En autonomie ; session longue. ADR-289 D3.3, ADR-292 : **refaire le témoin tout-3D de R43 avec la 3D
+Session : S755 — **terminée**. En autonomie ; session longue. ADR-289 D3.3, ADR-292 : **refaire le témoin tout-3D de R43 avec la 3D
 corrigée.** C'est le montage de S730 E2 (`d` = 0,5 m, `H/d` = 0,3, 1:12, le raccord du rivage à 12,0 m) qui jugeait les raccords et le
 sélecteur. **La question** : avec une 3D qui garde l'onde, où et quand la vague de R43 plonge-t-elle, et de combien les mesures changent-elles ?
 
@@ -98,7 +98,13 @@ que l'ancienne 3D (Kennedy 0,65 : 2,73 s ; 10,46 m). La concordance avec SGN est
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le mode ; l'essai ; (1)–(3), les mesures.
-- [ ] **P3** — preuve ; le lot ; fermeture.
+- [x] **P2** — le mode ; l'essai ; (1)–(3), les mesures.
+- [x] **P3** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (1 235 s) :
+  - le retournement à 3,092 s et 11,088 m ; l'air à 3,257 s et 11,425 m ; la remontée 0,3005 m ;
+  - le mur 0 ; la masse 1,2·10⁻¹⁶ ;
+  - critères tenus.
+
+  La vague déferle 0,47 s plus tard, 1,15 m plus près du rivage. Le raccord à 12,0 m devient trop près (la règle d'ADR-284 : ≈ 12,2 m).

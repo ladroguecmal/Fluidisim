@@ -546,6 +546,8 @@ l'onde solitaire moins bien gardée) ; la cinquante-troisième revue (ADR-288 : 
 surface vers sa densité attendue — aucune des six variantes ne tient à la fois le repos, l'onde et la remontée (4.1).
 **S750–S752** : deux remèdes au freinage de la lame (R1, le déplacement avec la vitesse de la grille, tient presque tout) ; la
 cinquante-quatrième revue (ADR-290 : le bilan propre d'un opérateur) ; R1′ réfutée ; **ADR-291 : la 3D corrigée, version 1** (4.1).
+**S753–S755** : contre Synolakis, R1 trop lente ; **ADR-292 : la 3D corrigée = `Complete` consciente du fond**, mieux que sans correction
+aux trois instants ; le témoin de R43 refait (le déferlement 0,47 s plus tard, 1,15 m plus près du rivage) (4.1, 4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

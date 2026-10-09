@@ -2394,3 +2394,13 @@ sans R1, sur la plage de Synolakis. **Mesuré** :
 Le critère (1) est manqué de 0,0009 d, sous le quantum. **Décision** ([ADR-292](../docs/adr/ADR-292-la-3d-corrigee-complete-jugee-par-le-laboratoire.md)) :
 `Complete` consciente est la 3D corrigée ; R1 écartée. Maillons **1** (4.1). Suivant : **S755**, refaire R43 et S1 avec la 3D corrigée ;
 le lot.
+
+## S755 — 2026-10-10 — Le témoin de R43 refait avec la 3D corrigée
+
+**Entrée.** ADR-289 D3.3, ADR-292. **Fait** ([preuve](../docs/validation/TEMOIN-R43-CORRIGE-S755.md)) : `Large::AucunCorrigee`, le film.
+**Mesuré** :
+- le retournement à 3,09 s et 11,09 m (l'ancienne 3D : 2,62 s et 9,94 m) ; l'air à 3,26 s ;
+- la remontée 0,301 m (0,355 m) ; la masse exacte ; +7 % de coût.
+
+La vague déferle plus tard, plus près du rivage ; le raccord du rivage à 12,0 m devient trop près (note datée sur ADR-284). Le lot
+S753–S755. Maillons **1** (4.14). Suivant : **S756**, la revue de méthode.

@@ -495,6 +495,8 @@ enum Large {
     Aucun,
     /// S709 : le même, avec la projection de densité d'APIC, dans sa variante.
     AucunDensite(crate::apic3d::DensityVariant),
+    /// S755 : le tout-3D jusqu'à 5 s, avec la 3D corrigée d'ADR-292 (`Complete`, consciente du fond).
+    AucunCorrigee,
     /// S710 : le même, avec la projection de densité faible (`Complete`, κ en millièmes).
     AucunDensiteFaible(u16),
     /// S714 : le même (sans projection), le pas plafonné à 2,5 ms au lieu de 10 ms.
@@ -687,8 +689,8 @@ fn deux_raccords_porteur_xf(x_r: f64, large_: Large, x_f: f64, mut enreg: Option
     };
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
     let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_) | Large::AucunPasCourt
-        | Large::AucunJusqua5 | Large::AucunMort);
-    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort | Large::BoutEnBout | Large::BandeJusqua5) { 5_000_000 } else { 4_000_000 };
+        | Large::AucunJusqua5 | Large::AucunMort | Large::AucunCorrigee);
+    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort | Large::BoutEnBout | Large::BandeJusqua5 | Large::AucunCorrigee) { 5_000_000 } else { 4_000_000 };
     let meurt = matches!(large_, Large::AucunMort | Large::BoutEnBout);
     let t_mort: u64 = 3_200_000;
     let plafond_us: u64 = if large_ == Large::AucunPasCourt { 2_500 } else { 10_000 };
@@ -736,6 +738,11 @@ fn deux_raccords_porteur_xf(x_r: f64, large_: Large, x_f: f64, mut enreg: Option
     a.enable_open_boundaries(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     // S709 : la projection de densité.
+    // S755 : la 3D corrigée (ADR-292).
+    if large_ == Large::AucunCorrigee {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_bed_aware(true).unwrap();
+    }
     if let Large::AucunDensite(v) = large_ {
         a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
     }
@@ -3576,5 +3583,22 @@ fn complete_density_against_synolakis_s754() {
         println!("S754 t = {t:.0} : V_φ/V_n {vol:.4}");
     }
     println!("S754 : {d:.0} s");
+}
+
+/// **S755 — le témoin tout-3D de R43 refait avec la 3D corrigée** (ADR-292) : le montage de S730 E2 (le raccord du rivage à 12,0 m), 5 s, le
+/// film. (1) la masse à 10⁻¹² ; (2) le mur sous 1 cm ; (3) un retournement. Le reste rapporté contre S730 E2.
+#[test]
+#[ignore = "S755 : le tout-3D de R43 avec la 3D corrigée (≈ 30 min)"]
+fn the_r43_witness_with_the_corrected_3d_s755() {
+    let mut e = Enregistrement { film: Some(Vec::new()), ..Default::default() };
+    let (p, a, masse, _, _, d) = deux_raccords_porteur_xf(0.0, Large::AucunCorrigee, 12.0, Some(&mut e), None);
+    std::fs::write(format!("{}/../../calculs/s755_tout3d_corrigee.bin", env!("CARGO_MANIFEST_DIR")), e.film.take().unwrap()).unwrap();
+    let (j, tj, bruit) = mur_s730(&e);
+    let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+    println!("S755 la 3D corrigée : retournement {p:?} (S730 : 2,620 s ; 9,938 m) ; air {a:?} (2,804 s ; 10,375 m) ; la remontée {rr:.4} m à {tr:.3} s (0,3547 m à 3,942 s) ; le mur {:.1} mm à {tj:.3} s (bruit {:.2} mm) ; la masse {masse:.1e} ; {d:.0} s (1 152 s)",
+        j * 1e3, bruit * 1e3);
+    assert!(masse < 1e-12, "critère 1 : la masse {masse}");
+    assert!(j < 0.01, "critère 2 : le mur {j}");
+    assert!(p.is_some(), "critère 3 : aucun retournement");
 }
 

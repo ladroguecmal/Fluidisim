@@ -75,5 +75,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   pas le repos. Au lot S744–S746 : la projection consciente du fond rend le repos ; corriger la surface garde l'onde mais freine la
   lame, ne pas la corriger fait l'inverse : la voie hybride suit. Au lot S747–S749 : **ADR-289**, le plan des solveurs éprouvés seuls ;
   six variantes de la projection, aucune ne tient les trois essais ; le suspect suivant, le déplacement sans sa vitesse. Au lot S750–S752 :
-  **la 3D corrigée, version 1** (ADR-291 : la remontée +8 %, l'onde −7,5 % sur 10 m) ; la suite, la juger contre les mesures de Synolakis.
+  **la 3D corrigée, version 1** (ADR-291 : la remontée +8 %, l'onde −7,5 % sur 10 m) ; la suite, la juger contre les mesures de Synolakis. Au lot
+  S753–S755 : **ADR-292**, la 3D corrigée jugée par le laboratoire ; le témoin de R43 refait (le déferlement plus tard, plus près du rivage).
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).
