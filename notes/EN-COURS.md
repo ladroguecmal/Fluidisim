@@ -62,36 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S731 — **terminée**. La cinquantième revue de méthode (ADR-222 D4), sur S726–S730, et le lot S729–S731 (ADR-213 D3).
+Session : S732 — **en cours**. La conception du **sélecteur des domaines** (ADR-284, ADR-285 D4) : la pièce qui décide où vont SGN, la 3D
+et Saint-Venant, et quand. L'utilisateur en fait la pièce la plus peaufinée et la plus solide.
 
-**Ce que la session fait.**
-- Relire les frictions de S726 à S730, et décider (ADR-285). Les trois relevées :
-  1. **le témoin tout-3D de la plage portait un raccord** (Saint-Venant au rivage, à 10,775 m) dont personne n'avait mesuré le saut. De
-     S717 à S730, ses remontées et la conclusion de S718–S719 (« le large SGN en cause ») en dépendaient. C'est l'utilisateur qui l'a vu,
-     sur une image (R43) ;
-  2. **le filtre d'`essai.py`** est une sous-chaîne : E1 de S730 a lancé E2 aussi, et dans l'autre ordre ;
-  3. **un ADR créé sans sa ligne d'index** a fait refuser la fermeture de S730 ; l'arbre est resté modifié, à restaurer à la main.
-- **La demande de l'utilisateur** (2026-10-09, après S730) : le système qui choisit le type de simulation (SGN, la 3D, Saint-Venant) doit être
-  la pièce la plus peaufinée et la plus solide. La revue en fait la campagne suivante, avec ses juges.
-- `essai.py` : un nom qui en désigne plusieurs est refusé, sauf s'il en désigne un exactement (alors seul lui tourne).
-- Le lot : FEUILLE-DE-ROUTE et ROADMAP-VIVANTE (S729–S731).
+**Ce que la session fait.** Le registre [SELECTEUR-DOMAINES-S732](../docs/registres/SELECTEUR-DOMAINES-S732.md) :
+- ce que le sélecteur décide (s'il faut la 3D, où commencent et finissent ses frontières, quand elle naît et meurt) ;
+- ce qu'il lit (le porteur bon marché : SGN, Saint-Venant ; la bathymétrie ; les corps) ;
+- ses règles (ADR-284 D2) ;
+- sa solidité (la surveillance, le rattrapage, le repli, le journal des décisions) ;
+- la batterie de scènes, chacune avec un témoin tout-3D contrôlé (ADR-285 D1) ;
+- les pièces, une par session, et leurs critères.
 
-**Critère** : `essai.py` ne lance que l'essai nommé quand un autre nom le contient. Vérifié sur `the_shore_relay_beyond_the_jet_s730`, par
-la liste des essais seulement (sans rien lancer de long : `--liste`).
+Les nombres du registre (le seuil de déferlement d'une onde solitaire sur une pente, la distance de chute du jet) sont calculés par un
+script, et leurs formules citées.
 
 **Contrôles du plan** (ADR-266)
 
-- **témoin** : `essai.py --liste` sur les trois noms de S730 (aucun calcul long).
-- **instrument** : la liste des essais que cargo désigne (`--list`).
-- **calcul** : aucun.
-- **ADR** : ADR-222 D4 (la revue), ADR-213 D3 (le lot), ADR-285 D3 (l'arbre restauré avant de relancer une fermeture refusée).
-- **pièges** : ADR-223 D4 (pas de barre oblique inverse dans un *heredoc*) — retrouvé deux fois en S731, corrigé par l'outil d'édition.
+- **témoin** : le tout-3D de S730 (raccord au-delà du jet) pour la scène de R43 ; les autres témoins sont à faire, et le registre le dit.
+- **instrument** : les juges d'ADR-285 D4 (le retournement, le mur `J`, la remontée, le coût, les bascules).
+- **calcul** : aucun calcul long ; un script pour les nombres.
+- **ADR** : ADR-284 D2–D4, ADR-285 D1 et D4, ADR-275 D1 (l'hystérésis), ADR-278 D2 (les tolérances).
+- **pièges** : le déclencheur au plus simple se déclenchait au départ sur les plages de référence (S722) : leurs ondes partent trop près du
+  pied. Les scènes doivent laisser au prédicteur une distance à prévoir.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `essai.py` ; ADR-285 ; METHODE ; le lot.
-- [x] **P3** — fermeture.
+- [ ] **P2** — le registre ; ses nombres.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 fini** — `essai.py` vérifié par `--liste` : `the_shore_relay_beyond_the_jet_s730` ne désigne plus que lui ; `beyond_the_jet_s730` est refusé (deux essais) ; le nom de E2 ne désigne que E2. ADR-285 écrit ; METHODE ; le lot (FEUILLE-DE-ROUTE, ROADMAP-VIVANTE).
