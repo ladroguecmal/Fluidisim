@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 19:17 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 19:18 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S746 — la cinquante-troisième revue de méthode (S741–S745) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S745 — La projection consciente du fond, sans correction de surface ([journal](notes/JOURNAL.md)). Avant : S744 (La projection de densité consciente du fond)
 Session suivante : S746 — la cinquante-troisième revue de méthode (S741–S745) ; puis S747, la projection hybride (la surface corrigée sauf dans la lame mince)
 Maillons        : 1

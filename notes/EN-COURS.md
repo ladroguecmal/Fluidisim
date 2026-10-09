@@ -62,43 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S745 — **terminée**. En autonomie ; session longue. DENSITE-CONSCIENTE-S744 : la projection consciente du fond rend le repos, mais
-freine encore la remontée (−11 %). **La question** : sans correction aux mailles de surface (`DensityVariant::WithoutSurface`, S709), avec
-le fond compté, la 3D tient-elle à la fois le repos, la remontée et l'onde solitaire ?
+Session : S746 — **en cours**. La cinquante-troisième revue de méthode (ADR-222 D4), sur S741–S745.
 
-**Une seule différence avec S744** (ADR-276 D2) : la variante `WithoutSurface` au lieu de `Complete`. Dans une lame mince, toutes les mailles
-sont des mailles de surface : cette variante ne les corrige pas.
+**Ce que la session fait.** Relire les frictions de S741 à S745 et décider (ADR-288). Celles relevées :
+1. **S742 : un essai de propagation lancé avant le repos.** La levée (B2) tournait sur un fond lisse qui ne tient pas le repos (S743) ;
+2. **S742 : une amplitude sous le quantum de pose** (15 mm contre 12,5 mm), ADR-236 non appliqué ; **une crête suivie par le maximum
+   global**, détournée par toute bosse parasite ;
+3. **S743 : le lot passé sans ses lignes** : `fermer.py --lot` l'a accepté, et les lignes ont été écrites en S744 ;
+4. **S744 : une prémisse « au bit » non vérifiée** (la nominale aux murs du domaine dépasse 1) ;
+5. **S740, S742 : le piège d'ADR-223 D4 encore**, sans dommage ;
+6. S743–S745 : chaque essai a désigné une cause, et la méthode a tenu.
 
-**Les essais, et leurs critères écrits avant** :
-1. **Le repos sur l'escalier**, 1:30 et 1:12 : la vitesse sous 1 cm/s, l'écart par les particules sous 3 mm ;
-2. **la remontée de S645** : à **10 %** de la loi (S744 : −11 % ; sans projection : +0,5 %) ;
-3. **l'onde solitaire sur le canal à 2,5 cm** (S740 E7) : la largeur au-dessus de **80 %**, le creux sous **10 % de `H`**.
+**Ce que la session change dans l'outil** : `rituel.py fin --lot` refuse si la feuille de route n'a pas une ligne de lot qui finit par la
+session (« **S…–Snnn** »).
 
-Si les trois tiennent, la 3D corrigée passe ces trois essais du banc (ADR-287 D1).
+**Critère** : chaque friction a sa suite. L'outil refuse un `--lot` sans ligne, ce qu'on vérifie sur un faux appel.
 
-**Contrôles du plan** (ADR-276, ADR-286, ADR-287)
+**Contrôles du plan** (ADR-266)
 
-- **témoin** :
-  - le repos exact ;
-  - la loi de Synolakis ;
-  - l'onde solitaire exacte ;
-  - les mesures de S744 avec `Complete`.
-- **instrument** : ceux de S743, S645 et S740.
-- **calcul** : le repos (2 cas, 2 min), la remontée (6 min), le canal à 2,5 cm (9 min).
-- **ADR** : ADR-276 D2 (une différence) ; ADR-287 D1.
-- **pièges** : S709 a vu `WithoutSurface` laisser plonger la vague (2,932 s), mais sans le fond compté ; le canal dira si elle garde l'onde
-  (la surface n'est plus corrigée, or le tassement est sous la crête).
+- **témoin** : les journaux et les preuves de S741 à S745 ; un appel de `rituel.py fin --lot` sans la ligne, qui doit refuser.
+- **instrument** : la relecture ; la sortie de l'outil.
+- **calcul** : aucun.
+- **ADR** : ADR-222 D4 ; ADR-213 D3 (le lot) ; ADR-236 ; ADR-287 D1, D2.
+- **pièges** : le faux appel ne doit rien écrire : il est fait sur une copie de l'arbre propre, puis l'arbre est restauré (`git restore`).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la variante dans les montages ; (1), (2), (3).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — ADR-288 ; METHODE ; l'outil et son essai.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 fini** :
-  - (1) **tenu** : 6,8 mm/s ; 0,02–0,07 mm ;
-  - (2) **tenu** : 0,2169 m, −5,5 % ;
-  - (3) **non tenu** : la largeur à 87 %, mais un creux de 40,5 mm et une crête finale de 109,5 mm.
-
-  La voie hybride (la surface corrigée en eau profonde, pas dans la lame mince) pour S747.
