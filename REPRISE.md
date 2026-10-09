@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 23:11 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 23:12 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S754 — Complete consciente contre Synolakis ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S753 — La 3D corrigée contre Synolakis ([journal](notes/JOURNAL.md)). Avant : S752 (Le bilan propre de la projection, R1′, la 3D corrigée version 1)
 Session suivante : S754 — Complete consciente (sans R1) contre les mesures de Synolakis : le laboratoire tranche entre la célérité juste et la remontée
 Maillons        : 1

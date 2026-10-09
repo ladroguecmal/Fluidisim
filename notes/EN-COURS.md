@@ -62,49 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S753 — **terminée**. En autonomie ; session longue. ADR-289 D3.3, ADR-291 D4 : **la 3D corrigée contre une référence extérieure**,
-les mesures de laboratoire de Synolakis (l'onde solitaire `H/d` = 0,3 qui déferle sur la plage canonique de 1:19,85 ; S712, `references/synolakis/`).
+Session : S754 — **en cours**. En autonomie ; session longue. SYNOLAKIS-CORRIGEE-S753 : R1 rend la hauteur juste mais ralentit la vague
+(−5,6 %) ; `Complete` garde la célérité (+0,4 %) mais freine la remontée de S645 contre la loi théorique (−11 %). **La question** : laquelle
+des deux suit le mieux les **mesures** de Synolakis (ADR-280 D2 : la référence extérieure tranche) ?
 
-**L'essai** : le montage de S712 (`d` = 0,5 m, 2,5 cm, le pas plafonné à 2,5 ms comme S713 E2), avec la 3D corrigée (ADR-291 : `Complete`,
-consciente du fond, R1). Les profils de la surface à t·√(g/d) = 15, 20, 25, comparés aux mesures par `comparer_synolakis_s712` : l'écart
-quadratique moyen, la crête mesurée contre la calculée.
+**L'essai** : le montage de S753, `Complete` consciente du fond, sans R1 ; le même pas (2,5 ms), les profils à t·√(g/d) = 15, 20, 25. Une
+seule différence avec S753 : R1 (ADR-276 D2).
 
-**Le témoin** : S713 E2, la 3D sans correction au même pas :
+**Les critères, écrits avant** — `Complete` est retenue à la place de R1 si :
+1. la crête à t = 15 reste à **0,05 d** de la mesure ;
+2. sa place à t = 15 et à t = 20 est plus proche de la mesure que celle de R1 (S753 : 9,42 d et 5,82 d, contre 8,38 d et 3,66 d) ;
+3. l'écart quadratique est plus petit que celui de R1 à au moins deux des trois instants (S753 : 0,030, 0,075, 0,059 d).
 
-| t | la crête mesurée | S713 E2, la 3D sans correction | l'écart quadratique |
-|---|---|---|---|
-| 15 | 0,314 d en 8,38 d | 0,424 d en 8,07 d | 0,044 d |
-| 20 | 0,318 d en 3,66 d | 0,316 d en 3,77 d | 0,066 d |
-| 25 | 0,190 d en 0,30 d | 0,218 d en −3,03 d | 0,035 d |
+Sinon, R1 reste, et la question de la célérité reste ouverte.
 
-**Les critères, écrits avant** :
-1. **la crête à t = 15 à 0,05 d de la mesure** (sans correction, 0,11 d de trop : l'onde trop haute de S713) ;
-2. **l'écart quadratique plus petit que S713 E2** à au moins deux des trois instants.
+**Contrôles du plan** (ADR-276, ADR-280, ADR-289, ADR-291)
 
-**Le repos** (ADR-290 D3) : la 3D corrigée tient le repos sur l'escalier à 1:30 et 1:12 (S750) ; la plage de 1:19,85 est entre les deux.
-
-**Contrôles du plan** (ADR-280, ADR-287, ADR-289, ADR-291)
-
-- **témoin** : les mesures de Synolakis (la référence extérieure, ADR-280 D2) ; S713 E2 (la 3D sans correction).
-- **instrument** : `comparer_synolakis_s712`, éprouvé en S712–S713 (le profil par la surface, lissé sur 10 cm).
-- **calcul** : ≈ 45 min, en arrière-plan.
-- **ADR** : ADR-280 D2 (une référence extérieure tranche) ; ADR-289 D3.3 ; ADR-291 D4.
-- **pièges** :
-  - les mesures portent une onde générée par un batteur, amortie sur le trajet (le NOAA le dit) : un écart restant n'est pas
-    forcément celui de la 3D ;
-  - à t = 25, la lame monte sur le sable sec : le pas tombe (S712).
+- **témoin** : les mesures de Synolakis ; S753 (R1) ; S713 E2 (sans correction).
+- **instrument** : `comparer_synolakis_s712`.
+- **calcul** : ≈ 45 min.
+- **ADR** : ADR-280 D2 ; ADR-276 D2 ; ADR-291 (et sa note de S753).
+- **pièges** : `Complete` freinait la lame de S645 (une onde posée près du pied, contre la loi) ; le laboratoire peut en juger autrement, ou
+  pas.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la configuration dans le montage ; l'essai ; (1), (2).
-- [x] **P3** — preuve ; fermeture.
+- [ ] **P2** — l'essai ; (1), (2), (3).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (2 648 s) :
-  - t = 15 : 0,326 d en 9,42 d, l'écart 0,030 d ;
-  - t = 20 : 0,319 d en 5,82 d, 0,075 d ;
-  - t = 25 : 0,450 d en 0,72 d, 0,059 d.
-
-  (1) tenu ; (2) manqué. La célérité relue sur le canal : `Complete` +0,4 %, R1 −5,6 %, R1′ −1,3 %. R1 ralentit la vague : le choix
-  d'ADR-291 était prématuré, une note datée y est ajoutée.
