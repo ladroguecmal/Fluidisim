@@ -62,33 +62,52 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S751 — **terminée**. La cinquante-quatrième revue de méthode (ADR-222 D4), sur S746–S750.
+Session : S752 — **en cours**. En autonomie ; session longue. DEUX-REMEDES-S750 : R1 (le déplacement de la projection avec sa vitesse, reprise
+de la grille) tient le repos, la remontée (+7,9 %) et la largeur de l'onde ; mais le creux est manqué de 0,8 mm, et l'onde s'atténue de 9 %
+(91,3 mm contre 100,2 mm avec `Complete`). **La question** : d'où vient l'atténuation, et une mise à jour de la vitesse sans la grille la
+supprime-t-elle ?
 
-**Ce que la session fait.** Relire les frictions de S746 à S750 et décider (ADR-290). Celles relevées :
-1. **S744–S749 : six variantes de la projection essayées avant que le mécanisme soit nommé.** Le mécanisme (le déplacement sans la vitesse)
-   a été trouvé en S750 en raisonnant sur l'opérateur. S748 mesurait l'énergie de la lame, mais pas l'effet propre de la projection à
-   chaque pas, et l'a attribué à la dilatation ;
-2. **S749 : une formule de cible (ρ* = 0,875 au repos) supposée, non vérifiée sur son cas statique** avant 20 min de calcul ;
-3. **S749–S750 : la remontée lancée avant le repos**, contre ADR-288 D1, pour gagner du temps ; le repos ne coûte que 2 min ;
-4. **S748 : un tracé raté au premier essai** (l'échelle, les noms de fichiers) ;
-5. **S747 : le piège d'ADR-223 D4, dans la mémoire elle-même** ;
-6. S749 : la vérification du lot (ADR-288 D3) a fait son office.
+**Le bilan propre de la projection** (ADR-290 D1) : à chaque pas, l'énergie cinétique et l'énergie potentielle de toutes les particules,
+juste avant et juste après `density_project` ; leur somme cumulée est rendue par le cœur (`density_projection_budget`). C'est une lecture,
+sans effet.
 
-**Critère** : chaque friction a sa suite.
+**L'hypothèse nommée** : R1 remplace la vitesse de chaque particule déplacée par celle de la grille à sa nouvelle place. Ce passage par la
+grille lisse la vitesse, et retire de l'énergie à l'onde. Or une particule d'APIC porte le gradient de vitesse autour d'elle (sa matrice
+affine `C`). **R1′** (`set_density_shift_affine`) : `v ← v + C·Δx`, la mise à jour exacte au premier ordre, sans grille, `C` gardée.
 
-**Contrôles du plan** (ADR-266)
+**Signature prédite** :
+- R1 retire de l'énergie cinétique à chaque pas, R1′ presque rien ;
+- R1′ garde la remontée comme R1, car le déplacement porte sa vitesse ;
+- R1′ garde l'onde comme `Complete`.
 
-- **témoin** : les journaux et les preuves de S746 à S750.
-- **instrument** : la relecture.
-- **calcul** : aucun.
-- **ADR** : ADR-222 D4 ; ADR-226 D1 ; ADR-288 D1, D4, qu'ADR-290 complète.
-- **pièges** : ADR-223 D4.
+**Les essais, et leurs critères écrits avant** (ADR-290 D3 : le repos d'abord) :
+1. **R1′, le repos** sur l'escalier, 1:30 et 1:12 : 1 cm/s ; 3 mm.
+2. **Le bilan sur le canal à 2,5 cm**, `Complete`, R1, R1′ (4,25 s) : l'énergie cumulée retirée par la projection, rapportée ; et pour R1′,
+   **l'onde** (la largeur 80 % ; le creux 10 mm ; **la crête finale à 5 % de celle de 0,25 s**).
+3. **R1′, la remontée de S645** : à 10 % de la loi.
+
+**Les quanta** (ADR-288 D2) : le creux se lit à environ 1 mm près (la surface lissée sur 10 cm) ; au départ, l'onde montre déjà un creux de
+5 mm, l'ajustement de l'onde de départ (S739 : −4,8 mm à 0,25 s). Le critère de 10 mm est au-dessus des deux.
+
+**Contrôles du plan** (ADR-276, ADR-287, ADR-288, ADR-290)
+
+- **témoin** :
+  - `Complete` et R1 (S750), sur les mêmes essais ;
+  - l'onde exacte ;
+  - la loi de Synolakis ;
+  - le repos exact.
+- **instrument** : le bilan propre de la projection (nouveau, éprouvé d'abord : nul au repos, à 10⁻¹⁰ J) ; ceux de S743, S740 et S645.
+- **calcul** : le repos (2 min), le canal trois fois (≈ 30 min), la remontée (7 min).
+- **ADR** : ADR-276 D2 (R1′ diffère de R1 par la mise à jour seule) ; ADR-290 D1, D3.
+- **pièges** :
+  - `C·Δx` suppose un déplacement petit devant la maille (borné au quart de maille par la projection) ;
+  - l'énergie potentielle dépend de `z` ; seul le changement par la projection compte.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-290 ; METHODE.
-- [x] **P3** — fermeture.
+- [ ] **P2** — le bilan, R1′ ; (1), (2).
+- [ ] **P3** — (3).
+- [ ] **P4** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-290 (D1 le bilan propre d'un opérateur, une variante contre une hypothèse nommée ; D2 la cible vérifiée sur son cas statique ; D3 le repos d'abord). METHODE, l'index.

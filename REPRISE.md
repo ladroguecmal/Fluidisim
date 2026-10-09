@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 21:38 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 21:39 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S752 — R1 affiné : le bilan propre de la projection, R1′ (v + C·Δx) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S751 — la cinquante-quatrième revue de méthode (ADR-290) ([journal](notes/JOURNAL.md)). Avant : S750 (Deux remèdes au freinage de la lame)
 Session suivante : S752 — R1 affiné : le bilan propre de la projection à chaque pas (ADR-290 D1), le creux au regard du bruit de lecture, l'atténuation de l'onde ; le lot
 Maillons        : 0
