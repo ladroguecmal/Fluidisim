@@ -37,6 +37,12 @@ pub(crate) struct Densite {
     pub(crate) p_sauve: Vec<f32>,
     /// Le déplacement maximal du dernier pas, m (pour la mesure).
     pub(crate) deplacement_max: f32,
+    /// **S744 — la densité consciente du fond** (`set_density_bed_aware`) : la densité d'une maille rapportée à sa nominale, celle d'un
+    /// réseau régulier posé partout hors du fond ; `false`, le défaut : rapportée à 1 (S709, au bit).
+    pub(crate) conscient: bool,
+    /// S744 — la nominale de chaque maille, calculée au premier pas (`nominale_faite`).
+    pub(crate) nominale: Vec<f32>,
+    pub(crate) nominale_faite: bool,
 }
 
 impl Apic3 {
@@ -53,11 +59,22 @@ impl Apic3 {
         let Domain3 { nx, ny, nz, .. } = self.domain;
         let cells = nx * ny * nz;
         let (fu, fv, fw) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz, nx * ny * (nz + 1));
-        host.alloc.alloc_persistent((2 * cells + fu + fv + fw) * 4).map_err(|e| match e {
+        host.alloc.alloc_persistent((3 * cells + fu + fv + fw) * 4).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
-            p_sauve: vec![0.; cells], deplacement_max: 0. }));
+            p_sauve: vec![0.; cells], deplacement_max: 0., conscient: false, nominale: vec![0.; cells], nominale_faite: false }));
+        Ok(())
+    }
+
+    /// **S744 — la projection de densité consciente du fond** (REPOS-PENTE-S743) : la densité de chaque maille est rapportée à sa nominale,
+    /// `Σ w/8` d'un réseau régulier de `2 × 2 × 2` points par maille posé partout hors du fond (l'escalier ou le fond lisse), calculée au
+    /// premier pas — le fond doit être posé avant. Sans elle, les poids qui tombent dans le solide font paraître creuses les mailles qui touchent
+    /// le fond, et la projection les comble. Refus sans projection.
+    pub fn set_density_bed_aware(&mut self, on: bool) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        d.conscient = on;
+        d.nominale_faite = false;
         Ok(())
     }
 
@@ -90,6 +107,41 @@ impl Apic3 {
             }
             for (idx, wt, _) in weights(self.x[k], dx, [0.5; 3], [nx, ny, nz]) {
                 dens.rho[idx] += wt / nominal;
+            }
+        }
+        // S744 : la densité rapportée à la nominale de chaque maille (le fond compté).
+        if dens.conscient {
+            if !dens.nominale_faite {
+                dens.nominale.fill(0.);
+                let pas = 1. / PER_AXIS as f32;
+                for k in 0..nz {
+                    for j in 0..ny {
+                        for i in 0..nx {
+                            for a in 0..PER_AXIS * PER_AXIS * PER_AXIS {
+                                let (ax, ay, az) = (a % PER_AXIS, (a / PER_AXIS) % PER_AXIS, a / (PER_AXIS * PER_AXIS));
+                                let q = [(i as f32 + (ax as f32 + 0.5) * pas) * dx, (j as f32 + (ay as f32 + 0.5) * pas) * dx,
+                                    (k as f32 + (az as f32 + 0.5) * pas) * dx];
+                                let sous = if self.lisse.is_some() {
+                                    q[2] < self.smooth_seabed_height(q[0], q[1])
+                                } else {
+                                    q[2] < self.seabed_height(i, j)
+                                };
+                                if sous {
+                                    continue;
+                                }
+                                for (idx, wt, _) in weights(q, dx, [0.5; 3], [nx, ny, nz]) {
+                                    dens.nominale[idx] += wt / nominal;
+                                }
+                            }
+                        }
+                    }
+                }
+                dens.nominale_faite = true;
+            }
+            for (r, n) in dens.rho.iter_mut().zip(&dens.nominale) {
+                if *n > 0.05 {
+                    *r /= *n;
+                }
             }
         }
         // Le second membre et la diagonale, comme la pression : la surface à q = 0 (la fraction fantôme), les parois sans flux.

@@ -2277,3 +2277,14 @@ et sans projection, par deux lectures. **Mesuré** :
 - le fond lisse ne tient pas le repos (0,3 à 0,7 m/s ; la lecture par φ fausse de 22 mm).
 
 La suite : la projection de densité consciente du fond. Maillons **0**. Suivant : **S744**.
+
+## S744 — 2026-10-09 — La projection de densité consciente du fond
+
+**Entrée.** REPOS-PENTE-S743. **Fait** ([preuve](../docs/validation/DENSITE-CONSCIENTE-S744.md)) : `set_density_bed_aware`, la densité
+rapportée à la nominale de chaque maille (le fond compté). **Mesuré** :
+- le repos sur l'escalier rendu (6,8 mm/s ; 0,02 mm) ;
+- le canal pas au bit (la prémisse était fausse : aux murs, la nominale dépasse 1) ;
+- la remontée de S645 encore freinée (−11 %) : le fond n'était pas la cause.
+
+Le suspect suivant : la correction de surface dans la lame mince. Maillons **1** (4.1). Suivant : **S745**, la projection sans correction
+de surface.

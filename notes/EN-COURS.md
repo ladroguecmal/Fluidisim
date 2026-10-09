@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S744 — **en cours**. En autonomie ; session longue. REPOS-PENTE-S743 : la projection de densité met le lac en mouvement contre un
+Session : S744 — **terminée**. En autonomie ; session longue. REPOS-PENTE-S743 : la projection de densité met le lac en mouvement contre un
 fond. **La question** : une densité rapportée à la valeur nominale de chaque maille, qui compte le fond, rend-elle à la projection le repos
 et la remontée, sans perdre l'onde solitaire ?
 
@@ -101,8 +101,12 @@ tableau réservé à la configuration (I-06). La densité vaut alors `Σ w / nom
 ### Plan
 
 - [x] **P1** — jeton ; plan ; les lignes du lot S741–S743.
-- [ ] **P2** — la densité nominale ; (1), (2).
-- [ ] **P3** — (3), la remontée.
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P2** — la densité nominale ; (1), (2).
+- [x] **P3** — (3), la remontée.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **(1) tenu** : l'escalier avec la projection consciente, 6,8 mm/s et 0,02–0,07 mm (comme sans projection). Le lisse : 0,26–0,80 m/s,
+  7–11 mm (il ne diverge plus).
+- **(2) manqué**, la prémisse fausse : la crête finale 112,24 contre 114,02 mm ; aux murs, la nominale dépasse 1 (les poids rabattus).
+- **(3) manqué** : la remontée 0,2042 m (−11,0 %), contre −12 % avant. Le fond n'était pas la cause du freinage.

@@ -1876,12 +1876,18 @@ fn onde_sur_pente_fond_s644(dx: f32, lisse: bool, glissant: bool, balistique: bo
 
 /// S742 — le même montage, avec en option la projection de densité (S709 ; le banc canonique, ADR-287 D1). Sans elle, au bit.
 fn onde_sur_pente_densite_s742(dx: f32, lisse: bool, glissant: bool, balistique: bool, densite: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
+    onde_sur_pente_conscient_s744(dx, lisse, glissant, balistique, densite, false)
+}
+
+/// S744 — le même montage, la projection consciente du fond en option.
+fn onde_sur_pente_conscient_s744(dx: f32, lisse: bool, glissant: bool, balistique: bool, densite: bool, conscient: bool) -> (f64, f64, usize, usize, usize, f32, [f64; 2]) {
     use crate::grand_evenement::{OndeSolitaire, Plage};
     let (d, h, cot, x1, x_pied, niveau, fond0) = (0.35f64, 0.07f64, 3.0f64, 2.80f64, 4.768f64, 0.40f32, 0.05f32);
     let (nx, ny, nz) = ((6.6 / dx).round() as usize, 4usize, (0.8 / dx).round() as usize);
     let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
     if densite {
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_bed_aware(conscient).unwrap();
     }
     let lz = nz as f32 * dx;
     let fond: Vec<f32> = (0..nx * ny).map(|c| {
@@ -2941,6 +2947,18 @@ fn the_right_inlet_poses_particles_for_a_given_volume_s683() {
 fn the_canonical_runup_bench_with_density_s742() {
     let (r, sv, n, garde, sous, haut, cr) = onde_sur_pente_densite_s742(0.025, false, false, true, true);
     println!("S742 B4 : avec la projection, la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; Saint-Venant {sv:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
+        100. * (haut as f64 / 0.2295 - 1.), cr[0]);
+    assert!(garde == n && sous == 0, "les particules");
+}
+
+/// **S744 — (3) la remontée de S645 avec la projection consciente du fond** : la particule la plus haute à 10 % de la loi (0,2295 m ; S742,
+/// la projection d'avant : −12 %). **Mesuré : 0,2042 m (−11,0 %), manqué** ; le fond n'était pas la cause du freinage. N'affirme que les
+/// particules.
+#[test]
+#[ignore = "S744 (3) : la remontée de S645, la projection consciente (≈ 7 min)"]
+fn the_runup_with_bed_aware_density_s744() {
+    let (r, _, n, garde, sous, haut, cr) = onde_sur_pente_conscient_s744(0.025, false, false, true, true, true);
+    println!("S744 (3) : la remontée par les particules {haut:.4} m ({:+.1} % de 0,2295), par les étiquettes {r:.4} m ; la crête au pied {:.4} m ; particules {n} → {garde}, {sous} sous le fond",
         100. * (haut as f64 / 0.2295 - 1.), cr[0]);
     assert!(garde == n && sous == 0, "les particules");
 }
