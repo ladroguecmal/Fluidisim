@@ -62,57 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S740 — **terminée**. En autonomie ; session longue. ONDE-SOLITAIRE-3D-S739 : la 3D raidit l'onde solitaire sur fond plat. **La
-question** : quelle partie du pas en est la cause ? Les suspects, un à la fois (ADR-276 D2), sur le canal à 5 cm, qui montre le défaut en
-6 min (S739). **Aucun remède adopté dans cette session** : un suspect qui guérit le canal est désigné, puis éprouvé à 2,5 cm.
+Session : S741 — **en cours**. La cinquante-deuxième revue de méthode (ADR-222 D4), sur S736–S740.
 
-**Ce que la session fait.**
-- Deux réglages du cœur, **leurs défauts au bit** : `set_pressure_max_iterations` (4 000 par défaut) et `set_separation_passes` (2 par
-  défaut).
-- Le canal relève, à chaque pas, les itérations et le résidu de la pression (`ApicReport`) : le plus grand nombre d'itérations, la part des
-  pas au plafond, le plus grand résidu.
-- Le résumé du canal prend sa référence à 0,25 s (S739 la prenait à 0 s, avant toute surface : ±inf).
+**Ce que la session fait.** Relire les frictions de S736 à S740 et décider (ADR-287). Celles relevées :
+1. **S739–S740 : un solveur pris pour référence sans son essai canonique.** Le juge du déferlement (S647, S690–S730) et tous les témoins
+   reposaient sur une 3D qui ne garde pas une onde solitaire sur fond plat (le tassement des particules). L'essai qui l'aurait montré, le
+   plus simple d'un modèle de vagues, n'avait jamais été fait en cent sessions ;
+2. **S737 : un critère tiré d'un seuil publié, sans vérifier ce qu'il couvre** (Synolakis : 0,818 pour la montée, 0,479 pour le reflux) ;
+3. **S739 : un résumé qui lit son instrument avant qu'il existe** (la surface à t = 0, ±inf) ;
+4. **S740 : le profil regardé après quatre suspects** ; regardé d'abord, il désignait le tassement ;
+5. **S737, S740 : le piège d'ADR-223 D4 retrouvé deux fois de plus** (un `
+` dans un *heredoc*) ;
+6. S736–S738 : les règles d'ADR-286 appliquées (la durée bornée, la seconde lecture, un sujet à la fois) : elles ont tenu.
 
-**Les essais, et leurs critères écrits avant** (le canal A à 5 cm, 4,25 s ; « guérit » = la largeur à mi-hauteur au-dessus de **80 %** de
-celle de 0,25 s, et le creux sous **10 % de `H`**) :
-- **E1 — la pression telle quelle** : les itérations, le résidu. Le plafond est-il atteint ? Rapporté.
-- **E2 — la pression convergée** : le plafond à 100 000. Si E1 atteignait le plafond, E2 dit si c'est la cause.
-- **E3 — sans la séparation des particules** (`set_separation_passes(0)`).
-- **E4 — le pas plafonné à 2,5 ms** (au lieu de 10 ms ; S713 : une maille par pas).
+**Critère** : chaque friction a sa suite.
 
-On s'arrête au premier qui guérit, et on l'éprouve à 2,5 cm (**E5**, les mêmes critères). Si aucun ne guérit, la question reste ouverte,
-avec les nombres, et les suspects suivants sont nommés.
+**Contrôles du plan** (ADR-266)
 
-**Contrôles du plan** (ADR-226, ADR-276, ADR-286)
-
-- **témoin** : le canal de S739, au bit (les réglages à leurs défauts) ; SGN garde la même onde (S694).
-- **instrument** : la largeur à mi-hauteur et le creux, par la surface ; les itérations et le résidu, par le pas lui-même.
-- **calcul** : E1 à E4, ≈ 6 min chacun (A seulement, 3 min) ; E5 ≈ 15 min.
-- **ADR** : ADR-276 D2 (une cause à la fois) ; ADR-286 D1 (le canal de 24 m, 5,1 m de marge, inchangé).
-- **pièges** :
-  - un plafond d'itérations levé peut rendre un pas très long ;
-  - sans séparation, des particules se tassent : le volume est rapporté.
+- **témoin** : les journaux et les preuves de S736 à S740.
+- **instrument** : la relecture.
+- **calcul** : aucun.
+- **ADR** : ADR-222 D4 ; ADR-230 D1 (une référence convergée), ADR-280 D2, ADR-281 D1, qu'ADR-287 complète.
+- **pièges** : ADR-223 D4 — l'outil d'écriture pour tout texte qui porte une barre oblique inverse.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — les réglages, le relevé de la pression ; E1, E2.
-- [x] **P3** — E3, E4 ; **ajoutés après E4** (aucun n'a guéri ; le profil montre l'onde qui se scinde, un long plateau devant, un pic
-  serré derrière, comme un tassement des particules sous la crête) : **E5, la projection de densité** (S709, complète) et **E6, faible**
-  (κ = 0,05, S710). Les mêmes critères. Puis l'essai à 2,5 cm du suspect désigné.
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — ADR-287 ; METHODE.
+- [ ] **P3** — fermeture.
 
 ### Notes de reprise
-- **P2 fini** — E1 : la pression converge en **138 itérations au plus**, jamais au plafond (0 sur 523 pas), résidu 1,0·10⁻⁶ ; la largeur
-  tombe à 20 %, le creux à 54 mm ; ne guérit pas. E2 (le plafond à 100 000) : **identique au bit**. Le plafond de la pression n'est pas la
-  cause.
-- **E3** (sans séparation) : la largeur à 22 %, le creux 46 mm, la crête finale 82 mm ; ne guérit pas.
-- **E4** (le pas à 2,5 ms) : la largeur à 23 %, le creux 25 mm, la crête finale 62 mm ; ne guérit pas.
-- **Le profil** (`captures/s740_profils.png`, A à 5 cm, toutes les 0,5 s) : l'onde se scinde. Un long plateau bas, d'environ 20 mm, file
-  devant sur plusieurs mètres ; un pic étroit, plus lent, reste derrière ; du bruit et des creux suivent.
-- **E5** (la projection de densité complète) : **la largeur à 84 %**, le creux 15,3 mm (15 % de H), la crête finale 112 mm ; ne guérit pas
-  au sens strict (le creux), mais **la cause principale est désignée : le tassement des particules**. **E6** (faible, κ = 0,05) : la
-  largeur à 39 %, le creux 34 mm, la crête 207 mm.
-- **E7, ajouté après E6** : E5 à 2,5 cm sur le canal, aux mêmes critères, avec les profils. Le conflit à garder en tête : S709 a vu la
-  projection complète empêcher la vague de plonger.
-- **E7** (la projection de densité, 2,5 cm) : la largeur à **92 %**, le creux **9,0 mm**, la crête finale 98,8 mm ; 266 itérations au plus ; 544 s. **Guérit.** Les profils envoyés à l'utilisateur.

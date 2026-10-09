@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 17:35 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 17:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S741 — la cinquante-deuxième revue de méthode (S736–S740) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S740 — Pourquoi la 3D raidit l'onde solitaire : le tassement des particules ([journal](notes/JOURNAL.md)). Avant : S739 (L'onde solitaire se déforme dans la 3D)
 Session suivante : S741 — la cinquante-deuxième revue de méthode (S736–S740) ; puis la 3D avec la projection de densité contre les mesures de Synolakis et sur la vague de R43
 Maillons        : 1
