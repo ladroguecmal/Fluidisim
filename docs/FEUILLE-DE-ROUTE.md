@@ -548,6 +548,8 @@ surface vers sa densité attendue — aucune des six variantes ne tient à la fo
 cinquante-quatrième revue (ADR-290 : le bilan propre d'un opérateur) ; R1′ réfutée ; **ADR-291 : la 3D corrigée, version 1** (4.1).
 **S753–S755** : contre Synolakis, R1 trop lente ; **ADR-292 : la 3D corrigée = `Complete` consciente du fond**, mieux que sans correction
 aux trois instants ; le témoin de R43 refait (le déferlement 0,47 s plus tard, 1,15 m plus près du rivage) (4.1, 4.14).
+**S756–S758** : la cinquante-cinquième revue (ADR-293 : la décision après la référence extérieure ; la célérité ; la bande de quantum) ;
+le ballottement (la période de la 3D corrigée à 0,33 %, mais l'énergie injectée) ; la neutralité par particule réfutée (4.1).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

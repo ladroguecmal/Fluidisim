@@ -79,6 +79,8 @@ pub(crate) struct Densite {
     pub(crate) relaxation_surface: Option<f32>,
     /// **S752 — R1′** : chaque particule déplacée garde sa vitesse, corrigée de `C·Δx` (sa matrice affine, sans la grille).
     pub(crate) affine: bool,
+    /// **S758 — la projection neutre en énergie** : chaque particule déplacée de Δz garde son énergie, `|v|² ← max(|v|² − 2g·Δz, 0)`.
+    pub(crate) neutre: bool,
     /// **S752 — le bilan propre de la projection** (ADR-290 D1) : l'énergie cinétique et l'énergie potentielle (J, ρ = 1 000 kg/m³) que la
     /// projection a changées, cumulées depuis la configuration. Une lecture, sans effet.
     pub(crate) bilan: [f64; 2],
@@ -104,7 +106,7 @@ impl Apic3 {
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0., deplacement_lieu: [0.; 3], conscient: false, nominale: vec![0.; cells], nominale_faite: false,
             colonnes: vec![0; nx * ny], reechantillonner: false, relaxation_surface: None,
-            affine: false, bilan: [0.; 2] }));
+            affine: false, neutre: false, bilan: [0.; 2] }));
         Ok(())
     }
 
@@ -121,6 +123,14 @@ impl Apic3 {
     pub fn set_density_shift_affine(&mut self, on: bool) -> Result<(), Error> {
         let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
         d.affine = on;
+        Ok(())
+    }
+
+    /// **S758 — la projection neutre en énergie** (BALLOTTEMENT-S757 : la projection ajoute de l'énergie potentielle) : chaque particule
+    /// déplacée de Δz garde son énergie, sa vitesse mise à l'échelle dans sa direction, `|v|² ← max(|v|² − 2g·Δz, 0)`. Refus sans projection.
+    pub fn set_density_energy_neutral(&mut self, on: bool) -> Result<(), Error> {
+        let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
+        d.neutre = on;
         Ok(())
     }
 
@@ -342,6 +352,17 @@ impl Apic3 {
                 let s = if norme > borne { borne / norme } else { 1. };
                 for a in 0..3 {
                     self.x[k][a] += s * d[a];
+                }
+                // S758 : la vitesse rendue à l'énergie du déplacement vertical.
+                if dens.neutre {
+                    let v = self.vel[k];
+                    let v2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+                    if v2 > 0. {
+                        let f = ((v2 - 2. * self.g_eff * s * d[2]).max(0.) / v2).sqrt();
+                        for a in 0..3 {
+                            self.vel[k][a] *= f;
+                        }
+                    }
                 }
                 // S752 — R1′ : la vitesse corrigée par la matrice affine, `v_a += Σ_b C[a][b]·Δx_b` (`C[a][b] = ∂v_a/∂x_b`).
                 if dens.affine {

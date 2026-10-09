@@ -2981,6 +2981,8 @@ struct ReglagesCanal {
     relaxation_surface: Option<f32>,
     /// S752 : R1′, le déplacement corrigé par la matrice affine.
     affine: bool,
+    /// S758 : la projection neutre en énergie.
+    neutre: bool,
 }
 
 /// S740 — ce que la pression a fait sur le canal : le plus grand nombre d'itérations, les pas au plafond, les pas, le plus grand résidu.
@@ -3009,6 +3011,7 @@ fn canal_regle_s740(dx: f32, profil: bool, duree: f64, r: ReglagesCanal) -> (Vec
         a.set_density_bed_aware(r.conscient).unwrap();
         a.set_density_shift_resample(r.reechantillonner).unwrap();
         a.set_density_shift_affine(r.affine).unwrap();
+        a.set_density_energy_neutral(r.neutre).unwrap();
         if let Some(k) = r.relaxation_surface {
             a.set_density_surface_relaxation(k).unwrap();
         }
@@ -3606,6 +3609,11 @@ fn the_r43_witness_with_the_corrected_3d_s755() {
 /// repos à son maximum (`A` = 40 mm), 10 s. `corrigee` : la 3D corrigée d'ADR-292. Rend `(la période, s ; l'amortissement par période, part ;
 /// les passages par zéro comptés)`, la surface lue par φ au mur de gauche.
 fn ballottement_s757(corrigee: bool) -> (f64, f64, usize) {
+    ballottement_regle_s758(corrigee, &|_| {})
+}
+
+/// S758 — le même ballottement, un réglage de plus.
+fn ballottement_regle_s758(corrigee: bool, regle: &dyn Fn(&mut Apic3)) -> (f64, f64, usize) {
     let (lx, d, amp, dx) = (2.0f64, 0.5f64, 0.04f64, 0.025f32);
     let dxs = dx as f64;
     let (nx, ny, nz) = ((lx / dxs).round() as usize, 2usize, ((d + 0.2) / dxs).ceil() as usize);
@@ -3614,6 +3622,7 @@ fn ballottement_s757(corrigee: bool) -> (f64, f64, usize) {
     if corrigee {
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
         a.set_density_bed_aware(true).unwrap();
+        regle(&mut a);
     }
     a.seed(&|p| (p[2] as f64) < d + amp * (std::f64::consts::PI * p[0] as f64 / lx).cos()).unwrap();
     a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
@@ -3664,3 +3673,33 @@ fn the_sloshing_bench_s757() {
             100. * (p / exacte - 1.), 100. * amort, if (p / exacte - 1.).abs() < 0.01 { "tenu" } else { "NON TENU" });
     }
 }
+
+/// **S758 — la projection neutre en énergie** : (1) le repos sur l'escalier ; (2) le ballottement (la période à 1 %, l'amortissement entre
+/// −0,5 % et +1 % par période) ; (3) l'onde solitaire sur le canal à 2,5 cm (la largeur 80 %, le creux 10 mm, la célérité à 1 %).
+#[test]
+#[ignore = "S758 : le repos, le ballottement, le canal, la projection neutre (≈ 20 min)"]
+fn energy_neutral_projection_s758() {
+    let neutre = |a: &mut Apic3| a.set_density_energy_neutral(true).unwrap();
+    for cot in [30.0f64, 12.0] {
+        let (v, ep, ephi, _) = repos_pente_regle_s750(cot, false, Some(crate::apic3d::DensityVariant::Complete), true, &neutre);
+        println!("S758 (1) le repos 1:{cot} : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3,
+            if v < 0.01 && ep < 0.003 { "tenu" } else { "NON TENU" });
+    }
+    let (lx, d, g) = (2.0f64, 0.5f64, 9.81f64);
+    let k = std::f64::consts::PI / lx;
+    let exacte = 2. * std::f64::consts::PI / (g * k * (k * d).tanh()).sqrt();
+    let (p, amort, n) = ballottement_regle_s758(true, &neutre);
+    println!("S758 (2) le ballottement : la période {p:.4} s ({:+.2} %) ; l'amortissement {:.2} % par période ; {n} passages ; {}",
+        100. * (p / exacte - 1.), 100. * amort, if (p / exacte - 1.).abs() < 0.01 && (-0.005..0.01).contains(&amort) { "tenu" } else { "NON TENU" });
+    let (m, _) = canal_regle_s740(0.025, false, 4.25, ReglagesCanal { densite: true, conscient: true, variante: Some(crate::apic3d::DensityVariant::Complete), neutre: true, ..Default::default() });
+    let l0 = m[1].3;
+    let (lmin, creux) = m[1..].iter().fold((f64::MAX, 0f64), |(l, c), x| (l.min(x.3), c.max(-x.4)));
+    let pts: Vec<(f64, f64)> = m.iter().filter(|x| x.0 >= 1.0).map(|x| (x.0, x.1)).collect();
+    let (mt, mx) = (pts.iter().map(|p| p.0).sum::<f64>() / pts.len() as f64, pts.iter().map(|p| p.1).sum::<f64>() / pts.len() as f64);
+    let cel = pts.iter().map(|p| (p.0 - mt) * (p.1 - mx)).sum::<f64>() / pts.iter().map(|p| (p.0 - mt).powi(2)).sum::<f64>();
+    let cex = (9.81f64 * 0.6).sqrt();
+    println!("S758 (3) le canal : la largeur {:.0} %, le creux {:.1} mm, la crête finale {:.1} mm, la célérité {cel:.3} m/s ({:+.1} %) ; {}",
+        100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, 100. * (cel / cex - 1.),
+        if lmin > 0.8 * l0 && creux < 0.01 && (cel / cex - 1.).abs() < 0.01 { "tenu" } else { "NON TENU" });
+}
+

@@ -2424,3 +2424,14 @@ dispersion linéaire exacte. **Mesuré** :
 
 La rupture de barrage attend les mesures de Martin et Moyce (un téléchargement à accorder, inscrit dans la boussole). Maillons **1** (4.1).
 Suivant : **S758**, une projection neutre en énergie.
+
+## S758 — 2026-10-10 — Une projection neutre en énergie, particule par particule : réfutée
+
+**Entrée.** BALLOTTEMENT-S757 ; ADR-290 D1. **Fait** ([preuve](../docs/validation/ENERGIE-PARTICULE-S758.md)) :
+`set_density_energy_neutral`, `|v|² ← |v|² − 2g·Δz` à chaque déplacement. **Mesuré** :
+- le repos perdu (0,16 m/s) ;
+- le ballottement −37 % ;
+- +5,9 J d'énergie cinétique.
+
+**Réfutée** : les déplacements vont autant vers le bas que vers le haut, et la règle accélère ceux qui descendent. La suite : une correction
+globale (l'énergie potentielle ajoutée retirée à l'énergie cinétique, uniformément). Le lot S756–S758. Maillons **0**. Suivant : **S759**.

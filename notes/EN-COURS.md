@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S758 — **en cours**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
+Session : S758 — **terminée**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
 grandit de 2,8 % par période ; S752 avait mesuré la projection qui ajoute de l'énergie potentielle (+2 à +3 J en 4 s). **La question** : une
 projection qui rend à chaque particule l'énergie de son déplacement vertical arrête-t-elle l'injection, sans perdre ce que la 3D corrigée
 tient ?
@@ -100,7 +100,15 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — la règle ; (1), (2), (3).
-- [ ] **P3** — preuve ; le lot ; fermeture.
+- [x] **P2** — la règle ; (1), (2), (3).
+- [x] **P3** — preuve ; le lot ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (1 113 s) — **tous les critères tombent** :
+  - le repos : 0,11–0,16 m/s, 8 mm ;
+  - le ballottement : −36,7 %, 68 % d'amortissement ;
+  - le bilan : +5,9 J cinétique ;
+  - le canal : 59 %, 10,9 mm, −4,3 %.
+
+  **L'hypothèse est réfutée** : les déplacements de la projection ne sont pas des mouvements dans la pesanteur. La suite : une correction
+  globale de l'énergie.
