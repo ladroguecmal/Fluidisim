@@ -62,35 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S746 — **terminée**. La cinquante-troisième revue de méthode (ADR-222 D4), sur S741–S745.
+Session : S747 — **en cours**. En autonomie ; session longue. SANS-SURFACE-S745 : corriger la surface (`Complete`) garde l'onde mais freine la
+lame ; ne pas la corriger (`WithoutSurface`) fait l'inverse. **La question** : une projection hybride tient-elle les trois essais du banc ?
 
-**Ce que la session fait.** Relire les frictions de S741 à S745 et décider (ADR-288). Celles relevées :
-1. **S742 : un essai de propagation lancé avant le repos.** La levée (B2) tournait sur un fond lisse qui ne tient pas le repos (S743) ;
-2. **S742 : une amplitude sous le quantum de pose** (15 mm contre 12,5 mm), ADR-236 non appliqué ; **une crête suivie par le maximum
-   global**, détournée par toute bosse parasite ;
-3. **S743 : le lot passé sans ses lignes** : `fermer.py --lot` l'a accepté, et les lignes ont été écrites en S744 ;
-4. **S744 : une prémisse « au bit » non vérifiée** (la nominale aux murs du domaine dépasse 1) ;
-5. **S740, S742 : le piège d'ADR-223 D4 encore**, sans dommage ;
-6. S743–S745 : chaque essai a désigné une cause, et la méthode a tenu.
+**La variante** (`DensityVariant::Hybrid`, consciente du fond) :
+- comme `Complete`, partout où la colonne porte au moins **trois mailles d'eau** (la règle du film du rivage, S678) ;
+- **aucune correction** dans une colonne qui en porte moins : la lame mince, le jet de rive.
 
-**Ce que la session change dans l'outil** : `rituel.py fin --lot` refuse si la feuille de route n'a pas une ligne de lot qui finit par la
-session (« **S…–Snnn** »).
+Le compte se fait sur les étiquettes du pas (les mailles d'eau de la colonne).
 
-**Critère** : chaque friction a sa suite. L'outil refuse un `--lot` sans ligne, ce qu'on vérifie sur un faux appel.
+**Les essais, et leurs critères écrits avant** (les mêmes que S745, ADR-288 D1 : le repos d'abord) :
+1. **Le repos sur l'escalier**, 1:30 et 1:12 : la vitesse sous 1 cm/s, l'écart par les particules sous 3 mm ;
+2. **la remontée de S645** : à **10 %** de la loi (`Complete` −11 % ; `WithoutSurface` −5,5 %) ;
+3. **l'onde solitaire sur le canal à 2,5 cm** : la largeur au-dessus de **80 %**, le creux sous **10 % de `H`** (`Complete` 9 mm ;
+   `WithoutSurface` 40,5 mm).
 
-**Contrôles du plan** (ADR-266)
+**Les quanta** (ADR-288 D2) : le seuil de trois mailles vaut 7,5 cm d'eau. La lame de S645 en a moins, le canal (0,5 m) beaucoup plus.
 
-- **témoin** : les journaux et les preuves de S741 à S745 ; un appel de `rituel.py fin --lot` sans la ligne, qui doit refuser.
-- **instrument** : la relecture ; la sortie de l'outil.
-- **calcul** : aucun.
-- **ADR** : ADR-222 D4 ; ADR-213 D3 (le lot) ; ADR-236 ; ADR-287 D1, D2.
-- **pièges** : le faux appel ne doit rien écrire : il est fait sur une copie de l'arbre propre, puis l'arbre est restauré (`git restore`).
+**Contrôles du plan** (ADR-276, ADR-287, ADR-288)
+
+- **témoin** : les deux variantes de S744 et S745, sur les mêmes essais ; le repos exact ; la loi ; l'onde exacte.
+- **instrument** : ceux de S743, S645 et S740.
+- **calcul** : le repos (2 min), la remontée (8 min), le canal (13 min), en série.
+- **ADR** : ADR-276 D2 (une différence : le seuil de la lame mince) ; ADR-287 D1 ; ADR-288 D1, D2.
+- **pièges** :
+  - une colonne qui passe le seuil pendant le pas change de traitement : c'est le comportement voulu ;
+  - le juge du déferlement, plus tard, dira si la variante garde le plongeon (S709).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-288 ; METHODE ; l'outil et son essai.
-- [x] **P3** — fermeture.
+- [ ] **P2** — la variante ; (1), (2), (3).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-288 (D1 le repos d'abord ; D2 trois quanta, la crête dans une fenêtre ; D3 le lot vérifié par l'outil ; D4 la prémisse « au bit » vérifiée sur un petit cas). `rituel.py` : le faux appel `fin --lot` refuse (« aucune ligne de lot **S…–S746** »), sans rien écrire. METHODE, l'index.
