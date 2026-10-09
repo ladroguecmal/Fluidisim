@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-09 04:23 +02:00
+JETON            : occupé
+Battement        : 2026-10-09 04:26 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S723 — B1, Saint-Venant troué (session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S722 — L'étape 3 du LOD conçue ([journal](notes/JOURNAL.md)). Avant : S721 (la quarante-huitième revue de méthode)
 Session suivante : S723 — B1, Saint-Venant troué (le trou rempli par un second Saint-Venant)
 Maillons        : 1

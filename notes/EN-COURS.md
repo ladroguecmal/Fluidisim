@@ -62,33 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S722 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). L'étape 2 du LOD est faite : N1, N2, M1 et la vague de bout en
-bout (S707–S720) ; R43 attend son verdict. Le déclencheur au plus simple (D1) est remis : sur les plages de référence, l'onde touche la
-bande dès le départ, et il ne se juge pas utilement sans la décision « faut-il la 3D ? », que l'utilisateur a voulu remettre.
-**La conception de l'étape 3 : la 3D rallumée autour d'un corps** (ADR-275 D2).
+Session : S723 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B1 : Saint-Venant
+troué**.
 
-**Ce que la session fait.** Le registre `LOD-ETAPE-3-S722` : les pièces, une par session au plus, chacune avec son essai.
+**Ce que la session fait.** Dans `SaintVenant2D`, à l'ordre deux :
+- **`regler_trou(i0, i1, j0, j1)`** : un rectangle de mailles gelées. Leurs faces avec l'eau active deviennent des parois (la pression de
+  la maille active, aucun flux calculé), et la reconstruction des mailles voisines n'y lit rien (les pentes y sont nulles, comme aux
+  bords du domaine) ;
+- **`pas_avec_flux_trou(dt, flux)`** : sur chaque face du trou, la masse `F` entre dans la maille active (positive) ou en sort. Elle
+  emporte `F·u` et `F·v` de la maille active, comme le flux imposé au bord droit (S687). Les faces sont rangées : la gauche, la droite (par
+  `j`), puis le bas, le haut (par `i`) ;
+- **`pas_avec_flux_bords4(dt, flux)`** : le même flux imposé sur les quatre bords du domaine (la gauche, la droite par `j` ; le bas, le
+  haut par `i`), positif vers l'intérieur.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-277)
+Sans trou ni flux, le code ne change pas (le banc au bit).
 
-- **témoin** : sans objet (une conception).
-- **instrument** : chaque pièce nomme son essai, et d'abord son essai entre deux copies du même solveur (ADR-273 D1).
-- **calcul** : le coût d'une boîte de 3D de 1 m × 1 m, à 2,5 cm, sur 0,5 m d'eau : 40 × 40 × 20 mailles d'eau × 8 particules ≈ 256 000
-  particules. C'est l'ordre du tout-3D de S690 : il est montré et mesuré dans la pièce qui l'emploie.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) :
-  - ADR-275 D2 ;
-  - ADR-273 D1, pièce par pièce ;
-  - ADR-280 D1 : la surface à la naissance et à la mort ;
-  - ADR-282 : la fermeture par l'outil.
-- **pièges** : un raccord sur quatre côtés n'est pas deux raccords de plus. Les coins, où deux côtés se touchent, ont leur propre essai.
+**L'essai, entre deux copies du même solveur (ADR-273 D1).** Une bosse d'eau (2 cm, rayon 0,3 m) sur un fond plat de 3 m × 3 m
+(`dx` = 5 cm) s'étale en rond ; un trou de 0,75 m × 1,25 m sur son chemin. Le Saint-Venant troué et un second Saint-Venant, qui remplit le
+trou, échangent à chaque pas le flux de masse de Rusanov calculé entre leurs mailles voisines. Le même flux, de signe opposé, va aux deux.
 
-**Critères.** Le registre, chaque pièce avec son essai et son critère ; la note sur ADR-275.
+**Critères, écrits avant.**
+1. La masse des deux ensemble, au bit (10⁻¹²).
+2. Contre le Saint-Venant entier, après 1,5 s : l'écart maximal de `h` sous **5 %** de l'amplitude de la bosse (1 mm). Le flux d'interface
+   est gelé sur le pas de Heun, et d'ordre un : une erreur d'ordre `dt` est attendue.
+3. Le banc de non-régression au bit (le défaut inchangé).
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-277, ADR-281)
+
+- **témoin** : le Saint-Venant entier, le même pas, la même bosse.
+- **instrument** : l'écart maximal de `h` et la masse, recalculés à la fin (ADR-281 D2 : ils peuvent échouer).
+- **calcul** : la bosse de 2 cm sur 0,5 m d'eau, `c` = 2,2 m/s : en 1,5 s, l'onde parcourt 3,3 m et traverse le trou. Le pas : Courant
+  0,4.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-273 D1 (deux copies) ; ADR-282 (la fermeture par l'outil).
+- **pièges** :
+  - les quatre côtés ont des signes opposés ; on vérifie que la masse se tient pour chacun ;
+  - les coins du trou n'ont pas de face diagonale (rien à faire) ;
+  - le chemin d'ordre un n'est pas touché (le trou demande l'ordre deux).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le registre ; la note.
-- [x] **P3** — la fermeture (`fermer.py`).
+- [ ] **P2** — le trou, les flux ; l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — LOD-ETAPE-3-S722 (B1 Saint-Venant troué, B2 APIC à quatre bords, B3 le raccord de la boîte, B4 la boîte qui suit le corps, B5 le déclencheur de présence) ; la note datée sur ADR-275.
