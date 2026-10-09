@@ -490,6 +490,8 @@ pas recopiée ici (L137).
   ([preuve](validation/LECTURE-PARTICULES-S737.md)).
   **S738** : S645 redonné au millimètre (aucune régression) ; la remontée de S4 trop haute vient de la distance parcourue sur le fond
   plat (+47 % avec 3 m de plus, −7 % sans) : l'onde de départ se transforme dans la 3D ([preuve](validation/DISTANCE-PARCOURUE-S738.md)).
+  **S739** : **la 3D ne garde pas une onde solitaire** sur fond plat (la crête +50 %, la largeur ÷ 5, un creux derrière, en 10 m, à 2,5 cm
+  comme à 5 cm, quelle que soit l'onde de départ) : la cause commune de la 3D trop haute ([preuve](validation/ONDE-SOLITAIRE-3D-S739.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

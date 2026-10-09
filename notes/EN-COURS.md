@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S739 — **en cours**. En autonomie ; session longue. DISTANCE-PARCOURUE-S738. **La question** : comment l'onde solitaire posée
+Session : S739 — **terminée**. En autonomie ; session longue. DISTANCE-PARCOURUE-S738. **La question** : comment l'onde solitaire posée
 aujourd'hui se transforme-t-elle dans la 3D sur un fond plat, et une onde de départ dotée de son profil vertical (celui de SGN, S698) se
 garde-t-elle mieux ?
 
@@ -108,10 +108,10 @@ S'il n'y en a pas, la question reste ouverte, avec les nombres. L'application à
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le canal, les deux ondes, les mesures ; E1, E2 à 5 cm.
-- [ ] **P3** — **E3 changé, après E1–E2** (aucune onde retenue) : **A à 2,5 cm**, pour savoir si la déformation tient à la maille. Critère
+- [x] **P3** — **E3 changé, après E1–E2** (aucune onde retenue) : **A à 2,5 cm**, pour savoir si la déformation tient à la maille. Critère
   écrit avant : à 2,5 cm, la largeur à mi-hauteur reste au-dessus de **80 %** de sa valeur à 0,25 s, et le creux sous **10 % de `H`**
   jusqu'à 4,25 s. Si oui, la maille de 5 cm est la cause ; sinon, la 3D à la maille des témoins déforme l'onde.
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — E1 et E2 à 5 cm (349 s) : **les deux ondes se déforment pareil**.
@@ -121,3 +121,4 @@ S'il n'y en a pas, la question reste ouverte, avec les nombres. L'application à
   - **B non retenue** : l'onde de départ n'est pas la cause. La 3D à 5 cm ne garde pas une onde solitaire : elle la raidit et la rétrécit,
     comme un modèle sans dispersion, et un creux se creuse derrière.
   - Le résumé imprimé (±inf) est faux : la mesure à t = 0 est prise avant toute reconstruction de la surface. Les séries affichées font foi.
+- **P3 fini** — A à 2,5 cm (873 s) : la largeur 2,35 → 0,45 m, la crête 96 → 150 mm, le creux −42 mm, la célérité 2,19 m/s (−10 %). **Manqué** : la 3D à la maille des témoins déforme l'onde. Le suspect suivant : la pression (le gradient conjugué plafonné à 4 000 itérations).

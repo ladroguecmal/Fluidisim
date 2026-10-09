@@ -2222,3 +2222,13 @@ de S4 vers S645, l'instrument de S645 dans le témoin. **Mesuré** :
 **L'écart désigné : la distance parcourue sur le fond plat.** L'onde de départ (une vitesse uniforme sur la verticale) se transforme dans la
 3D, et c'est le suspect commun de la crête trop haute (S713, S1). Maillons **0** (diagnostic). Suivant : **S739**, l'onde dans la 3D sur un
 long canal plat, puis l'onde de départ exacte.
+
+## S739 — 2026-10-09 — L'onde solitaire se déforme dans la 3D
+
+**Entrée.** DISTANCE-PARCOURUE-S738. **Fait** ([preuve](../docs/validation/ONDE-SOLITAIRE-3D-S739.md)) : un canal plat de 24 m, deux
+ondes de départ (A : celle d'aujourd'hui ; B : avec le profil vertical de SGN). **Mesuré** : **la 3D ne garde pas une onde solitaire**.
+- À 2,5 cm, en 5 s : la crête 96 → 150 mm, la largeur à mi-hauteur 2,35 → 0,45 m, un creux de −42 mm derrière, la célérité −10 %.
+- À 5 cm, de même et plus vite, avec A comme avec B.
+
+Ce n'est donc ni la maille ni l'onde de départ. C'est la cause commune de la 3D trop haute (S713, S733, S738). Le suspect suivant : la
+pression, plafonnée à 4 000 itérations. Maillons **0** (diagnostic). Suivant : **S740**, la pression du canal.

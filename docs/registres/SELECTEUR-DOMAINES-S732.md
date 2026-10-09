@@ -161,3 +161,6 @@ montée ; il n'est pas « sans déferlement ». La scène sans aucun déferlemen
 *Note datée du 2026-10-09 (S738)* : la remontée trop haute de S4 vient de la distance parcourue sur le fond plat
 ([preuve](../validation/DISTANCE-PARCOURUE-S738.md)). L'onde de départ (une vitesse uniforme sur la verticale) se transforme dans la 3D.
 Les témoins de la batterie en dépendent ; l'onde de départ exacte vient avant le calibrage.
+
+*Note datée du 2026-10-09 (S739)* : **la 3D ne garde pas une onde solitaire** sur un fond plat ([preuve](../validation/ONDE-SOLITAIRE-3D-S739.md)).
+C'est la cause commune de la 3D trop haute (S713, S733, S738). Les témoins et le calibrage attendent sa correction.
