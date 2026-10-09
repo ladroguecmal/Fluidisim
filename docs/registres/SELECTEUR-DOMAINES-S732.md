@@ -137,3 +137,9 @@ Plus tard, dans le même registre :
 - la place de la vague et son jet sont prévus à 0,1 m, pour 68 ms ;
 - l'instant du déclenchement ne l'est pas encore : les seuils publiés tombent de 0,5 à 0,85 m à côté. Le calibrage attend les témoins de
   P2.
+
+*Note datée du 2026-10-09 (S734)* : **P2, les témoins**, en partie ([preuve](../validation/TEMOINS-SELECTEUR-S734.md)).
+- S2 est sûr : le retournement à 3,29 s.
+- S3 déferle à 3,49 s, mais sa durée dépassait son mur : à refaire.
+- S4 n'a pas de témoin valable : le front se fige sur la pente de 1:3, que le fond soit en escalier ou lisse. À diagnostiquer en S735,
+  avant tout calibrage.

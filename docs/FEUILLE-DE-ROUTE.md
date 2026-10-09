@@ -529,6 +529,9 @@ dans la boîte (B4a : la force à 2 %) ; la boîte qui suit le corps (B4b : 33 a
 **S729–S731** : la boîte qui naît et meurt avec le corps (B5 : l'étape 3 du LOD faite) ; **R43 reçu** (ADR-284) — le raccord du rivage placé
 au-delà du jet efface le mur de Saint-Venant (28 cm → 0) pour 6 % de calcul, le tout-3D refait ; la cinquantième revue (ADR-285 : un témoin
 contrôlé comme l'objet ; le sélecteur des domaines, la campagne suivante, à la demande de l'utilisateur) (4.14).
+**S732–S734** : le sélecteur des domaines conçu (sept scènes, trois juges) ; le prédicteur (SGN sur fond doux en avance, 68 ms pour 3 s :
+la vague et son jet prévus à 0,1 m, l'instant du déferlement pas encore) ; les témoins (S2 sûr ; S3 et S4 à refaire, S4 à diagnostiquer)
+(4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

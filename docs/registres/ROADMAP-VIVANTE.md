@@ -66,5 +66,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   Saint-Venant, la masse au bit. Reste à la faire suivre un corps (B4) et à la déclencher (B5). Au lot S726–S728 : **la bulle de 3D suit son
   corps** (B4a, B4b) — la force à 2 % (fixe) et 6 % (qui suit), six fois moins de 3D. Reste le déclencheur de présence (B5). Au lot S729–S731 : **B5 fait, l'étape 3 du LOD
   faite** ; R43 reçu, le mur du raccord du rivage effacé (ADR-284) ; **le sélecteur des domaines** devient la campagne suivante, la pièce
-  la plus exigée (ADR-285 D4).
+  la plus exigée (ADR-285 D4). Au lot S732–S734 : le sélecteur conçu ; le prédicteur prévoit la vague et son jet, pas encore l'instant
+  du déferlement ; un témoin sûr (S2) sur trois ; S4 (la pente de 1:3) à diagnostiquer avant tout calibrage.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

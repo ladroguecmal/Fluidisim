@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S734 — **en cours**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P2 : les témoins**. **La question** : les scènes
+Session : S734 — **terminée**. En autonomie ; session longue. SELECTEUR-DOMAINES-S732, **P2 : les témoins**. **La question** : les scènes
 S2, S3 et S4 en tout-3D, sans aucun raccord, que donnent-elles (le retournement, la crête, la remontée), et que prévoit le prédicteur de
 S733 sur chacune ? Ce sont les données du calibrage du prédicteur (S735).
 
@@ -119,10 +119,10 @@ S4 change de pente par rapport au registre (0,03 sur 1:12) : une onde de 15 mm y
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — le témoin générique, le porteur générique ; la compilation ; S4.
-- [ ] **P3** — S2 et S3 (en arrière-plan) ; les nombres au fil du calcul.
-- [ ] **P3c** — **ajouté après S4** : S4 sur le **fond lisse** (S640), les mêmes critères (1) et (2) ; la comparaison des deux fonds localise
+- [x] **P3** — S2 et S3 (en arrière-plan) ; les nombres au fil du calcul.
+- [x] **P3c** — **ajouté après S4** : S4 sur le **fond lisse** (S640), les mêmes critères (1) et (2) ; la comparaison des deux fonds localise
   l'écart (ADR-226 D1).
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **Écart au plan, S2** : sans approche ajoutée (le départ de S712) ; le retournement vient vers 3,3 s, ce qui laisse au prédicteur plus de
@@ -140,3 +140,9 @@ S4 change de pente par rapport au registre (0,03 sur 1:12) : une onde de 15 mm y
   1 m du mur » y est faux par construction. **Corrigé avant le calcul** : le niveau de la colonne du mur reste à 5 mm du repos.
 - **Reprise** (2026-10-09) : le travail fait après `44807cd2` a été effacé à la demande de l'utilisateur. S2, S3 et S4 sur fond lisse
   tournent en série, seuls.
+- **P3 et P3c finis** :
+  - S2 **tenu** (3,290 s ; 12,013 m ; 1 681 s) ;
+  - S3 **manqué** sur le mur : la vague l'atteint, 307 mm, parce que la durée était trop longue ; le déferlement à 3,488 s, à 9,54 m ; 4 012 s ;
+  - S4 sur fond lisse **manqué** : la remontée 0,600 m (+83 %) ; le front figé à 13,113 m dès 4,1 s ; un « retournement » à 4,14 m ;
+    2 113 s.
+- Le prédicteur rapporté sur chaque scène. L'utilisateur accepte de fermer ainsi ; le diagnostic de S4 en S735.

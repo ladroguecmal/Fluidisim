@@ -480,6 +480,9 @@ pas recopiée ici (L137).
   frontières au-delà du jet, la surveillance et le rattrapage, sept scènes jugées contre le tout-3D.
   **S733** : le prédicteur (SGN sur fond doux, en avance ; 68 ms pour 3 s) : la place de la vague et son jet prévus à 0,1 m ; l'instant
   du déferlement pas encore (les seuils publiés hors de 0,3 m) ([preuve](validation/PREDICTEUR-S733.md)).
+  **S734** : les témoins du sélecteur — S2 (Synolakis) sûr, le déferlement à 3,29 s ; S3 (glissante) déferle à 3,49 s, mais sa durée
+  dépassait son mur ; S4 (sans déferlement) sans témoin valable (le front figé sur la pente, à diagnostiquer)
+  ([preuve](validation/TEMOINS-SELECTEUR-S734.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

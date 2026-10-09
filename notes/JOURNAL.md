@@ -2162,3 +2162,16 @@ prédicteur.
 - 277 ms à 2,5 cm (manqué), puis 68 ms à 5 cm (E3, tenu).
 
 Maillons **1** (4.14). Suivant : **S734**, P2, les témoins.
+
+## S734 — 2026-10-09 — Les témoins du sélecteur (P2), en partie
+
+**Entrée.** SELECTEUR-DOMAINES-S732, P2. Un volet visuel lancé en parallèle a été **annulé et effacé** à la demande de l'utilisateur (une
+tranche 2D étirée en vague uniforme : pas le souhait) ; le dépôt est revenu à `44807cd2`, puis la session a repris seule.
+**Fait** ([preuve](../docs/validation/TEMOINS-SELECTEUR-S734.md)) : le témoin tout-3D générique, le prédicteur sur chaque scène.
+**Mesuré** :
+- S2 (Synolakis) **tenu** : le retournement à 3,290 s, à 12,01 m ;
+- S3 déferle à 3,488 s, mais sa durée dépassait son mur (manqué, une erreur de montage) ;
+- S4 sans témoin valable : sur l'escalier comme sur le fond lisse, le front se fige sur la pente de 1:3 (+47 % ; +83 %).
+
+Le prédicteur : le rapport 0,8 juste sur S2, faux sur S1 ; SGN déclenche 2 à 6 s trop tard sur S3. Maillons **1** (4.14). Suivant :
+**S735**, le diagnostic de S4.
