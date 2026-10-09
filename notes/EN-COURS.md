@@ -62,30 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S726 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). **La quarante-neuvième revue de méthode** (ADR-222 D4 :
-S721–S725).
+Session : S727 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B4a : un corps dans la
+boîte**. La boîte est fixe ; une sphère la traverse. Son déplacement avec le corps (B4b) vient ensuite.
 
-**Contrôles du plan** (ADR-266, ADR-267, ADR-268)
+**L'essai.** Une sphère de rayon 8 cm, son centre à la surface (z = 0,4 m, à demi immergée), tirée à 0,3 m/s selon x pendant 1,5 s :
+- **le témoin** : un APIC entier de 2 m × 2 m (80 × 80 × 24, ≈ 820 000 particules), aux murs fermés ;
+- **la boîte** : un APIC de 1 m × 1 m au milieu, dans un Saint-Venant de 2 m × 2 m troué au même endroit, aux mêmes murs.
 
-- **témoin** : sans objet (une revue).
-- **instrument** : la relecture des cinq sessions, contre leurs critères. Les règles se cherchent d'abord dans METHODE :
-  - ADR-273 D1, un raccord jugé d'abord entre deux copies du même solveur ;
-  - ADR-273 D2, une seule source ;
-  - ADR-267 D2, un script de plus de 20 lignes par l'outil d'écriture ;
-  - le plan avant le travail.
-  Rien encore sur le régime commun de deux modèles différents, ni sur les constantes de deux solveurs mêlées dans un bilan.
-- **calcul** : aucun nombre hors des sessions relues.
-- **ADR**, et comment chacun est tenu (ADR-277 D1) : ADR-222 D4, la revue elle-même.
-- **pièges** : prendre une règle déjà écrite pour une règle nouvelle ; ajouter une protection pour une friction qui n'a rien coûté.
+Les deux ont les mêmes murs : les vagues qui y rebondissent sont les mêmes. Seul le dehors de la boîte change, la 3D contre Saint-Venant.
 
-**Critères, écrits avant.** (1) ADR-283 relit chaque session et sa friction ; (2) une protection nouvelle seulement pour une friction qui a
-coûté ; (3) la prochaine revue nommée.
+**Critères, écrits avant** (ADR-283 D1 : les vagues d'un corps sont courtes, et Saint-Venant les porte mal ; on juge ce qui compte en jeu,
+la 3D près du corps) :
+1. la force sur la sphère : son écart moyen au témoin, sur 0,2 à 1,5 s, sous **10 %** de sa moyenne ;
+2. la surface dans la boîte à 1,0 s : l'écart quadratique moyen au témoin sous **20 %** de la plus haute vague du témoin ;
+3. la masse à 10⁻¹².
+
+**Contrôles du plan** (ADR-266, ADR-267, ADR-268, ADR-273, ADR-276, ADR-277, ADR-280, ADR-281, ADR-283)
+
+- **témoin** : la même 3D, entière (ADR-273 D1). Les murs sont les mêmes ; la boîte et ses particules aussi, au même réseau.
+- **instrument** :
+  - la force sur le corps (`body_force`), à chaque pas ;
+  - la surface par colonne (φ), dans la boîte ;
+  - la masse.
+  Tous peuvent échouer (ADR-281 D2). Ce que rendrait chaque hypothèse :
+  - si le raccord renvoie peu des vagues courtes, la force et la surface sont près du témoin ;
+  - s'il les réfléchit, la surface dans la boîte s'en écarte, la force moins.
+- **calcul** :
+  - le témoin : ≈ 820 000 particules, ≈ 17 min pour 1,5 s ;
+  - la boîte : ≈ 205 000 particules, ≈ 4 min.
+- **ADR**, et comment chacun est tenu (ADR-277 D1) :
+  - ADR-283 D1 : l'état de départ de Saint-Venant est le niveau que lit la boîte ; le régime est celui du jeu, et la limite est nommée ;
+  - ADR-276 D1 : la même construction pour les deux, la sphère et le réseau ;
+  - ADR-282 : la fermeture par l'outil.
+- **pièges** :
+  - le repère : la boîte commence à (0,5 ; 0,5) m dans le témoin ;
+  - les particules hors de la sphère au départ ;
+  - le même pas pour les deux (le plus petit).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-283 ; METHODE.
-- [x] **P3** — fermeture.
+- [ ] **P2** — l'essai ; (1)–(3).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-283 : D1 (un état et un régime partagés pour juger un raccord entre deux modèles), D2 (les constantes de chaque solveur dans un bilan), D3 (rappel : le plan avant le code) ; la prochaine revue S731.
