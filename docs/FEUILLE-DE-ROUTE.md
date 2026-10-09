@@ -522,6 +522,8 @@ le tout-3D, le déferlement dans la tolérance, la remontée +3 cm) ; la même o
 SGN) (4.14).
 **S720–S722** : le jalon visuel de la phase A (la vague de bout en bout contre le tout-3D, rendue ; R43 posée) ; la quarante-huitième
 revue (ADR-282 : la fermeture par `outils/fermer.py`) ; l'étape 3 du LOD conçue (la 3D rallumée autour d'un corps) (4.14).
+**S723–S725** : Saint-Venant troué (B1 : le flux complet, 1,6 %) ; APIC à quatre bords (B2 : la masse et l'écoulement) ; le raccord de la
+boîte (B3 : au repos au micron, la masse au bit, une onde longue réfléchie à 9 %) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

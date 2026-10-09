@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-09 05:18 +02:00
+JETON            : libre
+Battement        : 2026-10-09 06:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S725 — B3, le raccord de la boîte avec Saint-Venant troué (session longue) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S724 — APIC à quatre bords (B2) ([journal](notes/JOURNAL.md)). Avant : S723 (Saint-Venant troué)
-Session suivante : S725 — B3, le raccord de la boîte avec Saint-Venant troué (au repos, puis une onde longue)
+Session en cours : aucune
+Dernière session : S725 — Le raccord de la boîte (B3) ([journal](notes/JOURNAL.md))
+Session suivante : S726 — la quarante-neuvième revue de méthode (S721–S725) ; puis B4, la boîte qui suit un corps
 Maillons        : 1
-Registres       : dernier lot S724 (ADR-213 D3) ; le prochain au plus tard en S727
+Registres       : dernier lot S725 (ADR-213 D3) ; le prochain au plus tard en S728
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

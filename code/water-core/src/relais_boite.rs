@@ -27,6 +27,9 @@ pub struct RelaisBoite {
     pub j0: usize,
     /// S725 — le volume rendu à Saint-Venant pour garder la masse exacte, au total (m³, en valeur absolue).
     pub correction: f64,
+    /// S725 — la dette de chaque face (m³) : ce que Saint-Venant doit recevoir encore. Elle est rendue par fraction, étalée sur les mailles
+    /// voisines : rendue d'un coup dans une seule maille, un quantum (`dx/8` de hauteur) y faisait un pic de 3 mm.
+    pub dette: Vec<f64>,
 }
 
 impl RelaisBoite {
@@ -38,7 +41,11 @@ impl RelaisBoite {
             return Err(Refus::Montage);
         }
         sv.regler_trou(i0, i0 + d.nx, j0, j0 + d.ny).map_err(|_| Refus::Montage)?;
-        Ok(RelaisBoite { apic, sv, i0, j0, correction: 0. })
+        if i0 < 3 || j0 < 3 || i0 + d.nx + 3 > sv.nx || j0 + d.ny + 3 > sv.ny {
+            return Err(Refus::Montage);
+        }
+        let n = 2 * (d.nx + d.ny);
+        Ok(RelaisBoite { apic, sv, i0, j0, correction: 0., dette: vec![0.; n] })
     }
 
     /// Le quantum d'APIC (m³).
@@ -64,7 +71,7 @@ impl RelaisBoite {
         v += self.apic.left_inlet().map_or(0., |g| g.3.iter().sum::<f64>());
         v += self.apic.right_inlet().map_or(0., |r| r.0.iter().sum::<f64>());
         v += self.apic.y_boundaries().map_or(0., |b| b.5);
-        v
+        v + self.dette.iter().sum::<f64>()
     }
 
     /// Le pas stable (µs) sous `plafond_us` : APIC, et Saint-Venant à Courant 0,4.
@@ -86,6 +93,9 @@ impl RelaisBoite {
         let d = self.apic.domain();
         let (nx, ny, nz) = (d.nx, d.ny, d.nz);
         let (dx, dt, g) = (d.dx as f64, us as f64 * 1e-6, self.sv.g);
+        // S725 : tout ce qui touche Saint-Venant se compte avec son pas (`f64`), non celui d'APIC (`f32`) — la différence (1,5·10⁻⁸)
+        // laissait fuir la masse au pas.
+        let dxs = self.sv.dx;
         let nsv = self.sv.ny;
         // 1. L'état des colonnes 3D : le niveau par la surface reconstruite, les vitesses moyennes des particules.
         let (phi, l) = (self.apic.distance(), self.apic.labels());
@@ -147,6 +157,11 @@ impl RelaisBoite {
             (f0 / h).clamp(-borne(h, u), borne(h, u))
         };
         let part = |h: f64, k: usize| ((h - k as f64 * dx) / dx).clamp(0., 1.);
+        // Les poids des couches d'une colonne de niveau `h` (leur somme vaut 1, même sous la première couche).
+        let poids = |h: f64, k: usize| {
+            let s: f64 = (0..nz).map(|q| part(h, q)).sum();
+            if s > 0. { part(h, k) / s } else if k == 0 { 1. } else { 0. }
+        };
         let (mut gx, mut dxr) = (vec![0f32; nz * ny], vec![0f32; nz * ny]);
         let (mut vg, mut bg, mut vd) = (vec![0f64; nz * ny], vec![0f32; nz * ny], vec![0f64; ny]);
         let mut vd_v = 0f64;
@@ -158,7 +173,7 @@ impl RelaisBoite {
                     gx[k * ny + j] = w as f32;
                 }
                 if f[j][0] > 0. {
-                    vg[k * ny + j] = f[j][0] * part(h, k) / (h.max(dx / 4.)) * dt * dx * dx;
+                    vg[k * ny + j] = f[j][0] * dt * dxs * poids(h, k);
                     bg[k * ny + j] = (w.max(0.) * dt) as f32;
                 }
             }
@@ -170,7 +185,7 @@ impl RelaisBoite {
                 }
             }
             if f[ny + j][0] < 0. {
-                vd[j] = -f[ny + j][0] * dt * dx;
+                vd[j] = -f[ny + j][0] * dt * dxs;
                 vd_v = vd_v.min(w);
             }
         }
@@ -186,7 +201,7 @@ impl RelaisBoite {
                         gy[face] = w as f32;
                     }
                     if entre {
-                        vy[face] = f0.abs() * part(h, k) / h.max(dx / 4.) * dt * dx * dx;
+                        vy[face] = f0.abs() * dt * dxs * poids(h, k);
                         by[face] = (w.abs() * dt) as f32;
                     }
                 }
@@ -205,27 +220,45 @@ impl RelaisBoite {
         let sorti_g: Vec<f64> = self.apic.left_inlet().map(|g| g.0.to_vec()).unwrap_or_default();
         let sorti_d: Vec<f64> = self.apic.right_outlet().map(|s| s.0.to_vec()).unwrap_or_default();
         let sorti_y: Vec<f64> = self.apic.y_outlet_step().map(|s| s.to_vec()).unwrap_or_default();
-        let ajouter = |sv: &mut SaintVenant2D, i: usize, j: usize, delta: f64, total: &mut f64| {
-            sv.h[i * nsv + j] = (sv.h[i * nsv + j] + delta / (dx * dx)).max(0.);
-            *total += delta.abs();
-        };
-        let mut total = 0.;
         for j in 0..ny {
             // la gauche : F₀ va de Saint-Venant vers APIC.
             let recu = vg[j..].iter().step_by(ny).sum::<f64>();
-            let delta = f[j][0] * dt * dx - recu + sorti_g.get(j).copied().unwrap_or(0.);
-            ajouter(&mut self.sv, i0 - 1, j0 + j, delta, &mut total);
+            self.dette[j] += f[j][0] * dt * dxs - recu + sorti_g.get(j).copied().unwrap_or(0.);
             // la droite : F₀ va d'APIC vers Saint-Venant.
-            let delta = -(f[ny + j][0] * dt * dx + vd[j] - sorti_d.get(j).copied().unwrap_or(0.));
-            ajouter(&mut self.sv, i0 + nx, j0 + j, delta, &mut total);
+            self.dette[ny + j] -= f[ny + j][0] * dt * dxs + vd[j] - sorti_d.get(j).copied().unwrap_or(0.);
         }
         for i in 0..nx {
             let recu: f64 = (0..nz).map(|k| vy[k * nx + i]).sum();
-            let delta = f[2 * ny + i][0] * dt * dx - recu + sorti_y.get(i).copied().unwrap_or(0.);
-            ajouter(&mut self.sv, i0 + i, j0 - 1, delta, &mut total);
+            self.dette[2 * ny + i] += f[2 * ny + i][0] * dt * dxs - recu + sorti_y.get(i).copied().unwrap_or(0.);
             let recu: f64 = (0..nz).map(|k| vy[nz * nx + k * nx + i]).sum();
-            let delta = -(f[2 * ny + nx + i][0] * dt * dx + recu - sorti_y.get(nx + i).copied().unwrap_or(0.));
-            ajouter(&mut self.sv, i0 + i, j0 + ny, delta, &mut total);
+            self.dette[2 * ny + nx + i] -= f[2 * ny + nx + i][0] * dt * dxs + recu - sorti_y.get(nx + i).copied().unwrap_or(0.);
+        }
+        // Une fraction de chaque dette, rendue à six mailles : trois le long de la face, deux en profondeur (poids 1/4, 1/2, 1/4 × 0,6, 0,4).
+        const FRACTION: f64 = 0.2;
+        let mut total = 0.;
+        for fi in 0..2 * (nx + ny) {
+            let rendu = FRACTION * self.dette[fi];
+            self.dette[fi] -= rendu;
+            total += rendu.abs();
+            // La maille active voisine (i, j), la direction vers l'extérieur (di, dj), la direction le long de la face (li, lj).
+            let (i, j, di, dj, li, lj): (isize, isize, isize, isize, isize, isize) = if fi < ny {
+                (i0 as isize - 1, (j0 + fi) as isize, -1, 0, 0, 1)
+            } else if fi < 2 * ny {
+                ((i0 + nx) as isize, (j0 + fi - ny) as isize, 1, 0, 0, 1)
+            } else if fi < 2 * ny + nx {
+                ((i0 + fi - 2 * ny) as isize, j0 as isize - 1, 0, -1, 1, 0)
+            } else {
+                ((i0 + fi - 2 * ny - nx) as isize, (j0 + ny) as isize, 0, 1, 1, 0)
+            };
+            for (prof, wp) in [(0isize, 0.6), (1, 0.4)] {
+                for (lat, wl) in [(-1isize, 0.25), (0, 0.5), (1, 0.25)] {
+                    let (ii, jj) = ((i + prof * di + lat * li) as usize, (j + prof * dj + lat * lj) as usize);
+                    let dans = (i0..i0 + nx).contains(&ii) && (j0..j0 + ny).contains(&jj);
+                    // Une maille du trou (au coin) ne reçoit rien : sa part va à la maille active voisine de la face.
+                    let (ii, jj) = if dans { (i as usize, j as usize) } else { (ii, jj) };
+                    self.sv.h[ii * nsv + jj] += rendu * wp * wl / (dxs * dxs);
+                }
+            }
         }
         self.correction += total;
         Ok(())

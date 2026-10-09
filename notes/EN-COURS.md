@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S725 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B3 : le raccord de la
+Session : S725 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort) ; session longue. LOD-ETAPE-3-S722, **B3 : le raccord de la
 boîte**. Saint-Venant troué (B1) et APIC à quatre bords (B2) sont réunis.
 
 **Ce que la session fait.** `relais_boite.rs`, `RelaisBoite`. À chaque pas, pour chaque face du trou :
@@ -105,9 +105,13 @@ Les sorties en y sont comptées par face (`y_outlet_step`), et le flux de Rusano
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E1, E2.
-- [ ] **P3** — preuve ; fermeture (le lot S723–S725).
+- [x] **P2** — E1, E2, E2′.
+- [x] **P3** — preuve ; fermeture (le lot S723–S725).
 
 ### Notes de reprise
 - **E1, premier passage : échoue** (APIC 1,2 m/s, Saint-Venant 0,5 m/s, 6 cm). Le diagnostic du premier pas : la surface reconstruite de la boîte se lit à 0,39931 m pour 0,4 m posés. Saint-Venant, à 0,4 m, poussait son eau dans la boîte ; elle n'y entre que par quanta, le niveau lu ne monte pas, et le couplage s'emballe. **Le remède de S684** (ADR-273 D2, une seule source) : Saint-Venant part du niveau que lit la 3D. Les mêmes critères.
 - **E1 tenu** (second passage) : APIC 4,6·10⁻⁶ m/s, Saint-Venant 2,4·10⁻⁶ m/s, |η| 2,9·10⁻⁷ m, la masse 6,5·10⁻¹⁴.
+- **E2, premier passage : échoue** — la masse 6,1·10⁻¹¹ (critère 10⁻¹²), la réflexion 23 % (critère 10 %), l'aval 17 %. La cause : le bilan rendu d'un coup à une seule maille ; un quantum fait `dx/8` de hauteur (3 mm), un pic sur une onde de 2 cm. **Le remède** : une dette par face, comptée dans la masse, rendue par fraction (20 % par pas), étalée sur six mailles voisines. Le plancher `max(0)` de la hauteur est retiré (il cassait la masse). Les mêmes critères.
+- **E2, second passage** (la dette étalée) : la réflexion 18,8 %, la masse 5,8·10⁻¹¹ ; la dette n'était pas la cause principale. **Le témoin était mal choisi** : la bosse de rayon 0,4 m est dispersive (`kd` ≈ 1,6). La 3D la porte autrement que Saint-Venant, et ce désaccord physique réfléchit aussi. Le jugement du raccord demande une onde que les deux portent également. **E2′**, les mêmes critères : une onde longue (rayon 1,2 m, `kd` ≈ 0,5), Saint-Venant 6 m × 6 m, la boîte au milieu. La masse (6·10⁻¹¹) reste à expliquer.
+- **E2′ (l'onde longue) : la réflexion 8,7 % (tenue)**, l'aval 13,5 % ; la masse 2,4·10⁻¹¹ (échoue). Le diagnostic, pas à pas : ≈ 10⁻¹² m³ par pas pendant l'entrée, 1,7·10⁻⁸ de l'échange. C'est la précision d'un `f32` : le pas d'APIC (0,025000000373) contre celui de Saint-Venant (0,025). **Le remède** : tout ce qui touche Saint-Venant se compte avec son pas, et les volumes posés sont répartis par des poids normalisés.
+- **P2 fini** — E1 tenu (6,5·10⁻¹⁴) ; E2 la réflexion 18 % (la bosse dispersive : le désaccord des modèles) ; **E2′ tenu** : la réflexion 9,0 %, la masse 2,3·10⁻¹⁴. B3 acquis.

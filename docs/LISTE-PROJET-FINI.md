@@ -466,6 +466,8 @@ pas recopiée ici (L137).
   à 1,6 % du Saint-Venant entier ([preuve](validation/SV-TROUE-S723.md)).
   **S724** : APIC à quatre bords (B2) — au repos au micron ; un courant en biais à 0,5 %, le volume à 0,4 % ; quelques millimètres de rides à
   l'entrée en y ([preuve](validation/BOITE-QUATRE-BORDS-S724.md)).
+  **S725** : le raccord de la boîte (B3) — APIC à quatre bords dans Saint-Venant troué : au repos au micron, la masse au bit, une onde
+  longue réfléchie à 9 % ([preuve](validation/RACCORD-BOITE-S725.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

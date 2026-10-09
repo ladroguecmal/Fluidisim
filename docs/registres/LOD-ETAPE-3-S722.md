@@ -45,3 +45,7 @@ Saint-Venant entier, à condition d'échanger le **flux complet** (la masse seul
 
 *Note datée du 2026-10-09 (S724)* : **B2 acquis pour la masse et l'écoulement** — la boîte à quatre bords au repos au micron, un courant en
 biais à 0,5 % ([preuve](../validation/BOITE-QUATRE-BORDS-S724.md)). Restent quelques millimètres de rides à l'entrée en y, à juger dans B3.
+
+*Note datée du 2026-10-09 (S725)* : **B3 acquis** — la boîte de 3D au milieu de Saint-Venant, au repos au micron, la masse au bit, une
+onde longue réfléchie à 9 % ([preuve](../validation/RACCORD-BOITE-S725.md)). Une onde dispersive réfléchit deux fois plus : c'est le
+désaccord des modèles, non le raccord. Suivant : B4, la boîte qui suit un corps.

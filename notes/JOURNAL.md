@@ -2078,3 +2078,11 @@ bash, sans effet (ADR-267 D2 le défend : à la revue). **B1 acquis.** Maillons 
 0,4 % (tenus) ; l'écart maximal et la surface échouent. Le témoin en x seul montre le même écart de vitesse (la surface libre d'APIC) ;
 l'entrée en y ajoute ≈ 3,5 mm de rides. Maillons **1** (4.14). Suivant : **S725**, B3, le raccord de la boîte avec Saint-Venant ; la revue en
 S726.
+
+## S725 — 2026-10-09 — Le raccord de la boîte (B3)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; LOD-ETAPE-3-S722. **Fait** ([preuve](../docs/validation/RACCORD-BOITE-S725.md)) :
+`RelaisBoite` (le flux complet par face, `F₀/h` au bord d'APIC, la dette par face étalée). Trois fautes trouvées et nommées : le niveau de
+départ (Saint-Venant part de ce que lit la 3D, comme en S684), les pics d'un quantum dans une maille, la fuite de masse d'un `f32`.
+**Mesuré** : au repos au micron, la masse au bit ; une onde longue réfléchie à 9 % (tenu) ; une bosse dispersive à 18 % (le désaccord des
+modèles). **B3 acquis.** Maillons **1** (4.14). Lot S723–S725. Suivant : **S726**, la quarante-neuvième revue ; puis B4.

@@ -62,5 +62,6 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   la suite de la phase A est M1 (la mort), puis le déclencheur et l'ensemble. Au lot S717–S719 : **la vague de bout en bout fonctionne**,
   pour 4 fois moins de calcul que le tout-3D. La remontée est 3 cm plus haute (≈ 35 cm de lame), un écart de SGN contre la 3D. Le jalon
   de la phase A, une séance visuelle (R43), vient après la revue S721. Au lot S720–S722 : R43 posée (S720) ; l'étape 3 du LOD, la 3D
-  rallumée autour d'un corps, est conçue (cinq pièces).
+  rallumée autour d'un corps, est conçue (cinq pièces). Au lot S723–S725 : B1, B2, B3 acquis — une boîte de 3D vit au milieu de
+  Saint-Venant, la masse au bit. Reste à la faire suivre un corps (B4) et à la déclencher (B5).
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).
