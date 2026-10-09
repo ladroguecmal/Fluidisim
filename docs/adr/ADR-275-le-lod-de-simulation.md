@@ -44,3 +44,7 @@ vitesse, la courbure, l'air enfermé) ou le contact d'un corps. Elle descend ave
 *Note datée du 2026-10-08 (S705)* : l'étape 1 est close par [ADR-278](ADR-278-le-raccord-du-large-retenu.md) D4. La zone de colonnes du
 large est remplacée par le bord à particules, nourri par SGN et posé par la grille. La tolérance de temps de D3 est rapportée à la
 convergence du juge par ADR-278 D2 : la position à 0,15 m, l'instant à 0,1 s.
+
+*Note datée du 2026-10-09 (S722)* : l'étape 2 est faite (N1, N2, M1, la vague de bout en bout, S707–S720). Le déclencheur au plus simple est
+remis, à la demande de l'utilisateur. L'étape 3, la 3D rallumée autour d'un corps, est conçue dans
+[LOD-ETAPE-3-S722](../registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5).

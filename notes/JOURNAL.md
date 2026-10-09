@@ -2056,3 +2056,10 @@ Suivant : **S721**, la quarante-huitième revue (S716–S720).
 ferme par `outils/fermer.py`, qui ne commet que si le script de fin, la compilation et le rituel ont réussi (S702, S719 : une chaîne `;`
 avait commis un état partiel ; la règle d'ADR-279 D2 n'avait pas suffi). D2 : un script de fin vise des chaînes uniques. La session se
 ferme par l'outil lui-même. Maillons **0** (méthode). Suivant : **S722** ; la revue en S726. R43 attend le verdict de l'utilisateur.
+
+## S722 — 2026-10-09 — L'étape 3 du LOD conçue
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort). **Fait** : [LOD-ETAPE-3-S722](../docs/registres/LOD-ETAPE-3-S722.md), la 3D
+rallumée autour d'un corps : B1 (Saint-Venant troué), B2 (APIC à quatre bords), B3 (le raccord de la boîte), B4 (la boîte qui suit le
+corps), B5 (le déclencheur de présence). Chaque pièce a son essai entre deux copies du même solveur d'abord. Le déclencheur au plus simple
+(D1) est remis : il ne se juge pas utilement sur les plages de référence. Maillons **1** (4.14). Lot S720–S722. Suivant : **S723**, B1.

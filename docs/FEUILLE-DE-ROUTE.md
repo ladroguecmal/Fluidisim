@@ -520,6 +520,8 @@ mesuré ; un critère doit pouvoir échouer) (4.14).
 **S717–S719** : la mort de la 3D vers Saint-Venant (M1 acquis, la remontée à 0,2 mm) ; la vague de bout en bout (4 fois moins cher que
 le tout-3D, le déferlement dans la tolérance, la remontée +3 cm) ; la même onde pour SGN et la 3D (l'écart vient de la dynamique de
 SGN) (4.14).
+**S720–S722** : le jalon visuel de la phase A (la vague de bout en bout contre le tout-3D, rendue ; R43 posée) ; la quarante-huitième
+revue (ADR-282 : la fermeture par `outils/fermer.py`) ; l'étape 3 du LOD conçue (la 3D rallumée autour d'un corps) (4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S722 — **en cours**. En autonomie, sans arrêt (l'utilisateur dort). L'étape 2 du LOD est faite : N1, N2, M1 et la vague de bout en
+Session : S722 — **terminée**. En autonomie, sans arrêt (l'utilisateur dort). L'étape 2 du LOD est faite : N1, N2, M1 et la vague de bout en
 bout (S707–S720) ; R43 attend son verdict. Le déclencheur au plus simple (D1) est remis : sur les plages de référence, l'onde touche la
 bande dès le départ, et il ne se juge pas utilement sans la décision « faut-il la 3D ? », que l'utilisateur a voulu remettre.
 **La conception de l'étape 3 : la 3D rallumée autour d'un corps** (ADR-275 D2).
@@ -87,7 +87,8 @@ bande dès le départ, et il ne se juge pas utilement sans la décision « faut-
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — le registre ; la note.
-- [ ] **P3** — la fermeture (`fermer.py`).
+- [x] **P2** — le registre ; la note.
+- [x] **P3** — la fermeture (`fermer.py`).
 
 ### Notes de reprise
+- **P2 fini** — LOD-ETAPE-3-S722 (B1 Saint-Venant troué, B2 APIC à quatre bords, B3 le raccord de la boîte, B4 la boîte qui suit le corps, B5 le déclencheur de présence) ; la note datée sur ADR-275.
