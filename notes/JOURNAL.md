@@ -2006,3 +2006,10 @@ reste vers 0,42 d (la mesure : 0,31 d) ; ni la maille ni le pas n'en sont la cau
 **Entrée.** En autonomie, sans arrêt ; S713. **Fait** ([preuve](../docs/validation/JUGE-PAS-COURT-S714.md)) : le tout-3D de S690 au pas de
 2,5 ms (`Large::AucunPasCourt`). **Mesuré** : le retournement à 2,595 s (−0,042 s), dans la tolérance ; le plafond de 10 ms reste, 2,2 fois
 moins cher. Maillons **1** (4.14). Suivant : **S715**, la renaissance de la 3D par la surface (N2) ; la revue en S716.
+
+## S715 — 2026-10-09 — La renaissance de la 3D par la surface (session longue)
+
+**Entrée.** En autonomie, sans arrêt (l'utilisateur dort) ; ADR-280 D1. **Fait** ([preuve](../docs/validation/RENAISSANCE-SURFACE-S715.md)) :
+`Renaissance::DepuisLaSurface`, la lecture des profils par la surface. **E1 tenu** : renée par la surface, la 3D reste à 1 % de la 3D
+ininterrompue (facteur 0,992 à 1,0 s ; par le compte, S707 : 0,935). **E2** : née de SGN, la phase juste, l'onde 10 % plus haute qui se
+repose. **N2 acquis.** Maillons **1** (4.14). Suivant : **S716**, la quarante-septième revue ; puis M1, la mort par la surface.

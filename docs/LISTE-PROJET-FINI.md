@@ -452,6 +452,8 @@ pas recopiée ici (L137).
   la crête du déferlement rejoint la mesure (0,316 d contre 0,318 d) ([preuve](validation/ONDE-TROP-HAUTE-S713.md)).
   **S714** : le juge de S690 au pas de 2,5 ms se retourne 0,042 s plus tôt, dans la tolérance ; le plafond de 10 ms reste
   ([preuve](validation/JUGE-PAS-COURT-S714.md)).
+  **S715** : la renaissance de la 3D par la surface (N2 acquis) — à 1 % de la 3D ininterrompue (par le compte : −6,5 %) ; née de SGN, la
+  phase juste, l'onde 10 % plus haute qui se repose ([preuve](validation/RENAISSANCE-SURFACE-S715.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

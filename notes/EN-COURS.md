@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S715 — **en cours**. En autonomie, sans arrêt ; session longue. Le LOD reprend (LOD-ETAPE-2-S705, N2). S707 : renée depuis le
+Session : S715 — **terminée**. En autonomie, sans arrêt ; session longue. Le LOD reprend (LOD-ETAPE-2-S705, N2). S707 : renée depuis le
 compte de ses particules, la 3D perdait 6 % d'amplitude, car APIC tasse ses particules sous la crête et le compte n'est pas la surface.
 **La renaissance par la surface.**
 
@@ -102,8 +102,9 @@ compte de ses particules, la 3D perdait 6 % d'amplitude, car APIC tasse ses part
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — E1.
-- [ ] **P3** — E2.
-- [ ] **P4** — preuve ; rituel.
+- [x] **P3** — E2.
+- [x] **P4** — preuve ; rituel.
 
 ### Notes de reprise
 - **P2 fini (E1)** — **tenu** : décalage 1,1 / −2,9 / −0,5 cm, facteur 0,996 / 0,992 / 0,999 aux photos de 0,6, 1,0 et 1,6 s (S707 par le compte : 0,935 à 1,0 s). Particules 271 952 → 270 652. `V_φ` −0,07 % à 0,6 s, −0,31 % à 1,6 s. **Réserve** : la photo de 0,4 s lit un φ reconstruit avant la renaissance (φ ne se refait qu'au pas suivant) ; son « plancher » était trivial, et la mesure vaut à partir de 0,6 s.
+- **P3 fini (E2)** — née de SGN : la phase juste (sous 4 cm), le facteur 1,098 → 1,065 → 1,040 ; la crête de SGN se repose vers celle de la 3D. N2 acquis.

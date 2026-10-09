@@ -164,6 +164,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Audit des intentions initiales — S640](registres/AUDIT-INTENTIONS-INITIALES-S640.md) : les documents fondateurs relus — intentions oubliées, changées, caduques.
 - [L'étape 2 du LOD : la bande 3D qui naît et meurt avec la vague — conception (S705)](registres/LOD-ETAPE-2-S705.md) : cinq pièces, leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [La renaissance de la 3D par la surface — S715](validation/RENAISSANCE-SURFACE-S715.md) : N2 acquis.
 - [Le juge des raccords sous un pas plus court — S714](validation/JUGE-PAS-COURT-S714.md) : −0,042 s, dans la tolérance.
 - [L'onde trop haute de la 3D : ni la maille, ni le pas — S713](validation/ONDE-TROP-HAUTE-S713.md) : le pas court rend juste la crête du déferlement.
 - [Le juge contre le laboratoire : la plage canonique de Synolakis — S712](validation/JUGE-SYNOLAKIS-S712.md) : la 3D trop haute avant le déferlement.

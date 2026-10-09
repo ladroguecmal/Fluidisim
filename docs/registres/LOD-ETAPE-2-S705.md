@@ -48,3 +48,7 @@ rivage doivent tenir à la tolérance d'ADR-278 D2 (la position à 0,15 m), et s
 *Note datée du 2026-10-08 (S707)* : **N1 tenue** (la naissance au repos, [preuve](../validation/NAISSANCE-3D-S707.md)). **N2 reportée** :
 la renaissance depuis la 3D doit lire et reposer la surface, non le compte, car APIC tasse ses particules sous la crête (+3,8 %). M1 aussi
 devra rendre la surface. D'abord S708 : le volume d'APIC par la surface, contre le compte.
+
+*Note datée du 2026-10-09 (S715)* : **N2 acquis** — la renaissance par la surface tient à 1 % de la 3D ininterrompue
+([preuve](../validation/RENAISSANCE-SURFACE-S715.md)). Née de SGN, la 3D garde la phase et naît avec l'onde de SGN, 10 % plus haute,
+qui se repose en ≈ 1 s. Suivant : M1, la mort par la surface.

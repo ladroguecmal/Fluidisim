@@ -1897,7 +1897,8 @@ fn the_full_3d_judge_with_a_short_step_s714() {
 }
 
 /// **S715 E1 — la renaissance de la 3D par la surface**, contre la 3D ininterrompue, lue par la surface : à 0,4 s, le plancher (décalage
-/// sous 1 cm, facteur à 0,5 %, `V_φ` continu à 0,3 %) ; à 1,0 et 1,6 s, le décalage sous 5 cm et le facteur à 2 %.
+/// sous 1 cm, facteur à 0,5 %, `V_φ` continu à 0,3 %) ; à 1,0 et 1,6 s, le décalage sous 5 cm et le facteur à 2 %. **Mesuré** : tenu —
+/// le facteur 0,996 / 0,992 / 0,999 à 0,6 / 1,0 / 1,6 s. La photo de 0,4 s lit un φ d'avant la renaissance (trivial).
 #[test]
 #[ignore = "l'onde sur fond plat, deux fois (≈ 5 min)"]
 fn the_3d_reborn_by_its_surface_s715() {
@@ -1916,7 +1917,8 @@ fn the_3d_reborn_by_its_surface_s715() {
     }
 }
 
-/// **S715 E2 — la naissance depuis SGN, lue par la surface**, contre la 3D ininterrompue. Rapporte.
+/// **S715 E2 — la naissance depuis SGN, lue par la surface**, contre la 3D ininterrompue. Rapporte. **Mesuré** : la phase juste (sous
+/// 4 cm) ; le facteur 1,098 → 1,040, la crête de SGN (0,147 m) se reposant vers celle de la 3D (0,134 m).
 #[test]
 #[ignore = "l'onde sur fond plat, deux fois (≈ 5 min)"]
 fn the_3d_born_from_serre_by_its_surface_s715() {
