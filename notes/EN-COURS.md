@@ -62,60 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S749 — **terminée**. En autonomie ; session longue. SURFACE-DILATEE-S748 : la projection dilate la couche de surface, parce qu'elle
-n'y corrige que l'excès. **La question** : corrigée dans les deux sens vers sa densité attendue, la surface reste-t-elle à sa place, et la 3D
-tient-elle les trois essais ?
+Session : S750 — **en cours**. En autonomie ; session longue. CIBLE-SURFACE-S749 : aucune des six variantes de la projection ne tient à la fois
+le repos, l'onde solitaire et la remontée. Les variantes qui corrigent la surface freinent la lame (−11 à −12 %). **La question** : l'un de
+deux remèdes rend-il la remontée à `Complete` (consciente du fond), qui tient déjà le repos et l'onde ?
 
-**La densité attendue d'une maille de surface** : le noyau de la densité (le chapeau trilinéaire, d'une maille de demi-largeur) appliqué à
-une eau uniforme sous une surface plane, située à `a = −φ/dx` mailles au-dessus du centre (φ lu à la maille) :
-- `ρ*(a) = 0,5 + a − a²/2` pour `0 ≤ a ≤ 1` ;
-- `0,5 + a + a²/2` pour `−1 ≤ a < 0` ;
-- 1 au-dessus, 0 en dessous.
+**Les deux remèdes, chacun une différence avec `Complete` (ADR-276 D2)** :
+- **R1, le déplacement avec sa vitesse** (`set_density_shift_resample`) : chaque particule déplacée par la projection reprend la vitesse et
+  la matrice affine de la grille à sa nouvelle place (`grid_affine`). Dans APIC, la vitesse d'une particule est déjà celle de la grille à sa
+  place (le G2P) : la déplacer sans la mettre à jour place une vitesse au mauvais endroit dans un champ cisaillé.
+- **R2, la surface relâchée** (`set_density_surface_relaxation`) : aux mailles de surface, la correction est faite à κ = 0,1 par pas ;
+  à l'intérieur, à 1.
 
-Au repos, la surface est sur la face haute de la dernière maille : `a = 0,5`, et `ρ* = 0,875`, la valeur exacte du réseau de pose (deux
-particules par maille, aux quarts). **Corriger `ρ − ρ*` dans les deux sens ne bouge donc rien au repos**, et empêche la surface de se
-dilater.
+**Les essais, et leurs critères écrits avant** :
+- **la remontée de S645 d'abord**, pour R1 et R2 (6 min chacun) : à **10 %** de la loi ;
+- pour un remède qui la tient, **le repos** (l'escalier : 1 cm/s ; 3 mm) et **l'onde solitaire** (le canal à 2,5 cm : la largeur 80 % ; le
+  creux 10 % de `H`).
 
-**La variante** (`DensityVariant::SurfaceTarget`, consciente du fond) : l'intérieur dans les deux sens vers 1, la surface dans les deux sens
-vers `ρ*`. Le seuil de la lame mince (S747) n'est pas repris : une seule différence avec `Complete` (ADR-276 D2).
+Si aucun ne la tient, la question reste ouverte, avec les nombres.
 
-**Les critères, écrits avant** (ADR-288 D1 : le repos d'abord) :
-1. **Le repos** sur l'escalier, 1:30 et 1:12 : la vitesse sous 1 cm/s, l'écart par les particules sous 3 mm ;
-2. **l'onde solitaire** sur le canal à 2,5 cm : la largeur au-dessus de 80 %, le creux sous 10 % de `H` ;
-3. **la remontée de S645** : à 10 % de la loi ;
-4. **le niveau** : sur le canal, le niveau moyen de la surface loin derrière l'onde (de 0,5 à 2,5 m) reste à **1 mm** du repos, là où
-   `Complete` le soulevait de 3 à 5 mm (S748).
+**Contrôles du plan** (ADR-276, ADR-287, ADR-288)
 
-**Les quanta** (ADR-288 D2) : la lecture du niveau par les particules vaut `dx/4` près (6 mm) ; le niveau moyen sur 2 m (80 colonnes) en
-tire un plancher d'environ 1 mm. Le critère 4 est donc à la limite : il est rapporté, et ne fait pas échouer seul.
-
-**Contrôles du plan** (ADR-236, ADR-276, ADR-287, ADR-288)
-
-- **témoin** :
-  - le repos exact ;
-  - l'onde exacte ;
-  - la loi de Synolakis ;
-  - les variantes de S744 à S747 sur les mêmes essais.
-- **instrument** : ceux de S743, S740 et S645 ; le niveau moyen, une lecture nouvelle sur le canal, éprouvée sur la variante `Complete` (elle
-  doit montrer les 3 à 5 mm de S748).
-- **calcul** : le repos (2 min), le canal (13 min), la remontée (7 min), en série.
-- **ADR** : ADR-276 D2 ; ADR-287 D1 ; ADR-288 D1, D2.
+- **témoin** : `Complete` consciente (S744 : le repos, l'onde, −11 %) ; S645 sans projection (+0,5 %) ; la loi.
+- **instrument** : ceux de S645, S743 et S740.
+- **calcul** : 2 × 6 min, puis 15 min pour le remède retenu.
+- **ADR** : ADR-276 D2 ; ADR-287 D1 ; ADR-288 D1 (le repos aussi pour le remède retenu).
 - **pièges** :
-  - φ lu à une maille dont le centre est presque à la surface : `a` voisin de 0, `ρ*` voisin de 0,5 ;
-  - une surface en pente : la formule suppose une surface plane, horizontale ; elle est approchée.
+  - R1 reprend la vitesse de la grille : c'est déjà la règle d'APIC au G2P, mais à un moment du pas où la grille a été projetée. Le repos
+    dira s'il dérange ;
+  - R2 ralentit la correction de surface : la dilatation de S748 peut revenir, plus lentement.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — la variante ; (1), (3).
-- [x] **P3** — (2), (4) sur le canal.
-- [x] **P4** — preuve ; le lot ; fermeture.
+- [ ] **P2** — R1 et R2 ; la remontée pour chacun.
+- [ ] **P3** — le repos et l'onde pour le remède qui tient.
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **Fini** :
-  - (1) **non tenu** : 9,8 mm/s ; 4,38 mm ;
-  - (2) **tenu** : 96 % ; 8,3 mm ;
-  - (3) **non tenu** : −12,3 % ;
-  - (4) `Complete` +2,73 → −0,48 mm ; `SurfaceTarget` +6,66 → +4,40 mm.
-
-  Aucune des six variantes ne tient les trois essais. Le suspect suivant : le déplacement sans sa vitesse.
