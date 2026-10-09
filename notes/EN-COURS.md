@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S736 — **en cours**. La cinquante et unième revue de méthode (ADR-222 D4), sur S731–S735.
+Session : S736 — **terminée**. La cinquante et unième revue de méthode (ADR-222 D4), sur S731–S735.
 
 **Ce que la session fait.** Relire les frictions de S731 à S735 et décider (ADR-286). Celles relevées :
 1. **S734 : une durée fixée sans calculer quand l'onde atteint le mur** (S3, 67 min de calcul dont la fin ne prouvait rien) ;
@@ -88,7 +88,7 @@ Session : S736 — **en cours**. La cinquante et unième revue de méthode (ADR-
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-286 ; METHODE.
-- [ ] **P3** — fermeture.
+- [x] **P3** — fermeture.
 
 ### Notes de reprise
 - **P2 fini** — ADR-286 : D1 la durée bornée par l'arrivée à chaque frontière ; D2 la seconde lecture d'un instrument neuf ; D3 les chemins absolus ; D4 un sujet à la fois. METHODE, l'index.

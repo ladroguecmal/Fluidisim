@@ -2186,3 +2186,16 @@ instantanés du témoin, `outils/diagnostic_s735.py`. **Mesuré**, par deux lect
 - le faux retournement est une maille d'air à φ = +1 mm.
 
 Maillons **0** (diagnostic). Suivant : **S736**, la revue de méthode.
+
+## S736 — 2026-10-09 — la cinquante et unième revue de méthode (ADR-286)
+
+**Entrée.** La revue (S731–S735). **Fait** : [ADR-286](../docs/adr/ADR-286-cinquante-et-unieme-revue-de-methode.md).
+- D1 : un montage borne sa durée par l'arrivée de l'onde à chaque frontière, calculée ; un critère de témoin se relit contre sa géométrie
+  (S734 : S3 dépassait son mur, et son critère était faux par construction).
+- D2 : un instrument sur une géométrie neuve porte une seconde lecture, rapportée au fil du calcul (S734–S735 : le front lu par φ, faux sur
+  1:3).
+- D3 : un calcul en arrière-plan s'appelle par chemins absolus.
+- D4 : un seul sujet à la fois (l'utilisateur).
+
+Maillons **0** (méthode). Suivant : **S737**, la lecture par les particules et le juge robuste.
+
