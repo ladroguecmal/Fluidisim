@@ -88,7 +88,8 @@ Session : S741 — **en cours**. La cinquante-deuxième revue de méthode (ADR-2
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-287 ; METHODE.
+- [x] **P2** — ADR-287 ; METHODE.
 - [ ] **P3** — fermeture.
 
 ### Notes de reprise
+- **P2 fini** — ADR-287 : D1 les essais canoniques avant toute référence ; D2 un seuil publié avec son phénomène ; D3 la référence lue où l'instrument est valide ; D4 regarder le champ avant le second suspect. METHODE, l'index.
