@@ -102,8 +102,9 @@ S4 (`H/d` = 0,2, 1:3, `d` = 0,5 m) à 0,52 m au moins, quand S645, le même cas 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E1.
+- [x] **P2** — E1.
 - [ ] **P3** — les variantes de la scène ; E2 à E5 (on s'arrête à la première qui ramène).
 - [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — E1 : **S645 redonne exactement 0,2307 m** (la particule la plus haute), 0,2250 m (étiquettes), la crête 0,0730 m ; 380 s. **Aucune régression** : l'écart est dans le montage. Les variantes E2 à E5 écrites (`s4_vers_s645_s738`), l'instrument de S645 ajouté au témoin.
