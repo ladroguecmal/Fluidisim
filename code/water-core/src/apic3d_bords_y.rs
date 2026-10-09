@@ -13,6 +13,8 @@ pub(crate) struct BordsY {
     /// Les vitesses normales (`v`) des faces du devant puis du derrière, `nx·nz` chacune, rangées `k·nx + i`.
     pub(crate) v: Vec<f32>,
     pub(crate) sorti: f64,
+    /// S725 — le volume sorti au dernier pas, par face de colonne : le devant (`i`) puis le derrière.
+    pub(crate) sorti_pas: Vec<f64>,
     pub(crate) retirees: u64,
     /// Les réservoirs des faces, le devant puis le derrière.
     pub(crate) reservoir: Vec<f64>,
@@ -31,7 +33,7 @@ impl Apic3 {
         host.alloc.alloc_persistent(2 * nx * nz * 12).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
-        self.bords_y = Some(Box::new(BordsY { v: vec![0.; 2 * nx * nz], sorti: 0., retirees: 0, reservoir: vec![0.; 2 * nx * nz], entre: 0.,
+        self.bords_y = Some(Box::new(BordsY { v: vec![0.; 2 * nx * nz], sorti: 0., sorti_pas: vec![0.; 2 * nx], retirees: 0, reservoir: vec![0.; 2 * nx * nz], entre: 0.,
             posees: 0, refusees: 0 }));
         Ok(())
     }
@@ -50,6 +52,11 @@ impl Apic3 {
         b.v[..nx * nz].copy_from_slice(devant);
         b.v[nx * nz..].copy_from_slice(derriere);
         Ok(())
+    }
+
+    /// S725 — le volume sorti au dernier pas par les bords en y, par colonne `i` : le devant puis le derrière (`2·nx`).
+    pub fn y_outlet_step(&self) -> Option<&[f64]> {
+        self.bords_y.as_ref().map(|b| &b.sorti_pas[..])
     }
 
     /// S724 — les bords en y : `(sorti au total, retirées, reçu, posées, refusées, le reste des réservoirs)`.
@@ -72,13 +79,16 @@ impl Apic3 {
     /// S724 : retire les particules passées au-delà des bords en y, compte leur volume.
     pub(crate) fn drain_y(&mut self) {
         let Some(mut b) = self.bords_y.take() else { return };
-        let Domain3 { ny, dx, .. } = self.domain;
+        let Domain3 { nx, ny, dx, .. } = self.domain;
         let ly = ny as f32 * dx;
         let quantum = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        b.sorti_pas.fill(0.);
         let mut k = 0;
         while k < self.n {
             let y = self.x[k][1];
             if y < 0. || y >= ly {
+                let i = ((self.x[k][0] / dx).max(0.) as usize).min(nx - 1);
+                b.sorti_pas[if y < 0. { i } else { nx + i }] += quantum;
                 b.sorti += quantum;
                 b.retirees += 1;
                 let last = self.n - 1;

@@ -109,3 +109,5 @@ Les sorties en y sont comptées par face (`y_outlet_step`), et le flux de Rusano
 - [ ] **P3** — preuve ; fermeture (le lot S723–S725).
 
 ### Notes de reprise
+- **E1, premier passage : échoue** (APIC 1,2 m/s, Saint-Venant 0,5 m/s, 6 cm). Le diagnostic du premier pas : la surface reconstruite de la boîte se lit à 0,39931 m pour 0,4 m posés. Saint-Venant, à 0,4 m, poussait son eau dans la boîte ; elle n'y entre que par quanta, le niveau lu ne monte pas, et le couplage s'emballe. **Le remède de S684** (ADR-273 D2, une seule source) : Saint-Venant part du niveau que lit la 3D. Les mêmes critères.
+- **E1 tenu** (second passage) : APIC 4,6·10⁻⁶ m/s, Saint-Venant 2,4·10⁻⁶ m/s, |η| 2,9·10⁻⁷ m, la masse 6,5·10⁻¹⁴.

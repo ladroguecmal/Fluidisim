@@ -165,6 +165,13 @@ fn rusanov(g: f64, hl: f64, ul: f64, vl: f64, hr: f64, ur: f64, vr: f64) -> [f64
     ]
 }
 
+/// **S725** — le flux de Rusanov `[masse, normale, tangentielle]` entre deux états `(h, u normal, v tangentiel)`, orienté de gauche à
+/// droite : le flux d'une face de raccord (le trou de S723), le même aux deux côtés.
+#[allow(clippy::too_many_arguments)]
+pub fn flux_rusanov(g: f64, hl: f64, ul: f64, vl: f64, hr: f64, ur: f64, vr: f64) -> [f64; 3] {
+    rusanov(g, hl, ul, vl, hr, ur, vr)
+}
+
 /// **S622** — la face gauche forcée par l'extérieur `(h_e, u_e)` : la pression de paroi retirée, le flux fantôme–maille ajouté.
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::too_many_arguments)]
