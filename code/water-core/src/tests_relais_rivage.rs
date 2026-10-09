@@ -499,6 +499,10 @@ enum Large {
     AucunDensiteFaible(u16),
     /// S714 : le même (sans projection), le pas plafonné à 2,5 ms au lieu de 10 ms.
     AucunPasCourt,
+    /// S717 : le même, jusqu'à 5 s (le témoin de la mort).
+    AucunJusqua5,
+    /// S717 : le même, jusqu'à 5 s ; à 3,2 s, toute la 3D meurt vers Saint-Venant (la plage entière).
+    AucunMort,
     /// S693, S695 : la zone de colonnes de S650 (0,6 m), la vitesse uniforme sur la verticale ; le porteur Saint-Venant, ou SGN si `sgn`.
     Colonnes { sgn: bool },
     /// S698 : le bord à particules, la pose par faces, les vitesses du profil vertical de SGN.
@@ -533,6 +537,9 @@ struct Enregistrement {
     plan: Vec<(f64, f64, f64, f64, f64)>,
     /// S708 : à chaque pas, `(t, V_n le compte, V_φ la surface)`.
     volumes: Vec<(f64, f64, f64)>,
+    /// S717 : à chaque pas, `(t, la remontée sous la maille)` ; et, à la mort, `(V rendu à Saint-Venant, V_φ + le rivage)`.
+    remontee: Vec<(f64, f64)>,
+    mort: Option<(f64, f64)>,
 }
 
 /// **S708 — le volume d'APIC par sa surface** : `Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides (`distance()`, l'eau où φ < 0) ;
@@ -558,6 +565,39 @@ fn volume_surface_s708(a: &Apic3) -> (f64, Vec<f64>) {
     (v, h)
 }
 
+/// **S717 (M1) — la mort de la 3D vers Saint-Venant, par la surface** : par colonne et par rangée (Saint-Venant, `i·ny + j`), la hauteur
+/// de la surface reconstruite au-dessus du fond d'APIC, rapportée au fond continu `z(x)` de Saint-Venant (le niveau gardé), et `h·ū`, `ū`
+/// la moyenne des vitesses des particules de la colonne. Rend `(h, h·ū)`.
+fn mort_vers_sv(a: &Apic3, z: &dyn Fn(f64) -> f64) -> (Vec<f64>, Vec<f64>) {
+    let crate::delta3d::Domain3 { nx, ny, nz, dx } = a.domain();
+    let dxs = dx as f64;
+    let (phi, l) = (a.distance(), a.labels());
+    let (mut su, mut n) = (vec![0f64; nx * ny], vec![0usize; nx * ny]);
+    for (p, v) in a.particles().iter().zip(a.velocities()) {
+        let (i, j) = (((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1));
+        su[i * ny + j] += v[0] as f64;
+        n[i * ny + j] += 1;
+    }
+    let (mut h, mut q) = (vec![0f64; nx * ny], vec![0f64; nx * ny]);
+    for i in 0..nx {
+        for j in 0..ny {
+            let mut e = 0f64;
+            for k in 0..nz {
+                let m = (k * ny + j) * nx + i;
+                if l[m] != crate::apic3d::SOLID {
+                    e += (0.5 - phi[m] as f64 / dxs).clamp(0., 1.) * dxs;
+                }
+            }
+            let zb = a.seabed_height(i, j) as f64;
+            let hh = if e > 1e-6 { (zb + e - z((i as f64 + 0.5) * dxs)).max(0.) } else { 0. };
+            let k = i * ny + j;
+            h[k] = hh;
+            q[k] = if n[k] > 0 { hh * su[k] / n[k] as f64 } else { 0. };
+        }
+    }
+    (h, q)
+}
+
 /// S699 — le plan de l'enregistrement.
 const PLAN_S699: f32 = 5.0;
 
@@ -567,7 +607,10 @@ const PLAN_S699: f32 = 5.0;
 fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregistrement>, rejeu: Option<&Enregistrement>)
     -> (Option<(f64, f64)>, Option<(f64, f64)>, f64, f64, usize, f64) {
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
-    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_) | Large::AucunPasCourt);
+    let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_) | Large::AucunPasCourt
+        | Large::AucunJusqua5 | Large::AucunMort);
+    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort) { 5_000_000 } else { 4_000_000 };
+    let t_mort: u64 = 3_200_000;
     let plafond_us: u64 = if large_ == Large::AucunPasCourt { 2_500 } else { 10_000 };
     assert_eq!(sans_raccord, x_r == 0., "{large_:?} et x_r = {x_r}");
     assert_eq!(matches!(large_, Large::Rejeu(_)), rejeu.is_some(), "{large_:?} et l'enregistrement");
@@ -664,8 +707,11 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
     let (mut t, mut t_sv, mut entre, mut premier, mut air, mut masse, mut dette) = (0u64, 0f64, 0f64, None, None, 0f64, 0f64);
     let pas_large = 0.1 * dxs;
     let mut prochain = 0u64;
-    while t < 4_000_000 {
-        let us = rel.pas_stable_us(plafond_us).min(4_000_000 - t);
+    while t < t_fin {
+        let mut us = rel.pas_stable_us(plafond_us).min(t_fin - t);
+        if large_ == Large::AucunMort && t < t_mort {
+            us = us.min(t_mort - t);
+        }
         let t1 = (t + us) as f64 * 1e-6;
         while t_sv < t1 - 1e-12 {
             if sgn {
@@ -814,6 +860,44 @@ fn deux_raccords_porteur(x_r: f64, large_: Large, mut enreg: Option<&mut Enregis
         let (k, x) = air_enferme_s648(&rel.apic);
         if k > 0 && premier.is_some() && air.is_none() {
             air = Some((ts, x_r + x));
+        }
+        if let Some(e) = enreg.as_deref_mut() {
+            e.remontee.push((ts, remontee_niveau_s688(&rel.sv, niveau as f64)));
+        }
+        if large_ == Large::AucunMort && t == t_mort {
+            // S717 (M1) : toute la 3D meurt ; Saint-Venant reprend la plage entière, la 3D et le rivage réunis.
+            let (h3, q3) = mort_vers_sv(&rel.apic, &|x: f64| (x - x_pied).max(0.) / cot);
+            let (nsv, ny_) = (rel.sv.nx, rel.sv.ny);
+            let nt = nx + nsv;
+            let zc = |i: usize| ((i as f64 + 0.5) * dxs - x_pied).max(0.) / cot;
+            let z: Vec<f64> = (0..nt * ny_).map(|k| zc(k / ny_)).collect();
+            let h: Vec<f64> = (0..nt * ny_).map(|k| if k / ny_ < nx { h3[k] } else { rel.sv.h[k - nx * ny_] }).collect();
+            let qx: Vec<f64> = (0..nt * ny_).map(|k| if k / ny_ < nx { q3[k] } else { rel.sv.qx[k - nx * ny_] }).collect();
+            let qy = vec![0f64; nt * ny_];
+            let v_rendu = h.iter().sum::<f64>() * dxs * dxs;
+            let v_avant = volume_surface_s708(&rel.apic).0 + rel.sv.h.iter().sum::<f64>() * dxs * dxs;
+            eprintln!("S717 mort à {ts:.2} s : le volume rendu {v_rendu:.6} m³, la surface et le rivage {v_avant:.6} m³ ({:+.3e})", v_rendu / v_avant - 1.);
+            let mut tout = SaintVenant2D::nouveau(nt, ny_, dxs, 9.81, z, h, qx, qy).unwrap();
+            tout.regler_ordre_deux(1e-16).unwrap();
+            let mut ts2 = ts;
+            while ts2 < t_fin as f64 * 1e-6 - 1e-12 {
+                let mut c = 0f64;
+                for k in 0..nt * ny_ {
+                    if tout.h[k] > 1e-6 {
+                        c = c.max((tout.qx[k] / tout.h[k]).abs().max((tout.qy[k] / tout.h[k]).abs()) + (9.81 * tout.h[k]).sqrt());
+                    }
+                }
+                let dt = (0.4 * dxs / c.max(1e-6)).min(t_fin as f64 * 1e-6 - ts2);
+                tout.pas(dt).unwrap();
+                ts2 += dt;
+                if let Some(e) = enreg.as_deref_mut() {
+                    e.remontee.push((ts2, remontee_niveau_s688(&tout, niveau as f64)));
+                }
+            }
+            if let Some(e) = enreg.as_deref_mut() {
+                e.mort = Some((v_rendu, v_avant));
+            }
+            break;
         }
         masse = masse.max((rel.volume() - v0 - entre).abs() / v0);
         dette = dette.max(rel.dette.iter().fold(0f64, |m, x| m.max(x.abs())) / q);
@@ -1928,5 +2012,54 @@ fn the_3d_born_from_serre_by_its_surface_s715() {
     let mesures: Vec<(f64, (f64, f64, f64))> = s0.iter().zip(e0.iter().zip(&e1)).map(|(p, (a, b))| (p.0, comparer_profils_s707(a, b, 0.025))).collect();
     let cretes: Vec<(f64, f64, f64)> = s0.iter().zip(&s1).map(|(a, b)| (a.0, a.2, b.2)).collect();
     println!("S715 E2 : née de SGN — particules {avant} → {apres} ; (t, (décalage m, facteur, écart m)) {mesures:.4?} ; (t, crête par la surface ininterrompue, née de SGN) {cretes:.4?} ; {duree:.0} s");
+}
+
+/// **S717 E1 — la mort de la 3D au repos** : fond plat, 4 m, `h` = 0,49 m ; la 3D au repos meurt, Saint-Venant reprend 1 s. Le volume rendu à
+/// 10⁻³ du volume de la surface ; la vitesse de Saint-Venant sous 1 mm/s et `|η|` sous 2 mm.
+#[test]
+#[ignore = "l'eau au repos, la mort (≈ 1 min)"]
+fn the_3d_dies_at_rest_s717() {
+    let dx = 0.025f32;
+    let dxs = dx as f64;
+    let (nx, ny, nz, h0) = (160usize, 4usize, 32usize, 0.49f64);
+    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    a.seed(&|p| (p[2] as f64) < h0).unwrap();
+    a.step(1000).unwrap();
+    let (h, q) = mort_vers_sv(&a, &|_| 0.);
+    let v_phi = volume_surface_s708(&a).0;
+    let v_rendu = h.iter().sum::<f64>() * dxs * dxs;
+    let mut sv = SaintVenant2D::nouveau(nx, ny, dxs, 9.81, vec![0.; nx * ny], h, q, vec![0.; nx * ny]).unwrap();
+    sv.regler_ordre_deux(1e-16).unwrap();
+    let niveau0 = sv.h.iter().sum::<f64>() / (nx * ny) as f64;
+    let mut t = 0f64;
+    while t < 1. - 1e-12 {
+        let dt = (0.4 * dxs / (9.81 * 0.6f64).sqrt()).min(1. - t);
+        sv.pas(dt).unwrap();
+        t += dt;
+    }
+    let vmax = (0..nx * ny).fold(0f64, |m, k| m.max((sv.qx[k] / sv.h[k]).abs()));
+    let eta = sv.h.iter().fold(0f64, |m, h| m.max((h - niveau0).abs()));
+    println!("S717 E1 : au repos — le volume rendu {v_rendu:.6} m³, la surface {v_phi:.6} m³ ({:+.2e}) ; après 1 s, la vitesse max {vmax:.2e} m/s, |η| max {eta:.2e} m (niveau {niveau0:.5} m)", v_rendu / v_phi - 1.);
+    assert!((v_rendu / v_phi - 1.).abs() < 1e-3 && vmax < 1e-3 && eta < 2e-3, "critères E1");
+}
+
+/// **S717 E2 — la mort de la 3D après le déferlement** (M1) : la vague de S690 ; à 3,2 s, toute la 3D meurt vers Saint-Venant, contre le
+/// tout-3D jusqu'à 5 s. La remontée maximale à 1,25 cm, son instant à 0,1 s ; le volume rendu à 0,5 %.
+#[test]
+#[ignore = "le tout-3D jusqu'à 5 s, puis la mort à 3,2 s (≈ 35 min)"]
+fn the_3d_dies_after_the_break_s717() {
+    let max_rem = |e: &Enregistrement| e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+    let mut e0 = Enregistrement::default();
+    let (_, _, _, _, _, d0) = deux_raccords_porteur(0.0, Large::AucunJusqua5, Some(&mut e0), None);
+    let (t0, r0) = max_rem(&e0);
+    println!("S717 E2 témoin : le tout-3D jusqu'à 5 s — la remontée maximale {r0:.4} m à {t0:.3} s ; {d0:.0} s");
+    let mut e1 = Enregistrement::default();
+    let (_, _, _, _, _, d1) = deux_raccords_porteur(0.0, Large::AucunMort, Some(&mut e1), None);
+    let (t1, r1) = max_rem(&e1);
+    let (vr, va) = e1.mort.expect("la mort");
+    println!("S717 E2 : la 3D morte à 3,2 s — la remontée maximale {r1:.4} m à {t1:.3} s (le tout-3D : {r0:.4} m à {t0:.3} s) ; le volume rendu {:+.3e} ; {d1:.0} s", vr / va - 1.);
+    assert!((vr / va - 1.).abs() < 0.005, "critère E2 : le volume");
+    assert!((r1 - r0).abs() < 0.0125 && (t1 - t0).abs() < 0.1, "critère E2 : la remontée ({r1} à {t1} contre {r0} à {t0})");
 }
 

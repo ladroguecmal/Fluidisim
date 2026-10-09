@@ -105,8 +105,9 @@ vers Saint-Venant**, par la surface (S715, ADR-280 D1).
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — E1.
+- [x] **P2** — E1.
 - [ ] **P3** — E2.
 - [ ] **P4** — preuve ; rituel.
 
 ### Notes de reprise
+- **P2 fini (E1)** — **tenu** : le volume rendu à 1,1·10⁻¹³ de la surface ; après 1 s, la vitesse de Saint-Venant 5,7·10⁻⁷ m/s, |η| 1,6·10⁻⁷ m.
