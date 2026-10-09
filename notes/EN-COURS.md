@@ -62,33 +62,51 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S736 — **terminée**. La cinquante et unième revue de méthode (ADR-222 D4), sur S731–S735.
+Session : S737 — **en cours**. En autonomie ; session longue. DIAGNOSTIC-S4-S735. **La question** : lus par les particules, le front et la
+remontée suivent-ils l'eau, et un juge du retournement qui ignore le bruit de surface garde-t-il les vrais retournements en écartant le faux
+de S4 ?
 
-**Ce que la session fait.** Relire les frictions de S731 à S735 et décider (ADR-286). Celles relevées :
-1. **S734 : une durée fixée sans calculer quand l'onde atteint le mur** (S3, 67 min de calcul dont la fin ne prouvait rien) ;
-2. **S734 : un critère faux par construction** (le front de S3, alors que le mur est dans l'eau) ;
-3. **S734 : un instrument pris sur une géométrie neuve sans l'éprouver** (le front par φ sur une pente de 1:3 ; ADR-233 D1 le disait
-   déjà). S735 a montré qu'il lisait faux ;
-4. **S734 : une chaîne de calculs lancée avec un chemin relatif**, qui n'a rien lancé ;
-5. **S733, S734 : deux fermetures refusées** (le registre de précision, le lot) : l'outil a fait son office ;
-6. **S731 : le piège d'ADR-223 D4 retrouvé deux fois** ;
-7. **la consigne de l'utilisateur** (2026-10-09) : *« on ne fait plus en parallèle »*.
+**Ce que la session fait.**
+- **Le front par les particules** (`front_particules_s737`) : par colonne, l'épaisseur comptée `n·dx/(8·ny)` (toutes les rangées). Le front
+  est la colonne la plus avancée au-dessus de 5 mm dont la voisine d'amont l'est aussi, ce qui écarte une goutte isolée. La remontée vaut
+  `zb(front) − d`. **Sa seconde lecture** (ADR-286 D2) : le front par φ de S734, rapporté à côté au fil du calcul.
+- **Le juge robuste** (`retournement_robuste_s737`) : celui de S647, mais une maille « air » du vide ne compte que si son φ dépasse
+  `dx/4`. Plus près, c'est l'interface (S735 : φ = +1 mm). **Le juge de S647 reste tel quel**, et les deux sont rapportés.
+- `temoin_plage_s734` rapporte les deux juges, les deux fronts, et la série de la remontée par les particules tous les 0,1 s.
 
-**Critère** : chaque friction a sa suite (une décision, ou « aucune », avec la raison).
+**Les essais, et leurs critères écrits avant.**
+1. **Le cas d'école de S647** (une couche plate ; une lèvre d'eau au-dessus d'un vide) : le juge robuste ne trouve rien sur la couche, et
+   trouve la lèvre.
+2. **S4 sur fond lisse**, 6 s : le juge robuste **ne voit aucun retournement** (celui de S647 en voyait un à 4,94 s, à 4,14 m). La
+   remontée par les particules **redescend** : à 6 s, sous 80 % de son maximum. Son maximum est rapporté contre 0,328 m (S735 attend 0,45
+   à 0,53 m).
+3. **S2**, 5,65 s : le juge robuste voit le retournement à **0,05 s et 0,1 m** de celui de S647 (3,290 s ; 12,01 m).
 
-**Contrôles du plan** (ADR-266)
+**Les bornes de durée** (ADR-286 D1, `python` au plan) :
+- S4 : le mur à 15,31 m ; même à +80 % de la loi, la lame s'arrête à 13,08 m, soit 2,2 m de marge ;
+- S2 : le mur à 20,22 m ; le front de S734 s'arrêtait à 17,59 m, soit 2,6 m de marge.
 
-- **témoin** : les journaux et les preuves de S731 à S735.
-- **instrument** : la relecture.
-- **calcul** : aucun.
-- **ADR** : ADR-222 D4 ; ADR-233 D1, ADR-235, ADR-257 (les bornes d'un montage), qu'ADR-286 complète.
-- **pièges** : ADR-223 D4 (aucune barre oblique inverse dans un *heredoc*).
+**Contrôles du plan** (ADR-226, ADR-233, ADR-280, ADR-285, ADR-286)
+
+- **témoin** :
+  - le juge de S647 sur les mêmes calculs ;
+  - le cas d'école de S647 ;
+  - la loi de Synolakis, rapportée.
+- **instrument** : le front par les particules, éprouvé sur S4 lui-même, contre φ (ADR-286 D2) ; le compte de toutes les rangées (et non
+  plus d'une seule) divise le bruit par deux.
+- **calcul** : S4 (≈ 35 min), puis S2 (≈ 28 min), en série, par chemins absolus (ADR-286 D3).
+- **ADR** :
+  - ADR-280 D1 : deux lectures nommées ;
+  - ADR-245 D2 : un seuil dans une seule fonction (`dx/4`, une constante).
+- **pièges** :
+  - changer le juge de S647 changerait toutes les mesures passées ; il n'est pas touché ;
+  - le seuil de `dx/4` doit garder la lèvre du cas d'école.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-286 ; METHODE.
-- [x] **P3** — fermeture.
+- [ ] **P2** — les deux lectures, le juge robuste ; le cas d'école (1).
+- [ ] **P3** — S4 et S2 ; (2), (3).
+- [ ] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-286 : D1 la durée bornée par l'arrivée à chaque frontière ; D2 la seconde lecture d'un instrument neuf ; D3 les chemins absolus ; D4 un sujet à la fois. METHODE, l'index.
