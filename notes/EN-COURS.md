@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S760 — **en cours**. En autonomie ; session longue. ADR-289 D3.3 : refaire les résultats importants avec la 3D corrigée
+Session : S760 — **terminée**. En autonomie ; session longue. ADR-289 D3.3 : refaire les résultats importants avec la 3D corrigée
 (ADR-294 : `Complete` consciente du fond, avec le compte cumulé d'énergie). **La question** : que deviennent les témoins du sélecteur
 (SELECTEUR-DOMAINES-S732 §6), mesurés avec l'ancienne 3D trop haute (S734–S738) ?
 
@@ -104,9 +104,9 @@ Le témoin est contrôlé comme l'objet (ADR-285 D1) : aucune sortie de particul
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — `corrigee`, `arret_mur`, `density_energy_removed` ; (1) le repos 1:3 ; (2) S4 à 0,1 ; (3) S4 à 0,2.
-- [ ] **P3** — (4) S2 ; (5) S3.
-- [ ] **P4** — (6) R43.
-- [ ] **P5** — preuve ; fermeture.
+- [x] **P3** — (4) S2 ; (5) S3.
+- [x] **P4** — (6) R43.
+- [x] **P5** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** (2 696 s) — **les trois tenus** :
@@ -116,3 +116,13 @@ Le témoin est contrôlé comme l'objet (ADR-285 D1) : aucune sortie de particul
     (permis : 0,2 > 0,141) ; 0,58 J retirés.
 
   L'ancienne 3D : +37 % au moins (S735), +47 % (S734). Le témoin contrôlé : aucune sortie, le front à plus de 3 m du mur.
+- **Pour la revue de S761** (les frictions de S756–S760) :
+  - S758 : une règle réfutée en une session ; un examen statique de son signe (les déplacements vont dans les deux sens) l'aurait écartée
+    avant le calcul (ADR-290 D3, « la cible vérifiée statiquement », appliquée à une règle de vitesse) ;
+  - S759 : le bilan d'abord a choisi entre H1 et H2 avant tout remède : il a tenu ; la règle pas à pas a coûté un essai (le cliquet) ;
+  - S759 : `fermer.py` laissait `BOUSSOLE.md` hors du commit (corrigé en S760) ;
+  - S760 P1 : un script de plan en échec, suivi d'un `git add -A` sur une autre ligne : un commit sous un faux titre (corrigé par
+    `--amend` avant la poussée). Le script et le commit sur une seule chaîne `&&`.
+- **P3 fini** (4 467 s) : S2, le retournement à 4,14 s (x = 14,09 m), rien de retiré ; S3, le retournement à 6,84 s (16,41 m), l'onde au mur
+  à 9,62 s, 2,16 J retirés.
+- **P4 fini** (1 227 s) : R43, rien de retiré, **identique à S755** (3,0915 s ; 11,0875 m ; 0,3005 m).

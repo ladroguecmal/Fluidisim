@@ -497,6 +497,8 @@ enum Large {
     AucunDensite(crate::apic3d::DensityVariant),
     /// S755 : le tout-3D jusqu'à 5 s, avec la 3D corrigée d'ADR-292 (`Complete`, consciente du fond).
     AucunCorrigee,
+    /// S760 : le même, avec la 3D corrigée d'ADR-294 (le compte cumulé d'énergie en plus).
+    AucunCorrigeeEnergie,
     /// S710 : le même, avec la projection de densité faible (`Complete`, κ en millièmes).
     AucunDensiteFaible(u16),
     /// S714 : le même (sans projection), le pas plafonné à 2,5 ms au lieu de 10 ms.
@@ -558,6 +560,8 @@ struct Enregistrement {
     /// S730 (ADR-284 D4) : à chaque pas avant la mort, `(t, J)` — le niveau de Saint-Venant à sa première maille (moyenne des rangées) moins
     /// celui de la 3D à sa dernière colonne (le fond + l'épaisseur lue par φ) ; zéro si les deux côtés sont secs (moins d'un millimètre).
     mur: Vec<(f64, f64)>,
+    /// S760 : l'énergie que le compte de la 3D corrigée a retirée, cumulée, à chaque pas (J).
+    retire: f64,
 }
 
 /// **S708 — le volume d'APIC par sa surface** : `Σ clamp(½ − φ/dx, 0, 1)·dx³` sur les mailles non solides (`distance()`, l'eau où φ < 0) ;
@@ -689,8 +693,9 @@ fn deux_raccords_porteur_xf(x_r: f64, large_: Large, x_f: f64, mut enreg: Option
     };
     // S702 (ADR-277 D2) : les combinaisons sans sens, refusées.
     let sans_raccord = matches!(large_, Large::Aucun | Large::AucunDensite(_) | Large::AucunDensiteFaible(_) | Large::AucunPasCourt
-        | Large::AucunJusqua5 | Large::AucunMort | Large::AucunCorrigee);
-    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort | Large::BoutEnBout | Large::BandeJusqua5 | Large::AucunCorrigee) { 5_000_000 } else { 4_000_000 };
+        | Large::AucunJusqua5 | Large::AucunMort | Large::AucunCorrigee | Large::AucunCorrigeeEnergie);
+    let t_fin: u64 = if matches!(large_, Large::AucunJusqua5 | Large::AucunMort | Large::BoutEnBout | Large::BandeJusqua5 | Large::AucunCorrigee
+        | Large::AucunCorrigeeEnergie) { 5_000_000 } else { 4_000_000 };
     let meurt = matches!(large_, Large::AucunMort | Large::BoutEnBout);
     let t_mort: u64 = 3_200_000;
     let plafond_us: u64 = if large_ == Large::AucunPasCourt { 2_500 } else { 10_000 };
@@ -739,9 +744,13 @@ fn deux_raccords_porteur_xf(x_r: f64, large_: Large, x_f: f64, mut enreg: Option
     a.enable_right_outlet(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
     // S709 : la projection de densité.
     // S755 : la 3D corrigée (ADR-292).
-    if large_ == Large::AucunCorrigee {
+    if matches!(large_, Large::AucunCorrigee | Large::AucunCorrigeeEnergie) {
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
         a.set_density_bed_aware(true).unwrap();
+    }
+    // S760 : la 3D corrigée d'ADR-294.
+    if large_ == Large::AucunCorrigeeEnergie {
+        a.set_density_energy_correction(crate::apic3d::EnergyCorrection::CumulativeStepLoss).unwrap();
     }
     if let Large::AucunDensite(v) = large_ {
         a.enable_density_projection_variant(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, v).unwrap();
@@ -930,6 +939,7 @@ fn deux_raccords_porteur_xf(x_r: f64, large_: Large, x_f: f64, mut enreg: Option
             let (hs, us_) = (0.5 * (serre.h[i_c - 1] + serre.h[i_c]), 0.5 * (serre.q[i_c - 1] / serre.h[i_c - 1] + serre.q[i_c] / serre.h[i_c]));
             e.plan.push((ts, hs, us_, haut, ub3));
             e.volumes.push((ts, rel.apic.particle_count() as f64 * dxs.powi(3) / crate::apic3d::PER_AXIS.pow(3) as f64, volume_surface_s708(&rel.apic).0));
+            e.retire = rel.apic.density_energy_removed().unwrap_or(0.);
         }
         if let Some(col) = rel.apic.columns.as_ref() {
             entre += (0..ny).map(|j| col.flux_x[j * (nx + 1)]).sum::<f64>();
@@ -3858,5 +3868,33 @@ fn the_selector_witness_s4_corrected_s760() {
             r.retournement, r.retournement_robuste, r.particules.0, r.particules.1, r.front_max, s.geometrie().2,
             if tenue && (if k == 2 { r.retournement.is_none() } else { avant }) { "tenu" } else { "NON TENU" });
     }
+}
+
+/// **S760 — S2 et S3 refaits avec la 3D d'ADR-294** : (4) S2, le retournement contre l'ancienne 3D (S734 : 3,29 s) ; (5) S3, arrêté à
+/// l'arrivée au mur, le retournement rapporté. Rapporte.
+#[test]
+#[ignore = "S760 : S2 et S3 avec la 3D corrigée (≈ 1 h 30)"]
+fn the_selector_witnesses_s2_s3_corrected_s760() {
+    let s2 = ScenePlage { nom: "S2 corrigée", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(),
+        lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: true, arret_mur: false };
+    let r = temoin_plage_s734(&s2);
+    println!("S760 (4) S2 : le retournement {:?} (robuste {:?} ; S734 : 3,29 s) ; l'air {:?} ; la remontée {:.4} m à {:.3} s ; le témoin : particules {} → {}, le front {:.3} m (mur {:.3} m)",
+        r.retournement, r.retournement_robuste, r.air, r.remontee.1, r.remontee.0, r.particules.0, r.particules.1, r.front_max, s2.geometrie().2);
+    let s3 = ScenePlage { nom: "S3 corrigée", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 14.,
+        lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: true, arret_mur: true };
+    let r = temoin_plage_s734(&s3);
+    println!("S760 (5) S3 : le retournement {:?} (robuste {:?}) ; l'air {:?} ; l'arrivée au mur {:?} ; le témoin : particules {} → {}",
+        r.retournement, r.retournement_robuste, r.air, r.arret, r.particules.0, r.particules.1);
+}
+
+/// **S760 — (6) le tout-3D de R43 avec la 3D d'ADR-294** : le montage de S755 ; l'énergie retirée par le compte, et les grandeurs de S755.
+#[test]
+#[ignore = "S760 : le tout-3D de R43 avec la 3D d'ADR-294 (≈ 30 min)"]
+fn the_r43_witness_with_the_energy_account_s760() {
+    let mut e = Enregistrement { film: None, ..Default::default() };
+    let (p, a, masse, _, _, d) = deux_raccords_porteur_xf(0.0, Large::AucunCorrigeeEnergie, 12.0, Some(&mut e), None);
+    let (tr, rr) = e.remontee.iter().fold((0f64, f64::MIN), |m, &(t, r)| if r > m.1 { (t, r) } else { m });
+    println!("S760 (6) R43 : l'énergie retirée {:.4e} J ; le retournement {p:?} (S755 : 3,09 s ; 11,09 m) ; l'air {a:?} ; la remontée {rr:.4} m à {tr:.3} s (S755 : 0,301 m) ; la masse {masse:.1e} ; {d:.0} s",
+        e.retire);
 }
 

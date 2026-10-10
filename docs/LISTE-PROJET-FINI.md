@@ -524,6 +524,8 @@ pas recopiée ici (L137).
   ([preuve](validation/ENERGIE-PARTICULE-S758.md)).
   **S759** : le bilan d'énergie (le pas perd par le tassement, la projection rend 0,30 J de trop) ; **le compte cumulé** tient le repos, le
   ballottement (−0,44 % ; 0,16 % par période) et l'onde solitaire, Synolakis inchangé ; **ADR-294** ([preuve](validation/ENERGIE-COMPTE-S759.md)).
+  **S760** : les témoins du sélecteur refaits — la remontée sans déferlement à **−0,7 %** de la loi de Synolakis (l'ancienne 3D : +37 à
+  +47 %) ; S2 et S3 retournent plus tard (4,14 s ; 6,84 s) ; R43 identique à S755 ([preuve](validation/TEMOINS-CORRIGES-S760.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

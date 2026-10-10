@@ -2446,3 +2446,13 @@ ballottement, le pas et la projection séparés ; `set_density_energy_correction
 - Synolakis identique à S754 : la correction ne s'y déclenche pas.
 
 **ADR-294** : la 3D corrigée garde son énergie. Ouvert : un compte par région. Maillons **1** (4.1). Suivant : **S760**, ADR-289 D3.3.
+
+## S760 — 2026-10-10 — Les témoins du sélecteur refaits avec la 3D d'ADR-294
+
+**Entrée.** ADR-289 D3.3 ; ADR-294. **Fait** ([preuve](../docs/validation/TEMOINS-CORRIGES-S760.md)) : la 3D corrigée dans le témoin
+de S734, l'arrêt au mur, la lecture de l'énergie retirée. **Mesuré** :
+- le repos 1:3 tenu ;
+- S4 : la remontée à **−0,7 %** de la loi de Synolakis (`H/d` = 0,1), −13,6 % (0,2) ; l'ancienne 3D +37 à +47 % ;
+- S2 et S3 retournent plus tard (4,14 s ; 6,84 s) ; R43 identique à S755.
+
+En passant : `fermer.py` ajoute la boussole. Maillons **1** (4.1). Suivant : **S761**, la cinquante-sixième revue.

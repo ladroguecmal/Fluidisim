@@ -164,3 +164,11 @@ Les témoins de la batterie en dépendent ; l'onde de départ exacte vient avant
 
 *Note datée du 2026-10-09 (S739)* : **la 3D ne garde pas une onde solitaire** sur un fond plat ([preuve](../validation/ONDE-SOLITAIRE-3D-S739.md)).
 C'est la cause commune de la 3D trop haute (S713, S733, S738). Les témoins et le calibrage attendent sa correction.
+
+*Note datée du 2026-10-10 (S760)* : **les témoins refaits avec la 3D corrigée d'ADR-294** ([preuve](../validation/TEMOINS-CORRIGES-S760.md)).
+- S4 : la remontée à −0,7 % de la loi de Synolakis (`H/d` = 0,1) et à −13,6 % (0,2) ; le retournement de 0,2 au reflux, à 5,71 s.
+- S2 : le retournement à 4,14 s, x = 14,09 m (l'ancienne 3D : 3,29 s).
+- S3 : le retournement à 6,84 s, x = 16,41 m, avant le mur (9,62 s) : la 3D est nécessaire, à cette résolution.
+- R43 : identique à S755 (3,09 s ; 11,09 m).
+
+Le calibrage du prédicteur (P1) se fait sur ces témoins.
