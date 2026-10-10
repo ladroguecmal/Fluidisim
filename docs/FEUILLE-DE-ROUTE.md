@@ -550,6 +550,8 @@ cinquante-quatrième revue (ADR-290 : le bilan propre d'un opérateur) ; R1′ r
 aux trois instants ; le témoin de R43 refait (le déferlement 0,47 s plus tard, 1,15 m plus près du rivage) (4.1, 4.14).
 **S756–S758** : la cinquante-cinquième revue (ADR-293 : la décision après la référence extérieure ; la célérité ; la bande de quantum) ;
 le ballottement (la période de la 3D corrigée à 0,33 %, mais l'énergie injectée) ; la neutralité par particule réfutée (4.1).
+**S759–S761** : le bilan d'énergie de la projection et le compte cumulé (**ADR-294** : la 3D corrigée garde son énergie) ; les témoins
+du sélecteur refaits (la remontée à −0,7 % de la loi de Synolakis ; R43 identique) ; la cinquante-sixième revue (ADR-295, `etape.py`) (4.1, 4.14).
 **S552–S553** : 6.6 — un navire gîte par sa brèche (une citerne latérale sous la pesanteur inclinée) ; l'envahissement progressif par une
 cloison percée.
 

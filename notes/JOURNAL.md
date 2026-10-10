@@ -2461,4 +2461,4 @@ En passant : `fermer.py` ajoute la boussole. Maillons **1** (4.1). Suivant : **S
 
 **Entrée.** ADR-222 D4 ; S756–S760. **ADR-295** : D1 une règle de correction s'écrit par ses cas signés avant le calcul (S758) ; D2 une
 correction de conservation tient un compte cumulé (S759) ; D3 `outils/etape.py`, le commit d'étape qui n'a lieu qu'après un script
-réussi (S760). Ce qui a tenu : le bilan avant le remède, la référence avant la décision.
+réussi (S760). Ce qui a tenu : le bilan avant le remède, la référence avant la décision. Le lot S759–S761. Maillons **0**. Suivant : **S762**, le corps qui flotte contre Archimède.

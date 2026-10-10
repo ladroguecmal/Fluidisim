@@ -77,5 +77,7 @@ Les séances visuelles reviennent aussi entre les jalons, quand une avancée se 
   six variantes de la projection, aucune ne tient les trois essais ; le suspect suivant, le déplacement sans sa vitesse. Au lot S750–S752 :
   **la 3D corrigée, version 1** (ADR-291 : la remontée +8 %, l'onde −7,5 % sur 10 m) ; la suite, la juger contre les mesures de Synolakis. Au lot
   S753–S755 : **ADR-292**, la 3D corrigée jugée par le laboratoire ; le témoin de R43 refait (le déferlement plus tard, plus près du rivage). Au lot S756–S758 : le ballottement juste en
-  période, mais la projection injecte de l'énergie (+2,8 % par période) ; à corriger avant le reste du banc.
+  période, mais la projection injecte de l'énergie (+2,8 % par période) ; à corriger avant le reste du banc. Au lot S759–S761 : **ADR-294**, le compte
+  cumulé arrête l'injection ; les témoins du sélecteur refaits, la remontée juste ; suite : le corps qui flotte, la rupture de barrage, le
+  calibrage du prédicteur.
 - **Les calculs longs** : lancés quand ils servent, explorés à 5 cm d'abord, montrés et mesurés (ADR-274).

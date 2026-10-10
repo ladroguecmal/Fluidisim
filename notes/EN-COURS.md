@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S761 — **en cours**. La cinquante-sixième revue de méthode (ADR-222 D4), sur S756–S760 ; le lot des registres (S759–S761).
+Session : S761 — **terminée**. La cinquante-sixième revue de méthode (ADR-222 D4), sur S756–S760 ; le lot des registres (S759–S761).
 
 **Les frictions relevées** (notes de S760) :
 - S758 : une règle de vitesse réfutée en une session ; l'examen de ses cas signés (le déplacement vers le haut, vers le bas, au repos)
@@ -81,7 +81,7 @@ décision doit changer une ligne de METHODE ou un outil, sinon elle ne s'écrit 
 
 - [x] **P1** — jeton ; plan.
 - [x] **P2** — ADR-295 ; `outils/etape.py` (un commit d'étape qui n'a lieu qu'après un script réussi) ; METHODE.
-- [ ] **P3** — le lot (S759–S761) ; fermeture.
+- [x] **P3** — le lot (S759–S761) ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** — ADR-295 : D1 les cas signés d'une règle ; D2 le compte cumulé ; D3 `etape.py` (ce commit-ci passe par lui). METHODE,
