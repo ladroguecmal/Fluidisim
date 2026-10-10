@@ -62,27 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S761 — **terminée**. La cinquante-sixième revue de méthode (ADR-222 D4), sur S756–S760 ; le lot des registres (S759–S761).
+Session : S762 — **en cours**. En autonomie ; session longue. ADR-289 D3.2, le banc de la 3D corrigée (ADR-294) : **le corps qui flotte**.
+**La question** : une sphère libre se pose-t-elle à son tirant d'eau exact, celui d'Archimède, et l'écart diminue-t-il avec la maille ?
 
-**Les frictions relevées** (notes de S760) :
-- S758 : une règle de vitesse réfutée en une session ; l'examen de ses cas signés (le déplacement vers le haut, vers le bas, au repos)
-  l'aurait écartée avant le calcul ;
-- S759 : la règle pas à pas a coûté un essai : une borne d'un seul côté, appliquée à chaque pas, est un cliquet ;
-- S759 : `fermer.py` laissait `BOUSSOLE.md` hors du commit (corrigé en S760) ;
-- S760 P1 : un script de plan en échec, suivi d'un `git add -A` sur une autre ligne : un commit sous un faux titre.
+**La référence** (exacte) : une sphère de rayon `R`, de densité relative `s`, s'enfonce d'une calotte `h` telle que
+`(h/R)²·(3 − h/R) = 4s` : `h/R` = 0,6527 (s = 0,25), 1 (0,5), 1,3473 (0,75). Le tirant mesuré : le niveau de l'eau loin de la sphère
+(lu par φ, `|x − x_c| > 0,3 m`) moins le bas de la sphère. Ainsi l'eau que la sphère déplace dans la cuve fermée ne fausse rien.
 
-**Ce qui a tenu** : le bilan avant le remède (ADR-290 D1) a choisi entre H1 et H2 avant tout essai (S759) ; la référence extérieure avant
-la décision (ADR-293 D1, Synolakis avant ADR-294).
+**Le montage** : une cuve de 1,2 × 0,4 m, 0,4 m d'eau ; la sphère de `R` = 0,1 m au centre, posée 2 cm au-dessus de son équilibre, libre
+(`set_body_mass`, la masse ajoutée implicite de S655) ; 5 s ; la moyenne et la vitesse maximale sur la dernière seconde.
 
-**Contrôles du plan** — témoin : ADR-293 ; instrument : `rituel.py` ; calcul : sans objet ; ADR : ADR-222 D4, ADR-293 ; pièges : une
-décision doit changer une ligne de METHODE ou un outil, sinon elle ne s'écrit pas.
+**Les essais** : (A) la 3D d'ADR-294 à 2,5 cm, s = 0,25, 0,5, 0,75 ; (B) la 3D sans projection, s = 0,5, 2,5 cm ; (C) la 3D d'ADR-294 à
+5 cm ; (D) à 1,25 cm, s = 0,5.
+
+**Les critères, écrits avant** (ADR-293 D3 : la lecture du niveau moyennée sur des dizaines de colonnes, son quantum est sous le mm) :
+1. le tirant d'eau à **1 cm** (5 % du diamètre) de l'exact, aux trois densités, à 2,5 cm ;
+2. l'écart diminue quand la maille diminue (C → A → D, s = 0,5) ;
+3. la sphère posée : la vitesse verticale sous 1 cm/s sur la dernière seconde ;
+4. la masse de l'eau exacte (le nombre de particules constant).
+
+**Contrôles du plan** (ADR-276, ADR-287, ADR-290, ADR-293, ADR-295)
+
+- **témoin** : la flottaison de S653–S655 (5 cm, s = 0,5 : le centre 1,3 cm sous le niveau, niveau nominal) ; Archimède.
+- **instrument** : le niveau par φ loin de la sphère (`volume_surface_s708`), le centre du corps (`body()`).
+- **calcul** : (A) et (B) 4 × 5 min ; (C) 2 min ; (D) 40 min.
+- **ADR** : ADR-289 D3.2 ; ADR-287 D1 (un essai canonique) ; ADR-293 D3 ; ADR-295 D1 (sans objet : aucune règle nouvelle).
+- **pièges** :
+  - la projection de densité près du corps : sa densité nominale ne compte que le fond, pas la sphère ; les mailles voisines du corps
+    peuvent paraître creuses et attirer les particules. (B) le départage ;
+  - le niveau monte quand la sphère s'enfonce (la cuve est fermée) : le tirant se lit contre le niveau mesuré, jamais contre le nominal ;
+  - la sphère dérive vers une paroi : sa place horizontale est rapportée.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — ADR-295 ; `outils/etape.py` (un commit d'étape qui n'a lieu qu'après un script réussi) ; METHODE.
-- [x] **P3** — le lot (S759–S761) ; fermeture.
+- [ ] **P2** — l'essai ; (A), (B), (C), (D).
+- [ ] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** — ADR-295 : D1 les cas signés d'une règle ; D2 le compte cumulé ; D3 `etape.py` (ce commit-ci passe par lui). METHODE,
-  l'index.
