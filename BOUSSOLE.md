@@ -56,7 +56,7 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 | critère | indiscernable du réel, au budget ; le budget est un plafond ; aucune limite de réalisme hors du budget | ADR-262 |
 | méthode | elle se révise elle-même toutes les cinq sessions ; une décision technique que la mesure contredit est remplacée sans demander ; à l'utilisateur : ambition, rendus, téléchargements, configuration de sa machine | ADR-222 |
 | solveurs | trois familles (le spectral, le 2D moyenné, la 3D), chacune éprouvée seule sur un banc à référence indépendante avant d'être combinée ; la 3D corrigée d'abord, les nouveautés attendent | ADR-289 |
-| 3D corrigée | la projection de densité `Complete`, consciente du fond : l'onde solitaire gardée, le repos tenu, Synolakis suivi mieux que sans elle | ADR-292 |
+| 3D corrigée | la projection de densité `Complete`, consciente du fond, avec le compte cumulé d'énergie : l'onde solitaire gardée, le repos tenu, le ballottement juste et conservé, Synolakis suivi mieux que sans elle | ADR-292, ADR-294 |
 | domaines | placés, puis déplacés, selon la situation : aucune frontière entre deux modèles là où agit une physique que l'un n'a pas (R43) | ADR-284 |
 | structure | la boussole d'abord ; l'état dans les registres générés ; les calculs longs par `calcul.py` ; le rituel par `rituel.py` | ADR-221 |
 
