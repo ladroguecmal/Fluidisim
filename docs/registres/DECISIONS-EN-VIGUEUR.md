@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**293 ADR** — actée : 242, proposée : 49, rétractée en partie : 2.
+**294 ADR** — actée : 243, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -232,7 +232,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
 | [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 | 222 |
-| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 263 265 266 267 268 269 270 271 272 273 274 276 277 279 280 281 282 283 285 286 287 288 290 291 292 293 |
+| [222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) | La méthode se révise elle-même : les frictions mesurées, les décisions techniques remplacées sans demander | actée | S481 | 127 215 218 221 | 223 224 226 227 228 230 231 232 233 234 235 236 237 238 239 240 242 243 244 245 246 248 249 250 251 252 253 254 255 256 257 258 259 260 263 265 266 267 268 269 270 271 272 273 274 276 277 279 280 281 282 283 285 286 287 288 290 291 292 293 294 |
 | [223](../adr/ADR-223-premiere-revue-de-methode.md) | Première revue de méthode (S481–S485) | actée | S486 | 222 | 224 226 |
 | [224](../adr/ADR-224-deuxieme-revue-de-methode.md) | Deuxième revue de méthode (S486–S490) | actée | S491 | 222 223 | 226 |
 | [225](../adr/ADR-225-la-tolerance-de-divergence-au-point-mort.md) | La tolérance de divergence au point mort d'une oscillation | actée | S492 | 144 215 |  |
@@ -302,5 +302,6 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [289](../adr/ADR-289-des-solveurs-eprouves-seuls-avant-d-etre-combines.md) | Des solveurs éprouvés seuls avant d'être combinés | actée | S747 |  | 291 |
 | [290](../adr/ADR-290-cinquante-quatrieme-revue-de-methode.md) | Cinquante-quatrième revue de méthode (S746–S750) | actée | S751 | 222 288 | 293 |
 | [291](../adr/ADR-291-la-3d-corrigee-version-1.md) | La 3D corrigée, version 1 | actée | S752 | 215 222 289 | 292 |
-| [292](../adr/ADR-292-la-3d-corrigee-complete-jugee-par-le-laboratoire.md) | La 3D corrigée : `Complete` consciente du fond, jugée par le laboratoire | actée | S754 | 222 291 |  |
+| [292](../adr/ADR-292-la-3d-corrigee-complete-jugee-par-le-laboratoire.md) | La 3D corrigée : `Complete` consciente du fond, jugée par le laboratoire | actée | S754 | 222 291 | 294 |
 | [293](../adr/ADR-293-cinquante-cinquieme-revue-de-methode.md) | Cinquante-cinquième revue de méthode (S751–S755) | actée | S756 | 222 290 |  |
+| [294](../adr/ADR-294-la-3d-corrigee-garde-son-energie.md) | La 3D corrigée garde son énergie : le compte cumulé de la projection | actée | S759 | 222 292 |  |

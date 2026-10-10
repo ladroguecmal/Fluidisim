@@ -1935,6 +1935,13 @@ fn plage_synolakis_pas(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: 
 /// S753 — la même, `corrigee` : la 3D corrigée d'ADR-291 (`Complete`, consciente du fond, R1).
 #[allow(clippy::type_complexity)]
 fn plage_synolakis_conf_s753(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: u64, corrigee: bool, r1: bool) -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
+    plage_synolakis_regle_s759(kappa, dx, jusqua, plafond_us, corrigee, r1, &|_| {})
+}
+
+/// S759 — le même montage, un réglage de plus sur la 3D corrigée.
+#[allow(clippy::too_many_arguments)]
+fn plage_synolakis_regle_s759(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafond_us: u64, corrigee: bool, r1: bool, regle: &dyn Fn(&mut Apic3))
+    -> (Vec<(f64, Vec<(f64, f64)>, f64)>, f64) {
     use crate::grand_evenement::OndeSolitaire;
     let horloge = std::time::Instant::now();
     let (d, rapport, cot, g) = (0.5f64, 0.3f64, 19.85f64, 9.81f64);
@@ -1957,6 +1964,7 @@ fn plage_synolakis_conf_s753(kappa: Option<f32>, dx: f32, jusqua: &[f64], plafon
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
         a.set_density_bed_aware(true).unwrap();
         a.set_density_shift_resample(r1).unwrap();
+        regle(&mut a);
     }
     if let Some(k) = kappa {
         a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
@@ -3789,5 +3797,18 @@ fn energy_correction_s759() {
     println!("S759 (3) le canal : la largeur {:.0} %, le creux {:.1} mm, la crête finale {:.1} mm, la célérité {cel:.3} m/s ({:+.1} %) ; {}",
         100. * lmin / l0, creux * 1e3, m.last().unwrap().2 * 1e3, 100. * (cel / cex - 1.),
         if lmin > 0.8 * l0 && creux < 0.01 && (cel / cex - 1.).abs() < 0.01 { "tenu" } else { "NON TENU" });
+}
+
+/// **S759 — la 3D corrigée, avec le compte cumulé d'énergie, contre Synolakis** (ADR-293 D1 : la référence extérieure avant la décision) ;
+/// le montage de S754.
+#[test]
+#[ignore = "S759 : le compte cumulé contre les mesures de Synolakis (≈ 45 min)"]
+fn cumulative_energy_against_synolakis_s759() {
+    let (photos, d) = plage_synolakis_regle_s759(None, 0.025, &[15., 20., 25.], 2_500, true, false,
+        &|a: &mut Apic3| a.set_density_energy_correction(crate::apic3d::EnergyCorrection::CumulativeStepLoss).unwrap());
+    for (t, _, vol) in &photos {
+        println!("S759 t = {t:.0} : V_φ/V_n {vol:.4}");
+    }
+    println!("S759 : {d:.0} s");
 }
 

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S759 — **en cours**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
+Session : S759 — **terminée**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
 grandit de 2,8 % par période. S758 a réfuté la correction particule par particule. **La question** : d'où vient l'énergie gagnée, et quelle
 correction globale l'arrête sans perdre ce que la 3D corrigée tient ?
 
@@ -104,8 +104,8 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
 - [x] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
 - [x] **P3** — la correction choisie par P2 ; (1), (2), (3).
 - [x] **P3b** — le compte cumulé (la perte du pas reste due d'un pas à l'autre) ; (1), (2), (3).
-- [ ] **P3c** — le compte cumulé contre Synolakis (ADR-293 D1 : la référence extérieure avant la décision).
-- [ ] **P4** — preuve ; fermeture.
+- [x] **P3c** — le compte cumulé contre Synolakis (ADR-293 D1 : la référence extérieure avant la décision).
+- [x] **P4** — preuve ; fermeture.
 
 ### Notes de reprise
 - **P2 fini** (579 s) — **H2** :
@@ -128,3 +128,5 @@ Synolakis (45 min) vient ensuite, si les trois tiennent.
   - (3) le canal : 92 %, 9,0 mm, la célérité +0,3 %.
 
   Le cliquet était la cause. Synolakis ensuite (P3c).
+- **P3c fini** (2 544 s) : Synolakis **identique à S754** aux quatre chiffres (0,0348 ; 0,0466 ; 0,0246 d ; V_φ/V_n compris) — la
+  correction ne s'est jamais déclenchée (le pas perd plus que la projection ne rend, sur la plage). **ADR-294**.

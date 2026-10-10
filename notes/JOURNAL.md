@@ -2435,3 +2435,14 @@ Suivant : **S758**, une projection neutre en énergie.
 
 **Réfutée** : les déplacements vont autant vers le bas que vers le haut, et la règle accélère ceux qui descendent. La suite : une correction
 globale (l'énergie potentielle ajoutée retirée à l'énergie cinétique, uniformément). Le lot S756–S758. Maillons **0**. Suivant : **S759**.
+
+## S759 — 2026-10-10 — Le compte d'énergie de la projection
+
+**Entrée.** BALLOTTEMENT-S757 ; S758 réfuté. **Fait** ([preuve](../docs/validation/ENERGIE-COMPTE-S759.md)) : le bilan d'énergie du
+ballottement, le pas et la projection séparés ; `set_density_energy_correction`, trois règles. **Mesuré** :
+- le pas perd par le tassement (−1,20 J en 10 s), la projection rend +1,50 J : H2 ;
+- H2 pas à pas amortit (un cliquet, +2,74 % par période) ;
+- **le compte cumulé** tient le repos, le ballottement (−0,44 % ; 0,16 %) et l'onde solitaire ; l'énergie à 1 % du mode ;
+- Synolakis identique à S754 : la correction ne s'y déclenche pas.
+
+**ADR-294** : la 3D corrigée garde son énergie. Ouvert : un compte par région. Maillons **1** (4.1). Suivant : **S760**, ADR-289 D3.3.
