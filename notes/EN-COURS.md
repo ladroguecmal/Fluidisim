@@ -62,67 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S760 — **terminée**. En autonomie ; session longue. ADR-289 D3.3 : refaire les résultats importants avec la 3D corrigée
-(ADR-294 : `Complete` consciente du fond, avec le compte cumulé d'énergie). **La question** : que deviennent les témoins du sélecteur
-(SELECTEUR-DOMAINES-S732 §6), mesurés avec l'ancienne 3D trop haute (S734–S738) ?
+Session : S761 — **en cours**. La cinquante-sixième revue de méthode (ADR-222 D4), sur S756–S760 ; le lot des registres (S759–S761).
 
-**Ce qui est fait** :
-- `ScenePlage.corrigee` : la 3D d'ADR-294 dans le témoin de S734 ;
-- `ScenePlage.arret_mur` : le témoin s'arrête quand l'onde atteint le mur, à 5 mm du repos (ADR-286 D1, ADR-293 D4). S3 dépassait son mur ;
-- `density_energy_removed` : l'énergie que le compte a retirée, cumulée (une lecture). Elle dit si la correction a joué.
+**Les frictions relevées** (notes de S760) :
+- S758 : une règle de vitesse réfutée en une session ; l'examen de ses cas signés (le déplacement vers le haut, vers le bas, au repos)
+  l'aurait écartée avant le calcul ;
+- S759 : la règle pas à pas a coûté un essai : une borne d'un seul côté, appliquée à chaque pas, est un cliquet ;
+- S759 : `fermer.py` laissait `BOUSSOLE.md` hors du commit (corrigé en S760) ;
+- S760 P1 : un script de plan en échec, suivi d'un `git add -A` sur une autre ligne : un commit sous un faux titre.
 
-En passant : `fermer.py` n'ajoutait pas `BOUSSOLE.md` au commit (S759 l'a laissé dehors) ; ajouté à ses chemins.
+**Ce qui a tenu** : le bilan avant le remède (ADR-290 D1) a choisi entre H1 et H2 avant tout essai (S759) ; la référence extérieure avant
+la décision (ADR-293 D1, Synolakis avant ADR-294).
 
-**Les critères, écrits avant** (ADR-290 D3, le repos d'abord ; ADR-293 D3, la bande de quantum) :
-1. **le repos sur l'escalier de 1:3**, la pente de S4 (1 cm/s ; 3 mm) ;
-2. **S4 sans déferlement**, `H/d` = 0,1 sur 1:3 (Synolakis : le déferlement au reflux dès 0,141) :
-   - aucun retournement ;
-   - la remontée par φ à 15 % de la loi, `2,831·√cot·(H/d)^(5/4)·d` = 0,1379 m, plus le quantum `dx/cot` = 8,3 mm ;
-   - la remontée par les particules en seconde lecture ;
-3. **S4**, `H/d` = 0,2 sur 1:3 (le déferlement au reflux permis, pas à la montée : 0,241) : la remontée à 15 % de 0,3280 m, plus 8,3 mm ;
-   aucun retournement avant le maximum de la remontée ;
-4. **S2** (Synolakis, `H/d` = 0,3 sur 1:19,85) : un retournement ; son instant et sa place rapportés contre l'ancienne 3D (S734 : 3,29 s) ;
-5. **S3** (`H/d` = 0,5 sur 1:90), arrêté à l'arrivée au mur : le retournement rapporté, qu'il ait lieu ou non (la question de la scène) ;
-6. **R43** (le montage de S755) : l'énergie retirée rapportée. Si elle est nulle, S755 reste vrai tel quel ; sinon, les grandeurs de S755
-   sont comparées.
-
-Le témoin est contrôlé comme l'objet (ADR-285 D1) : aucune sortie de particules, le front à plus de 1 m du mur.
-
-**Contrôles du plan** (ADR-276, ADR-287, ADR-290, ADR-293)
-
-- **témoin** : les témoins de S734–S738 (l'ancienne 3D) ; S755.
-- **instrument** : le témoin de S734, son juge robuste et sa lecture par les particules (S737) ; l'énergie retirée (nouvelle ; sa seconde
-  lecture est la comparaison au bit avec S755).
-- **calcul** : le repos 2 min ; S4 deux fois 25 min ; S2 40 min ; S3 45 min ; R43 30 min.
-- **ADR** : ADR-289 D3.3 ; ADR-285 D1 ; ADR-286 D1 ; ADR-293 D3, D4 ; ADR-294.
-- **pièges** :
-  - la loi de remontée vaut sans déferlement à la montée : S4 à 0,2 est sous le seuil (0,241), S4 à 0,1 sous les deux ;
-  - le fond lisse ne tient pas le repos (S745) : l'escalier, et son repos vérifié d'abord ;
-  - S3 : la durée bornée par l'arrivée au mur, non par une constante (S734 dépassait).
+**Contrôles du plan** — témoin : ADR-293 ; instrument : `rituel.py` ; calcul : sans objet ; ADR : ADR-222 D4, ADR-293 ; pièges : une
+décision doit changer une ligne de METHODE ou un outil, sinon elle ne s'écrit pas.
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — `corrigee`, `arret_mur`, `density_energy_removed` ; (1) le repos 1:3 ; (2) S4 à 0,1 ; (3) S4 à 0,2.
-- [x] **P3** — (4) S2 ; (5) S3.
-- [x] **P4** — (6) R43.
-- [x] **P5** — preuve ; fermeture.
+- [ ] **P2** — ADR-295 ; `outils/etape.py` (un commit d'étape qui n'a lieu qu'après un script réussi) ; METHODE.
+- [ ] **P3** — le lot (S759–S761) ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (2 696 s) — **les trois tenus** :
-  - (1) le repos 1:3 : 9,0 mm/s ; 0,12 mm ;
-  - (2) S4 à 0,1 : aucun retournement ; la remontée **0,1368 m contre 0,1379 m (−0,7 %)**, par φ et par les particules ; 0,78 J retirés ;
-  - (3) S4 à 0,2 : la remontée **0,2835 m contre 0,3279 m (−13,6 %**, la bande ±17,5 %) à 3,83 s ; le retournement au reflux, 5,71 s
-    (permis : 0,2 > 0,141) ; 0,58 J retirés.
-
-  L'ancienne 3D : +37 % au moins (S735), +47 % (S734). Le témoin contrôlé : aucune sortie, le front à plus de 3 m du mur.
-- **Pour la revue de S761** (les frictions de S756–S760) :
-  - S758 : une règle réfutée en une session ; un examen statique de son signe (les déplacements vont dans les deux sens) l'aurait écartée
-    avant le calcul (ADR-290 D3, « la cible vérifiée statiquement », appliquée à une règle de vitesse) ;
-  - S759 : le bilan d'abord a choisi entre H1 et H2 avant tout remède : il a tenu ; la règle pas à pas a coûté un essai (le cliquet) ;
-  - S759 : `fermer.py` laissait `BOUSSOLE.md` hors du commit (corrigé en S760) ;
-  - S760 P1 : un script de plan en échec, suivi d'un `git add -A` sur une autre ligne : un commit sous un faux titre (corrigé par
-    `--amend` avant la poussée). Le script et le commit sur une seule chaîne `&&`.
-- **P3 fini** (4 467 s) : S2, le retournement à 4,14 s (x = 14,09 m), rien de retiré ; S3, le retournement à 6,84 s (16,41 m), l'onde au mur
-  à 9,62 s, 2,16 J retirés.
-- **P4 fini** (1 227 s) : R43, rien de retiré, **identique à S755** (3,0915 s ; 11,0875 m ; 0,3005 m).

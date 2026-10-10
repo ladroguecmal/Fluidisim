@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-10 05:15 +02:00
+JETON            : occupé
+Battement        : 2026-10-10 06:30 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S761 — la cinquante-sixième revue de méthode (S756–S760) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S760 — Les témoins du sélecteur refaits avec la 3D d'ADR-294 ([journal](notes/JOURNAL.md)). Avant : S759 (Le compte d'énergie de la projection)
 Session suivante : S761 — la cinquante-sixième revue de méthode (S756–S760), puis le banc de la 3D : le corps qui flotte contre Archimède
 Maillons        : 1
