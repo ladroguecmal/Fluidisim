@@ -80,7 +80,9 @@ décision doit changer une ligne de METHODE ou un outil, sinon elle ne s'écrit 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — ADR-295 ; `outils/etape.py` (un commit d'étape qui n'a lieu qu'après un script réussi) ; METHODE.
+- [x] **P2** — ADR-295 ; `outils/etape.py` (un commit d'étape qui n'a lieu qu'après un script réussi) ; METHODE.
 - [ ] **P3** — le lot (S759–S761) ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** — ADR-295 : D1 les cas signés d'une règle ; D2 le compte cumulé ; D3 `etape.py` (ce commit-ci passe par lui). METHODE,
+  l'index.
