@@ -2462,3 +2462,14 @@ En passant : `fermer.py` ajoute la boussole. Maillons **1** (4.1). Suivant : **S
 **Entrée.** ADR-222 D4 ; S756–S760. **ADR-295** : D1 une règle de correction s'écrit par ses cas signés avant le calcul (S758) ; D2 une
 correction de conservation tient un compte cumulé (S759) ; D3 `outils/etape.py`, le commit d'étape qui n'a lieu qu'après un script
 réussi (S760). Ce qui a tenu : le bilan avant le remède, la référence avant la décision. Le lot S759–S761. Maillons **0**. Suivant : **S762**, le corps qui flotte contre Archimède.
+
+## S762 — 2026-10-10 — Le corps qui flotte contre Archimède
+
+**Entrée.** ADR-289 D3.2 ; ADR-294. **Fait** ([preuve](../docs/validation/FLOTTAISON-S762.md)) : une sphère libre dans une cuve fermée,
+trois densités, trois mailles. **Mesuré** :
+- le tirant à +0,3 / −4,3 / −2,0 mm de l'exact (2,5 cm) ; +11,5 mm à 5 cm ; le même sans projection ;
+- la sphère oscille encore (1,2 à 4,6 cm/s) : le critère du repos était mal posé dans une cuve fermée, avec un schéma qui conserve
+  l'énergie.
+
+L'essai à 1,25 cm a été arrêté avant la fin : la session est close à la demande de l'utilisateur. Maillons **1** (4.1). Suivant :
+**S763**, l'essai à 1,25 cm et le repos du corps aux bords absorbants.

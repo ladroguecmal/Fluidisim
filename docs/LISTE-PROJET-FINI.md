@@ -526,6 +526,8 @@ pas recopiée ici (L137).
   ballottement (−0,44 % ; 0,16 % par période) et l'onde solitaire, Synolakis inchangé ; **ADR-294** ([preuve](validation/ENERGIE-COMPTE-S759.md)).
   **S760** : les témoins du sélecteur refaits — la remontée sans déferlement à **−0,7 %** de la loi de Synolakis (l'ancienne 3D : +37 à
   +47 %) ; S2 et S3 retournent plus tard (4,14 s ; 6,84 s) ; R43 identique à S755 ([preuve](validation/TEMOINS-CORRIGES-S760.md)).
+  **S762** : une sphère libre flotte à son tirant d'Archimède, à 0,3–4,3 mm près aux trois densités (2,5 cm) ; l'écart décroît de
+  5 à 2,5 cm ; le repos du corps reste à juger hors d'une cuve fermée ([preuve](validation/FLOTTAISON-S762.md)).
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S762 — **en cours**. En autonomie ; session longue. ADR-289 D3.2, le banc de la 3D corrigée (ADR-294) : **le corps qui flotte**.
+Session : S762 — **terminée**. En autonomie ; session longue. ADR-289 D3.2, le banc de la 3D corrigée (ADR-294) : **le corps qui flotte**.
 **La question** : une sphère libre se pose-t-elle à son tirant d'eau exact, celui d'Archimède, et l'écart diminue-t-il avec la maille ?
 
 **La référence** (exacte) : une sphère de rayon `R`, de densité relative `s`, s'enfonce d'une calotte `h` telle que
@@ -96,7 +96,14 @@ Session : S762 — **en cours**. En autonomie ; session longue. ADR-289 D3.2, le
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — l'essai ; (A), (B), (C), (D).
-- [ ] **P3** — preuve ; fermeture.
+- [x] **P2** — l'essai ; (A), (B), (C), (D).
+- [x] **P3** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini en partie** (928 s ; D arrêté, la session close à la demande de l'utilisateur, qui continue sur un autre compte) :
+  - (A) 2,5 cm : le tirant +0,3 / −4,3 / −2,0 mm (s = 0,25 / 0,5 / 0,75) ; la vitesse 1,2 à 4,6 cm/s ;
+  - (B) sans projection : −4,2 mm ; 2,5 cm/s ;
+  - (C) 5 cm : +11,5 mm ;
+  - (D) 1,25 cm : **non mesuré**.
+
+  (1) tenu ; (2) en partie ; (3) manqué, mal posé (la cuve fermée, le schéma qui conserve l'énergie) ; (4) tenu.

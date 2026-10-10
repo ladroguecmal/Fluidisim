@@ -166,6 +166,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le sélecteur des domaines — conception (S732)](registres/SELECTEUR-DOMAINES-S732.md) : la prévision par le porteur, les frontières, la solidité, sept scènes, trois juges, six pièces.
 - [L'étape 3 du LOD : la 3D rallumée autour d'un corps — conception (S722)](registres/LOD-ETAPE-3-S722.md) : cinq pièces (B1 à B5), leurs essais.
 - [**La feuille de route vivante, jusqu'à la v2**](registres/ROADMAP-VIVANTE.md) : six phases, leurs jalons visibles, le calendrier selon le régime.
+- [Le corps qui flotte contre Archimède — S762](validation/FLOTTAISON-S762.md) : le tirant à quelques mm de l'exact.
 - [Les témoins du sélecteur refaits avec la 3D d'ADR-294 — S760](validation/TEMOINS-CORRIGES-S760.md) : la remontée à −0,7 % de la loi.
 - [Le compte d'énergie de la projection — S759](validation/ENERGIE-COMPTE-S759.md) : le ballottement tenu, l'énergie conservée ; ADR-294.
 - [Une projection neutre en énergie, particule par particule : réfutée — S758](validation/ENERGIE-PARTICULE-S758.md).

@@ -3898,3 +3898,71 @@ fn the_r43_witness_with_the_energy_account_s760() {
         e.retire);
 }
 
+/// S762 — le tirant d'eau exact d'une sphère de densité relative `s` (Archimède) : `h/R` tel que `(h/R)²·(3 − h/R) = 4s`, par bissection.
+fn tirant_archimede_s762(s: f64) -> f64 {
+    let (mut a, mut b) = (0f64, 2f64);
+    for _ in 0..60 {
+        let m = 0.5 * (a + b);
+        if m * m * (3. - m) < 4. * s { a = m } else { b = m }
+    }
+    0.5 * (a + b)
+}
+
+/// **S762 — une sphère libre flotte** (ADR-289 D3.2) : une cuve de 1,2 × 0,4 m, 0,4 m d'eau, une sphère de 0,1 m de rayon au centre, posée
+/// 2 cm au-dessus de son équilibre ; 5 s. `corrigee` : la 3D d'ADR-294. Rend `(le tirant mesuré, m ; la vitesse verticale max de la
+/// dernière seconde, m/s ; le déplacement horizontal final, m ; les particules au départ et à la fin)`.
+fn flottaison_s762(dx: f32, densite: f64, corrigee: bool) -> (f64, f64, f64, (usize, usize)) {
+    let (lx, ly, d, r) = (1.2f64, 0.4f64, 0.4f64, 0.1f64);
+    let dxs = dx as f64;
+    let (nx, ny, nz) = ((lx / dxs).round() as usize, (ly / dxs).round() as usize, (0.65 / dxs).round() as usize);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    a.set_ballistic_air(true);
+    if corrigee {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_bed_aware(true).unwrap();
+        a.set_density_energy_correction(crate::apic3d::EnergyCorrection::CumulativeStepLoss).unwrap();
+    }
+    let h0 = tirant_archimede_s762(densite) * r;
+    let c = [(lx / 2.) as f32, (ly / 2.) as f32, (d - h0 + r + 0.02) as f32];
+    a.set_body(Some(crate::apic3d::Sphere3 { center: c, radius: r as f32, velocity: [0.; 3] })).unwrap();
+    a.set_body_mass(Some((densite * 1000. * 4. / 3. * std::f64::consts::PI * r.powi(3)) as f32)).unwrap();
+    let rr = (r * r) as f32;
+    let n0 = a.seed(&|p| (p[2] as f64) < d && (p[0] - c[0]).powi(2) + (p[1] - c[1]).powi(2) + (p[2] - c[2]).powi(2) >= rr).unwrap();
+    a.set_jobs(Some(std::sync::Arc::new(Fils(std::thread::available_parallelism().map_or(1, |n| n.get() as u32)))));
+    let (mut t, fin) = (0u64, 5_000_000u64);
+    let (mut vmax, mut tirants) = (0f64, Vec::new());
+    while t < fin {
+        let us = a.stable_step_us(10_000).min(fin - t);
+        a.step(us).unwrap();
+        t += us;
+        let b = a.body().unwrap();
+        if t > 4_000_000 {
+            vmax = vmax.max(b.velocity[2].abs() as f64);
+            let (_, h) = volume_surface_s708(&a);
+            let loin: Vec<f64> = (0..nx).filter(|&i| (((i as f64 + 0.5) * dxs) - lx / 2.).abs() > 0.3).map(|i| h[i]).collect();
+            let niveau = loin.iter().sum::<f64>() / loin.len() as f64;
+            tirants.push(niveau - (b.center[2] as f64 - r));
+        }
+    }
+    let b = a.body().unwrap();
+    let derive = ((b.center[0] - c[0]).powi(2) + (b.center[1] - c[1]).powi(2)).sqrt() as f64;
+    (tirants.iter().sum::<f64>() / tirants.len() as f64, vmax, derive, (n0, a.particle_count()))
+}
+
+/// **S762 — le corps qui flotte contre Archimède** : (A) la 3D d'ADR-294 à 2,5 cm, trois densités ; (B) sans projection ; (C) à 5 cm ;
+/// (D) à 1,25 cm. Rapporte ; les critères se lisent dans la preuve.
+#[test]
+#[ignore = "S762 : la sphère qui flotte, six calculs (≈ 1 h)"]
+fn a_floating_sphere_against_archimedes_s762() {
+    let essais: [(&str, f32, f64, bool); 6] = [("A", 0.025, 0.25, true), ("A", 0.025, 0.5, true), ("A", 0.025, 0.75, true), ("B", 0.025, 0.5, false),
+        ("C", 0.05, 0.5, true), ("D", 0.0125, 0.5, true)];
+    for (nom, dx, s, corrigee) in essais {
+        let horloge = std::time::Instant::now();
+        let exact = tirant_archimede_s762(s) * 0.1;
+        let (h, vmax, derive, (n0, n1)) = flottaison_s762(dx, s, corrigee);
+        println!("S762 ({nom}) dx {dx} m, s {s}, {} : le tirant {:.4} m contre {exact:.4} m (écart {:+.1} mm) ; la vitesse verticale max {:.4} m/s ; la dérive {:.3} m ; particules {n0} → {n1} ; {:.0} s ; {}",
+            if corrigee { "la 3D d'ADR-294" } else { "sans projection" }, h, (h - exact) * 1e3, vmax, derive, horloge.elapsed().as_secs_f64(),
+            if (h - exact).abs() <= 0.01 && vmax <= 0.01 && n0 == n1 { "tenu" } else { "NON TENU" });
+    }
+}
+

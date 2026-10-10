@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-10 06:45 +02:00
+JETON            : libre
+Battement        : 2026-10-10 06:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S762 — le corps qui flotte contre Archimède ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S761 — La cinquante-sixième revue de méthode ([journal](notes/JOURNAL.md)). Avant : S760 (Les témoins du sélecteur refaits avec la 3D d'ADR-294)
-Session suivante : S762 — le banc de la 3D corrigée : le corps qui flotte, contre Archimède (le tirant d'eau exact)
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S762 — Le corps qui flotte contre Archimède ([journal](notes/JOURNAL.md)). Avant : S761 (La cinquante-sixième revue de méthode)
+Session suivante : S763 — le corps qui flotte : l'essai à 1,25 cm (la convergence) et le repos jugé aux bords absorbants ; puis la rupture de barrage (Martin et Moyce, à accorder)
+Maillons        : 1
 Registres       : dernier lot S761 (ADR-213 D3) ; le prochain au plus tard en S764
 ```
 
