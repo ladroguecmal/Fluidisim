@@ -102,6 +102,8 @@ pub(crate) struct Densite {
     pub(crate) energie_pas: f64,
     /// S759 — la perte due (J), pour `CumulativeStepLoss`.
     pub(crate) credit: f64,
+    /// S760 — l'énergie que la correction a retirée, cumulée depuis la configuration (J ; une lecture, sans effet).
+    pub(crate) retire: f64,
     /// **S752 — le bilan propre de la projection** (ADR-290 D1) : l'énergie cinétique et l'énergie potentielle (J, ρ = 1 000 kg/m³) que la
     /// projection a changées, cumulées depuis la configuration. Une lecture, sans effet.
     pub(crate) bilan: [f64; 2],
@@ -127,7 +129,7 @@ impl Apic3 {
         self.densite = Some(Box::new(Densite { variante, relaxation: 1., rho: vec![0.; cells], du: vec![0.; fu], dv: vec![0.; fv], dw: vec![0.; fw],
             p_sauve: vec![0.; cells], deplacement_max: 0., deplacement_lieu: [0.; 3], conscient: false, nominale: vec![0.; cells], nominale_faite: false,
             colonnes: vec![0; nx * ny], reechantillonner: false, relaxation_surface: None,
-            affine: false, neutre: false, correction: EnergyCorrection::Off, energie_pas: f64::NAN, credit: 0., bilan: [0.; 2] }));
+            affine: false, neutre: false, correction: EnergyCorrection::Off, energie_pas: f64::NAN, credit: 0., retire: 0., bilan: [0.; 2] }));
         Ok(())
     }
 
@@ -160,6 +162,11 @@ impl Apic3 {
         let Some(d) = self.densite.as_mut() else { return Err(Error::Domain) };
         d.correction = mode;
         Ok(())
+    }
+
+    /// **S760 — l'énergie que la correction a retirée**, cumulée depuis la configuration (J) ; `None` sans projection.
+    pub fn density_energy_removed(&self) -> Option<f64> {
+        self.densite.as_ref().map(|d| d.retire)
     }
 
     /// S759 — l'énergie des particules (J, ρ = 1 000 kg/m³, g = 9,81) : `(cinétique, potentielle)`, et la cinétique hors gouttes.
@@ -447,6 +454,7 @@ impl Apic3 {
             }
         };
         if excedent > 0. && eau > 1e-12 {
+            dens.retire += excedent.min(eau);
             let f = ((eau - excedent).max(0.) / eau).sqrt() as f32;
             for k in 0..self.n {
                 if self.is_droplet(k) {

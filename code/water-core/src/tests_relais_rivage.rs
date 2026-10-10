@@ -2591,6 +2591,10 @@ struct ScenePlage {
     plafond: Option<f64>,
     /// S738 : la vitesse de départ posée aussi sur la grille (S734) ; `false` : sur les particules seulement (S645).
     vitesse_grille: bool,
+    /// S760 : la 3D corrigée d'ADR-294 (`Complete` consciente du fond, le compte cumulé d'énergie).
+    corrigee: bool,
+    /// S760 : le témoin s'arrête quand l'onde atteint le mur de droite, à 5 mm du repos (ADR-286 D1, ADR-293 D4).
+    arret_mur: bool,
 }
 
 impl ScenePlage {
@@ -2639,6 +2643,10 @@ struct Temoin {
     mur_eta: f64,
     /// S737 : le juge robuste (`retournement_robuste_s737`), `(t, x)`.
     retournement_robuste: Option<(f64, f64)>,
+    /// S760 : l'instant où l'onde atteint le mur (`arret_mur`), s.
+    arret: Option<f64>,
+    /// S760 : l'énergie que le compte de la 3D corrigée a retirée, J.
+    retire: f64,
     /// S737 : la remontée par les particules, la plus haute `(t, R)`, et sa série tous les 0,1 s `(t, R)`.
     remontee_particules: (f64, f64),
     /// S738 : la particule la plus haute au-delà du pied, au-dessus du niveau (l'instrument de S645), m.
@@ -2672,9 +2680,14 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
     let remontee_exacte = if s.rapport < seuil { 2.831 * cot.sqrt() * s.rapport.powf(1.25) * d } else { 0. };
     let haut = d + s.plafond.unwrap_or((2. * s.rapport * d).max(remontee_exacte + 0.1) + 0.15);
     let nz = (haut / dxs).ceil() as usize;
-    let (mut a, _arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
     let xg = |i: f64| (i + 0.5) * dxs;
     let fond: Vec<f32> = (0..nx * ny).map(|c| (((xg((c % nx) as f64) - pied).max(0.) / cot) as f32).min(nz as f32 * dx)).collect();
+    if s.corrigee {
+        a.enable_density_projection(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        a.set_density_bed_aware(true).unwrap();
+        a.set_density_energy_correction(crate::apic3d::EnergyCorrection::CumulativeStepLoss).unwrap();
+    }
     if s.lisse {
         a.set_seabed_smooth(Some(&fond)).unwrap();
     } else {
@@ -2744,6 +2757,11 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
         let (_, h) = volume_surface_s708(&a);
         if s.mur_apres_pied.is_some() {
             r.mur_eta = r.mur_eta.max((marche[nx - 1] as f64 + h[nx - 1] - d).abs());
+            if s.arret_mur && r.mur_eta > 0.005 {
+                r.arret = Some(ts);
+                eprintln!("S760 {} : l'onde atteint le mur à {ts:.3} s ; arrêt", s.nom);
+                break;
+            }
         }
         if let Some(i) = (0..nx).rev().find(|&i| h[i] > 0.005) {
             let x = xg(i as f64);
@@ -2764,6 +2782,10 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
     }
     r.particules = (n0, a.particle_count());
     r.duree = horloge.elapsed().as_secs_f64();
+    r.retire = a.density_energy_removed().unwrap_or(0.);
+    if s.corrigee {
+        println!("S760 {} : l'énergie retirée par le compte {:.4e} J ; l'arrêt au mur {:?}", s.nom, r.retire, r.arret);
+    }
     println!("S734 {} : retournement {:?} ; air {:?} ; la remontée {:.4} m à {:.3} s ; le front le plus avancé {:.3} m (mur à {lx:.3} m) ; particules {} → {} ; {:.0} s",
         s.nom, r.retournement, r.air, r.remontee.1, r.remontee.0, r.front_max, r.particules.0, r.particules.1, r.duree);
     r
@@ -2774,7 +2796,7 @@ fn temoin_plage_s734(s: &ScenePlage) -> Temoin {
 #[test]
 #[ignore = "le témoin S4 du sélecteur, tout-3D (≈ 25 min)"]
 fn the_selector_witness_s4_no_breaking_s734() {
-    let s = ScenePlage { nom: "S4", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: false, instantanes: &[], plafond: None, vitesse_grille: true };
+    let s = ScenePlage { nom: "S4", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
     println!("S734 S4 : la remontée {:.4} m contre {exacte:.4} m ({:+.1} %)", r.remontee.1, 100. * (r.remontee.1 / exacte - 1.));
@@ -2789,7 +2811,7 @@ fn the_selector_witness_s4_no_breaking_s734() {
 #[test]
 #[ignore = "le témoin S2 du sélecteur, tout-3D (≈ 40 min)"]
 fn the_selector_witness_s2_synolakis_s734() {
-    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false, instantanes: &[], plafond: None, vitesse_grille: true };
+    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
     assert!(r.front_max < s.geometrie().2 - 1., "le témoin : le front loin du mur");
@@ -2802,7 +2824,7 @@ fn the_selector_witness_s2_synolakis_s734() {
 #[test]
 #[ignore = "le témoin S3 du sélecteur, tout-3D (≈ 1 h)"]
 fn the_selector_witness_s3_spilling_s734() {
-    let s = ScenePlage { nom: "S3", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 12., lisse: false, instantanes: &[], plafond: None, vitesse_grille: true };
+    let s = ScenePlage { nom: "S3", d: 0.3, rapport: 0.5, cot: 90., approche: 3., terre: 0., mur_apres_pied: Some(16.), duree: 12., lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     println!("S734 S3 : le retournement {:?} (la question de la scène) ; le niveau au mur {:.1} mm du repos", r.retournement, r.mur_eta * 1e3);
     assert_eq!(r.particules.0, r.particules.1, "le témoin : aucune sortie");
@@ -2814,7 +2836,7 @@ fn the_selector_witness_s3_spilling_s734() {
 #[test]
 #[ignore = "le témoin S4 du sélecteur sur le fond lisse, tout-3D (≈ 35 min)"]
 fn the_selector_witness_s4_on_a_smooth_bottom_s734() {
-    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true, instantanes: &[], plafond: None, vitesse_grille: true };
+    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
     println!("S734 S4 lisse : la remontée {:.4} m contre {exacte:.4} m ({:+.1} %)", r.remontee.1, 100. * (r.remontee.1 / exacte - 1.));
@@ -2867,7 +2889,7 @@ fn instantane_s735(a: &Apic3, s: &ScenePlage, marche: &[f32], t: f64, quoi: &str
 #[ignore = "le diagnostic de S4, sur le fond lisse (≈ 25 min)"]
 fn the_s4_front_diagnostic_s735() {
     let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 5.0, lisse: true,
-        instantanes: &[3.5, 4.1, 4.5, 5.0], plafond: None, vitesse_grille: true };
+        instantanes: &[3.5, 4.1, 4.5, 5.0], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     println!("S735 S4 lisse : la remontée lue {:.4} m à {:.3} s ; le front {:.3} m ; retournement {:?}", r.remontee.1, r.remontee.0, r.front_max, r.retournement);
 }
@@ -2897,7 +2919,7 @@ fn front_particules_s737(a: &Apic3, pied: f64, cot: f64, d: f64, seuil: f64) -> 
 #[test]
 #[ignore = "S4 sur fond lisse, les deux lectures (≈ 35 min)"]
 fn the_particle_front_and_robust_judge_on_s4_s737() {
-    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true, instantanes: &[], plafond: None, vitesse_grille: true };
+    let s = ScenePlage { nom: "S4 lisse", d: 0.5, rapport: 0.2, cot: 3., approche: 3., terre: 4., mur_apres_pied: None, duree: 6., lisse: true, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     let exacte = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * 0.5;
     let fin = r.serie_particules.last().map_or(f64::NAN, |p| p.1);
@@ -2914,7 +2936,7 @@ fn the_particle_front_and_robust_judge_on_s4_s737() {
 #[test]
 #[ignore = "S2, les deux juges (≈ 28 min)"]
 fn the_robust_judge_keeps_the_s2_breaking_s737() {
-    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false, instantanes: &[], plafond: None, vitesse_grille: true };
+    let s = ScenePlage { nom: "S2", d: 0.5, rapport: 0.3, cot: 19.85, approche: 0., terre: 4., mur_apres_pied: None, duree: 25. * (0.5f64 / 9.81).sqrt(), lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     println!("S737 (3) S2 : le juge robuste {:?}, celui de S647 {:?} ; la remontée par les particules {:.4} m", r.retournement_robuste, r.retournement, r.remontee_particules.1);
     let ((t1, x1), (t0, x0)) = (r.retournement_robuste.expect("critère 3 : aucun"), r.retournement.expect("S647 : aucun"));
@@ -2927,7 +2949,7 @@ fn the_robust_judge_keeps_the_s2_breaking_s737() {
 fn s4_vers_s645_s738(etape: u8) {
     let d = if etape >= 5 { 0.35 } else { 0.5 };
     let s = ScenePlage { nom: "S4 vers S645", d, rapport: 0.2, cot: 3., approche: if etape >= 3 { 0. } else { 3. }, terre: 4., mur_apres_pied: None,
-        duree: 6., lisse: false, instantanes: &[], plafond: Some(1.0), vitesse_grille: etape < 4 };
+        duree: 6., lisse: false, instantanes: &[], plafond: Some(1.0), vitesse_grille: etape < 4, corrigee: false, arret_mur: false };
     let r = temoin_plage_s734(&s);
     let loi = 2.831 * 3f64.sqrt() * 0.2f64.powf(1.25) * d;
     println!("S738 E{etape} : la particule la plus haute {:.4} m ({:+.1} % de la loi {loi:.4} m) ; le front par les particules {:.4} m à {:.3} s ({:+.1} %) ; par φ {:.4} m ; le juge robuste {:?}",
@@ -3810,5 +3832,31 @@ fn cumulative_energy_against_synolakis_s759() {
         println!("S759 t = {t:.0} : V_φ/V_n {vol:.4}");
     }
     println!("S759 : {d:.0} s");
+}
+
+/// **S760 — S4 refait avec la 3D d'ADR-294** : (1) le repos sur l'escalier de 1:3 ; (2) `H/d` = 0,1, sans déferlement ; (3) `H/d` = 0,2. La
+/// remontée contre la loi de Synolakis, à 15 % plus le quantum `dx/cot`. Rapporte ; les critères se lisent dans la preuve.
+#[test]
+#[ignore = "S760 : le repos 1:3, S4 à 0,1 et 0,2 avec la 3D corrigée (≈ 55 min)"]
+fn the_selector_witness_s4_corrected_s760() {
+    let regle = |a: &mut Apic3| a.set_density_energy_correction(crate::apic3d::EnergyCorrection::CumulativeStepLoss).unwrap();
+    let (v, ep, ephi, _) = repos_pente_regle_s750(3., false, Some(crate::apic3d::DensityVariant::Complete), true, &regle);
+    println!("S760 (1) le repos 1:3 : la vitesse {v:.2e} m/s ; l'écart par les particules {:.2} mm, par φ {:.2} mm ; {}", ep * 1e3, ephi * 1e3,
+        if v < 0.01 && ep < 0.003 { "tenu" } else { "NON TENU" });
+    let q = 0.025 / 3.;
+    for (k, rapport, duree) in [(2, 0.1f64, 7.), (3, 0.2f64, 6.)] {
+        let s = ScenePlage { nom: if k == 2 { "S4 à 0,1 corrigée" } else { "S4 corrigée" }, d: 0.5, rapport, cot: 3., approche: 3., terre: 4., mur_apres_pied: None,
+            duree, lisse: false, instantanes: &[], plafond: None, vitesse_grille: true, corrigee: true, arret_mur: false };
+        let r = temoin_plage_s734(&s);
+        let exacte = 2.831 * 3f64.sqrt() * rapport.powf(1.25) * 0.5;
+        let ecart = r.remontee.1 / exacte - 1.;
+        let tenue = ecart.abs() < 0.15 + q / exacte;
+        let avant = r.retournement.is_none_or(|(t, _)| t > r.remontee.0);
+        println!("S760 ({k}) {} : la remontée par φ {:.4} m à {:.3} s contre {exacte:.4} m ({:+.1} % ; la bande ±{:.1} %), par les particules {:.4} m ({:+.1} %) ; \
+            le retournement {:?} (robuste {:?}) ; le témoin : particules {} → {}, le front {:.3} m (mur {:.3} m) ; {}",
+            s.nom, r.remontee.1, r.remontee.0, 100. * ecart, 100. * (0.15 + q / exacte), r.remontee_particules.1, 100. * (r.remontee_particules.1 / exacte - 1.),
+            r.retournement, r.retournement_robuste, r.particules.0, r.particules.1, r.front_max, s.geometrie().2,
+            if tenue && (if k == 2 { r.retournement.is_none() } else { avant }) { "tenu" } else { "NON TENU" });
+    }
 }
 

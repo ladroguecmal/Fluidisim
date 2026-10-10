@@ -103,9 +103,16 @@ Le témoin est contrôlé comme l'objet (ADR-285 D1) : aucune sortie de particul
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [ ] **P2** — `corrigee`, `arret_mur`, `density_energy_removed` ; (1) le repos 1:3 ; (2) S4 à 0,1 ; (3) S4 à 0,2.
+- [x] **P2** — `corrigee`, `arret_mur`, `density_energy_removed` ; (1) le repos 1:3 ; (2) S4 à 0,1 ; (3) S4 à 0,2.
 - [ ] **P3** — (4) S2 ; (5) S3.
 - [ ] **P4** — (6) R43.
 - [ ] **P5** — preuve ; fermeture.
 
 ### Notes de reprise
+- **P2 fini** (2 696 s) — **les trois tenus** :
+  - (1) le repos 1:3 : 9,0 mm/s ; 0,12 mm ;
+  - (2) S4 à 0,1 : aucun retournement ; la remontée **0,1368 m contre 0,1379 m (−0,7 %)**, par φ et par les particules ; 0,78 J retirés ;
+  - (3) S4 à 0,2 : la remontée **0,2835 m contre 0,3279 m (−13,6 %**, la bande ±17,5 %) à 3,83 s ; le retournement au reflux, 5,71 s
+    (permis : 0,2 > 0,141) ; 0,58 J retirés.
+
+  L'ancienne 3D : +37 % au moins (S735), +47 % (S734). Le témoin contrôlé : aucune sortie, le front à plus de 3 m du mur.
