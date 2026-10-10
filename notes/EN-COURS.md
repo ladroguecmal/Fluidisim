@@ -62,71 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S759 — **terminée**. En autonomie ; session longue. BALLOTTEMENT-S757 : la 3D corrigée a la période juste, mais l'oscillation
-grandit de 2,8 % par période. S758 a réfuté la correction particule par particule. **La question** : d'où vient l'énergie gagnée, et quelle
-correction globale l'arrête sans perdre ce que la 3D corrigée tient ?
+Session : S760 — **en cours**. En autonomie ; session longue. ADR-289 D3.3 : refaire les résultats importants avec la 3D corrigée
+(ADR-294 : `Complete` consciente du fond, avec le compte cumulé d'énergie). **La question** : que deviennent les témoins du sélecteur
+(SELECTEUR-DOMAINES-S732 §6), mesurés avec l'ancienne 3D trop haute (S734–S738) ?
 
-**Ce qui manque avant de corriger** : le bilan d'énergie du pas lui-même. Sans projection, le même ballottement s'amortit de 35 % par
-période : le pas perd donc de l'énergie (sans doute l'eau qui se tasse et descend). Si la projection rend surtout cette perte, lui retirer
-tout son gain laisserait l'amortissement du pas : la correction serait fausse.
+**Ce qui est fait** :
+- `ScenePlage.corrigee` : la 3D d'ADR-294 dans le témoin de S734 ;
+- `ScenePlage.arret_mur` : le témoin s'arrête quand l'onde atteint le mur, à 5 mm du repos (ADR-286 D1, ADR-293 D4). S3 dépassait son mur ;
+- `density_energy_removed` : l'énergie que le compte a retirée, cumulée (une lecture). Elle dit si la correction a joué.
 
-**Les deux hypothèses nommées** (ADR-290 D1), départagées par P2 :
-- **H1** : le pas conserve presque l'énergie ; le gain vient de la projection. Le remède : retirer à l'énergie cinétique, uniformément,
-  tout le gain de la projection.
-- **H2** : le pas perd de l'énergie (le tassement) ; la projection en rend plus qu'il n'en a perdu. Le remède : la projection ne rend que
-  ce que le pas a perdu ; l'excédent est retiré à l'énergie cinétique, uniformément.
-
-**L'instrument** (ADR-286 D2, une seconde lecture indépendante de φ) : l'énergie des particules, `Σ ½mv² + mgz`, à chaque pas, avant le pas,
-avant la projection, après. Le bilan propre de la projection (S752) donne l'écart entre les deux dernières.
+En passant : `fermer.py` n'ajoutait pas `BOUSSOLE.md` au commit (S759 l'a laissé dehors) ; ajouté à ses chemins.
 
 **Les critères, écrits avant** (ADR-290 D3, le repos d'abord ; ADR-293 D3, la bande de quantum) :
-1. **le repos** sur l'escalier (1 cm/s ; 3 mm) ;
-2. **le ballottement** : la période à 1 % ; l'amortissement entre **−0,5 % et +1 %** par période ;
-3. **l'onde solitaire** sur le canal à 2,5 cm : la largeur 80 %, le creux 10 mm, la célérité à 1 % (ADR-293 D2).
+1. **le repos sur l'escalier de 1:3**, la pente de S4 (1 cm/s ; 3 mm) ;
+2. **S4 sans déferlement**, `H/d` = 0,1 sur 1:3 (Synolakis : le déferlement au reflux dès 0,141) :
+   - aucun retournement ;
+   - la remontée par φ à 15 % de la loi, `2,831·√cot·(H/d)^(5/4)·d` = 0,1379 m, plus le quantum `dx/cot` = 8,3 mm ;
+   - la remontée par les particules en seconde lecture ;
+3. **S4**, `H/d` = 0,2 sur 1:3 (le déferlement au reflux permis, pas à la montée : 0,241) : la remontée à 15 % de 0,3280 m, plus 8,3 mm ;
+   aucun retournement avant le maximum de la remontée ;
+4. **S2** (Synolakis, `H/d` = 0,3 sur 1:19,85) : un retournement ; son instant et sa place rapportés contre l'ancienne 3D (S734 : 3,29 s) ;
+5. **S3** (`H/d` = 0,5 sur 1:90), arrêté à l'arrivée au mur : le retournement rapporté, qu'il ait lieu ou non (la question de la scène) ;
+6. **R43** (le montage de S755) : l'énergie retirée rapportée. Si elle est nulle, S755 reste vrai tel quel ; sinon, les grandeurs de S755
+   sont comparées.
 
-Synolakis (45 min) vient ensuite, si les trois tiennent.
+Le témoin est contrôlé comme l'objet (ADR-285 D1) : aucune sortie de particules, le front à plus de 1 m du mur.
 
 **Contrôles du plan** (ADR-276, ADR-287, ADR-290, ADR-293)
 
-- **témoin** : la 3D corrigée sans correction (S757) ; la 3D sans projection (S757) ; la dispersion exacte.
-- **instrument** : l'énergie des particules (nouvelle : sa seconde lecture est φ, S757) ; le bilan propre (S752).
-- **calcul** : le bilan du ballottement 2 × 5 min ; le repos 2 min ; le ballottement 5 min ; le canal 10 min.
-- **ADR** : ADR-276 D2 (une différence) ; ADR-286 D2 ; ADR-290 D1 ; ADR-293 D2, D3.
+- **témoin** : les témoins de S734–S738 (l'ancienne 3D) ; S755.
+- **instrument** : le témoin de S734, son juge robuste et sa lecture par les particules (S737) ; l'énergie retirée (nouvelle ; sa seconde
+  lecture est la comparaison au bit avec S755).
+- **calcul** : le repos 2 min ; S4 deux fois 25 min ; S2 40 min ; S3 45 min ; R43 30 min.
+- **ADR** : ADR-289 D3.3 ; ADR-285 D1 ; ADR-286 D1 ; ADR-293 D3, D4 ; ADR-294.
 - **pièges** :
-  - la correction met à l'échelle les vitesses **et** la matrice affine (APIC) : sinon le transfert vers la grille rend l'énergie ;
-  - au repos, l'énergie cinétique est nulle : la correction ne peut rien retirer et ne doit rien diviser par zéro ;
-  - l'énergie potentielle de l'eau prise à g = 9,81, la même que le bilan propre ;
-  - les gouttes balistiques restent hors de la correction, comme hors de la projection.
+  - la loi de remontée vaut sans déferlement à la montée : S4 à 0,2 est sous le seuil (0,241), S4 à 0,1 sous les deux ;
+  - le fond lisse ne tient pas le repos (S745) : l'escalier, et son repos vérifié d'abord ;
+  - S3 : la durée bornée par l'arrivée au mur, non par une constante (S734 dépassait).
 
 ### Plan
 
 - [x] **P1** — jeton ; plan.
-- [x] **P2** — le bilan d'énergie du ballottement : le pas et la projection, séparés, avec et sans projection ; H1 ou H2.
-- [x] **P3** — la correction choisie par P2 ; (1), (2), (3).
-- [x] **P3b** — le compte cumulé (la perte du pas reste due d'un pas à l'autre) ; (1), (2), (3).
-- [x] **P3c** — le compte cumulé contre Synolakis (ADR-293 D1 : la référence extérieure avant la décision).
-- [x] **P4** — preuve ; fermeture.
+- [ ] **P2** — `corrigee`, `arret_mur`, `density_energy_removed` ; (1) le repos 1:3 ; (2) S4 à 0,1 ; (3) S4 à 0,2.
+- [ ] **P3** — (4) S2 ; (5) S3.
+- [ ] **P4** — (6) R43.
+- [ ] **P5** — preuve ; fermeture.
 
 ### Notes de reprise
-- **P2 fini** (579 s) — **H2** :
-  - sans projection, le pas perd 4,32 J en 10 s (dix fois l'énergie du mode, 0,392 J) : le tassement ;
-  - la 3D corrigée : le pas perd 1,20 J, la projection rend 1,50 J ; **l'excédent, +0,30 J**, est presque l'énergie du mode ;
-  - la perte du pas et le gain de la projection sont réguliers (≈ 0,12 et 0,15 J/s).
-
-  Le remède : la projection ne rend que ce que le pas a perdu (`BeyondStepLoss`).
-- **P3 fini** (993 s), H2 pas à pas (`BeyondStepLoss`) :
-  - (1) le repos **tenu** (6,8 mm/s ; 0,02 et 0,07 mm) ;
-  - (2) le ballottement **NON TENU** : 2,0102 s (**+1,70 %**), l'amortissement **+2,74 %** par période ; l'énergie −0,20 J en 10 s ;
-  - (3) le canal **tenu** : 93 %, 8,8 mm, −0,3 %.
-
-  L'injection est arrêtée, mais le ballottement s'amortit. **L'hypothèse (P3b)** : un cliquet pas à pas. Quand la projection rend moins
-  que la perte du pas, le reste est oublié ; quand elle rend plus, elle est rognée. **Le remède** : un compte cumulé, borné en bas par zéro
-  (un pas qui gagne de l'énergie n'ouvre aucun droit). **La signature** : l'amortissement près de zéro, la période revenue vers +0,3 %.
-- **P3b fini** (1 011 s), le compte cumulé (`CumulativeStepLoss`) — **les trois tenus** :
-  - (1) le repos : 6,8 mm/s ; 0,02 et 0,07 mm ;
-  - (2) le ballottement : 1,9678 s (**−0,44 %**), l'amortissement **0,16 %** par période ; l'énergie à ±0,005 J en 10 s (1 % du mode) ;
-  - (3) le canal : 92 %, 9,0 mm, la célérité +0,3 %.
-
-  Le cliquet était la cause. Synolakis ensuite (P3c).
-- **P3c fini** (2 544 s) : Synolakis **identique à S754** aux quatre chiffres (0,0348 ; 0,0466 ; 0,0246 d ; V_φ/V_n compris) — la
-  correction ne s'est jamais déclenchée (le pas perd plus que la projection ne rend, sur la plage). **ADR-294**.

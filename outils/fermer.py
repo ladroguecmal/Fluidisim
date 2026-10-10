@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ATTRIBUTION = "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
-CHEMINS = ["code", "docs", "notes", "REPRISE.md", "outils", "references"]
+CHEMINS = ["code", "docs", "notes", "REPRISE.md", "BOUSSOLE.md", "outils", "references"]
 
 
 def etape(nom, cmd, **kw):
